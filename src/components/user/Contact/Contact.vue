@@ -120,7 +120,26 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
+
+const contactJsonLdId = "jsonld-contact-itemlist";
+
+onMounted(() => {
+  setJsonLd(contactJsonLdId, {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        url: "http://localhost:8084/lien-he"
+      }
+    ]
+  });
+});
+
+onBeforeUnmount(() => removeJsonLd(contactJsonLdId));
 
 // Active location state
 const activeLocation = ref('headquarters')

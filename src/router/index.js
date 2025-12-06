@@ -48,6 +48,7 @@ import Investments from "../components/user/Investment/Investments.vue";
 import InvestmentDetail from "../components/user/Investment/InvestmentDetail.vue";
 import Payment from "../components/user/Profile/component/Payment.vue";
 import ProductList from "../components/productAdmin/ProductList.vue";
+import ProductDetail from "../components/productAdmin/ProductDetail.vue";
 
 import Ga4EventExample from "../components/Ga4EventExample.vue";
 
@@ -57,12 +58,33 @@ const routes = [
             name: "LoginForm",
             component: LoginForm,
         },
-        // {
-        //     path: "/test01",
-        //     name: "productlist",
-        //     meta: {requiresAuth: false},
-        //     component: ProductList,
-        // },
+    {
+        path: "/test01",
+        meta: {requiresAuth: false},
+        component: Menu,
+        children: [
+            {
+                path: "",   // → /admin/products/:id
+                name: "ProductList",
+                component: ProductList,
+                props: true,
+            }
+        ]
+    },
+    {
+        path: "/admin",
+        component: Menu,       // ⭐ Bổ sung MENU tại đây
+        meta: { requiresAuth: false },
+
+        children: [
+            {
+                path: "products/:id",   // → /admin/products/:id
+                name: "ProductDetail",
+                component: ProductDetail,
+                props: true,
+            }
+        ]
+    },
         {
             path: "/-thg/loai-hinh",
             component: Menu, // MenuUser là layout chính

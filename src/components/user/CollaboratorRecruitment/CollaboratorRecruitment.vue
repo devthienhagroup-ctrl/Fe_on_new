@@ -70,7 +70,7 @@
                   </div>
                 </div>
                 <button class="btn-detail info-btn"
-                        @click="router.push('/collaborator-jobs/personal-task/' + job.id)">
+                        @click="router.push('/cong-viec-cong-tac-vien/nhiem-vu-ca-nhan/' + job.id)">
                   <i class="fa-solid fa-circle-info"></i> Xem chi tiết
                 </button>
               </div>
@@ -279,7 +279,7 @@
                 <i class="fa-solid fa-paper-plane"></i> Đăng ký ngay
               </button>
               <button
-                  @click="router.push('/collaborator-jobs/'+ job.id)"
+                  @click="router.push('/cong-viec-cong-tac-vien/'+ job.id)"
                   class="btn-detail-2 outline"
                   v-if="hoveredJob === job.id"
               >
@@ -312,8 +312,9 @@
 
 
 <script setup>
-import {ref, computed, onMounted} from 'vue'
+import {ref, computed, onMounted, onBeforeUnmount} from 'vue'
 import {useRouter} from "vue-router";
+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
 
 const router = useRouter()
 
@@ -332,6 +333,37 @@ const searchQuery = ref('')
 const clearSearch = () => {
   searchQuery.value = ''
 }
+
+const collaboratorJobsJsonLdId = "jsonld-collaborator-jobs-itemlist";
+
+onMounted(() => {
+  setJsonLd(collaboratorJobsJsonLdId, {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        url: "http://localhost:8084/cong-viec-cong-tac-vien"
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        url: "http://localhost:8084/cong-viec-cong-tac-vien/1"
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        url: "http://localhost:8084/cong-viec-cong-tac-vien/2"
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        url: "http://localhost:8084/cong-viec-cong-tac-vien/3"
+      }
+    ]
+  });
+});
 
 // Carousel variables
 const currentSlide = ref(0)
@@ -1024,6 +1056,8 @@ const formatSalaryDisplay = () => {
 onMounted(() => {
   initializeCarousel()
 })
+
+onBeforeUnmount(() => removeJsonLd(collaboratorJobsJsonLdId));
 </script>
 
 <style scoped>

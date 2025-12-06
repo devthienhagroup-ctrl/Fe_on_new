@@ -77,6 +77,25 @@ import ContactForm from "../Home/components/ContactForm.vue";
 import Footer from "../Home/components/Footer.vue";
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import FeeEP from "./Components/FeeEP.vue";
+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
+
+const estimateJsonLdId = "jsonld-estimate-property-itemlist";
+
+onMounted(() => {
+  setJsonLd(estimateJsonLdId, {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        url: "http://localhost:8084/dinh-gia-bds"
+      }
+    ]
+  });
+});
+
+onBeforeUnmount(() => removeJsonLd(estimateJsonLdId));
 
 const valuationBtn = ref(null);
 

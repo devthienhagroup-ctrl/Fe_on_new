@@ -39,7 +39,7 @@
         </router-link>
       </li>
       <li class="nav-item ivm-item">
-        <router-link to="/investments" class="nav-link">
+        <router-link to="/hop-tac" class="nav-link">
           <i class="fa-solid fa-sack-dollar"></i> Hợp tác
         </router-link>
       </li>

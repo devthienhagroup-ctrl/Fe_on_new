@@ -20,11 +20,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from "vue-router";
 import InvestmentModal from "./Components/InvestmentModal.vue";
 import InvestmentIntro from "./Components/InvestmentIntro.vue";
 import Funding from "./Components/Funding.vue";
+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
 
 
 
@@ -52,6 +53,39 @@ const handlePayment = (paymentData) => {
   // Xử lý thanh toán ở đây
   closeModal()
 }
+
+const investmentsJsonLdId = "jsonld-investments-itemlist";
+
+onMounted(() => {
+  setJsonLd(investmentsJsonLdId, {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        url: "http://localhost:8084/hop-tac"
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        url: "http://localhost:8084/hop-tac/1"
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        url: "http://localhost:8084/hop-tac/2"
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        url: "http://localhost:8084/hop-tac/3"
+      }
+    ]
+  });
+});
+
+onBeforeUnmount(() => removeJsonLd(investmentsJsonLdId));
 
 // Hàm xem chi tiết
 const viewDetails = (index) => {

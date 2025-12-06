@@ -30,6 +30,7 @@
 
 
 <script setup>
+import { onBeforeUnmount, onMounted } from "vue";
 import Banner from "./components/Banner.vue";
 import HeroSection from "./components/HeroSection.vue";
 import ServiceSection from "./components/ServiceSection.vue";
@@ -44,6 +45,25 @@ import Footer from "./components/Footer.vue";
 import Stats from "./components/Stats.vue";
 import SoldSection from "./components/SoldSection.vue";
 import ParticleBackground from "../ParticleBackground.vue";
+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
+
+const homeJsonLdId = "jsonld-home-itemlist";
+
+onMounted(() => {
+  setJsonLd(homeJsonLdId, {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        url: "http://localhost:8084/"
+      }
+    ]
+  });
+});
+
+onBeforeUnmount(() => removeJsonLd(homeJsonLdId));
 </script>
 
 

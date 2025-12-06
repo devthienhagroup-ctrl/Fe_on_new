@@ -138,6 +138,7 @@
 
 <script setup lang="ts">
 import {ref, computed, onMounted, onBeforeUnmount} from 'vue'
+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
 import QuickSaleS1 from "./Components/QuickSaleS1.vue";
 import QuickSaleS2 from "./Components/QuickSaleS2.vue";
 import QuickSaleS3 from "./Components/QuickSaleS3.vue";
@@ -152,6 +153,22 @@ import SoldSection from "../Home/components/SoldSection.vue";
 import ContactForm from "../Home/components/ContactForm.vue";
 import Footer from "../Home/components/Footer.vue";
 import QSbenefits from "./Components/QSbenefits.vue";
+
+const quickSaleJsonLdId = "jsonld-quick-sale-itemlist";
+
+onMounted(() => {
+  setJsonLd(quickSaleJsonLdId, {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        url: "http://localhost:8084/giai-phap-ban-nhanh"
+      }
+    ]
+  });
+});
 
 // Tab state
 const activeTab = ref('dinhgia')
@@ -252,6 +269,8 @@ onMounted(() => {
   // cleanup
   onBeforeUnmount(() => observer.disconnect());
 });
+
+onBeforeUnmount(() => removeJsonLd(quickSaleJsonLdId));
 </script>
 
 <style scoped>

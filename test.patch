@@ -1,360 +1,956 @@
-diff --git a/src/components/ChatRoom.vue b/src/components/ChatRoom.vue
+diff --git a/src/components/user/CollaboratorRecruitment/CollaboratorRecruitment.vue b/src/components/user/CollaboratorRecruitment/CollaboratorRecruitment.vue
+index 63447b6d5db00fab5b52a87e8c16c0403ecc26fd..7571bd92b44f05ed8970fe68c999fbd591bbc797 100644
+--- a/src/components/user/CollaboratorRecruitment/CollaboratorRecruitment.vue
++++ b/src/components/user/CollaboratorRecruitment/CollaboratorRecruitment.vue
+@@ -290,71 +290,103 @@
+         </div>
+ 
+         <!-- Pagination -->
+         <div class="pagination">
+           <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
+ 
+           <button
+               v-for="page in totalPages"
+               :key="page"
+               class="page-btn"
+               :class="{ active: currentPage === page }"
+               @click="currentPage = page"
+           >
+             {{ page }}
+           </button>
+ 
+           <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
+         </div>
+       </section>
+     </div>
+   </div>
+ </template>
+ 
+ 
+ <script setup>
+-import {ref, computed, onMounted} from 'vue'
++import {ref, computed, onMounted, onBeforeUnmount} from 'vue'
+ import {useRouter} from "vue-router";
++import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
+ 
+ const router = useRouter()
+ 
+ // Mock data for images (replace with actual imports in your project)
+ const ctvBanner = '/imgs/ctv.png'
+ const logoTHG = '/imgs/logoTHG.png'
+ 
+ // Random image URLs for demonstration
+ const getRandomImage = (seed) => {
+   return `https://picsum.photos/300/200?random=${seed}`
+ }
+ 
+ // Thêm vào script setup
+ const searchQuery = ref('')
+ 
+ const clearSearch = () => {
+   searchQuery.value = ''
+ }
+ 
++const collaboratorJobsJsonLdId = "jsonld-collaborator-jobs-itemlist";
++
++onMounted(() => {
++  setJsonLd(collaboratorJobsJsonLdId, {
++    "@context": "https://schema.org",
++    "@type": "ItemList",
++    itemListElement: [
++      {
++        "@type": "ListItem",
++        position: 1,
++        url: "http://localhost:8084/cong-viec-cong-tac-vien"
++      },
++      {
++        "@type": "ListItem",
++        position: 2,
++        url: "http://localhost:8084/cong-viec-cong-tac-vien/1"
++      },
++      {
++        "@type": "ListItem",
++        position: 3,
++        url: "http://localhost:8084/cong-viec-cong-tac-vien/2"
++      },
++      {
++        "@type": "ListItem",
++        position: 4,
++        url: "http://localhost:8084/cong-viec-cong-tac-vien/3"
++      }
++    ]
++  });
++});
++
+ // Carousel variables
+ const currentSlide = ref(0)
+ const slidesPerView = ref(3)
+ const isLoading = ref(false)
+ const carouselTrack = ref(null)
+ const allAssignedJobs = ref([])
+ const displayedAssignedJobs = ref([])
+ 
+ // Mock job data - ĐÃ SỬA: Đổi tên biến assignedJobs thành initialAssignedJobs
+ const initialAssignedJobs = [
+   {
+     id: 1,
+     title: 'Môi giới căn hộ cao cấp',
+     salary: 15000000,
+     salaryVisible: false,
+     location: 'Quận 1, TP.HCM',
+     date: '15/10/2023',
+     image: getRandomImage(1),
+     creator: 'Công ty BĐS Diamond Land',
+     income: '15-25 triệu',
+     applicants: 8,
+     jobDescription: `
+       <h3>Mô tả công việc</h3>
+       <ul>
+         <li>Tìm kiếm và tư vấn khách hàng về các dự án căn hộ cao cấp tại Quận 1</li>
+@@ -1002,50 +1034,52 @@ const openSalaryModal = () => {
+ 
+ const closeSalaryModal = () => {
+   showSalaryModal.value = false
+ }
+ 
+ const applySalaryFilter = () => {
+   closeSalaryModal()
+   // Logic áp dụng bộ lọc lương ở đây
+ }
+ 
+ const resetSalaryFilter = () => {
+   salaryRange.value = { min: 0, max: 50000000 }
+ }
+ 
+ const formatSalaryDisplay = () => {
+   if (salaryRange.value.min === 0 && salaryRange.value.max === 50000000) {
+     return 'Tất cả mức lương'
+   }
+   return `${formatSalary(salaryRange.value.min)} - ${formatSalary(salaryRange.value.max)}`
+ }
+ 
+ // Initialize
+ onMounted(() => {
+   initializeCarousel()
+ })
++
++onBeforeUnmount(() => removeJsonLd(collaboratorJobsJsonLdId));
+ </script>
+ 
+ <style scoped>
+ 
+ /* Carousel Styles */
+ .carousel-container {
+   position: relative;
+   margin-bottom: 50px;
+   padding: 0 50px;
+ }
+ 
+ .carousel-track {
+   display: flex;
+   gap: 30px;
+   transition: transform 0.3s ease;
+   overflow-x: auto;
+   scroll-behavior: smooth;
+   scrollbar-width: none; /* Firefox */
+   -ms-overflow-style: none; /* IE and Edge */
+ }
+ 
+ .carousel-track::-webkit-scrollbar {
+   display: none; /* Chrome, Safari and Opera */
+ }
+ 
+diff --git a/src/components/user/Contact/Contact.vue b/src/components/user/Contact/Contact.vue
+index 52cc83731a0483a070c4efbf0f8937b8b5e72d42..7f36c2f5c5e7d0871cc183d0f4d84e08f69c581a 100644
+--- a/src/components/user/Contact/Contact.vue
++++ b/src/components/user/Contact/Contact.vue
+@@ -98,51 +98,70 @@
+                     placeholder="Vấn đề của bạn"
+                     required
+                     class="form-textarea"
+                 ></textarea>
+               </div>
+               <button type="submit" class="submit-btn">Gửi thông tin</button>
+             </form>
+           </div>
+ 
+           <div class="thank-you-message">
+             <p>Cảm ơn bạn đã tin tưởng, kết nối cùng <b>Thiên Hà Group</b>!</p>
+             <p>Chúng tôi rất mong được lắng nghe và hỗ trợ bạn trong thời gian sớm nhất.</p>
+           </div>
+         </div>
+       </div>
+     </main>
+ 
+     <!-- Notification Toast -->
+     <div v-if="showNotification" class="notification-toast">
+       <span>{{ notificationMessage }}</span>
+     </div>
+   </div>
+ </template>
+ 
+ <script setup>
+-import { ref, reactive } from 'vue'
++import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
++import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
++
++const contactJsonLdId = "jsonld-contact-itemlist";
++
++onMounted(() => {
++  setJsonLd(contactJsonLdId, {
++    "@context": "https://schema.org",
++    "@type": "ItemList",
++    itemListElement: [
++      {
++        "@type": "ListItem",
++        position: 1,
++        url: "http://localhost:8084/lien-he"
++      }
++    ]
++  });
++});
++
++onBeforeUnmount(() => removeJsonLd(contactJsonLdId));
+ 
+ // Active location state
+ const activeLocation = ref('headquarters')
+ 
+ // Form data
+ const formData = reactive({
+   fullName: '',
+   phone: '',
+   email: '',
+   message: ''
+ })
+ 
+ // Notification state
+ const showNotification = ref(false)
+ const notificationMessage = ref('')
+ // Map URLs
+ const mapUrls = {
+   headquarters: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31348.906870926585!2d106.70607739528673!3d10.84087193956894!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3175295a6c0ebc8b%3A0xc51466fa5345ab8c!2zQ8O0bmcgVHkgQ-G7lSBQaOG6p24gxJDhuqd1IFTGsCBC4bqldCDEkOG7mW5nIFPhuqNuIFRoacOqbiBIw6AgR3JvdXA!5e0!3m2!1svi!2s!4v1763093883591!5m2!1svi!2s',
+   branch: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.1747235012276!2d106.68906221148586!3d10.797926389307754!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3175290063ccdf0f%3A0x6171a166d6b789b7!2zQ2hpIE5ow6FuaCBUaGnDqm4gSMOgIEdyb3VwIFBow7ogTmh14bqtbiAtIEdp4bqjaSBQaMOhcCBCw6FuIEfhuqVwIELhuqV0IMSQ4buZbmcgU-G6o24!5e0!3m2!1svi!2s!4v1763094237511!5m2!1svi!2s'
+ }
+ 
+ // Computed property for active map URL
+ const activeMapUrl = ref(mapUrls.headquarters)
+ 
+ // Set active location
+diff --git a/src/components/user/EstimateProperty/EstimateProperty.vue b/src/components/user/EstimateProperty/EstimateProperty.vue
+index 73fe927f333280f13971c3ad5fe9e04b3032fc6b..22489881b4f26bb9099a337be997a48f98d469fb 100644
+--- a/src/components/user/EstimateProperty/EstimateProperty.vue
++++ b/src/components/user/EstimateProperty/EstimateProperty.vue
+@@ -55,50 +55,69 @@ ease;
+     <ProcessEP></ProcessEP>
+     <PropertyValueFactors id="propertyValueFactors"></PropertyValueFactors>
+     <Reason></Reason>
+     <FeeEP id="feeEP" @navigateToValuation="scrollToValuation"></FeeEP>
+     <SoldSection title="DỰ ÁN ĐÃ BÁN THÀNH CÔNG NHỜ ĐỊNH GIÁ ĐÚNG"></SoldSection>
+     <Faq @navigateToCriteria="scrollToCriteria"
+          @navigateToPricing="scrollToPricing"
+          @navigateToValuation="scrollToValuation"
+     ></Faq>
+     <ContactForm></ContactForm>
+   </div>
+ </template>
+ 
+ 
+ <script setup>
+ import ProcessStep from "./Components/ProcessStep.vue";
+ import ProcessEP from "./Components/ProcessEP.vue";
+ import PropertyValueFactors from "./Components/PropertyValueFactors.vue";
+ import Reason from "./Components/Reason.vue";
+ import Faq from "./Components/Faq.vue";
+ import SoldSection from "../Home/components/SoldSection.vue";
+ import ContactForm from "../Home/components/ContactForm.vue";
+ import Footer from "../Home/components/Footer.vue";
+ import { onBeforeUnmount, onMounted, ref } from "vue";
+ import FeeEP from "./Components/FeeEP.vue";
++import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
++
++const estimateJsonLdId = "jsonld-estimate-property-itemlist";
++
++onMounted(() => {
++  setJsonLd(estimateJsonLdId, {
++    "@context": "https://schema.org",
++    "@type": "ItemList",
++    itemListElement: [
++      {
++        "@type": "ListItem",
++        position: 1,
++        url: "http://localhost:8084/dinh-gia-bds"
++      }
++    ]
++  });
++});
++
++onBeforeUnmount(() => removeJsonLd(estimateJsonLdId));
+ 
+ const valuationBtn = ref(null);
+ 
+ // Hàm cuộn đến phần tiêu chí định giá
+ const scrollToCriteria = () => {
+   const element = document.getElementById('propertyValueFactors');
+   if (element) {
+     element.scrollIntoView({
+       behavior: 'smooth',
+       block: 'start'
+     });
+   }
+ };
+ 
+ // Hàm cuộn đến phần bảng giá
+ const scrollToPricing = () => {
+   const element = document.getElementById('feeEP');
+   if (element) {
+     element.scrollIntoView({
+       behavior: 'smooth',
+       block: 'start'
+     });
+   }
+ };
+ 
+diff --git a/src/components/user/Home/LandingPage.vue b/src/components/user/Home/LandingPage.vue
+index 23beece0d133d75ac9544aa6e20a17682c483ad5..eaaaaa0a74c0d4dcc4a2b8e76bd4e0bf306bed46 100644
+--- a/src/components/user/Home/LandingPage.vue
++++ b/src/components/user/Home/LandingPage.vue
+@@ -8,57 +8,77 @@
+     <ServiceSection></ServiceSection>
+     <OverviewSection></OverviewSection>
+     <ImpressiveNumbers></ImpressiveNumbers>
+     <SoldSection></SoldSection>
+     <div class="reviews">
+       <ParticleBackground class="image" image-url="/imgs/background_building.jpg"
+                           alt-text="Mô tả ảnh"
+                           :max-particle-size="20"
+                           particle-color="#3C4980"
+                           line-color="#031358"
+                           :line-width="0.5"
+       ></ParticleBackground>
+       <Reviews></Reviews>
+       <SystemEvaluation></SystemEvaluation>
+     </div>
+     <MediaAboutUs></MediaAboutUs>
+     <NewsSection></NewsSection>
+     <ContactForm></ContactForm>
+   </div>
+ 
+ 
+ </template>
+ 
+ 
+ <script setup>
++import { onBeforeUnmount, onMounted } from "vue";
+ import Banner from "./components/Banner.vue";
+ import HeroSection from "./components/HeroSection.vue";
+ import ServiceSection from "./components/ServiceSection.vue";
+ import OverviewSection from "./components/OverviewSection.vue";
+ import ImpressiveNumbers from "./components/ImpressiveNumbers.vue";
+ import Reviews from "./components/Reviews.vue";
+ import SystemEvaluation from "./components/SystemEvaluation.vue";
+ import MediaAboutUs from "./components/MediaAboutUs.vue";
+ import NewsSection from "./components/NewsSection.vue";
+ import ContactForm from "./components/ContactForm.vue";
+ import Footer from "./components/Footer.vue";
+ import Stats from "./components/Stats.vue";
+ import SoldSection from "./components/SoldSection.vue";
+ import ParticleBackground from "../ParticleBackground.vue";
++import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
++
++const homeJsonLdId = "jsonld-home-itemlist";
++
++onMounted(() => {
++  setJsonLd(homeJsonLdId, {
++    "@context": "https://schema.org",
++    "@type": "ItemList",
++    itemListElement: [
++      {
++        "@type": "ListItem",
++        position: 1,
++        url: "http://localhost:8084/"
++      }
++    ]
++  });
++});
++
++onBeforeUnmount(() => removeJsonLd(homeJsonLdId));
+ </script>
+ 
+ 
+ <style scoped>
+ 
+ .main-container {
+   padding-top: 60px;
+   align-items: center; /* căn giữa ngang */
+ }
+ 
+ .reviews .image {
+   position: absolute;
+   height: 130%;
+   z-index: 0;
+ }
+ 
+ 
+ </style>
+\ No newline at end of file
+diff --git a/src/components/user/Investment/InvestmentDetail.vue b/src/components/user/Investment/InvestmentDetail.vue
+index 1c28165f78590d97db11b59d73c774c6c0041fb8..20e2f734c32685053e6d6f9950b18ea780a2e0d0 100644
+--- a/src/components/user/Investment/InvestmentDetail.vue
++++ b/src/components/user/Investment/InvestmentDetail.vue
+@@ -1,20 +1,50 @@
+ <script setup>
+ 
++import { onBeforeUnmount, onMounted } from "vue";
+ import HeroSection from "./Components/HeroSection.vue";
+ import InvestmentPackages from "./Components/InvestmentPackages.vue";
+ import InvestorsList from "./Components/InvestorsList.vue";
++import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
++
++const investmentDetailJsonLdId = "jsonld-investment-detail-itemlist";
++
++onMounted(() => {
++  setJsonLd(investmentDetailJsonLdId, {
++    "@context": "https://schema.org",
++    "@type": "ItemList",
++    itemListElement: [
++      {
++        "@type": "ListItem",
++        position: 1,
++        url: "http://localhost:8084/hop-tac/1"
++      },
++      {
++        "@type": "ListItem",
++        position: 2,
++        url: "http://localhost:8084/hop-tac/2"
++      },
++      {
++        "@type": "ListItem",
++        position: 3,
++        url: "http://localhost:8084/hop-tac/3"
++      }
++    ]
++  });
++});
++
++onBeforeUnmount(() => removeJsonLd(investmentDetailJsonLdId));
+ </script>
+ 
+ <template>
+   <div class="investment-container">
+     <HeroSection></HeroSection>
+     <InvestmentPackages></InvestmentPackages>
+     <InvestorsList></InvestorsList>
+   </div>
+ </template>
+ 
+ <style scoped>
+   .investment-container {
+     padding-top: 80px;
+   }
+ </style>
+\ No newline at end of file
+diff --git a/src/components/user/Investment/Investments.vue b/src/components/user/Investment/Investments.vue
+index 5fca22d718c9b39b60e2a3e966afc5d9fc27e16c..00040435e5291a03ec2d1427a747023065569f3b 100644
+--- a/src/components/user/Investment/Investments.vue
++++ b/src/components/user/Investment/Investments.vue
+@@ -1,67 +1,101 @@
+ <template>
+   <div>
+     <!-- Sử dụng component IntroSection -->
+     <InvestmentIntro />
+ 
+     <!-- Sử dụng component FundingSection -->
+     <Funding
+         @open-modal="openModal"
+         @view-details="viewDetails"
+     />
+ 
+     <!-- Modal component -->
+     <InvestmentModal
+         :visible="showModal"
+         :project-data="selectedProject"
+         @close="closeModal"
+         @payment="handlePayment"
+     />
+   </div>
+ </template>
+ 
+ <script setup>
+-import { ref } from 'vue'
++import { onBeforeUnmount, onMounted, ref } from 'vue'
+ import { useRouter } from "vue-router";
+ import InvestmentModal from "./Components/InvestmentModal.vue";
+ import InvestmentIntro from "./Components/InvestmentIntro.vue";
+ import Funding from "./Components/Funding.vue";
++import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
+ 
+ 
+ 
+ const router = useRouter();
+ 
+ // State cho modal
+ const showModal = ref(false)
+ const selectedProject = ref(null)
+ 
+ // Hàm mở modal
+ const openModal = (branch) => {
+   selectedProject.value = branch
+   showModal.value = true
+ }
+ 
+ // Hàm đóng modal
+ const closeModal = () => {
+   showModal.value = false
+   selectedProject.value = null
+ }
+ 
+ // Hàm xử lý thanh toán
+ const handlePayment = (paymentData) => {
+   console.log('Payment data:', paymentData)
+   // Xử lý thanh toán ở đây
+   closeModal()
+ }
+ 
++const investmentsJsonLdId = "jsonld-investments-itemlist";
++
++onMounted(() => {
++  setJsonLd(investmentsJsonLdId, {
++    "@context": "https://schema.org",
++    "@type": "ItemList",
++    itemListElement: [
++      {
++        "@type": "ListItem",
++        position: 1,
++        url: "http://localhost:8084/hop-tac"
++      },
++      {
++        "@type": "ListItem",
++        position: 2,
++        url: "http://localhost:8084/hop-tac/1"
++      },
++      {
++        "@type": "ListItem",
++        position: 3,
++        url: "http://localhost:8084/hop-tac/2"
++      },
++      {
++        "@type": "ListItem",
++        position: 4,
++        url: "http://localhost:8084/hop-tac/3"
++      }
++    ]
++  });
++});
++
++onBeforeUnmount(() => removeJsonLd(investmentsJsonLdId));
++
+ // Hàm xem chi tiết
+ const viewDetails = (index) => {
+   router.push('/investments/' + index)
+ }
+ </script>
+ 
+ <style scoped>
+ /* Các style toàn cục nếu cần */
+ .body-no-scroll {
+   overflow: hidden;
+ }
+ </style>
+\ No newline at end of file
+diff --git a/src/components/user/News/News.vue b/src/components/user/News/News.vue
+index fb77f425e45d2ee95e7894a3a3cf6fa61f885bad..8474fe9c80e02293b78059abae74f5379dff3668 100644
+--- a/src/components/user/News/News.vue
++++ b/src/components/user/News/News.vue
+@@ -1,13 +1,48 @@
+ <template>
+   <FeaturedNews></FeaturedNews>
+   <LatestNews></LatestNews>
+   <CategoryNews></CategoryNews>
+   <EmailSubscribe></EmailSubscribe>
+ </template>
+ 
+ <script setup>
++import { onBeforeUnmount, onMounted } from "vue";
+ import FeaturedNews from "./Component/FeaturedNews.vue";
+ import LatestNews from "./Component/LatestNews.vue";
+ import CategoryNews from "./Component/CategoryNews.vue";
+ import EmailSubscribe from "./Component/EmailSubscribe.vue";
++import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
++
++const newsJsonLdId = "jsonld-news-itemlist";
++
++onMounted(() => {
++  setJsonLd(newsJsonLdId, {
++    "@context": "https://schema.org",
++    "@type": "ItemList",
++    itemListElement: [
++      {
++        "@type": "ListItem",
++        position: 1,
++        url: "http://localhost:8084/tin-tuc"
++      },
++      {
++        "@type": "ListItem",
++        position: 2,
++        url: "http://localhost:8084/tin-tuc/1"
++      },
++      {
++        "@type": "ListItem",
++        position: 3,
++        url: "http://localhost:8084/tin-tuc/2"
++      },
++      {
++        "@type": "ListItem",
++        position: 4,
++        url: "http://localhost:8084/tin-tuc/3"
++      }
++    ]
++  });
++});
++
++onBeforeUnmount(() => removeJsonLd(newsJsonLdId));
+ </script>
+\ No newline at end of file
+diff --git a/src/components/user/QuickSaleSolution/QuickSaleSolution.vue b/src/components/user/QuickSaleSolution/QuickSaleSolution.vue
+index d27720ed3bd221bf7899316c908eb42d710c5bde..623e261b63d7a348bc5c9248d908a95468a579d0 100644
+--- a/src/components/user/QuickSaleSolution/QuickSaleSolution.vue
++++ b/src/components/user/QuickSaleSolution/QuickSaleSolution.vue
+@@ -116,65 +116,82 @@
+       <QuickSaleS1></QuickSaleS1>
+       <div class="section23">
+         <img class="right-img" src="/imgs/bg-s1.png" alt="">
+         <QuickSaleS2></QuickSaleS2>
+         <QuickSaleS3></QuickSaleS3>
+       </div>
+       <QuickSaleS4></QuickSaleS4>
+       <QuickSaleS5></QuickSaleS5>
+       <QuickSaleS6></QuickSaleS6>
+       <div class="section78">
+ <!--        <img src="/imgs/bg-s2.png" alt="">-->
+         <QuickSaleS7></QuickSaleS7>
+         <QuickSaleS8></QuickSaleS8>
+       </div>
+       <QuickSaleS9></QuickSaleS9>
+       <QuickSaleS10></QuickSaleS10>
+       <QSbenefits></QSbenefits>
+     </div>
+     <SoldSection></SoldSection>
+     <ContactForm></ContactForm>
+   </div>
+ </template>
+ 
+ <script setup lang="ts">
+ import {ref, computed, onMounted, onBeforeUnmount} from 'vue'
++import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
+ import QuickSaleS1 from "./Components/QuickSaleS1.vue";
+ import QuickSaleS2 from "./Components/QuickSaleS2.vue";
+ import QuickSaleS3 from "./Components/QuickSaleS3.vue";
+ import QuickSaleS4 from "./Components/QuickSaleS4.vue";
+ import QuickSaleS5 from "./Components/QuickSaleS5.vue";
+ import QuickSaleS6 from "./Components/QuickSaleS6.vue";
+ import QuickSaleS7 from "./Components/QuickSaleS7.vue";
+ import QuickSaleS8 from "./Components/QuickSaleS8.vue";
+ import QuickSaleS9 from "./Components/QuickSaleS9.vue";
+ import QuickSaleS10 from "./Components/QuickSaleS10.vue";
+ import SoldSection from "../Home/components/SoldSection.vue";
+ import ContactForm from "../Home/components/ContactForm.vue";
+ import Footer from "../Home/components/Footer.vue";
+ import QSbenefits from "./Components/QSbenefits.vue";
+ 
++const quickSaleJsonLdId = "jsonld-quick-sale-itemlist";
++
++onMounted(() => {
++  setJsonLd(quickSaleJsonLdId, {
++    "@context": "https://schema.org",
++    "@type": "ItemList",
++    itemListElement: [
++      {
++        "@type": "ListItem",
++        position: 1,
++        url: "http://localhost:8084/giai-phap-ban-nhanh"
++      }
++    ]
++  });
++});
++
+ // Tab state
+ const activeTab = ref('dinhgia')
+ const tabSliderStyle = computed(() => ({
+   transform: activeTab.value === 'dinhgia' ? 'translateX(0)' : 'translateX(100%)'
+ }))
+ 
+ // Property type dropdown state
+ const isPropertyTypeExpanded = ref(false)
+ const selectedPropertyType = ref({value: 'all', label: 'Tất cả'})
+ const propertyTypes = ref([
+   {value: 'all', label: 'Tất cả'},
+   {value: 'house', label: 'Nhà phố'},
+   {value: 'apartment', label: 'Chung cư'},
+   {value: 'project', label: 'Dự án'}
+ ])
+ 
+ // Search state
+ const searchQuery = ref('')
+ 
+ // Emit events
+ const emit = defineEmits(['search', 'submit', 'focus', 'blur'])
+ 
+ // Tab methods
+ const setActiveTab = (tab) => {
+   activeTab.value = tab
+@@ -230,50 +247,52 @@ onMounted(() => {
+ onMounted(() => {
+   const animatedElements = document.querySelectorAll(
+       ".fade-left, .fade-right, .fade-in, .fade-up"
+   );
+ 
+   const observer = new IntersectionObserver(
+       (entries) => {
+         entries.forEach((entry) => {
+           if (entry.isIntersecting) {
+             entry.target.classList.add("show");
+             // Nếu chỉ muốn chạy 1 lần, unobserve sau khi hiện
+             observer.unobserve(entry.target);
+           }
+         });
+       },
+       {
+         threshold: 0.5, // phần tử hiện 20% là kích hoạt
+       }
+   );
+ 
+   animatedElements.forEach((el) => observer.observe(el));
+ 
+   // cleanup
+   onBeforeUnmount(() => observer.disconnect());
+ });
++
++onBeforeUnmount(() => removeJsonLd(quickSaleJsonLdId));
+ </script>
+ 
+ <style scoped>
+ 
+ .subtitle {
+   font-size: 40px;
+   color: #031358;
+   font-weight: 700;
+   text-align: center;
+   margin: 30px auto;
+   margin-bottom: 100px;
+ }
+ 
+ .section23 {
+   position: relative;
+   width: 100%;
+ }
+ 
+ 
+ .section23 > .right-img {
+   position: absolute;
+   width: auto;
+   height: 70%;
+   z-index: 0;
+   bottom: 0;
+diff --git a/src/components/user/Recruitment/Recruitment.vue b/src/components/user/Recruitment/Recruitment.vue
+index 80f4c8ab6f75bd6b408f5bacef0550a27b8a91ca..9e69f09cf55b213ee16c7a22d9572f7dda2a55f8 100644
+--- a/src/components/user/Recruitment/Recruitment.vue
++++ b/src/components/user/Recruitment/Recruitment.vue
+@@ -60,50 +60,51 @@
+             <!-- Trạng thái hover - hiện nền trắng và content -->
+             <div class="highlight-hover" :class="{ 'active': activeItem === index }">
+               <div class="hover-background"></div>
+               <div class="hover-content">
+                 <h3 class="highlight-title-hover">{{ item.title }}</h3>
+                 <p class="highlight-description">{{ item.description }}</p>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
+   <div class="main-content">
+     <HeroSection></HeroSection>
+     <BenefitsSection></BenefitsSection>
+     <JobPositionList></JobPositionList>
+     <DepartmentSection></DepartmentSection>
+     <PostSection></PostSection>
+     <FormSection ref="formSection"></FormSection>
+   </div>
+ </template>
+ 
+ <script setup>
+ import {onBeforeUnmount, onMounted, ref} from 'vue'
++import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
+ import HeroSection from "./Components/HeroSection.vue";
+ import BenefitsSection from "./Components/BenefitsSection.vue";
+ import JobPositionList from "./Components/JobPositionList.vue";
+ import DepartmentSection from "./Components/DepartmentSection.vue";
+ import PostSection from "./Components/PostSection.vue";
+ import FormSection from "./Components/FormSection.vue";
+ import ParticleBackground from "../ParticleBackground.vue";
+ 
+ // Tiêu đề chính
+ const title = "Không chỉ là công việc, đây là cơ hội để bạn phát triển sự nghiệp!"
+ 
+ // Trạng thái cho hiệu ứng nút
+ const isAnimating = ref(false)
+ 
+ // Bắt đầu hiệu ứng
+ const startAnimation = () => {
+   isAnimating.value = true
+ }
+ 
+ // Dừng hiệu ứng
+ const stopAnimation = () => {
+   isAnimating.value = false
+ }
+ 
+ // Dữ liệu cho phần nổi bật
+@@ -116,84 +117,117 @@ const highlightItems = ref([
+   {
+     title: "Môi trường trẻ trung, năng động",
+     description: "Làm việc cùng đội ngũ nhiệt huyết, sẵn sàng chia sẻ và hỗ trợ nhau mỗi ngày.",
+     image: "/imgs/experts-animate.svg"
+   },
+   {
+     title: "Cơ hội thăng tiến rõ ràng",
+     description: "Chúng tôi đánh giá dựa trên năng lực và kết quả, không phải thâm niên.",
+     image: "/imgs/growth-curve-animate.svg"
+   },
+   {
+     title: "Thu nhập và phúc lợi hấp dẫn",
+     description: "Mức thưởng cạnh tranh, chế độ đãi ngộ tốt – xứng đáng với nỗ lực của bạn.",
+     image: "/imgs/make-it-rain-animate.svg"
+   }
+ ])
+ 
+ // Theo dõi item đang active
+ const activeItem = ref(null)
+ 
+ // Đặt item active
+ const setActiveItem = (index) => {
+   activeItem.value = index
+ }
+ 
++const recruitmentJsonLdId = "jsonld-recruitment-itemlist";
++
++onMounted(() => {
++  setJsonLd(recruitmentJsonLdId, {
++    "@context": "https://schema.org",
++    "@type": "ItemList",
++    itemListElement: [
++      {
++        "@type": "ListItem",
++        position: 1,
++        url: "http://localhost:8084/tuyen-dung"
++      },
++      {
++        "@type": "ListItem",
++        position: 2,
++        url: "http://localhost:8084/tuyen-dung/1"
++      },
++      {
++        "@type": "ListItem",
++        position: 3,
++        url: "http://localhost:8084/tuyen-dung/2"
++      },
++      {
++        "@type": "ListItem",
++        position: 4,
++        url: "http://localhost:8084/tuyen-dung/3"
++      }
++    ]
++  });
++});
++
+ 
+ const formSection = ref(null)
+ 
+ const scrollToSectionB = () => {
+   formSection.value?.$el.scrollIntoView({ behavior: 'smooth' })
+ }
+ 
+ //EFFECT
+ 
+ onMounted(() => {
+   const animatedElements = document.querySelectorAll(
+       ".fade-left, .fade-right, .fade-in, .fade-up"
+   );
+ 
+   const observer = new IntersectionObserver(
+       (entries) => {
+         entries.forEach((entry) => {
+           if (entry.isIntersecting) {
+             entry.target.classList.add("show");
+             // Nếu chỉ muốn chạy 1 lần, unobserve sau khi hiện
+             observer.unobserve(entry.target);
+           }
+         });
+       },
+       {
+         threshold: 0.5, // phần tử hiện 20% là kích hoạt
+       }
+   );
+ 
+   animatedElements.forEach((el) => observer.observe(el));
+ 
+   // cleanup
+   onBeforeUnmount(() => observer.disconnect());
+ });
++
++onBeforeUnmount(() => removeJsonLd(recruitmentJsonLdId));
+ </script>
+ 
+ <style scoped>
+ .main-content {
+   margin: 60px 0;
+ }
+ 
+ .recruitment-banner {
+   margin-top: 60px;
+   font-family: 'Ubuntu', sans-serif;
+   width: 100%;
+   position: relative;
+ }
+ 
+ .banner-container {
+   position: relative;
+   width: 100%;
+   min-height: 90vh; /* Sử dụng viewport height */
+   max-height: 900px; /* Giới hạn chiều cao tối đa */
+   overflow: hidden;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+ }
+ 
+diff --git a/src/utils/structuredData.js b/src/utils/structuredData.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..83308ceb00d975f94e54ad4b79b0b313568e783b
+index 0000000000000000000000000000000000000000..8dbb28b443bfac8c4697ea86ad2c062c471edc61
 --- /dev/null
-+++ b/src/components/ChatRoom.vue
-@@ -0,0 +1,354 @@
-+<template>
-+  <div class="chat-room card">
-+    <div class="card-header d-flex align-items-center justify-content-between">
-+      <div class="d-flex align-items-center gap-2">
-+        <div class="chat-title">Team Chat</div>
-+        <span v-if="teamName" class="badge bg-light text-dark">{{ teamName }}</span>
-+      </div>
-+      <button
-+        class="btn btn-sm btn-outline-secondary"
-+        :disabled="isLoading"
-+        @click="loadInitialMessages"
-+      >
-+        <i class="fa-solid fa-rotate"></i>
-+      </button>
-+    </div>
++++ b/src/utils/structuredData.js
+@@ -0,0 +1,23 @@
++export const setJsonLd = (id, data) => {
++  if (typeof document === "undefined") return;
 +
-+    <div class="card-body d-flex flex-column chat-body">
-+      <div class="chat-messages" ref="messageContainer">
-+        <div v-if="isLoading" class="text-center text-muted py-4">
-+          <i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải tin nhắn...
-+        </div>
-+
-+        <template v-else>
-+          <button
-+            v-if="hasMore"
-+            class="btn btn-link text-decoration-none w-100 load-more"
-+            :disabled="isLoadingMore"
-+            @click="loadOlderMessages"
-+          >
-+            <span v-if="isLoadingMore">
-+              <i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải...
-+            </span>
-+            <span v-else>Xem tin nhắn cũ</span>
-+          </button>
-+
-+          <div
-+            v-for="message in messages"
-+            :key="message.id"
-+            class="message-row"
-+            :class="{ 'align-right': isOwnMessage(message) }"
-+          >
-+            <div class="avatar" v-if="!isOwnMessage(message)">
-+              <img v-if="message.avatar" :src="message.avatar" alt="avatar" />
-+              <div v-else class="avatar-placeholder">
-+                <i class="fa-solid fa-user"></i>
-+              </div>
-+            </div>
-+
-+            <div class="bubble" :class="isOwnMessage(message) ? 'mine' : 'theirs'">
-+              <div class="sender" v-if="!isOwnMessage(message)">{{ message.senderName }}</div>
-+              <div v-if="message.type === 'image' && message.content" class="image-message">
-+                <img :src="message.content" alt="image message" />
-+              </div>
-+              <div v-else-if="message.type === 'file'" class="file-message">
-+                <div class="file-name">{{ message.content || 'Tập tin' }}</div>
-+                <a
-+                  v-if="message.fileUrl"
-+                  class="btn btn-sm btn-outline-light"
-+                  :href="message.fileUrl"
-+                  download
-+                >
-+                  <i class="fa-solid fa-download me-1"></i>Tải xuống
-+                </a>
-+              </div>
-+              <div v-else class="text-message">{{ message.content }}</div>
-+              <div class="timestamp">{{ formatTimestamp(message.createdAt) }}</div>
-+            </div>
-+
-+            <div class="avatar" v-if="isOwnMessage(message)">
-+              <img v-if="message.avatar" :src="message.avatar" alt="avatar" />
-+              <div v-else class="avatar-placeholder">
-+                <i class="fa-solid fa-user"></i>
-+              </div>
-+            </div>
-+          </div>
-+        </template>
-+      </div>
-+    </div>
-+  </div>
-+</template>
-+
-+<script setup>
-+import { nextTick, onMounted, ref, watch } from 'vue'
-+import dayjs from 'dayjs'
-+import api from '@/api/api.js'
-+
-+const props = defineProps({
-+  teamId: {
-+    type: [String, Number],
-+    required: true,
-+  },
-+  currentUserId: {
-+    type: [String, Number],
-+    required: true,
-+  },
-+  teamName: {
-+    type: String,
-+    default: '',
-+  },
-+})
-+
-+const size = 40
-+const page = ref(0)
-+const messages = ref([])
-+const hasMore = ref(true)
-+const isLoading = ref(false)
-+const isLoadingMore = ref(false)
-+const messageContainer = ref(null)
-+
-+const isOwnMessage = (message) => {
-+  if (!message || props.currentUserId == null) return false
-+  return String(message.senderId) === String(props.currentUserId)
-+}
-+
-+const formatTimestamp = (value) => {
-+  if (!value) return ''
-+  return dayjs(value).format('HH:mm, DD/MM/YYYY')
-+}
-+
-+const generateId = () =>
-+  typeof crypto !== 'undefined' && crypto.randomUUID
-+    ? crypto.randomUUID()
-+    : `msg-${Date.now()}-${Math.random().toString(16).slice(2)}`
-+
-+const normalizeMessages = (list = []) => {
-+  return [...list]
-+    .map((item) => ({
-+      id: item.id || item.messageId || generateId(),
-+      senderId: item.senderId || item.authorId || item.userId,
-+      senderName: item.senderName || item.authorName || item.author?.name || 'Người dùng',
-+      avatar: item.avatar || item.author?.avatar,
-+      content: item.content || item.messageContent || item.text,
-+      createdAt: item.createdAt || item.createdDate || item.time,
-+      type: item.type || item.messageType || inferType(item),
-+      fileUrl: item.fileUrl || item.url,
-+    }))
-+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-+}
-+
-+const inferType = (item) => {
-+  const type = (item.type || item.messageType || '').toLowerCase()
-+  if (type) return type
-+  const url = item.fileUrl || item.url || item.content
-+  if (!url) return 'text'
-+  const ext = url.split('?')[0].split('.').pop()?.toLowerCase()
-+  if (['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'].includes(ext)) return 'image'
-+  return item.fileUrl || item.url ? 'file' : 'text'
-+}
-+
-+const fetchMessages = async (pageNumber) => {
-+  if (!props.teamId) return []
-+  const res = await api.get(`/chat/messages/${props.teamId}`, {
-+    params: { page: pageNumber, size },
-+  })
-+  return Array.isArray(res.data) ? res.data : []
-+}
-+
-+const scrollToBottom = async () => {
-+  await nextTick()
-+  const container = messageContainer.value
-+  if (container) {
-+    container.scrollTop = container.scrollHeight
++  const existing = document.getElementById(id);
++  if (existing) {
++    existing.remove();
 +  }
-+}
 +
-+const appendOldMessages = async (olderMessages, oldScrollHeight, oldScrollTop) => {
-+  if (!olderMessages.length) return
-+  const container = messageContainer.value
-+  messages.value = [...olderMessages, ...messages.value]
-+  await nextTick()
-+  if (container) {
-+    const newScrollHeight = container.scrollHeight
-+    container.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight)
++  const script = document.createElement("script");
++  script.type = "application/ld+json";
++  script.id = id;
++  script.text = JSON.stringify(data);
++  document.head.appendChild(script);
++};
++
++export const removeJsonLd = (id) => {
++  if (typeof document === "undefined") return;
++
++  const existing = document.getElementById(id);
++  if (existing) {
++    existing.remove();
 +  }
-+}
-+
-+const loadInitialMessages = async () => {
-+  if (isLoading.value) return
-+  isLoading.value = true
-+  hasMore.value = true
-+  page.value = 0
-+  try {
-+    const data = await fetchMessages(0)
-+    messages.value = normalizeMessages(data)
-+    hasMore.value = data.length === size
-+    await scrollToBottom()
-+  } finally {
-+    isLoading.value = false
-+  }
-+}
-+
-+const loadOlderMessages = async () => {
-+  if (isLoading.value || isLoadingMore.value || !hasMore.value) return
-+  const container = messageContainer.value
-+  if (!container) return
-+  const oldScrollHeight = container.scrollHeight
-+  const oldScrollTop = container.scrollTop
-+  isLoadingMore.value = true
-+  try {
-+    const nextPage = page.value + 1
-+    const data = await fetchMessages(nextPage)
-+    const normalized = normalizeMessages(data)
-+    await appendOldMessages(normalized, oldScrollHeight, oldScrollTop)
-+    hasMore.value = data.length === size
-+    if (data.length > 0) {
-+      page.value = nextPage
-+    }
-+  } finally {
-+    isLoadingMore.value = false
-+  }
-+}
-+
-+onMounted(loadInitialMessages)
-+
-+watch(
-+  () => props.teamId,
-+  async () => {
-+    messages.value = []
-+    page.value = 0
-+    hasMore.value = true
-+    await loadInitialMessages()
-+  }
-+)
-+</script>
-+
-+<style scoped>
-+.chat-room {
-+  height: 100%;
-+  display: flex;
-+  flex-direction: column;
-+  border: 1px solid #e5e7eb;
-+  border-radius: 12px;
-+}
-+
-+.card-header {
-+  background: #f9fafb;
-+  border-bottom: 1px solid #e5e7eb;
-+  padding: 12px 16px;
-+}
-+
-+.chat-title {
-+  font-weight: 700;
-+  font-size: 16px;
-+}
-+
-+.chat-body {
-+  padding: 0;
-+  flex: 1;
-+  min-height: 0;
-+}
-+
-+.chat-messages {
-+  flex: 1;
-+  overflow-y: auto;
-+  padding: 12px 16px 16px;
-+  display: flex;
-+  flex-direction: column;
-+  gap: 10px;
-+  height: 100%;
-+}
-+
-+.load-more {
-+  margin-bottom: 4px;
-+  color: #2563eb;
-+}
-+
-+.message-row {
-+  display: flex;
-+  align-items: flex-end;
-+  gap: 8px;
-+}
-+
-+.message-row.align-right {
-+  flex-direction: row-reverse;
-+}
-+
-+.avatar {
-+  width: 36px;
-+  height: 36px;
-+  border-radius: 50%;
-+  overflow: hidden;
-+  background: #e5e7eb;
-+  display: flex;
-+  align-items: center;
-+  justify-content: center;
-+}
-+
-+.avatar img {
-+  width: 100%;
-+  height: 100%;
-+  object-fit: cover;
-+}
-+
-+.avatar-placeholder {
-+  color: #6b7280;
-+}
-+
-+.bubble {
-+  max-width: 70%;
-+  padding: 10px 12px;
-+  border-radius: 12px;
-+  position: relative;
-+  display: flex;
-+  flex-direction: column;
-+  gap: 6px;
-+}
-+
-+.bubble.mine {
-+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-+  color: #fff;
-+  border-bottom-right-radius: 4px;
-+}
-+
-+.bubble.theirs {
-+  background: #f3f4f6;
-+  color: #111827;
-+  border-bottom-left-radius: 4px;
-+}
-+
-+.sender {
-+  font-weight: 700;
-+  font-size: 13px;
-+}
-+
-+.text-message {
-+  white-space: pre-wrap;
-+  word-break: break-word;
-+}
-+
-+.image-message img {
-+  max-width: 260px;
-+  border-radius: 8px;
-+  display: block;
-+}
-+
-+.file-message {
-+  display: flex;
-+  align-items: center;
-+  gap: 10px;
-+}
-+
-+.file-name {
-+  font-weight: 600;
-+}
-+
-+.timestamp {
-+  font-size: 11px;
-+  color: rgba(255, 255, 255, 0.8);
-+}
-+
-+.bubble.theirs .timestamp {
-+  color: #6b7280;
-+}
-+</style>
++};

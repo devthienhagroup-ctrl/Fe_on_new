@@ -153,7 +153,7 @@
           <!-- Action Card -->
           <div class="action-card">
             <h3 class="action-title">Xem thêm các công việc khác</h3>
-            <router-link to="/collaborator-jobs" class="action-button">
+            <router-link to="/cong-viec-cong-tac-vien" class="action-button">
               Ứng tuyển CTV
             </router-link>
           </div>

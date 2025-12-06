@@ -7,7 +7,7 @@
         <div class="avatar-section">
           <div class="avatar-container">
             <img
-                :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/'+user_info.avatar || '/default-avatar.png'"
+                :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+user_info.avatar || '/default-avatar.png'"
                 alt="Avatar"
                 class="avatar"
             />
@@ -286,7 +286,7 @@ const avatarUrl = computed(() => {
   if (editedInfo.avatarFile) {
     return URL.createObjectURL(editedInfo.avatarFile)
   } else {
-    return ' https://s3.cloudfly.vn/thg-storage/uploads-public/' + (editedInfo.avatar || props.user_info.avatar)
+    return ' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + (editedInfo.avatar || props.user_info.avatar)
   }
 })
 
@@ -346,7 +346,7 @@ watch(currentAddress, (newAddress) => {
     editedInfo.ward = ''
     editedInfo.province = ''
     // Nếu không, dùng ảnh từ server
-    return 'https://s3.cloudfly.vn/thg-storage/uploads-public/' + (editedInfo.avatar || props.user_info.avatar)
+    return 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + (editedInfo.avatar || props.user_info.avatar)
   }
 })
 

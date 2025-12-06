@@ -82,6 +82,7 @@
 
 <script setup>
 import {onBeforeUnmount, onMounted, ref} from 'vue'
+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
 import HeroSection from "./Components/HeroSection.vue";
 import BenefitsSection from "./Components/BenefitsSection.vue";
 import JobPositionList from "./Components/JobPositionList.vue";
@@ -138,6 +139,37 @@ const setActiveItem = (index) => {
   activeItem.value = index
 }
 
+const recruitmentJsonLdId = "jsonld-recruitment-itemlist";
+
+onMounted(() => {
+  setJsonLd(recruitmentJsonLdId, {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        url: "http://localhost:8084/tuyen-dung"
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        url: "http://localhost:8084/tuyen-dung/1"
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        url: "http://localhost:8084/tuyen-dung/2"
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        url: "http://localhost:8084/tuyen-dung/3"
+      }
+    ]
+  });
+});
+
 
 const formSection = ref(null)
 
@@ -172,6 +204,8 @@ onMounted(() => {
   // cleanup
   onBeforeUnmount(() => observer.disconnect());
 });
+
+onBeforeUnmount(() => removeJsonLd(recruitmentJsonLdId));
 </script>
 
 <style scoped>

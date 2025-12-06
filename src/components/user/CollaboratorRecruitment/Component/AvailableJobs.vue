@@ -188,7 +188,7 @@
             <i class="fa-solid fa-paper-plane"></i> Đăng ký ngay
           </button>
           <button
-              @click="router.push('/collaborator-jobs/'+ job.id)"
+              @click="router.push('/cong-viec-cong-tac-vien/'+ job.id)"
               class="btn-detail-2 outline"
               v-if="hoveredJob === job.id"
           >
