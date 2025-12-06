@@ -57,13 +57,12 @@ const routes = [
             name: "LoginForm",
             component: LoginForm,
         },
-        {
-            path: "/test01",
-            name: "productlist",
-            meta: {requiresAuth: false},
-            component: ProductList,
-        },
-
+        // {
+        //     path: "/test01",
+        //     name: "productlist",
+        //     meta: {requiresAuth: false},
+        //     component: ProductList,
+        // },
         {
             path: "/-thg/loai-hinh",
             component: Menu, // MenuUser là layout chính
@@ -588,7 +587,7 @@ const routes = [
         ]
     },
     {
-        path: "/investments",
+        path: "/hop-tac",
         name: "Investments",
         component: MenuUser,
         children: [
