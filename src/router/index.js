@@ -51,6 +51,7 @@ import ProductList from "../components/productAdmin/ProductList.vue";
 import ProductDetail from "../components/productAdmin/ProductDetail.vue";
 import Demo from "../components/productAdmin/Demo.vue";
 import ProductUpdate  from "../components/productAdmin/ProductUpdate.vue";
+import ProductDetail2 from "../components/productAdmin/ProductDetail2.vue";
 
 import Ga4EventExample from "../components/Ga4EventExample.vue";
 
@@ -86,6 +87,7 @@ const routes = [
                 }
             ]
         },
+
         {
             path: "/test02",
             meta: {requiresAuth: false, hideFooterMap: true},
@@ -110,8 +112,15 @@ const routes = [
                 name: "ProductDetail",
                 component: ProductDetail,
                 props: true,
+            },
+            {
+                path: "products-2/:id",   // → /admin/products/:id
+                name: "ProductDetail2",
+                component: ProductDetail2,
+                props: true,
             }
-        ]
+        ],
+
     },
         {
             path: "/-thg/loai-hinh",

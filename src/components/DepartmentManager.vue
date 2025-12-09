@@ -302,7 +302,7 @@ function validateDepartment() {
 
 function formatAddress(address) {
   if (!address) return "";
-  return address.replace(/\s*\/\s*/g, ", ");
+  return address.replace(/\s*\/!!\s*/g, ", ");
 }
 
 const previewImage = ref();

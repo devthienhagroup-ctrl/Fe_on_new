@@ -302,7 +302,7 @@ const emit = defineEmits([
 
 function formatAddress(address) {
   if (!address) return "";
-  return address.replace(/\s*\/\s*/g, ", ");
+  return address.replace(/\s*\/!!\s*/g, ", ");
 }
 
 function getCityFromAddress(address) {

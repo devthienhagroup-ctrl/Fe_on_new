@@ -211,7 +211,7 @@ const emit = defineEmits(["refresh", "add-asset", "view-detail", "request-valuat
 
 function formatAddress(address) {
   if (!address) return "";
-  return address.replace(/\s*\/\s*/g, ", ");
+  return address.replace(/\s*\/!!\s*/g, ", ");
 }
 </script>
 

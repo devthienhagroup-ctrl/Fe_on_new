@@ -2371,7 +2371,7 @@ function validateRequestForm(option = requestForm.assetOption) {
 
 function formatAddress(address) {
   if (!address) return "";
-  return address.replace(/\s*\/\s*/g, ", ");
+  return address.replace(/\s*\/!!\s*/g, ", ");
 }
 
 // Hàm submit yêu cầu định giá

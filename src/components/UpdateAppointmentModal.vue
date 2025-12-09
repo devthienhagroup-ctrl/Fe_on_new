@@ -114,7 +114,7 @@ const form = ref({
 function fixAddress(address) {
   if (!address) return "";
   return address
-      .replace(/\s*\/\s*/g, ", ")   // thay / thành ,
+      .replace(/\s*\/!!\s*/g, ", ")  // thay / thành ,
       .replace(/\s+/g, " ")         // xóa khoảng trắng dư
       .trim();
 }

@@ -168,7 +168,7 @@ function openFastSale(landAssetId, id, address, purpose) {
 }
 function formatAddress(address) {
   if (!address) return "";
-  return address.replace(/\s*\/\s*/g, ", ");
+  return address.replace(/\s*\/!!\s*/g, ", ");
 }
 // =======================================================
 // 🔥 LẤY ID TỪ LOCAL STORAGE

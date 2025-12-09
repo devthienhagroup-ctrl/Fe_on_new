@@ -262,75 +262,51 @@
           </div>
         </div>
 
-        <!-- SECTION 2: ĐỊA CHỈ & KHU VỰC -->
+        <!-- SECTION 2: ĐỊA CHỈ -->
         <div class="bg-white rounded-2xl shadow-xl border border-slate-300 p-6">
           <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
             <div class="bg-gradient-to-r from-emerald-500 to-green-600 p-2.5 rounded-xl">
               <i class="fa-solid fa-location-dot text-white text-lg"></i>
             </div>
-            <h2 class="text-xl font-bold text-slate-900">Địa chỉ & Khu vực</h2>
+            <h2 class="text-xl font-bold text-slate-900">Địa chỉ</h2>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Tỉnh/Thành phố -->
+
+            <!-- 🟦 TỈNH / THÀNH PHỐ — nằm cột trái -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-                    <i class="fa-solid fa-city text-white text-xs"></i>
-                  </div>
-                  <span>Tỉnh/Thành phố *</span>
-                </span>
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
+            <i class="fa-solid fa-city text-white text-xs"></i>
+          </div>
+          <span>Tỉnh/Thành phố *</span>
+        </span>
               </label>
+
               <select
-                  v-model="selectedProvince"
-                  @change="onProvinceChange"
+                  v-model="formAddress.province"
                   class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
                   required
               >
-                <option value="">-- Chọn tỉnh/thành phố --</option>
-                <option v-for="province in provinces" :key="province.name" :value="province.name">
-                  {{ formatProvinceName(province.name) }}
+                <option value="">-- Chọn tỉnh/thành --</option>
+                <option v-for="province in provinceOptions" :key="province.code" :value="province.name">
+                  {{ province.name }}
                 </option>
               </select>
             </div>
 
-            <!-- Phường/Xã -->
+            <!-- 🟪 ĐỊA CHỈ ĐƯỜNG — chuyển sang cột phải -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
-                    <i class="fa-solid fa-map-marker-alt text-white text-xs"></i>
-                  </div>
-                  <span>Phường/Xã *</span>
-                </span>
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 flex items-center justify-center">
+            <i class="fa-solid fa-road text-white text-xs"></i>
+          </div>
+          <span>Địa chỉ đường *</span>
+        </span>
               </label>
-              <select
-                  v-model="formAddress.ward"
-                  :disabled="!selectedProvince"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400 disabled:bg-slate-100 disabled:cursor-not-allowed"
-                  required
-              >
-                <option value="">-- Chọn phường/xã --</option>
-                <option v-for="ward in wards" :key="ward.name" :value="ward.name">
-                  {{ formatWardName(ward.name) }}
-                </option>
-              </select>
-              <div v-if="!selectedProvince" class="text-xs text-slate-500 italic">
-                Vui lòng chọn tỉnh/thành phố trước
-              </div>
-            </div>
 
-            <!-- Địa chỉ đường -->
-            <div class="space-y-2 md:col-span-2 lg:col-span-1">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 flex items-center justify-center">
-                    <i class="fa-solid fa-road text-white text-xs"></i>
-                  </div>
-                  <span>Địa chỉ đường *</span>
-                </span>
-              </label>
               <div class="relative">
                 <input
                     type="text"
@@ -343,34 +319,40 @@
               </div>
             </div>
 
-            <!-- Khu vực mã -->
+            <!-- 🟩 PHƯỜNG / XÃ -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
-                    <i class="fa-solid fa-map-pin text-white text-xs"></i>
-                  </div>
-                  <span>Khu vực</span>
-                </span>
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
+            <i class="fa-solid fa-map-marker-alt text-white text-xs"></i>
+          </div>
+          <span>Phường/Xã *</span>
+        </span>
               </label>
-              <input
-                  type="text"
-                  v-model="formData.khuVucMa"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: TP. Thủ Đức"
-              />
+
+              <select
+                  v-model="formAddress.ward"
+                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                  required
+              >
+                <option value="">-- Chọn phường/xã --</option>
+                <option v-for="ward in wardOptions" :key="ward.code" :value="ward.name">
+                  {{ ward.name }}
+                </option>
+              </select>
             </div>
 
-            <!-- Vị trí -->
+            <!-- 🟧 VỊ TRÍ -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
-                    <i class="fa-solid fa-location-arrow text-white text-xs"></i>
-                  </div>
-                  <span>Vị trí *</span>
-                </span>
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
+            <i class="fa-solid fa-location-arrow text-white text-xs"></i>
+          </div>
+          <span>Vị trí *</span>
+        </span>
               </label>
+
               <select
                   v-model="formData.landPosition"
                   class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
@@ -386,16 +368,17 @@
               </select>
             </div>
 
-            <!-- Địa chỉ cũ -->
+            <!-- 🟥 ĐỊA CHỈ CŨ -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-slate-500 to-gray-500 flex items-center justify-center">
-                    <i class="fa-solid fa-history text-white text-xs"></i>
-                  </div>
-                  <span>Địa chỉ cũ</span>
-                </span>
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-slate-500 to-gray-500 flex items-center justify-center">
+            <i class="fa-solid fa-history text-white text-xs"></i>
+          </div>
+          <span>Địa chỉ cũ</span>
+        </span>
               </label>
+
               <input
                   type="text"
                   v-model="formData.oldAddress"
@@ -404,16 +387,17 @@
               />
             </div>
 
-            <!-- Preview địa chỉ -->
+            <!-- 🟦 PREVIEW -->
             <div class="md:col-span-3 space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center">
-                    <i class="fa-solid fa-eye text-white text-xs"></i>
-                  </div>
-                  <span>Xem trước địa chỉ</span>
-                </span>
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center">
+            <i class="fa-solid fa-eye text-white text-xs"></i>
+          </div>
+          <span>Xem trước địa chỉ</span>
+        </span>
               </label>
+
               <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
                 <div class="flex items-center gap-2 text-slate-800">
                   <i class="fa-solid fa-map-marker-alt text-blue-500"></i>
@@ -421,6 +405,7 @@
                 </div>
               </div>
             </div>
+
           </div>
         </div>
 
@@ -450,7 +435,7 @@
                     v-model="formData.ownerName"
                     class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
                     placeholder="Nhập tên chủ sở hữu"
-                    required
+                    readonly
                 />
                 <i class="fa-solid fa-user-tag absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
               </div>
@@ -472,7 +457,7 @@
                     v-model="formData.ownerPhone"
                     class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
                     placeholder="Nhập số điện thoại"
-                    required
+                    readonly
                 />
                 <i class="fa-solid fa-mobile-screen absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
               </div>
@@ -613,7 +598,7 @@
                   v-model="formData.status"
                   class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
                   placeholder="Ví dụ: Đã định giá sơ bộ"
-                  required
+                  readonly
               />
             </div>
 
@@ -1110,6 +1095,117 @@
           </div>
         </div>
 
+        <!-- SECTION: CHI TIẾT PHÒNG -->
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-300 p-6">
+          <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
+            <div class="bg-gradient-to-r from-teal-500 to-emerald-500 p-2.5 rounded-xl">
+              <i class="fa-solid fa-bed text-white text-lg"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-slate-900">Chi tiết phòng</h2>
+              <p class="text-sm text-slate-600">Cập nhật số lượng, diện tích và mô tả cho từng loại phòng.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+              <thead class="bg-slate-100 text-slate-700">
+              <tr>
+                <th class="px-4 py-3 font-semibold">Loại phòng</th>
+                <th class="px-4 py-3 font-semibold w-32">Số lượng</th>
+                <th class="px-4 py-3 font-semibold w-40">Diện tích (m²)</th>
+                <th class="px-4 py-3 font-semibold">Mô tả</th>
+                <th class="px-4 py-3 font-semibold w-20 text-center">Xóa</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="(room, index) in formData.rooms" :key="room.id || index" class="border-t border-slate-200">
+                <td class="px-4 py-3">
+                  <select
+                      v-model="room.loaiPhong"
+                      class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      required
+                  >
+                    <option disabled value="">-- Chọn loại phòng --</option>
+                    <option v-for="opt in roomTypeOptions" :key="opt" :value="opt">
+                      {{ opt }}
+                    </option>
+                  </select>
+                </td>
+                <td class="px-4 py-3">
+                  <input
+                      v-model.number="room.soLuong"
+                      type="number"
+                      min="0"
+                      class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      required
+                  />
+                </td>
+                <td class="px-4 py-3">
+                  <input
+                      v-model.number="room.dienTich"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      required
+                  />
+                </td>
+                <td class="px-4 py-3">
+                  <input
+                      v-model="room.moTa"
+                      type="text"
+                      class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="Ghi chú thêm..."
+                      required
+                  />
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <button type="button" class="text-rose-600 hover:text-rose-700" @click="removeRoom(index)">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr v-if="!formData.rooms.length">
+                <td colspan="5" class="px-4 py-4 text-center text-slate-500">Chưa có thông tin phòng</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mt-4 flex items-center justify-between">
+            <div class="text-sm text-slate-600">Thêm mới hoặc chỉnh sửa chi tiết phòng để mô tả đầy đủ tài sản.</div>
+            <button
+                type="button"
+                class="px-4 py-2 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-xl font-semibold shadow hover:from-teal-600 hover:to-emerald-600"
+                @click="addRoom"
+            >
+              <i class="fa-solid fa-plus mr-2"></i>Thêm phòng
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION: HÌNH ẢNH & TỆP ĐÍNH KÈM -->
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-300 p-6">
+          <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
+            <div class="bg-gradient-to-r from-indigo-500 to-blue-500 p-2.5 rounded-xl">
+              <i class="fa-solid fa-images text-white text-lg"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-slate-900">Hình ảnh & tài liệu</h2>
+              <p class="text-sm text-slate-600">Quản lý ảnh, sổ và file đính kèm của tài sản.</p>
+            </div>
+          </div>
+
+          <FileOrLand
+              entity-type="land"
+              :entity-id="asset.id"
+              :file-list="formData.files || []"
+              :canEdit="true"
+              @update:files="handleFilesUpdate"
+          />
+        </div>
+
         <!-- ACTION BUTTONS -->
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 pb-10">
           <button
@@ -1147,10 +1243,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import api from "/src/api/api.js";
+import FileOrLand from "../land/FileOrLand.vue";
 import addressData from "/src/assets/js/address.json";
+import {showLoading, updateAlertSuccess} from "../../assets/js/alertService.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -1158,31 +1256,38 @@ const id = route.params.id;
 
 const asset = ref(null);
 const formData = ref({});
+const originalFiles = ref([]);
 const formAddress = ref({
   street: "",
   ward: "",
-  area: ""
+  province: ""
 });
-const selectedProvince = ref(null);
-const wards = ref([]);
-const provinces = ref([]);
 const isSaving = ref(false);
+const provinces = addressData || [];
+
+const provinceOptions = computed(() => provinces);
+const selectedProvince = computed(() => findProvinceByName(formAddress.value.province));
+const wardOptions = computed(() => selectedProvince.value?.wards || []);
+
+watch(() => formAddress.value.province, (newProvince) => {
+  const province = findProvinceByName(newProvince);
+
+  if (!province) {
+    formAddress.value.ward = "";
+    return;
+  }
+
+  const wardStillValid = province.wards.find(ward => normalizeText(ward.name) === normalizeText(formAddress.value.ward));
+
+  if (!wardStillValid) {
+    formAddress.value.ward = "";
+  }
+});
 
 // Load dữ liệu ban đầu
 onMounted(async () => {
   await loadAssetDetail();
-  loadProvinces();
 });
-
-function loadProvinces() {
-  provinces.value = addressData;
-}
-
-function onProvinceChange() {
-  const found = provinces.value.find(p => p.name === selectedProvince.value);
-  wards.value = found ? found.wards : [];
-  formAddress.value.ward = "";
-}
 
 
 async function loadAssetDetail() {
@@ -1191,40 +1296,8 @@ async function loadAssetDetail() {
     asset.value = res.data;
     initializeFormData();
     parseAddress();
-    matchAddressWithData();
   } catch (error) {
     console.error("Lỗi khi tải dữ liệu tài sản:", error);
-  }
-}
-
-function matchAddressWithData() {
-  if (!formAddress.value.area) return;
-
-  const provinceName = formAddress.value.area.trim();
-
-  // 🔍 tìm đúng tỉnh
-  const foundProvince = provinces.value.find(
-      p => p.name.trim() === provinceName
-  );
-
-  if (!foundProvince) {
-    console.warn("Không tìm thấy tỉnh:", provinceName);
-    return;
-  }
-
-  // set STRING
-  selectedProvince.value = foundProvince.name;
-
-  // load wards
-  wards.value = foundProvince.wards;
-
-  // match ward
-  const foundWard = foundProvince.wards.find(
-      w => w.name.trim() === formAddress.value.ward.trim()
-  );
-
-  if (foundWard) {
-    formAddress.value.ward = foundWard.name;
   }
 }
 
@@ -1232,17 +1305,58 @@ function initializeFormData() {
   formData.value = JSON.parse(JSON.stringify(asset.value));
   formData.value.loaiTaiSan = formData.value.loaiTaiSan || detectAssetTypeFromStructure.value || "";
   formData.value.rooms = formData.value.rooms || [];
+  formData.value.files = formData.value.files || [];
+  formData.value.newFiles = formData.value.newFiles || [];
+  formData.value.newLandBookFiles = formData.value.newLandBookFiles || [];
+  formData.value.deletedFileIds = formData.value.deletedFileIds || [];
+  formData.value.deletedLandBookFileIds = formData.value.deletedLandBookFileIds || [];
+  originalFiles.value = JSON.parse(JSON.stringify(formData.value.files));
 }
 
 function parseAddress() {
-  if (!formData.value.address) return;
+  if (!formData.value.address) {
+    formAddress.value = { street: "", ward: "", province: "" };
+    return;
+  }
 
   const parts = formData.value.address.split("/!!").map(p => p.trim());
+  const street = parts[0] || "";
+  const rawWard = parts[1] || "";
+  const rawProvince = parts[2] || "";
+
+  const provinceMatched = findProvinceByName(rawProvince);
+  const provinceName = provinceMatched?.name || "";
+  const wardName = findWardByName(rawWard, provinceMatched);
+
   formAddress.value = {
-    street: parts[0] || "",
-    ward: parts[1] || "",
-    area: parts[2] || ""
+    street,
+    ward: wardName,
+    province: provinceName
   };
+  formData.value.khuVucMa = provinceName;
+}
+
+function normalizeText(value) {
+  return (value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim();
+}
+
+function findProvinceByName(name) {
+  const normalized = normalizeText(name);
+  if (!normalized) return null;
+
+  return provinces.find(province => normalizeText(province.name) === normalized) || null;
+}
+
+function findWardByName(name, province) {
+  const normalized = normalizeText(name);
+  if (!normalized || !province) return "";
+
+  const match = (province.wards || []).find(ward => normalizeText(ward.name) === normalized);
+  return match ? match.name : "";
 }
 
 // Computed properties
@@ -1277,7 +1391,7 @@ const fullAddressPreview = computed(() => {
   const parts = [
     formAddress.value.street,
     formAddress.value.ward,
-    formData.value.khuVucMa || formAddress.value.area
+    formAddress.value.province
   ].filter(part => part && part.trim());
 
   return parts.join(", ") || "Chưa có địa chỉ";
@@ -1298,6 +1412,55 @@ function onAssetTypeChange() {
   }
 }
 
+function handleFilesUpdate(updatedFiles) {
+  formData.value.files = updatedFiles;
+
+  const existingFiles = updatedFiles.filter(file => !file.file && file.id);
+  const newFiles = updatedFiles.filter(file => file.file instanceof File);
+
+  formData.value.newFiles = newFiles
+      .filter(f => !f.isIG)
+      .map(f => ({ file: f.file }));
+
+  formData.value.newLandBookFiles = newFiles
+      .filter(f => f.isIG)
+      .map(f => ({ file: f.file }));
+
+
+  const originalIds = (originalFiles.value || []).map(f => f.id);
+  const currentIds = existingFiles.map(f => f.id);
+
+  const deletedFileIds = originalIds.filter(id => {
+    const file = (originalFiles.value || []).find(f => f.id === id);
+    return !currentIds.includes(id) && file && !file.isIG;
+  });
+
+  const deletedLandBookFileIds = originalIds.filter(id => {
+    const file = (originalFiles.value || []).find(f => f.id === id);
+    return !currentIds.includes(id) && file && file.isIG;
+  });
+
+  formData.value.deletedFileIds = deletedFileIds;
+  formData.value.deletedLandBookFileIds = deletedLandBookFileIds;
+}
+
+function addRoom() {
+  formData.value.rooms.push({
+    id: -Date.now(),
+    loaiPhong: "",
+    soLuong: 0,
+    dienTich: null,
+    moTa: ""
+  });
+
+  recalculateRooms();
+}
+
+function removeRoom(index) {
+  formData.value.rooms.splice(index, 1);
+  recalculateRooms();
+}
+
 async function saveChanges() {
   try {
     isSaving.value = true;
@@ -1306,27 +1469,48 @@ async function saveChanges() {
     const addressParts = [
       formAddress.value.street,
       formAddress.value.ward,
-      formData.value.khuVucMa || formAddress.value.area
+      formAddress.value.province
     ].filter(part => part && part.trim());
 
     formData.value.address = addressParts.join("/!!");
+    formData.value.khuVucMa = formAddress.value.province || "";
 
-    // Chuẩn bị payload
-    const payload = {
+    // 🟩 Tạo FormData
+    const payload = new FormData();
+
+    // 🟩 Gửi DTO JSON
+    const dtoToSend = {
       ...formData.value,
-      slide: undefined,
-      files: undefined,
-      valuations: undefined,
-      createAt: undefined,
-      updateAt: undefined
+      newFiles: undefined,           // FE gửi file vào @RequestPart
+      newLandBookFiles: undefined,   // FE gửi file vào @RequestPart
     };
 
-    const res = await api.put(`/admin.thg/product/admin/cap-nhat/${id}`, payload);
+    payload.append("dto", new Blob([JSON.stringify(dtoToSend)], { type: "application/json" }));
+
+    // 🟦 Gửi file thường
+    (formData.value.newFiles || []).forEach(f => {
+      payload.append("newFiles", f.file);
+    });
+
+    // 🟦 Gửi file sổ đỏ
+    (formData.value.newLandBookFiles || []).forEach(f => {
+      payload.append("newLandBookFiles", f.file);
+    });
+
+    // DEBUG
+    console.log("=== FormData gửi BE ===");
+    for (let pair of payload.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+
+    // Gửi API
+    const res =  await showLoading(api.post(`/admin.thg/product/admin/cap-nhat/${id}`, payload));
 
     if (res.status === 200) {
-      alert("Cập nhật thành công!");
+      updateAlertSuccess("Cập nhật dữ liệu thành công", "Hệ thống đã ghi nhận!");
       router.back();
     }
+
   } catch (error) {
     console.error("Lỗi khi cập nhật:", error);
     alert("Có lỗi xảy ra khi cập nhật!");
@@ -1335,11 +1519,12 @@ async function saveChanges() {
   }
 }
 
+
+
 function resetForm() {
   if (confirm("Bạn có chắc muốn đặt lại tất cả thay đổi?")) {
     initializeFormData();
     parseAddress();
-    matchAddressWithData();
   }
 }
 
@@ -1362,19 +1547,6 @@ function formatUpdatedAt(value) {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-function formatProvinceName(name) {
-  if (!name) return "";
-  return name.replace(/^Thành phố\s+/i, "TP. ").replace(/^Tỉnh\s+/i, "T. ");
-}
-
-function formatWardName(name) {
-  if (!name) return "";
-  return name
-      .replace(/^Phường\s+/i, "P. ")
-      .replace(/^Xã\s+/i, "X. ")
-      .replace(/^Thị trấn\s+/i, "TT. ");
 }
 
 function formatMoneyVN(value) {
@@ -1410,6 +1582,71 @@ function badgeClass(code) {
   };
   return map[code] || "bg-gradient-to-r from-slate-500 to-gray-600 text-white";
 }
+
+function recalculateRooms() {
+  let total = 0;
+  let bedrooms = 0;
+  let bathrooms = 0;
+
+  (formData.value.rooms || []).forEach(room => {
+    const qty = Number(room.soLuong || 0);
+    if (qty <= 0) return;
+
+    total += qty;
+
+    const name = normalizeText(room.loaiPhong || "").trim();
+
+    // ---- PHÒNG NGỦ ----
+    if (
+        name.includes("phong ngu") ||
+        name.includes("ngu")
+    ) {
+      bedrooms += qty;
+    }
+
+    // ---- PHÒNG TẮM + WC ----
+    if (
+        name.includes("wc") ||
+        name.includes("toilet") ||
+        name.includes("ve sinh") ||
+        name.includes("vesinh") ||
+        name.includes("phong tam") ||
+        name.startsWith("tam ") ||
+        name.endsWith(" tam") ||
+        name.includes(" tam ")
+    ) {
+      bathrooms += qty;
+    }
+  });
+
+  formData.value.tongSoPhong = total;
+  formData.value.soPhongNgu = bedrooms;
+  formData.value.soPhongTam = bathrooms;
+
+}
+
+
+watch(
+    () => formData.value.rooms,
+    () => recalculateRooms(),
+    { deep: true }
+);
+
+const roomTypeOptions = [
+  "Phòng ngủ",
+  "Phòng tắm",
+  "WC",
+  "Phòng khách",
+  "Phòng bếp",
+  "Phòng ăn",
+  "Phòng đọc sách",
+  "Phòng làm việc",
+  "Phòng đa năng",
+  "Kho",
+  "Sân thượng",
+  "Khác"
+];
+
 </script>
 
 <style scoped>

@@ -2509,7 +2509,7 @@ function convertToWordsSquare(amount) {
 
 function formatAddress(address) {
   if (!address) return "";
-  return address.replace(/\s*\/\s*/g, ", ");
+  return address.replace(/\s*\/!!\s*/g, ", ");
 }
 
 import {socketService} from "../../services/socketService.js";

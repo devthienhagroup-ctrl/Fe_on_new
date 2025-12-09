@@ -208,7 +208,7 @@ watch([provinceCode, wardCode, street], () => {
 
     const full = [street.value.trim(), ward?.name, province?.name]
         .filter(Boolean)
-        .join("/");
+        .join("/!!");
 
     emit("update:modelValue", full);
   } else {

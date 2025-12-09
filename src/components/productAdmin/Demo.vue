@@ -291,7 +291,7 @@
                 </td>
                 <td class="text-center">
                   <button
-                      @click="$router.push(`/admin/products/${item.id}`)"
+                      @click="$router.push(`/admin/products-2/${item.id}`)"
                       class="
     px-1.5
     py-[2px]

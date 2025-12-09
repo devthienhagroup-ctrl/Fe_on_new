@@ -264,7 +264,7 @@ function formatCurrency(num) {
 }
 function formatAddress(address) {
   if (!address) return "";
-  return address.replace(/\s*\/\s*/g, ", ");
+  return address.replace(/\s*\/!!\s*/g, ", ");
 }
 function formatDateTime(d) {
   if (!d) return "";
