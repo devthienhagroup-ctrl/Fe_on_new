@@ -1,956 +1,240 @@
-diff --git a/src/components/user/CollaboratorRecruitment/CollaboratorRecruitment.vue b/src/components/user/CollaboratorRecruitment/CollaboratorRecruitment.vue
-index 63447b6d5db00fab5b52a87e8c16c0403ecc26fd..7571bd92b44f05ed8970fe68c999fbd591bbc797 100644
---- a/src/components/user/CollaboratorRecruitment/CollaboratorRecruitment.vue
-+++ b/src/components/user/CollaboratorRecruitment/CollaboratorRecruitment.vue
-@@ -290,71 +290,103 @@
-         </div>
+diff --git a/src/components/productAdmin/ProductUpdate.vue b/src/components/productAdmin/ProductUpdate.vue
+index 0be3c48a4ff257f5cceff9a80f19bb2222321572..df4759de9e16a65cc21cdce9ce942190b67045b6 100644
+--- a/src/components/productAdmin/ProductUpdate.vue
++++ b/src/components/productAdmin/ProductUpdate.vue
+@@ -1,86 +1,120 @@
+ <template>
+-  <div v-if="asset" class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 p-3" style="padding-top: 90px!important;">
+-    <div class="max-w-6xl mx-auto">
++  <div v-if="asset" class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 px-4 sm:px-6 lg:px-10 pb-10" style="padding-top: 90px!important;">
++    <div class="space-y-6 w-full">
  
-         <!-- Pagination -->
-         <div class="pagination">
-           <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
- 
-           <button
-               v-for="page in totalPages"
-               :key="page"
-               class="page-btn"
-               :class="{ active: currentPage === page }"
-               @click="currentPage = page"
-           >
-             {{ page }}
-           </button>
- 
-           <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
-         </div>
-       </section>
-     </div>
-   </div>
- </template>
- 
- 
- <script setup>
--import {ref, computed, onMounted} from 'vue'
-+import {ref, computed, onMounted, onBeforeUnmount} from 'vue'
- import {useRouter} from "vue-router";
-+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
- 
- const router = useRouter()
- 
- // Mock data for images (replace with actual imports in your project)
- const ctvBanner = '/imgs/ctv.png'
- const logoTHG = '/imgs/logoTHG.png'
- 
- // Random image URLs for demonstration
- const getRandomImage = (seed) => {
-   return `https://picsum.photos/300/200?random=${seed}`
- }
- 
- // Thêm vào script setup
- const searchQuery = ref('')
- 
- const clearSearch = () => {
-   searchQuery.value = ''
- }
- 
-+const collaboratorJobsJsonLdId = "jsonld-collaborator-jobs-itemlist";
+       <!-- HEADER -->
+-      <div class="bg-white rounded-2xl shadow-xl border border-slate-300 mb-6 p-6">
+-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+-          <div class="flex-1">
+-            <div class="flex items-center gap-3 mb-3">
+-              <button
+-                  @click="$router.back()"
+-                  class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-sm hover:shadow-md"
+-              >
+-                <i class="fa-solid fa-arrow-left text-sm"></i>
+-                <span>Quay lại</span>
+-              </button>
++      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-700 via-blue-700 to-emerald-600 shadow-2xl border border-indigo-200/60 text-white">
++        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.4),transparent_30%),radial-gradient(circle_at_80%_0,rgba(255,255,255,0.35),transparent_25%),radial-gradient(circle_at_50%_80%,rgba(255,255,255,0.3),transparent_30%)]"></div>
++        <div class="relative p-6 lg:p-8 space-y-6">
++          <div class="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-8 justify-between">
++            <div class="flex-1 space-y-4">
++              <div class="flex flex-wrap items-center gap-3">
++                <button
++                    @click="$router.back()"
++                    class="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 text-white rounded-xl font-semibold backdrop-blur transition-all duration-200 shadow-sm border border-white/30"
++                >
++                  <i class="fa-solid fa-arrow-left text-sm"></i>
++                  <span>Quay lại</span>
++                </button>
 +
-+onMounted(() => {
-+  setJsonLd(collaboratorJobsJsonLdId, {
-+    "@context": "https://schema.org",
-+    "@type": "ItemList",
-+    itemListElement: [
-+      {
-+        "@type": "ListItem",
-+        position: 1,
-+        url: "http://localhost:8084/cong-viec-cong-tac-vien"
-+      },
-+      {
-+        "@type": "ListItem",
-+        position: 2,
-+        url: "http://localhost:8084/cong-viec-cong-tac-vien/1"
-+      },
-+      {
-+        "@type": "ListItem",
-+        position: 3,
-+        url: "http://localhost:8084/cong-viec-cong-tac-vien/2"
-+      },
-+      {
-+        "@type": "ListItem",
-+        position: 4,
-+        url: "http://localhost:8084/cong-viec-cong-tac-vien/3"
-+      }
-+    ]
-+  });
-+});
-+
- // Carousel variables
- const currentSlide = ref(0)
- const slidesPerView = ref(3)
- const isLoading = ref(false)
- const carouselTrack = ref(null)
- const allAssignedJobs = ref([])
- const displayedAssignedJobs = ref([])
++                <div class="flex items-center gap-2 px-4 py-2.5 bg-white/15 rounded-xl border border-white/30 backdrop-blur">
++                  <div class="bg-white/30 p-2 rounded-lg">
++                    <i class="fa-solid fa-pen text-white text-sm"></i>
++                  </div>
++                  <div>
++                    <p class="text-xs uppercase tracking-wide text-white/80">Chỉnh sửa tài sản</p>
++                    <h1 class="text-2xl font-bold">#{{ asset.id }}</h1>
++                  </div>
++                </div>
  
- // Mock job data - ĐÃ SỬA: Đổi tên biến assignedJobs thành initialAssignedJobs
- const initialAssignedJobs = [
-   {
-     id: 1,
-     title: 'Môi giới căn hộ cao cấp',
-     salary: 15000000,
-     salaryVisible: false,
-     location: 'Quận 1, TP.HCM',
-     date: '15/10/2023',
-     image: getRandomImage(1),
-     creator: 'Công ty BĐS Diamond Land',
-     income: '15-25 triệu',
-     applicants: 8,
-     jobDescription: `
-       <h3>Mô tả công việc</h3>
-       <ul>
-         <li>Tìm kiếm và tư vấn khách hàng về các dự án căn hộ cao cấp tại Quận 1</li>
-@@ -1002,50 +1034,52 @@ const openSalaryModal = () => {
- 
- const closeSalaryModal = () => {
-   showSalaryModal.value = false
- }
- 
- const applySalaryFilter = () => {
-   closeSalaryModal()
-   // Logic áp dụng bộ lọc lương ở đây
- }
- 
- const resetSalaryFilter = () => {
-   salaryRange.value = { min: 0, max: 50000000 }
- }
- 
- const formatSalaryDisplay = () => {
-   if (salaryRange.value.min === 0 && salaryRange.value.max === 50000000) {
-     return 'Tất cả mức lương'
-   }
-   return `${formatSalary(salaryRange.value.min)} - ${formatSalary(salaryRange.value.max)}`
- }
- 
- // Initialize
- onMounted(() => {
-   initializeCarousel()
- })
-+
-+onBeforeUnmount(() => removeJsonLd(collaboratorJobsJsonLdId));
- </script>
- 
- <style scoped>
- 
- /* Carousel Styles */
- .carousel-container {
-   position: relative;
-   margin-bottom: 50px;
-   padding: 0 50px;
- }
- 
- .carousel-track {
-   display: flex;
-   gap: 30px;
-   transition: transform 0.3s ease;
-   overflow-x: auto;
-   scroll-behavior: smooth;
-   scrollbar-width: none; /* Firefox */
-   -ms-overflow-style: none; /* IE and Edge */
- }
- 
- .carousel-track::-webkit-scrollbar {
-   display: none; /* Chrome, Safari and Opera */
- }
- 
-diff --git a/src/components/user/Contact/Contact.vue b/src/components/user/Contact/Contact.vue
-index 52cc83731a0483a070c4efbf0f8937b8b5e72d42..7f36c2f5c5e7d0871cc183d0f4d84e08f69c581a 100644
---- a/src/components/user/Contact/Contact.vue
-+++ b/src/components/user/Contact/Contact.vue
-@@ -98,51 +98,70 @@
-                     placeholder="Vấn đề của bạn"
-                     required
-                     class="form-textarea"
-                 ></textarea>
+-              <div class="flex items-center gap-2">
+-                <div class="bg-gradient-to-r from-violet-600 to-purple-600 p-2 rounded-lg">
+-                  <i class="fa-solid fa-pen text-white text-sm"></i>
++                <div class="flex flex-wrap items-center gap-2">
++                  <span :class="['px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm border border-white/30 bg-white/10', badgeClass(asset.phanLoaiHang)]">
++                    {{ asset.phanLoaiHang }}
++                  </span>
++                  <span v-if="isHouse" class="px-3 py-1.5 bg-white/15 text-white rounded-full font-semibold text-xs border border-white/30">
++                    <i class="fa-solid fa-house-chimney mr-1"></i> Nhà
++                  </span>
++                  <span v-if="isLand" class="px-3 py-1.5 bg-white/15 text-white rounded-full font-semibold text-xs border border-white/30">
++                    <i class="fa-solid fa-mountain-sun mr-1"></i> Đất
++                  </span>
+                 </div>
+-                <h1 class="text-xl font-bold text-slate-900">Chỉnh sửa tài sản #{{ asset.id }}</h1>
                </div>
-               <button type="submit" class="submit-btn">Gửi thông tin</button>
-             </form>
-           </div>
+-            </div>
  
-           <div class="thank-you-message">
-             <p>Cảm ơn bạn đã tin tưởng, kết nối cùng <b>Thiên Hà Group</b>!</p>
-             <p>Chúng tôi rất mong được lắng nghe và hỗ trợ bạn trong thời gian sớm nhất.</p>
-           </div>
-         </div>
-       </div>
-     </main>
- 
-     <!-- Notification Toast -->
-     <div v-if="showNotification" class="notification-toast">
-       <span>{{ notificationMessage }}</span>
-     </div>
-   </div>
- </template>
- 
- <script setup>
--import { ref, reactive } from 'vue'
-+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
-+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
-+
-+const contactJsonLdId = "jsonld-contact-itemlist";
-+
-+onMounted(() => {
-+  setJsonLd(contactJsonLdId, {
-+    "@context": "https://schema.org",
-+    "@type": "ItemList",
-+    itemListElement: [
-+      {
-+        "@type": "ListItem",
-+        position: 1,
-+        url: "http://localhost:8084/lien-he"
-+      }
-+    ]
-+  });
-+});
-+
-+onBeforeUnmount(() => removeJsonLd(contactJsonLdId));
- 
- // Active location state
- const activeLocation = ref('headquarters')
- 
- // Form data
- const formData = reactive({
-   fullName: '',
-   phone: '',
-   email: '',
-   message: ''
- })
- 
- // Notification state
- const showNotification = ref(false)
- const notificationMessage = ref('')
- // Map URLs
- const mapUrls = {
-   headquarters: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31348.906870926585!2d106.70607739528673!3d10.84087193956894!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3175295a6c0ebc8b%3A0xc51466fa5345ab8c!2zQ8O0bmcgVHkgQ-G7lSBQaOG6p24gxJDhuqd1IFTGsCBC4bqldCDEkOG7mW5nIFPhuqNuIFRoacOqbiBIw6AgR3JvdXA!5e0!3m2!1svi!2s!4v1763093883591!5m2!1svi!2s',
-   branch: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.1747235012276!2d106.68906221148586!3d10.797926389307754!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3175290063ccdf0f%3A0x6171a166d6b789b7!2zQ2hpIE5ow6FuaCBUaGnDqm4gSMOgIEdyb3VwIFBow7ogTmh14bqtbiAtIEdp4bqjaSBQaMOhcCBCw6FuIEfhuqVwIELhuqV0IMSQ4buZbmcgU-G6o24!5e0!3m2!1svi!2s!4v1763094237511!5m2!1svi!2s'
- }
- 
- // Computed property for active map URL
- const activeMapUrl = ref(mapUrls.headquarters)
- 
- // Set active location
-diff --git a/src/components/user/EstimateProperty/EstimateProperty.vue b/src/components/user/EstimateProperty/EstimateProperty.vue
-index 73fe927f333280f13971c3ad5fe9e04b3032fc6b..22489881b4f26bb9099a337be997a48f98d469fb 100644
---- a/src/components/user/EstimateProperty/EstimateProperty.vue
-+++ b/src/components/user/EstimateProperty/EstimateProperty.vue
-@@ -55,50 +55,69 @@ ease;
-     <ProcessEP></ProcessEP>
-     <PropertyValueFactors id="propertyValueFactors"></PropertyValueFactors>
-     <Reason></Reason>
-     <FeeEP id="feeEP" @navigateToValuation="scrollToValuation"></FeeEP>
-     <SoldSection title="DỰ ÁN ĐÃ BÁN THÀNH CÔNG NHỜ ĐỊNH GIÁ ĐÚNG"></SoldSection>
-     <Faq @navigateToCriteria="scrollToCriteria"
-          @navigateToPricing="scrollToPricing"
-          @navigateToValuation="scrollToValuation"
-     ></Faq>
-     <ContactForm></ContactForm>
-   </div>
- </template>
- 
- 
- <script setup>
- import ProcessStep from "./Components/ProcessStep.vue";
- import ProcessEP from "./Components/ProcessEP.vue";
- import PropertyValueFactors from "./Components/PropertyValueFactors.vue";
- import Reason from "./Components/Reason.vue";
- import Faq from "./Components/Faq.vue";
- import SoldSection from "../Home/components/SoldSection.vue";
- import ContactForm from "../Home/components/ContactForm.vue";
- import Footer from "../Home/components/Footer.vue";
- import { onBeforeUnmount, onMounted, ref } from "vue";
- import FeeEP from "./Components/FeeEP.vue";
-+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
-+
-+const estimateJsonLdId = "jsonld-estimate-property-itemlist";
-+
-+onMounted(() => {
-+  setJsonLd(estimateJsonLdId, {
-+    "@context": "https://schema.org",
-+    "@type": "ItemList",
-+    itemListElement: [
-+      {
-+        "@type": "ListItem",
-+        position: 1,
-+        url: "http://localhost:8084/dinh-gia-bds"
-+      }
-+    ]
-+  });
-+});
-+
-+onBeforeUnmount(() => removeJsonLd(estimateJsonLdId));
- 
- const valuationBtn = ref(null);
- 
- // Hàm cuộn đến phần tiêu chí định giá
- const scrollToCriteria = () => {
-   const element = document.getElementById('propertyValueFactors');
-   if (element) {
-     element.scrollIntoView({
-       behavior: 'smooth',
-       block: 'start'
-     });
-   }
- };
- 
- // Hàm cuộn đến phần bảng giá
- const scrollToPricing = () => {
-   const element = document.getElementById('feeEP');
-   if (element) {
-     element.scrollIntoView({
-       behavior: 'smooth',
-       block: 'start'
-     });
-   }
- };
- 
-diff --git a/src/components/user/Home/LandingPage.vue b/src/components/user/Home/LandingPage.vue
-index 23beece0d133d75ac9544aa6e20a17682c483ad5..eaaaaa0a74c0d4dcc4a2b8e76bd4e0bf306bed46 100644
---- a/src/components/user/Home/LandingPage.vue
-+++ b/src/components/user/Home/LandingPage.vue
-@@ -8,57 +8,77 @@
-     <ServiceSection></ServiceSection>
-     <OverviewSection></OverviewSection>
-     <ImpressiveNumbers></ImpressiveNumbers>
-     <SoldSection></SoldSection>
-     <div class="reviews">
-       <ParticleBackground class="image" image-url="/imgs/background_building.jpg"
-                           alt-text="Mô tả ảnh"
-                           :max-particle-size="20"
-                           particle-color="#3C4980"
-                           line-color="#031358"
-                           :line-width="0.5"
-       ></ParticleBackground>
-       <Reviews></Reviews>
-       <SystemEvaluation></SystemEvaluation>
-     </div>
-     <MediaAboutUs></MediaAboutUs>
-     <NewsSection></NewsSection>
-     <ContactForm></ContactForm>
-   </div>
- 
- 
- </template>
- 
- 
- <script setup>
-+import { onBeforeUnmount, onMounted } from "vue";
- import Banner from "./components/Banner.vue";
- import HeroSection from "./components/HeroSection.vue";
- import ServiceSection from "./components/ServiceSection.vue";
- import OverviewSection from "./components/OverviewSection.vue";
- import ImpressiveNumbers from "./components/ImpressiveNumbers.vue";
- import Reviews from "./components/Reviews.vue";
- import SystemEvaluation from "./components/SystemEvaluation.vue";
- import MediaAboutUs from "./components/MediaAboutUs.vue";
- import NewsSection from "./components/NewsSection.vue";
- import ContactForm from "./components/ContactForm.vue";
- import Footer from "./components/Footer.vue";
- import Stats from "./components/Stats.vue";
- import SoldSection from "./components/SoldSection.vue";
- import ParticleBackground from "../ParticleBackground.vue";
-+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
-+
-+const homeJsonLdId = "jsonld-home-itemlist";
-+
-+onMounted(() => {
-+  setJsonLd(homeJsonLdId, {
-+    "@context": "https://schema.org",
-+    "@type": "ItemList",
-+    itemListElement: [
-+      {
-+        "@type": "ListItem",
-+        position: 1,
-+        url: "http://localhost:8084/"
-+      }
-+    ]
-+  });
-+});
-+
-+onBeforeUnmount(() => removeJsonLd(homeJsonLdId));
- </script>
- 
- 
- <style scoped>
- 
- .main-container {
-   padding-top: 60px;
-   align-items: center; /* căn giữa ngang */
- }
- 
- .reviews .image {
-   position: absolute;
-   height: 130%;
-   z-index: 0;
- }
- 
- 
- </style>
-\ No newline at end of file
-diff --git a/src/components/user/Investment/InvestmentDetail.vue b/src/components/user/Investment/InvestmentDetail.vue
-index 1c28165f78590d97db11b59d73c774c6c0041fb8..20e2f734c32685053e6d6f9950b18ea780a2e0d0 100644
---- a/src/components/user/Investment/InvestmentDetail.vue
-+++ b/src/components/user/Investment/InvestmentDetail.vue
-@@ -1,20 +1,50 @@
- <script setup>
- 
-+import { onBeforeUnmount, onMounted } from "vue";
- import HeroSection from "./Components/HeroSection.vue";
- import InvestmentPackages from "./Components/InvestmentPackages.vue";
- import InvestorsList from "./Components/InvestorsList.vue";
-+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
-+
-+const investmentDetailJsonLdId = "jsonld-investment-detail-itemlist";
-+
-+onMounted(() => {
-+  setJsonLd(investmentDetailJsonLdId, {
-+    "@context": "https://schema.org",
-+    "@type": "ItemList",
-+    itemListElement: [
-+      {
-+        "@type": "ListItem",
-+        position: 1,
-+        url: "http://localhost:8084/hop-tac/1"
-+      },
-+      {
-+        "@type": "ListItem",
-+        position: 2,
-+        url: "http://localhost:8084/hop-tac/2"
-+      },
-+      {
-+        "@type": "ListItem",
-+        position: 3,
-+        url: "http://localhost:8084/hop-tac/3"
-+      }
-+    ]
-+  });
-+});
-+
-+onBeforeUnmount(() => removeJsonLd(investmentDetailJsonLdId));
- </script>
- 
- <template>
-   <div class="investment-container">
-     <HeroSection></HeroSection>
-     <InvestmentPackages></InvestmentPackages>
-     <InvestorsList></InvestorsList>
-   </div>
- </template>
- 
- <style scoped>
-   .investment-container {
-     padding-top: 80px;
-   }
- </style>
-\ No newline at end of file
-diff --git a/src/components/user/Investment/Investments.vue b/src/components/user/Investment/Investments.vue
-index 5fca22d718c9b39b60e2a3e966afc5d9fc27e16c..00040435e5291a03ec2d1427a747023065569f3b 100644
---- a/src/components/user/Investment/Investments.vue
-+++ b/src/components/user/Investment/Investments.vue
-@@ -1,67 +1,101 @@
- <template>
-   <div>
-     <!-- Sử dụng component IntroSection -->
-     <InvestmentIntro />
- 
-     <!-- Sử dụng component FundingSection -->
-     <Funding
-         @open-modal="openModal"
-         @view-details="viewDetails"
-     />
- 
-     <!-- Modal component -->
-     <InvestmentModal
-         :visible="showModal"
-         :project-data="selectedProject"
-         @close="closeModal"
-         @payment="handlePayment"
-     />
-   </div>
- </template>
- 
- <script setup>
--import { ref } from 'vue'
-+import { onBeforeUnmount, onMounted, ref } from 'vue'
- import { useRouter } from "vue-router";
- import InvestmentModal from "./Components/InvestmentModal.vue";
- import InvestmentIntro from "./Components/InvestmentIntro.vue";
- import Funding from "./Components/Funding.vue";
-+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
- 
- 
- 
- const router = useRouter();
- 
- // State cho modal
- const showModal = ref(false)
- const selectedProject = ref(null)
- 
- // Hàm mở modal
- const openModal = (branch) => {
-   selectedProject.value = branch
-   showModal.value = true
- }
- 
- // Hàm đóng modal
- const closeModal = () => {
-   showModal.value = false
-   selectedProject.value = null
- }
- 
- // Hàm xử lý thanh toán
- const handlePayment = (paymentData) => {
-   console.log('Payment data:', paymentData)
-   // Xử lý thanh toán ở đây
-   closeModal()
- }
- 
-+const investmentsJsonLdId = "jsonld-investments-itemlist";
-+
-+onMounted(() => {
-+  setJsonLd(investmentsJsonLdId, {
-+    "@context": "https://schema.org",
-+    "@type": "ItemList",
-+    itemListElement: [
-+      {
-+        "@type": "ListItem",
-+        position: 1,
-+        url: "http://localhost:8084/hop-tac"
-+      },
-+      {
-+        "@type": "ListItem",
-+        position: 2,
-+        url: "http://localhost:8084/hop-tac/1"
-+      },
-+      {
-+        "@type": "ListItem",
-+        position: 3,
-+        url: "http://localhost:8084/hop-tac/2"
-+      },
-+      {
-+        "@type": "ListItem",
-+        position: 4,
-+        url: "http://localhost:8084/hop-tac/3"
-+      }
-+    ]
-+  });
-+});
-+
-+onBeforeUnmount(() => removeJsonLd(investmentsJsonLdId));
-+
- // Hàm xem chi tiết
- const viewDetails = (index) => {
-   router.push('/investments/' + index)
- }
- </script>
- 
- <style scoped>
- /* Các style toàn cục nếu cần */
- .body-no-scroll {
-   overflow: hidden;
- }
- </style>
-\ No newline at end of file
-diff --git a/src/components/user/News/News.vue b/src/components/user/News/News.vue
-index fb77f425e45d2ee95e7894a3a3cf6fa61f885bad..8474fe9c80e02293b78059abae74f5379dff3668 100644
---- a/src/components/user/News/News.vue
-+++ b/src/components/user/News/News.vue
-@@ -1,13 +1,48 @@
- <template>
-   <FeaturedNews></FeaturedNews>
-   <LatestNews></LatestNews>
-   <CategoryNews></CategoryNews>
-   <EmailSubscribe></EmailSubscribe>
- </template>
- 
- <script setup>
-+import { onBeforeUnmount, onMounted } from "vue";
- import FeaturedNews from "./Component/FeaturedNews.vue";
- import LatestNews from "./Component/LatestNews.vue";
- import CategoryNews from "./Component/CategoryNews.vue";
- import EmailSubscribe from "./Component/EmailSubscribe.vue";
-+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
-+
-+const newsJsonLdId = "jsonld-news-itemlist";
-+
-+onMounted(() => {
-+  setJsonLd(newsJsonLdId, {
-+    "@context": "https://schema.org",
-+    "@type": "ItemList",
-+    itemListElement: [
-+      {
-+        "@type": "ListItem",
-+        position: 1,
-+        url: "http://localhost:8084/tin-tuc"
-+      },
-+      {
-+        "@type": "ListItem",
-+        position: 2,
-+        url: "http://localhost:8084/tin-tuc/1"
-+      },
-+      {
-+        "@type": "ListItem",
-+        position: 3,
-+        url: "http://localhost:8084/tin-tuc/2"
-+      },
-+      {
-+        "@type": "ListItem",
-+        position: 4,
-+        url: "http://localhost:8084/tin-tuc/3"
-+      }
-+    ]
-+  });
-+});
-+
-+onBeforeUnmount(() => removeJsonLd(newsJsonLdId));
- </script>
-\ No newline at end of file
-diff --git a/src/components/user/QuickSaleSolution/QuickSaleSolution.vue b/src/components/user/QuickSaleSolution/QuickSaleSolution.vue
-index d27720ed3bd221bf7899316c908eb42d710c5bde..623e261b63d7a348bc5c9248d908a95468a579d0 100644
---- a/src/components/user/QuickSaleSolution/QuickSaleSolution.vue
-+++ b/src/components/user/QuickSaleSolution/QuickSaleSolution.vue
-@@ -116,65 +116,82 @@
-       <QuickSaleS1></QuickSaleS1>
-       <div class="section23">
-         <img class="right-img" src="/imgs/bg-s1.png" alt="">
-         <QuickSaleS2></QuickSaleS2>
-         <QuickSaleS3></QuickSaleS3>
-       </div>
-       <QuickSaleS4></QuickSaleS4>
-       <QuickSaleS5></QuickSaleS5>
-       <QuickSaleS6></QuickSaleS6>
-       <div class="section78">
- <!--        <img src="/imgs/bg-s2.png" alt="">-->
-         <QuickSaleS7></QuickSaleS7>
-         <QuickSaleS8></QuickSaleS8>
-       </div>
-       <QuickSaleS9></QuickSaleS9>
-       <QuickSaleS10></QuickSaleS10>
-       <QSbenefits></QSbenefits>
-     </div>
-     <SoldSection></SoldSection>
-     <ContactForm></ContactForm>
-   </div>
- </template>
- 
- <script setup lang="ts">
- import {ref, computed, onMounted, onBeforeUnmount} from 'vue'
-+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
- import QuickSaleS1 from "./Components/QuickSaleS1.vue";
- import QuickSaleS2 from "./Components/QuickSaleS2.vue";
- import QuickSaleS3 from "./Components/QuickSaleS3.vue";
- import QuickSaleS4 from "./Components/QuickSaleS4.vue";
- import QuickSaleS5 from "./Components/QuickSaleS5.vue";
- import QuickSaleS6 from "./Components/QuickSaleS6.vue";
- import QuickSaleS7 from "./Components/QuickSaleS7.vue";
- import QuickSaleS8 from "./Components/QuickSaleS8.vue";
- import QuickSaleS9 from "./Components/QuickSaleS9.vue";
- import QuickSaleS10 from "./Components/QuickSaleS10.vue";
- import SoldSection from "../Home/components/SoldSection.vue";
- import ContactForm from "../Home/components/ContactForm.vue";
- import Footer from "../Home/components/Footer.vue";
- import QSbenefits from "./Components/QSbenefits.vue";
- 
-+const quickSaleJsonLdId = "jsonld-quick-sale-itemlist";
-+
-+onMounted(() => {
-+  setJsonLd(quickSaleJsonLdId, {
-+    "@context": "https://schema.org",
-+    "@type": "ItemList",
-+    itemListElement: [
-+      {
-+        "@type": "ListItem",
-+        position: 1,
-+        url: "http://localhost:8084/giai-phap-ban-nhanh"
-+      }
-+    ]
-+  });
-+});
-+
- // Tab state
- const activeTab = ref('dinhgia')
- const tabSliderStyle = computed(() => ({
-   transform: activeTab.value === 'dinhgia' ? 'translateX(0)' : 'translateX(100%)'
- }))
- 
- // Property type dropdown state
- const isPropertyTypeExpanded = ref(false)
- const selectedPropertyType = ref({value: 'all', label: 'Tất cả'})
- const propertyTypes = ref([
-   {value: 'all', label: 'Tất cả'},
-   {value: 'house', label: 'Nhà phố'},
-   {value: 'apartment', label: 'Chung cư'},
-   {value: 'project', label: 'Dự án'}
- ])
- 
- // Search state
- const searchQuery = ref('')
- 
- // Emit events
- const emit = defineEmits(['search', 'submit', 'focus', 'blur'])
- 
- // Tab methods
- const setActiveTab = (tab) => {
-   activeTab.value = tab
-@@ -230,50 +247,52 @@ onMounted(() => {
- onMounted(() => {
-   const animatedElements = document.querySelectorAll(
-       ".fade-left, .fade-right, .fade-in, .fade-up"
-   );
- 
-   const observer = new IntersectionObserver(
-       (entries) => {
-         entries.forEach((entry) => {
-           if (entry.isIntersecting) {
-             entry.target.classList.add("show");
-             // Nếu chỉ muốn chạy 1 lần, unobserve sau khi hiện
-             observer.unobserve(entry.target);
-           }
-         });
-       },
-       {
-         threshold: 0.5, // phần tử hiện 20% là kích hoạt
-       }
-   );
- 
-   animatedElements.forEach((el) => observer.observe(el));
- 
-   // cleanup
-   onBeforeUnmount(() => observer.disconnect());
- });
-+
-+onBeforeUnmount(() => removeJsonLd(quickSaleJsonLdId));
- </script>
- 
- <style scoped>
- 
- .subtitle {
-   font-size: 40px;
-   color: #031358;
-   font-weight: 700;
-   text-align: center;
-   margin: 30px auto;
-   margin-bottom: 100px;
- }
- 
- .section23 {
-   position: relative;
-   width: 100%;
- }
- 
- 
- .section23 > .right-img {
-   position: absolute;
-   width: auto;
-   height: 70%;
-   z-index: 0;
-   bottom: 0;
-diff --git a/src/components/user/Recruitment/Recruitment.vue b/src/components/user/Recruitment/Recruitment.vue
-index 80f4c8ab6f75bd6b408f5bacef0550a27b8a91ca..9e69f09cf55b213ee16c7a22d9572f7dda2a55f8 100644
---- a/src/components/user/Recruitment/Recruitment.vue
-+++ b/src/components/user/Recruitment/Recruitment.vue
-@@ -60,50 +60,51 @@
-             <!-- Trạng thái hover - hiện nền trắng và content -->
-             <div class="highlight-hover" :class="{ 'active': activeItem === index }">
-               <div class="hover-background"></div>
-               <div class="hover-content">
-                 <h3 class="highlight-title-hover">{{ item.title }}</h3>
-                 <p class="highlight-description">{{ item.description }}</p>
+-            <div class="flex flex-col gap-2">
+-              <div class="flex items-center gap-2 text-slate-700">
+-                <i class="fa-solid fa-location-dot text-blue-500"></i>
+-                <span class="font-medium">{{ formatAddress(asset.address) }}</span>
++              <div class="flex flex-wrap items-center gap-3 text-sm text-white/90">
++                <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 border border-white/20">
++                  <i class="fa-solid fa-location-dot"></i>
++                  <span class="font-medium">{{ formatAddress(asset.address) }}</span>
++                </div>
++                <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 border border-white/20">
++                  <i class="fa-solid fa-calendar-check"></i>
++                  <span class="font-medium">Đã cập nhật: {{ formatUpdatedAt(asset.updatedAt) }}</span>
++                </div>
                </div>
++            </div>
+ 
+-              <div class="flex flex-wrap items-center gap-2">
+-                <span :class="['px-3 py-1 rounded-full font-bold text-xs', badgeClass(asset.phanLoaiHang)]">
+-                  {{ asset.phanLoaiHang }}
+-                </span>
+-                <span v-if="isHouse" class="px-3 py-1 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-full font-bold text-xs">
+-                  <i class="fa-solid fa-house-chimney mr-1"></i> Nhà
+-                </span>
+-                <span v-if="isLand" class="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-full font-bold text-xs">
+-                  <i class="fa-solid fa-mountain-sun mr-1"></i> Đất
+-                </span>
+-              </div>
++            <div class="flex flex-wrap gap-3 justify-start lg:justify-end items-center">
++              <button
++                  @click="resetForm"
++                  class="px-5 py-2.5 bg-white/10 text-white rounded-xl font-semibold hover:bg-white/20 transition-all duration-200 shadow-sm flex items-center gap-2 border border-white/30"
++              >
++                <i class="fa-solid fa-rotate-left"></i>
++                <span>Đặt lại</span>
++              </button>
++              <button
++                  @click="saveChanges"
++                  :disabled="isSaving"
++                  class="px-5 py-2.5 bg-white text-indigo-900 rounded-xl font-semibold hover:bg-slate-100 transition-all duration-200 shadow-lg flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
++              >
++                <i class="fa-solid fa-save"></i>
++                <span>{{ isSaving ? 'Đang lưu...' : 'Lưu thay đổi' }}</span>
++              </button>
              </div>
            </div>
+ 
+-          <div class="flex flex-wrap gap-3">
+-            <button
+-                @click="saveChanges"
+-                :disabled="isSaving"
+-                class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg font-semibold hover:from-emerald-600 hover:to-green-700 transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+-            >
+-              <i class="fa-solid fa-save"></i>
+-              <span>{{ isSaving ? 'Đang lưu...' : 'Lưu thay đổi' }}</span>
+-            </button>
+-            <button
+-                @click="resetForm"
+-                class="px-5 py-2.5 bg-gradient-to-r from-slate-500 to-gray-600 text-white rounded-lg font-semibold hover:from-slate-600 hover:to-gray-700 transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-2"
+-            >
+-              <i class="fa-solid fa-rotate-left"></i>
+-              <span>Đặt lại</span>
+-            </button>
++          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
++            <div class="bg-white/10 rounded-2xl p-4 border border-white/20 backdrop-blur">
++              <div class="flex items-center justify-between text-sm text-white/70">
++                <span>Giá bán</span>
++                <i class="fa-solid fa-sack-dollar"></i>
++              </div>
++              <div class="text-2xl font-bold mt-2">{{ formatMoneyVN(formData.giaBan || asset.giaBan) }}</div>
++            </div>
++            <div class="bg-white/10 rounded-2xl p-4 border border-white/20 backdrop-blur">
++              <div class="flex items-center justify-between text-sm text-white/70">
++                <span>Giá nội bộ</span>
++                <i class="fa-solid fa-hand-holding-dollar"></i>
++              </div>
++              <div class="text-2xl font-bold mt-2">{{ formatMoneyVN(formData.giaNoiBo || asset.giaNoiBo) }}</div>
++            </div>
++            <div class="bg-white/10 rounded-2xl p-4 border border-white/20 backdrop-blur">
++              <div class="flex items-center justify-between text-sm text-white/70">
++                <span>Phí môi giới</span>
++                <i class="fa-solid fa-percent"></i>
++              </div>
++              <div class="text-2xl font-bold mt-2">{{ formData.phiMoiGioi ? formData.phiMoiGioi + '%' : asset.phiMoiGioi + '%' }}</div>
++            </div>
+           </div>
          </div>
        </div>
-     </div>
-   </div>
-   <div class="main-content">
-     <HeroSection></HeroSection>
-     <BenefitsSection></BenefitsSection>
-     <JobPositionList></JobPositionList>
-     <DepartmentSection></DepartmentSection>
-     <PostSection></PostSection>
-     <FormSection ref="formSection"></FormSection>
-   </div>
- </template>
  
- <script setup>
- import {onBeforeUnmount, onMounted, ref} from 'vue'
-+import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
- import HeroSection from "./Components/HeroSection.vue";
- import BenefitsSection from "./Components/BenefitsSection.vue";
- import JobPositionList from "./Components/JobPositionList.vue";
- import DepartmentSection from "./Components/DepartmentSection.vue";
- import PostSection from "./Components/PostSection.vue";
- import FormSection from "./Components/FormSection.vue";
- import ParticleBackground from "../ParticleBackground.vue";
+       <!-- MAIN EDIT FORM -->
+       <form @submit.prevent="saveChanges" class="space-y-6">
  
- // Tiêu đề chính
- const title = "Không chỉ là công việc, đây là cơ hội để bạn phát triển sự nghiệp!"
+         <!-- SECTION 1: THÔNG TIN CƠ BẢN -->
+         <div class="bg-white rounded-2xl shadow-xl border border-slate-300 p-6">
+           <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
+             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-2.5 rounded-xl">
+               <i class="fa-solid fa-circle-info text-white text-lg"></i>
+             </div>
+             <h2 class="text-xl font-bold text-slate-900">Thông tin cơ bản</h2>
+           </div>
  
- // Trạng thái cho hiệu ứng nút
- const isAnimating = ref(false)
- 
- // Bắt đầu hiệu ứng
- const startAnimation = () => {
-   isAnimating.value = true
- }
- 
- // Dừng hiệu ứng
- const stopAnimation = () => {
-   isAnimating.value = false
- }
- 
- // Dữ liệu cho phần nổi bật
-@@ -116,84 +117,117 @@ const highlightItems = ref([
-   {
-     title: "Môi trường trẻ trung, năng động",
-     description: "Làm việc cùng đội ngũ nhiệt huyết, sẵn sàng chia sẻ và hỗ trợ nhau mỗi ngày.",
-     image: "/imgs/experts-animate.svg"
-   },
-   {
-     title: "Cơ hội thăng tiến rõ ràng",
-     description: "Chúng tôi đánh giá dựa trên năng lực và kết quả, không phải thâm niên.",
-     image: "/imgs/growth-curve-animate.svg"
-   },
-   {
-     title: "Thu nhập và phúc lợi hấp dẫn",
-     description: "Mức thưởng cạnh tranh, chế độ đãi ngộ tốt – xứng đáng với nỗ lực của bạn.",
-     image: "/imgs/make-it-rain-animate.svg"
+           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             <!-- Loại tài sản -->
+             <div class="space-y-2">
+               <label class="block text-sm font-semibold text-slate-800">
+                 <span class="flex items-center gap-2">
+                   <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
+                     <i class="fa-solid fa-tag text-white text-xs"></i>
+                   </div>
+                   <span>Loại tài sản *</span>
+@@ -1291,50 +1325,65 @@ async function saveChanges() {
+       alert("Cập nhật thành công!");
+       router.back();
+     }
+   } catch (error) {
+     console.error("Lỗi khi cập nhật:", error);
+     alert("Có lỗi xảy ra khi cập nhật!");
+   } finally {
+     isSaving.value = false;
    }
- ])
- 
- // Theo dõi item đang active
- const activeItem = ref(null)
- 
- // Đặt item active
- const setActiveItem = (index) => {
-   activeItem.value = index
  }
  
-+const recruitmentJsonLdId = "jsonld-recruitment-itemlist";
+ function resetForm() {
+   if (confirm("Bạn có chắc muốn đặt lại tất cả thay đổi?")) {
+     initializeFormData();
+     parseAddress();
+     matchAddressWithData();
+   }
+ }
+ 
+ // Format functions
+ function formatAddress(address) {
+   if (!address) return "";
+   return address.replace(/\/!!/g, ", ");
+ }
+ 
++function formatUpdatedAt(value) {
++  if (!value) return "Chưa cập nhật";
++  const date = new Date(value);
 +
-+onMounted(() => {
-+  setJsonLd(recruitmentJsonLdId, {
-+    "@context": "https://schema.org",
-+    "@type": "ItemList",
-+    itemListElement: [
-+      {
-+        "@type": "ListItem",
-+        position: 1,
-+        url: "http://localhost:8084/tuyen-dung"
-+      },
-+      {
-+        "@type": "ListItem",
-+        position: 2,
-+        url: "http://localhost:8084/tuyen-dung/1"
-+      },
-+      {
-+        "@type": "ListItem",
-+        position: 3,
-+        url: "http://localhost:8084/tuyen-dung/2"
-+      },
-+      {
-+        "@type": "ListItem",
-+        position: 4,
-+        url: "http://localhost:8084/tuyen-dung/3"
-+      }
-+    ]
++  if (isNaN(date.getTime())) return "Chưa cập nhật";
++
++  return date.toLocaleString("vi-VN", {
++    day: "2-digit",
++    month: "2-digit",
++    year: "numeric",
++    hour: "2-digit",
++    minute: "2-digit",
 +  });
-+});
++}
 +
- 
- const formSection = ref(null)
- 
- const scrollToSectionB = () => {
-   formSection.value?.$el.scrollIntoView({ behavior: 'smooth' })
+ function formatProvinceName(name) {
+   if (!name) return "";
+   return name.replace(/^Thành phố\s+/i, "TP. ").replace(/^Tỉnh\s+/i, "T. ");
  }
  
- //EFFECT
- 
- onMounted(() => {
-   const animatedElements = document.querySelectorAll(
-       ".fade-left, .fade-right, .fade-in, .fade-up"
-   );
- 
-   const observer = new IntersectionObserver(
-       (entries) => {
-         entries.forEach((entry) => {
-           if (entry.isIntersecting) {
-             entry.target.classList.add("show");
-             // Nếu chỉ muốn chạy 1 lần, unobserve sau khi hiện
-             observer.unobserve(entry.target);
-           }
-         });
-       },
-       {
-         threshold: 0.5, // phần tử hiện 20% là kích hoạt
-       }
-   );
- 
-   animatedElements.forEach((el) => observer.observe(el));
- 
-   // cleanup
-   onBeforeUnmount(() => observer.disconnect());
- });
-+
-+onBeforeUnmount(() => removeJsonLd(recruitmentJsonLdId));
- </script>
- 
- <style scoped>
- .main-content {
-   margin: 60px 0;
+ function formatWardName(name) {
+   if (!name) return "";
+   return name
+       .replace(/^Phường\s+/i, "P. ")
+       .replace(/^Xã\s+/i, "X. ")
+       .replace(/^Thị trấn\s+/i, "TT. ");
  }
  
- .recruitment-banner {
-   margin-top: 60px;
-   font-family: 'Ubuntu', sans-serif;
-   width: 100%;
-   position: relative;
- }
+ function formatMoneyVN(value) {
+   if (value == null || isNaN(value)) return "0";
+   const num = Number(value);
  
- .banner-container {
-   position: relative;
-   width: 100%;
-   min-height: 90vh; /* Sử dụng viewport height */
-   max-height: 900px; /* Giới hạn chiều cao tối đa */
-   overflow: hidden;
-   display: flex;
-   align-items: center;
-   justify-content: center;
- }
+   if (num < 1_000_000) {
+     return num.toLocaleString("vi-VN");
+   }
  
-diff --git a/src/utils/structuredData.js b/src/utils/structuredData.js
-new file mode 100644
-index 0000000000000000000000000000000000000000..8dbb28b443bfac8c4697ea86ad2c062c471edc61
---- /dev/null
-+++ b/src/utils/structuredData.js
-@@ -0,0 +1,23 @@
-+export const setJsonLd = (id, data) => {
-+  if (typeof document === "undefined") return;
-+
-+  const existing = document.getElementById(id);
-+  if (existing) {
-+    existing.remove();
-+  }
-+
-+  const script = document.createElement("script");
-+  script.type = "application/ld+json";
-+  script.id = id;
-+  script.text = JSON.stringify(data);
-+  document.head.appendChild(script);
-+};
-+
-+export const removeJsonLd = (id) => {
-+  if (typeof document === "undefined") return;
-+
-+  const existing = document.getElementById(id);
-+  if (existing) {
-+    existing.remove();
-+  }
-+};
+   if (num < 1_000_000_000) {
+     const trieu = num / 1_000_000;
+     return `${trieu.toFixed(trieu % 1 === 0 ? 0 : 1)} triệu`;
+   }

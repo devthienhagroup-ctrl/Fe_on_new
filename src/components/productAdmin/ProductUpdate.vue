@@ -1,64 +1,98 @@
 <template>
-  <div v-if="asset" class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 p-3" style="padding-top: 90px!important;">
-    <div class="max-w-6xl mx-auto">
+  <div v-if="asset" class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 px-4 sm:px-6 lg:px-10 pb-10">
+    <div class="space-y-6 w-full">
 
       <!-- HEADER -->
-      <div class="bg-white rounded-2xl shadow-xl border border-slate-300 mb-6 p-6">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div class="flex-1">
-            <div class="flex items-center gap-3 mb-3">
-              <button
-                  @click="$router.back()"
-                  class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-sm hover:shadow-md"
-              >
-                <i class="fa-solid fa-arrow-left text-sm"></i>
-                <span>Quay lại</span>
-              </button>
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-700 via-blue-700 to-emerald-600 shadow-2xl border border-indigo-200/60 text-white">
+        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.4),transparent_30%),radial-gradient(circle_at_80%_0,rgba(255,255,255,0.35),transparent_25%),radial-gradient(circle_at_50%_80%,rgba(255,255,255,0.3),transparent_30%)]"></div>
+        <div class="relative p-6 lg:p-8 space-y-6">
+          <div class="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-8 justify-between">
+            <div class="flex-1 space-y-4">
+              <div class="flex flex-wrap items-center gap-3">
+                <button
+                    @click="$router.back()"
+                    class="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 text-white rounded-xl font-semibold backdrop-blur transition-all duration-200 shadow-sm border border-white/30"
+                >
+                  <i class="fa-solid fa-arrow-left text-sm"></i>
+                  <span>Quay lại</span>
+                </button>
 
-              <div class="flex items-center gap-2">
-                <div class="bg-gradient-to-r from-violet-600 to-purple-600 p-2 rounded-lg">
-                  <i class="fa-solid fa-pen text-white text-sm"></i>
+                <div class="flex items-center gap-2 px-4 py-2.5 bg-white/15 rounded-xl border border-white/30 backdrop-blur">
+                  <div class="bg-white/30 p-2 rounded-lg">
+                    <i class="fa-solid fa-pen text-white text-sm"></i>
+                  </div>
+                  <div>
+                    <p class="text-xs uppercase tracking-wide text-white/80">Chỉnh sửa tài sản</p>
+                    <h1 class="text-2xl font-bold">#{{ asset.id }}</h1>
+                  </div>
                 </div>
-                <h1 class="text-xl font-bold text-slate-900">Chỉnh sửa tài sản #{{ asset.id }}</h1>
+
+                <div class="flex flex-wrap items-center gap-2">
+                  <span :class="['px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm border border-white/30 bg-white/10', badgeClass(asset.phanLoaiHang)]">
+                    {{ asset.phanLoaiHang }}
+                  </span>
+                  <span v-if="isHouse" class="px-3 py-1.5 bg-white/15 text-white rounded-full font-semibold text-xs border border-white/30">
+                    <i class="fa-solid fa-house-chimney mr-1"></i> Nhà
+                  </span>
+                  <span v-if="isLand" class="px-3 py-1.5 bg-white/15 text-white rounded-full font-semibold text-xs border border-white/30">
+                    <i class="fa-solid fa-mountain-sun mr-1"></i> Đất
+                  </span>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-3 text-sm text-white/90">
+                <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 border border-white/20">
+                  <i class="fa-solid fa-location-dot"></i>
+                  <span class="font-medium">{{ formatAddress(asset.address) }}</span>
+                </div>
+                <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 border border-white/20">
+                  <i class="fa-solid fa-calendar-check"></i>
+                  <span class="font-medium">Đã cập nhật: {{ formatUpdatedAt(asset.updatedAt) }}</span>
+                </div>
               </div>
             </div>
 
-            <div class="flex flex-col gap-2">
-              <div class="flex items-center gap-2 text-slate-700">
-                <i class="fa-solid fa-location-dot text-blue-500"></i>
-                <span class="font-medium">{{ formatAddress(asset.address) }}</span>
-              </div>
-
-              <div class="flex flex-wrap items-center gap-2">
-                <span :class="['px-3 py-1 rounded-full font-bold text-xs', badgeClass(asset.phanLoaiHang)]">
-                  {{ asset.phanLoaiHang }}
-                </span>
-                <span v-if="isHouse" class="px-3 py-1 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-full font-bold text-xs">
-                  <i class="fa-solid fa-house-chimney mr-1"></i> Nhà
-                </span>
-                <span v-if="isLand" class="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-full font-bold text-xs">
-                  <i class="fa-solid fa-mountain-sun mr-1"></i> Đất
-                </span>
-              </div>
+            <div class="flex flex-wrap gap-3 justify-start lg:justify-end items-center">
+              <button
+                  @click="resetForm"
+                  class="px-5 py-2.5 bg-white/10 text-white rounded-xl font-semibold hover:bg-white/20 transition-all duration-200 shadow-sm flex items-center gap-2 border border-white/30"
+              >
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>Đặt lại</span>
+              </button>
+              <button
+                  @click="saveChanges"
+                  :disabled="isSaving"
+                  class="px-5 py-2.5 bg-white text-indigo-900 rounded-xl font-semibold hover:bg-slate-100 transition-all duration-200 shadow-lg flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                <i class="fa-solid fa-save"></i>
+                <span>{{ isSaving ? 'Đang lưu...' : 'Lưu thay đổi' }}</span>
+              </button>
             </div>
           </div>
 
-          <div class="flex flex-wrap gap-3">
-            <button
-                @click="saveChanges"
-                :disabled="isSaving"
-                class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg font-semibold hover:from-emerald-600 hover:to-green-700 transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              <i class="fa-solid fa-save"></i>
-              <span>{{ isSaving ? 'Đang lưu...' : 'Lưu thay đổi' }}</span>
-            </button>
-            <button
-                @click="resetForm"
-                class="px-5 py-2.5 bg-gradient-to-r from-slate-500 to-gray-600 text-white rounded-lg font-semibold hover:from-slate-600 hover:to-gray-700 transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-2"
-            >
-              <i class="fa-solid fa-rotate-left"></i>
-              <span>Đặt lại</span>
-            </button>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white/10 rounded-2xl p-4 border border-white/20 backdrop-blur">
+              <div class="flex items-center justify-between text-sm text-white/70">
+                <span>Giá bán</span>
+                <i class="fa-solid fa-sack-dollar"></i>
+              </div>
+              <div class="text-2xl font-bold mt-2">{{ formatMoneyVN(formData.giaBan || asset.giaBan) }}</div>
+            </div>
+            <div class="bg-white/10 rounded-2xl p-4 border border-white/20 backdrop-blur">
+              <div class="flex items-center justify-between text-sm text-white/70">
+                <span>Giá nội bộ</span>
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+              </div>
+              <div class="text-2xl font-bold mt-2">{{ formatMoneyVN(formData.giaNoiBo || asset.giaNoiBo) }}</div>
+            </div>
+            <div class="bg-white/10 rounded-2xl p-4 border border-white/20 backdrop-blur">
+              <div class="flex items-center justify-between text-sm text-white/70">
+                <span>Phí môi giới</span>
+                <i class="fa-solid fa-percent"></i>
+              </div>
+              <div class="text-2xl font-bold mt-2">{{ formData.phiMoiGioi ? formData.phiMoiGioi + '%' : asset.phiMoiGioi + '%' }}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -255,7 +289,7 @@
                   required
               >
                 <option value="">-- Chọn tỉnh/thành phố --</option>
-                <option v-for="province in provinces" :key="province.code" :value="province">
+                <option v-for="province in provinces" :key="province.name" :value="province.name">
                   {{ formatProvinceName(province.name) }}
                 </option>
               </select>
@@ -278,7 +312,7 @@
                   required
               >
                 <option value="">-- Chọn phường/xã --</option>
-                <option v-for="ward in wards" :key="ward.code" :value="ward.name">
+                <option v-for="ward in wards" :key="ward.name" :value="ward.name">
                   {{ formatWardName(ward.name) }}
                 </option>
               </select>
@@ -1145,13 +1179,11 @@ function loadProvinces() {
 }
 
 function onProvinceChange() {
-  if (selectedProvince.value && selectedProvince.value.wards) {
-    wards.value = selectedProvince.value.wards;
-  } else {
-    wards.value = [];
-  }
+  const found = provinces.value.find(p => p.name === selectedProvince.value);
+  wards.value = found ? found.wards : [];
   formAddress.value.ward = "";
 }
+
 
 async function loadAssetDetail() {
   try {
@@ -1168,27 +1200,31 @@ async function loadAssetDetail() {
 function matchAddressWithData() {
   if (!formAddress.value.area) return;
 
-  // Tìm province từ address
-  const provinceName = formAddress.value.area;
-  const foundProvince = provinces.value.find(p =>
-      p.name === provinceName ||
-      p.name.replace(/^Thành phố\s+|^Tỉnh\s+/i, '') === provinceName.replace(/^TP\.\s+|^T\.\s+/i, '')
+  const provinceName = formAddress.value.area.trim();
+
+  // 🔍 tìm đúng tỉnh
+  const foundProvince = provinces.value.find(
+      p => p.name.trim() === provinceName
   );
 
-  if (foundProvince) {
-    selectedProvince.value = foundProvince;
-    onProvinceChange();
+  if (!foundProvince) {
+    console.warn("Không tìm thấy tỉnh:", provinceName);
+    return;
+  }
 
-    // Tìm ward
-    if (formAddress.value.ward && wards.value.length > 0) {
-      const foundWard = wards.value.find(w =>
-          w.name === formAddress.value.ward ||
-          w.name.replace(/^Phường\s+|^Xã\s+|^Thị trấn\s+/i, '') === formAddress.value.ward.replace(/^P\.\s+|^X\.\s+|^TT\.\s+/i, '')
-      );
-      if (foundWard) {
-        formAddress.value.ward = foundWard.name;
-      }
-    }
+  // set STRING
+  selectedProvince.value = foundProvince.name;
+
+  // load wards
+  wards.value = foundProvince.wards;
+
+  // match ward
+  const foundWard = foundProvince.wards.find(
+      w => w.name.trim() === formAddress.value.ward.trim()
+  );
+
+  if (foundWard) {
+    formAddress.value.ward = foundWard.name;
   }
 }
 
@@ -1313,6 +1349,21 @@ function formatAddress(address) {
   return address.replace(/\/!!/g, ", ");
 }
 
+function formatUpdatedAt(value) {
+  if (!value) return "Chưa cập nhật";
+  const date = new Date(value);
+
+  if (isNaN(date.getTime())) return "Chưa cập nhật";
+
+  return date.toLocaleString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function formatProvinceName(name) {
   if (!name) return "";
   return name.replace(/^Thành phố\s+/i, "TP. ").replace(/^Tỉnh\s+/i, "T. ");
@@ -1414,8 +1465,8 @@ button:hover {
 /* THÊM CÁC STYLE MỚI ĐỂ LOẠI BỎ KHOẢNG TRẮNG */
 .min-h-screen {
   min-height: 100vh;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
 }
 
 /* Đảm bảo các container chính chiếm toàn bộ chiều rộng */
