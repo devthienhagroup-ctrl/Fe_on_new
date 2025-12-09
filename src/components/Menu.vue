@@ -6,7 +6,8 @@
     }"
   >
     <!-- ========== SIDEBAR ========== -->
-    <aside class="sidebar">
+    <aside class="sidebar" :class="{ collapsed: sidebar.isExpanded }">
+
 
       <!-- Logo -->
       <div class="logo mb-3">
@@ -108,6 +109,10 @@ const allowedLabels = computed(() =>
 const filteredMenu = computed(() =>
     allMenuItems.filter(item => allowedLabels.value.includes(item.label))
 )
+
+import { useSidebarStore } from "../stores/sidebarStore";
+const sidebar = useSidebarStore();
+
 </script>
 
 <style scoped>
@@ -250,5 +255,38 @@ const filteredMenu = computed(() =>
   background: rgba(255, 255, 255, 0.3);
   border-radius: 2px;
 }
+/* Thu gọn menu */
+/* Sidebar bình thường */
+.sidebar {
+  width: 100px;
+  min-width: 100px;
+  max-width: 100px;
+
+  background: rgba(255, 255, 255, 0.04);
+  color: white;
+  backdrop-filter: blur(14px);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding-top: 16px;
+  padding-bottom: 0;
+
+  transition: width .25s ease;
+}
+
+/* Thu gọn */
+.sidebar.collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+
 
 </style>

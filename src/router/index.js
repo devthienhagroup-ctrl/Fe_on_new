@@ -49,6 +49,8 @@ import InvestmentDetail from "../components/user/Investment/InvestmentDetail.vue
 import Payment from "../components/user/Profile/component/Payment.vue";
 import ProductList from "../components/productAdmin/ProductList.vue";
 import ProductDetail from "../components/productAdmin/ProductDetail.vue";
+import Demo from "../components/productAdmin/Demo.vue";
+import ProductUpdate  from "../components/productAdmin/ProductUpdate.vue";
 
 import Ga4EventExample from "../components/Ga4EventExample.vue";
 
@@ -58,20 +60,46 @@ const routes = [
             name: "LoginForm",
             component: LoginForm,
         },
-    {
-        path: "/test01",
-        meta: {requiresAuth: false},
-        component: Menu,
-        children: [
-            {
-                path: "",   // → /admin/products/:id
-                name: "ProductList",
-                component: ProductList,
-                props: true,
-            }
-        ]
-    },
-    {
+        {
+            path: "/test01",
+            meta: {requiresAuth: false},
+            component: Menu,
+            children: [
+                {
+                    path: "",   // → /admin/products/:id
+                    name: "ProductList",
+                    component: ProductList,
+                    props: true,
+                }
+            ]
+        },
+        {
+            path: "/admin/product",
+            meta: {requiresAuth: false},
+            component: Menu,
+            children: [
+                {
+                    path: "update/:id",   // → /admin/products/:id
+                    name: "ProducUpdate",
+                    component: ProductUpdate,
+                    props: true,
+                }
+            ]
+        },
+        {
+            path: "/test02",
+            meta: {requiresAuth: false, hideFooterMap: true},
+            component: MenuUser,
+            children: [
+                {
+                    path: "",   // → /admin/products/:id
+                    name: "Demo",
+                    component: Demo,
+                    props: true,
+                }
+            ]
+        },
+        {
         path: "/admin",
         component: Menu,       // ⭐ Bổ sung MENU tại đây
         meta: { requiresAuth: false },

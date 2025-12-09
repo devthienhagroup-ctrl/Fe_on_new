@@ -218,3 +218,43 @@ export async function confirmYesNo(title, message, onConfirm) {
         onConfirm();
     }
 }
+
+
+/** ✔️ Thành công - hiển thị giữa màn hình */
+export function showCenterSuccess(title, text = "") {
+    Swal.fire({
+        icon: "success",
+        title: title,
+        text: text,
+        position: "center",
+        showConfirmButton: false,
+        timer: 1800,
+        timerProgressBar: true,
+    });
+}
+
+/** ❌ Lỗi - hiển thị giữa màn hình */
+export function showCenterError(title, text = "") {
+    Swal.fire({
+        icon: "error",
+        title: title,
+        text: text,
+        position: "center",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+    });
+}
+
+/** ⚠️ Cảnh báo - hiển thị giữa màn hình */
+export function showCenterWarning(title, text = "") {
+    Swal.fire({
+        icon: "warning",
+        title: title,
+        text: text,
+        position: "center",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+    });
+}

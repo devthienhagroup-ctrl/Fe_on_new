@@ -3,7 +3,8 @@
     <div class="max-w-[1600px] mx-auto">
 
       <!-- Tiêu đề chính -->
-      <div class="relative bg-gradient-to-r from-indigo-700 via-blue-700 to-cyan-700 rounded-2xl shadow-2xl p-5 mb-5 overflow-hidden">
+      <div
+          class="relative bg-gradient-to-r from-indigo-700 via-blue-700 to-cyan-700 rounded-2xl shadow-2xl p-5 mb-5 overflow-hidden">
         <div class="absolute inset-0 opacity-10 bg-pattern"></div>
         <div class="relative flex items-center justify-between">
           <div>
@@ -25,7 +26,7 @@
 
               <!-- Chuông thông báo -->
               <div>
-                <NotificationBell />
+                <NotificationBell/>
               </div>
 
               <!-- Thông tin người dùng -->
@@ -144,7 +145,7 @@
             </div>
 
             <h3 class="text-slate-900 text-sm font-medium mb-1">Tổng Giá Trị</h3>
-            <p class="text-2xl font-bold text-slate-900 mb-1">{{  formatMoneyVN( stats.totalValue ) }}</p>
+            <p class="text-2xl font-bold text-slate-900 mb-1">{{ formatMoneyVN(stats.totalValue) }}</p>
             <p class="text-xs text-slate-600">Giá trị danh mục đầu tư</p>
           </div>
         </div>
@@ -177,7 +178,7 @@
             </div>
 
             <h3 class="text-slate-900 text-sm font-medium mb-1">Giá TB/Sản Phẩm</h3>
-            <p class="text-2xl font-bold text-slate-900 mb-1">{{ formatMoneyVN( stats.avgValue ) }}</p>
+            <p class="text-2xl font-bold text-slate-900 mb-1">{{ formatMoneyVN(stats.avgValue) }}</p>
             <p class="text-xs text-slate-600">Giá trị trung bình</p>
           </div>
         </div>
@@ -360,6 +361,9 @@
               <option value="">Tất cả</option>
               <option value="Mặt tiền">Mặt tiền</option>
               <option value="Hẻm">Hẻm</option>
+              <option value="Hẻm cụt">Hẻm cụt</option>
+              <option value="Khu dân cư">Khu dân cư</option>
+              <option value="Mặt tiền đường lớn">Mặt tiền đường lớn</option>
               <option value="Chưa cập nhật">Chưa cập nhật</option>
             </select>
           </div>
@@ -424,6 +428,7 @@
                 v-for="(item, idx) in landAssets"
                 :key="item.id"
                 :class="['transition-all duration-200', idx % 2 === 0 ? 'bg-blue-50/50' : 'bg-rose-50/50']"
+                style="font-weight: 550;"
             >
               <td class="text-center">
                 <div class="flex justify-end items-center pr-1 ml-3">
@@ -445,76 +450,107 @@
                     </span>
                 </div>
               </td>
-              <td class="font-medium text-slate-900">{{ item.tenChuNha || 'Không có' }}</td>
-              <td class="text-slate-900">{{ item.soDienThoai || 'Không có' }}</td>
-              <td class="font-bold text-blue-700">{{ item.giaBan }}</td>
-              <td class="text-slate-900">{{ item.dinhGia || 'Chưa định giá' }}</td>
-              <td class="text-slate-800">{{ formatAddressDetail(item) }}</td>
-              <td class="text-slate-900">{{ formatWard(item) }}</td>
-              <td class="text-slate-900">{{ formatProvince(item) }}</td>
-              <td class="text-slate-900">{{ item.viTri }}</td>
-              <td class="font-medium text-slate-800">{{ item.dtcn }}</td>
-              <td class="text-slate-900">{{ item.ketCau || '-' }}</td>
+              <td class="font-medium text-slate-900 text-gray-800">{{ item.tenChuNha || '—' }}</td>
+              <td class="text-slate-900 text-gray-800">{{ item.soDienThoai || '—' }}</td>
+              <td class="font-bold text-blue-700">{{ formatMoneyVN(item.giaBan) }}</td>
+              <td
+                  :class="item.giaDinhGia? 'font-bold text-blue-700' : 'text-slate-800 text-gray-800'"
+              >
+                {{ item.giaDinhGia ? formatMoneyVN(item.giaDinhGia) : '—' }}
+              </td>
+
+              <td class="text-slate-800 text-gray-800">{{ formatAddressDetail(item.diaChi) }}</td>
+              <td class="text-slate-900 text-gray-800">{{ formatWard(item.diaChi) }}</td>
+              <td class="text-slate-900 text-gray-800">{{ formatProvince(item.khuVuc) }}</td>
+              <td class="text-slate-900 text-gray-800">{{ item.viTri }}</td>
+              <td class="font-medium text-slate-800">{{ item.dtcn + 'm²' }}</td>
+              <td class="text-slate-900 text-gray-800 max-w-[150px] truncate">
+                {{ item.ketCau || '-' }}
+              </td>
 
               <td class="font-bold text-blue-700">
-                {{ item.phiMoiGioi || '-' }}
+                {{ item.phiMoiGioi + '%' || '-' }}
               </td>
 
               <td>
-                  <span :class="['px-2 py-1 rounded-lg text-xs font-semibold', badgeClass(item.LoaiMH)]">
-                    {{ item.LoaiMH }}
+                  <span :class="['px-2 py-1 rounded-lg font-semibold', badgeClass(item.loaiMH)]"
+                        style="border-radius: 8px !important; font-size: 12px !important;">
+                    {{ item.loaiMH }}
                   </span>
               </td>
               <td>
-                <span :class="[
-                    'inline-flex items-center gap-1 px-1.5 py-[2px] rounded-md text-[11px] font-medium',
-                    item.donVi === 'THG'
-                      ? 'bg-purple-100 text-purple-800 border border-purple-300'
-                      : 'bg-orange-100 text-orange-800 border border-orange-300'
-                  ]">
-                    <i :class="item.donVi === 'THG'
-                        ? 'fa-solid fa-building text-purple-700'
-                        : 'fa-solid fa-handshake text-orange-700'
-                    "></i>
-                    {{ item.donVi }}
-                  </span>
+              <span
+                  :class="[
+                  'inline-flex items-center gap-1 px-2 py-1 font-semibold text-white shadow-sm',
+                  item.donVi === 'THG'
+                    ? 'bg-[#6A0DAD]'
+                    : 'bg-[#0057D9]'
+                ]"
+                                style="border-radius: 8px; font-size: 12px; line-height: 16px;"
+                            >
+                <i
+                    :class="[
+                    'fa-solid text-white',
+                    item.donVi === 'THG' ? 'fa-building' : 'fa-handshake'
+                  ]"
+                    style="font-size: 11px;"
+                ></i>
+                {{ item.donVi }}
+              </span>
+
               </td>
               <td class="text-center">
                 <button
-                    @click="item.show = !item.show"
+                    @click="toggleShowSingle(item)"
                     :class="[
-        'px-2.5 py-[2px] rounded-md text-[11px] flex items-center gap-1 transition-all shadow-sm',
-        item.show
-          ? 'bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-200'
-          : 'bg-gray-200 text-gray-700 border border-gray-300 hover:bg-gray-300'
-      ]"
-                >
+                              'px-2.5 py-1 rounded-md text-[11px] flex items-center gap-1 transition-all shadow-sm font-semibold',
+                              item.show
+                                ? 'bg-[#00C2A8] text-white hover:bg-[#00b89f]'   // YES
+                                : 'bg-[#E63946] text-white  hover:bg-[#d5303d]'   // NO
+                            ]"
+                    style="border-radius: 8px; font-size: 12px; line-height: 16px;" >
                   <i
-                      :class="item.show
-          ? 'fa-solid fa-check text-blue-700 text-[11px]'
-          : 'fa-solid fa-xmark text-gray-700 text-[11px]'
-        "
+                      :class="[
+                            'fa-solid text-white text-[11px]',
+                            item.show ? 'fa-check' : 'fa-xmark'
+                          ]"
                   ></i>
 
                   {{ item.show ? 'Yes' : 'No' }}
                 </button>
               </td>
+
               <td class="text-center">
                 <button
                     @click="$router.push(`/admin/products/${item.id}`)"
-                    class="px-2.5 py-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg transition-all duration-200 shadow-sm hover:shadow-md inline-flex items-center gap-1"
+                    class="
+    px-1.5
+    py-[2px]
+    rounded-md
+    inline-flex items-center gap-1
+    text-[10px] font-semibold
+    bg-[#BFDBFE]
+    text-[#1D4ED8]
+    border border-[#93C5FD]
+    shadow-sm
+    hover:bg-[#93C5FD]
+    transition-all duration-200
+  "
+                    style="border-radius: 8px; font-size: 11px;"
                 >
-                  <i class="fa-regular fa-eye text-xs"></i>
-                  <span class="text-xs font-medium">Xem</span>
+                  <i class="fa-regular fa-eye text-[10px] text-[#1D4ED8]"></i>
+                  <span>Xem</span>
                 </button>
               </td>
+
             </tr>
             </tbody>
           </table>
         </div>
 
         <!-- Phân trang -->
-        <div class="flex items-center justify-between p-3 bg-gradient-to-r from-slate-100 to-slate-200 border-t border-slate-300">
+        <div
+            class="flex items-center justify-between p-3 bg-gradient-to-r from-slate-100 to-slate-200 border-t border-slate-300">
           <div class="flex items-center gap-1">
             <button
                 @click="goToPage(0)"
@@ -572,7 +608,7 @@
         </div>
       </div>
 
-<!--       Thống kê phân loại -->
+      <!--       Thống kê phân loại -->
       <div class="grid grid-cols-3 gap-3 mb-5">
         <div
             v-for="([category, count]) in Object.entries(stats.loaiMHStats)"
@@ -631,7 +667,7 @@
                 <div class="icon-wrap">
                   <i class="fa-solid fa-map-marker-alt text-violet-700"></i>
                 </div>
-                <h3 class="title">{{ chinhTenKhuVuc( location ) }}</h3>
+                <h3 class="title">{{ chinhTenKhuVuc(location) }}</h3>
               </div>
             </div>
 
@@ -655,14 +691,15 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
-import { useSidebarStore } from "/src/stores/sidebarStore.js";
+import {ref, computed, watch, onMounted} from "vue";
+import {useSidebarStore} from "/src/stores/sidebarStore.js";
 import addressData from "/src/assets/js/address.json";
 import NotificationBell from "/src/components/NotificationBell.vue";
 
 const filterShow = ref("");
 
-import { useAuthStore } from "/src/stores/authStore.js";
+import {useAuthStore} from "/src/stores/authStore.js";
+
 const authStore = useAuthStore();
 const info = authStore.userInfo;
 
@@ -716,28 +753,32 @@ const formatDate = (dateString) => {
   ).padStart(2, "0")}/${String(date.getFullYear()).slice(-2)}`;
 };
 
-const formatAddressDetail = (item) => {
-  let raw = item.addressDetail || "";
+const formatAddressDetail = (diaChi) => {
+  let raw = diaChi || "";
 
   // Lấy phần trước /!! đầu tiên
   let clean = raw.split("/!!")[0].trim();
 
   // Thay "Đường" (hoặc đường) thành "Đ."
-  clean = clean.replace(/^đường\s+/i, "Đ. ");
+  clean = clean.replace(/(\d+\s*)(đường)\s+/i, "$1Đ. ");
 
   return clean;
 };
 
 
+const formatWard = (addressDetail) => {
+  const raw = addressDetail || "";
+  const parts = raw.split("/!!");
 
-const formatWard = (item) => {
-  const ward = item.ward || "";
-  if (typeof ward !== "string") return ward || "";
+  // Ward nằm ở vị trí 1
+  let ward = parts[1]?.trim() || "";
+
   return ward
-      .replace(/^Phường\s+/i, "P.")
-      .replace(/^Xã\s+/i, "X.")
-      .replace(/^Thị trấn\s+/i, "TT.");
+      .replace(/^Phường\s+/i, "P. ")
+      .replace(/^Xã\s+/i, "X. ")
+      .replace(/^Thị trấn\s+/i, "TT. ");
 };
+
 
 const formatWardShort = (ward) => {
   if (!ward || typeof ward !== "string") return ward || "";
@@ -747,8 +788,7 @@ const formatWardShort = (ward) => {
       .replace(/^Thị trấn\s+/i, "TT.");
 };
 
-const formatProvince = (item) => {
-  const province = item.province || "";
+const formatProvince = (province) => {
   if (typeof province !== "string") return province || "";
   return province
       .replace(/^Thành phố\s+/i, "TP.")
@@ -765,11 +805,46 @@ const formatProvinceShort = (province) => {
 // Type
 const getAssetType = (item) => {
   const dtcnValue = parseFloat(item.dtcn) || 0;
-  const hasHouse = item.ketCau && item.ketCau.includes("lầu");
-  if (hasHouse) return "house";
-  if (dtcnValue > 100) return "land-large";
+  const ketCau = (item.ketCau || "").toLowerCase();
+
+  // Ưu tiên dữ liệu từ backend
+  if (item.loaiTaiSan) {
+    const map = {
+      NHA: "house",
+      DAT: "land",
+      DATLON: "land-large"
+    };
+
+    if (map[item.loaiTaiSan]) {
+      return map[item.loaiTaiSan];
+    }
+  }
+
+  // Từ khóa nhận diện nhà (bao gồm cả chung cư, căn hộ)
+  const houseKeywords = [
+    // Nhà truyền thống
+    "lầu", "trệt", "tầng", "hầm", "gác",
+    "nhà cấp", "cấp 1", "cấp 2", "cấp 3", "cấp 4",
+    "biệt thự", "villa", "shophouse", "townhouse", "nhà",
+
+    // Chung cư & căn hộ → cũng tính là "nhà"
+    "chung cư", "căn hộ", "chcc", "studio",
+    "condotel", "officetel", "apartment", "can ho",
+    "chung cu", "tower", "block"
+  ];
+
+  // Nếu kết cấu chứa từ khóa → là nhà
+  if (houseKeywords.some(keyword => ketCau.includes(keyword))) {
+    return "house";
+  }
+
+  // Nếu diện tích lớn → đất lớn
+  if (dtcnValue > 1000) return "land-large";
+
+  // Còn lại → đất
   return "land";
 };
+
 
 const getAssetTypeIcon = (item) => {
   const type = getAssetType(item);
@@ -787,9 +862,9 @@ const getAssetTypeColor = (item) => {
   const type = getAssetType(item);
   switch (type) {
     case "house":
-      return "text-rose-700";
-    case "land-large":
       return "text-emerald-700";
+    case "land-large":
+      return "text-rose-700";
     default:
       return "text-blue-700";
   }
@@ -798,17 +873,19 @@ const getAssetTypeColor = (item) => {
 const badgeClass = (code) => {
   const map = {
     BN30N:
-        "bg-gradient-to-r from-rose-100 to-rose-200/80 text-rose-800 border border-rose-300",
+        "bg-green-500 text-white font-semibold ",
     HTT:
-        "bg-gradient-to-r from-emerald-100 to-emerald-200/80 text-emerald-800 border border-emerald-300",
+        "bg-yellow-500 text-white font-semibold",
     HOPTAC:
-        "bg-gradient-to-r from-amber-100 to-amber-200/80 text-amber-800 border border-amber-300",
+        "bg-orange-500 text-white font-semibold",
   };
+
   return (
       map[code] ||
-      "bg-gradient-to-r from-slate-100 to-slate-200/80 text-slate-800 border border-slate-300"
+      "bg-slate-400 text-white font-semibold"
   );
 };
+
 
 // Range
 const matchGiaRange = (asset) => {
@@ -843,8 +920,10 @@ const updatePageSize = () => {
 };
 
 // Export/import
-const handleExport = () => alert("Xuất Excel - Chức năng đang phát triển");
-const handleImport = () => alert("Nhập Excel - Chức năng đang phát triển");
+import {showCenterWarning, showCenterSuccess, showCenterError} from "../../assets/js/alertService.js";
+
+const handleExport = () => showCenterWarning("Xuất Excel", "Chức năng đang phát trển !")
+const handleImport = () => showCenterWarning("Nhập Excel", "Chức năng đang phát trển !")
 
 // Refresh
 const handleRefresh = () => {
@@ -894,16 +973,65 @@ watch([selectedRows, landAssets], () => {
 });
 
 // Toggle show
-const toggleSelectedRows = () => {
+const toggleSelectedRows = async () => {
+  await toggleShowFromServer();
   landAssets.value = landAssets.value.map((item) =>
       selectedRows.value.includes(item.id)
-          ? { ...item, show: !item.show }
+          ? {...item, show: !item.show}
           : item
   );
 };
 
+
+async function toggleShowFromServer() {
+  if (selectedRows.value.length === 0) {
+    showCenterWarning("Chưa chọn tài sản", "Vui lòng chọn ít nhất 1 dòng để cập nhật.");
+    return;
+  }
+
+  try {
+    await api.post("/admin.thg/product/admin/toggle-show-multiple", selectedRows.value);
+
+    showCenterSuccess(
+        "Đã cập nhật trạng thái!",
+        `${selectedRows.value.length} tài sản đã được đổi trạng thái hiển thị.`
+    );
+
+  } catch (e) {
+    console.error(e);
+    showCenterError(
+        "Lỗi cập nhật!",
+        "Không thể thay đổi trạng thái hiển thị. Vui lòng thử lại."
+    );
+  }
+}
+
+
+async function toggleShowSingle(item) {
+  try {
+    await api.post(`/admin.thg/product/admin/toggle-show/${item.id}`);
+
+    // Cập nhật giao diện FE
+    item.show = !item.show;
+
+    showCenterSuccess(
+        "Cập nhật thành công",
+        `Tài sản ID ${item.id} đã được đổi trạng thái hiển thị.`
+    );
+
+  } catch (e) {
+    console.error(e);
+    showCenterError(
+        "Lỗi cập nhật!",
+        "Không thể thay đổi trạng thái hiển thị tài sản. Vui lòng thử lại."
+    );
+  }
+}
+
+
 // API
 import api from "/src/api/api.js";
+import {showError} from "../../assets/js/alertService.js";
 
 const stats = ref({
   total: 0,
@@ -990,7 +1118,7 @@ watch(
       pageSize,
     ],
     () => debouncedFilter(),
-    { deep: true, immediate: true }
+    {deep: true, immediate: true}
 );
 
 // FETCH FILTERED
@@ -1031,6 +1159,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
 * {
   font-size: 14px;
 }
@@ -1110,10 +1239,12 @@ table {
   border-radius: 16px;
   overflow: hidden;
 }
-th{
+
+th {
   padding-top: 7px !important;
   padding-bottom: 7px !important;
 }
+
 /* Màu tím header bảng */
 .table-header {
   background: linear-gradient(to right, #641eaf, #562df3); /* tím pastel */
@@ -1127,18 +1258,19 @@ th{
   color: white;
   text-align: left;
 }
+
 .location-card {
   background: linear-gradient(to bottom right, #fafafa, #f3f4f6);
   border: 1px solid #e5e7eb;
   border-radius: 14px;
   padding: 14px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   transition: transform .2s ease, box-shadow .2s ease;
 }
 
 .location-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
 .icon-wrap {
@@ -1184,19 +1316,20 @@ th{
   color: #6b7280;
   font-weight: 500;
 }
+
 /* Card tổng thể */
 .LoaiMH-card {
   background: linear-gradient(to bottom right, #ffffff, #f8fafc);
   border: 1px solid #e5e7eb;
   border-radius: 14px;
   padding: 16px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
   transition: 0.25s ease;
 }
 
 .LoaiMH-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
 }
 
 /* Badge nhu cầu */
