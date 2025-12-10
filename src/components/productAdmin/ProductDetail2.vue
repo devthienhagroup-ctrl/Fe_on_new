@@ -1,4 +1,5 @@
 <template>
+
   <div v-if="asset" class="executive-container" style="padding-top: 90px !important;">
 
     <!-- HEADER CARD -->
@@ -77,7 +78,7 @@
                   <span class="press-desc">Ưu đãi riêng cho hệ thống đại lý</span>
                 </div>
                 <div class="press-card">
-                  <span class="press-label">Quy mô</span>
+                  <span class="press-label">Diện tích</span>
                   <span class="press-value">{{ formatArea(asset.totalArea) }}</span>
                   <span class="press-desc">Diện tích sẵn sàng bàn giao</span>
                 </div>
@@ -165,6 +166,11 @@
             <div class="info-row highlight-row">
               <span class="info-label">Giá nội bộ</span>
               <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.giaNoiBo) }}</span>
+            </div>
+
+            <div class="info-row highlight-row">
+              <span class="info-label">Giá mong muốn</span>
+              <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.desire) }}</span>
             </div>
 
             <div class="info-row">
@@ -262,8 +268,35 @@
           <span class="detail-value">{{ asset.status }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">Giá mong muốn</span>
-          <span class="detail-value text-primary">{{ formatMoneyVN( asset.desire ) }}</span>
+          <span class="detail-label">Chiều ngang và chiều dài</span>
+          <span class="detail-value text-primary">
+            Ngang {{ formatArea2( asset.chieuNgang ) }}m , Dài {{ formatArea2( asset.chieuDai ) }}m
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Loại đất</span>
+          <span class="detail-value">{{ asset.loaiDat }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Hình dạng / Kết cấu</span>
+          <span class="detail-value">{{ asset.structure }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Hiện trạng</span>
+          <span class="detail-value">{{ asset.hienTrangDat }}</span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Lộ giới & Độ rộng đường</span>
+          <span class="detail-value">{{ asset.loGioi }}m & {{ asset.doRongDuong }}m</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Quy hoạch</span>
+          <span class="detail-value">{{ asset.quyHoach }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Mặt tiền</span>
+          <span class="detail-value">{{ asset.matTienNha }} m</span>
         </div>
       </div>
     </div>
@@ -279,39 +312,37 @@
 
       <div class="detail-grid">
         <div class="detail-item">
-          <span class="detail-label">Chiều ngang</span>
-          <span class="detail-value highlight">{{ formatArea2( asset.chieuNgang ) }}m</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Chiều dài</span>
-          <span class="detail-value highlight">{{ formatArea2( asset.chieuDai ) }}m</span>
-        </div>
-        <div class="detail-item">
           <span class="detail-label">Diện tích sàn</span>
           <span class="detail-value highlight">{{ formatArea( asset.floorArea ) }} </span>
         </div>
-
         <div class="detail-item">
-          <span class="detail-label">Kết cấu</span>
-          <span class="detail-value">{{ asset.structure }}</span>
+          <span class="detail-label">Loại nhà</span>
+          <span class="detail-value highlight">{{ asset.loaiNha }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">Số tầng</span>
-          <span class="detail-value">{{ asset.soTang }} tầng </span>
+          <span class="detail-label">Số tầng & Số lầu</span>
+          <span class="detail-value">{{ asset.soTang }} tầng & {{ asset.soLau }} lầu </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">Số lầu</span>
-          <span class="detail-value">{{ asset.soLau }} lầu </span>
+          <span class="detail-label">Hiện trạng nhà</span>
+          <span class="detail-value">{{ asset.hienTrangNha }}</span>
         </div>
 
         <div class="detail-item">
           <span class="detail-label">Phòng ngủ</span>
           <span class="detail-value">{{ asset.soPhongNgu }} phòng</span>
         </div>
+
         <div class="detail-item">
           <span class="detail-label">Phòng tắm</span>
-          <span class="detail-value">{{ asset.soPhongTam }} phòng </span>
+          <span class="detail-value">{{ asset.soPhongTam }} phòng</span>
         </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Tổng số phòng</span>
+          <span class="detail-value">{{ asset.tongSoPhong }} phòng</span>
+        </div>
+
         <div class="detail-item">
           <span class="detail-label">Năm xây dựng</span>
           <span class="detail-value">{{ asset.namXayDung }}</span>
@@ -320,65 +351,6 @@
         <div class="detail-item">
           <span class="detail-label">Nội thất</span>
           <span class="detail-value">{{ asset.noiThat }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Mặt tiền</span>
-          <span class="detail-value">{{ asset.matTienNha }} m</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Tổng số phòng</span>
-          <span class="detail-value">{{ asset.tongSoPhong }} phòng</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- LAND SECTION -->
-    <div class="detail-section section-land" v-if="getAssetType(asset) === 'DAT'">
-      <div class="section-header">
-        <div class="section-title-group">
-          <i class="fa-solid fa-mountain-sun section-icon"></i>
-          <h3 class="section-title">Thông tin thửa đất</h3>
-        </div>
-      </div>
-
-      <div class="detail-grid">
-        <div class="detail-item">
-          <span class="detail-label">Chiều ngang</span>
-          <span class="detail-value highlight">{{ asset.chieuNgang }} m</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Chiều dài</span>
-          <span class="detail-value highlight">{{ asset.chieuDai }} m</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Diện tích</span>
-          <span class="detail-value highlight">{{ asset.totalArea }} m²</span>
-        </div>
-
-        <div class="detail-item">
-          <span class="detail-label">Loại đất</span>
-          <span class="detail-value">{{ asset.loaiDat }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Hình dạng</span>
-          <span class="detail-value">{{ asset.hinhDangThuaDat }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Hiện trạng</span>
-          <span class="detail-value">{{ asset.hienTrangDat }}</span>
-        </div>
-
-        <div class="detail-item">
-          <span class="detail-label">Lộ giới</span>
-          <span class="detail-value">{{ asset.loGioi }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Độ rộng đường</span>
-          <span class="detail-value">{{ asset.doRongDuong }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Quy hoạch</span>
-          <span class="detail-value">{{ asset.quyHoach }}</span>
         </div>
       </div>
     </div>
@@ -647,7 +619,7 @@ const formatArea2 = (value) => {
 
 const getAssetType = (item) => {
   const dtcnValue = parseFloat(item.dtcn) || 0;
-  const ketCau = (item.ketCau || "").toLowerCase();
+  const structure = (item.structure || "").toLowerCase();
 
   // Ưu tiên dữ liệu từ backend
   if (item.loaiTaiSan) {
@@ -676,7 +648,7 @@ const getAssetType = (item) => {
   ];
 
   // Nếu kết cấu chứa từ khóa → là nhà
-  if (houseKeywords.some(keyword => ketCau.includes(keyword))) {
+  if (houseKeywords.some(keyword => structure.includes(keyword))) {
     return "NHA";
   }
 

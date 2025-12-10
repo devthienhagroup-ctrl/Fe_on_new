@@ -411,57 +411,61 @@
 
         <!-- SECTION 3: CHỦ SỞ HỮU & THÔNG TIN PHÁP LÝ -->
         <div class="bg-white rounded-2xl shadow-xl border border-slate-300 p-6">
-          <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
-            <div class="bg-gradient-to-r from-purple-500 to-violet-600 p-2.5 rounded-xl">
-              <i class="fa-solid fa-user-tie text-white text-lg"></i>
+          <div class="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-200">
+            <div class="flex items-center gap-3">
+              <div class="bg-gradient-to-r from-purple-500 to-violet-600 p-2.5 rounded-xl">
+                <i class="fa-solid fa-user-tie text-white text-lg"></i>
+              </div>
+              <h2 class="text-xl font-bold text-slate-900">Chủ sở hữu & Pháp lý</h2>
             </div>
-            <h2 class="text-xl font-bold text-slate-900">Chủ sở hữu & Pháp lý</h2>
+
+            <!-- ==== HIỂN THỊ THÔNG TIN CHỦ SỞ HỮU ==== -->
+            <div class="flex flex-wrap items-center gap-2 mt-1">
+
+              <!-- Tên chủ sở hữu -->
+              <!-- Chủ sở hữu -->
+              <div class="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-xl border border-blue-200 shadow-sm">
+                <i class="fa-solid fa-user"></i>
+                <span class="font-semibold text-sm">{{ formData.ownerName || '—' }}</span>
+              </div>
+
+              <!-- Số điện thoại -->
+              <div class="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl border border-emerald-200 shadow-sm">
+                <i class="fa-solid fa-phone"></i>
+                <span class="font-semibold text-sm">{{ formData.ownerPhone || '—' }}</span>
+              </div>
+
+              <div
+                  class="flex items-center gap-2 px-4 py-2 rounded-xl shadow-sm border relative cursor-pointer
+         bg-red-50 text-red-700 border-red-200">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                <!-- SELECT thật nhưng làm trong suốt để giữ UI -->
+                <select
+                    v-model="formData.status"
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                >
+                  <option disabled value="">— Chọn trạng thái —</option>
+                  <option value="Chưa định giá sơ bộ">Chưa định giá sơ bộ</option>
+                  <option value="Đã định giá sơ bộ">Đã định giá sơ bộ</option>
+                  <option value="Bán nhanh 30 ngày">Bán nhanh 30 ngày</option>
+                </select>
+
+                <!-- Text hiển thị -->
+                <span class="font-semibold text-sm">
+    {{ formData.status || 'Chọn trạng thái' }}
+  </span>
+
+                <!-- mũi tên -->
+                <i class="fa-solid fa-chevron-down text-xs"></i>
+              </div>
+
+            </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Chủ sở hữu -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-                    <i class="fa-solid fa-user text-white text-xs"></i>
-                  </div>
-                  <span>Tên chủ sở hữu *</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="text"
-                    v-model="formData.ownerName"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập tên chủ sở hữu"
-                    readonly
-                />
-                <i class="fa-solid fa-user-tag absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
-            </div>
 
-            <!-- Số điện thoại -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
-                    <i class="fa-solid fa-phone text-white text-xs"></i>
-                  </div>
-                  <span>Số điện thoại *</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="tel"
-                    v-model="formData.ownerPhone"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập số điện thoại"
-                    readonly
-                />
-                <i class="fa-solid fa-mobile-screen absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
-            </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
             <!-- Loại đất -->
             <div class="space-y-2">
@@ -583,27 +587,173 @@
               />
             </div>
 
-            <!-- Trạng thái -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
                 <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
-                    <i class="fa-solid fa-circle-check text-white text-xs"></i>
+                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
+                    <i class="fa-solid fa-arrows-left-right text-white text-xs"></i>
                   </div>
-                  <span>Trạng thái *</span>
+                  <span>Chiều ngang (m)</span>
+                </span>
+              </label>
+              <div class="relative">
+                <input
+                    type="number"
+                    v-model.number="formData.chieuNgang"
+                    step="0.1"
+                    min="0"
+                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                    placeholder="Nhập chiều ngang"
+                />
+                <i class="fa-solid fa-ruler-horizontal absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+              </div>
+            </div>
+
+            <!-- Chiều dài -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+                <span class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
+                    <i class="fa-solid fa-arrows-up-down text-white text-xs"></i>
+                  </div>
+                  <span>Chiều dài (m)</span>
+                </span>
+              </label>
+              <div class="relative">
+                <input
+                    type="number"
+                    v-model.number="formData.chieuDai"
+                    step="0.1"
+                    min="0"
+                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                    placeholder="Nhập chiều dài"
+                />
+                <i class="fa-solid fa-ruler-vertical absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+              </div>
+            </div>
+
+            <!-- Kết cấu -->
+            <div class="space-y-2 ">
+              <label class="block text-sm font-semibold text-slate-800">
+                <span class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
+                    <i class="fa-solid fa-layer-group text-white text-xs"></i>
+                  </div>
+                  <span>Kết cấu / hình dạng</span>
                 </span>
               </label>
               <input
                   type="text"
-                  v-model="formData.status"
+                  v-model="formData.structure"
+                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                  placeholder="Ví dụ: 1 trệt 5 lầu, 1 hầm"
+                  required
+              />
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+                <span class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
+                    <i class="fa-solid fa-eye text-white text-xs"></i>
+                  </div>
+                  <span>Hiện trạng đất</span>
+                </span>
+              </label>
+              <input
+                  type="text"
+                  v-model="formData.hienTrangDat"
                   class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: Đã định giá sơ bộ"
+                  placeholder="Ví dụ: Đất trống"
+              />
+            </div>
+
+            <!-- Lộ giới -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+                <span class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
+                    <i class="fa-solid fa-road text-white text-xs"></i>
+                  </div>
+                  <span>Lộ giới (m)</span>
+                </span>
+              </label>
+              <div class="relative">
+                <input
+                    type="text"
+                    v-model="formData.loGioi"
+                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                    placeholder="Ví dụ: 10"
+                />
+                <i class="fa-solid fa-road absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+              </div>
+            </div>
+
+            <!-- Độ rộng đường -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+                <span class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
+                    <i class="fa-solid fa-road text-white text-xs"></i>
+                  </div>
+                  <span>Độ rộng đường (m)</span>
+                </span>
+              </label>
+              <div class="relative">
+                <input
+                    type="text"
+                    v-model="formData.doRongDuong"
+                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                    placeholder="Ví dụ: 6"
+                />
+                <i class="fa-solid fa-ruler-combined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+              </div>
+            </div>
+
+            <!-- Quy hoạch -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+                <span class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
+                    <i class="fa-solid fa-map text-white text-xs"></i>
+                  </div>
+                  <span>Quy hoạch</span>
+                </span>
+              </label>
+              <input
+                  type="text"
+                  v-model="formData.quyHoach"
+                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                  placeholder="Ví dụ: Đất ở đô thị"
                   readonly
               />
             </div>
 
+            <!-- Mặt tiền nhà -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+                <span class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-yellow-500 flex items-center justify-center">
+                    <i class="fa-solid fa-road text-white text-xs"></i>
+                  </div>
+                  <span>Mặt tiền (m)</span>
+                </span>
+              </label>
+              <div class="relative">
+                <input
+                    type="number"
+                    v-model.number="formData.matTienNha"
+                    step="0.1"
+                    min="0"
+                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                    placeholder="Nhập mặt tiền"
+                />
+                <i class="fa-solid fa-road absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+              </div>
+            </div>
+
             <!-- Giá mong muốn -->
-            <div class="space-y-2 md:col-span-2">
+            <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
                 <span class="flex items-center gap-2">
                   <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
@@ -640,24 +790,7 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Kết cấu -->
-            <div class="space-y-2 md:col-span-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-                    <i class="fa-solid fa-layer-group text-white text-xs"></i>
-                  </div>
-                  <span>Kết cấu *</span>
-                </span>
-              </label>
-              <input
-                  type="text"
-                  v-model="formData.structure"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: 1 trệt 5 lầu, 1 hầm"
-                  required
-              />
-            </div>
+
 
             <!-- Diện tích sàn -->
             <div class="space-y-2">
@@ -682,119 +815,6 @@
               </div>
               <div v-if="formData.floorArea" class="text-sm font-medium text-emerald-700 bg-emerald-50 p-2 rounded-lg">
                 {{ formatArea(formData.floorArea) }}
-              </div>
-            </div>
-
-            <!-- Chiều ngang -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 flex items-center justify-center">
-                    <i class="fa-solid fa-arrows-left-right text-white text-xs"></i>
-                  </div>
-                  <span>Chiều ngang (m)</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="number"
-                    v-model.number="formData.chieuNgang"
-                    step="0.1"
-                    min="0"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập chiều ngang"
-                />
-                <i class="fa-solid fa-ruler-horizontal absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
-            </div>
-
-            <!-- Chiều dài -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
-                    <i class="fa-solid fa-arrows-up-down text-white text-xs"></i>
-                  </div>
-                  <span>Chiều dài (m)</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="number"
-                    v-model.number="formData.chieuDai"
-                    step="0.1"
-                    min="0"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập chiều dài"
-                />
-                <i class="fa-solid fa-ruler-vertical absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
-            </div>
-
-            <!-- Mặt tiền nhà -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
-                    <i class="fa-solid fa-road text-white text-xs"></i>
-                  </div>
-                  <span>Mặt tiền nhà (m)</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="number"
-                    v-model.number="formData.matTienNha"
-                    step="0.1"
-                    min="0"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập mặt tiền"
-                />
-                <i class="fa-solid fa-road absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
-            </div>
-
-            <!-- Số tầng -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-                    <i class="fa-solid fa-building text-white text-xs"></i>
-                  </div>
-                  <span>Số tầng</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="number"
-                    v-model.number="formData.soTang"
-                    min="0"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập số tầng"
-                />
-                <i class="fa-solid fa-stairs absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
-            </div>
-
-            <!-- Số lầu -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
-                    <i class="fa-solid fa-stairs text-white text-xs"></i>
-                  </div>
-                  <span>Số lầu</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="number"
-                    v-model.number="formData.soLau"
-                    min="0"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập số lầu"
-                />
-                <i class="fa-solid fa-stairs absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
               </div>
             </div>
 
@@ -938,159 +958,56 @@
                   placeholder="Ví dụ: Sạch sẽ"
               />
             </div>
-          </div>
+            <!-- Số tầng -->
+            <div class="grid grid-cols-2 gap-2">
+
+              <!-- Số tầng -->
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-800">
+      <span class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
+          <i class="fa-solid fa-building text-white text-xs"></i>
         </div>
-
-        <!-- SECTION 4B: THÔNG TIN ĐẤT (chỉ hiện khi loại tài sản là DAT hoặc DATLON) -->
-        <div v-if="isLand" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-6">
-          <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
-            <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-2.5 rounded-xl">
-              <i class="fa-solid fa-mountain-sun text-white text-lg"></i>
-            </div>
-            <h2 class="text-xl font-bold text-slate-900">Thông tin đất</h2>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Chiều ngang -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-                    <i class="fa-solid fa-arrows-left-right text-white text-xs"></i>
-                  </div>
-                  <span>Chiều ngang (m)</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="number"
-                    v-model.number="formData.chieuNgang"
-                    step="0.1"
-                    min="0"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập chiều ngang"
-                />
-                <i class="fa-solid fa-ruler-horizontal absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+        <span>Số tầng</span>
+      </span>
+                </label>
+                <div class="relative">
+                  <input
+                      type="number"
+                      v-model.number="formData.soTang"
+                      min="0"
+                      class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl
+                focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                      placeholder="Nhập số tầng"
+                  />
+                  <i class="fa-solid fa-stairs absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                </div>
               </div>
-            </div>
 
-            <!-- Chiều dài -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
-                    <i class="fa-solid fa-arrows-up-down text-white text-xs"></i>
-                  </div>
-                  <span>Chiều dài (m)</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="number"
-                    v-model.number="formData.chieuDai"
-                    step="0.1"
-                    min="0"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập chiều dài"
-                />
-                <i class="fa-solid fa-ruler-vertical absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+              <!-- Số lầu -->
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-800">
+      <span class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
+          <i class="fa-solid fa-stairs text-white text-xs"></i>
+        </div>
+        <span>Số lầu</span>
+      </span>
+                </label>
+                <div class="relative">
+                  <input
+                      type="number"
+                      v-model.number="formData.soLau"
+                      min="0"
+                      class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl
+                focus:ring-2 focus:ring-emerald-500 focus:border-transparent
+                bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                      placeholder="Nhập số lầu"
+                  />
+                  <i class="fa-solid fa-stairs absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                </div>
               </div>
-            </div>
-
-            <!-- Hình dạng thửa đất -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 flex items-center justify-center">
-                    <i class="fa-solid fa-shapes text-white text-xs"></i>
-                  </div>
-                  <span>Hình dạng thửa đất</span>
-                </span>
-              </label>
-              <input
-                  type="text"
-                  v-model="formData.hinhDangThuaDat"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: Hình chữ nhật"
-              />
-            </div>
-
-            <!-- Hiện trạng đất -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
-                    <i class="fa-solid fa-eye text-white text-xs"></i>
-                  </div>
-                  <span>Hiện trạng đất</span>
-                </span>
-              </label>
-              <input
-                  type="text"
-                  v-model="formData.hienTrangDat"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: Đất trống"
-              />
-            </div>
-
-            <!-- Lộ giới -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
-                    <i class="fa-solid fa-road text-white text-xs"></i>
-                  </div>
-                  <span>Lộ giới</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="text"
-                    v-model="formData.loGioi"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Ví dụ: 10"
-                />
-                <i class="fa-solid fa-road absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
-            </div>
-
-            <!-- Độ rộng đường -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
-                    <i class="fa-solid fa-road text-white text-xs"></i>
-                  </div>
-                  <span>Độ rộng đường (m)</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="text"
-                    v-model="formData.doRongDuong"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Ví dụ: 6"
-                />
-                <i class="fa-solid fa-ruler-combined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
-            </div>
-
-            <!-- Quy hoạch -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-                    <i class="fa-solid fa-map text-white text-xs"></i>
-                  </div>
-                  <span>Quy hoạch</span>
-                </span>
-              </label>
-              <input
-                  type="text"
-                  v-model="formData.quyHoach"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: Đất ở đô thị"
-              />
             </div>
           </div>
         </div>
