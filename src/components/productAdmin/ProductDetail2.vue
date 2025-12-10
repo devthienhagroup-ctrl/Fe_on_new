@@ -51,10 +51,19 @@
               <p class="press-lede">
                 {{ formatAddress(asset.address) }} đang mở chào bán với mức giá cạnh tranh, pháp lý minh bạch và quỹ hoa hồng hấp dẫn. Mọi thông tin được biên tập theo định dạng tạp chí để anh/chị môi giới dễ tư vấn và chốt khách.
               </p>
-              <p>
-                Bạn bán căn này nhận đủ HOA HỒNG {{ asset.phiMoiGioi }}% tương đương số tiền là
-                {{ formatMoneyVN( (asset.phiMoiGioi * asset.giaBan)/100 ) }}
-              </p>
+              <div class="commission-spotlight">
+                <div class="spotlight-badge">
+                  <i class="fa-solid fa-sparkles"></i>
+                  Ưu tiên cộng đồng môi giới
+                </div>
+                <div class="spotlight-copy">
+                  <div class="spotlight-line">Anh/chị chốt căn này nhận trọn <span class="spotlight-percent">{{ asset.phiMoiGioi }}%</span> hoa hồng</div>
+                  <div class="spotlight-line">
+                    Tương đương <span class="spotlight-amount">{{ formatMoneyVN( (asset.phiMoiGioi * asset.giaBan)/100 ) }}</span> được giải ngân nhanh, không để anh/chị chờ đợi.
+                  </div>
+                </div>
+                <div class="spotlight-wave"></div>
+              </div>
 
               <div class="press-grid">
                 <div class="press-card">
@@ -72,9 +81,12 @@
                   <span class="press-value">{{ formatArea(asset.totalArea) }}</span>
                   <span class="press-desc">Diện tích sẵn sàng bàn giao</span>
                 </div>
-                <div class="press-card">
+                <div class="press-card press-commission-card">
                   <span class="press-label">Hoa hồng</span>
-                  <span class="press-value press-commission">{{ asset.phiMoiGioi }}%</span>
+                  <span class="press-value press-commission">
+                    <span class="pulse-dot"></span>
+                    {{ asset.phiMoiGioi }}%
+                  </span>
                   <span class="press-desc">Cam kết chi trả rõ ràng, minh bạch</span>
                 </div>
               </div>
@@ -181,7 +193,10 @@
 
             <div class="info-row">
               <span class="info-label">Phí môi giới</span>
-              <span class="info-value text-primary">{{ asset.phiMoiGioi + '%' }}</span>
+              <span class="info-value text-primary info-commission-pill">
+                <i class="fa-solid fa-bolt"></i>
+                {{ asset.phiMoiGioi + '%' }}
+              </span>
             </div>
           </div>
 
@@ -895,6 +910,8 @@ const openPdf = async (pdfFile) => {
   flex-direction: column;
   gap: 4px;
   box-shadow: 0 10px 25px -16px rgba(15, 23, 42, 0.35);
+  position: relative;
+  overflow: hidden;
 }
 
 .press-label {
@@ -913,6 +930,36 @@ const openPdf = async (pdfFile) => {
 
 .press-commission {
   color: #dc2626;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-shadow: 0 2px 10px rgba(248, 113, 113, 0.5);
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.press-commission-card {
+  background: linear-gradient(135deg, #fff1f2 0%, #ffffff 100%);
+  border-color: #fecdd3;
+  box-shadow: 0 16px 36px -20px rgba(239, 68, 68, 0.55);
+}
+
+.press-commission-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 0%, rgba(254, 226, 226, 0.55) 40%, transparent 80%);
+  transform: translateX(-100%);
+  animation: shimmer 4s infinite;
+  pointer-events: none;
+}
+
+.pulse-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #ef4444;
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+  animation: pulseDot 1.6s infinite;
 }
 
 .press-desc {
@@ -969,6 +1016,105 @@ const openPdf = async (pdfFile) => {
 .contact-sub {
   font-size: 13px;
   opacity: 0.9;
+}
+
+.commission-spotlight {
+  position: relative;
+  margin: 6px 0 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: linear-gradient(120deg, #0f172a 0%, #1e293b 40%, #0f172a 100%);
+  color: #f8fafc;
+  overflow: hidden;
+  box-shadow: 0 14px 30px -18px rgba(15, 23, 42, 0.8), 0 0 0 1px rgba(148, 163, 184, 0.35);
+}
+
+.spotlight-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 10px 24px -16px rgba(34, 197, 94, 0.8);
+}
+
+.spotlight-copy {
+  margin-top: 10px;
+  display: grid;
+  gap: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.spotlight-line {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+}
+
+.spotlight-percent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: #e0f2fe;
+  color: #0ea5e9;
+  font-weight: 800;
+  box-shadow: 0 8px 20px -14px rgba(14, 165, 233, 0.9);
+  animation: spotlightPulse 1.4s ease-in-out infinite;
+}
+
+.spotlight-amount {
+  font-weight: 800;
+  color: #f7fc5d;
+  padding: 5px 8px;
+  border-radius: 10px;
+  background: rgba(240, 253, 250, 0.12);
+}
+
+.spotlight-wave {
+  position: absolute;
+  inset: -30%;
+  background: radial-gradient(circle at 10% 20%, rgba(34, 197, 94, 0.25), transparent 45%),
+  radial-gradient(circle at 90% 10%, rgba(59, 130, 246, 0.3), transparent 40%),
+  radial-gradient(circle at 30% 80%, rgba(45, 212, 191, 0.22), transparent 40%);
+  filter: blur(12px);
+  opacity: 0.65;
+  animation: waveSlide 9s linear infinite;
+}
+
+@keyframes pulseGlow {
+  0% { text-shadow: 0 0 0 rgba(239, 68, 68, 0.3); }
+  50% { text-shadow: 0 4px 14px rgba(239, 68, 68, 0.8); }
+  100% { text-shadow: 0 0 0 rgba(239, 68, 68, 0.3); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateX(120%); opacity: 0; }
+}
+
+@keyframes pulseDot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+@keyframes spotlightPulse {
+  0% { transform: translateY(0); box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.45); }
+  50% { transform: translateY(-1px); box-shadow: 0 10px 28px -16px rgba(14, 165, 233, 0.9); }
+  100% { transform: translateY(0); box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.45); }
+}
+
+@keyframes waveSlide {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(2deg) scale(1.05); }
+  100% { transform: rotate(0deg) scale(1); }
 }
 
 .property-badge {
@@ -1157,12 +1303,14 @@ const openPdf = async (pdfFile) => {
 }
 
 .info-card {
-  background: white;
+  background: linear-gradient(180deg, #fffdf6 0%, #ffffff 60%);
   border-radius: 16px;
   padding: 28px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  box-shadow: 0 18px 36px -24px rgba(15, 23, 42, 0.45);
+  border: 1px solid #e7dec8;
   height: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
 .card-header {
@@ -1184,20 +1332,25 @@ const openPdf = async (pdfFile) => {
   font-weight: 700;
   color: #0f172a;
   margin: 0;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 
 .info-grid {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .info-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f1f5f9;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px -20px rgba(15, 23, 42, 0.35);
 }
 
 .info-row:last-child {
@@ -1205,11 +1358,11 @@ const openPdf = async (pdfFile) => {
 }
 
 .highlight-row {
-  background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
+  background: linear-gradient(90deg, #e0f2fe 0%, #ffffff 100%);
   padding: 12px 16px;
-  margin: 0 -16px;
-  border-bottom: 1px solid #e2e8f0;
-  border-radius: 8px;
+  margin: 0;
+  border: 1px solid #bae6fd;
+  border-radius: 10px;
 }
 
 .info-label {
@@ -1223,6 +1376,17 @@ const openPdf = async (pdfFile) => {
   font-size: 15px;
   font-weight: 600;
   text-align: right;
+}
+
+.info-commission-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #e0f2fe 0%, #c7d2fe 100%);
+  color: #1d4ed8;
+  box-shadow: 0 8px 20px -14px rgba(59, 130, 246, 0.6);
 }
 
 .phone-number {
@@ -1257,11 +1421,11 @@ const openPdf = async (pdfFile) => {
 
 /* ========= DETAIL SECTIONS ========= */
 .detail-section {
-  background: white;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 85%);
   border-radius: 16px;
   padding: 32px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 18px 40px -26px rgba(15, 23, 42, 0.35);
   border: 1px solid #e2e8f0;
   border-left: 4px solid;
 }
@@ -1289,7 +1453,11 @@ const openPdf = async (pdfFile) => {
 .section-header {
   margin-bottom: 28px;
   padding-bottom: 16px;
-  border-bottom: 2px solid #f1f5f9;
+  border-bottom: 2px solid #e2e8f0;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .section-title-group {
@@ -1328,19 +1496,25 @@ const openPdf = async (pdfFile) => {
   font-weight: 700;
   color: #0f172a;
   margin: 0;
+  letter-spacing: 0.4px;
 }
 
 /* ========= DETAIL GRID ========= */
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px 32px;
+  gap: 20px 24px;
 }
 
 .detail-item {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  padding: 16px 18px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 26px -20px rgba(15, 23, 42, 0.45);
 }
 
 .detail-label {

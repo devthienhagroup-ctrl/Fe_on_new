@@ -52,6 +52,7 @@ import ProductDetail from "../components/productAdmin/ProductDetail.vue";
 import Demo from "../components/productAdmin/Demo.vue";
 import ProductUpdate  from "../components/productAdmin/ProductUpdate.vue";
 import ProductDetail2 from "../components/productAdmin/ProductDetail2.vue";
+import ProductCreate from "../components/productAdmin/ProductCreate.vue";
 
 import Ga4EventExample from "../components/Ga4EventExample.vue";
 
@@ -60,6 +61,12 @@ const routes = [
             path: "/-thg/dang-nhap",
             name: "LoginForm",
             component: LoginForm,
+        },
+        {
+            path: "/test03",
+            meta: {requiresAuth: false},
+            name: "ProductCreate",
+            component: ProductCreate,
         },
         {
             path: "/test01",
