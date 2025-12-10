@@ -1,5 +1,5 @@
 <template>
-  <div v-if="asset" class="executive-container">
+  <div v-if="asset" class="executive-container" style="padding-top: 90px !important;">
 
     <!-- HEADER CARD -->
     <div class="executive-header">
@@ -34,6 +34,65 @@
                   <span class="meta-label">Giá nội bộ:</span>
                   <span class="price-internal">{{ formatMoneyVN(asset.giaNoiBo) }}</span>
                 </span>
+            </div>
+
+            <div class="press-hero">
+              <div class="press-top-row">
+                <div class="press-badge">
+                  <i class="fa-solid fa-newspaper"></i>
+                  <span>Ấn phẩm dành cho môi giới</span>
+                </div>
+                <div class="press-time">
+                  <i class="fa-regular fa-clock"></i>
+                  <span>Tin nhanh | Cập nhật mới nhất</span>
+                </div>
+              </div>
+
+              <p class="press-lede">
+                {{ formatAddress(asset.address) }} đang mở chào bán với mức giá cạnh tranh, pháp lý minh bạch và quỹ hoa hồng hấp dẫn. Mọi thông tin được biên tập theo định dạng tạp chí để anh/chị môi giới dễ tư vấn và chốt khách.
+              </p>
+              <p>
+                Bạn bán căn này nhận đủ HOA HỒNG {{ asset.phiMoiGioi }}% tương đương số tiền là
+                {{ formatMoneyVN( (asset.phiMoiGioi * asset.giaBan)/100 ) }}
+              </p>
+
+              <div class="press-grid">
+                <div class="press-card">
+                  <span class="press-label">Giá công bố</span>
+                  <span class="press-value">{{ formatMoneyVN(asset.giaBan) }}</span>
+                  <span class="press-desc">Cập nhật theo bảng giá mới nhất</span>
+                </div>
+                <div class="press-card">
+                  <span class="press-label">Giá nội bộ</span>
+                  <span class="press-value text-primary">{{ formatMoneyVN(asset.giaNoiBo) }}</span>
+                  <span class="press-desc">Ưu đãi riêng cho hệ thống đại lý</span>
+                </div>
+                <div class="press-card">
+                  <span class="press-label">Quy mô</span>
+                  <span class="press-value">{{ formatArea(asset.totalArea) }}</span>
+                  <span class="press-desc">Diện tích sẵn sàng bàn giao</span>
+                </div>
+                <div class="press-card">
+                  <span class="press-label">Hoa hồng</span>
+                  <span class="press-value press-commission">{{ asset.phiMoiGioi }}%</span>
+                  <span class="press-desc">Cam kết chi trả rõ ràng, minh bạch</span>
+                </div>
+              </div>
+
+              <div class="press-cta">
+                <div class="press-quote">
+                  "Bản tin nhanh gọn, đầy đủ để môi giới tự tin giới thiệu sản phẩm trong 5 phút đầu tiên."
+                </div>
+                <div class="press-contact">
+                  <div class="contact-icon">
+                    <i class="fa-solid fa-bullhorn"></i>
+                  </div>
+                  <div>
+                    <div class="contact-title">Sẵn sàng hỗ trợ tư vấn & booking</div>
+                    <div class="contact-sub">Ưu tiên phản hồi cho đối tác gửi khách ngay hôm nay.</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -769,6 +828,149 @@ const openPdf = async (pdfFile) => {
   background: #cbd5e1;
 }
 
+.press-hero {
+  margin-top: 20px;
+  background: linear-gradient(120deg, #ffffff 0%, #f8fafc 50%, #eef2ff 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 8px 20px -8px rgba(15, 23, 42, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.press-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.press-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #1d4ed8;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  box-shadow: 0 10px 30px -12px rgba(29, 78, 216, 0.6);
+}
+
+.press-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #334155;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: #e2e8f0;
+}
+
+.press-lede {
+  margin: 0;
+  color: #0f172a;
+  font-size: 15px;
+  line-height: 1.6;
+  font-weight: 600;
+}
+
+.press-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.press-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 10px 25px -16px rgba(15, 23, 42, 0.35);
+}
+
+.press-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #475569;
+  font-weight: 700;
+}
+
+.press-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.press-commission {
+  color: #dc2626;
+}
+
+.press-desc {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.press-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+}
+
+.press-quote {
+  flex: 1;
+  font-style: italic;
+  color: #1e293b;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.press-contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
+  box-shadow: 0 12px 28px -14px rgba(16, 185, 129, 0.8);
+}
+
+.contact-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 18px;
+}
+
+.contact-title {
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.contact-sub {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
 .property-badge {
   padding: 6px 14px;
   border-radius: 8px;
@@ -1352,6 +1554,10 @@ const openPdf = async (pdfFile) => {
   .detail-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .press-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 768px) {
@@ -1400,6 +1606,15 @@ const openPdf = async (pdfFile) => {
 
   .meta-divider {
     display: none;
+  }
+
+  .press-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .press-cta {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 

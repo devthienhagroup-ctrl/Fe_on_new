@@ -104,7 +104,7 @@ const routes = [
         {
         path: "/admin",
         component: Menu,       // ⭐ Bổ sung MENU tại đây
-        meta: { requiresAuth: false },
+        meta: { requiresAuth: false, hideFooterMap: true },
 
         children: [
             {
@@ -112,7 +112,16 @@ const routes = [
                 name: "ProductDetail",
                 component: ProductDetail,
                 props: true,
-            },
+            }
+        ],
+
+    },
+    {
+        path: "/admin",
+        component: MenuUser,       // ⭐ Bổ sung MENU tại đây
+        meta: { requiresAuth: false },
+
+        children: [
             {
                 path: "products-2/:id",   // → /admin/products/:id
                 name: "ProductDetail2",
