@@ -1038,16 +1038,18 @@
               <tbody>
               <tr v-for="(room, index) in formData.rooms" :key="room.id || index" class="border-t border-slate-200">
                 <td class="px-4 py-3">
-                  <select
+                  <input
+                      list="roomList"
                       v-model="room.loaiPhong"
                       class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="Ghi tên phòng"
                       required
-                  >
-                    <option disabled value="">-- Chọn loại phòng --</option>
-                    <option v-for="opt in roomTypeOptions" :key="opt" :value="opt">
-                      {{ opt }}
-                    </option>
-                  </select>
+                  />
+
+                  <datalist id="roomList">
+                    <option v-for="opt in roomTypeOptions" :key="opt" :value="opt" />
+                  </datalist>
+
                 </td>
                 <td class="px-4 py-3">
                   <input
@@ -1551,18 +1553,17 @@ watch(
 
 const roomTypeOptions = [
   "Phòng ngủ",
-  "Phòng tắm",
-  "WC",
+  "Nhà vệ sinh",
   "Phòng khách",
   "Phòng bếp",
   "Phòng ăn",
-  "Phòng đọc sách",
   "Phòng làm việc",
-  "Phòng đa năng",
+  "Phòng đọc sách",
+  "Phòng thờ",
   "Kho",
-  "Sân thượng",
-  "Khác"
+  "Sân thượng"
 ];
+
 
 </script>
 
