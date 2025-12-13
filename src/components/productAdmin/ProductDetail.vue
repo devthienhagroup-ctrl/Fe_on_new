@@ -117,18 +117,23 @@
               </div>
 
               <div class="info-row">
-                <span class="info-label">Loại đất</span>
-                <span class="info-value">{{ asset.loaiDat }}</span>
+                <span class="info-label">Liên hệ</span>
+                <span class="info-value">{{ asset.lienHe ?? 'Chưa cập nhật' }}</span>
               </div>
 
               <div class="info-row">
                 <span class="info-label">Chủ sở hữu</span>
                 <span v-if="asset.ownerName != null" class="info-value">
-                  {{ asset.ownerName }} <span>
+                  {{ asset.ownerName ?? 'Chưa cập nhật' }} <span>
                   ( <i class="fa-solid fa-phone text-danger"></i>
-                  {{ asset.ownerPhone }} )</span>
+                  {{ asset.ownerPhone ?? 'Chưa cập nhật' }} )</span>
                 </span>
-                <span v-else class="text-gray-600">Không có</span>
+                <span v-else class="text-gray-600 info-value">Chưa cập nhật</span>
+              </div>
+
+              <div class="info-row">
+                <span class="info-label">Loại đất</span>
+                <span class="info-value">{{ asset.loaiDat }}</span>
               </div>
 
               <div class="info-row">
@@ -202,6 +207,12 @@
           <div class="detail-item">
             <span class="detail-label">Vị trí</span>
             <span class="detail-value">{{ asset.landPosition }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Trạng thái</span>
+            <span v-if="asset.status == null" class="detail-value">Chưa cập nhật</span>
+            <span v-else-if="asset === 'Đã bán'" class="detail-value">Đã bán</span>
+            <span v-else class="detail-value">Đang rao bán</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Chiều ngang & chiều dài</span>

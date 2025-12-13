@@ -1,12 +1,152 @@
 diff --git a/src/components/productAdmin/ProductDetail2.vue b/src/components/productAdmin/ProductDetail2.vue
-index 0585bb4f3ecc13c38228de378f33ba607f7771bb..4f128f1f19c074cb39e0d483f83da1e24e8f4769 100644
+index 61045d737383901a0fd492d973dff2a18b85360e..812d208e56f8e017954609fd8cb164ab79b58ec2 100644
 --- a/src/components/productAdmin/ProductDetail2.vue
 +++ b/src/components/productAdmin/ProductDetail2.vue
-@@ -128,51 +128,62 @@
-               <img
-                   v-for="(img, i) in asset.slide"
-                   :key="i"
-                   :src="img"
+@@ -11,137 +11,137 @@
+             <span>Quay lại danh sách</span>
+           </button>
+
+           <div class="property-title-section">
+             <h1 class="property-address">{{ formatAddress( asset.address ) ?? 'Chưa cập nhật' }}</h1>
+
+             <div class="property-meta">
+                 <span class="meta-item">
+                   <span class="meta-label">Loại mặt hàng:</span>
+                   <span :class="['property-badge', badgeClass(asset.phanLoaiHang)]">
+                     {{ asset.phanLoaiHang ?? 'Chưa cập nhật' }}
+                   </span>
+                 </span>
+
+               <div class="meta-divider"></div>
+
+               <span class="meta-item">
+                   <span class="meta-label">Giá bán:</span>
+                   <span class="price-selling">{{  formatMoneyVN(asset.giaBan) ?? 'Chưa cập nhật' }}</span>
+                 </span>
+
+               <div class="meta-divider"></div>
+
+               <span class="meta-item">
+                   <span class="meta-label">Giá nội bộ:</span>
+-                  <span class="price-internal">{{ formatMoneyVN(asset.giaNoiBo)?? 'Chưa cập nhật' }}</span>
++                    <span class="price-internal">{{ formatMoneyVN(asset.giaNoiBo) ?? 'Chưa cập nhật' }}</span>
+                 </span>
+             </div>
+
+             <div class="press-hero">
+               <div class="press-top-row">
+                 <div class="press-badge">
+                   <i class="fa-solid fa-newspaper"></i>
+                   <span>Ấn phẩm dành cho môi giới</span>
+                 </div>
+                 <div class="press-time">
+                   <i class="fa-regular fa-clock"></i>
+                   <span>Tin nhanh | Cập nhật mới nhất</span>
+                 </div>
+               </div>
+
+               <p class="press-lede">
+                 {{ formatAddress(asset.address) ?? 'Chưa cập nhật' }} đang mở chào bán với mức giá cạnh tranh, pháp lý minh bạch và quỹ hoa hồng hấp dẫn. Mọi thông tin được biên tập theo định dạng tạp chí để anh/chị môi giới dễ tư vấn và chốt khách.
+               </p>
+               <div class="commission-spotlight">
+                 <div class="spotlight-badge">
+                   <i class="fa-solid fa-sparkles"></i>
+                   Ưu tiên cộng đồng môi giới
+                 </div>
+                 <div class="spotlight-copy">
+                   <div class="spotlight-line">Anh/chị chốt căn này nhận trọn <span class="spotlight-percent">
+                     {{ asset.phiMoiGioi != null ? asset.phiMoiGioi + '%' : 'Chưa cập nhật' }}
+                     </span> hoa hồng</div>
+                   <div class="spotlight-line">
+                     Tương đương <span class="spotlight-amount"> <DotLottieVue
+                       src="https://lottie.host/8d71de76-976c-465c-89a2-4566dab2a452/hAewJBkGNO.lottie"
+                       autoplay
+                       loop
+                       style="
+                             width: 30px;
+                             height: 30px;
+                             display: inline-block;
+                             vertical-align: bottom;
+                           "
+-                  />{{ formatMoneyVN( (asset.phiMoiGioi * asset.giaBan)/100 ) }}</span> được giải ngân nhanh, không để anh/chị chờ đợi.
++                    />{{ asset.phiMoiGioi != null && asset.giaBan != null ? formatMoneyVN((asset.phiMoiGioi * asset.giaBan)/100) : 'Chưa cập nhật' }}</span> được giải ngân nhanh, không để anh/chị chờ đợi.
+                   </div>
+                 </div>
+                 <div class="spotlight-wave"></div>
+               </div>
+
+               <div class="press-grid">
+                 <div class="press-card">
+                   <span class="press-label">Giá công bố</span>
+                   <span class="press-value">
+-                     {{ formatMoneyVN(asset.giaBan) }}
++                       {{ formatMoneyVN(asset.giaBan) ?? 'Chưa cập nhật' }}
+                     <DotLottieVue
+                       src="https://lottie.host/87fdfae5-3796-4026-b945-4a0e36bedcb6/r8ftGwOC5C.lottie"
+                       autoplay
+                       loop
+                       style="
+                             width: 35px;
+                             height: 35px;
+                             display: inline-block;
+                             vertical-align: bottom;
+                           "
+                   /></span>
+                   <span class="press-desc">Cập nhật theo bảng giá mới nhất</span>
+                 </div>
+                 <div class="press-card">
+                   <span class="press-label">Giá nội bộ</span>
+-                  <span class="press-value text-primary mt-2">{{ formatMoneyVN(asset.giaNoiBo) }}</span>
++                    <span class="press-value text-primary mt-2">{{ formatMoneyVN(asset.giaNoiBo) ?? 'Chưa cập nhật' }}</span>
+                   <span class="press-desc">Giá chốt hợp đồng tối thiểu</span>
+                 </div>
+                 <div class="press-card">
+                   <span class="press-label">Diện tích</span>
+-                  <span class="press-value mt-2">{{ formatArea(asset.totalArea) }}</span>
++                    <span class="press-value mt-2">{{ formatArea(asset.totalArea) ?? 'Chưa cập nhật' }}</span>
+                   <span class="press-desc">Diện tích sẵn sàng bàn giao</span>
+                 </div>
+                 <div class="press-card press-commission-card">
+                   <span class="press-label">Hoa hồng</span>
+                   <span class="press-value press-commission">
+                     <DotLottieVue
+                         src="https://lottie.host/0d33a3ef-36a8-4096-af70-3c1668b578d9/1eeRku3lYw.lottie"
+                         autoplay
+                         loop
+                         style="
+                             width: 35px;
+                             height: 35px;
+                             display: inline-block;
+                             vertical-align: middle;
+                           "
+-                    /><span style="position: relative; top:5px">{{ asset.phiMoiGioi }}%</span>
++                    /><span style="position: relative; top:5px">{{ asset.phiMoiGioi != null ? asset.phiMoiGioi + '%' : 'Chưa cập nhật' }}</span>
+
+                   </span>
+                   <span class="press-desc">Cam kết chi trả rõ ràng, minh bạch</span>
+                 </div>
+               </div>
+
+               <div class="press-cta">
+                 <div class="press-quote">
+                   "Bản tin nhanh gọn, đầy đủ để môi giới tự tin giới thiệu sản phẩm trong 5 phút đầu tiên."
+                 </div>
+                 <div class="press-contact">
+                   <div class="contact-icon">
+                     <i class="fa-solid fa-bullhorn"></i>
+                   </div>
+                   <div>
+                     <div class="contact-title">Sẵn sàng hỗ trợ tư vấn & booking</div>
+                     <div class="contact-sub">Ưu tiên phản hồi cho đối tác gửi khách ngay hôm nay.</div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+     </div>
+@@ -166,328 +166,328 @@
                    @click="activeImage = i"
                    :class="['thumbnail', { 'thumbnail-active': activeImage === i }]"
                    alt="Thumbnail"
@@ -19,91 +159,84 @@ index 0585bb4f3ecc13c38228de378f33ba607f7771bb..4f128f1f19c074cb39e0d483f83da1e2
            </div>
          </div>
        </div>
- 
+
        <!-- RIGHT COLUMN - GENERAL INFO -->
-       <div class="info-section">
+       <div class="info-section" style="min-width: 400px">
          <div class="info-card">
            <div class="card-header">
              <i class="fa-solid fa-circle-info header-icon"></i>
              <h3 class="card-title">Thông tin chung</h3>
            </div>
- 
--          <div class="info-grid">
-+          <div class="section-deck">
-+            Bản tóm tắt theo phong cách tạp chí, cô đọng những dữ liệu quan trọng nhất để anh/chị nắm nhanh chỉ trong một
-+            nhịp lật trang.
-+          </div>
-+
-+          <div class="editorial-band">
-+            <span class="band-dot"></span>
-+            <span class="band-text">Hồ sơ tài sản – phiên bản biên tập</span>
-+            <span class="band-dot"></span>
-+          </div>
-+
-+          <div class="info-grid magazine-grid">
+
+           <div class="info-grid magazine-grid">
              <div class="info-row">
                <span class="info-label">Loại tài sản</span>
                <span class="info-value" :class="badgeLoai(asset.loaiTaiSan)">
-                   {{ formatLoai( asset.loaiTaiSan ) }}
+-                  {{ formatLoai( asset.loaiTaiSan ) }}
++                  {{ formatLoai( asset.loaiTaiSan ) ?? 'Chưa cập nhật' }}
                  </span>
              </div>
- 
+
              <div class="info-row highlight-row">
                <span class="info-label">Giá bán</span>
-               <span class="info-value price-selling text-primary">{{ formatMoneyVN(asset.giaBan) }}</span>
+-              <span class="info-value price-selling text-primary">{{ formatMoneyVN(asset.giaBan) }}</span>
++              <span class="info-value price-selling text-primary">{{ formatMoneyVN(asset.giaBan) ?? 'Chưa cập nhật' }}</span>
              </div>
- 
+
              <div class="info-row highlight-row">
                <span class="info-label">Giá nội bộ</span>
-               <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.giaNoiBo) }}</span>
+-              <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.giaNoiBo) }}</span>
++              <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.giaNoiBo) ?? 'Chưa cập nhật' }}</span>
              </div>
- 
+
              <div class="info-row highlight-row">
                <span class="info-label">Giá mong muốn</span>
-               <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.desire) }}</span>
+-              <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.desire) }}</span>
++              <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.desire) ?? 'Chưa cập nhật' }}</span>
              </div>
- 
+
              <div class="info-row">
                <span class="info-label">Loại đất</span>
-               <span class="info-value">{{ asset.loaiDat }}</span>
-@@ -184,63 +195,76 @@
-                   {{ asset.ownerName }} <span>
+-              <span class="info-value">{{ asset.loaiDat }}</span>
++              <span class="info-value">{{ asset.loaiDat ?? 'Chưa cập nhật' }}</span>
+             </div>
+
+             <div class="info-row">
+               <span class="info-label">Chủ sở hữu</span>
+               <span v-if="asset.ownerName != null" class="info-value">
+-                  {{ asset.ownerName }} <span>
++                  {{ asset.ownerName ?? 'Chưa cập nhật' }} <span>
                    ( <i class="fa-solid fa-phone text-danger"></i>
-                   {{ asset.ownerPhone }} )</span>
+-                  {{ asset.ownerPhone }} )</span>
++                  {{ asset.ownerPhone ?? 'Chưa cập nhật' }} )</span>
                  </span>
                <span v-else class="text-gray-600">Không có</span>
              </div>
- 
+
              <div class="info-row">
                <span class="info-label">Đơn vị sở hữu</span>
                <span class="info-value owner-unit">
                    <img v-if="asset.donViSoHuu === 'THG'" src="/imgs/logokn.png" alt="THG" class="unit-logo">
                    <i v-else-if="asset.donViSoHuu === 'DT'" class="fa-solid fa-handshake unit-icon"></i>
-                     <span>{{ asset.donViSoHuu }}</span>
+-                    <span>{{ asset.donViSoHuu }}</span>
++                  <span>{{ asset.donViSoHuu ?? 'Chưa cập nhật' }}</span>
                  </span>
              </div>
- 
+
              <div class="info-row">
                <span class="info-label">Phí môi giới</span>
                <span class="info-value text-primary info-commission-pill">
                  <i class="fa-solid fa-bolt"></i>
-                 {{ asset.phiMoiGioi + '%' }}
+-                {{ asset.phiMoiGioi + '%' }}
++                {{ asset.phiMoiGioi != null ? asset.phiMoiGioi + '%' : 'Chưa cập nhật' }}
                </span>
              </div>
            </div>
- 
-+          <div class="info-footnote">
-+            <div class="footnote-bullet"></div>
-+            <p class="footnote-copy">
-+              Thông tin tài chính và phân loại được biên tập theo phiên bản mới nhất. Các con số nổi bật được đóng khung
-+              như chuyên mục "Market Watch" để tiện đối chiếu khi tư vấn.
-+            </p>
-+          </div>
-+
+
          </div>
        </div>
      </div>
- 
+
      <!-- LEGAL INFO SECTION -->
      <div class="detail-section section-legal">
        <div class="section-header">
@@ -112,71 +245,124 @@ index 0585bb4f3ecc13c38228de378f33ba607f7771bb..4f128f1f19c074cb39e0d483f83da1e2
            <h3 class="section-title">Thông tin pháp lý & quản trị</h3>
          </div>
        </div>
- 
-+      <div class="section-deck">
-+        Chuyên mục kiểm chứng pháp lý, trình bày kiểu hồ sơ bìa kép: đầy đủ địa chỉ, quy hoạch, trạng thái lộ giới và các
-+        thông số sở hữu giúp môi giới an tâm khi chào khách.
-+      </div>
-+
+
        <div class="detail-grid">
          <div class="detail-item">
-           <span class="detail-label">Đường</span>
-           <span class="detail-value">{{ formatAddressDetail( asset.address ) }}</span>
+-          <span class="detail-label">Đường</span>
+-          <span class="detail-value">{{ formatAddressDetail( asset.address ) }}</span>
++            <span class="detail-label">Đường</span>
++            <span class="detail-value">{{ formatAddressDetail( asset.address ) ?? 'Chưa cập nhật' }}</span>
          </div>
          <div class="detail-item">
-           <span class="detail-label">Phường/Xã</span>
-           <span class="detail-value">{{  formatWard( asset.address )  }}</span>
+-          <span class="detail-label">Phường/Xã</span>
+-          <span class="detail-value">{{  formatWard( asset.address )  }}</span>
++            <span class="detail-label">Phường/Xã</span>
++            <span class="detail-value">{{  formatWard( asset.address ) ?? 'Chưa cập nhật'  }}</span>
          </div>
          <div class="detail-item">
-           <span class="detail-label">Khu vực</span>
-           <span class="detail-value">{{ asset.khuVucMa }}</span>
+-          <span class="detail-label">Khu vực</span>
+-          <span class="detail-value">{{ asset.khuVucMa }}</span>
++            <span class="detail-label">Khu vực</span>
++            <span class="detail-value">{{ asset.khuVucMa ?? 'Chưa cập nhật' }}</span>
          </div>
- 
+
          <div class="detail-item">
-           <span class="detail-label">Địa chỉ cũ</span>
-           <span class="detail-value">{{ asset.oldAddress }}</span>
-         </div>
-         <div class="detail-item">
-           <span class="detail-label">Số tờ bản đồ</span>
-           <span class="detail-value">{{ asset.plotNumber }}</span>
-         </div>
-         <div class="detail-item">
-           <span class="detail-label">Số thửa đất</span>
-           <span class="detail-value">{{ asset.parcelNumber }}</span>
-@@ -277,187 +301,228 @@
-           <span class="detail-label">Loại đất</span>
-           <span class="detail-value">{{ asset.loaiDat }}</span>
+-          <span class="detail-label">Địa chỉ cũ</span>
+-          <span class="detail-value">{{ asset.oldAddress }}</span>
++            <span class="detail-label">Địa chỉ cũ</span>
++            <span class="detail-value">{{ asset.oldAddress ?? 'Chưa cập nhật' }}</span>
          </div>
          <div class="detail-item">
-           <span class="detail-label">Hình dạng / Kết cấu</span>
-           <span class="detail-value">{{ asset.structure }}</span>
+-          <span class="detail-label">Số tờ bản đồ</span>
+-          <span class="detail-value">{{ asset.plotNumber }}</span>
++            <span class="detail-label">Số tờ bản đồ</span>
++            <span class="detail-value">{{ asset.plotNumber ?? 'Chưa cập nhật' }}</span>
          </div>
          <div class="detail-item">
-           <span class="detail-label">Hiện trạng</span>
-           <span class="detail-value">{{ asset.hienTrangDat }}</span>
+-          <span class="detail-label">Số thửa đất</span>
+-          <span class="detail-value">{{ asset.parcelNumber }}</span>
++            <span class="detail-label">Số thửa đất</span>
++            <span class="detail-value">{{ asset.parcelNumber ?? 'Chưa cập nhật' }}</span>
          </div>
- 
+
          <div class="detail-item">
-           <span class="detail-label">Lộ giới & Độ rộng đường</span>
-           <span class="detail-value">{{ asset.loGioi }}m & {{ asset.doRongDuong }}m</span>
+-          <span class="detail-label">Diện tích tổng</span>
+-          <span class="detail-value highlight">{{  formatArea( asset.totalArea) }}</span>
++            <span class="detail-label">Diện tích tổng</span>
++            <span class="detail-value highlight">{{  formatArea( asset.totalArea) ?? 'Chưa cập nhật' }}</span>
          </div>
          <div class="detail-item">
-           <span class="detail-label">Quy hoạch</span>
-           <span class="detail-value">{{ asset.quyHoach }}</span>
+-          <span class="detail-label">Quan hệ sở hữu</span>
+-          <span class="detail-value">{{ asset.ownershipRelation }}</span>
++            <span class="detail-label">Quan hệ sở hữu</span>
++            <span class="detail-value">{{ asset.ownershipRelation ?? 'Chưa cập nhật' }}</span>
          </div>
          <div class="detail-item">
-           <span class="detail-label">Mặt tiền</span>
-           <span class="detail-value">{{ asset.matTienNha }} m</span>
+-          <span class="detail-label">Quyền sử dụng đất</span>
+-          <span class="detail-value">{{ asset.landUseRight }}</span>
++            <span class="detail-label">Quyền sử dụng đất</span>
++            <span class="detail-value">{{ asset.landUseRight ?? 'Chưa cập nhật' }}</span>
+         </div>
+
+         <div class="detail-item">
+-          <span class="detail-label">Vị trí</span>
+-          <span class="detail-value">{{ asset.landPosition }}</span>
++            <span class="detail-label">Vị trí</span>
++            <span class="detail-value">{{ asset.landPosition ?? 'Chưa cập nhật' }}</span>
+         </div>
+         <div class="detail-item">
+-          <span class="detail-label">Trạng thái</span>
+-          <span class="detail-value">{{ asset.status }}</span>
++            <span class="detail-label">Trạng thái</span>
++            <span class="detail-value">{{ asset.status ?? 'Chưa cập nhật' }}</span>
+         </div>
+         <div class="detail-item">
+           <span class="detail-label">Chiều ngang và chiều dài</span>
+           <span class="detail-value text-primary">
+-            Ngang {{ formatArea2( asset.chieuNgang ) }}m , Dài {{ formatArea2( asset.chieuDai ) }}m
++              Ngang {{ asset.chieuNgang != null ? formatArea2(asset.chieuNgang) + 'm' : 'Chưa cập nhật' }} , Dài {{ asset.chieuDai != null ? formatArea2(asset.chieuDai) + 'm' : 'Chưa cập nhật' }}
+           </span>
+         </div>
+         <div class="detail-item">
+-          <span class="detail-label">Loại đất</span>
+-          <span class="detail-value">{{ asset.loaiDat }}</span>
++            <span class="detail-label">Loại đất</span>
++            <span class="detail-value">{{ asset.loaiDat ?? 'Chưa cập nhật' }}</span>
+         </div>
+         <div class="detail-item">
+-          <span class="detail-label">Hình dạng / Kết cấu</span>
+-          <span class="detail-value">{{ asset.structure }}</span>
++            <span class="detail-label">Hình dạng / Kết cấu</span>
++            <span class="detail-value">{{ asset.structure ?? 'Chưa cập nhật' }}</span>
+         </div>
+         <div class="detail-item">
+-          <span class="detail-label">Hiện trạng</span>
+-          <span class="detail-value">{{ asset.hienTrangDat }}</span>
++            <span class="detail-label">Hiện trạng</span>
++            <span class="detail-value">{{ asset.hienTrangDat ?? 'Chưa cập nhật' }}</span>
+         </div>
+
+         <div class="detail-item">
+-          <span class="detail-label">Lộ giới & Độ rộng đường</span>
+-          <span class="detail-value">{{ asset.loGioi }}m & {{ asset.doRongDuong }}m</span>
++            <span class="detail-label">Lộ giới & Độ rộng đường</span>
++            <span class="detail-value">{{ asset.loGioi != null ? asset.loGioi + 'm' : 'Chưa cập nhật' }} & {{ asset.doRongDuong != null ? asset.doRongDuong + 'm' : 'Chưa cập nhật' }}</span>
+         </div>
+         <div class="detail-item">
+-          <span class="detail-label">Quy hoạch</span>
+-          <span class="detail-value">{{ asset.quyHoach }}</span>
++            <span class="detail-label">Quy hoạch</span>
++            <span class="detail-value">{{ asset.quyHoach ?? 'Chưa cập nhật' }}</span>
+         </div>
+         <div class="detail-item">
+-          <span class="detail-label">Mặt tiền</span>
+-          <span class="detail-value">{{ asset.matTienNha }} m</span>
++            <span class="detail-label">Mặt tiền</span>
++            <span class="detail-value">{{ asset.matTienNha != null ? asset.matTienNha + ' m' : 'Chưa cập nhật' }}</span>
          </div>
        </div>
-+
-+      <div class="magazine-ribbon">
-+        <span class="ribbon-tag">Editorial Check</span>
-+        <p class="ribbon-copy">Những thông số pháp lý trên đã được biên tập theo chuẩn kiểm tra nội bộ, giúp anh/chị dễ
-+          dàng thêm vào brochure hoặc gửi file PDF cho khách.</p>
-+      </div>
      </div>
- 
+
      <!-- HOUSE SECTION -->
      <div class="detail-section section-house" v-if=" getAssetType(asset) === 'NHA'">
        <div class="section-header">
@@ -185,64 +371,70 @@ index 0585bb4f3ecc13c38228de378f33ba607f7771bb..4f128f1f19c074cb39e0d483f83da1e2
            <h3 class="section-title">Kích thước & Kết cấu (Nhà)</h3>
          </div>
        </div>
- 
--      <div class="detail-grid">
-+      <div class="section-deck">
-+        Góc "Feature Home" trình bày kích thước và kết cấu nổi bật của căn nhà, mô phỏng khối thông tin nằm bên cạnh bộ
-+        ảnh trong tạp chí kiến trúc.
-+      </div>
-+
-+      <div class="detail-grid magazine-highlight">
+
+       <div class="detail-grid">
          <div class="detail-item">
-           <span class="detail-label">Diện tích sàn</span>
-           <span class="detail-value highlight">{{ formatArea( asset.floorArea ) }} </span>
+-          <span class="detail-label">Diện tích sàn</span>
+-          <span class="detail-value highlight">{{ formatArea( asset.floorArea ) }} </span>
++            <span class="detail-label">Diện tích sàn</span>
++            <span class="detail-value highlight">{{ formatArea( asset.floorArea ) ?? 'Chưa cập nhật' }} </span>
          </div>
          <div class="detail-item">
-           <span class="detail-label">Loại nhà</span>
-           <span class="detail-value highlight">{{ asset.loaiNha }}</span>
+-          <span class="detail-label">Loại nhà</span>
+-          <span class="detail-value highlight">{{ asset.loaiNha }}</span>
++            <span class="detail-label">Loại nhà</span>
++            <span class="detail-value highlight">{{ asset.loaiNha ?? 'Chưa cập nhật' }}</span>
          </div>
          <div class="detail-item">
-           <span class="detail-label">Số tầng & Số lầu</span>
-           <span class="detail-value">{{ asset.soTang }} tầng & {{ asset.soLau }} lầu </span>
+-          <span class="detail-label">Số tầng & Số lầu</span>
+-          <span class="detail-value">{{ asset.soTang }} tầng & {{ asset.soLau }} lầu </span>
++            <span class="detail-label">Số tầng & Số lầu</span>
++            <span class="detail-value">{{ asset.soTang != null ? asset.soTang + ' tầng' : 'Chưa cập nhật' }} & {{ asset.soLau != null ? asset.soLau + ' lầu' : 'Chưa cập nhật' }} </span>
          </div>
          <div class="detail-item">
-           <span class="detail-label">Hiện trạng nhà</span>
-           <span class="detail-value">{{ asset.hienTrangNha }}</span>
+-          <span class="detail-label">Hiện trạng nhà</span>
+-          <span class="detail-value">{{ asset.hienTrangNha }}</span>
++            <span class="detail-label">Hiện trạng nhà</span>
++            <span class="detail-value">{{ asset.hienTrangNha ?? 'Chưa cập nhật' }}</span>
          </div>
- 
+
          <div class="detail-item">
-           <span class="detail-label">Phòng ngủ</span>
-           <span class="detail-value">{{ asset.soPhongNgu }} phòng</span>
+-          <span class="detail-label">Phòng ngủ</span>
+-          <span class="detail-value">{{ asset.soPhongNgu }} phòng</span>
++            <span class="detail-label">Phòng ngủ</span>
++            <span class="detail-value">{{ asset.soPhongNgu != null ? asset.soPhongNgu + ' phòng' : 'Chưa cập nhật' }}</span>
          </div>
- 
+
          <div class="detail-item">
-           <span class="detail-label">Phòng tắm</span>
-           <span class="detail-value">{{ asset.soPhongTam }} phòng</span>
+-          <span class="detail-label">Phòng tắm</span>
+-          <span class="detail-value">{{ asset.soPhongTam }} phòng</span>
++            <span class="detail-label">Phòng tắm</span>
++            <span class="detail-value">{{ asset.soPhongTam != null ? asset.soPhongTam + ' phòng' : 'Chưa cập nhật' }}</span>
          </div>
- 
+
          <div class="detail-item">
-           <span class="detail-label">Tổng số phòng</span>
-           <span class="detail-value">{{ asset.tongSoPhong }} phòng</span>
+-          <span class="detail-label">Tổng số phòng</span>
+-          <span class="detail-value">{{ asset.tongSoPhong }} phòng</span>
++            <span class="detail-label">Tổng số phòng</span>
++            <span class="detail-value">{{ asset.tongSoPhong != null ? asset.tongSoPhong + ' phòng' : 'Chưa cập nhật' }}</span>
          </div>
- 
+
          <div class="detail-item">
-           <span class="detail-label">Năm xây dựng</span>
-           <span class="detail-value">{{ asset.namXayDung }}</span>
+-          <span class="detail-label">Năm xây dựng</span>
+-          <span class="detail-value">{{ asset.namXayDung }}</span>
++            <span class="detail-label">Năm xây dựng</span>
++            <span class="detail-value">{{ asset.namXayDung ?? 'Chưa cập nhật' }}</span>
          </div>
- 
+
          <div class="detail-item">
-           <span class="detail-label">Nội thất</span>
-           <span class="detail-value">{{ asset.noiThat }}</span>
+-          <span class="detail-label">Nội thất</span>
+-          <span class="detail-value">{{ asset.noiThat }}</span>
++            <span class="detail-label">Nội thất</span>
++            <span class="detail-value">{{ asset.noiThat ?? 'Chưa cập nhật' }}</span>
          </div>
        </div>
-+
-+      <div class="editorial-note">
-+        <div class="note-title">Góc biên tập</div>
-+        <p class="note-copy">Các mốc tầng, phòng và năm xây dựng được trình bày dạng bullet ngắn gọn để người xem lướt mắt
-+          qua vẫn cảm nhận được "tính cách" của căn nhà giống như đọc mục "Specs" trong tạp chí nhà đẹp.</p>
-+      </div>
      </div>
- 
+
      <!-- ROOMS DETAIL -->
      <div class="detail-section section-rooms" v-if="getAssetType(asset) === 'NHA'">
        <div class="section-header">
@@ -251,20 +443,9 @@ index 0585bb4f3ecc13c38228de378f33ba607f7771bb..4f128f1f19c074cb39e0d483f83da1e2
            <h3 class="section-title">Chi tiết phòng</h3>
          </div>
        </div>
- 
-+      <div class="section-deck">
-+        Bảng phân bổ phòng được thiết kế như trang nội dung "Room Brief" trong tạp chí: rõ ràng, mạch lạc và có ghi chú
-+        cho từng mô tả.
-+      </div>
-+
+
        <div class="table-wrapper">
--        <!-- Nếu có room thì mới hiện table -->
--        <table class="executive-table" v-if="asset.rooms && asset.rooms.length > 0">
-+        <div class="table-caption" v-if="asset.rooms && asset.rooms.length > 0">
-+          Dàn trải phòng ốc — bản in thử
-+        </div>
-+
-+        <table class="executive-table magazine-table" v-if="asset.rooms && asset.rooms.length > 0">
+         <table class="executive-table magazine-table" v-if="asset.rooms && asset.rooms.length > 0">
            <thead>
            <tr>
              <th>Loại phòng</th>
@@ -273,28 +454,27 @@ index 0585bb4f3ecc13c38228de378f33ba607f7771bb..4f128f1f19c074cb39e0d483f83da1e2
              <th>Mô tả</th>
            </tr>
            </thead>
- 
+
            <tbody>
            <tr v-for="(r, index) in asset.rooms" :key="index">
-             <td class="room-type">{{ r.loaiPhong }}</td>
-             <td class="text-start">{{ r.soLuong }}</td>
-             <td class="room-area">{{ r.dienTich }} m²</td>
+-            <td class="room-type">{{ r.loaiPhong }}</td>
+-            <td class="text-start">{{ r.soLuong }}</td>
+-            <td class="room-area">{{ r.dienTich }} m²</td>
++              <td class="room-type">{{ r.loaiPhong ?? 'Chưa cập nhật' }}</td>
++              <td class="text-start">{{ r.soLuong ?? 'Chưa cập nhật' }}</td>
++              <td class="room-area">{{ r.dienTich != null ? r.dienTich + ' m²' : 'Chưa cập nhật' }}</td>
              <td class="room-desc">{{ r.moTa || '—' }}</td>
            </tr>
            </tbody>
          </table>
- 
+
          <!-- Nếu không có dữ liệu -->
          <div v-else class="text-center text-muted py-3">
            Chưa có thông tin
          </div>
--
-+        <div class="table-footnote" v-if="asset.rooms && asset.rooms.length > 0">
-+          Số liệu phòng lấy trực tiếp từ khảo sát hiện trạng. Mỗi mô tả được biên tập gọn để dễ đưa vào leaflet bán hàng.
-+        </div>
        </div>
      </div>
- 
+
      <!-- VALUATION SECTION -->
      <div class="detail-section section-valuation">
        <div class="section-header">
@@ -303,24 +483,14 @@ index 0585bb4f3ecc13c38228de378f33ba607f7771bb..4f128f1f19c074cb39e0d483f83da1e2
            <h3 class="section-title">Định giá</h3>
          </div>
        </div>
- 
-+      <div class="section-deck">
-+        Dữ liệu định giá được trình bày như mục "Market Insight" với nhịp điệu timeline, giúp môi giới dễ kể câu chuyện
-+        về giá trị tài sản qua từng kỳ.
-+      </div>
-+
+
        <div v-if="!asset.valuations || asset.valuations.length === 0" class="empty-state">
          <i class="fa-solid fa-chart-simple empty-icon"></i>
          <p class="empty-text">Chưa có dữ liệu định giá cho tài sản này</p>
        </div>
- 
--      <div v-else class="table-wrapper">
--        <table class="executive-table">
-+      <div v-else class="table-wrapper valuation-wrapper">
-+        <div class="table-caption">
-+          Timeline định giá — bản lưu trữ nội bộ
-+        </div>
-+        <table class="executive-table magazine-table">
+
+       <div v-else class="table-wrapper valuation-wrapper">
+         <table class="executive-table magazine-table">
            <thead>
            <tr>
              <th>Lần định giá</th>
@@ -332,489 +502,54 @@ index 0585bb4f3ecc13c38228de378f33ba607f7771bb..4f128f1f19c074cb39e0d483f83da1e2
            </tr>
            </thead>
            <tbody>
-           <tr v-for="v in asset.valuations" :key="v.valuationId">
-             <td class="valuation-round">Lần {{ v.valuationRound }}</td>
-             <td>{{ v.effectiveDate }}</td>
-             <td><span class="price-valuation">{{ formatMoneyVN( v.totalPrice ) }}</span></td>
-             <td><span class="price-valuation">{{  formatMoneyVN( v.totalMaxPrice) }}</span></td>
-             <td v-html="renderPriceCompare(asset.desire, v.totalPrice)"> </td>
-             <td>
-               <button class="pdf-btn" @click="openPdf(v.pdfFile)">
-                 <i class="fa-solid fa-file-pdf"></i>
-                 <span>{{ v.pdfFile.fileName }}</span>
-               </button>
-             </td>
-           </tr>
+-          <tr v-for="v in asset.valuations" :key="v.valuationId">
+-            <td class="valuation-round">Lần {{ v.valuationRound }}</td>
+-            <td>{{ v.effectiveDate }}</td>
+-            <td><span class="price-valuation">{{ formatMoneyVN( v.totalPrice ) }}</span></td>
+-            <td><span class="price-valuation">{{  formatMoneyVN( v.totalMaxPrice) }}</span></td>
+-            <td v-html="renderPriceCompare(asset.desire, v.totalPrice)"> </td>
+-            <td>
+-              <button class="pdf-btn" @click="openPdf(v.pdfFile)">
+-                <i class="fa-solid fa-file-pdf"></i>
+-                <span>{{ v.pdfFile.fileName }}</span>
+-              </button>
+-            </td>
+-          </tr>
++            <tr v-for="v in asset.valuations" :key="v.valuationId">
++              <td class="valuation-round">Lần {{ v.valuationRound ?? 'Chưa cập nhật' }}</td>
++              <td>{{ v.effectiveDate ?? 'Chưa cập nhật' }}</td>
++              <td><span class="price-valuation">{{ formatMoneyVN( v.totalPrice ) ?? 'Chưa cập nhật' }}</span></td>
++              <td><span class="price-valuation">{{  formatMoneyVN( v.totalMaxPrice) ?? 'Chưa cập nhật' }}</span></td>
++              <td v-html="renderPriceCompare(asset.desire, v.totalPrice)"> </td>
++              <td>
++                <button class="pdf-btn" @click="openPdf(v.pdfFile)">
++                  <i class="fa-solid fa-file-pdf"></i>
++                  <span>{{ v.pdfFile?.fileName ?? 'Chưa cập nhật' }}</span>
++                </button>
++              </td>
++            </tr>
            </tbody>
          </table>
-+
-+        <div class="valuation-note">
-+          <div class="note-title">Ghi chú biên tập</div>
-+          <p class="note-copy">Các giá trị được sắp xếp theo từng lần định giá như mục timeline, kèm mô tả tương quan để
-+            anh/chị dễ dẫn dắt khách hàng: từ mức mong muốn đến mức khảo sát thị trường.</p>
-+        </div>
        </div>
      </div>
    </div>
  </template>
- 
+
  <script setup>
  import { ref, onMounted, computed } from "vue";
  import { useRoute, useRouter } from "vue-router";
  import FileOrLand from "../land/FileOrLand.vue";
- 
+ import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
+
  const route = useRoute();
  const router = useRouter();
  const id = route.params.id;
  const activeImage = ref(0);
- 
+
  const asset = ref(null);
  const rooms = ref([]);
  const pdfUrl = ref(null);
- 
+
  onMounted(() => loadDetail(id));
- 
+
  import api from "/src/api/api.js"
- import Spam from "./Spam.vue";
- 
- async function loadDetail(id) {
-@@ -1272,70 +1337,117 @@ const openPdf = async (pdfFile) => {
- .info-section {
-   display: flex;
-   flex-direction: column;
- }
- 
- .info-card {
-   background: linear-gradient(180deg, #fffdf6 0%, #ffffff 60%);
-   border-radius: 16px;
-   padding: 28px;
-   box-shadow: 0 18px 36px -24px rgba(15, 23, 42, 0.45);
-   border: 1px solid #e7dec8;
-   height: 100%;
-   position: relative;
-   overflow: hidden;
- }
- 
- .card-header {
-   display: flex;
-   align-items: center;
-   gap: 12px;
-   margin-bottom: 24px;
-   padding-bottom: 16px;
-   border-bottom: 2px solid #f1f5f9;
- }
- 
-+.section-deck {
-+  color: #475569;
-+  font-size: 15px;
-+  line-height: 1.6;
-+  background: #f8fafc;
-+  border-left: 4px solid #94a3b8;
-+  padding: 12px 16px;
-+  border-radius: 12px;
-+  margin: -4px 0 18px;
-+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
-+}
-+
-+.editorial-band {
-+  display: flex;
-+  align-items: center;
-+  justify-content: center;
-+  gap: 12px;
-+  background: linear-gradient(90deg, #e0f2fe, #f8fafc, #e0f2fe);
-+  padding: 10px 14px;
-+  border-radius: 12px;
-+  margin-bottom: 18px;
-+  border: 1px solid #bfdbfe;
-+}
-+
-+.band-dot {
-+  width: 10px;
-+  height: 10px;
-+  border-radius: 50%;
-+  background: #0ea5e9;
-+  box-shadow: 0 0 0 6px rgba(14, 165, 233, 0.12);
-+}
-+
-+.band-text {
-+  letter-spacing: 1px;
-+  text-transform: uppercase;
-+  color: #0f172a;
-+  font-weight: 700;
-+}
-+
- .header-icon {
-   font-size: 22px;
-   color: #3b82f6;
- }
- 
- .card-title {
-   font-size: 20px;
-   font-weight: 700;
-   color: #0f172a;
-   margin: 0;
-   letter-spacing: 0.3px;
-   text-transform: uppercase;
- }
- 
- .info-grid {
-   display: flex;
-   flex-direction: column;
-   gap: 12px;
- }
- 
-+.magazine-grid {
-+  background: #ffffff;
-+  padding: 12px;
-+  border-radius: 14px;
-+  border: 1px dashed #e2e8f0;
-+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-+}
-+
- .info-row {
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   padding: 12px 14px;
-   border: 1px solid #e2e8f0;
-   background: #f8fafc;
-   border-radius: 10px;
-   box-shadow: 0 10px 24px -20px rgba(15, 23, 42, 0.35);
- }
- 
- .info-row:last-child {
-   border-bottom: none;
- }
- 
- .highlight-row {
-   background: linear-gradient(90deg, #e0f2fe 0%, #ffffff 100%);
-   padding: 12px 16px;
-   margin: 0;
-   border: 1px solid #bae6fd;
-   border-radius: 10px;
- }
- 
- .info-label {
-   color: #64748b;
-@@ -1369,175 +1481,321 @@ const openPdf = async (pdfFile) => {
- .owner-unit {
-   display: flex;
-   align-items: center;
-   gap: 8px;
- }
- 
- .unit-logo {
-   width: 50px;
-   height: 30px;
-   object-fit: contain;
-   border-radius: 16px;
-   border: 1px solid #2563eb;
- }
- 
- .unit-icon {
-   font-size: 18px;
-   color: #3b82f6;
- }
- 
- .file-section {
-   margin-top: 24px;
-   padding-top: 24px;
-   border-top: 2px solid #f1f5f9;
- }
- 
-+.info-footnote {
-+  display: flex;
-+  gap: 10px;
-+  align-items: flex-start;
-+  margin-top: 16px;
-+  padding: 14px 16px;
-+  background: #f8fafc;
-+  border-radius: 12px;
-+  border: 1px solid #e2e8f0;
-+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
-+}
-+
-+.footnote-bullet {
-+  width: 12px;
-+  height: 12px;
-+  border-radius: 50%;
-+  background: #3b82f6;
-+  margin-top: 4px;
-+  box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.12);
-+}
-+
-+.footnote-copy {
-+  margin: 0;
-+  color: #475569;
-+  line-height: 1.6;
-+}
-+
- /* ========= DETAIL SECTIONS ========= */
- .detail-section {
-   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 85%);
-   border-radius: 16px;
-   padding: 32px;
-   margin-bottom: 24px;
-   box-shadow: 0 18px 40px -26px rgba(15, 23, 42, 0.35);
-   border: 1px solid #e2e8f0;
-   border-left: 4px solid;
- }
- 
- .section-legal {
-   border-left-color: #0ea5e9;
- }
- 
- .section-house {
-   border-left-color: #10b981;
- }
- 
- .section-land {
-   border-left-color: #f59e0b;
- }
- 
- .section-rooms {
-   border-left-color: #8b5cf6;
- }
- 
- .section-valuation {
-   border-left-color: #ef4444;
- }
- 
- .section-header {
-   margin-bottom: 28px;
-   padding-bottom: 16px;
-   border-bottom: 2px solid #e2e8f0;
-   position: relative;
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
- }
- 
-+.magazine-ribbon {
-+  margin-top: 18px;
-+  display: grid;
-+  grid-template-columns: auto 1fr;
-+  gap: 10px 14px;
-+  align-items: center;
-+  background: linear-gradient(90deg, #fef3c7, #fff7ed);
-+  padding: 12px 16px;
-+  border-radius: 12px;
-+  border: 1px solid #fef3c7;
-+  box-shadow: 0 10px 28px -24px rgba(234, 88, 12, 0.5);
-+}
-+
-+.ribbon-tag {
-+  background: #f59e0b;
-+  color: #fff7ed;
-+  padding: 6px 10px;
-+  border-radius: 999px;
-+  font-weight: 700;
-+  letter-spacing: 0.5px;
-+  text-transform: uppercase;
-+}
-+
-+.ribbon-copy {
-+  margin: 0;
-+  color: #92400e;
-+  line-height: 1.6;
-+}
-+
- .section-title-group {
-   display: flex;
-   align-items: center;
-   gap: 12px;
- }
- 
- .section-icon {
-   font-size: 24px;
-   color: inherit;
- }
- 
- .section-legal .section-icon {
-   color: #0ea5e9;
- }
- 
- .section-house .section-icon {
-   color: #10b981;
- }
- 
- .section-land .section-icon {
-   color: #f59e0b;
- }
- 
- .section-rooms .section-icon {
-   color: #8b5cf6;
- }
- 
- .section-valuation .section-icon {
-   color: #ef4444;
- }
- 
- .section-title {
-   font-size: 22px;
-   font-weight: 700;
-   color: #0f172a;
-   margin: 0;
-   letter-spacing: 0.4px;
- }
- 
- /* ========= DETAIL GRID ========= */
- .detail-grid {
-   display: grid;
-   grid-template-columns: repeat(3, 1fr);
-   gap: 20px 24px;
- }
- 
-+.magazine-highlight .detail-item {
-+  background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 90%);
-+  border: 1px solid #e0f2fe;
-+  position: relative;
-+  overflow: hidden;
-+}
-+
-+.magazine-highlight .detail-item::after {
-+  content: "";
-+  position: absolute;
-+  inset: 0;
-+  background: radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.12), transparent 45%);
-+  pointer-events: none;
-+}
-+
- .detail-item {
-   display: flex;
-   flex-direction: column;
-   gap: 6px;
-   padding: 16px 18px;
-   background: #ffffff;
-   border: 1px solid #e2e8f0;
-   border-radius: 12px;
-   box-shadow: 0 10px 26px -20px rgba(15, 23, 42, 0.45);
- }
- 
- .detail-label {
-   color: #64748b;
-   font-size: 13px;
-   font-weight: 600;
-   text-transform: uppercase;
-   letter-spacing: 0.5px;
- }
- 
- .detail-value {
-   color: #0f172a;
-   font-size: 15px;
-   font-weight: 600;
- }
- 
- .detail-value.highlight {
-   color: #3b82f6;
-   font-size: 16px;
-   font-weight: 700;
- }
- 
-+.editorial-note {
-+  margin-top: 18px;
-+  padding: 14px 16px;
-+  background: linear-gradient(90deg, #ecfeff, #f8fafc);
-+  border-radius: 12px;
-+  border: 1px solid #cbd5e1;
-+  display: grid;
-+  grid-template-columns: 140px 1fr;
-+  gap: 10px 16px;
-+  align-items: center;
-+}
-+
-+.note-title {
-+  font-weight: 800;
-+  text-transform: uppercase;
-+  color: #0f172a;
-+  letter-spacing: 0.8px;
-+}
-+
-+.note-copy {
-+  margin: 0;
-+  color: #475569;
-+  line-height: 1.6;
-+}
-+
- /* ========= TABLE ========= */
- .table-wrapper {
-   overflow-x: auto;
-   border-radius: 12px;
-   border: 1px solid #e2e8f0;
- }
- 
-+.table-caption {
-+  background: #0f172a;
-+  color: #e2e8f0;
-+  padding: 10px 14px;
-+  border-radius: 12px 12px 0 0;
-+  letter-spacing: 0.8px;
-+  text-transform: uppercase;
-+  font-weight: 700;
-+}
-+
-+.magazine-table thead {
-+  background: linear-gradient(90deg, #e0f2fe, #f8fafc);
-+}
-+
-+.magazine-table tbody tr:nth-child(odd) {
-+  background: #f8fafc;
-+}
-+
-+.magazine-table tbody tr:nth-child(even) {
-+  background: #ffffff;
-+}
-+
-+.table-footnote {
-+  padding: 10px 14px;
-+  background: #f8fafc;
-+  border-top: 1px solid #e2e8f0;
-+  border-radius: 0 0 12px 12px;
-+  color: #475569;
-+  font-size: 14px;
-+}
-+
-+.valuation-wrapper {
-+  border-radius: 16px;
-+  border: 1px solid #e2e8f0;
-+  box-shadow: 0 10px 24px -22px rgba(15, 23, 42, 0.35);
-+}
-+
-+.valuation-wrapper .table-caption {
-+  background: #111827;
-+  color: #f3f4f6;
-+}
-+
-+.valuation-note {
-+  padding: 14px 16px;
-+  background: #fff7ed;
-+  border-top: 1px solid #ffe4e6;
-+  border-radius: 0 0 16px 16px;
-+  color: #92400e;
-+}
-+
- .executive-table {
-   width: 100%;
-   border-collapse: collapse;
-   font-size: 14px;
- }
- 
- .executive-table thead {
-   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
- }
- 
- .executive-table th {
-   padding: 16px 20px;
-   text-align: left;
-   font-weight: 700;
-   color: #475569;
-   text-transform: uppercase;
-   font-size: 12px;
-   letter-spacing: 0.5px;
-   border-bottom: 2px solid #e2e8f0;
- }
- 
- .executive-table tbody tr {
-   border-bottom: 1px solid #f1f5f9;
-   transition: background 0.2s;
- }
