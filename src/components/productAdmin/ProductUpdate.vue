@@ -117,7 +117,7 @@
                   <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
                     <i class="fa-solid fa-tag text-white text-xs"></i>
                   </div>
-                  <span>Loại tài sản *</span>
+                  <span>Loại tài sản</span>
                 </span>
               </label>
               <select
@@ -137,49 +137,6 @@
               </div>
             </div>
 
-            <!-- Phân loại hàng -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
-                    <i class="fa-solid fa-box text-white text-xs"></i>
-                  </div>
-                  <span>Phân loại hàng *</span>
-                </span>
-              </label>
-              <select
-                  v-model="formData.phanLoaiHang"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  required
-              >
-                <option value="">-- Chọn phân loại --</option>
-                <option value="BN30N">Bán nhanh 30 ngày</option>
-                <option value="HOPTAC">Hàng hợp tác</option>
-                <option value="HTT">Hàng thị trường</option>
-              </select>
-            </div>
-
-            <!-- Đơn vị sở hữu -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 flex items-center justify-center">
-                    <i class="fa-solid fa-building text-white text-xs"></i>
-                  </div>
-                  <span>Đơn vị sở hữu *</span>
-                </span>
-              </label>
-              <select
-                  v-model="formData.donViSoHuu"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  required
-              >
-                <option value="">-- Chọn đơn vị --</option>
-                <option value="THG">THG</option>
-                <option value="DT">Đối tác</option>
-              </select>
-            </div>
-
             <!-- Giá bán -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
@@ -187,7 +144,7 @@
                   <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
                     <i class="fa-solid fa-money-bill-wave text-white text-xs"></i>
                   </div>
-                  <span>Giá bán *</span>
+                  <span>Giá bán</span>
                 </span>
               </label>
               <div class="relative">
@@ -206,6 +163,57 @@
               </div>
             </div>
 
+            <!-- Phân loại hàng -->
+            <div class="grid grid-cols-2 gap-4">
+              <!-- Phân loại hàng -->
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-800">
+      <span class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
+          <i class="fa-solid fa-box text-white text-xs"></i>
+        </div>
+        <span>Phân loại hàng</span>
+      </span>
+                </label>
+                <select
+                    v-model="formData.phanLoaiHang"
+                    class="w-full px-4 py-3 border border-slate-300 rounded-xl
+             focus:ring-2 focus:ring-emerald-500 focus:border-transparent
+             bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                    required
+                >
+                  <option value="">-- Chọn phân loại --</option>
+                  <option value="BN30N">Bán nhanh 30 ngày</option>
+                  <option value="HOPTAC">Hàng hợp tác</option>
+                  <option value="HTT">Hàng thị trường</option>
+                </select>
+              </div>
+
+              <!-- Đơn vị sở hữu -->
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-800">
+      <span class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 flex items-center justify-center">
+          <i class="fa-solid fa-building text-white text-xs"></i>
+        </div>
+        <span>Đơn vị sở hữu</span>
+      </span>
+                </label>
+                <select
+                    v-model="formData.donViSoHuu"
+                    class="w-full px-4 py-3 border border-slate-300 rounded-xl
+             focus:ring-2 focus:ring-purple-500 focus:border-transparent
+             bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                    required
+                >
+                  <option value="">-- Chọn đơn vị --</option>
+                  <option value="THG">THG</option>
+                  <option value="DT">Đối tác</option>
+                </select>
+              </div>
+            </div>
+
+
             <!-- Giá nội bộ -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
@@ -213,7 +221,7 @@
                   <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
                     <i class="fa-solid fa-hand-holding-usd text-white text-xs"></i>
                   </div>
-                  <span>Giá nội bộ *</span>
+                  <span>Giá nội bộ</span>
                 </span>
               </label>
               <div class="relative">
@@ -232,33 +240,102 @@
               </div>
             </div>
 
-            <!-- Phí môi giới -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
                 <span class="flex items-center gap-2">
                   <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
-                    <i class="fa-solid fa-percent text-white text-xs"></i>
+                    <i class="fa-solid fa-bullseye text-white text-xs"></i>
                   </div>
-                  <span>Phí môi giới (%) *</span>
+                  <span>Giá mong muốn (VND)</span>
                 </span>
               </label>
               <div class="relative">
                 <input
                     type="number"
-                    v-model.number="formData.phiMoiGioi"
-                    step="0.1"
-                    min="0"
-                    max="100"
+                    v-model.number="formData.desire"
+                    step="1000000"
                     class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập % phí môi giới"
+                    placeholder="Nhập giá mong muốn"
                     required
                 />
-                <i class="fa-solid fa-percent absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                <i class="fa-solid fa-dollar-sign absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
               </div>
               <div class="text-sm font-medium text-rose-700 bg-rose-50 p-2 rounded-lg">
-                {{ formData.phiMoiGioi }}%
+                {{ formatMoneyVN(formData.desire) }}
               </div>
             </div>
+
+            <!-- Phí môi giới -->
+            <div class="grid grid-cols-2 gap-4">
+              <!-- Phí môi giới (%) -->
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-800">
+      <span class="flex items-center gap-2">
+        <div
+            class="w-6 h-6 rounded-lg bg-gradient-to-r from-yellow-400 to-amber-500
+                 flex items-center justify-center shadow-sm"
+        >
+          <i class="fa-solid fa-percent text-white text-xs"></i>
+        </div>
+        <span>Phí môi giới (%)</span>
+      </span>
+                </label>
+
+                <div class="relative">
+                  <input
+                      type="number"
+                      v-model.number="formData.phiMoiGioi"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl
+               focus:ring-2 focus:ring-purple-500 focus:border-transparent
+               bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                      placeholder="Nhập % phí môi giới"
+                  />
+                  <i
+                      class="fa-solid fa-percent absolute left-3 top-1/2 -translate-y-1/2
+               text-yellow-500 text-sm"
+                  ></i>
+                </div>
+
+                <!-- Hiển thị giá trị -->
+                <div
+                    v-if="formData.phiMoiGioi !== null && formData.phiMoiGioi !== ''"
+                    class="text-sm font-medium text-purple-700 bg-purple-50 p-2 rounded-lg"
+                >
+                  {{ formData.phiMoiGioi }}%
+                </div>
+              </div>
+
+              <!-- Hiển thị (Yes / No) -->
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-800">
+      <span class="flex items-center gap-2">
+        <div
+            class="w-6 h-6 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500
+                 flex items-center justify-center shadow-sm"
+        >
+          <i class="fa-solid fa-eye text-white text-xs"></i>
+        </div>
+        <span>Hiển thị</span>
+      </span>
+                </label>
+
+                <select
+                    v-model="formData.show"
+                    class="w-full px-4 py-3 border border-slate-300 rounded-xl
+             focus:ring-2 focus:ring-purple-500 focus:border-transparent
+             bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                    required
+                >
+                  <option :value="true">Yes</option>
+                  <option :value="false">No</option>
+                </select>
+              </div>
+            </div>
+
+
           </div>
         </div>
 
@@ -280,7 +357,7 @@
           <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
             <i class="fa-solid fa-city text-white text-xs"></i>
           </div>
-          <span>Tỉnh/Thành phố *</span>
+          <span>Tỉnh/Thành phố</span>
         </span>
               </label>
 
@@ -303,7 +380,7 @@
           <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 flex items-center justify-center">
             <i class="fa-solid fa-road text-white text-xs"></i>
           </div>
-          <span>Địa chỉ đường *</span>
+          <span>Địa chỉ đường</span>
         </span>
               </label>
 
@@ -326,7 +403,7 @@
           <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
             <i class="fa-solid fa-map-marker-alt text-white text-xs"></i>
           </div>
-          <span>Phường/Xã *</span>
+          <span>Phường/Xã</span>
         </span>
               </label>
 
@@ -345,47 +422,81 @@
             <!-- 🟧 VỊ TRÍ -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-        <span class="flex items-center gap-2">
-          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
-            <i class="fa-solid fa-location-arrow text-white text-xs"></i>
-          </div>
-          <span>Vị trí *</span>
-        </span>
+    <span class="flex items-center gap-2">
+      <div
+          class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500
+               flex items-center justify-center"
+      >
+        <i class="fa-solid fa-location-arrow text-white text-xs"></i>
+      </div>
+      <span>Vị trí</span>
+    </span>
               </label>
 
-              <select
-                  v-model="formData.landPosition"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  required
-              >
-                <option value="">-- Chọn vị trí --</option>
-                <option value="Mặt tiền">Mặt tiền</option>
-                <option value="Hẻm">Hẻm</option>
-                <option value="Hẻm cụt">Hẻm cụt</option>
-                <option value="Khu dân cư">Khu dân cư</option>
-                <option value="Mặt tiền đường lớn">Mặt tiền đường lớn</option>
-                <option value="Chưa cập nhật">Chưa cập nhật</option>
-              </select>
+              <div class="relative">
+                <input
+                    type="text"
+                    v-model="formData.landPosition"
+                    list="landPositions"
+                    required
+                    placeholder="Chọn hoặc nhập vị trí"
+                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl
+             focus:ring-2 focus:ring-rose-500 focus:border-transparent
+             bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                />
+
+                <i
+                    class="fa-solid fa-location-arrow
+             absolute left-3 top-1/2 -translate-y-1/2
+             text-slate-500 text-sm"
+                ></i>
+
+                <!-- DATALIST -->
+                <datalist id="landPositions">
+                  <option value="Mặt tiền đường chính"></option>
+                  <option value="Mặt tiền quốc lộ"></option>
+                  <option value="Mặt tiền tỉnh lộ"></option>
+                  <option value="Mặt tiền nội bộ"></option>
+
+                  <option value="Góc 2 mặt tiền"></option>
+                  <option value="Góc 3 mặt tiền"></option>
+
+                  <option value="Hẻm xe hơi"></option>
+                  <option value="Hẻm xe hơi tránh nhau"></option>
+                  <option value="Hẻm xe máy"></option>
+                  <option value="Hẻm cụt"></option>
+
+                  <option value="Khu dân cư"></option>
+                  <option value="Chưa cập nhật"></option>
+                </datalist>
+              </div>
             </div>
 
+
             <!-- 🟥 ĐỊA CHỈ CŨ -->
-            <div class="space-y-2">
+            <div class="space-y-2 col-span-2">
               <label class="block text-sm font-semibold text-slate-800">
-        <span class="flex items-center gap-2">
-          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-slate-500 to-gray-500 flex items-center justify-center">
-            <i class="fa-solid fa-history text-white text-xs"></i>
-          </div>
-          <span>Địa chỉ cũ</span>
-        </span>
+    <span class="flex items-center gap-2">
+      <div
+          class="w-6 h-6 rounded-lg bg-gradient-to-r from-slate-500 to-gray-500
+               flex items-center justify-center"
+      >
+        <i class="fa-solid fa-history text-white text-xs"></i>
+      </div>
+      <span>Địa chỉ cũ</span>
+    </span>
               </label>
 
               <input
                   type="text"
                   v-model="formData.oldAddress"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                  class="w-full px-4 py-3 border border-slate-300 rounded-xl
+           focus:ring-2 focus:ring-slate-500 focus:border-transparent
+           bg-white shadow-sm transition-all text-sm hover:border-slate-400"
                   placeholder="Nhập địa chỉ cũ"
               />
             </div>
+
 
             <!-- 🟦 PREVIEW -->
             <div class="md:col-span-3 space-y-2">
@@ -411,6 +522,7 @@
 
         <!-- SECTION 3: CHỦ SỞ HỮU & THÔNG TIN PHÁP LÝ -->
         <div class="bg-white rounded-2xl shadow-xl border border-slate-300 p-6">
+          <!-- HEADER -->
           <div class="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-200">
             <div class="flex items-center gap-3">
               <div class="bg-gradient-to-r from-purple-500 to-violet-600 p-2.5 rounded-xl">
@@ -418,367 +530,241 @@
               </div>
               <h2 class="text-xl font-bold text-slate-900">Chủ sở hữu & Pháp lý</h2>
             </div>
-
-            <!-- ==== HIỂN THỊ THÔNG TIN CHỦ SỞ HỮU ==== -->
-            <div class="flex flex-wrap items-center gap-2 mt-1">
-
-              <!-- Tên chủ sở hữu -->
-              <!-- Chủ sở hữu -->
-              <div class="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-xl border border-blue-200 shadow-sm">
-                <i class="fa-solid fa-user"></i>
-                <span class="font-semibold text-sm">{{ formData.ownerName || '—' }}</span>
-              </div>
-
-              <!-- Số điện thoại -->
-              <div class="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl border border-emerald-200 shadow-sm">
-                <i class="fa-solid fa-phone"></i>
-                <span class="font-semibold text-sm">{{ formData.ownerPhone || '—' }}</span>
-              </div>
-
-              <div
-                  class="flex items-center gap-2 px-4 py-2 rounded-xl shadow-sm border relative cursor-pointer
-         bg-red-50 text-red-700 border-red-200">
-
-                <i class="fa-solid fa-circle-check"></i>
-
-                <!-- SELECT thật nhưng làm trong suốt để giữ UI -->
-                <select
-                    v-model="formData.status"
-                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                >
-                  <option disabled value="">— Chọn trạng thái —</option>
-                  <option value="Chưa định giá sơ bộ">Chưa định giá sơ bộ</option>
-                  <option value="Đã định giá sơ bộ">Đã định giá sơ bộ</option>
-                  <option value="Bán nhanh 30 ngày">Bán nhanh 30 ngày</option>
-                </select>
-
-                <!-- Text hiển thị -->
-                <span class="font-semibold text-sm">
-    {{ formData.status || 'Chọn trạng thái' }}
-  </span>
-
-                <!-- mũi tên -->
-                <i class="fa-solid fa-chevron-down text-xs"></i>
-              </div>
-
-            </div>
           </div>
 
-
+          <!-- GRID -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- HÀNG 1 -->
+            <!-- Số thửa -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
+            <i class="fa-solid fa-vector-square text-white text-xs"></i>
+          </div>
+          <span>Số thửa đất</span>
+        </span>
+              </label>
+              <input v-model="formData.parcelNumber"
+                     class="w-full px-4 py-3 border border-slate-300 rounded-xl" />
+            </div>
+
+            <!-- Số tờ -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 flex items-center justify-center">
+            <i class="fa-solid fa-map text-white text-xs"></i>
+          </div>
+          <span>Số tờ bản đồ</span>
+        </span>
+              </label>
+              <input v-model="formData.plotNumber"
+                     class="w-full px-4 py-3 border border-slate-300 rounded-xl" />
+            </div>
+
+            <!-- Tổng diện tích -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
+            <i class="fa-solid fa-ruler-combined text-white text-xs"></i>
+          </div>
+          <span>Diện tích tổng (m²)</span>
+        </span>
+              </label>
+              <input v-model.number="formData.totalArea" type="number"
+                     class="w-full px-4 py-3 border border-slate-300 rounded-xl" />
+            </div>
+
+            <!-- HÀNG 2 -->
+            <!-- Quan hệ -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
+            <i class="fa-solid fa-handshake text-white text-xs"></i>
+          </div>
+          <span>Quan hệ sở hữu</span>
+        </span>
+              </label>
+              <input v-model="formData.ownershipRelation" list="ownershipRelations"
+                     class="w-full px-4 py-3 border border-slate-300 rounded-xl" />
+              <datalist id="ownershipRelations">
+                <option value="Chính chủ"></option>
+                <option value="Người thân"></option>
+                <option value="Uỷ quyền"></option>
+                <option value="Đồng sở hữu"></option>
+                <option value="Môi giới đại diện"></option>
+              </datalist>
+            </div>
+
+            <!-- Quyền sử dụng -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
+            <i class="fa-solid fa-scale-balanced text-white text-xs"></i>
+          </div>
+          <span>Quyền sử dụng đất</span>
+        </span>
+              </label>
+              <input v-model="formData.landUseRight"
+                     class="w-full px-4 py-3 border border-slate-300 rounded-xl"  list="landUseRights"/>
+              <datalist id="landUseRights">
+                <option value="Sổ đỏ"></option>
+                <option value="Sổ hồng"></option>
+                <option value="Đất thổ cư"></option>
+                <option value="Đất nông nghiệp"></option>
+                <option value="Giấy tờ viết tay"></option>
+              </datalist>
+            </div>
 
             <!-- Loại đất -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
-                    <i class="fa-solid fa-mountain text-white text-xs"></i>
-                  </div>
-                  <span>Loại đất *</span>
-                </span>
+    <span class="flex items-center gap-2">
+      <div
+          class="w-6 h-6 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500
+               flex items-center justify-center"
+      >
+        <i class="fas fa-clipboard-check text-white text-xs"></i>
+      </div>
+      <span>
+        Trạng thái <span class="text-red-500">*</span>
+      </span>
+    </span>
               </label>
-              <input
-                  type="text"
-                  v-model="formData.loaiDat"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: Thuộc nhóm đất ở"
-                  required
-              />
+
+              <select
+                  v-model="formData.status"
+                  class="w-full px-4 py-3 border border-slate-300 rounded-xl
+           focus:ring-2 focus:ring-amber-500 focus:border-transparent
+           bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+              >
+                <option value="">-- Chọn tình trạng --</option>
+                <option value="Chưa định giá sơ bộ">Mới</option>
+                <option value="Bán nhanh 30 ngày">Bán nhanh 30 ngày</option>
+                <option value="Đã bán">Đã bán</option>
+              </select>
+
+              <small v-if="errors?.status" class="text-red-600 text-sm">
+                {{ errors.status }}
+              </small>
             </div>
 
-            <!-- Số tờ bản đồ -->
+
+            <!-- HÀNG 3 -->
+            <!-- Mặt tiền -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 flex items-center justify-center">
-                    <i class="fa-solid fa-map text-white text-xs"></i>
-                  </div>
-                  <span>Số tờ bản đồ</span>
-                </span>
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-yellow-500 flex items-center justify-center">
+            <i class="fa-solid fa-road text-white text-xs"></i>
+          </div>
+          <span>Mặt tiền (m)</span>
+        </span>
               </label>
-              <input
-                  type="text"
-                  v-model="formData.plotNumber"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: 6 tờ"
-              />
+              <input v-model.number="formData.matTienNha" type="number"
+                     class="w-full px-4 py-3 border border-slate-300 rounded-xl" />
             </div>
 
-            <!-- Số thửa đất -->
+            <!-- Chiều ngang -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
-                    <i class="fa-solid fa-vector-square text-white text-xs"></i>
-                  </div>
-                  <span>Số thửa đất</span>
-                </span>
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
+            <i class="fa-solid fa-arrows-left-right text-white text-xs"></i>
+          </div>
+          <span>Chiều ngang (m)</span>
+        </span>
               </label>
-              <input
-                  type="text"
-                  v-model="formData.parcelNumber"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: 10 B/1 A"
-              />
-            </div>
-
-            <!-- Diện tích tổng -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
-                    <i class="fa-solid fa-ruler-combined text-white text-xs"></i>
-                  </div>
-                  <span>Diện tích tổng (m²) *</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="number"
-                    v-model.number="formData.totalArea"
-                    step="0.01"
-                    min="0"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập diện tích"
-                    required
-                />
-                <i class="fa-solid fa-square absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
-              <div class="text-sm font-medium text-emerald-700 bg-emerald-50 p-2 rounded-lg">
-                {{ formatArea(formData.totalArea) }}
-              </div>
-            </div>
-
-            <!-- Quan hệ sở hữu -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-                    <i class="fa-solid fa-handshake text-white text-xs"></i>
-                  </div>
-                  <span>Quan hệ sở hữu *</span>
-                </span>
-              </label>
-              <input
-                  type="text"
-                  v-model="formData.ownershipRelation"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: Chủ"
-                  required
-              />
-            </div>
-
-            <!-- Quyền sử dụng đất -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
-                    <i class="fa-solid fa-scale-balanced text-white text-xs"></i>
-                  </div>
-                  <span>Quyền sử dụng đất *</span>
-                </span>
-              </label>
-              <input
-                  type="text"
-                  v-model="formData.landUseRight"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: Sở hữu lâu dài"
-                  required
-              />
-            </div>
-
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-                    <i class="fa-solid fa-arrows-left-right text-white text-xs"></i>
-                  </div>
-                  <span>Chiều ngang (m)</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="number"
-                    v-model.number="formData.chieuNgang"
-                    step="0.1"
-                    min="0"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập chiều ngang"
-                />
-                <i class="fa-solid fa-ruler-horizontal absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
+              <input v-model.number="formData.chieuNgang" type="number"
+                     class="w-full px-4 py-3 border border-slate-300 rounded-xl" />
             </div>
 
             <!-- Chiều dài -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
-                    <i class="fa-solid fa-arrows-up-down text-white text-xs"></i>
-                  </div>
-                  <span>Chiều dài (m)</span>
-                </span>
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
+            <i class="fa-solid fa-arrows-up-down text-white text-xs"></i>
+          </div>
+          <span>Chiều dài (m)</span>
+        </span>
               </label>
-              <div class="relative">
-                <input
-                    type="number"
-                    v-model.number="formData.chieuDai"
-                    step="0.1"
-                    min="0"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập chiều dài"
-                />
-                <i class="fa-solid fa-ruler-vertical absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
+              <input v-model.number="formData.chieuDai" type="number"
+                     class="w-full px-4 py-3 border border-slate-300 rounded-xl" />
             </div>
 
-            <!-- Kết cấu -->
-            <div class="space-y-2 ">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-                    <i class="fa-solid fa-layer-group text-white text-xs"></i>
-                  </div>
-                  <span>Kết cấu / hình dạng</span>
-                </span>
-              </label>
-              <input
-                  type="text"
-                  v-model="formData.structure"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: 1 trệt 5 lầu, 1 hầm"
-                  required
-              />
-            </div>
-
+            <!-- HÀNG 4 -->
+            <!-- Hiện trạng -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
-                    <i class="fa-solid fa-eye text-white text-xs"></i>
-                  </div>
-                  <span>Hiện trạng đất</span>
-                </span>
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
+            <i class="fa-solid fa-eye text-white text-xs"></i>
+          </div>
+          <span >Hiện trạng đất</span>
+        </span>
               </label>
-              <input
-                  type="text"
-                  v-model="formData.hienTrangDat"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: Đất trống"
-              />
+              <input v-model="formData.hienTrangDat"
+                     class="w-full px-4 py-3 border border-slate-300 rounded-xl" list="hienTrangDatList" />
+              <datalist id="hienTrangDatList">
+                <option value="Đất trống"></option>
+                <option value="Có nhà"></option>
+                <option value="Đã lên thổ cư"></option>
+                <option value="Đang cho thuê"></option>
+                <option value="Đang tranh chấp"></option>
+              </datalist>
+            </div>
+
+            <!-- Độ rộng -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
+            <i class="fa-solid fa-road text-white text-xs"></i>
+          </div>
+          <span>Độ rộng đường</span>
+        </span>
+              </label>
+              <input v-model="formData.doRongDuong"
+                     class="w-full px-4 py-3 border border-slate-300 rounded-xl" />
             </div>
 
             <!-- Lộ giới -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
-                    <i class="fa-solid fa-road text-white text-xs"></i>
-                  </div>
-                  <span>Lộ giới (m)</span>
-                </span>
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
+            <i class="fa-solid fa-road text-white text-xs"></i>
+          </div>
+          <span>Lộ giới</span>
+        </span>
               </label>
-              <div class="relative">
-                <input
-                    type="text"
-                    v-model="formData.loGioi"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Ví dụ: 10"
-                />
-                <i class="fa-solid fa-road absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
+              <input v-model="formData.loGioi"
+                     class="w-full px-4 py-3 border border-slate-300 rounded-xl" />
             </div>
 
-            <!-- Độ rộng đường -->
-            <div class="space-y-2">
+            <!-- FULL -->
+            <div class="space-y-2 col-span-1 md:col-span-2 lg:col-span-3">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
-                    <i class="fa-solid fa-road text-white text-xs"></i>
-                  </div>
-                  <span>Độ rộng đường (m)</span>
-                </span>
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
+            <i class="fa-solid fa-layer-group text-white text-xs"></i>
+          </div>
+          <span>Kết cấu / hình dạng</span>
+        </span>
               </label>
-              <div class="relative">
-                <input
-                    type="text"
-                    v-model="formData.doRongDuong"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Ví dụ: 6"
-                />
-                <i class="fa-solid fa-ruler-combined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
+              <input v-model="formData.structure"
+                     class="w-full px-4 py-3 border border-slate-300 rounded-xl" />
             </div>
 
-            <!-- Quy hoạch -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-                    <i class="fa-solid fa-map text-white text-xs"></i>
-                  </div>
-                  <span>Quy hoạch</span>
-                </span>
-              </label>
-              <input
-                  type="text"
-                  v-model="formData.quyHoach"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: Đất ở đô thị"
-                  readonly
-              />
-            </div>
-
-            <!-- Mặt tiền nhà -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-yellow-500 flex items-center justify-center">
-                    <i class="fa-solid fa-road text-white text-xs"></i>
-                  </div>
-                  <span>Mặt tiền (m)</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="number"
-                    v-model.number="formData.matTienNha"
-                    step="0.1"
-                    min="0"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập mặt tiền"
-                />
-                <i class="fa-solid fa-road absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
-            </div>
-
-            <!-- Giá mong muốn -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
-                    <i class="fa-solid fa-bullseye text-white text-xs"></i>
-                  </div>
-                  <span>Giá mong muốn (VND) *</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="number"
-                    v-model.number="formData.desire"
-                    step="1000000"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập giá mong muốn"
-                    required
-                />
-                <i class="fa-solid fa-dollar-sign absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
-              <div class="text-sm font-medium text-rose-700 bg-rose-50 p-2 rounded-lg">
-                {{ formatMoneyVN(formData.desire) }}
-              </div>
-            </div>
           </div>
         </div>
+
 
         <!-- SECTION 4A: THÔNG TIN NHÀ (chỉ hiện khi loại tài sản là NHA) -->
         <div v-if="isHouse" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-6">
@@ -791,16 +777,16 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-
+            <!-- HÀNG 1 -->
             <!-- Diện tích sàn -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
-                    <i class="fa-solid fa-square text-white text-xs"></i>
-                  </div>
-                  <span>Diện tích sàn (m²)</span>
-                </span>
+      <span class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
+          <i class="fa-solid fa-square text-white text-xs"></i>
+        </div>
+        <span>Diện tích sàn (m²)</span>
+      </span>
               </label>
               <div class="relative">
                 <input
@@ -808,7 +794,9 @@
                     v-model.number="formData.floorArea"
                     step="0.01"
                     min="0"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl
+                 focus:ring-2 focus:ring-emerald-500 focus:border-transparent
+                 bg-white shadow-sm transition-all text-sm hover:border-slate-400"
                     placeholder="Nhập diện tích sàn"
                 />
                 <i class="fa-solid fa-ruler absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
@@ -818,22 +806,76 @@
               </div>
             </div>
 
+            <!-- Loại nhà -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+      <span class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 flex items-center justify-center">
+          <i class="fa-solid fa-home text-white text-xs"></i>
+        </div>
+        <span>Loại nhà</span>
+      </span>
+              </label>
+              <input
+                  type="text"
+                  v-model="formData.loaiNha"
+                  class="w-full px-4 py-3 border border-slate-300 rounded-xl
+               focus:ring-2 focus:ring-purple-500 focus:border-transparent
+               bg-white shadow-sm transition-all text-sm hover:border -slate-400"
+                  placeholder="Ví dụ: Nhà phố" list="loaiNhaList"
+              />
+              <datalist id="loaiNhaList">
+                <option value="Nhà cấp 4"></option>
+                <option value="Chung cư"></option>
+                <option value="Nhà 4 tầng"></option>
+                <option value="Nhà phố"></option>
+                <option value="Nhà biệt thự"></option>
+              </datalist>
+            </div>
+
+            <!-- Tổng số phòng -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+      <span class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
+          <i class="fa-solid fa-door-closed text-white text-xs"></i>
+        </div>
+        <span>Tổng số phòng</span>
+      </span>
+              </label>
+              <div class="relative">
+                <input
+                    type="number"
+                    v-model.number="formData.tongSoPhong"
+                    min="0"
+                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl
+                 focus:ring-2 focus:ring-rose-500 focus:border-transparent
+                 bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                    placeholder="Nhập tổng số phòng"
+                />
+                <i class="fa-solid fa-door-closed absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+              </div>
+            </div>
+
+            <!-- HÀNG 2 -->
             <!-- Số phòng ngủ -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 flex items-center justify-center">
-                    <i class="fa-solid fa-bed text-white text-xs"></i>
-                  </div>
-                  <span>Số phòng ngủ</span>
-                </span>
+      <span class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 flex items-center justify-center">
+          <i class="fa-solid fa-bed text-white text-xs"></i>
+        </div>
+        <span>Số phòng ngủ</span>
+      </span>
               </label>
               <div class="relative">
                 <input
                     type="number"
                     v-model.number="formData.soPhongNgu"
                     min="0"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl
+                 focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                 bg-white shadow-sm transition-all text-sm hover:border-slate-400"
                     placeholder="Nhập số phòng ngủ"
                 />
                 <i class="fa-solid fa-bed absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
@@ -843,133 +885,38 @@
             <!-- Số phòng tắm -->
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
-                    <i class="fa-solid fa-shower text-white text-xs"></i>
-                  </div>
-                  <span>Số phòng tắm</span>
-                </span>
+      <span class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
+          <i class="fa-solid fa-shower text-white text-xs"></i>
+        </div>
+        <span>Số phòng tắm</span>
+      </span>
               </label>
               <div class="relative">
                 <input
                     type="number"
                     v-model.number="formData.soPhongTam"
                     min="0"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl
+                 focus:ring-2 focus:ring-amber-500 focus:border-transparent
+                 bg-white shadow-sm transition-all text-sm hover:border-slate-400"
                     placeholder="Nhập số phòng tắm"
                 />
                 <i class="fa-solid fa-shower absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
               </div>
             </div>
 
-            <!-- Tổng số phòng -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
-                    <i class="fa-solid fa-door-closed text-white text-xs"></i>
-                  </div>
-                  <span>Tổng số phòng</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="number"
-                    v-model.number="formData.tongSoPhong"
-                    min="0"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Nhập tổng số phòng"
-                />
-                <i class="fa-solid fa-door-closed absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
-            </div>
-
-            <!-- Năm xây dựng -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-                    <i class="fa-solid fa-calendar text-white text-xs"></i>
-                  </div>
-                  <span>Năm xây dựng</span>
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                    type="text"
-                    v-model="formData.namXayDung"
-                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                    placeholder="Ví dụ: 2020"
-                />
-                <i class="fa-solid fa-calendar-days absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              </div>
-            </div>
-
-            <!-- Nội thất -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
-                    <i class="fa-solid fa-couch text-white text-xs"></i>
-                  </div>
-                  <span>Nội thất</span>
-                </span>
-              </label>
-              <input
-                  type="text"
-                  v-model="formData.noiThat"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: Cơ bản"
-              />
-            </div>
-
-            <!-- Loại nhà -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 flex items-center justify-center">
-                    <i class="fa-solid fa-home text-white text-xs"></i>
-                  </div>
-                  <span>Loại nhà</span>
-                </span>
-              </label>
-              <input
-                  type="text"
-                  v-model="formData.loaiNha"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: Nhà phố"
-              />
-            </div>
-
-            <!-- Hiện trạng nhà -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-800">
-                <span class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
-                    <i class="fa-solid fa-eye text-white text-xs"></i>
-                  </div>
-                  <span>Hiện trạng nhà</span>
-                </span>
-              </label>
-              <input
-                  type="text"
-                  v-model="formData.hienTrangNha"
-                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white shadow-sm transition-all text-sm hover:border-slate-400"
-                  placeholder="Ví dụ: Sạch sẽ"
-              />
-            </div>
-            <!-- Số tầng -->
+            <!-- Số tầng + Số lầu (GIỮ NGUYÊN GRID CON) -->
             <div class="grid grid-cols-2 gap-2">
-
               <!-- Số tầng -->
               <div class="space-y-2">
                 <label class="block text-sm font-semibold text-slate-800">
-      <span class="flex items-center gap-2">
-        <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-          <i class="fa-solid fa-building text-white text-xs"></i>
-        </div>
-        <span>Số tầng</span>
-      </span>
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
+            <i class="fa-solid fa-building text-white text-xs"></i>
+          </div>
+          <span>Số tầng</span>
+        </span>
                 </label>
                 <div class="relative">
                   <input
@@ -977,8 +924,8 @@
                       v-model.number="formData.soTang"
                       min="0"
                       class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl
-                focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                   focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                   bg-white shadow-sm transition-all text-sm hover:border-slate-400"
                       placeholder="Nhập số tầng"
                   />
                   <i class="fa-solid fa-stairs absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
@@ -988,12 +935,12 @@
               <!-- Số lầu -->
               <div class="space-y-2">
                 <label class="block text-sm font-semibold text-slate-800">
-      <span class="flex items-center gap-2">
-        <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
-          <i class="fa-solid fa-stairs text-white text-xs"></i>
-        </div>
-        <span>Số lầu</span>
-      </span>
+        <span class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
+            <i class="fa-solid fa-stairs text-white text-xs"></i>
+          </div>
+          <span>Số lầu</span>
+        </span>
                 </label>
                 <div class="relative">
                   <input
@@ -1001,15 +948,97 @@
                       v-model.number="formData.soLau"
                       min="0"
                       class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl
-                focus:ring-2 focus:ring-emerald-500 focus:border-transparent
-                bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                   focus:ring-2 focus:ring-emerald-500 focus:border-transparent
+                   bg-white shadow-sm transition-all text-sm hover:border-slate-400"
                       placeholder="Nhập số lầu"
                   />
                   <i class="fa-solid fa-stairs absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
                 </div>
               </div>
             </div>
+
+            <!-- HÀNG 3 -->
+            <!-- Nội thất -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+      <span class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 flex items-center justify-center">
+          <i class="fa-solid fa-couch text-white text-xs"></i>
+        </div>
+        <span>Nội thất</span>
+      </span>
+              </label>
+              <input
+                  type="text"
+                  v-model="formData.noiThat"
+                  class="w-full px-4 py-3 border border-slate-300 rounded-xl
+               focus:ring-2 focus:ring-emerald-500 focus:border-transparent
+               bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                  placeholder="Ví dụ: Cơ bản" list="noiThatList"
+              />
+              <datalist id="noiThatList">
+                <option value="Full nội thất"></option>
+                <option value="Cơ bản"></option>
+                <option value="Nội thất trống"></option>
+                <option value="Có tủ bếp"></option>
+                <option value="Có máy lạnh"></option>
+              </datalist>
+            </div>
+
+
+
+            <!-- Hiện trạng nhà -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+      <span class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
+          <i class="fa-solid fa-eye text-white text-xs"></i>
+        </div>
+        <span>Hiện trạng nhà</span>
+      </span>
+              </label>
+              <input
+                  type="text"
+                  v-model="formData.hienTrangNha"
+                  class="w-full px-4 py-3 border border-slate-300 rounded-xl
+               focus:ring-2 focus:ring-amber-500 focus:border-transparent
+               bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                  placeholder="Ví dụ: Sạch sẽ" list="hienTrangNhaList"
+              />
+              <datalist id="hienTrangNhaList">
+                <option value="Nhà mới"></option>
+                <option value="Nhà đang ở"></option>
+                <option value="Nhà đang cho thuê"></option>
+                <option value="Nhà xuống cấp"></option>
+                <option value="Nhà bỏ trống"></option>
+              </datalist>
+            </div>
+
+            <!-- Năm xây dựng -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-800">
+      <span class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
+          <i class="fa-solid fa-calendar text-white text-xs"></i>
+        </div>
+        <span>Năm xây dựng</span>
+      </span>
+              </label>
+              <div class="relative">
+                <input
+                    type="text"
+                    v-model="formData.namXayDung"
+                    class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl
+                 focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                 bg-white shadow-sm transition-all text-sm hover:border-slate-400"
+                    placeholder="Ví dụ: 2020"
+                />
+                <i class="fa-solid fa-calendar-days absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+              </div>
+            </div>
+
           </div>
+
         </div>
 
         <!-- SECTION: CHI TIẾT PHÒNG -->
@@ -1103,18 +1132,204 @@
             </button>
           </div>
         </div>
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-300 p-6">
+          <section class="mb-5">
+            <div class="d-flex align-items-center mb-4 border-bottom pb-3 gap-3">
+              <!-- ICON -->
+              <div
+                  class="d-flex align-items-center justify-content-center
+           rounded-4
+           bg-danger bg-opacity-10
+           shadow-sm"
+                  style="width: 48px; height: 48px;"
+              >
+                <i class="fas fa-user-tie text-danger fs-4"></i>
+              </div>
+
+              <!-- TEXT -->
+              <div>
+                <h2 class="h5 fw-bold mb-1">Thông tin chủ tài sản và liên hệ</h2>
+                <p class="text-muted small mb-0">Thông tin người sở hữu tài sản</p>
+              </div>
+            </div>
+
+
+            <div class="alert alert-warning border-warning bg-warning-light mb-4" v-if="isLookupMode">
+            <div class="d-flex align-items-start">
+              <i class="fas fa-info-circle mt-1 me-2 text-warning"></i>
+              <div>
+                <p class="mb-1 fw-medium">Chế độ tìm kiếm chủ tài sản</p>
+                <p class="small mb-0">
+                  Đối với hạng "Hợp tác" và "Bán nhanh 30 ngày", hệ thống sẽ tự động tìm và
+                  khóa thông tin khi tìm thấy chủ tài sản.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-4">
+            <!-- Tìm chủ tài sản -->
+            <div class="col-md-4" v-if="isLookupMode">
+              <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                <i class="fas fa-search text-primary"></i>
+                <span>Tìm chủ tài sản <span class="text-danger">*</span></span>
+              </label>
+              <div class="input-group input-group-md">
+        <span class="input-group-text bg-light">
+          <i class="fas fa-search text-muted"></i>
+        </span>
+                <input
+                    type="text"
+                    class="form-control"
+                    v-model.trim="ownerSearch"
+                    @blur="handleOwnerLookup"
+                    placeholder="Nhập số điện thoại hoặc email"
+                />
+              </div>
+
+              <div v-if="ownerLookupMessage" class="mt-2">
+                <div
+                    :class="[
+            'alert',
+            ownerLookupMessage.includes('thành công')
+              ? 'alert-success'
+              : 'alert-danger',
+            'py-2 small'
+          ]"
+                >
+                  <i
+                      :class="
+              ownerLookupMessage.includes('thành công')
+                ? 'fas fa-check-circle'
+                : 'fas fa-exclamation-circle'
+            "
+                  ></i>
+                  {{ ownerLookupMessage }}
+                </div>
+              </div>
+
+              <small v-if="errors.ownerSearch" class="text-danger">
+                {{ errors.ownerSearch }}
+              </small>
+            </div>
+
+            <!-- Họ tên chủ -->
+            <div class="col-md-4">
+              <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                <i class="fas fa-user text-success"></i>
+                <span>Họ tên chủ <span class="text-danger">*</span></span>
+              </label>
+              <div class="input-group input-group-md">
+        <span class="input-group-text bg-light">
+          <i class="fas fa-user text-muted"></i>
+        </span>
+                <input
+                    type="text"
+                    class="form-control"
+                    v-model.trim="formData.ownerName"
+                    :readonly="isLookupMode && formData.ownerId"
+                    :class="{ 'bg-light': isLookupMode && formData.ownerId }"
+                    placeholder="Họ và tên đầy đủ"
+                />
+              </div>
+              <small v-if="errors.ownerName" class="text-danger">
+                {{ errors.ownerName }}
+              </small>
+            </div>
+
+            <!-- Số điện thoại -->
+            <div class="col-md-4">
+              <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                <i class="fas fa-phone text-info"></i>
+                <span>Số điện thoại <span class="text-danger">*</span></span>
+              </label>
+              <div class="input-group input-group-md">
+        <span class="input-group-text bg-light">
+          <i class="fas fa-phone text-muted"></i>
+        </span>
+                <input
+                    type="text"
+                    class="form-control"
+                    v-model.trim="formData.ownerPhone"
+                    :readonly="isLookupMode && formData.ownerId"
+                    :class="{ 'bg-light': isLookupMode && formData.ownerId }"
+                    placeholder="Số điện thoại liên hệ"
+                />
+              </div>
+              <small v-if="errors.ownerPhone" class="text-danger">
+                {{ errors.ownerPhone }}
+              </small>
+            </div>
+          </div>
+
+          <div class="row g-4 mt-2">
+            <!-- Liên hệ mở khóa -->
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">
+                Liên hệ <span class="text-danger">*</span>
+              </label>
+              <input
+                  v-model="formData.lienHeMoKhoa"
+                  type="tel"
+                  class="form-control"
+                  placeholder="VD: 0909 123 456"
+              />
+              <small v-if="errors.lienHeMoKhoa" class="text-danger">
+                {{ errors.lienHeMoKhoa }}
+              </small>
+            </div>
+
+            <!-- Hiện thông tin chủ -->
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">
+                Hiện thông tin chủ khi MG mở khóa
+              </label>
+              <select
+                  v-model="formData.hienThongTinChuKhiMoKhoa"
+                  class="form-select"
+              >
+                <option :value="true">Có</option>
+                <option :value="false">Không</option>
+              </select>
+            </div>
+
+            <!-- Hiện liên hệ -->
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">
+                Hiện liên hệ khi MG mở khóa
+              </label>
+              <select
+                  v-model="formData.hienLienHeKhiMoKhoa"
+                  class="form-select"
+              >
+                <option :value="true">Có</option>
+                <option :value="false">Không</option>
+              </select>
+            </div>
+          </div>
+        </section>
+        </div>
 
         <!-- SECTION: HÌNH ẢNH & TỆP ĐÍNH KÈM -->
         <div class="bg-white rounded-2xl shadow-xl border border-slate-300 p-6">
-          <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
-            <div class="bg-gradient-to-r from-indigo-500 to-blue-500 p-2.5 rounded-xl">
-              <i class="fa-solid fa-images text-white text-lg"></i>
+          <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-200">
+            <div
+                class="w-12 h-12 rounded-2xl
+           bg-gradient-to-r from-indigo-500 to-blue-500
+           flex items-center justify-center
+           shadow-lg shadow-blue-500/30 ring-1 ring-white/30"
+            >
+              <i class="fa-solid fa-images text-white text-2xl"></i>
             </div>
+
             <div>
               <h2 class="text-xl font-bold text-slate-900">Hình ảnh & tài liệu</h2>
-              <p class="text-sm text-slate-600">Quản lý ảnh, sổ và file đính kèm của tài sản.</p>
+              <p class="text-sm text-slate-600">
+                Quản lý ảnh, sổ và file đính kèm của tài sản.
+              </p>
             </div>
           </div>
+
 
           <FileOrLand
               entity-type="land"
@@ -1162,7 +1377,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import {ref, computed, onMounted, watch, reactive} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import api from "/src/api/api.js";
 import FileOrLand from "../land/FileOrLand.vue";
@@ -1330,6 +1545,73 @@ function onAssetTypeChange() {
     formData.value.soLau = "";
   }
 }
+
+const errors = reactive({})
+const ownerSearch = ref('')
+const ownerLookupMessage = ref('')
+const isSubmitting = ref(false)
+const isLookupMode = computed(() =>
+    ['HOPTAC', 'BN30N'].includes(formData.value.phanLoaiHang)
+)
+
+const handleOwnerLookup = async () => {
+  ownerLookupMessage.value = ''
+
+  // Không đúng chế độ thì không lookup
+  if (!isLookupMode.value) return
+
+  if (!ownerSearch.value) {
+    errors.ownerSearch = 'Nhập phone hoặc email để tìm kiếm'
+    return
+  }
+
+  errors.ownerSearch = ''
+
+  try {
+    const { data } = await api.get(
+        '/admin.thg/product/admin/tim-chu-tai-san',
+        {
+          params: {
+            search: ownerSearch.value,
+            phanLoaiHang: formData.value.phanLoaiHang,
+          },
+        }
+    )
+
+    if (data) {
+      formData.value.ownerId = data.id
+      formData.value.ownerName = data.fullName
+      formData.value.ownerPhone = data.phone
+
+      ownerLookupMessage.value = 'Tìm thấy chủ tài sản thành công'
+    } else {
+      ownerLookupMessage.value =
+          'Không tìm thấy chủ tài sản với thông tin đã nhập'
+    }
+  } catch (e) {
+    console.error(e)
+    ownerLookupMessage.value = 'Lỗi khi tìm kiếm chủ tài sản'
+  }
+}
+
+watch(
+    () => formData.value.phanLoaiHang,
+    (newVal, oldVal) => {
+      ownerLookupMessage.value = ''
+      errors.ownerSearch = ''
+
+      const wasLookup = ['HOPTAC', 'BN30N'].includes(oldVal)
+      const isLookup = ['HOPTAC', 'BN30N'].includes(newVal)
+
+      // 👉 CHỈ reset khi TỪ lookup → KHÔNG lookup
+      if (wasLookup && !isLookup) {
+        formData.value.ownerName = ''
+        formData.value.ownerPhone = ''
+        formData.value.ownerId = null
+      }
+    }
+)
+
 
 function handleFilesUpdate(updatedFiles) {
   formData.value.files = updatedFiles;

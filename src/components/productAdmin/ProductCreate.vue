@@ -359,7 +359,7 @@
               <div class="col-md-4">
                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
                   <i class="fas fa-clipboard-check text-info"></i>
-                  <span>Tình trạng <span class="text-danger">*</span></span>
+                  <span>Trạng thái <span class="text-danger">*</span></span>
                 </label>
                 <select class="form-select form-select-md" v-model="form.status">
                   <option value="">-- Chọn tình trạng --</option>
@@ -504,10 +504,9 @@
                     type="text"
                     class="form-control "
                     v-model.trim="form.loaiNha"
-                    list="loaiNhaList"
                     placeholder="Loại nhà"
+                    list="loaiNhaList"
                 >
-
                 <datalist id="loaiNhaList">
                   <option value="Nhà cấp 4"></option>
                   <option value="Chung cư"></option>
@@ -805,7 +804,7 @@
             <div class="row g-4 mt-2">
               <div class="col-md-4">
                 <label class="form-label fw-semibold">
-                  Liên hệ
+                  Liên hệ <span class="text-danger"> *</span>
                 </label>
 
                 <input
@@ -815,6 +814,7 @@
                     placeholder="VD: 0909 123 456"
                 />
               </div>
+              <small v-if="errors.lienHeMoKhoa" class="text-danger">{{ errors.lienHeMoKhoa }}</small>
               <!-- Hiện thông tin chủ khi MG mở khóa -->
               <div class="col-md-4">
                 <label class="form-label fw-semibold">
@@ -1090,11 +1090,24 @@ const validateForm = () => {
     if (!form.ownerPhone) {
       errors.ownerPhone = 'Nhập số điện thoại'
       isValid = false
+    } else if (!isValidVietnamPhone(form.ownerPhone)) {
+      errors.ownerPhone = 'Số điện thoại không đúng định dạng'
+      isValid = false
     }
   } else if (!ownerSearch.value) {
     errors.ownerSearch = 'Nhập phone hoặc email để tìm kiếm'
     isValid = false
   }
+
+  // 🔐 Liên hệ khi MG mở khóa (LUÔN CÓ)
+  if (!form.lienHeMoKhoa) {
+    errors.lienHeMoKhoa = 'Vui lòng nhập số điện thoại liên hệ'
+    isValid = false
+  } else if (!isValidVietnamPhone(form.lienHeMoKhoa)) {
+    errors.lienHeMoKhoa = 'Số điện thoại không đúng định dạng'
+    isValid = false
+  }
+
 
   if (isHouse.value) {
     track(requireNumberField(form.floorArea, 'floorArea', 'Nhập diện tích sàn hợp lệ'))
@@ -1102,7 +1115,6 @@ const validateForm = () => {
     track(requireNumberField(form.tongSoPhong, 'tongSoPhong', 'Nhập tổng số phòng'))
     track(requireNumberField(form.soPhongNgu, 'soPhongNgu', 'Nhập số phòng ngủ'))
     track(requireNumberField(form.soPhongTam, 'soPhongTam', 'Nhập số phòng tắm'))
-    track(requireNumberField(form.soLau, 'soLau', 'Nhập số lầu'))
     track(requireNumberField(form.soTang, 'soTang', 'Nhập số tầng'))
     track(requireTextField(form.noiThat, 'noiThat', 'Nhập thông tin nội thất'))
     track(requireTextField(form.hienTrangNha, 'hienTrangNha', 'Nhập hiện trạng nhà'))
@@ -1116,6 +1128,10 @@ const validateForm = () => {
       const hasMoTa = normalizeText(room.moTa)
       return !(hasLoaiPhong && hasSoLuong && hasDienTich && hasMoTa)
     })
+
+    if(form.soLau == null ){
+      errors.soLau = 'Nhập số lầu'
+    }
 
     if (!hasRooms || invalidRoom) {
       errors.rooms = 'Nhà phải có ít nhất 1 phòng và điền đủ loại phòng, số lượng, diện tích, mô tả'
@@ -1133,6 +1149,17 @@ const validateForm = () => {
 
   return isValid
 }
+
+const isValidVietnamPhone = (phone) => {
+  if (!phone) return false
+
+  const cleaned = phone.replace(/\s+/g, '')
+
+  // 0xxxxxxxxx hoặc +84xxxxxxxxx (9–10 số)
+  return /^(0|\+84)[3|5|7|8|9]\d{8}$/.test(cleaned)
+}
+
+
 
 const handleOwnerLookup = async () => {
   ownerLookupMessage.value = ''

@@ -150,7 +150,7 @@
     <div class="content-grid">
 
       <!-- LEFT COLUMN - GALLERY -->
-      <div class="gallery-section" style="max-width: 900px">
+      <div class="gallery-section" style="width: 930px; max-width: 930px">
         <div class="gallery-wrapper">
           <div class="main-image-container">
             <img :src="asset.slide[activeImage]" alt="Property image" class="main-image" />
