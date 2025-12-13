@@ -1,502 +1,820 @@
-diff --git a/src/components/productAdmin/ProductCreate.vue b/src/components/productAdmin/ProductCreate.vue
-index 3b79e4185230de1b98bc15c4ecdb09c64bf29c64..850feb6a819a776b73bb0c618b3dbd8e4507bc25 100644
---- a/src/components/productAdmin/ProductCreate.vue
-+++ b/src/components/productAdmin/ProductCreate.vue
-@@ -20,51 +20,51 @@
-           <div class="icon-circle-admin">
-             <i class="fas fa-city fs-4"></i>
+diff --git a/src/components/productAdmin/ProductDetail2.vue b/src/components/productAdmin/ProductDetail2.vue
+index 0585bb4f3ecc13c38228de378f33ba607f7771bb..4f128f1f19c074cb39e0d483f83da1e24e8f4769 100644
+--- a/src/components/productAdmin/ProductDetail2.vue
++++ b/src/components/productAdmin/ProductDetail2.vue
+@@ -128,51 +128,62 @@
+               <img
+                   v-for="(img, i) in asset.slide"
+                   :key="i"
+                   :src="img"
+                   @click="activeImage = i"
+                   :class="['thumbnail', { 'thumbnail-active': activeImage === i }]"
+                   alt="Thumbnail"
+               />
+             </div>
            </div>
-           <div>
-             <h1 class="h3 mb-1 fw-bold text-dark">Tạo mới tài sản</h1>
-             <p class="text-muted mb-0">Thêm tài sản mới vào hệ thống quản lý</p>
+           <div class="file-section">
+             <FileOrLand entity-type="land" :entity-id="asset.id" :file-list="asset.files || [] "
+                         :canEdit="false"/>
            </div>
          </div>
        </div>
-       <div class="d-flex gap-2">
-         <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" @click="$router.back()">
-           <i class="fas fa-arrow-left"></i><span>Quay lại</span>
-         </button>
-         <button type="button" class="btn btn-outline-warning d-flex align-items-center gap-2" @click="resetForm">
-           <i class="fas fa-redo"></i><span>Đặt lại</span>
-         </button>
-         <button type="button" class="btn btn-primary d-flex align-items-center gap-2 px-4" :disabled="isSubmitting" @click="submitForm">
-           <i class="fas fa-save"></i><span>{{ isSubmitting ? 'Đang xử lý...' : 'Lưu tài sản' }}</span>
-         </button>
+ 
+       <!-- RIGHT COLUMN - GENERAL INFO -->
+       <div class="info-section">
+         <div class="info-card">
+           <div class="card-header">
+             <i class="fa-solid fa-circle-info header-icon"></i>
+             <h3 class="card-title">Thông tin chung</h3>
+           </div>
+ 
+-          <div class="info-grid">
++          <div class="section-deck">
++            Bản tóm tắt theo phong cách tạp chí, cô đọng những dữ liệu quan trọng nhất để anh/chị nắm nhanh chỉ trong một
++            nhịp lật trang.
++          </div>
++
++          <div class="editorial-band">
++            <span class="band-dot"></span>
++            <span class="band-text">Hồ sơ tài sản – phiên bản biên tập</span>
++            <span class="band-dot"></span>
++          </div>
++
++          <div class="info-grid magazine-grid">
+             <div class="info-row">
+               <span class="info-label">Loại tài sản</span>
+               <span class="info-value" :class="badgeLoai(asset.loaiTaiSan)">
+                   {{ formatLoai( asset.loaiTaiSan ) }}
+                 </span>
+             </div>
+ 
+             <div class="info-row highlight-row">
+               <span class="info-label">Giá bán</span>
+               <span class="info-value price-selling text-primary">{{ formatMoneyVN(asset.giaBan) }}</span>
+             </div>
+ 
+             <div class="info-row highlight-row">
+               <span class="info-label">Giá nội bộ</span>
+               <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.giaNoiBo) }}</span>
+             </div>
+ 
+             <div class="info-row highlight-row">
+               <span class="info-label">Giá mong muốn</span>
+               <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.desire) }}</span>
+             </div>
+ 
+             <div class="info-row">
+               <span class="info-label">Loại đất</span>
+               <span class="info-value">{{ asset.loaiDat }}</span>
+@@ -184,63 +195,76 @@
+                   {{ asset.ownerName }} <span>
+                   ( <i class="fa-solid fa-phone text-danger"></i>
+                   {{ asset.ownerPhone }} )</span>
+                 </span>
+               <span v-else class="text-gray-600">Không có</span>
+             </div>
+ 
+             <div class="info-row">
+               <span class="info-label">Đơn vị sở hữu</span>
+               <span class="info-value owner-unit">
+                   <img v-if="asset.donViSoHuu === 'THG'" src="/imgs/logokn.png" alt="THG" class="unit-logo">
+                   <i v-else-if="asset.donViSoHuu === 'DT'" class="fa-solid fa-handshake unit-icon"></i>
+                     <span>{{ asset.donViSoHuu }}</span>
+                 </span>
+             </div>
+ 
+             <div class="info-row">
+               <span class="info-label">Phí môi giới</span>
+               <span class="info-value text-primary info-commission-pill">
+                 <i class="fa-solid fa-bolt"></i>
+                 {{ asset.phiMoiGioi + '%' }}
+               </span>
+             </div>
+           </div>
+ 
++          <div class="info-footnote">
++            <div class="footnote-bullet"></div>
++            <p class="footnote-copy">
++              Thông tin tài chính và phân loại được biên tập theo phiên bản mới nhất. Các con số nổi bật được đóng khung
++              như chuyên mục "Market Watch" để tiện đối chiếu khi tư vấn.
++            </p>
++          </div>
++
+         </div>
        </div>
      </div>
  
-     <div class="card border-0 shadow-sm">
-       <div class="card-body p-4">
-         <form @submit.prevent>
--          <!-- Thông tin cơ bản -->
-+                    <!-- Thông tin cơ bản -->
-           <section class="mb-5">
-             <div class="d-flex align-items-center mb-4 border-bottom pb-3">
-               <div class="section-icon bg-primary-light">
-                 <i class="fas fa-info-circle text-primary"></i>
-               </div>
-               <div>
-                 <h2 class="h5 fw-bold mb-1">Thông tin cơ bản</h2>
-                 <p class="text-muted small mb-0">Thông tin chính xác định tài sản</p>
-               </div>
-             </div>
-             <div class="row g-4">
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                   <i class="fas fa-building text-primary"></i>
-                   <span>Loại tài sản <span class="text-danger">*</span></span>
-                 </label>
-                 <select class="form-select form-select-md" v-model="form.loaiTaiSan">
-                   <option value="">-- Chọn loại tài sản --</option>
-                   <option value="NHA">Nhà</option>
-                   <option value="DAT">Đất</option>
-                   <option value="DATLON">Đất lớn</option>
-                 </select>
-                 <small v-if="errors.loaiTaiSan" class="text-danger">{{ errors.loaiTaiSan }}</small>
-               </div>
+     <!-- LEGAL INFO SECTION -->
+     <div class="detail-section section-legal">
+       <div class="section-header">
+         <div class="section-title-group">
+           <i class="fa-solid fa-scale-balanced section-icon"></i>
+           <h3 class="section-title">Thông tin pháp lý & quản trị</h3>
+         </div>
+       </div>
  
-@@ -75,302 +75,316 @@
-                 </label>
-                 <select class="form-select form-select-md" v-model="form.phanLoaiHang">
-                   <option value="">-- Chọn phân loại --</option>
-                   <option value="BN30N">Bán nhanh 30 ngày</option>
-                   <option value="HOPTAC">Hợp tác</option>
-                   <option value="HTT">Hàng thị trường</option>
-                 </select>
-                 <small v-if="errors.phanLoaiHang" class="text-danger">{{ errors.phanLoaiHang }}</small>
-               </div>
- 
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                   <i class="fas fa-university text-info"></i>
-                   <span>Đơn vị sở hữu <span class="text-danger">*</span></span>
-                 </label>
-                 <select class="form-select form-select-md" v-model="form.donViSoHuu">
-                   <option value="">-- Chọn đơn vị --</option>
-                   <option value="THG">THG</option>
-                   <option value="DT">Đối tác</option>
-                 </select>
-                 <small v-if="errors.donViSoHuu" class="text-danger">{{ errors.donViSoHuu }}</small>
-               </div>
- 
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
--                  <i class="fas fa-road text-secondary"></i>
--                  <span>Số nhà, đường <span class="text-danger">*</span></span>
-+                  <i class="fas fa-tag text-success"></i>
-+                  <span>Giá bán <span class="text-danger">*</span></span>
-                 </label>
--                <input type="text" class="form-control form-control-md" v-model.trim="formAddress.street" placeholder="Số nhà, tên đường">
--                <small v-if="errors.address" class="text-danger">{{ errors.address }}</small>
-+                <div class="input-group input-group-md">
-+                  <span class="input-group-text bg-light"><i class="fas fa-money-bill-wave"></i></span>
-+                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.giaBan" placeholder="Nhập giá bán">
-+                  <span class="input-group-text bg-light">VNĐ</span>
-+                </div>
-+                <div class="d-flex align-items-center justify-content-between mt-1">
-+                  <small v-if="errors.giaBan" class="text-danger">{{ errors.giaBan }}</small>
-+                  <small v-if="form.giaBan" class="text-success fw-medium">
-+                    <i class="fas fa-coins me-1"></i>{{ formatMoneyVN(form.giaBan) }}
-+                  </small>
-+                </div>
-+              </div>
++      <div class="section-deck">
++        Chuyên mục kiểm chứng pháp lý, trình bày kiểu hồ sơ bìa kép: đầy đủ địa chỉ, quy hoạch, trạng thái lộ giới và các
++        thông số sở hữu giúp môi giới an tâm khi chào khách.
++      </div>
 +
-+              <div class="col-md-4">
-+                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-+                  <i class="fas fa-building text-info"></i>
-+                  <span>Giá nội bộ</span>
-+                </label>
-+                <div class="input-group input-group-md">
-+                  <span class="input-group-text bg-light"><i class="fas fa-eye"></i></span>
-+                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.giaNoiBo" placeholder="Giá nội bộ">
-+                  <span class="input-group-text bg-light">VNĐ</span>
-+                </div>
-+                <small v-if="form.giaNoiBo" class="text-info fw-medium mt-1 d-block">
-+                  <i class="fas fa-chart-line me-1"></i>{{ formatMoneyVN(form.giaNoiBo) }}
-+                </small>
-+              </div>
+       <div class="detail-grid">
+         <div class="detail-item">
+           <span class="detail-label">Đường</span>
+           <span class="detail-value">{{ formatAddressDetail( asset.address ) }}</span>
+         </div>
+         <div class="detail-item">
+           <span class="detail-label">Phường/Xã</span>
+           <span class="detail-value">{{  formatWard( asset.address )  }}</span>
+         </div>
+         <div class="detail-item">
+           <span class="detail-label">Khu vực</span>
+           <span class="detail-value">{{ asset.khuVucMa }}</span>
+         </div>
+ 
+         <div class="detail-item">
+           <span class="detail-label">Địa chỉ cũ</span>
+           <span class="detail-value">{{ asset.oldAddress }}</span>
+         </div>
+         <div class="detail-item">
+           <span class="detail-label">Số tờ bản đồ</span>
+           <span class="detail-value">{{ asset.plotNumber }}</span>
+         </div>
+         <div class="detail-item">
+           <span class="detail-label">Số thửa đất</span>
+           <span class="detail-value">{{ asset.parcelNumber }}</span>
+@@ -277,187 +301,228 @@
+           <span class="detail-label">Loại đất</span>
+           <span class="detail-value">{{ asset.loaiDat }}</span>
+         </div>
+         <div class="detail-item">
+           <span class="detail-label">Hình dạng / Kết cấu</span>
+           <span class="detail-value">{{ asset.structure }}</span>
+         </div>
+         <div class="detail-item">
+           <span class="detail-label">Hiện trạng</span>
+           <span class="detail-value">{{ asset.hienTrangDat }}</span>
+         </div>
+ 
+         <div class="detail-item">
+           <span class="detail-label">Lộ giới & Độ rộng đường</span>
+           <span class="detail-value">{{ asset.loGioi }}m & {{ asset.doRongDuong }}m</span>
+         </div>
+         <div class="detail-item">
+           <span class="detail-label">Quy hoạch</span>
+           <span class="detail-value">{{ asset.quyHoach }}</span>
+         </div>
+         <div class="detail-item">
+           <span class="detail-label">Mặt tiền</span>
+           <span class="detail-value">{{ asset.matTienNha }} m</span>
+         </div>
+       </div>
 +
-+              <div class="col-md-4">
-+                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-+                  <i class="fas fa-percentage text-warning"></i>
-+                  <span>Phí môi giới (%)</span>
-+                </label>
-+                <div class="input-group input-group-md">
-+                  <input type="number" min="0" max="100" step="0.1" class="form-control" v-model.number="form.phiMoiGioi">
-+                  <span class="input-group-text"><i class="fas fa-handshake"></i></span>
-+                </div>
-+              </div>
++      <div class="magazine-ribbon">
++        <span class="ribbon-tag">Editorial Check</span>
++        <p class="ribbon-copy">Những thông số pháp lý trên đã được biên tập theo chuẩn kiểm tra nội bộ, giúp anh/chị dễ
++          dàng thêm vào brochure hoặc gửi file PDF cho khách.</p>
++      </div>
+     </div>
+ 
+     <!-- HOUSE SECTION -->
+     <div class="detail-section section-house" v-if=" getAssetType(asset) === 'NHA'">
+       <div class="section-header">
+         <div class="section-title-group">
+           <i class="fa-solid fa-house-chimney section-icon"></i>
+           <h3 class="section-title">Kích thước & Kết cấu (Nhà)</h3>
+         </div>
+       </div>
+ 
+-      <div class="detail-grid">
++      <div class="section-deck">
++        Góc "Feature Home" trình bày kích thước và kết cấu nổi bật của căn nhà, mô phỏng khối thông tin nằm bên cạnh bộ
++        ảnh trong tạp chí kiến trúc.
++      </div>
 +
-+              <div class="col-md-4">
-+                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-+                  <i class="fas fa-bullseye text-danger"></i>
-+                  <span>Kỳ vọng (tỷ)</span>
-+                </label>
-+                <div class="input-group input-group-md">
-+                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.desire">
-+                  <span class="input-group-text"><i class="fas fa-chart-line"></i></span>
-+                </div>
-+              </div>
++      <div class="detail-grid magazine-highlight">
+         <div class="detail-item">
+           <span class="detail-label">Diện tích sàn</span>
+           <span class="detail-value highlight">{{ formatArea( asset.floorArea ) }} </span>
+         </div>
+         <div class="detail-item">
+           <span class="detail-label">Loại nhà</span>
+           <span class="detail-value highlight">{{ asset.loaiNha }}</span>
+         </div>
+         <div class="detail-item">
+           <span class="detail-label">Số tầng & Số lầu</span>
+           <span class="detail-value">{{ asset.soTang }} tầng & {{ asset.soLau }} lầu </span>
+         </div>
+         <div class="detail-item">
+           <span class="detail-label">Hiện trạng nhà</span>
+           <span class="detail-value">{{ asset.hienTrangNha }}</span>
+         </div>
+ 
+         <div class="detail-item">
+           <span class="detail-label">Phòng ngủ</span>
+           <span class="detail-value">{{ asset.soPhongNgu }} phòng</span>
+         </div>
+ 
+         <div class="detail-item">
+           <span class="detail-label">Phòng tắm</span>
+           <span class="detail-value">{{ asset.soPhongTam }} phòng</span>
+         </div>
+ 
+         <div class="detail-item">
+           <span class="detail-label">Tổng số phòng</span>
+           <span class="detail-value">{{ asset.tongSoPhong }} phòng</span>
+         </div>
+ 
+         <div class="detail-item">
+           <span class="detail-label">Năm xây dựng</span>
+           <span class="detail-value">{{ asset.namXayDung }}</span>
+         </div>
+ 
+         <div class="detail-item">
+           <span class="detail-label">Nội thất</span>
+           <span class="detail-value">{{ asset.noiThat }}</span>
+         </div>
+       </div>
 +
-+              <div class="col-md-4">
-+                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-+                  <i class="fas fa-eye text-primary"></i>
-+                  <span>Hiển thị</span>
-+                </label>
-+                <select class="form-select form-select-md" v-model="form.show">
-+                  <option :value="true">Hiển thị</option>
-+                  <option :value="false">Ẩn</option>
-+                </select>
-               </div>
-+            </div>
-+          </section>
++      <div class="editorial-note">
++        <div class="note-title">Góc biên tập</div>
++        <p class="note-copy">Các mốc tầng, phòng và năm xây dựng được trình bày dạng bullet ngắn gọn để người xem lướt mắt
++          qua vẫn cảm nhận được "tính cách" của căn nhà giống như đọc mục "Specs" trong tạp chí nhà đẹp.</p>
++      </div>
+     </div>
  
-+          <!-- Địa chỉ &amp; vị trí -->
-+          <section class="mb-5">
-+            <div class="d-flex align-items-center mb-4 border-bottom pb-3">
-+              <div class="section-icon bg-success-light">
-+                <i class="fas fa-map-marked-alt text-success"></i>
-+              </div>
-+              <div>
-+                <h2 class="h5 fw-bold mb-1">Địa chỉ &amp; vị trí</h2>
-+                <p class="text-muted small mb-0">Chi tiết nơi tọa lạc của tài sản</p>
-+              </div>
-+            </div>
-+            <div class="row g-4">
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                   <i class="fas fa-map-marker-alt text-danger"></i>
-                   <span>Tỉnh/Thành phố <span class="text-danger">*</span></span>
-                 </label>
-                 <select class="form-select form-select-md" v-model="formAddress.province">
-                   <option value="">-- Chọn Tỉnh/TP --</option>
-                   <option v-for="province in provinceOptions" :key="province.code" :value="province.name">{{ province.name }}</option>
-                 </select>
-                 <small v-if="errors.address" class="text-danger">{{ errors.address }}</small>
-               </div>
+     <!-- ROOMS DETAIL -->
+     <div class="detail-section section-rooms" v-if="getAssetType(asset) === 'NHA'">
+       <div class="section-header">
+         <div class="section-title-group">
+           <i class="fa-solid fa-door-closed section-icon"></i>
+           <h3 class="section-title">Chi tiết phòng</h3>
+         </div>
+       </div>
  
-+              <div class="col-md-4">
-+                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-+                  <i class="fas fa-road text-secondary"></i>
-+                  <span>Số nhà, đường <span class="text-danger">*</span></span>
-+                </label>
-+                <input type="text" class="form-control form-control-md" v-model.trim="formAddress.street" placeholder="Số nhà, tên đường">
-+                <small v-if="errors.address" class="text-danger">{{ errors.address }}</small>
-+              </div>
++      <div class="section-deck">
++        Bảng phân bổ phòng được thiết kế như trang nội dung "Room Brief" trong tạp chí: rõ ràng, mạch lạc và có ghi chú
++        cho từng mô tả.
++      </div>
 +
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                   <i class="fas fa-map-pin text-success"></i>
-                   <span>Quận/Huyện/Phường <span class="text-danger">*</span></span>
-                 </label>
-                 <select class="form-select form-select-md" v-model="formAddress.ward" :disabled="!formAddress.province">
-                   <option value="">-- Chọn khu vực --</option>
-                   <option v-for="ward in wardOptions" :key="ward.name" :value="ward.name">{{ ward.name }}</option>
-                 </select>
-                 <small v-if="errors.address" class="text-danger">{{ errors.address }}</small>
-               </div>
- 
-+              <div class="col-md-4">
-+                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-+                  <i class="fas fa-map-pin text-primary"></i>
-+                  <span>Vị trí đất</span>
-+                </label>
-+                <input type="text" class="form-control form-control-md" v-model.trim="form.landPosition" placeholder="Vị trí chi tiết">
-+              </div>
+       <div class="table-wrapper">
+-        <!-- Nếu có room thì mới hiện table -->
+-        <table class="executive-table" v-if="asset.rooms && asset.rooms.length > 0">
++        <div class="table-caption" v-if="asset.rooms && asset.rooms.length > 0">
++          Dàn trải phòng ốc — bản in thử
++        </div>
 +
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                   <i class="fas fa-history text-muted"></i>
-                   <span>Địa chỉ cũ</span>
-                 </label>
-                 <input type="text" class="form-control form-control-md" v-model.trim="form.oldAddress" placeholder="Địa chỉ cũ (nếu có)">
-               </div>
-+            </div>
-+          </section>
++        <table class="executive-table magazine-table" v-if="asset.rooms && asset.rooms.length > 0">
+           <thead>
+           <tr>
+             <th>Loại phòng</th>
+             <th>Số lượng</th>
+             <th>Diện tích (từng phòng)</th>
+             <th>Mô tả</th>
+           </tr>
+           </thead>
+ 
+           <tbody>
+           <tr v-for="(r, index) in asset.rooms" :key="index">
+             <td class="room-type">{{ r.loaiPhong }}</td>
+             <td class="text-start">{{ r.soLuong }}</td>
+             <td class="room-area">{{ r.dienTich }} m²</td>
+             <td class="room-desc">{{ r.moTa || '—' }}</td>
+           </tr>
+           </tbody>
+         </table>
+ 
+         <!-- Nếu không có dữ liệu -->
+         <div v-else class="text-center text-muted py-3">
+           Chưa có thông tin
+         </div>
+-
++        <div class="table-footnote" v-if="asset.rooms && asset.rooms.length > 0">
++          Số liệu phòng lấy trực tiếp từ khảo sát hiện trạng. Mỗi mô tả được biên tập gọn để dễ đưa vào leaflet bán hàng.
++        </div>
+       </div>
+     </div>
+ 
+     <!-- VALUATION SECTION -->
+     <div class="detail-section section-valuation">
+       <div class="section-header">
+         <div class="section-title-group">
+           <i class="fa-solid fa-chart-line section-icon"></i>
+           <h3 class="section-title">Định giá</h3>
+         </div>
+       </div>
+ 
++      <div class="section-deck">
++        Dữ liệu định giá được trình bày như mục "Market Insight" với nhịp điệu timeline, giúp môi giới dễ kể câu chuyện
++        về giá trị tài sản qua từng kỳ.
++      </div>
 +
-+          <!-- Thông tin pháp lý &amp; diện tích -->
-+          <section class="mb-5">
-+            <div class="d-flex align-items-center mb-4 border-bottom pb-3">
-+              <div class="section-icon bg-warning-light">
-+                <i class="fas fa-balance-scale text-warning"></i>
-+              </div>
-+              <div>
-+                <h2 class="h5 fw-bold mb-1">Thông tin pháp lý &amp; diện tích</h2>
-+                <p class="text-muted small mb-0">Các thông tin mô tả đặc điểm và pháp lý của tài sản</p>
-+              </div>
-+            </div>
+       <div v-if="!asset.valuations || asset.valuations.length === 0" class="empty-state">
+         <i class="fa-solid fa-chart-simple empty-icon"></i>
+         <p class="empty-text">Chưa có dữ liệu định giá cho tài sản này</p>
+       </div>
  
-+            <div class="row g-4">
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                   <i class="fas fa-hashtag text-primary"></i>
-                   <span>Số thửa</span>
-                 </label>
-                 <input type="text" class="form-control form-control-md" v-model.trim="form.plotNumber" placeholder="Số thửa">
-               </div>
- 
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                   <i class="fas fa-file-alt text-info"></i>
-                   <span>Số tờ</span>
-                 </label>
-                 <input type="text" class="form-control form-control-md" v-model.trim="form.parcelNumber" placeholder="Số tờ">
-               </div>
- 
-+              <div class="col-md-4">
-+                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-+                  <i class="fas fa-mountain text-success"></i>
-+                  <span>Loại đất</span>
-+                </label>
-+                <input type="text" class="form-control form-control-md" v-model.trim="form.loaiDat" placeholder="Loại đất">
-+              </div>
+-      <div v-else class="table-wrapper">
+-        <table class="executive-table">
++      <div v-else class="table-wrapper valuation-wrapper">
++        <div class="table-caption">
++          Timeline định giá — bản lưu trữ nội bộ
++        </div>
++        <table class="executive-table magazine-table">
+           <thead>
+           <tr>
+             <th>Lần định giá</th>
+             <th>Ngày hiệu lực</th>
+             <th>Tổng giá</th>
+             <th>Giá cao nhất</th>
+             <th>Tương quan</th>
+             <th>File PDF</th>
+           </tr>
+           </thead>
+           <tbody>
+           <tr v-for="v in asset.valuations" :key="v.valuationId">
+             <td class="valuation-round">Lần {{ v.valuationRound }}</td>
+             <td>{{ v.effectiveDate }}</td>
+             <td><span class="price-valuation">{{ formatMoneyVN( v.totalPrice ) }}</span></td>
+             <td><span class="price-valuation">{{  formatMoneyVN( v.totalMaxPrice) }}</span></td>
+             <td v-html="renderPriceCompare(asset.desire, v.totalPrice)"> </td>
+             <td>
+               <button class="pdf-btn" @click="openPdf(v.pdfFile)">
+                 <i class="fa-solid fa-file-pdf"></i>
+                 <span>{{ v.pdfFile.fileName }}</span>
+               </button>
+             </td>
+           </tr>
+           </tbody>
+         </table>
 +
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                   <i class="fas fa-expand-alt text-success"></i>
-                   <span>Tổng diện tích (m²)</span>
-                 </label>
-                 <div class="input-group input-group-md">
-                   <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.totalArea">
-                   <span class="input-group-text"><i class="fas fa-ruler-combined"></i></span>
-                 </div>
-               </div>
++        <div class="valuation-note">
++          <div class="note-title">Ghi chú biên tập</div>
++          <p class="note-copy">Các giá trị được sắp xếp theo từng lần định giá như mục timeline, kèm mô tả tương quan để
++            anh/chị dễ dẫn dắt khách hàng: từ mức mong muốn đến mức khảo sát thị trường.</p>
++        </div>
+       </div>
+     </div>
+   </div>
+ </template>
  
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                   <i class="fas fa-handshake text-warning"></i>
-                   <span>Quan hệ sở hữu</span>
-                 </label>
-                 <input type="text" class="form-control form-control-md" v-model.trim="form.ownershipRelation" placeholder="Quan hệ với chủ sở hữu">
-               </div>
+ <script setup>
+ import { ref, onMounted, computed } from "vue";
+ import { useRoute, useRouter } from "vue-router";
+ import FileOrLand from "../land/FileOrLand.vue";
  
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                   <i class="fas fa-gavel text-danger"></i>
-                   <span>Quyền sử dụng đất</span>
-                 </label>
-                 <input type="text" class="form-control form-control-md" v-model.trim="form.landUseRight" placeholder="Quyền sử dụng đất">
-               </div>
+ const route = useRoute();
+ const router = useRouter();
+ const id = route.params.id;
+ const activeImage = ref(0);
  
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
--                  <i class="fas fa-arrows-alt-h text-success"></i>
--                  <span>Độ rộng đường (m)</span>
--                </label>
--                <div class="input-group input-group-md">
--                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.doRongDuong">
--                  <span class="input-group-text"><i class="fas fa-road"></i></span>
--                </div>
--              </div>
--
--              <div class="col-md-4">
--                <label class="form-label fw-semibold d-flex align-items-center gap-2">
--                  <i class="fas fa-ruler-horizontal text-primary"></i>
--                  <span>Lộ giới (m)</span>
--                </label>
--                <div class="input-group input-group-md">
--                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.loGioi">
--                  <span class="input-group-text"><i class="fas fa-ruler"></i></span>
--                </div>
--              </div>
--
--              <div class="col-md-4">
--                <label class="form-label fw-semibold d-flex align-items-center gap-2">
--                  <i class="fas fa-layer-group text-info"></i>
--                  <span>Diện tích sàn (m²)</span>
-+                  <i class="fas fa-arrows-alt-h text-primary"></i>
-+                  <span>Chiều ngang (m)</span>
-                 </label>
-                 <div class="input-group input-group-md">
--                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.floorArea">
--                  <span class="input-group-text"><i class="fas fa-th-large"></i></span>
-+                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.chieuNgang">
-+                  <span class="input-group-text"><i class="fas fa-ruler-horizontal"></i></span>
-                 </div>
-               </div>
+ const asset = ref(null);
+ const rooms = ref([]);
+ const pdfUrl = ref(null);
  
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
--                  <i class="fas fa-tag text-success"></i>
--                  <span>Giá bán <span class="text-danger">*</span></span>
-+                  <i class="fas fa-arrows-alt-v text-success"></i>
-+                  <span>Chiều dài (m)</span>
-                 </label>
-                 <div class="input-group input-group-md">
--                  <span class="input-group-text bg-light"><i class="fas fa-money-bill-wave"></i></span>
--                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.giaBan" placeholder="Nhập giá bán">
--                  <span class="input-group-text bg-light">VNĐ</span>
--                </div>
--                <div class="d-flex align-items-center justify-content-between mt-1">
--                  <small v-if="errors.giaBan" class="text-danger">{{ errors.giaBan }}</small>
--                  <small v-if="form.giaBan" class="text-success fw-medium">
--                    <i class="fas fa-coins me-1"></i>{{ formatMoneyVN(form.giaBan) }}
--                  </small>
-+                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.chieuDai">
-+                  <span class="input-group-text"><i class="fas fa-ruler-vertical"></i></span>
-                 </div>
-               </div>
+ onMounted(() => loadDetail(id));
  
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
--                  <i class="fas fa-building text-info"></i>
--                  <span>Giá nội bộ</span>
-+                  <i class="fas fa-shapes text-warning"></i>
-+                  <span>Hình dạng thửa đất</span>
-                 </label>
--                <div class="input-group input-group-md">
--                  <span class="input-group-text bg-light"><i class="fas fa-eye"></i></span>
--                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.giaNoiBo" placeholder="Giá nội bộ">
--                  <span class="input-group-text bg-light">VNĐ</span>
--                </div>
--                <small v-if="form.giaNoiBo" class="text-info fw-medium mt-1 d-block">
--                  <i class="fas fa-chart-line me-1"></i>{{ formatMoneyVN(form.giaNoiBo) }}
--                </small>
-+                <input type="text" class="form-control form-control-md" v-model.trim="form.hinhDangThuaDat" placeholder="Hình dạng">
-               </div>
+ import api from "/src/api/api.js"
+ import Spam from "./Spam.vue";
  
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
--                  <i class="fas fa-percentage text-warning"></i>
--                  <span>Phí môi giới (%)</span>
-+                  <i class="fas fa-search text-info"></i>
-+                  <span>Hiện trạng đất</span>
-                 </label>
--                <div class="input-group input-group-md">
--                  <input type="number" min="0" max="100" step="0.1" class="form-control" v-model.number="form.phiMoiGioi">
--                  <span class="input-group-text"><i class="fas fa-handshake"></i></span>
--                </div>
-+                <input type="text" class="form-control form-control-md" v-model.trim="form.hienTrangDat" placeholder="Hiện trạng">
-               </div>
+ async function loadDetail(id) {
+@@ -1272,70 +1337,117 @@ const openPdf = async (pdfFile) => {
+ .info-section {
+   display: flex;
+   flex-direction: column;
+ }
  
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
--                  <i class="fas fa-bullseye text-danger"></i>
--                  <span>Kỳ vọng (tỷ)</span>
-+                  <i class="fas fa-arrows-alt-h text-success"></i>
-+                  <span>Độ rộng đường (m)</span>
-                 </label>
-                 <div class="input-group input-group-md">
--                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.desire">
--                  <span class="input-group-text"><i class="fas fa-chart-line"></i></span>
-+                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.doRongDuong">
-+                  <span class="input-group-text"><i class="fas fa-road"></i></span>
-                 </div>
-               </div>
+ .info-card {
+   background: linear-gradient(180deg, #fffdf6 0%, #ffffff 60%);
+   border-radius: 16px;
+   padding: 28px;
+   box-shadow: 0 18px 36px -24px rgba(15, 23, 42, 0.45);
+   border: 1px solid #e7dec8;
+   height: 100%;
+   position: relative;
+   overflow: hidden;
+ }
  
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
--                  <i class="fas fa-eye text-primary"></i>
--                  <span>Hiển thị</span>
--                </label>
--                <select class="form-select form-select-md" v-model="form.show">
--                  <option :value="true">Hiển thị</option>
--                  <option :value="false">Ẩn</option>
--                </select>
--              </div>
--            </div>
--          </section>
--
--          <!-- Thông tin vị trí -->
--          <section class="mb-5">
--            <div class="d-flex align-items-center mb-4 border-bottom pb-3">
--              <div class="section-icon bg-success-light">
--                <i class="fas fa-map-marked-alt text-success"></i>
--              </div>
--              <div>
--                <h2 class="h5 fw-bold mb-1">Thông tin vị trí</h2>
--                <p class="text-muted small mb-0">Chi tiết vị trí và đặc điểm đất</p>
--              </div>
--            </div>
--            <div class="row g-4">
--              <div class="col-md-4">
--                <label class="form-label fw-semibold d-flex align-items-center gap-2">
--                  <i class="fas fa-map-pin text-primary"></i>
--                  <span>Vị trí đất</span>
--                </label>
--                <input type="text" class="form-control form-control-md" v-model.trim="form.landPosition" placeholder="Vị trí chi tiết">
--              </div>
--
--              <div class="col-md-4">
--                <label class="form-label fw-semibold d-flex align-items-center gap-2">
--                  <i class="fas fa-seedling text-success"></i>
--                  <span>Loại đất</span>
--                </label>
--                <input type="text" class="form-control form-control-md" v-model.trim="form.loaiDat" placeholder="Loại đất">
--              </div>
--
--              <div class="col-md-4">
--                <label class="form-label fw-semibold d-flex align-items-center gap-2">
--                  <i class="fas fa-shapes text-warning"></i>
--                  <span>Hình dạng thửa đất</span>
--                </label>
--                <input type="text" class="form-control form-control-md" v-model.trim="form.hinhDangThuaDat" placeholder="Hình dạng">
--              </div>
--
--              <div class="col-md-4">
--                <label class="form-label fw-semibold d-flex align-items-center gap-2">
--                  <i class="fas fa-search text-info"></i>
--                  <span>Hiện trạng đất</span>
--                </label>
--                <input type="text" class="form-control form-control-md" v-model.trim="form.hienTrangDat" placeholder="Hiện trạng">
--              </div>
--
--              <div class="col-md-4">
--                <label class="form-label fw-semibold d-flex align-items-center gap-2">
--                  <i class="fas fa-arrows-alt-h text-primary"></i>
--                  <span>Chiều ngang (m)</span>
-+                  <i class="fas fa-ruler-horizontal text-primary"></i>
-+                  <span>Lộ giới (m)</span>
-                 </label>
-                 <div class="input-group input-group-md">
--                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.chieuNgang">
--                  <span class="input-group-text"><i class="fas fa-ruler-horizontal"></i></span>
-+                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.loGioi">
-+                  <span class="input-group-text"><i class="fas fa-ruler"></i></span>
-                 </div>
-               </div>
+ .card-header {
+   display: flex;
+   align-items: center;
+   gap: 12px;
+   margin-bottom: 24px;
+   padding-bottom: 16px;
+   border-bottom: 2px solid #f1f5f9;
+ }
  
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
--                  <i class="fas fa-arrows-alt-v text-success"></i>
--                  <span>Chiều dài (m)</span>
-+                  <i class="fas fa-layer-group text-info"></i>
-+                  <span>Diện tích sàn (m²)</span>
-                 </label>
-                 <div class="input-group input-group-md">
--                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.chieuDai">
--                  <span class="input-group-text"><i class="fas fa-ruler-vertical"></i></span>
-+                  <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.floorArea">
-+                  <span class="input-group-text"><i class="fas fa-th-large"></i></span>
-                 </div>
-               </div>
-             </div>
-           </section>
--
--          <!-- Thông tin nhà (Chỉ hiển thị khi là nhà) -->
-+<!-- Thông tin nhà (Chỉ hiển thị khi là nhà) -->
-           <section v-if="isHouse" class="mb-5">
-             <div class="d-flex align-items-center mb-4 border-bottom pb-3">
-               <div class="section-icon bg-warning-light">
-                 <i class="fas fa-home text-warning"></i>
-               </div>
-               <div>
-                 <h2 class="h5 fw-bold mb-1">Thông tin nhà</h2>
-                 <p class="text-muted small mb-0">Chi tiết về công trình nhà ở</p>
-               </div>
-             </div>
-             <div class="row g-4">
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                   <i class="fas fa-layer-group text-primary"></i>
-                   <span>Số lầu</span>
-                 </label>
-                 <input type="number" min="0" class="form-control form-control-md" v-model.number="form.soLau">
-               </div>
++.section-deck {
++  color: #475569;
++  font-size: 15px;
++  line-height: 1.6;
++  background: #f8fafc;
++  border-left: 4px solid #94a3b8;
++  padding: 12px 16px;
++  border-radius: 12px;
++  margin: -4px 0 18px;
++  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
++}
++
++.editorial-band {
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  gap: 12px;
++  background: linear-gradient(90deg, #e0f2fe, #f8fafc, #e0f2fe);
++  padding: 10px 14px;
++  border-radius: 12px;
++  margin-bottom: 18px;
++  border: 1px solid #bfdbfe;
++}
++
++.band-dot {
++  width: 10px;
++  height: 10px;
++  border-radius: 50%;
++  background: #0ea5e9;
++  box-shadow: 0 0 0 6px rgba(14, 165, 233, 0.12);
++}
++
++.band-text {
++  letter-spacing: 1px;
++  text-transform: uppercase;
++  color: #0f172a;
++  font-weight: 700;
++}
++
+ .header-icon {
+   font-size: 22px;
+   color: #3b82f6;
+ }
  
-               <div class="col-md-4">
-                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                   <i class="fas fa-building text-info"></i>
-                   <span>Số tầng</span>
-                 </label>
-                 <input type="number" min="0" class="form-control form-control-md" v-model.number="form.soTang">
+ .card-title {
+   font-size: 20px;
+   font-weight: 700;
+   color: #0f172a;
+   margin: 0;
+   letter-spacing: 0.3px;
+   text-transform: uppercase;
+ }
+ 
+ .info-grid {
+   display: flex;
+   flex-direction: column;
+   gap: 12px;
+ }
+ 
++.magazine-grid {
++  background: #ffffff;
++  padding: 12px;
++  border-radius: 14px;
++  border: 1px dashed #e2e8f0;
++  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
++}
++
+ .info-row {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   padding: 12px 14px;
+   border: 1px solid #e2e8f0;
+   background: #f8fafc;
+   border-radius: 10px;
+   box-shadow: 0 10px 24px -20px rgba(15, 23, 42, 0.35);
+ }
+ 
+ .info-row:last-child {
+   border-bottom: none;
+ }
+ 
+ .highlight-row {
+   background: linear-gradient(90deg, #e0f2fe 0%, #ffffff 100%);
+   padding: 12px 16px;
+   margin: 0;
+   border: 1px solid #bae6fd;
+   border-radius: 10px;
+ }
+ 
+ .info-label {
+   color: #64748b;
+@@ -1369,175 +1481,321 @@ const openPdf = async (pdfFile) => {
+ .owner-unit {
+   display: flex;
+   align-items: center;
+   gap: 8px;
+ }
+ 
+ .unit-logo {
+   width: 50px;
+   height: 30px;
+   object-fit: contain;
+   border-radius: 16px;
+   border: 1px solid #2563eb;
+ }
+ 
+ .unit-icon {
+   font-size: 18px;
+   color: #3b82f6;
+ }
+ 
+ .file-section {
+   margin-top: 24px;
+   padding-top: 24px;
+   border-top: 2px solid #f1f5f9;
+ }
+ 
++.info-footnote {
++  display: flex;
++  gap: 10px;
++  align-items: flex-start;
++  margin-top: 16px;
++  padding: 14px 16px;
++  background: #f8fafc;
++  border-radius: 12px;
++  border: 1px solid #e2e8f0;
++  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
++}
++
++.footnote-bullet {
++  width: 12px;
++  height: 12px;
++  border-radius: 50%;
++  background: #3b82f6;
++  margin-top: 4px;
++  box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.12);
++}
++
++.footnote-copy {
++  margin: 0;
++  color: #475569;
++  line-height: 1.6;
++}
++
+ /* ========= DETAIL SECTIONS ========= */
+ .detail-section {
+   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 85%);
+   border-radius: 16px;
+   padding: 32px;
+   margin-bottom: 24px;
+   box-shadow: 0 18px 40px -26px rgba(15, 23, 42, 0.35);
+   border: 1px solid #e2e8f0;
+   border-left: 4px solid;
+ }
+ 
+ .section-legal {
+   border-left-color: #0ea5e9;
+ }
+ 
+ .section-house {
+   border-left-color: #10b981;
+ }
+ 
+ .section-land {
+   border-left-color: #f59e0b;
+ }
+ 
+ .section-rooms {
+   border-left-color: #8b5cf6;
+ }
+ 
+ .section-valuation {
+   border-left-color: #ef4444;
+ }
+ 
+ .section-header {
+   margin-bottom: 28px;
+   padding-bottom: 16px;
+   border-bottom: 2px solid #e2e8f0;
+   position: relative;
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+ }
+ 
++.magazine-ribbon {
++  margin-top: 18px;
++  display: grid;
++  grid-template-columns: auto 1fr;
++  gap: 10px 14px;
++  align-items: center;
++  background: linear-gradient(90deg, #fef3c7, #fff7ed);
++  padding: 12px 16px;
++  border-radius: 12px;
++  border: 1px solid #fef3c7;
++  box-shadow: 0 10px 28px -24px rgba(234, 88, 12, 0.5);
++}
++
++.ribbon-tag {
++  background: #f59e0b;
++  color: #fff7ed;
++  padding: 6px 10px;
++  border-radius: 999px;
++  font-weight: 700;
++  letter-spacing: 0.5px;
++  text-transform: uppercase;
++}
++
++.ribbon-copy {
++  margin: 0;
++  color: #92400e;
++  line-height: 1.6;
++}
++
+ .section-title-group {
+   display: flex;
+   align-items: center;
+   gap: 12px;
+ }
+ 
+ .section-icon {
+   font-size: 24px;
+   color: inherit;
+ }
+ 
+ .section-legal .section-icon {
+   color: #0ea5e9;
+ }
+ 
+ .section-house .section-icon {
+   color: #10b981;
+ }
+ 
+ .section-land .section-icon {
+   color: #f59e0b;
+ }
+ 
+ .section-rooms .section-icon {
+   color: #8b5cf6;
+ }
+ 
+ .section-valuation .section-icon {
+   color: #ef4444;
+ }
+ 
+ .section-title {
+   font-size: 22px;
+   font-weight: 700;
+   color: #0f172a;
+   margin: 0;
+   letter-spacing: 0.4px;
+ }
+ 
+ /* ========= DETAIL GRID ========= */
+ .detail-grid {
+   display: grid;
+   grid-template-columns: repeat(3, 1fr);
+   gap: 20px 24px;
+ }
+ 
++.magazine-highlight .detail-item {
++  background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 90%);
++  border: 1px solid #e0f2fe;
++  position: relative;
++  overflow: hidden;
++}
++
++.magazine-highlight .detail-item::after {
++  content: "";
++  position: absolute;
++  inset: 0;
++  background: radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.12), transparent 45%);
++  pointer-events: none;
++}
++
+ .detail-item {
+   display: flex;
+   flex-direction: column;
+   gap: 6px;
+   padding: 16px 18px;
+   background: #ffffff;
+   border: 1px solid #e2e8f0;
+   border-radius: 12px;
+   box-shadow: 0 10px 26px -20px rgba(15, 23, 42, 0.45);
+ }
+ 
+ .detail-label {
+   color: #64748b;
+   font-size: 13px;
+   font-weight: 600;
+   text-transform: uppercase;
+   letter-spacing: 0.5px;
+ }
+ 
+ .detail-value {
+   color: #0f172a;
+   font-size: 15px;
+   font-weight: 600;
+ }
+ 
+ .detail-value.highlight {
+   color: #3b82f6;
+   font-size: 16px;
+   font-weight: 700;
+ }
+ 
++.editorial-note {
++  margin-top: 18px;
++  padding: 14px 16px;
++  background: linear-gradient(90deg, #ecfeff, #f8fafc);
++  border-radius: 12px;
++  border: 1px solid #cbd5e1;
++  display: grid;
++  grid-template-columns: 140px 1fr;
++  gap: 10px 16px;
++  align-items: center;
++}
++
++.note-title {
++  font-weight: 800;
++  text-transform: uppercase;
++  color: #0f172a;
++  letter-spacing: 0.8px;
++}
++
++.note-copy {
++  margin: 0;
++  color: #475569;
++  line-height: 1.6;
++}
++
+ /* ========= TABLE ========= */
+ .table-wrapper {
+   overflow-x: auto;
+   border-radius: 12px;
+   border: 1px solid #e2e8f0;
+ }
+ 
++.table-caption {
++  background: #0f172a;
++  color: #e2e8f0;
++  padding: 10px 14px;
++  border-radius: 12px 12px 0 0;
++  letter-spacing: 0.8px;
++  text-transform: uppercase;
++  font-weight: 700;
++}
++
++.magazine-table thead {
++  background: linear-gradient(90deg, #e0f2fe, #f8fafc);
++}
++
++.magazine-table tbody tr:nth-child(odd) {
++  background: #f8fafc;
++}
++
++.magazine-table tbody tr:nth-child(even) {
++  background: #ffffff;
++}
++
++.table-footnote {
++  padding: 10px 14px;
++  background: #f8fafc;
++  border-top: 1px solid #e2e8f0;
++  border-radius: 0 0 12px 12px;
++  color: #475569;
++  font-size: 14px;
++}
++
++.valuation-wrapper {
++  border-radius: 16px;
++  border: 1px solid #e2e8f0;
++  box-shadow: 0 10px 24px -22px rgba(15, 23, 42, 0.35);
++}
++
++.valuation-wrapper .table-caption {
++  background: #111827;
++  color: #f3f4f6;
++}
++
++.valuation-note {
++  padding: 14px 16px;
++  background: #fff7ed;
++  border-top: 1px solid #ffe4e6;
++  border-radius: 0 0 16px 16px;
++  color: #92400e;
++}
++
+ .executive-table {
+   width: 100%;
+   border-collapse: collapse;
+   font-size: 14px;
+ }
+ 
+ .executive-table thead {
+   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+ }
+ 
+ .executive-table th {
+   padding: 16px 20px;
+   text-align: left;
+   font-weight: 700;
+   color: #475569;
+   text-transform: uppercase;
+   font-size: 12px;
+   letter-spacing: 0.5px;
+   border-bottom: 2px solid #e2e8f0;
+ }
+ 
+ .executive-table tbody tr {
+   border-bottom: 1px solid #f1f5f9;
+   transition: background 0.2s;
+ }

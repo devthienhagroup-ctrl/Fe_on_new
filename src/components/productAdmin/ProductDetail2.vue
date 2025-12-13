@@ -12,13 +12,13 @@
           </button>
 
           <div class="property-title-section">
-            <h1 class="property-address">{{ formatAddress( asset.address ) }}</h1>
+            <h1 class="property-address">{{ formatAddress( asset.address ) ?? 'Chưa cập nhật' }}</h1>
 
             <div class="property-meta">
                 <span class="meta-item">
                   <span class="meta-label">Loại mặt hàng:</span>
                   <span :class="['property-badge', badgeClass(asset.phanLoaiHang)]">
-                    {{ asset.phanLoaiHang }}
+                    {{ asset.phanLoaiHang ?? 'Chưa cập nhật' }}
                   </span>
                 </span>
 
@@ -26,14 +26,14 @@
 
               <span class="meta-item">
                   <span class="meta-label">Giá bán:</span>
-                  <span class="price-selling">{{  formatMoneyVN(asset.giaBan) }}</span>
+                  <span class="price-selling">{{  formatMoneyVN(asset.giaBan) ?? 'Chưa cập nhật' }}</span>
                 </span>
 
               <div class="meta-divider"></div>
 
               <span class="meta-item">
                   <span class="meta-label">Giá nội bộ:</span>
-                  <span class="price-internal">{{ formatMoneyVN(asset.giaNoiBo) }}</span>
+                  <span class="price-internal">{{ formatMoneyVN(asset.giaNoiBo)?? 'Chưa cập nhật' }}</span>
                 </span>
             </div>
 
@@ -50,7 +50,7 @@
               </div>
 
               <p class="press-lede">
-                {{ formatAddress(asset.address) }} đang mở chào bán với mức giá cạnh tranh, pháp lý minh bạch và quỹ hoa hồng hấp dẫn. Mọi thông tin được biên tập theo định dạng tạp chí để anh/chị môi giới dễ tư vấn và chốt khách.
+                {{ formatAddress(asset.address) ?? 'Chưa cập nhật' }} đang mở chào bán với mức giá cạnh tranh, pháp lý minh bạch và quỹ hoa hồng hấp dẫn. Mọi thông tin được biên tập theo định dạng tạp chí để anh/chị môi giới dễ tư vấn và chốt khách.
               </p>
               <div class="commission-spotlight">
                 <div class="spotlight-badge">
@@ -58,9 +58,21 @@
                   Ưu tiên cộng đồng môi giới
                 </div>
                 <div class="spotlight-copy">
-                  <div class="spotlight-line">Anh/chị chốt căn này nhận trọn <span class="spotlight-percent">{{ asset.phiMoiGioi }}%</span> hoa hồng</div>
+                  <div class="spotlight-line">Anh/chị chốt căn này nhận trọn <span class="spotlight-percent">
+                    {{ asset.phiMoiGioi != null ? asset.phiMoiGioi + '%' : 'Chưa cập nhật' }}
+                    </span> hoa hồng</div>
                   <div class="spotlight-line">
-                    Tương đương <span class="spotlight-amount">{{ formatMoneyVN( (asset.phiMoiGioi * asset.giaBan)/100 ) }}</span> được giải ngân nhanh, không để anh/chị chờ đợi.
+                    Tương đương <span class="spotlight-amount"> <DotLottieVue
+                      src="https://lottie.host/8d71de76-976c-465c-89a2-4566dab2a452/hAewJBkGNO.lottie"
+                      autoplay
+                      loop
+                      style="
+                            width: 30px;
+                            height: 30px;
+                            display: inline-block;
+                            vertical-align: bottom;
+                          "
+                  />{{ formatMoneyVN( (asset.phiMoiGioi * asset.giaBan)/100 ) }}</span> được giải ngân nhanh, không để anh/chị chờ đợi.
                   </div>
                 </div>
                 <div class="spotlight-wave"></div>
@@ -69,24 +81,46 @@
               <div class="press-grid">
                 <div class="press-card">
                   <span class="press-label">Giá công bố</span>
-                  <span class="press-value">{{ formatMoneyVN(asset.giaBan) }}</span>
+                  <span class="press-value">
+                     {{ formatMoneyVN(asset.giaBan) }}
+                    <DotLottieVue
+                      src="https://lottie.host/87fdfae5-3796-4026-b945-4a0e36bedcb6/r8ftGwOC5C.lottie"
+                      autoplay
+                      loop
+                      style="
+                            width: 35px;
+                            height: 35px;
+                            display: inline-block;
+                            vertical-align: bottom;
+                          "
+                  /></span>
                   <span class="press-desc">Cập nhật theo bảng giá mới nhất</span>
                 </div>
                 <div class="press-card">
                   <span class="press-label">Giá nội bộ</span>
-                  <span class="press-value text-primary">{{ formatMoneyVN(asset.giaNoiBo) }}</span>
-                  <span class="press-desc">Ưu đãi riêng cho hệ thống đại lý</span>
+                  <span class="press-value text-primary mt-2">{{ formatMoneyVN(asset.giaNoiBo) }}</span>
+                  <span class="press-desc">Giá chốt hợp đồng tối thiểu</span>
                 </div>
                 <div class="press-card">
                   <span class="press-label">Diện tích</span>
-                  <span class="press-value">{{ formatArea(asset.totalArea) }}</span>
+                  <span class="press-value mt-2">{{ formatArea(asset.totalArea) }}</span>
                   <span class="press-desc">Diện tích sẵn sàng bàn giao</span>
                 </div>
                 <div class="press-card press-commission-card">
                   <span class="press-label">Hoa hồng</span>
                   <span class="press-value press-commission">
-                    <span class="pulse-dot"></span>
-                    {{ asset.phiMoiGioi }}%
+                    <DotLottieVue
+                        src="https://lottie.host/0d33a3ef-36a8-4096-af70-3c1668b578d9/1eeRku3lYw.lottie"
+                        autoplay
+                        loop
+                        style="
+                            width: 35px;
+                            height: 35px;
+                            display: inline-block;
+                            vertical-align: middle;
+                          "
+                    /><span style="position: relative; top:5px">{{ asset.phiMoiGioi }}%</span>
+
                   </span>
                   <span class="press-desc">Cam kết chi trả rõ ràng, minh bạch</span>
                 </div>
@@ -116,7 +150,7 @@
     <div class="content-grid">
 
       <!-- LEFT COLUMN - GALLERY -->
-      <div class="gallery-section">
+      <div class="gallery-section" style="max-width: 900px">
         <div class="gallery-wrapper">
           <div class="main-image-container">
             <img :src="asset.slide[activeImage]" alt="Property image" class="main-image" />
@@ -143,14 +177,14 @@
       </div>
 
       <!-- RIGHT COLUMN - GENERAL INFO -->
-      <div class="info-section">
+      <div class="info-section" style="min-width: 400px">
         <div class="info-card">
           <div class="card-header">
             <i class="fa-solid fa-circle-info header-icon"></i>
             <h3 class="card-title">Thông tin chung</h3>
           </div>
 
-          <div class="info-grid">
+          <div class="info-grid magazine-grid">
             <div class="info-row">
               <span class="info-label">Loại tài sản</span>
               <span class="info-value" :class="badgeLoai(asset.loaiTaiSan)">
@@ -365,8 +399,7 @@
       </div>
 
       <div class="table-wrapper">
-        <!-- Nếu có room thì mới hiện table -->
-        <table class="executive-table" v-if="asset.rooms && asset.rooms.length > 0">
+        <table class="executive-table magazine-table" v-if="asset.rooms && asset.rooms.length > 0">
           <thead>
           <tr>
             <th>Loại phòng</th>
@@ -390,7 +423,6 @@
         <div v-else class="text-center text-muted py-3">
           Chưa có thông tin
         </div>
-
       </div>
     </div>
 
@@ -408,8 +440,8 @@
         <p class="empty-text">Chưa có dữ liệu định giá cho tài sản này</p>
       </div>
 
-      <div v-else class="table-wrapper">
-        <table class="executive-table">
+      <div v-else class="table-wrapper valuation-wrapper">
+        <table class="executive-table magazine-table">
           <thead>
           <tr>
             <th>Lần định giá</th>
@@ -445,6 +477,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import FileOrLand from "../land/FileOrLand.vue";
+import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -1294,6 +1327,45 @@ const openPdf = async (pdfFile) => {
   border-bottom: 2px solid #f1f5f9;
 }
 
+.section-deck {
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.6;
+  background: #f8fafc;
+  border-left: 4px solid #94a3b8;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin: -4px 0 18px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.editorial-band {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(90deg, #e0f2fe, #f8fafc, #e0f2fe);
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  border: 1px solid #bfdbfe;
+}
+
+.band-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #0ea5e9;
+  box-shadow: 0 0 0 6px rgba(14, 165, 233, 0.12);
+}
+
+.band-text {
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #0f172a;
+  font-weight: 700;
+}
+
 .header-icon {
   font-size: 22px;
   color: #3b82f6;
@@ -1312,6 +1384,14 @@ const openPdf = async (pdfFile) => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.magazine-grid {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px dashed #e2e8f0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .info-row {
@@ -1391,6 +1471,33 @@ const openPdf = async (pdfFile) => {
   border-top: 2px solid #f1f5f9;
 }
 
+.info-footnote {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.footnote-bullet {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #3b82f6;
+  margin-top: 4px;
+  box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.12);
+}
+
+.footnote-copy {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
 /* ========= DETAIL SECTIONS ========= */
 .detail-section {
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 85%);
@@ -1430,6 +1537,35 @@ const openPdf = async (pdfFile) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.magazine-ribbon {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 14px;
+  align-items: center;
+  background: linear-gradient(90deg, #fef3c7, #fff7ed);
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid #fef3c7;
+  box-shadow: 0 10px 28px -24px rgba(234, 88, 12, 0.5);
+}
+
+.ribbon-tag {
+  background: #f59e0b;
+  color: #fff7ed;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.ribbon-copy {
+  margin: 0;
+  color: #92400e;
+  line-height: 1.6;
 }
 
 .section-title-group {
@@ -1478,6 +1614,20 @@ const openPdf = async (pdfFile) => {
   gap: 20px 24px;
 }
 
+.magazine-highlight .detail-item {
+  background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 90%);
+  border: 1px solid #e0f2fe;
+  position: relative;
+  overflow: hidden;
+}
+
+.magazine-highlight .detail-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 .detail-item {
   display: flex;
   flex-direction: column;
@@ -1509,11 +1659,86 @@ const openPdf = async (pdfFile) => {
   font-weight: 700;
 }
 
+.editorial-note {
+  margin-top: 18px;
+  padding: 14px 16px;
+  background: linear-gradient(90deg, #ecfeff, #f8fafc);
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 10px 16px;
+  align-items: center;
+}
+
+.note-title {
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #0f172a;
+  letter-spacing: 0.8px;
+}
+
+.note-copy {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
 /* ========= TABLE ========= */
 .table-wrapper {
   overflow-x: auto;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
+}
+
+.table-caption {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 10px 14px;
+  border-radius: 12px 12px 0 0;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.magazine-table thead {
+  background: linear-gradient(90deg, #e0f2fe, #f8fafc);
+}
+
+.magazine-table tbody tr:nth-child(odd) {
+  background: #f8fafc;
+}
+
+.magazine-table tbody tr:nth-child(even) {
+  background: #ffffff;
+}
+
+.table-footnote {
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0 0 12px 12px;
+  color: #475569;
+  font-size: 14px;
+}
+
+.valuation-wrapper {
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 24px -22px rgba(15, 23, 42, 0.35);
+}
+
+.valuation-wrapper .table-caption {
+  background: #111827;
+  color: #f3f4f6;
+}
+
+.valuation-note {
+  padding: 14px 16px;
+  background: #fff7ed;
+  border-top: 1px solid #ffe4e6;
+  border-radius: 0 0 16px 16px;
+  color: #92400e;
 }
 
 .executive-table {

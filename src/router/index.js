@@ -63,13 +63,13 @@ const routes = [
             component: LoginForm,
         },
         {
-            path: "/test03",
+            path: "/-thg/products/create",
             meta: {requiresAuth: false},
             name: "ProductCreate",
             component: ProductCreate,
         },
         {
-            path: "/test01",
+            path: "/-thg/quan-ly-san-pham",
             meta: {requiresAuth: false},
             component: Menu,
             children: [

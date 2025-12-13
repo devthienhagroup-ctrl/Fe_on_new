@@ -237,18 +237,11 @@
           </div>
           <div class="flex items-center gap-1">
             <button
-                @click="handleImport"
-                class="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-lg text-sm"
+                @click="$router.push('/-thg/products/create')"
+                class="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-lg hover:from-amber-600 hover:to-yellow-600 transition-all shadow-md hover:shadow-lg text-sm"
             >
-              <i class="fa-solid fa-file-import text-xs"></i>
-              <span class="font-medium">Nhập Excel</span>
-            </button>
-            <button
-                @click="handleExport"
-                class="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg text-sm"
-            >
-              <i class="fa-solid fa-file-export text-xs"></i>
-              <span class="font-medium">Xuất Excel</span>
+              <i class="fa-solid fa-plus text-xs"></i>
+              <span class="font-medium">Thêm sản phẩm</span>
             </button>
             <button
                 @click="toggleSelectedRows"
@@ -839,7 +832,7 @@ const getAssetType = (item) => {
   }
 
   // Nếu diện tích lớn → đất lớn
-  if (dtcnValue > 1000) return "land-large";
+  if (dtcnValue > 10000) return "land-large";
 
   // Còn lại → đất
   return "land";

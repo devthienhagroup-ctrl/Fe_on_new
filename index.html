@@ -11,7 +11,7 @@
     <script>
         // 💡 Chỗ này bạn đặt điều kiện của bạn
         // Ví dụ: chỉ load Tailwind nếu truy cập /admin
-        const enableTailwind = ["/test01", "/test02", "/admin/product/update/"].some(p => window.location.pathname.startsWith(p))
+        const enableTailwind = ["/-thg/quan-ly-san-pham", "/test02", "/admin/product/update/"].some(p => window.location.pathname.startsWith(p))
 
         if (enableTailwind) {
             const tw = document.createElement("script");

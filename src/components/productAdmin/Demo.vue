@@ -1,32 +1,27 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 p-3" style="padding-top: 90px!important;">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 px-5 py-3" style="padding-top: 90px!important;">
     <div class="max-w-[1600px] mx-auto">
       <!-- Bộ lọc nâng cao -->
-      <div class="bg-white rounded-xl shadow-lg border border-slate-300 mb-5 p-4">
+      <div class="bg-white rounded-xl shadow-lg border border-slate-300 mb-5 p-4"
+           style="
+            background-image: url('https://s3.cloudfly.vn/thg-storage/uploads-public/thienhagroup_filter_2.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+          ">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
-            <div class="bg-gradient-to-r from-indigo-600 to-blue-600 p-1.5 rounded-lg">
-              <i class="fa-solid fa-filter text-white text-sm"></i>
-            </div>
-            <h2 class="text-base font-bold text-slate-900">Bộ Lọc Nâng Cao</h2>
+            <h1
+                class="text-base font-bold"
+                style="text-shadow: 0 0 6px rgba(10,10,10,0.9); font-size: 22px; color: white!important;"
+            >
+              Sản Phẩm Thiên Hà Group Dành Riêng Cho Bạn
+            </h1>
+
           </div>
 
           <!-- Nút chuyển đổi giữa bảng và thẻ -->
           <div class="flex items-center gap-2">
-            <button
-                @click="viewMode = 'table'"
-                :class="[
-                'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
-                viewMode === 'table'
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-              ]"
-                title="Chế độ bảng"
-            >
-              <i class="fa-solid fa-table text-sm"></i>
-              <span class="text-sm font-medium">Bảng</span>
-            </button>
-
             <button
                 @click="viewMode = 'card'"
                 :class="[
@@ -39,6 +34,19 @@
             >
               <i class="fa-solid fa-grip text-sm"></i>
               <span class="text-sm font-medium">Thẻ</span>
+            </button>
+            <button
+                @click="viewMode = 'table'"
+                :class="[
+                'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
+                viewMode === 'table'
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+              ]"
+                title="Chế độ bảng"
+            >
+              <i class="fa-solid fa-table text-sm"></i>
+              <span class="text-sm font-medium">Bảng</span>
             </button>
           </div>
         </div>
@@ -56,20 +64,20 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-6 gap-2">
-          <!-- Các bộ lọc hiện tại... -->
+        <div class="grid grid-cols-8 gap-2">
+
           <!-- Mức giá -->
           <div>
-            <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
-              <i class="fa-solid fa-dollar-sign text-blue-600 text-xs"></i>
+            <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
+              <i class="fa-solid fa-dollar-sign text-blue-600 text-xs icon-glow" ></i>
               Mức Giá
             </label>
-            <select
-                v-model="filterGiaRange"
-                class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all"
-            >
+            <select v-model="filterGiaRange"
+                    class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg
+             focus:ring-2 focus:ring-blue-600 focus:border-transparent
+             bg-white shadow-sm transition-all">
               <option value="">Tất cả</option>
-              <option value="<1>">< 1 tỷ</option>
+              <option value="<1>">&lt; 1 tỷ</option>
               <option value="1-3">1 - 3 tỷ</option>
               <option value="3-5">3 - 5 tỷ</option>
               <option value="5-7">5 - 7 tỷ</option>
@@ -80,30 +88,31 @@
 
           <!-- Tỉnh thành -->
           <div>
-            <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
-              <i class="fa-solid fa-city text-emerald-600 text-xs"></i>
+            <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
+              <i class="fa-solid fa-city text-emerald-600 text-xs icon-glow"></i>
               Tỉnh Thành
             </label>
-            <select
-                style="max-height: 100px !important;"
-                v-model="filterProvince"
-                class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all"
-            >
+            <select v-model="filterProvince"
+                    class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg
+             focus:ring-2 focus:ring-blue-600 focus:border-transparent
+             bg-white shadow-sm transition-all">
               <option value="">Tất cả</option>
-              <option v-for="p in provinces" :key="p" :value="p">{{ formatProvinceShort(p) }}</option>
+              <option v-for="p in provinces" :key="p" :value="p">
+                {{ formatProvinceShort(p) }}
+              </option>
             </select>
           </div>
 
           <!-- Phường/Xã -->
           <div>
-            <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
-              <i class="fa-solid fa-location-dot text-violet-600 text-xs"></i>
+            <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
+              <i class="fa-solid fa-location-dot text-violet-600 text-xs icon-glow"></i>
               Phường/Xã
             </label>
-            <select
-                v-model="filterWard"
-                class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all"
-            >
+            <select v-model="filterWard"
+                    class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg
+             focus:ring-2 focus:ring-blue-600 focus:border-transparent
+             bg-white shadow-sm transition-all">
               <option value="">Tất cả</option>
               <option v-for="w in wards" :key="w" :value="w">{{ w }}</option>
             </select>
@@ -111,64 +120,92 @@
 
           <!-- Loại mặt hàng -->
           <div>
-            <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
-              <i class="fa-solid fa-tag text-rose-600 text-xs"></i>
+            <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
+              <i class="fa-solid fa-tag text-rose-600 text-xs icon-glow"></i>
               Loại Mặt Hàng
             </label>
-
-            <select
-                v-model="filterLoaiMH"
-                class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg
+            <select v-model="filterLoaiMH"
+                    class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg
              focus:ring-2 focus:ring-blue-600 focus:border-transparent
-             bg-white shadow-sm transition-all"
-            >
+             bg-white shadow-sm transition-all">
               <option value="">Tất cả</option>
-
               <option value="BN30N">Bán nhanh 30 ngày</option>
               <option value="HOPTAC">Hàng hợp tác</option>
               <option value="HTT">Hàng thị trường</option>
             </select>
           </div>
 
-
           <!-- Vị trí -->
           <div>
-            <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
-              <i class="fa-solid fa-location-arrow text-cyan-600 text-xs"></i>
+            <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
+              <i class="fa-solid fa-location-arrow text-cyan-400 text-xs icon-glow"></i>
               Vị Trí
             </label>
-            <select
+            <input
+                list="landPositions"
                 v-model="filterViTri"
-                class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all"
-            >
-              <option value="">Tất cả</option>
-              <option value="Mặt tiền">Mặt tiền</option>
-              <option value="Hẻm">Hẻm</option>
-              <option value="Hẻm cụt">Hẻm cụt</option>
-              <option value="Khu dân cư">Khu dân cư</option>
-              <option value="Mặt tiền đường lớn">Mặt tiền đường lớn</option>
-              <option value="Chưa cập nhật">Chưa cập nhật</option>
-            </select>
+                placeholder="Chọn hoặc nhập vị trí..."
+                class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg
+             focus:ring-2 focus:ring-blue-600 focus:border-transparent
+             bg-white shadow-sm transition-all" />
+            <datalist id="landPositions">
+              <option value="Mặt tiền đường chính"></option>
+              <option value="Góc 2 mặt tiền"></option>
+              <option value="Hẻm xe hơi"></option>
+              <option value="Khu dân cư"></option>
+            </datalist>
           </div>
 
+          <!-- Mở khóa -->
           <div>
-            <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
-              <i class="fa-solid fa-unlock-alt text-yellow-500 text-xs"></i>
-              Đã mở khóa
+            <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
+              <i class="fa-solid fa-unlock text-yellow-500 text-xs icon-glow"></i>
+              Mở khóa
             </label>
-
-            <select
-                v-model="filterUnlock"
-                class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg
-           focus:ring-2 focus:ring-blue-600 focus:border-transparent
-           bg-white shadow-sm transition-all"
-            >
+            <select v-model="filterUnlock"
+                    class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg
+             focus:ring-2 focus:ring-blue-600 focus:border-transparent
+             bg-white shadow-sm transition-all">
               <option value="">Tất cả</option>
               <option value="yes">Đã mở</option>
               <option value="no">Chưa mở</option>
             </select>
           </div>
+
+          <!-- Trạng thái -->
+          <div>
+            <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
+              <i class="fa-solid fa-circle-info text-pink-500 text-xs icon-glow"></i>
+              Trạng thái
+            </label>
+            <select v-model="filterStatus"
+                    class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg
+             focus:ring-2 focus:ring-blue-600 focus:border-transparent
+             bg-white shadow-sm transition-all">
+              <option value="">Tất cả</option>
+              <option value="Chưa bán">Chưa bán</option>
+              <option value="Đã bán">Đã bán</option>
+            </select>
+          </div>
+
+          <!-- Đã thích -->
+          <div>
+            <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
+              <i class="fa-solid fa-heart text-black text-xs icon-glow"></i>
+              Đã thích
+            </label>
+            <select v-model="filterLove"
+                    class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg
+             focus:ring-2 focus:ring-blue-600 focus:border-transparent
+             bg-white shadow-sm transition-all">
+              <option :value="null">Tất cả</option>
+              <option :value="true">Đã thích</option>
+              <option :value="false">Chưa thích</option>
+            </select>
+          </div>
+
         </div>
+
       </div>
 
       <!-- Hiển thị theo chế độ -->
@@ -196,10 +233,12 @@
                 <th class="text-left">Vị Trí</th>
                 <th class="text-left">DTCN</th>
                 <th class="text-left">Kết Cấu</th>
+                <th class="text-left">Cập Nhật</th>
                 <th class="text-left">Phí MG</th>
+                <th class="text-left">Trạng thái</th>
                 <th class="text-left">Loại MH</th>
                 <th class="text-left">Đơn Vị</th>
-                <th class="text-center">Thao Tác</th>
+                <th class="text-left">&nbsp; Thao Tác</th>
               </tr>
               </thead>
               <tbody>
@@ -260,8 +299,27 @@
                 <td class="text-slate-900 text-gray-800 max-w-[150px] truncate">
                   {{ item.ketCau || '-' }}
                 </td>
+                <td class="text-slate-900 text-gray-800">{{  formatDate(item.capNhatNgay) }}</td>
                 <td class="font-bold text-blue-700">
-                  {{ item.phiMoiGioi + '%' || '-' }}
+                  <div style="position: relative; top: -3px;">
+                    <DotLottieVue
+                        src="https://lottie.host/a94085b1-dc72-4753-88d0-4bdfad75c588/NgBvXtuOwE.lottie"
+                        autoplay
+                        loop
+                        style="
+                            width: 20px;
+                            height: 26px;
+                            display: inline-block;
+                            vertical-align: bottom;
+                            position: relative; top: -1px;
+                          "
+                    />{{ item.phiMoiGioi + '%' || '-' }}
+                  </div>
+                </td>
+                <td class="font-bold">
+                  <span :class="badgeStatus(item.status)">
+                    {{ formatStatusTW(item.status) }}
+                  </span>
                 </td>
                 <td>
                     <span :class="['px-2 py-1 rounded-lg font-semibold', badgeClass(item.loaiMH)]"
@@ -291,25 +349,35 @@
                 </td>
                 <td class="text-center">
                   <button
+                      @click="toggleLove(item)"
+                      style="background-color: rgba(133,132,132,0.13); padding: 0 10px; margin-right: 5px; border-radius: 8px">
+                    <i
+                        :class="item.daThich
+      ? 'fa-solid fa-heart text-black text-base'
+      : 'fa-regular fa-heart text-base'"
+                    ></i>
+                  </button>
+                  <button
                       @click="$router.push(`/admin/products-2/${item.id}`)"
                       class="
-    px-1.5
-    py-[2px]
-    rounded-md
-    inline-flex items-center gap-1
-    text-[10px] font-semibold
-    bg-[#BFDBFE]
-    text-[#1D4ED8]
-    border border-[#93C5FD]
-    shadow-sm
-    hover:bg-[#93C5FD]
-    transition-all duration-200
-  "
+                                px-1.5
+                                py-[2px]
+                                rounded-md
+                                inline-flex items-center gap-1
+                                text-[10px] font-semibold
+                                bg-[#BFDBFE]
+                                text-[#1D4ED8]
+                                border border-[#93C5FD]
+                                shadow-sm
+                                hover:bg-[#93C5FD]
+                                transition-all duration-200
+                              "
                       style="border-radius: 8px; font-size: 11px;"
                   >
                     <i class="fa-regular fa-eye text-[10px] text-[#1D4ED8]"></i>
                     <span>Xem</span>
                   </button>
+
                 </td>
               </tr>
               </tbody>
@@ -365,7 +433,7 @@
                   class="w-16 px-2 py-1 border border-slate-400 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm"
                   min="1"
               />
-              <span class="text-sm text-slate-900">
+              <span class="text-sm text-slate-900 font-semibold">
                 Hiển thị
                 {{ page * pageSize + 1 }}
                 -
@@ -383,7 +451,7 @@
             Tổng số: {{ totalRecords }} bất động sản
           </h3>
           <div class="flex items-center gap-3">
-            <div class="text-sm text-slate-600">
+            <div class="text-sm text-slate-600 font-bold">
               {{ page * pageSize + 1 }} - {{ Math.min((page + 1) * pageSize, totalRecords) }} của {{ totalRecords }}
             </div>
             <select
@@ -391,148 +459,223 @@
                 @change="updatePageSize"
                 class="px-2 py-1.5 border border-slate-400 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm"
             >
-              <option value="6">6 thẻ/trang</option>
-              <option value="9">9 thẻ/trang</option>
+              <option value="8">8 thẻ/trang</option>
               <option value="12">12 thẻ/trang</option>
-              <option value="15">15 thẻ/trang</option>
+              <option value="16">16 thẻ/trang</option>
+              <option value="20">20 thẻ/trang</option>
             </select>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          <div
-              v-for="(item) in landAssets"
-              :key="item.id"
-              class="bg-white rounded-xl shadow-lg border border-slate-300 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group"
-          >
-            <!-- Header thẻ với địa chỉ chi tiết -->
-            <div class="p-4 border-b border-slate-200 bg-gradient-to-r from-blue-50/50 to-indigo-50/50">
-              <div class="flex items-start justify-between mb-2">
-                <!-- Địa chỉ chi tiết thay cho STT -->
-                <div class="flex-1">
-                  <div class="flex items-center gap-2 mb-1">
-                    <div :class="['p-2 rounded-lg', getAssetTypeColor(item).replace('text-', 'bg-') + ' bg-opacity-20']">
-                      <i :class="[getAssetTypeIcon(item), getAssetTypeColor(item), 'text-base']"></i>
-                    </div>
-                    <div class="flex-1">
-                      <div class="text-xs font-semibold text-slate-500 mb-0.5">Địa chỉ</div>
-                      <div class="text-sm font-bold text-slate-900 truncate">
-                        {{ formatAddressDetail(item.diaChi) }}
-                      </div>
-                    </div>
-                  </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
 
-                  <div class="flex items-center gap-2 mt-2">
-                    <span class="text-xs px-2 py-1 bg-blue-100/50 rounded text-blue-700 font-medium">
-                      <i class="fa-solid fa-location-dot text-violet-500 mr-1"></i>
-                      {{ formatWard(item.diaChi) }}
-                    </span>
-                    <span class="text-xs px-2 py-1 bg-emerald-100/50 rounded text-emerald-700 font-medium">
-                      <i class="fa-solid fa-city text-emerald-500 mr-1"></i>
-                      {{ formatProvince(item.khuVuc) }}
-                    </span>
-                  </div>
+          <div
+              v-for="item in landAssets"
+              :key="item.id"
+              class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden
+         hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
+          >
+            <!-- Ảnh -->
+            <div class="relative w-full overflow-hidden" style="height: 200px">
+              <div class="relative w-full h-full px-3 pt-3  rounded-3 overflow-hidden aspect-[4/3] w-full">
+                <img
+                    :src="item.imageUrl || 'https://hoangphucphoto.com/wp-content/uploads/2024/11/anh-bds-1.jpg'"
+                    class="w-full rounded-3 h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+              <!-- Tag loại tài sản -->
+              <div class="absolute top-2  mt-3 ms-3 left-2 flex items-center gap-2">
+
+                <!-- Loại tài sản -->
+                <div
+                    class="px-2 py-1 rounded-full font-semibold
+    flex items-center gap-1 whitespace-nowrap
+    backdrop-blur-sm bg-black/20 ring-1 ring-white/20 shadow-sm text-white"  style="font-size: 10px !important;"
+                >
+                  <i :class="getAssetTypeIcon(item)" style="font-size: 13px !important;"></i>
+                  {{ getLoai(item) || '—' }}
                 </div>
 
-                <!-- Trạng thái mở khóa -->
-                <div class="text-right ml-2">
-                  <div class="text-xs font-semibold text-slate-500 mb-1">Trạng thái</div>
-                  <div v-if="item.unlocked" class="flex items-center gap-1 text-green-600 justify-end">
-                    <i class="fa-solid fa-lock-open text-sm"></i>
-                    <span class="text-xs font-medium">Đã mở</span>
-                  </div>
-                  <div v-else class="flex items-center gap-1 text-yellow-600 justify-end">
-                    <i class="fa-solid fa-lock text-sm"></i>
-                    <span class="text-xs font-medium">Chưa mở</span>
-                  </div>
+                <!-- Trạng thái khóa/mở -->
+                <div
+                    class="px-2 py-1 rounded-full font-semibold
+    flex items-center gap-1 whitespace-nowrap
+    backdrop-blur-sm bg-black/20 ring-1 ring-white/20 shadow-sm"
+                    :class="item.unlocked ? 'text-green-300' : 'text-yellow-300'" style="font-size: 10px !important;"
+                >
+                  <i :class="item.unlocked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock'" style="font-size: 10px !important;"></i>
+                  <span style="font-size: 10px !important;">{{ item.unlocked ? 'Đã mở' : 'Chưa mở' }}</span>
                 </div>
               </div>
-
-              <!-- Loại mặt hàng và đơn vị -->
-              <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-200/50">
-                <span :class="['px-2 py-1 rounded-lg font-semibold text-xs', badgeClass(item.loaiMH)]">
-                  {{ item.loaiMH }}
-                </span>
-                <span
-                    :class="[
-                      'px-2 py-1 rounded-lg font-semibold text-xs text-white shadow-sm',
-                      item.donVi === 'THG' ? 'bg-[#6A0DAD]' : 'bg-[#0057D9]'
-                    ]"
-                >
-                  {{ item.donVi }}
-                </span>
+              <div v-if="'Đã bán' === item.status" class="absolute top-5  mr-3 ms-3 right-2 flex items-center gap-2" style="width: 65px">
+                  <img src="/imgs/sold-out.png"/>
               </div>
             </div>
 
-            <!-- Thông tin chính -->
-            <div class="p-4">
-              <!-- Thông tin chủ nhà và giá -->
-              <div class="mb-4">
-                <!-- Chủ nhà và liên hệ -->
-                <div class="mb-3">
-                  <div class="text-xs font-semibold text-slate-500 mb-1">Chủ nhà & Liên hệ</div>
-                  <div class="flex items-center justify-between">
-                    <div class="text-sm font-bold text-slate-900 truncate max-w-[60%]">
-                      {{ item.tenChuNha || '—' }}
-                    </div>
-                    <div class="text-xs text-blue-600 font-medium">
-                      <i class="fa-solid fa-phone text-blue-500 mr-1"></i>
-                      {{ item.soDienThoai || '—' }}
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Giá bán và định giá -->
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="bg-blue-50/50 p-3 rounded-lg">
-                    <div class="text-xs font-semibold text-slate-500 mb-1">Giá bán</div>
-                    <div class="text-sm font-bold text-blue-700">{{ formatMoneyVN(item.giaBan) }}</div>
-                  </div>
-                  <div class="bg-slate-50 p-3 rounded-lg">
-                    <div class="text-xs font-semibold text-slate-500 mb-1">Định giá</div>
-                    <div v-if="item.giaDinhGia === -1.1" class="text-sm text-slate-800">*********</div>
-                    <div v-else-if="item.giaDinhGia" class="text-sm font-bold text-blue-700">{{ formatMoneyVN(item.giaDinhGia) }}</div>
-                    <div v-else class="text-sm text-slate-500">—</div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Thông tin chi tiết - 3 cột -->
-              <div class="grid grid-cols-3 gap-3 mb-4">
-                <div class="text-center">
-                  <div class="text-xs font-semibold text-slate-500 mb-1">Diện tích</div>
-                  <div class="text-sm font-bold text-slate-800">{{ item.dtcn }}m²</div>
-                </div>
-                <div class="text-center">
-                  <div class="text-xs font-semibold text-slate-500 mb-1">Vị trí</div>
-                  <div class="text-sm text-slate-800 truncate" :title="item.viTri">{{ item.viTri || '—' }}</div>
-                </div>
-                <div class="text-center">
-                  <div class="text-xs font-semibold text-slate-500 mb-1">Phí MG</div>
-                  <div class="text-sm font-bold text-blue-700">{{ item.phiMoiGioi }}%</div>
-                </div>
-              </div>
-
-              <!-- Kết cấu -->
-              <div class="mb-4">
-                <div class="text-xs font-semibold text-slate-500 mb-1">Kết cấu</div>
-                <div class="text-sm text-slate-800 line-clamp-2 bg-slate-50 p-2 rounded">
-                  {{ item.ketCau || 'Chưa có thông tin' }}
-                </div>
-              </div>
-
-              <!-- Nút hành động -->
-              <button
-                  @click="$router.push(`/admin/products/${item.id}`)"
-                  class="w-full px-3 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-sm group-hover:shadow-md"
+            <!-- Thông tin tài sản -->
+            <div class="p-3 leading-tight text-slate-800">
+              <!-- Địa chỉ chi tiết (tiêu đề) -->
+              <div
+                  class="font-semibold text-slate-900 mb-1"
+                  style="
+                    font-size: 15px;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                  "
               >
-                <i class="fa-regular fa-eye text-sm"></i>
-                <span>Xem chi tiết</span>
-                <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
-              </button>
+                {{ formatWardCard(item.diaChi) }}, {{ formatProvinceCard(item.khuVuc) }}
+              </div>
+              <div class="font-semibold text-slate-500" style="font-size: 13px">
+                Ngày cập nhật: {{ formatDate(item.capNhatNgay) }}
+              </div>
+
+              <!-- Giá + Loại mua bán/thuê -->
+              <div class="flex items-center justify-between mt-1">
+
+                <!-- Giá bán (bên trái) -->
+                <div style="color: #dc2626; font-weight: 700; font-size: 16px">
+                  {{ formatMoneyVN(item.giaBan) }}
+                  <span class="text-[12px] text-slate-500 font-semibold">Hoa hồng: </span>
+                  <DotLottieVue
+                      src="https://lottie.host/a94085b1-dc72-4753-88d0-4bdfad75c588/NgBvXtuOwE.lottie"
+                      autoplay
+                      loop
+                      style="
+                            width: 20px;
+                            height: 26px;
+                            display: inline-block;
+                            vertical-align: bottom;
+                          "
+                  />
+                  <span class="font-semibold text-blue-700 text-[14px]">
+                    {{ item.phiMoiGioi }}%
+                  </span>
+                </div>
+
+                <!-- Đơn vị + Loại MH (bên phải) -->
+                <div class="flex items-center gap-2 mt-2">
+
+                  <!-- Đơn vị -->
+                  <div
+                      class="px-2.5 py-0.5 rounded-full text-white shadow-sm"
+                      :class="item.donVi === 'THG' ? 'bg-[#6A0DAD]' : 'bg-[#0057D9]'"
+                      style="font-weight: 550; font-size: 12.5px !important;"
+                  >
+                    {{ item.donVi }}
+                  </div>
+
+                  <!-- Loại MH -->
+                  <span
+                      class="px-2 py-0.5 rounded-full"
+                      :class="badgeClass(item.loaiMH)"
+                      style="font-weight: 550; font-size: 12.5px !important;"
+                  >
+                      {{ item.loaiMH }}
+                    </span>
+
+                </div>
+              </div>
+
+              <!-- Chủ nhà + SĐT -->
+              <!-- Dòng Định giá phía trên -->
+              <div class="flex items-center justify-between mt-2 text-[14px]">
+                <!-- BÊN TRÁI: GIÁ ĐỊNH -->
+                <span class="font-semibold text-slate-700 truncate max-w-[55%]">
+                    <template v-if="!item.giaDinhGia">
+                      Chưa định giá
+                    </template>
+                    <template v-else-if="item.giaDinhGia == -1.1">
+                      *********** (Giá định)
+                    </template>
+                    <template v-else>
+                      {{ formatMoneyVN(item.giaDinhGia) }} (Giá định)
+                    </template>
+                  </span>
+
+                <!-- BÊN PHẢI: LƯỢT XEM + LƯỢT THÍCH -->
+                <div class="flex items-center gap-3 text-slate-500 text-[12px] shrink-0">
+                  <!-- Lượt xem -->
+                  <div class="flex items-center gap-1 font-medium ">
+                    <span class="font-medium text-slate-700">
+                      {{ item.soLuotXem ?? 0 }}
+                    </span>đã xem
+                  </div>
+
+                  <!-- Lượt thích -->
+                  <div class="flex items-center gap-1 font-medium ">
+                    <span class="font-medium text-slate-700">
+                      {{ item.soLuotThich ?? 0 }}
+                    </span>đã thích
+                  </div>
+                </div>
+              </div>
+
+
+              <!-- Giá bán & Định giá (nếu cần hiển thị) -->
+              <div class="grid grid-cols-2 gap-2 mt-2">
+                <div class="p-2 bg-blue-50 rounded-lg">
+                  <div class="text-[12px] text-slate-500 font-semibold">Chủ nhà</div>
+                  <div class="text-[14px] font-semibold text-slate-800 mt-0.5 truncate">
+                    {{ item.tenChuNha || '—' }}
+                  </div>
+                </div>
+                <div class="p-2 bg-slate-50 rounded-lg">
+                  <div class="text-[12px] text-slate-500 font-semibold">Liên hệ</div>
+                  <div class="text-[14px] font-semibold text-blue-700 mt-0.5 flex items-center gap-1">
+                    <i class="fa-solid fa-phone text-blue-500"></i>
+                    {{ item.soDienThoai || '—' }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Chi tiết: DT, Vị trí, MG -->
+              <div class="grid grid-cols-2 gap-2 mt-2 text-start">
+                <div>
+                  <div class="text-[12px] text-slate-500 font-semibold">Diện tích</div>
+                  <div class="font-bold">{{ item.dtcn }}m²</div>
+                </div>
+                <div>
+                  <div class="text-[12px] text-slate-500 font-semibold">Vị trí</div>
+                  <div class="text-slate-800 text-[13px] truncate font-bold">{{ item.viTri || '—' }}</div>
+                </div>
+              </div>
+
+              <!-- Nút xem chi tiết + nút yêu thích -->
+              <div class="flex items-center gap-2 mt-3">
+                <!-- Nút Xem chi tiết (primary) -->
+                <!-- Nút Xem chi tiết (giữ nguyên màu, chỉ bỏ border) -->
+                <button
+                    @click="$router.push(`/admin/products-2/${item.id}`)"
+                    class="flex-1 py-2.5 bg-gradient-to-r from-slate-900 to-black text-white rounded-full
+         text-[14px] font-semibold flex items-center justify-center gap-2
+         hover:opacity-90 transition-all"
+                >
+                  <i class="fa-regular fa-eye text-sm"></i>
+                  Xem chi tiết
+                </button>
+
+                <!-- Nút Yêu thích (không border + nền xám nhạt) -->
+                <button
+                    @click="toggleLove(item)"
+                    class="w-10 h-10 rounded-full bg-slate-100 text-slate-800 shadow-sm
+         hover:bg-slate-200 flex items-center justify-center transition"
+                >
+                  <i
+                      :class="item.daThich
+      ? 'fa-solid fa-heart text-black text-base'
+      : 'fa-regular fa-heart text-base'"
+                  ></i>
+                </button>
+
+              </div>
             </div>
           </div>
+
         </div>
+
 
         <!-- Phân trang cho chế độ thẻ -->
         <div class="flex items-center justify-between p-4 bg-white rounded-xl shadow-lg border border-slate-300">
@@ -584,13 +727,12 @@
 </template>
 
 <script setup>
-
+import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
 import { ref, computed, watch, onMounted } from "vue";
 import { useSidebarStore } from "/src/stores/sidebarStore.js";
 import addressData from "/src/assets/js/address.json";
 import NotificationBell from "/src/components/NotificationBell.vue";
 
-const filterUnlock = ref("");
 
 import { useAuthStore } from "/src/stores/authStore.js";
 const authStore = useAuthStore();
@@ -613,10 +755,17 @@ const filterViTri = ref("");
 const filterCreateDate = ref("");
 const filterUpdateDate = ref("");
 const searchQuery = ref("");
+const filterUnlock = ref("");
+const filterStatus = ref("");
+const filterLove = ref(null);
 
 // Pagination
 const page = ref(0);
-const pageSize = ref(9); // Mặc định 9 thẻ cho 3 cột
+const pageSize = ref(8);
+const viewMode = ref('card');
+watch(viewMode, (mode) => {
+  pageSize.value = mode === 'card' ? 8 : 10;
+});// Mặc định 9 thẻ cho 3 cột
 const totalPages = computed(() =>
     Math.ceil(totalRecords.value / pageSize.value || 1)
 );
@@ -641,10 +790,11 @@ watch(filterProvince, () => {
 const formatDate = (dateString) => {
   if (!dateString) return "";
   const date = new Date(dateString);
-  return `${String(date.getDate()).padStart(2, "0")}/${String(
+  return `${String(date.getDate()).padStart(2, "0")}-${String(
       date.getMonth() + 1
-  ).padStart(2, "0")}/${String(date.getFullYear()).slice(-2)}`;
+  ).padStart(2, "0")}-${String(date.getFullYear()).slice(-2)}`;
 };
+
 
 const formatAddressDetail = (diaChi) => {
   let raw = diaChi || "";
@@ -658,7 +808,37 @@ const formatAddressDetail = (diaChi) => {
   return clean;
 };
 
+const badgeStatus = (status) => {
+  if (status === "Đã bán") {
+    return "px-2 pe-2 py-1 rounded-lg bg-gray-600 text-white font-semibold line-through";
+  }else if (status !== "Đã bán" ) {
+    return "px-2 pe-2 py-1 rounded-lg bg-blue-600 text-white font-semibold";
+  }else{
+      return "px-2 pe-2 py-1 rounded-lg bg-slate-500 text-white font-medium";
+  }
+};
 
+
+
+function formatStatusTW(status) {
+  if (!status) return "Chưa cập nhật";
+
+  if ( 'Đã bán' === status ){
+    return 'Đã bán';
+  }else{
+    return 'Đang rao bán';
+  }
+}
+
+const formatWardCard = (addressDetail) => {
+  const raw = addressDetail || "";
+  const parts = raw.split("/!!");
+
+  // Ward nằm ở vị trí 1
+  let ward = parts[1]?.trim() || "";
+
+  return ward;
+};
 
 const formatWard = (addressDetail) => {
   const raw = addressDetail || "";
@@ -671,6 +851,11 @@ const formatWard = (addressDetail) => {
       .replace(/^Phường\s+/i, "P. ")
       .replace(/^Xã\s+/i, "X. ")
       .replace(/^Thị trấn\s+/i, "TT. ");
+};
+
+const formatProvinceCard = (province) => {
+  if (typeof province !== "string") return province || "";
+  return province;
 };
 
 const formatProvince = (province) => {
@@ -728,6 +913,48 @@ const getAssetType = (item) => {
 
   // Còn lại → đất
   return "land";
+};
+
+const getLoai = (item) => {
+  const dtcnValue = parseFloat(item.dtcn) || 0;
+  const structure = (item.structure || "").toLowerCase();
+
+  // Ưu tiên dữ liệu từ backend
+  if (item.loaiTaiSan) {
+    const map = {
+      NHA: "Nhà",
+      DAT: "Đất",
+      DATLON: "Đất lớn"
+    };
+
+    if (map[item.loaiTaiSan]) {
+      return map[item.loaiTaiSan];
+    }
+  }
+
+  // Từ khóa nhận diện nhà (bao gồm cả chung cư, căn hộ)
+  const houseKeywords = [
+    // Nhà truyền thống
+    "lầu", "trệt", "tầng", "hầm", "gác",
+    "nhà cấp", "cấp 1", "cấp 2", "cấp 3", "cấp 4",
+    "biệt thự", "villa", "shophouse", "townhouse", "nhà",
+
+    // Chung cư & căn hộ → cũng tính là "nhà"
+    "chung cư", "căn hộ", "chcc", "studio",
+    "condotel", "officetel", "apartment", "can ho",
+    "chung cu", "tower", "block"
+  ];
+
+  // Nếu kết cấu chứa từ khóa → là nhà
+  if (houseKeywords.some(keyword => structure.includes(keyword))) {
+    return "Nhà";
+  }
+
+  // Nếu diện tích lớn → đất lớn
+  if (dtcnValue > 10000) return "Đất lớn";
+
+  // Còn lại → đất
+  return "Đất";
 };
 
 const getAssetTypeIcon = (item) => {
@@ -848,6 +1075,20 @@ function formatMoneyVN(value) {
   return `${ty.toFixed(ty % 1 === 0 ? 0 : 2)} tỷ`;
 }
 
+const formatLoai = (loai) => {
+  if (!loai) return "";
+  switch (loai.toUpperCase()) {
+    case "NHA":
+      return "Nhà";
+    case "DAT":
+      return "Đất";
+    case "DATLON":
+      return "Đất lớn";
+    default:
+      return loai;
+  }
+};
+
 // Debounce
 function debounce(fn, delay = 300) {
   let timeout;
@@ -869,6 +1110,8 @@ watch(
       filterViTri,
       filterUnlock,
       searchQuery,
+      filterLove,
+      filterStatus,
       page,
       pageSize,
     ],
@@ -888,6 +1131,8 @@ async function fetchFilteredAssets() {
     viTri: filterViTri.value || null,
     loaiMH: filterLoaiMH.value || null,
     moKhoa: filterUnlock.value === "" ? null : filterUnlock.value === "yes",
+    trangThai: filterStatus.value || null,
+    daThich: filterLove.value || null,
   };
 
   try {
@@ -906,11 +1151,27 @@ async function fetchFilteredAssets() {
     console.error("Lỗi tải dữ liệu:", err);
   }
 }
+async function toggleLove(item) {
+
+  item.daThich = !item.daThich;
+  item.soLuotThich = !item.daThich?item.soLuotThich -1: item.soLuotThich+1;
+  const res = await api.post(
+      `/user.thg/product/user/love/toggle`,
+      null, // body không có gì
+      {
+        params: {
+          idAsset: item.id
+        }
+      }
+  );
+
+}
+
 
 onMounted(() => {
   fetchFilteredAssets();
 });
-const viewMode = ref('table'); // 'table' hoặc 'card'
+ // 'table' hoặc 'card'
 </script>
 
 <style scoped>
@@ -1033,4 +1294,14 @@ th{
   50% { opacity: 0.45; }
   100% { opacity: 1; }
 }
+
+.label-glow,
+.icon-glow {
+  text-shadow:
+      0 0 6px rgba(9, 9, 9, 0.9),
+      0 0 12px rgba(10, 10, 10, 0.8);
+}
+
+
+
 </style>

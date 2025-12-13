@@ -94,6 +94,13 @@
                 </span>
               </div>
 
+              <div class="info-row">
+                <span class="info-label">Trạng thái</span>
+                <span class="info-value" :class="badgeStatus(asset.status)">
+                  {{ formatStatus(asset.status) }}
+                </span>
+              </div>
+
               <div class="info-row highlight-row">
                 <span class="info-label">Giá bán</span>
                 <span class="info-value price-selling text-primary">{{ formatMoneyVN(asset.giaBan) }}</span>
@@ -195,10 +202,6 @@
           <div class="detail-item">
             <span class="detail-label">Vị trí</span>
             <span class="detail-value">{{ asset.landPosition }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Trạng thái</span>
-            <span class="detail-value">{{ asset.status }}</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Chiều ngang & chiều dài</span>
@@ -459,19 +462,6 @@
     }
   };
 
-  const formatLoai = (loai) => {
-    if (!loai) return "";
-    switch (loai.toUpperCase()) {
-      case "NHA":
-        return "Nhà";
-      case "DAT":
-        return "Đất";
-      case "DATLON":
-        return "Đất lớn";
-      default:
-        return loai;
-    }
-  };
 
 
   const badgeClass = (code) => {
@@ -582,7 +572,7 @@
     }
 
     // Nếu diện tích lớn → đất lớn
-    if (dtcnValue > 1000) return "DATLON";
+    if (dtcnValue > 10000) return "DATLON";
 
     // Còn lại → đất
     return "DAT";
@@ -652,6 +642,50 @@
     }
   };
 
+  function formatStatus(status) {
+    if (!status) return "—";
+
+    const map = {
+      "Chưa định giá sơ bộ": "Chưa định giá sơ bộ",
+      "Đã định giá sơ bộ": "Đã định giá sơ bộ",
+      "Đã bán": "Đã bán",
+      "Bán nhanh 30 ngày": "Bán nhanh 30 ngày"
+    };
+
+    return map[status] || status;
+  }
+
+  function badgeStatus(status) {
+    switch (status) {
+      case "Chưa định giá sơ bộ":
+        return "badge rounded-pill bg-warning-subtle text-warning-emphasis px-3 py-2";
+
+      case "Đã định giá sơ bộ":
+        return "badge rounded-pill bg-primary-subtle text-primary-emphasis px-3 py-2";
+
+      case "Đã bán":
+        return "badge rounded-pill bg-secondary-subtle text-secondary-emphasis px-3 py-2 text-decoration-line-through";
+
+      case "Bán nhanh 30N":
+        return "badge rounded-pill bg-success-subtle text-success-emphasis px-3 py-2";
+
+      default:
+        return "badge rounded-pill bg-light text-dark px-3 py-2";
+    }
+  }
+  const formatLoai = (loai) => {
+    if (!loai) return "";
+    switch (loai.toUpperCase()) {
+      case "NHA":
+        return "Nhà";
+      case "DAT":
+        return "Đất";
+      case "DATLON":
+        return "Đất lớn";
+      default:
+        return loai;
+    }
+  };
   </script>
 
 <style scoped>
@@ -1397,7 +1431,7 @@
   padding: 3px 10px;
   border-radius: 6px;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   display: inline-block;
 }
 
@@ -1415,6 +1449,7 @@
   background-color: #fff3e0;
   color: #e65100;
 }
+
 .bn30n-color {
   background-color: #22c55e !important; /* green-500 */
   border-color: #16a34a !important;     /* green-600 */

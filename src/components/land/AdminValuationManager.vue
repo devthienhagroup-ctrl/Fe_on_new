@@ -1615,7 +1615,7 @@ function formatAssetStatus(status) {
         text: "Đã định giá sơ bộ",
         class: "badge badge-green-subtle text-success fw-semibold"
       };
-    case "BÁN NHANH 30N":
+    case "BÁN NHANH 30 NGÀY":
       return {
         text: "Bán nhanh 30 ngày",
         class: "badge badge-purple-subtle fw-semibold"
