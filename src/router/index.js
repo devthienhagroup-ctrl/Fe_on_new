@@ -55,6 +55,7 @@ import ProductDetail2 from "../components/productAdmin/ProductDetail2.vue";
 import ProductCreate from "../components/productAdmin/ProductCreate.vue";
 
 import Ga4EventExample from "../components/Ga4EventExample.vue";
+import PaymentPage2 from "../components/productAdmin/PaymentPage2.vue";
 
 const routes = [
         {
@@ -63,7 +64,7 @@ const routes = [
             component: LoginForm,
         },
         {
-            path: "/-thg/products/create",
+            path: "/-thg/quan-ly-san-pham/tao-moi",
             meta: {requiresAuth: false},
             name: "ProductCreate",
             component: ProductCreate,
@@ -74,7 +75,7 @@ const routes = [
             component: Menu,
             children: [
                 {
-                    path: "",   // → /admin/products/:id
+                    path: "",   // → /-thg/quan-ly-san-phams/:id
                     name: "ProductList",
                     component: ProductList,
                     props: true,
@@ -82,12 +83,12 @@ const routes = [
             ]
         },
         {
-            path: "/admin/product",
+            path: "/-thg/quan-ly-san-pham",
             meta: {requiresAuth: false},
             component: Menu,
             children: [
                 {
-                    path: "update/:id",   // → /admin/products/:id
+                    path: "cap-nhat/:id",   // → /-thg/quan-ly-san-phams/:id
                     name: "ProducUpdate",
                     component: ProductUpdate,
                     props: true,
@@ -96,12 +97,12 @@ const routes = [
         },
 
         {
-            path: "/test02",
+            path: "/san-pham-thien-ha",
             meta: {requiresAuth: false, hideFooterMap: true},
             component: MenuUser,
             children: [
                 {
-                    path: "",   // → /admin/products/:id
+                    path: "",   // → /-thg/quan-ly-san-phams/:id
                     name: "Demo",
                     component: Demo,
                     props: true,
@@ -109,13 +110,13 @@ const routes = [
             ]
         },
         {
-        path: "/admin",
+        path: "/-thg/quan-ly-san-pham",
         component: Menu,       // ⭐ Bổ sung MENU tại đây
         meta: { requiresAuth: false, hideFooterMap: true },
 
         children: [
             {
-                path: "products/:id",   // → /admin/products/:id
+                path: ":id",   // → /-thg/quan-ly-san-phams/:id
                 name: "ProductDetail",
                 component: ProductDetail,
                 props: true,
@@ -124,13 +125,13 @@ const routes = [
 
     },
     {
-        path: "/admin",
+        path: "/san-pham-thien-ha",
         component: MenuUser,       // ⭐ Bổ sung MENU tại đây
         meta: { requiresAuth: false },
 
         children: [
             {
-                path: "products-2/:id",   // → /admin/products/:id
+                path: ":id",   // → /-thg/quan-ly-san-phams/:id
                 name: "ProductDetail2",
                 component: ProductDetail2,
                 props: true,
@@ -426,6 +427,19 @@ const routes = [
                 path: '',
                 name: 'checkout',
                 component: PaymentPage,
+                meta: {hideFooterMap: true}
+            }
+        ]
+    },
+    {
+        path: "/thanh-toan-san-pham",
+        name: "Checkout",
+        component: MenuUser,
+        children: [
+            {
+                path: '',
+                name: 'checkout',
+                component: PaymentPage2,
                 meta: {hideFooterMap: true}
             }
         ]

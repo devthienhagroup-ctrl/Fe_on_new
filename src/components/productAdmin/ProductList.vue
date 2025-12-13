@@ -237,7 +237,7 @@
           </div>
           <div class="flex items-center gap-1">
             <button
-                @click="$router.push('/-thg/products/create')"
+                @click="$router.push('/-thg/quan-ly-san-pham/tao-moi')"
                 class="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-lg hover:from-amber-600 hover:to-yellow-600 transition-all shadow-md hover:shadow-lg text-sm"
             >
               <i class="fa-solid fa-plus text-xs"></i>
@@ -462,7 +462,7 @@
               </td>
 
               <td class="font-bold text-blue-700">
-                {{ item.phiMoiGioi + '%' || '-' }}
+                {{ item.phiMoiGioi != null ? item.phiMoiGioi + '%' : '-' }}
               </td>
 
               <td>
@@ -515,7 +515,7 @@
 
               <td class="text-center">
                 <button
-                    @click="$router.push(`/admin/products/${item.id}`)"
+                    @click="$router.push(`/-thg/quan-ly-san-pham/${item.id}`)"
                     class="
     px-1.5
     py-[2px]
@@ -602,7 +602,7 @@
       </div>
 
       <!--       Thống kê phân loại -->
-      <div class="grid grid-cols-3 gap-3 mb-5">
+      <div class="grid grid-cols-4 gap-3 mb-5">
         <div
             v-for="([category, count]) in Object.entries(stats.loaiMHStats)"
             :key="category"
@@ -692,11 +692,11 @@ import NotificationBell from "/src/components/NotificationBell.vue";
 const filterShow = ref("");
 
 import {useAuthStore} from "/src/stores/authStore.js";
-
+const sidebar = useSidebarStore();
 const authStore = useAuthStore();
 const info = authStore.userInfo;
 
-const sidebar = useSidebarStore();
+
 
 // Data
 const landAssets = ref([]);

@@ -6,7 +6,7 @@
     <div class="executive-header">
       <div class="header-top">
         <div class="header-left">
-          <button class="back-button" @click="router.push('/test01')">
+          <button class="back-button" @click="router.push('/san-pham-thien-ha')">
             <i class="fa-solid fa-arrow-left"></i>
             <span>Quay lại danh sách</span>
           </button>
@@ -33,7 +33,9 @@
 
               <span class="meta-item">
                   <span class="meta-label">Giá nội bộ:</span>
-                    <span class="price-internal">{{ formatMoneyVN(asset.giaNoiBo) ?? 'Chưa cập nhật' }}</span>
+                   <span class="price-internal block">
+                       {{ asset.giaNoiBo === -1.1 ? '**********' : (formatMoneyVN(asset.giaNoiBo) ?? 'Chưa cập nhật') }}
+                </span>
                 </span>
             </div>
 
@@ -98,7 +100,9 @@
                 </div>
                 <div class="press-card">
                   <span class="press-label">Giá nội bộ</span>
-                    <span class="press-value text-primary mt-2">{{ formatMoneyVN(asset.giaNoiBo) ?? 'Chưa cập nhật' }}</span>
+                  <span class="press-value text-primary mt-2">
+                      {{ asset.giaNoiBo === -1.1 ? '*******' : (formatMoneyVN(asset.giaNoiBo) ?? 'Chưa cập nhật') }}
+                    </span>
                   <span class="press-desc">Giá chốt hợp đồng tối thiểu</span>
                 </div>
                 <div class="press-card">
@@ -126,19 +130,42 @@
                 </div>
               </div>
 
-              <div class="press-cta">
+              <div v-if="!asset.daMoKhoa" class="press-cta">
                 <div class="press-quote">
-                  "Bản tin nhanh gọn, đầy đủ để môi giới tự tin giới thiệu sản phẩm trong 5 phút đầu tiên."
+                  "Mở khóa ngay để xem thông tin liên hệ và dữ liệu nội bộ chi tiết về sản phẩm!"
                 </div>
-                <div class="press-contact">
-                  <div class="contact-icon">
-                    <i class="fa-solid fa-bullhorn"></i>
+                <!-- Nút mở khóa toàn khối -->
+                <button
+                    @click="handleUnlock( asset )"
+                    class="unlock-button-glow w-full text-left relative overflow-hidden group" style="max-width: 300px"
+                >
+                  <span class="unlock-shine"></span>
+
+                  <div class="contact-icon z-10">
+                    <DotLottieVue
+                        src="https://lottie.host/68218690-b607-4da9-9c9a-f75270cf5854/DH5nYNGUkY.lottie"
+                        autoplay
+                        loop
+                        style="
+                            width: 60px;
+                            height: 60px;
+                            display: inline-block;
+                            vertical-align: bottom;
+                            position: relative;
+                            top: -10px;
+                            left: -9px;
+                          "
+                    />
                   </div>
-                  <div>
-                    <div class="contact-title">Sẵn sàng hỗ trợ tư vấn & booking</div>
-                    <div class="contact-sub">Ưu tiên phản hồi cho đối tác gửi khách ngay hôm nay.</div>
+                  <div class="z-10">
+                    <div class="contact-title font-semibold">
+                      Mở khóa ngay
+                    </div>
                   </div>
-                </div>
+                </button>
+
+
+
               </div>
             </div>
           </div>
@@ -199,13 +226,18 @@
 
             <div class="info-row highlight-row">
               <span class="info-label">Giá nội bộ</span>
-              <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.giaNoiBo) ?? 'Chưa cập nhật' }}</span>
+              <span class="info-value price-internal text-primary">
+                {{ asset.giaNoiBo === -1.1 ? '*****' : (formatMoneyVN(asset.giaNoiBo) ?? 'Chưa cập nhật') }}
+              </span>
             </div>
 
             <div class="info-row highlight-row">
               <span class="info-label">Giá mong muốn</span>
-              <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.desire) ?? 'Chưa cập nhật' }}</span>
+              <span class="info-value price-internal text-primary">
+                  {{ asset.desire === -1.1 ? '*****' : (formatMoneyVN(asset.desire) ?? 'Chưa cập nhật') }}
+                </span>
             </div>
+
 
             <div class="info-row">
               <span class="info-label">Liên hệ</span>
@@ -464,9 +496,31 @@
             <tr v-for="v in asset.valuations" :key="v.valuationId">
               <td class="valuation-round">Lần {{ v.valuationRound ?? 'Chưa cập nhật' }}</td>
               <td>{{ v.effectiveDate ?? 'Chưa cập nhật' }}</td>
-              <td><span class="price-valuation">{{ formatMoneyVN( v.totalPrice ) ?? 'Chưa cập nhật' }}</span></td>
-              <td><span class="price-valuation">{{  formatMoneyVN( v.totalMaxPrice) ?? 'Chưa cập nhật' }}</span></td>
-              <td v-html="renderPriceCompare(asset.desire, v.totalPrice)"> </td>
+              <td>
+                <span class="price-valuation">
+                  {{ v.totalPrice === -1.1 ? '*****' : (formatMoneyVN(v.totalPrice) ?? 'Chưa cập nhật') }}
+                </span>
+              </td>
+
+              <td>
+                <span class="price-valuation">
+                  {{ v.totalMaxPrice === -1.1 ? '*****' : (formatMoneyVN(v.totalMaxPrice) ?? 'Chưa cập nhật') }}
+                </span>
+              </td>
+
+              <td>
+                <span
+                    v-if="asset.desire === -1.1 || v.totalPrice === -1.1"
+                >
+                  *******
+                </span>
+
+                <span
+                    v-else
+                    v-html="renderPriceCompare(asset.desire, v.totalPrice)"
+                ></span>
+              </td>
+
               <td>
                 <button class="pdf-btn" @click="openPdf(v.pdfFile)">
                   <i class="fa-solid fa-file-pdf"></i>
@@ -503,7 +557,7 @@ import Spam from "./Spam.vue";
 
 async function loadDetail(id) {
   try {
-    const res = await api.get(`/admin.thg/product/admin/chi-tiet/${id}`);
+    const res = await api.get(`/user.thg/product/user/chi-tiet/${id}`);
     const data = res.data;
     asset.value = data;
     console.log("Dữ liệu từ API:", data);
@@ -619,6 +673,32 @@ const formatWard = (addressDetail) => {
 
   return ward;
 };
+
+
+async function handleUnlock(asset) {
+  if (!asset?.id) {
+    console.error("❌ Thiếu asset.id");
+    return;
+  }
+
+  try {
+    // Gọi API kiểm tra có được unlock không
+    const res = await api.get(`/thg.user/my-land/checkout/check/${asset.id}`);
+
+    if (res?.data?.unlocked === true) {
+      // ✅ Nếu đã được mở khóa → reload trang
+      location.reload();
+    } else {
+      // ❌ Chưa đủ điều kiện → lưu vào localStorage và chuyển qua thanh toán
+      localStorage.setItem("landAssetId", asset.id);
+      router.push("/thanh-toan-san-pham");
+    }
+  } catch (e) {
+    console.error("❌ Lỗi khi gọi API kiểm tra mở khóa", e);
+  }
+}
+
+
 
 const formatArea = (value) => {
   if (value === null || value === undefined || isNaN(value)) return "";
@@ -2049,6 +2129,51 @@ const openPdf = async (pdfFile) => {
 .default-color {
   background-color: #94a3b8 !important; /* slate-400 */
   border-color: #64748b !important;     /* slate-500 */
+}
+.unlock-button-glow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
+  box-shadow: 0 12px 28px -14px rgba(16, 185, 129, 0.8);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: none;
+}
+
+.unlock-button-glow:hover {
+  transform: scale(1.02);
+  box-shadow: 0 16px 32px -12px rgba(5, 150, 105, 0.7);
+}
+
+.unlock-shine {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  z-index: 1;
+  transition: none;
+}
+
+.group:hover .unlock-shine {
+  animation: unlockShineMove 1s ease-in-out forwards;
+}
+
+@keyframes unlockShineMove {
+  0% {
+    left: -60%;
+  }
+  100% {
+    left: 120%;
+  }
 }
 
 </style>

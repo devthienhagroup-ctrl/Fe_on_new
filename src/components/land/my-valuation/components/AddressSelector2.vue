@@ -221,7 +221,7 @@ watch([provinceCode, wardCode, street], () => {
 onMounted(() => {
   if (!props.modelValue) return;
 
-  const parts = props.modelValue.split("/");
+  const parts = props.modelValue.split("/!!");
   if (parts.length >= 3) {
     street.value = parts[0] || "";
     const wardName = parts[1];

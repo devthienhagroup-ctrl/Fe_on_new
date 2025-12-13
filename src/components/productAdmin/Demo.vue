@@ -313,7 +313,7 @@
                             vertical-align: bottom;
                             position: relative; top: -1px;
                           "
-                    />{{ item.phiMoiGioi + '%' || '-' }}
+                    />{{ item.phiMoiGioi != null ? item.phiMoiGioi + '%' : '-' }}
                   </div>
                 </td>
                 <td class="font-bold">
@@ -358,7 +358,7 @@
                     ></i>
                   </button>
                   <button
-                      @click="$router.push(`/admin/products-2/${item.id}`)"
+                      @click="$router.push(`/san-pham-thien-ha/${item.id}`)"
                       class="
                                 px-1.5
                                 py-[2px]
@@ -551,7 +551,7 @@
                           "
                   />
                   <span class="font-semibold text-blue-700 text-[14px]">
-                    {{ item.phiMoiGioi }}%
+                    {{ item.phiMoiGioi != null ? item.phiMoiGioi + '%' : '-' }}
                   </span>
                 </div>
 
@@ -648,7 +648,7 @@
                 <!-- Nút Xem chi tiết (primary) -->
                 <!-- Nút Xem chi tiết (giữ nguyên màu, chỉ bỏ border) -->
                 <button
-                    @click="$router.push(`/admin/products-2/${item.id}`)"
+                    @click="$router.push(`/san-pham-thien-ha/${item.id}`)"
                     class="flex-1 py-2.5 bg-gradient-to-r from-slate-900 to-black text-white rounded-full
          text-[14px] font-semibold flex items-center justify-center gap-2
          hover:opacity-90 transition-all"

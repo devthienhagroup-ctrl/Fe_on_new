@@ -59,7 +59,7 @@
           </div>
 
           <div class="header-actions">
-            <button class="action-btn btn-edit" @click="$router.push(`/admin/product/update/${asset.id}`)">
+            <button class="action-btn btn-edit" @click="$router.push(`/-thg/quan-ly-san-pham/cap-nhat/${asset.id}`)">
               <i class="fa-solid fa-pen"></i>
               <span>Cập nhật thông tin</span>
             </button>

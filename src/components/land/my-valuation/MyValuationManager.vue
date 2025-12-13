@@ -199,7 +199,7 @@
                             >
                               <label class="form-label small field-label required-label">
                                 <span
-                                    class="d-none d-sm-inline">Diện tích tổng (m²)</span><i>{{ convertToWordsSquare(requestForm.newAsset.totalArea) }}</i>
+                                    class="d-none d-sm-inline">Diện tích tổng (m²)</span><i>{{ formatSquareNumber5555(requestForm.newAsset.totalArea) }}</i>
                                 <span class="d-inline d-sm-none">
                                   <i class="fa-solid fa-ruler-combined me-1"></i>DT tổng
                                 </span>
@@ -218,7 +218,7 @@
                             </div>
                             <div class="col-12 col-md-6">
                               <label class="form-label small field-label">Diện tích sàn
-                                (m²)</label><i>{{ convertToWordsSquare(requestForm.newAsset.floorArea) }}</i>
+                                (m²)</label><i>{{ formatSquareNumber5555(requestForm.newAsset.floorArea) }}</i>
                               <input
                                   type="number"
                                   min="0"
@@ -799,7 +799,7 @@
                               </div>
                               <div class="col-12 col-md-6 field-group" :class="{ 'has-error': addAssetErrors.totalArea }" >
                                 <label class="form-label small field-label required-label">
-                                  <span class="d-none d-sm-inline">Diện tích tổng (m²)</span><i>{{convertToWordsSquare(newAssetForm.totalArea)}}</i>
+                                  <span class="d-none d-sm-inline">Diện tích tổng (m²)</span><i>{{formatSquareNumber5555(newAssetForm.totalArea)}}</i>
                                   <span class="d-inline d-sm-none"><i class="fa-solid fa-ruler-combined me-1"></i>DT tổng</span>
                                 </label>
                                 <small v-if="addAssetErrors.totalArea" class="invalid-hint">
@@ -808,7 +808,7 @@
                                 <input type="number" class="form-control form-control-sm" :class="{ 'is-invalid': addAssetErrors.totalArea }" v-model.number="newAssetForm.totalArea" step="0.01" min="0" />
                               </div>
                               <div class="col-12 col-md-6">
-                                <label class="form-label small field-label">Diện tích sàn (m²)</label><i>{{convertToWordsSquare(newAssetForm.floorArea)}}</i>
+                                <label class="form-label small field-label">Diện tích sàn (m²)</label><i>{{formatSquareNumber5555(newAssetForm.floorArea)}}</i>
                                 <input type="number" class="form-control form-control-sm" v-model.number="newAssetForm.floorArea" step="0.01" min="0" />
                               </div>
                               <div class="col-12 col-md-6 field-group" :class="{ 'has-error': addAssetErrors.landUseRight }" >
@@ -2781,6 +2781,25 @@ function convertToWordsSquare(amount) {
   return finalText;
 }
 
+function formatSquareNumber5555(value) {
+  if (value === null || value === undefined || value === "") return "";
+
+  // Giữ nguyên chuỗi để không mất số 0 phía sau
+  const str = value.toString();
+
+  // Tách phần nguyên & thập phân
+  const [intPart, decimalPart] = str.split(".");
+
+  // Format phần nguyên theo chuẩn VN
+  const formattedInt = Number(intPart).toLocaleString("vi-VN");
+
+  // Ghép lại
+  let result = decimalPart !== undefined
+      ? `${formattedInt},${decimalPart}`
+      : formattedInt;
+
+  return result + " m²";
+}
 
 const formattedPrice = ref("");
 

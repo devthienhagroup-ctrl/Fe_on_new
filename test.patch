@@ -46,7 +46,7 @@ index 747027387489657291f307618e4aa91b85bb18d3..569c1932178118d1c7fa99b89fe70feb
            </div>
 
            <div class="header-actions">
-             <button class="action-btn btn-edit" @click="$router.push(`/admin/product/update/${asset.id}`)">
+             <button class="action-btn btn-edit" @click="$router.push(`/-thg/quan-ly-san-pham/update/${asset.id}`)">
                <i class="fa-solid fa-pen"></i>
                <span>Cập nhật thông tin</span>
 @@ -111,241 +111,244 @@
