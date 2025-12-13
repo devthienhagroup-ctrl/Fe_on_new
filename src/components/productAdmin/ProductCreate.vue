@@ -736,7 +736,7 @@
                 <i class="fas fa-user-tie text-danger"></i>
               </div>
               <div>
-                <h2 class="h5 fw-bold mb-1">Thông tin chủ tài sản</h2>
+                <h2 class="h5 fw-bold mb-1">Thông tin chủ tài sản và liên hệ</h2>
                 <p class="text-muted small mb-0">Thông tin người sở hữu tài sản</p>
               </div>
             </div>
@@ -802,6 +802,48 @@
                 <small v-if="errors.ownerPhone" class="text-danger">{{ errors.ownerPhone }}</small>
               </div>
             </div>
+            <div class="row g-4 mt-2">
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">
+                  Liên hệ
+                </label>
+
+                <input
+                    v-model="form.lienHeMoKhoa"
+                    type="tel"
+                    class="form-control"
+                    placeholder="VD: 0909 123 456"
+                />
+              </div>
+              <!-- Hiện thông tin chủ khi MG mở khóa -->
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">
+                  Hiện thông tin chủ khi MG mở khóa
+                </label>
+
+                <select v-model="form.hienThongTinChuKhiMoKhoa" class="form-select">
+                  <option :value="true">Có</option>
+                  <option :value="false">Không</option>
+                </select>
+              </div>
+
+              <!-- Hiện liên hệ khi MG mở khóa -->
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">
+                  Hiện liên hệ khi MG mở khóa
+                </label>
+
+                <select v-model="form.hienLienHeKhiMoKhoa" class="form-select">
+                  <option :value="true">Có</option>
+                  <option :value="false">Không</option>
+                </select>
+              </div>
+
+              <!-- Liên hệ khi mở khóa -->
+
+            </div>
+
+
           </section>
 
           <!-- Upload hồ sơ -->
@@ -905,6 +947,9 @@ const form = reactive({
   ownerFullName: '',
   ownerPhone: '',
   rooms: [defaultRoom()],
+  hienThongTinChuKhiMoKhoa: true,
+  hienLienHeKhiMoKhoa: true,
+  lienHeMoKhoa: ''
 })
 
 const formAddress = reactive({ street: '', ward: '', province: '' })

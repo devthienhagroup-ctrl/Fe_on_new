@@ -209,14 +209,14 @@
 
             <div class="info-row">
               <span class="info-label">Liên hệ</span>
-              <span class="info-value">{{ asset.lienHe ?? 'Chưa cập nhật' }}</span>
+              <span class="info-value"> <i class="fa-solid fa-phone text-danger"></i> {{ asset.lienHe ?? 'Chưa cập nhật' }}</span>
             </div>
 
             <div class="info-row">
               <span class="info-label">Chủ sở hữu</span>
               <span v-if="asset.ownerName != null" class="info-value">
                   {{ asset.ownerName ?? 'Chưa cập nhật' }} <span>
-                  ( <i class="fa-solid fa-phone text-danger"></i>
+                  (
                   {{ asset.ownerPhone ?? 'Chưa cập nhật' }} )</span>
                 </span>
               <span v-else class="text-gray-600 info-value">Chưa cập nhật</span>
