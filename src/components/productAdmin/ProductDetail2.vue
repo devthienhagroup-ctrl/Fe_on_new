@@ -174,13 +174,13 @@
     </div>
 
     <!-- MAIN CONTENT GRID -->
-    <div class="content-grid">
+    <div class="content-grid" >
 
       <!-- LEFT COLUMN - GALLERY -->
-      <div class="gallery-section" style="width: 930px; max-width: 930px">
-        <div class="gallery-wrapper">
+      <div class="gallery-section" >
+        <div class="gallery-wrapper" >
           <!-- ====== ẢNH CHÍNH ====== -->
-          <div class="main-image-container">
+          <div class="main-image-container" >
             <!-- 🔓 ĐÃ MỞ KHÓA -->
             <img
                 v-if="asset.daMoKhoa"
@@ -195,7 +195,6 @@
                 :src="lockedImage"
                 alt="Locked property image"
                 class="main-image"
-                style="height: 550px; border: solid 1px rgba(0,0,0,0.15)"
             />
 
             <div class="image-counter">
@@ -261,7 +260,7 @@
       </div>
 
       <!-- RIGHT COLUMN - GENERAL INFO -->
-      <div class="info-section" style="min-width: 400px">
+      <div class="info-section">
         <div class="info-card">
           <div class="card-header">
             <i class="fa-solid fa-circle-info header-icon"></i>
@@ -1385,7 +1384,7 @@ const openPdf = async (pdfFile) => {
 /* ========= CONTENT GRID ========= */
 .content-grid {
   display: grid;
-  grid-template-columns: 1fr 1.3fr;
+  grid-template-columns: minmax(0, 1.5fr) minmax(450px, 0.5fr);
   gap: 24px;
   margin-bottom: 24px;
 }
@@ -1397,10 +1396,11 @@ const openPdf = async (pdfFile) => {
   padding: 24px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
+  width: 100%;
 }
 
 .gallery-wrapper {
-  max-width: 920px !important;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -1409,16 +1409,14 @@ const openPdf = async (pdfFile) => {
 .main-image-container {
   position: relative;
   width: 100%;
-  height: 450px;
+  aspect-ratio: 4 / 3;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
 .main-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
 }
 
 .image-counter {
@@ -1435,15 +1433,19 @@ const openPdf = async (pdfFile) => {
 }
 
 .thumbnails-container {
+  width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
   padding: 4px 0;
 }
 
 .thumbnails-scroll {
-  display: flex;
+  display: inline-flex;
   gap: 12px;
+  width: max-content;
 }
 
+/* ====== THUMBNAILS DEFAULT (DESKTOP) ====== */
 .thumbnail {
   flex-shrink: 0;
   width: 100px;
@@ -1455,6 +1457,23 @@ const openPdf = async (pdfFile) => {
   transition: all 0.2s;
   opacity: 0.7;
 }
+
+@media (max-width: 768px) {
+  .thumbnails-container {
+    padding: 2px 0;
+  }
+
+  .thumbnails-scroll {
+    gap: 8px;
+  }
+
+  .thumbnail {
+    width: 64px;
+    height: 48px;
+    border-width: 2px;
+  }
+}
+
 
 .thumbnail:hover {
   opacity: 1;
@@ -1471,6 +1490,7 @@ const openPdf = async (pdfFile) => {
 .info-section {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .info-card {
@@ -2097,6 +2117,21 @@ const openPdf = async (pdfFile) => {
   }
 }
 
+@media (max-width: 1024px) {
+  .main-image-container {
+    height: 380px;
+  }
+
+  .gallery-section,
+  .info-card {
+    padding: 20px;
+  }
+
+  .content-grid {
+    gap: 18px;
+  }
+}
+
 @media (max-width: 768px) {
   .executive-container {
     padding: 16px;
@@ -2114,6 +2149,10 @@ const openPdf = async (pdfFile) => {
     font-size: 22px;
   }
 
+  .gallery-section {
+    padding: 16px;
+  }
+
   .header-actions {
     width: 100%;
     flex-direction: column;
@@ -2122,10 +2161,6 @@ const openPdf = async (pdfFile) => {
   .action-btn {
     width: 100%;
     justify-content: center;
-  }
-
-  .main-image-container {
-    height: 300px;
   }
 
   .detail-grid {
@@ -2160,8 +2195,13 @@ const openPdf = async (pdfFile) => {
     font-size: 18px;
   }
 
+  .thumbnails-container {
+    overflow-x: auto;
+  }
+
   .thumbnails-scroll {
-    gap: 8px;
+    flex-wrap: nowrap;
+    gap: 10px;
   }
 
   .thumbnail {
@@ -2255,6 +2295,44 @@ const openPdf = async (pdfFile) => {
 }
 .main-image.locked {
   filter: blur(6px);
+}
+
+@media (max-width: 768px) {
+  .gallery-section {
+    padding: 12px;
+  }
+
+  .main-image-container {
+    min-height: 450px;
+  }
+
+  .main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .thumbnails-container {
+    overflow-x: auto;
+    padding: 6px 10px;
+  }
+
+  .thumbnails-scroll {
+    display: flex;
+    gap: 6px;
+    width: max-content;
+  }
+
+  .thumbnail {
+    width: 56px;
+    height: 42px;
+    border-radius: 6px;
+  }
+}
+.main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 </style>

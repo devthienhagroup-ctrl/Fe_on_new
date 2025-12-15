@@ -1,428 +1,407 @@
-diff --git a/src/components/productAdmin/Demo.vue b/src/components/productAdmin/Demo.vue
-index 12716dcdee82f3dc9e705595d91680104ff2f8a8..b64d9679851b37d56abe7e3a42625843451df608 100644
---- a/src/components/productAdmin/Demo.vue
-+++ b/src/components/productAdmin/Demo.vue
-@@ -1,92 +1,94 @@
- <template>
-   <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 px-5 py-3" style="padding-top: 90px!important;">
-     <div class="max-w-[1600px] mx-auto">
-       <!-- Bộ lọc nâng cao -->
-       <div class="bg-white rounded-xl shadow-lg border border-slate-300 mb-5 p-4"
-            style="
-             background-image: url('https://s3.cloudfly.vn/thg-storage/uploads-public/thienhagroup_filter_2.png');
-             background-size: cover;
-             background-position: center;
-             background-repeat: no-repeat;
-           ">
--        <div class="flex items-center justify-between mb-3">
-+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
-           <div class="flex items-center gap-2">
-             <h1
-                 class="text-base font-bold"
-                 style="text-shadow: 0 0 6px rgba(10,10,10,0.9); font-size: 22px; color: white!important;"
-             >
-               Sản Phẩm Thiên Hà Group Dành Riêng Cho Bạn
-             </h1>
-
-           </div>
-
-           <!-- Nút chuyển đổi giữa bảng và thẻ -->
-           <div class="flex items-center gap-2">
-             <button
-                 @click="viewMode = 'card'"
-                 :class="[
-                 'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
-                 viewMode === 'card'
-                   ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                   : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-               ]"
-                 title="Chế độ thẻ"
-             >
-               <i class="fa-solid fa-grip text-sm"></i>
-               <span class="text-sm font-medium">Thẻ</span>
-             </button>
-             <button
-                 @click="viewMode = 'table'"
-+                :disabled="isMobile"
-                 :class="[
-                 'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
-                 viewMode === 'table'
-                   ? 'bg-blue-600 text-white border-blue-600 shadow-md'
--                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50',
-+                isMobile ? 'opacity-60 cursor-not-allowed' : ''
-               ]"
-                 title="Chế độ bảng"
-             >
-               <i class="fa-solid fa-table text-sm"></i>
-               <span class="text-sm font-medium">Bảng</span>
-             </button>
-           </div>
-         </div>
-
-         <!-- Thanh tìm kiếm -->
-         <div class="mb-3">
-           <div class="relative">
-             <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-             <input
-                 v-model="searchQuery"
-                 type="text"
-                 placeholder="Tìm kiếm theo tên chủ nhà hoặc số điện thoại, địa chỉ chi tết..."
-                 class="w-full pl-9 pr-4 py-2 border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all text-sm"
-             />
-           </div>
-         </div>
-
--        <div class="grid grid-cols-8 gap-2">
-+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-[1000px]:grid-cols-8 gap-2">
-
-           <!-- Mức giá -->
-           <div>
-             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
-               <i class="fa-solid fa-dollar-sign text-blue-600 text-xs icon-glow" ></i>
-               Mức Giá
-             </label>
-             <select v-model="filterGiaRange"
-                     class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg
-              focus:ring-2 focus:ring-blue-600 focus:border-transparent
-              bg-white shadow-sm transition-all">
-               <option value="">Tất cả</option>
-               <option value="<1>">&lt; 1 tỷ</option>
-               <option value="1-3">1 - 3 tỷ</option>
-               <option value="3-5">3 - 5 tỷ</option>
-               <option value="5-7">5 - 7 tỷ</option>
-               <option value="7-10">7 - 10 tỷ</option>
-               <option value=">10">&gt; 10 tỷ</option>
-             </select>
-           </div>
-
-           <!-- Tỉnh thành -->
-           <div>
-             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
-               <i class="fa-solid fa-city text-emerald-600 text-xs icon-glow"></i>
-@@ -363,116 +365,116 @@
-                                 px-1.5
-                                 py-[2px]
-                                 rounded-md
-                                 inline-flex items-center gap-1
-                                 text-[10px] font-semibold
-                                 bg-[#BFDBFE]
-                                 text-[#1D4ED8]
-                                 border border-[#93C5FD]
-                                 shadow-sm
-                                 hover:bg-[#93C5FD]
-                                 transition-all duration-200
-                               "
-                       style="border-radius: 8px; font-size: 11px;"
-                   >
-                     <i class="fa-regular fa-eye text-[10px] text-[#1D4ED8]"></i>
-                     <span>Xem</span>
-                   </button>
-
-                 </td>
-               </tr>
-               </tbody>
-             </table>
-           </div>
-
-           <!-- Phân trang -->
--          <div class="flex items-center justify-between p-3 bg-gradient-to-r from-slate-100 to-slate-200 border-t border-slate-300">
-+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-3 bg-gradient-to-r from-slate-100 to-slate-200 border-t border-slate-300">
-             <div class="flex items-center gap-1">
-               <button
-                   @click="goToPage(0)"
-                   :disabled="page === 0"
-                   class="p-1.5 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-               >
-                 <i class="fa-solid fa-angles-left text-sm"></i>
-               </button>
-               <button
-                   @click="goToPage(page - 1)"
-                   :disabled="page === 0"
-                   class="p-1.5 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-               >
-                 <i class="fa-solid fa-angle-left text-sm"></i>
-               </button>
-
-               <div class="px-3 py-1.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg shadow-md">
-                 <span class="text-sm font-bold">
-                   Trang {{ page + 1 }} / {{ totalPages }}
-                 </span>
-               </div>
-
-               <button
-                   @click="goToPage(page + 1)"
-                   :disabled="page >= totalPages - 1"
-                   class="p-1.5 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-               >
-                 <i class="fa-solid fa-angle-right text-sm"></i>
-               </button>
-               <button
-                   @click="goToPage(totalPages - 1)"
-                   :disabled="page >= totalPages - 1"
-                   class="p-1.5 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-               >
-                 <i class="fa-solid fa-angles-right text-sm"></i>
-               </button>
-             </div>
-
--            <div class="flex items-center gap-2">
-+            <div class="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
-               <span class="text-sm font-semibold text-slate-900">Số dòng mỗi trang:</span>
-               <input
-                   type="number"
-                   v-model.number="pageSize"
-                   @change="updatePageSize"
-                   class="w-16 px-2 py-1 border border-slate-400 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm"
-                   min="1"
-               />
-               <span class="text-sm text-slate-900 font-semibold">
-                 Hiển thị
-                 {{ page * pageSize + 1 }}
-                 -
-                 {{ Math.min((page + 1) * pageSize, totalRecords) }} của {{ totalRecords }}
-               </span>
-             </div>
-           </div>
-         </div>
-       </template>
-
-       <!-- Chế độ xem thẻ - 3 cột -->
-       <template v-else>
--        <div class="mb-4 flex items-center justify-between">
-+        <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-           <h3 class="text-lg font-bold text-slate-800">
-             Tổng số: {{ totalRecords }} bất động sản
-           </h3>
--          <div class="flex items-center gap-3">
-+          <div class="flex flex-nowrap items-center gap-2 sm:gap-3">
-             <div class="text-sm text-slate-600 font-bold">
-               {{ page * pageSize + 1 }} - {{ Math.min((page + 1) * pageSize, totalRecords) }} của {{ totalRecords }}
-             </div>
-             <select
-                 v-model.number="pageSize"
-                 @change="updatePageSize"
-                 class="px-2 py-1.5 border border-slate-400 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm"
-             >
-               <option value="8">8 thẻ/trang</option>
-               <option value="12">12 thẻ/trang</option>
-               <option value="16">16 thẻ/trang</option>
-               <option value="20">20 thẻ/trang</option>
-             </select>
-           </div>
-         </div>
-
-         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-
-           <div
-               v-for="item in landAssets"
-               :key="item.id"
-               class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden
-          hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
-           >
-             <!-- Ảnh -->
-@@ -660,135 +662,142 @@
-                   <i class="fa-regular fa-eye text-sm"></i>
-                   Xem chi tiết
+diff --git a/src/components/productAdmin/ProductDetail2.vue b/src/components/productAdmin/ProductDetail2.vue
+index e1084413e838e85bf386cdeb0db6215464e66107..b7f1380f7a47990c7e0c10f33bda50192e91eb22 100644
+--- a/src/components/productAdmin/ProductDetail2.vue
++++ b/src/components/productAdmin/ProductDetail2.vue
+@@ -155,51 +155,51 @@
+                             top: -10px;
+                             left: -9px;
+                           "
+                     />
+                   </div>
+                   <div class="z-10">
+                     <div class="contact-title font-semibold">
+                       Mở khóa ngay
+                     </div>
+                   </div>
                  </button>
 
-                 <!-- Nút Yêu thích (không border + nền xám nhạt) -->
-                 <button
-                     @click="toggleLove(item)"
-                     class="w-10 h-10 rounded-full bg-slate-100 text-slate-800 shadow-sm
-          hover:bg-slate-200 flex items-center justify-center transition"
-                 >
-                   <i
-                       :class="item.daThich
-       ? 'fa-solid fa-heart text-black text-base'
-       : 'fa-regular fa-heart text-base'"
-                   ></i>
-                 </button>
+
 
                </div>
              </div>
            </div>
-
          </div>
-
-
-         <!-- Phân trang cho chế độ thẻ -->
--        <div class="flex items-center justify-between p-4 bg-white rounded-xl shadow-lg border border-slate-300">
-+        <div class="flex flex-col gap-3 p-4 bg-white rounded-xl shadow-lg border border-slate-300 sm:flex-row sm:items-center sm:justify-between">
-           <div class="flex items-center gap-1">
-             <button
-                 @click="goToPage(0)"
-                 :disabled="page === 0"
-                 class="p-2 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-             >
-               <i class="fa-solid fa-angles-left text-sm"></i>
-             </button>
-             <button
-                 @click="goToPage(page - 1)"
-                 :disabled="page === 0"
-                 class="p-2 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-             >
-               <i class="fa-solid fa-angle-left text-sm"></i>
-             </button>
-
-             <div class="px-4 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg shadow-md">
-               <span class="text-sm font-bold">
-                 Trang {{ page + 1 }} / {{ totalPages }}
-               </span>
-             </div>
-
-             <button
-                 @click="goToPage(page + 1)"
-                 :disabled="page >= totalPages - 1"
-                 class="p-2 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-             >
-               <i class="fa-solid fa-angle-right text-sm"></i>
-             </button>
-             <button
-                 @click="goToPage(totalPages - 1)"
-                 :disabled="page >= totalPages - 1"
-                 class="p-2 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-             >
-               <i class="fa-solid fa-angles-right text-sm"></i>
-             </button>
-           </div>
-
--          <div class="text-sm text-slate-700">
-+          <div class="text-sm text-slate-700 text-center sm:text-right">
-             Hiển thị {{ Math.min((page + 1) * pageSize, totalRecords) }} / {{ totalRecords }} bất động sản
-           </div>
-         </div>
-       </template>
+       </div>
      </div>
-   </div>
- </template>
 
- <script setup>
- import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
--import { ref, computed, watch, onMounted } from "vue";
-+import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
- import { useSidebarStore } from "/src/stores/sidebarStore.js";
- import addressData from "/src/assets/js/address.json";
- import NotificationBell from "/src/components/NotificationBell.vue";
+     <!-- MAIN CONTENT GRID -->
+     <div class="content-grid">
 
+       <!-- LEFT COLUMN - GALLERY -->
+-      <div class="gallery-section" style="width: 930px; max-width: 930px">
++      <div class="gallery-section">
+         <div class="gallery-wrapper">
+           <!-- ====== ẢNH CHÍNH ====== -->
+           <div class="main-image-container">
+             <!-- 🔓 ĐÃ MỞ KHÓA -->
+             <img
+                 v-if="asset.daMoKhoa"
+                 :src="asset.slide[activeImage]"
+                 alt="Property image"
+                 class="main-image"
+             />
 
- import { useAuthStore } from "/src/stores/authStore.js";
- const authStore = useAuthStore();
- const info = authStore.userInfo;
+             <!-- 🔒 CHƯA MỞ KHÓA -->
+             <img
+                 v-else
+                 :src="lockedImage"
+                 alt="Locked property image"
+                 class="main-image"
+                 style="height: 550px; border: solid 1px rgba(0,0,0,0.15)"
+             />
 
- const sidebar = useSidebarStore();
+             <div class="image-counter">
+               <template v-if="asset.daMoKhoa">
+                 {{ activeImage + 1 }} / {{ asset.slide.length }}
+               </template>
+               <template v-else>
+@@ -239,51 +239,51 @@
+             </div>
+           </div>
 
- // Data
- const landAssets = ref([]);
- const totalRecords = ref(0);
+           <div v-if="asset.daMoKhoa" class="file-section">
+             <FileOrLand entity-type="land" :entity-id="asset.id" :file-list="asset.files || [] "
+                         :canEdit="false"/>
+           </div>
+           <div
+               v-else
+               class="
+     font-bold italic text-slate-700
+     border border-dashed border-slate-400
+     rounded-lg
+     px-4 py-2
+     text-center
+     bg-white/70
+   "
+               style=" border: dashed 1px rgba(52,52,52,0.44) !important "
+           >
+             Mở khóa để xem chi tiết + {{ asset.soLuongFiles }} ảnh và file khác.
+           </div>
+         </div>
+       </div>
 
- // Filters
- const filterGiaRange = ref("");
- const filterProvince = ref("");
- const filterWard = ref("");
- const filterStreet = ref("");
- const filterLoaiMH = ref("");
- const filterDTCN = ref("");
- const filterViTri = ref("");
- const filterCreateDate = ref("");
- const filterUpdateDate = ref("");
- const searchQuery = ref("");
- const filterUnlock = ref("");
- const filterStatus = ref("");
- const filterLove = ref(null);
+       <!-- RIGHT COLUMN - GENERAL INFO -->
+-      <div class="info-section" style="min-width: 400px">
++      <div class="info-section">
+         <div class="info-card">
+           <div class="card-header">
+             <i class="fa-solid fa-circle-info header-icon"></i>
+             <h3 class="card-title">Thông tin chung</h3>
+           </div>
 
- // Pagination
- const page = ref(0);
- const pageSize = ref(8);
- const viewMode = ref('card');
-+const isMobile = ref(false);
-+const updateViewportMode = () => {
-+  isMobile.value = typeof window !== 'undefined' && window.innerWidth < 768;
-+  if (isMobile.value) {
-+    viewMode.value = 'card';
-+  }
-+};
- watch(viewMode, (mode) => {
-   pageSize.value = mode === 'card' ? 8 : 10;
- });// Mặc định 9 thẻ cho 3 cột
- const totalPages = computed(() =>
-     Math.ceil(totalRecords.value / pageSize.value || 1)
- );
+           <div class="info-grid magazine-grid">
+             <div class="info-row">
+               <span class="info-label">Loại tài sản</span>
+               <span class="info-value" :class="badgeLoai(asset.loaiTaiSan)">
+                   {{ formatLoai( asset.loaiTaiSan ) ?? 'Chưa cập nhật' }}
+                 </span>
+             </div>
 
- // Unique values
- const provinces = computed(() => addressData.map(x => x.name));
+             <div class="info-row highlight-row">
+               <span class="info-label">Giá bán</span>
+               <span class="info-value price-selling text-primary">{{ formatMoneyVN(asset.giaBan) ?? 'Chưa cập nhật' }}</span>
+             </div>
 
- const wards = computed(() => {
-   if (!filterProvince.value) return [];
-
-   const province = addressData.find(p => p.name === filterProvince.value);
-   if (!province || !Array.isArray(province.wards)) return [];
-
-   return province.wards.map(w => w.name);
- });
- watch(filterProvince, () => {
-   filterWard.value = "";   // reset về Tất cả
- });
-
-
- // Format functions
- const formatDate = (dateString) => {
-@@ -1184,52 +1193,58 @@ async function toggleLove(item) {
-       ? item.soLuotThich + 1
-       : item.soLuotThich - 1;
-
-   try {
-     await api.post(
-         "/user.thg/product/user/love/toggle",
-         null,
-         {
-           params: {
-             idAsset: item.id
-           }
-         }
-     );
-   } catch (e) {
-     // ❌ Nếu API lỗi → rollback lại
-     item.daThich = !item.daThich;
-     item.soLuotThich = item.daThich
-         ? item.soLuotThich + 1
-         : item.soLuotThich - 1;
-   }
+             <div class="info-row highlight-row">
+               <span class="info-label">Giá nội bộ</span>
+               <span class="info-value price-internal text-primary">
+                 {{ asset.giaNoiBo === -1.1 ? '*****' : (formatMoneyVN(asset.giaNoiBo) ?? 'Chưa cập nhật') }}
+               </span>
+             </div>
+@@ -1363,136 +1363,141 @@ const openPdf = async (pdfFile) => {
+   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+   color: white;
+   box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
  }
 
+ .btn-edit:hover {
+   transform: translateY(-2px);
+   box-shadow: 0 6px 12px -1px rgba(59, 130, 246, 0.4);
+ }
 
+ .btn-news {
+   background: white;
+   color: #475569;
+   border: 2px solid #cbd5e1;
+ }
 
- onMounted(() => {
-+  updateViewportMode();
-+  window.addEventListener('resize', updateViewportMode);
-   fetchFilteredAssets();
- });
-+
-+onBeforeUnmount(() => {
-+  window.removeEventListener('resize', updateViewportMode);
-+});
-  // 'table' hoặc 'card'
- </script>
+ .btn-news:hover {
+   background: #f8fafc;
+   border-color: #94a3b8;
+   transform: translateY(-2px);
+ }
 
- <style scoped>
- /* Thêm style cho chế độ thẻ */
- .line-clamp-2 {
-   display: -webkit-box;
-   -webkit-line-clamp: 2;
-   -webkit-box-orient: vertical;
+ /* ========= CONTENT GRID ========= */
+ .content-grid {
+   display: grid;
+-  grid-template-columns: 1fr 1.3fr;
++  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.95fr);
+   gap: 24px;
+   margin-bottom: 24px;
+ }
+
+ /* ========= GALLERY ========= */
+ .gallery-section {
+   background: white;
+   border-radius: 16px;
+   padding: 24px;
+   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+   border: 1px solid #e2e8f0;
++  width: 100%;
+ }
+
+ .gallery-wrapper {
+-  max-width: 920px !important;
++  width: 100%;
+   display: flex;
+   flex-direction: column;
+   gap: 16px;
+ }
+
+ .main-image-container {
+   position: relative;
+   width: 100%;
+   height: 450px;
+   border-radius: 12px;
+   overflow: hidden;
+   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+ }
+
+ .main-image {
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+ }
+
+ .image-counter {
+   position: absolute;
+   bottom: 16px;
+   right: 16px;
+   background: rgba(15, 23, 42, 0.85);
+   backdrop-filter: blur(8px);
+   color: white;
+   padding: 8px 16px;
+   border-radius: 8px;
+   font-size: 13px;
+   font-weight: 600;
+ }
+
+ .thumbnails-container {
++  width: 100%;
+   overflow-x: auto;
++  overflow-y: hidden;
+   padding: 4px 0;
+ }
+
+ .thumbnails-scroll {
+-  display: flex;
++  display: inline-flex;
+   gap: 12px;
++  width: max-content;
+ }
+
+ .thumbnail {
+   flex-shrink: 0;
+   width: 100px;
+   height: 75px;
+   border-radius: 8px;
+   object-fit: cover;
+   cursor: pointer;
+   border: 3px solid transparent;
+   transition: all 0.2s;
+   opacity: 0.7;
+ }
+
+ .thumbnail:hover {
+   opacity: 1;
+   transform: translateY(-2px);
+ }
+
+ .thumbnail-active {
+   border-color: #3b82f6;
+   opacity: 1;
+   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+ }
+
+ /* ========= INFO SECTION ========= */
+ .info-section {
+   display: flex;
+   flex-direction: column;
++  min-width: 0;
+ }
+
+ .info-card {
+   background: linear-gradient(180deg, #fffdf6 0%, #ffffff 60%);
+   border-radius: 16px;
+   padding: 28px;
+   box-shadow: 0 18px 36px -24px rgba(15, 23, 42, 0.45);
+   border: 1px solid #e7dec8;
+   height: 100%;
+   position: relative;
    overflow: hidden;
  }
 
- /* Hiệu ứng cho thẻ */
- .group:hover .group-hover\:translate-x-1 {
-   transform: translateX(4px);
+ .card-header {
+   display: flex;
+   align-items: center;
+   gap: 12px;
+   margin-bottom: 24px;
+   padding-bottom: 16px;
+   border-bottom: 2px solid #f1f5f9;
  }
 
- /* Các style hiện tại giữ nguyên... */
- * {
-   font-size: 14px;
+ .section-deck {
+   color: #475569;
+   font-size: 15px;
+@@ -2075,115 +2080,146 @@ const openPdf = async (pdfFile) => {
+   background: rgba(239, 68, 68, 0.95);
+   transform: rotate(90deg);
  }
 
- table * {
-   font-size: 13.5px !important;
+ .pdf-frame {
+   width: 100%;
+   height: 100%;
+   border: none;
+ }
+
+ /* ========= RESPONSIVE ========= */
+ @media (max-width: 1200px) {
+   .content-grid {
+     grid-template-columns: 1fr;
+   }
+
+   .detail-grid {
+     grid-template-columns: repeat(2, 1fr);
+   }
+
+   .press-grid {
+     grid-template-columns: repeat(2, minmax(0, 1fr));
+   }
+ }
+
++@media (max-width: 1024px) {
++  .main-image-container {
++    height: 380px;
++  }
++
++  .gallery-section,
++  .info-card {
++    padding: 20px;
++  }
++
++  .content-grid {
++    gap: 18px;
++  }
++}
++
+ @media (max-width: 768px) {
+   .executive-container {
+     padding: 16px;
+   }
+
+   .executive-header {
+     padding: 20px;
+   }
+
+   .header-top {
+     flex-direction: column;
+   }
+
+   .property-address {
+     font-size: 22px;
+   }
+
++  .gallery-section {
++    padding: 16px;
++  }
++
++  .main-image-container {
++    height: 260px;
++  }
++
+   .header-actions {
+     width: 100%;
+     flex-direction: column;
+   }
+
+   .action-btn {
+     width: 100%;
+     justify-content: center;
+   }
+
+-  .main-image-container {
+-    height: 300px;
+-  }
+-
+   .detail-grid {
+     grid-template-columns: 1fr;
+   }
+
+   .detail-section {
+     padding: 20px;
+   }
+
+   .property-meta {
+     flex-direction: column;
+     align-items: flex-start;
+   }
+
+   .meta-divider {
+     display: none;
+   }
+
+   .press-grid {
+     grid-template-columns: 1fr;
+   }
+
+   .press-cta {
+     flex-direction: column;
+     align-items: flex-start;
+   }
+ }
+
+ @media (max-width: 480px) {
+   .property-address {
+     font-size: 18px;
+   }
+
++  .main-image-container {
++    height: auto;
++    max-width: calc(100vw - 32px);
++    aspect-ratio: 4 / 3;
++    margin: 0 auto;
++  }
++
++  .thumbnails-container {
++    overflow-x: auto;
++  }
++
+   .thumbnails-scroll {
+-    gap: 8px;
++    flex-wrap: nowrap;
++    gap: 10px;
+   }
+
+   .thumbnail {
+     width: 80px;
+     height: 60px;
+   }
+ }
+
+ .badge-loai {
+   padding: 3px 10px;
+   border-radius: 6px;
+   font-weight: 600;
+   font-size: 13px;
+   display: inline-block;
+ }
+
+ .badge-nha {
+   background-color: #e0f7fa;
+   color: #006064;
+ }
+
+ .badge-dat {
+   background-color: #e8f5e9;
+   color: #1b5e20;
  }

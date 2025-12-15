@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 px-5 py-3" style="padding-top: 90px!important;">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 px-4 py-3" style="padding-top: 90px!important;">
     <div class="max-w-[1600px] mx-auto">
       <!-- Bộ lọc nâng cao -->
       <div class="bg-white rounded-xl shadow-lg border border-slate-300 mb-5 p-4"
@@ -294,8 +294,8 @@
                 <td class="text-slate-900 text-gray-800">{{ formatProvince(item.khuVuc) }}</td>
                 <td class="text-slate-900 text-gray-800">{{ item.viTri }}</td>
                 <td class="font-medium text-slate-800">{{ item.dtcn + 'm²' }}</td>
-                <td class="text-slate-900 text-gray-800 max-w-[150px] truncate">
-                  {{ item.ketCau || '-' }}
+                <td class="text-slate-900 text-gray-800">
+                    {{ catChuoi(item.ketCau || '-', 10) }}
                 </td>
                 <td class="text-slate-900 text-gray-800">{{  formatDate(item.capNhatNgay) }}</td>
                 <td class="font-bold text-blue-700">
@@ -988,6 +988,15 @@ const getAssetTypeIcon = (item) => {
       return "fa-solid fa-map-location-dot";
   }
 };
+
+
+
+const catChuoi = (text, max = 11) => {
+  if (!text) return '-'
+  return text.length > max
+      ? text.slice(0, max) + '...'
+      : text
+}
 
 const getAssetTypeColor = (item) => {
   const type = getAssetType(item);

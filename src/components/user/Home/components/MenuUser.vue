@@ -14,8 +14,8 @@
         </router-link>
       </li>
       <li class="nav-item consignment-item">
-        <router-link to="/tinh-nang-dang-phat-trien" class="nav-link">
-          <i class="fas fa-handshake"></i> Ký gửi
+        <router-link to="/san-pham-thien-ha" class="nav-link">
+          <i class="fa-solid fa-box"></i>Sản Phẩm
         </router-link>
       </li>
       <li class="nav-item project-item">
