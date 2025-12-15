@@ -179,12 +179,40 @@
       <!-- LEFT COLUMN - GALLERY -->
       <div class="gallery-section" style="width: 930px; max-width: 930px">
         <div class="gallery-wrapper">
+          <!-- ====== ẢNH CHÍNH ====== -->
           <div class="main-image-container">
-            <img :src="asset.slide[activeImage]" alt="Property image" class="main-image" />
-            <div class="image-counter">{{ activeImage + 1 }} / {{ asset.slide.length }}</div>
+            <!-- 🔓 ĐÃ MỞ KHÓA -->
+            <img
+                v-if="asset.daMoKhoa"
+                :src="asset.slide[activeImage]"
+                alt="Property image"
+                class="main-image"
+            />
+
+            <!-- 🔒 CHƯA MỞ KHÓA -->
+            <img
+                v-else
+                :src="lockedImage"
+                alt="Locked property image"
+                class="main-image"
+                style="height: 550px; border: solid 1px rgba(0,0,0,0.15)"
+            />
+
+            <div class="image-counter">
+              <template v-if="asset.daMoKhoa">
+                {{ activeImage + 1 }} / {{ asset.slide.length }}
+              </template>
+              <template v-else>
+                1 / {{asset.soLuongFile}}
+              </template>
+            </div>
           </div>
 
-          <div class="thumbnails-container">
+          <!-- ====== THUMBNAILS (CHỈ KHI ĐÃ MỞ) ====== -->
+          <div
+              v-if="asset.daMoKhoa"
+              class="thumbnails-container"
+          >
             <div class="thumbnails-scroll">
               <img
                   v-for="(img, i) in asset.slide"
@@ -196,9 +224,38 @@
               />
             </div>
           </div>
-          <div class="file-section">
+          <div
+              v-if="!asset.daMoKhoa && asset.soLuongFile > 0"
+              class="thumbnails-container"
+          >
+            <div class="thumbnails-scroll">
+              <img
+                  v-for="i in asset.soLuongFile"
+                  :key="i"
+                  :src="thumbnailImage"
+                  class="thumbnail thumbnail-disabled"
+                  alt="Thumbnail locked"
+              />
+            </div>
+          </div>
+
+          <div v-if="asset.daMoKhoa" class="file-section">
             <FileOrLand entity-type="land" :entity-id="asset.id" :file-list="asset.files || [] "
                         :canEdit="false"/>
+          </div>
+          <div
+              v-else
+              class="
+    font-bold italic text-slate-700
+    border border-dashed border-slate-400
+    rounded-lg
+    px-4 py-2
+    text-center
+    bg-white/70
+  "
+              style=" border: dashed 1px rgba(52,52,52,0.44) !important "
+          >
+            Mở khóa để xem chi tiết + {{ asset.soLuongFiles }} ảnh và file khác.
           </div>
         </div>
       </div>
@@ -555,6 +612,12 @@ onMounted(() => loadDetail(id));
 import api from "/src/api/api.js"
 import Spam from "./Spam.vue";
 
+
+const thumbnailImage = computed(() => {
+  return asset.anhMacDinh
+      || 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg';
+});
+
 async function loadDetail(id) {
   try {
     const res = await api.get(`/user.thg/product/user/chi-tiet/${id}`);
@@ -573,6 +636,10 @@ const typeColor = (type) => {
   }
 };
 
+const lockedImage = computed(() => {
+  return asset.anhMacDinh
+      || 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg';
+});
 
 
 const parsedAddress = computed(() => {
@@ -2185,6 +2252,9 @@ const openPdf = async (pdfFile) => {
   100% {
     left: 120%;
   }
+}
+.main-image.locked {
+  filter: blur(6px);
 }
 
 </style>

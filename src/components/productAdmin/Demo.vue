@@ -9,47 +9,45 @@
             background-position: center;
             background-repeat: no-repeat;
           ">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-2">
-            <h1
-                class="text-base font-bold"
-                style="text-shadow: 0 0 6px rgba(10,10,10,0.9); font-size: 22px; color: white!important;"
-            >
+        <div class="filter-header mb-3">
+          <div class="filter-title-wrap">
+            <h1 class="filter-title">
               Sản Phẩm Thiên Hà Group Dành Riêng Cho Bạn
             </h1>
-
           </div>
 
           <!-- Nút chuyển đổi giữa bảng và thẻ -->
-          <div class="flex items-center gap-2">
+          <div class="filter-actions">
             <button
                 @click="viewMode = 'card'"
                 :class="[
-                'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
-                viewMode === 'card'
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-              ]"
-                title="Chế độ thẻ"
+        'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
+        viewMode === 'card'
+          ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+      ]"
             >
               <i class="fa-solid fa-grip text-sm"></i>
               <span class="text-sm font-medium">Thẻ</span>
             </button>
+
             <button
                 @click="viewMode = 'table'"
+                :disabled="isMobile"
                 :class="[
-                'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
-                viewMode === 'table'
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-              ]"
-                title="Chế độ bảng"
+        'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
+        viewMode === 'table'
+          ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50',
+        isMobile ? 'opacity-60 cursor-not-allowed' : ''
+      ]"
             >
               <i class="fa-solid fa-table text-sm"></i>
               <span class="text-sm font-medium">Bảng</span>
             </button>
           </div>
         </div>
+
 
         <!-- Thanh tìm kiếm -->
         <div class="mb-3">
@@ -64,10 +62,10 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-8 gap-2">
+        <div class="filter-row">
 
-          <!-- Mức giá -->
-          <div>
+        <!-- Mức giá -->
+          <div class="filter-item">
             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
               <i class="fa-solid fa-dollar-sign text-blue-600 text-xs icon-glow" ></i>
               Mức Giá
@@ -87,7 +85,7 @@
           </div>
 
           <!-- Tỉnh thành -->
-          <div>
+          <div class="filter-item">
             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
               <i class="fa-solid fa-city text-emerald-600 text-xs icon-glow"></i>
               Tỉnh Thành
@@ -104,7 +102,7 @@
           </div>
 
           <!-- Phường/Xã -->
-          <div>
+          <div class="filter-item">
             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
               <i class="fa-solid fa-location-dot text-violet-600 text-xs icon-glow"></i>
               Phường/Xã
@@ -119,7 +117,7 @@
           </div>
 
           <!-- Loại mặt hàng -->
-          <div>
+          <div class="filter-item">
             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
               <i class="fa-solid fa-tag text-rose-600 text-xs icon-glow"></i>
               Loại Mặt Hàng
@@ -136,7 +134,7 @@
           </div>
 
           <!-- Vị trí -->
-          <div>
+          <div class="filter-item">
             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
               <i class="fa-solid fa-location-arrow text-cyan-400 text-xs icon-glow"></i>
               Vị Trí
@@ -157,7 +155,7 @@
           </div>
 
           <!-- Mở khóa -->
-          <div>
+          <div class="filter-item">
             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
               <i class="fa-solid fa-unlock text-yellow-500 text-xs icon-glow"></i>
               Mở khóa
@@ -173,7 +171,7 @@
           </div>
 
           <!-- Trạng thái -->
-          <div>
+          <div class="filter-item">
             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
               <i class="fa-solid fa-circle-info text-pink-500 text-xs icon-glow"></i>
               Trạng thái
@@ -189,7 +187,7 @@
           </div>
 
           <!-- Đã thích -->
-          <div>
+          <div class="filter-item">
             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
               <i class="fa-solid fa-heart text-black text-xs icon-glow"></i>
               Đã thích
@@ -385,7 +383,7 @@
           </div>
 
           <!-- Phân trang -->
-          <div class="flex items-center justify-between p-3 bg-gradient-to-r from-slate-100 to-slate-200 border-t border-slate-300">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-3 bg-gradient-to-r from-slate-100 to-slate-200 border-t border-slate-300">
             <div class="flex items-center gap-1">
               <button
                   @click="goToPage(0)"
@@ -424,7 +422,7 @@
               </button>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex flex-col items-center gap-2 sm:flex-row sm:items-center">
               <span class="text-sm font-semibold text-slate-900">Số dòng mỗi trang:</span>
               <input
                   type="number"
@@ -446,11 +444,11 @@
 
       <!-- Chế độ xem thẻ - 3 cột -->
       <template v-else>
-        <div class="mb-4 flex items-center justify-between">
+        <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <h3 class="text-lg font-bold text-slate-800">
             Tổng số: {{ totalRecords }} bất động sản
           </h3>
-          <div class="flex items-center gap-3">
+          <div class="flex flex-nowrap items-center gap-2 sm:gap-3">
             <div class="text-sm text-slate-600 font-bold">
               {{ page * pageSize + 1 }} - {{ Math.min((page + 1) * pageSize, totalRecords) }} của {{ totalRecords }}
             </div>
@@ -682,8 +680,14 @@
 
 
         <!-- Phân trang cho chế độ thẻ -->
-        <div class="flex items-center justify-between p-4 bg-white rounded-xl shadow-lg border border-slate-300">
-          <div class="flex items-center gap-1">
+        <div
+            class="
+    flex flex-col items-center gap-3
+    p-4 bg-white rounded-xl shadow-lg border border-slate-300
+    sm:flex-row sm:items-center sm:justify-between
+  "
+        >
+        <div class="flex items-center gap-1">
             <button
                 @click="goToPage(0)"
                 :disabled="page === 0"
@@ -721,8 +725,11 @@
             </button>
           </div>
 
-          <div class="text-sm text-slate-700">
-            Hiển thị {{ Math.min((page + 1) * pageSize, totalRecords) }} / {{ totalRecords }} bất động sản
+          <div
+              class="text-sm text-slate-700 sm:text-right flex items-center justify-center sm:justify-end"
+              style="font-weight: 600"
+          >
+          Hiển thị {{ Math.min((page + 1) * pageSize, totalRecords) }} / {{ totalRecords }} bất động sản
           </div>
         </div>
       </template>
@@ -732,7 +739,7 @@
 
 <script setup>
 import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import { useSidebarStore } from "/src/stores/sidebarStore.js";
 import addressData from "/src/assets/js/address.json";
 import NotificationBell from "/src/components/NotificationBell.vue";
@@ -767,6 +774,13 @@ const filterLove = ref(null);
 const page = ref(0);
 const pageSize = ref(8);
 const viewMode = ref('card');
+const isMobile = ref(false);
+const updateViewportMode = () => {
+  isMobile.value = typeof window !== 'undefined' && window.innerWidth < 768;
+  if (isMobile.value) {
+    viewMode.value = 'card';
+  }
+};
 watch(viewMode, (mode) => {
   pageSize.value = mode === 'card' ? 8 : 10;
 });// Mặc định 9 thẻ cho 3 cột
@@ -1060,6 +1074,7 @@ const handleRefresh = () => {
 const selectedRows = ref([]);
 const selectAllRef = ref(null);
 
+
 // API
 import api from "/src/api/api.js";
 
@@ -1206,7 +1221,13 @@ async function toggleLove(item) {
 
 
 onMounted(() => {
+  updateViewportMode();
+  window.addEventListener('resize', updateViewportMode);
   fetchFilteredAssets();
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateViewportMode);
 });
  // 'table' hoặc 'card'
 </script>
@@ -1337,6 +1358,85 @@ th{
   text-shadow:
       0 0 6px rgba(9, 9, 9, 0.9),
       0 0 12px rgba(10, 10, 10, 0.8);
+}
+/* Hàng filter */
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Mỗi filter */
+.filter-item {
+  width: 100%;
+}
+
+/* Tablet */
+@media (min-width: 640px) {
+  .filter-item {
+    width: calc(50% - 12px);
+  }
+}
+
+/* Tablet ngang */
+@media (min-width: 768px) {
+  .filter-item {
+    width: calc(25% - 12px);
+  }
+}
+
+/* Laptop trở lên → 1 hàng */
+@media (min-width: 1024px) {
+  .filter-row {
+    flex-wrap: nowrap;
+  }
+
+  .filter-item {
+    flex: 1;
+    min-width: 100px;
+  }
+}
+/* Header chứa tiêu đề + nút */
+.filter-header {
+  display: flex;
+  flex-direction: column; /* mobile: 2 dòng */
+  gap: 12px;
+}
+
+/* Wrap tiêu đề */
+.filter-title-wrap {
+  display: flex;
+  align-items: center;
+}
+
+/* Tiêu đề */
+.filter-title {
+  font-weight: 700;
+  font-size: 20px;
+  color: white;
+  text-shadow: 0 0 6px rgba(10, 10, 10, 0.9);
+}
+
+/* Nút */
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end; /* mobile: nút sát phải */
+}
+
+/* Desktop trở lên */
+@media (min-width: 768px) {
+  .filter-header {
+    flex-direction: row;      /* cùng hàng */
+    align-items: center;
+  }
+
+  .filter-actions {
+    margin-left: auto;        /* đẩy nút sang phải cha */
+  }
+  .filter-title {
+    font-size: 22px;
+  }
 }
 
 

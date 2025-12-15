@@ -1,497 +1,428 @@
-diff --git a/src/components/productAdmin/ProductDetail.vue b/src/components/productAdmin/ProductDetail.vue
-index 747027387489657291f307618e4aa91b85bb18d3..569c1932178118d1c7fa99b89fe70febe206591c 100644
---- a/src/components/productAdmin/ProductDetail.vue
-+++ b/src/components/productAdmin/ProductDetail.vue
-@@ -1,45 +1,45 @@
-   <template>
-     <div v-if="asset" class="executive-container">
+diff --git a/src/components/productAdmin/Demo.vue b/src/components/productAdmin/Demo.vue
+index 12716dcdee82f3dc9e705595d91680104ff2f8a8..b64d9679851b37d56abe7e3a42625843451df608 100644
+--- a/src/components/productAdmin/Demo.vue
++++ b/src/components/productAdmin/Demo.vue
+@@ -1,92 +1,94 @@
+ <template>
+   <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 px-5 py-3" style="padding-top: 90px!important;">
+     <div class="max-w-[1600px] mx-auto">
+       <!-- Bộ lọc nâng cao -->
+       <div class="bg-white rounded-xl shadow-lg border border-slate-300 mb-5 p-4"
+            style="
+             background-image: url('https://s3.cloudfly.vn/thg-storage/uploads-public/thienhagroup_filter_2.png');
+             background-size: cover;
+             background-position: center;
+             background-repeat: no-repeat;
+           ">
+-        <div class="flex items-center justify-between mb-3">
++        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
+           <div class="flex items-center gap-2">
+             <h1
+                 class="text-base font-bold"
+                 style="text-shadow: 0 0 6px rgba(10,10,10,0.9); font-size: 22px; color: white!important;"
+             >
+               Sản Phẩm Thiên Hà Group Dành Riêng Cho Bạn
+             </h1>
 
-       <!-- HEADER CARD -->
-       <div class="executive-header">
-         <div class="header-top">
-           <div class="header-left">
-             <button class="back-button" @click="router.push('/test01')">
-               <i class="fa-solid fa-arrow-left"></i>
-               <span>Quay lại danh sách</span>
+           </div>
+
+           <!-- Nút chuyển đổi giữa bảng và thẻ -->
+           <div class="flex items-center gap-2">
+             <button
+                 @click="viewMode = 'card'"
+                 :class="[
+                 'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
+                 viewMode === 'card'
+                   ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                   : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+               ]"
+                 title="Chế độ thẻ"
+             >
+               <i class="fa-solid fa-grip text-sm"></i>
+               <span class="text-sm font-medium">Thẻ</span>
+             </button>
+             <button
+                 @click="viewMode = 'table'"
++                :disabled="isMobile"
+                 :class="[
+                 'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
+                 viewMode === 'table'
+                   ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+-                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
++                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50',
++                isMobile ? 'opacity-60 cursor-not-allowed' : ''
+               ]"
+                 title="Chế độ bảng"
+             >
+               <i class="fa-solid fa-table text-sm"></i>
+               <span class="text-sm font-medium">Bảng</span>
+             </button>
+           </div>
+         </div>
+
+         <!-- Thanh tìm kiếm -->
+         <div class="mb-3">
+           <div class="relative">
+             <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+             <input
+                 v-model="searchQuery"
+                 type="text"
+                 placeholder="Tìm kiếm theo tên chủ nhà hoặc số điện thoại, địa chỉ chi tết..."
+                 class="w-full pl-9 pr-4 py-2 border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all text-sm"
+             />
+           </div>
+         </div>
+
+-        <div class="grid grid-cols-8 gap-2">
++        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-[1000px]:grid-cols-8 gap-2">
+
+           <!-- Mức giá -->
+           <div>
+             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
+               <i class="fa-solid fa-dollar-sign text-blue-600 text-xs icon-glow" ></i>
+               Mức Giá
+             </label>
+             <select v-model="filterGiaRange"
+                     class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg
+              focus:ring-2 focus:ring-blue-600 focus:border-transparent
+              bg-white shadow-sm transition-all">
+               <option value="">Tất cả</option>
+               <option value="<1>">&lt; 1 tỷ</option>
+               <option value="1-3">1 - 3 tỷ</option>
+               <option value="3-5">3 - 5 tỷ</option>
+               <option value="5-7">5 - 7 tỷ</option>
+               <option value="7-10">7 - 10 tỷ</option>
+               <option value=">10">&gt; 10 tỷ</option>
+             </select>
+           </div>
+
+           <!-- Tỉnh thành -->
+           <div>
+             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
+               <i class="fa-solid fa-city text-emerald-600 text-xs icon-glow"></i>
+@@ -363,116 +365,116 @@
+                                 px-1.5
+                                 py-[2px]
+                                 rounded-md
+                                 inline-flex items-center gap-1
+                                 text-[10px] font-semibold
+                                 bg-[#BFDBFE]
+                                 text-[#1D4ED8]
+                                 border border-[#93C5FD]
+                                 shadow-sm
+                                 hover:bg-[#93C5FD]
+                                 transition-all duration-200
+                               "
+                       style="border-radius: 8px; font-size: 11px;"
+                   >
+                     <i class="fa-regular fa-eye text-[10px] text-[#1D4ED8]"></i>
+                     <span>Xem</span>
+                   </button>
+
+                 </td>
+               </tr>
+               </tbody>
+             </table>
+           </div>
+
+           <!-- Phân trang -->
+-          <div class="flex items-center justify-between p-3 bg-gradient-to-r from-slate-100 to-slate-200 border-t border-slate-300">
++          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-3 bg-gradient-to-r from-slate-100 to-slate-200 border-t border-slate-300">
+             <div class="flex items-center gap-1">
+               <button
+                   @click="goToPage(0)"
+                   :disabled="page === 0"
+                   class="p-1.5 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+               >
+                 <i class="fa-solid fa-angles-left text-sm"></i>
+               </button>
+               <button
+                   @click="goToPage(page - 1)"
+                   :disabled="page === 0"
+                   class="p-1.5 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+               >
+                 <i class="fa-solid fa-angle-left text-sm"></i>
+               </button>
+
+               <div class="px-3 py-1.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg shadow-md">
+                 <span class="text-sm font-bold">
+                   Trang {{ page + 1 }} / {{ totalPages }}
+                 </span>
+               </div>
+
+               <button
+                   @click="goToPage(page + 1)"
+                   :disabled="page >= totalPages - 1"
+                   class="p-1.5 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+               >
+                 <i class="fa-solid fa-angle-right text-sm"></i>
+               </button>
+               <button
+                   @click="goToPage(totalPages - 1)"
+                   :disabled="page >= totalPages - 1"
+                   class="p-1.5 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+               >
+                 <i class="fa-solid fa-angles-right text-sm"></i>
+               </button>
+             </div>
+
+-            <div class="flex items-center gap-2">
++            <div class="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
+               <span class="text-sm font-semibold text-slate-900">Số dòng mỗi trang:</span>
+               <input
+                   type="number"
+                   v-model.number="pageSize"
+                   @change="updatePageSize"
+                   class="w-16 px-2 py-1 border border-slate-400 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm"
+                   min="1"
+               />
+               <span class="text-sm text-slate-900 font-semibold">
+                 Hiển thị
+                 {{ page * pageSize + 1 }}
+                 -
+                 {{ Math.min((page + 1) * pageSize, totalRecords) }} của {{ totalRecords }}
+               </span>
+             </div>
+           </div>
+         </div>
+       </template>
+
+       <!-- Chế độ xem thẻ - 3 cột -->
+       <template v-else>
+-        <div class="mb-4 flex items-center justify-between">
++        <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+           <h3 class="text-lg font-bold text-slate-800">
+             Tổng số: {{ totalRecords }} bất động sản
+           </h3>
+-          <div class="flex items-center gap-3">
++          <div class="flex flex-nowrap items-center gap-2 sm:gap-3">
+             <div class="text-sm text-slate-600 font-bold">
+               {{ page * pageSize + 1 }} - {{ Math.min((page + 1) * pageSize, totalRecords) }} của {{ totalRecords }}
+             </div>
+             <select
+                 v-model.number="pageSize"
+                 @change="updatePageSize"
+                 class="px-2 py-1.5 border border-slate-400 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm"
+             >
+               <option value="8">8 thẻ/trang</option>
+               <option value="12">12 thẻ/trang</option>
+               <option value="16">16 thẻ/trang</option>
+               <option value="20">20 thẻ/trang</option>
+             </select>
+           </div>
+         </div>
+
+         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+
+           <div
+               v-for="item in landAssets"
+               :key="item.id"
+               class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden
+          hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
+           >
+             <!-- Ảnh -->
+@@ -660,135 +662,142 @@
+                   <i class="fa-regular fa-eye text-sm"></i>
+                   Xem chi tiết
+                 </button>
+
+                 <!-- Nút Yêu thích (không border + nền xám nhạt) -->
+                 <button
+                     @click="toggleLove(item)"
+                     class="w-10 h-10 rounded-full bg-slate-100 text-slate-800 shadow-sm
+          hover:bg-slate-200 flex items-center justify-center transition"
+                 >
+                   <i
+                       :class="item.daThich
+       ? 'fa-solid fa-heart text-black text-base'
+       : 'fa-regular fa-heart text-base'"
+                   ></i>
+                 </button>
+
+               </div>
+             </div>
+           </div>
+
+         </div>
+
+
+         <!-- Phân trang cho chế độ thẻ -->
+-        <div class="flex items-center justify-between p-4 bg-white rounded-xl shadow-lg border border-slate-300">
++        <div class="flex flex-col gap-3 p-4 bg-white rounded-xl shadow-lg border border-slate-300 sm:flex-row sm:items-center sm:justify-between">
+           <div class="flex items-center gap-1">
+             <button
+                 @click="goToPage(0)"
+                 :disabled="page === 0"
+                 class="p-2 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+             >
+               <i class="fa-solid fa-angles-left text-sm"></i>
+             </button>
+             <button
+                 @click="goToPage(page - 1)"
+                 :disabled="page === 0"
+                 class="p-2 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+             >
+               <i class="fa-solid fa-angle-left text-sm"></i>
              </button>
 
-             <div class="property-title-section">
-               <h1 class="property-address">{{ formatAddress( asset.address ) }}</h1>
-
-               <div class="property-meta">
-                 <span class="meta-item">
-                   <span class="meta-label">Loại mặt hàng:</span>
-                   <span :class="['property-badge', badgeClass(asset.phanLoaiHang)]">
--                    {{ asset.phanLoaiHang }}
-+                    {{ asset.phanLoaiHang ?? 'Chưa cập nhật' }}
-                   </span>
-                 </span>
-
-                 <div class="meta-divider"></div>
-
-                 <span class="meta-item">
-                   <span class="meta-label">Giá bán:</span>
-                   <span class="price-selling">{{  formatMoneyVN(asset.giaBan) }}</span>
-                 </span>
-
-                 <div class="meta-divider"></div>
-
-                 <span class="meta-item">
-                   <span class="meta-label">Giá nội bộ:</span>
-                   <span class="price-internal">{{ formatMoneyVN(asset.giaNoiBo) }}</span>
-                 </span>
-
-               </div>
-             </div>
-           </div>
-
-           <div class="header-actions">
-             <button class="action-btn btn-edit" @click="$router.push(`/-thg/quan-ly-san-pham/update/${asset.id}`)">
-               <i class="fa-solid fa-pen"></i>
-               <span>Cập nhật thông tin</span>
-@@ -111,241 +111,244 @@
-                 <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.giaNoiBo) }}</span>
-               </div>
-
-               <div class="info-row highlight-row">
-                 <span class="info-label">Giá mong muốn</span>
-                 <span class="info-value price-internal text-primary">{{  formatMoneyVN( asset.desire ) }}</span>
-               </div>
-
-               <div class="info-row">
-                 <span class="info-label">Liên hệ</span>
-                 <span class="info-value">{{ asset.lienHe ?? 'Chưa cập nhật' }}</span>
-               </div>
-
-               <div class="info-row">
-                 <span class="info-label">Chủ sở hữu</span>
-                 <span v-if="asset.ownerName != null" class="info-value">
-                   {{ asset.ownerName ?? 'Chưa cập nhật' }} <span>
-                   ( <i class="fa-solid fa-phone text-danger"></i>
-                   {{ asset.ownerPhone ?? 'Chưa cập nhật' }} )</span>
-                 </span>
-                 <span v-else class="text-gray-600 info-value">Chưa cập nhật</span>
-               </div>
-
-               <div class="info-row">
-                 <span class="info-label">Loại đất</span>
--                <span class="info-value">{{ asset.loaiDat }}</span>
-+                <span class="info-value">{{ asset.loaiDat ?? 'Chưa cập nhật' }}</span>
-               </div>
-
-               <div class="info-row">
-                 <span class="info-label">Đơn vị sở hữu</span>
-                 <span class="info-value owner-unit">
-                   <img v-if="asset.donViSoHuu === 'THG'" src="/imgs/logokn.png" alt="THG" class="unit-logo">
-                   <i v-else-if="asset.donViSoHuu === 'DT'" class="fa-solid fa-handshake unit-icon"></i>
--                    <span>{{ asset.donViSoHuu }}</span>
-+                    <span>{{ asset.donViSoHuu ?? 'Chưa cập nhật' }}</span>
-                 </span>
-               </div>
-
-               <div class="info-row">
-                 <span class="info-label">Phí môi giới</span>
--                <span class="info-value text-primary">{{ asset.phiMoiGioi + '%' }}</span>
-+                <span class="info-value text-primary">{{ asset.phiMoiGioi != null ? asset.phiMoiGioi + '%' : 'Chưa cập nhật' }}</span>
-               </div>
+             <div class="px-4 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg shadow-md">
+               <span class="text-sm font-bold">
+                 Trang {{ page + 1 }} / {{ totalPages }}
+               </span>
              </div>
 
+             <button
+                 @click="goToPage(page + 1)"
+                 :disabled="page >= totalPages - 1"
+                 class="p-2 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+             >
+               <i class="fa-solid fa-angle-right text-sm"></i>
+             </button>
+             <button
+                 @click="goToPage(totalPages - 1)"
+                 :disabled="page >= totalPages - 1"
+                 class="p-2 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+             >
+               <i class="fa-solid fa-angles-right text-sm"></i>
+             </button>
+           </div>
+
+-          <div class="text-sm text-slate-700">
++          <div class="text-sm text-slate-700 text-center sm:text-right">
+             Hiển thị {{ Math.min((page + 1) * pageSize, totalRecords) }} / {{ totalRecords }} bất động sản
            </div>
          </div>
-       </div>
+       </template>
+     </div>
+   </div>
+ </template>
 
-       <!-- LEGAL INFO SECTION -->
-       <div class="detail-section section-legal">
-         <div class="section-header">
-           <div class="section-title-group">
-             <i class="fa-solid fa-scale-balanced section-icon"></i>
-             <h3 class="section-title">Thông tin pháp lý & quản trị</h3>
-           </div>
-         </div>
+ <script setup>
+ import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
+-import { ref, computed, watch, onMounted } from "vue";
++import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
+ import { useSidebarStore } from "/src/stores/sidebarStore.js";
+ import addressData from "/src/assets/js/address.json";
+ import NotificationBell from "/src/components/NotificationBell.vue";
 
-         <div class="detail-grid">
-           <div class="detail-item">
-             <span class="detail-label">Đường</span>
-             <span class="detail-value">{{ formatAddressDetail( asset.address ) }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Phường/Xã</span>
-             <span class="detail-value">{{  formatWard( asset.address )  }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Khu vực</span>
--            <span class="detail-value">{{ asset.khuVucMa }}</span>
-+            <span class="detail-value">{{ asset.khuVucMa ?? 'Chưa cập nhật' }}</span>
-           </div>
 
-           <div class="detail-item">
-             <span class="detail-label">Địa chỉ cũ</span>
--            <span class="detail-value">{{ asset.oldAddress }}</span>
-+            <span class="detail-value">{{ asset.oldAddress ?? 'Chưa cập nhật' }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Số tờ bản đồ</span>
--            <span class="detail-value">{{ asset.plotNumber }}</span>
-+            <span class="detail-value">{{ asset.plotNumber ?? 'Chưa cập nhật' }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Số thửa đất</span>
--            <span class="detail-value">{{ asset.parcelNumber }}</span>
-+            <span class="detail-value">{{ asset.parcelNumber ?? 'Chưa cập nhật' }}</span>
-           </div>
+ import { useAuthStore } from "/src/stores/authStore.js";
+ const authStore = useAuthStore();
+ const info = authStore.userInfo;
 
-           <div class="detail-item">
-             <span class="detail-label">Diện tích tổng</span>
-             <span class="detail-value highlight">{{  formatArea( asset.totalArea) }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Quan hệ sở hữu</span>
--            <span class="detail-value">{{ asset.ownershipRelation }}</span>
-+            <span class="detail-value">{{ asset.ownershipRelation ?? 'Chưa cập nhật' }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Quyền sử dụng đất</span>
--            <span class="detail-value">{{ asset.landUseRight }}</span>
-+            <span class="detail-value">{{ asset.landUseRight ?? 'Chưa cập nhật' }}</span>
-           </div>
+ const sidebar = useSidebarStore();
 
-           <div class="detail-item">
-             <span class="detail-label">Vị trí</span>
--            <span class="detail-value">{{ asset.landPosition }}</span>
-+            <span class="detail-value">{{ asset.landPosition ?? 'Chưa cập nhật' }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Trạng thái</span>
-             <span v-if="asset.status == null" class="detail-value">Chưa cập nhật</span>
-             <span v-else-if="asset === 'Đã bán'" class="detail-value">Đã bán</span>
-             <span v-else class="detail-value">Đang rao bán</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Chiều ngang & chiều dài</span>
-             <span class="detail-value text-primary">
--              Ngang {{ formatArea2( asset.chieuNgang ) }}m , Dài {{ formatArea2( asset.chieuDai ) }}m</span>
-+              Ngang {{ asset.chieuNgang != null ? formatArea2(asset.chieuNgang) + 'm' : 'Chưa cập nhật' }} ,
-+              Dài {{ asset.chieuDai != null ? formatArea2(asset.chieuDai) + 'm' : 'Chưa cập nhật' }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Loại đất</span>
--            <span class="detail-value">{{ asset.loaiDat }}</span>
-+            <span class="detail-value">{{ asset.loaiDat ?? 'Chưa cập nhật' }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Hình dạng/ kết cấu</span>
--            <span class="detail-value">{{ asset.structure }}</span>
-+            <span class="detail-value">{{ asset.structure ?? 'Chưa cập nhật' }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Hiện trạng đất</span>
--            <span class="detail-value">{{ asset.hienTrangDat }}</span>
-+            <span class="detail-value">{{ asset.hienTrangDat ?? 'Chưa cập nhật' }}</span>
-           </div>
+ // Data
+ const landAssets = ref([]);
+ const totalRecords = ref(0);
 
-           <div class="detail-item">
-             <span class="detail-label">Lộ giới & Độ rộng đường</span>
--            <span class="detail-value">{{ asset.loGioi }}m & {{ asset.doRongDuong }}m</span>
-+            <span class="detail-value">{{ asset.loGioi != null ? asset.loGioi + 'm' : 'Chưa cập nhật' }} &
-+              {{ asset.doRongDuong != null ? asset.doRongDuong + 'm' : 'Chưa cập nhật' }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Quy hoạch</span>
--            <span class="detail-value">{{ asset.quyHoach }}</span>
-+            <span class="detail-value">{{ asset.quyHoach ?? 'Chưa cập nhật' }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Mặt tiền</span>
--            <span class="detail-value">{{ asset.matTienNha }} m</span>
-+            <span class="detail-value">{{ asset.matTienNha != null ? asset.matTienNha + ' m' : 'Chưa cập nhật' }}</span>
-           </div>
-         </div>
-       </div>
+ // Filters
+ const filterGiaRange = ref("");
+ const filterProvince = ref("");
+ const filterWard = ref("");
+ const filterStreet = ref("");
+ const filterLoaiMH = ref("");
+ const filterDTCN = ref("");
+ const filterViTri = ref("");
+ const filterCreateDate = ref("");
+ const filterUpdateDate = ref("");
+ const searchQuery = ref("");
+ const filterUnlock = ref("");
+ const filterStatus = ref("");
+ const filterLove = ref(null);
 
-       <!-- HOUSE SECTION -->
-       <div class="detail-section section-house" v-if=" getAssetType(asset) === 'NHA'">
-         <div class="section-header">
-           <div class="section-title-group">
-             <i class="fa-solid fa-house-chimney section-icon"></i>
-             <h3 class="section-title">Kích thước & Kết cấu (Nhà)</h3>
-           </div>
-         </div>
+ // Pagination
+ const page = ref(0);
+ const pageSize = ref(8);
+ const viewMode = ref('card');
++const isMobile = ref(false);
++const updateViewportMode = () => {
++  isMobile.value = typeof window !== 'undefined' && window.innerWidth < 768;
++  if (isMobile.value) {
++    viewMode.value = 'card';
++  }
++};
+ watch(viewMode, (mode) => {
+   pageSize.value = mode === 'card' ? 8 : 10;
+ });// Mặc định 9 thẻ cho 3 cột
+ const totalPages = computed(() =>
+     Math.ceil(totalRecords.value / pageSize.value || 1)
+ );
 
-         <div class="detail-grid">
-           <div class="detail-item">
-             <span class="detail-label">Diện tích sàn</span>
-             <span class="detail-value highlight">{{ formatArea( asset.floorArea ) }} </span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Loại nhà</span>
--            <span class="detail-value highlight">{{ asset.loaiNha }}</span>
-+            <span class="detail-value highlight">{{ asset.loaiNha ?? 'Chưa cập nhật' }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Số tầng & Số lầu</span>
--            <span class="detail-value">{{ asset.soTang }} tầng & {{ asset.soLau }} lầu </span>
-+            <span class="detail-value">{{ asset.soTang != null ? asset.soTang + ' tầng' : 'Chưa cập nhật' }} &
-+              {{ asset.soLau != null ? asset.soLau + ' lầu' : 'Chưa cập nhật' }} </span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Hiện trạng nhà</span>
--            <span class="detail-value">{{ asset.hienTrangNha }}</span>
-+            <span class="detail-value">{{ asset.hienTrangNha ?? 'Chưa cập nhật' }}</span>
-           </div>
+ // Unique values
+ const provinces = computed(() => addressData.map(x => x.name));
 
-           <div class="detail-item">
-             <span class="detail-label">Phòng ngủ</span>
--            <span class="detail-value">{{ asset.soPhongNgu }} phòng</span>
-+            <span class="detail-value">{{ asset.soPhongNgu != null ? asset.soPhongNgu + ' phòng' : 'Chưa cập nhật' }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Phòng tắm</span>
--            <span class="detail-value"> {{ asset.soPhongTam }} phòng</span>
-+            <span class="detail-value"> {{ asset.soPhongTam != null ? asset.soPhongTam + ' phòng' : 'Chưa cập nhật' }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Tổng số phòng</span>
--            <span class="detail-value">{{ asset.tongSoPhong }} phòng</span>
-+            <span class="detail-value">{{ asset.tongSoPhong != null ? asset.tongSoPhong + ' phòng' : 'Chưa cập nhật' }}</span>
-           </div>
-           <div class="detail-item">
-             <span class="detail-label">Năm xây dựng</span>
--            <span class="detail-value">{{ asset.namXayDung }}</span>
-+            <span class="detail-value">{{ asset.namXayDung ?? 'Chưa cập nhật' }}</span>
-           </div>
+ const wards = computed(() => {
+   if (!filterProvince.value) return [];
 
-           <div class="detail-item">
-             <span class="detail-label">Nội thất</span>
--            <span class="detail-value">{{ asset.noiThat }}</span>
-+            <span class="detail-value">{{ asset.noiThat ?? 'Chưa cập nhật' }}</span>
-           </div>
-         </div>
-       </div>
+   const province = addressData.find(p => p.name === filterProvince.value);
+   if (!province || !Array.isArray(province.wards)) return [];
 
-       <!-- ROOMS DETAIL -->
-       <div class="detail-section section-rooms" v-if="getAssetType(asset) === 'NHA'">
-         <div class="section-header">
-           <div class="section-title-group">
-             <i class="fa-solid fa-door-closed section-icon"></i>
-             <h3 class="section-title">Chi tiết phòng</h3>
-           </div>
-         </div>
+   return province.wards.map(w => w.name);
+ });
+ watch(filterProvince, () => {
+   filterWard.value = "";   // reset về Tất cả
+ });
 
-         <div class="table-wrapper">
-           <!-- Nếu có room thì mới hiện table -->
-           <table class="executive-table" v-if="asset.rooms && asset.rooms.length > 0">
-             <thead>
-             <tr>
-               <th>Loại phòng</th>
-               <th>Số lượng</th>
-               <th>Diện tích (từng phòng)</th>
-               <th>Mô tả</th>
-             </tr>
-             </thead>
 
-             <tbody>
-             <tr v-for="(r, index) in asset.rooms" :key="index">
--              <td class="room-type">{{ r.loaiPhong }}</td>
--              <td class="text-start">{{ r.soLuong }}</td>
--              <td class="room-area">{{ r.dienTich }} m²</td>
-+              <td class="room-type">{{ r.loaiPhong ?? 'Chưa cập nhật' }}</td>
-+              <td class="text-start">{{ r.soLuong ?? 'Chưa cập nhật' }}</td>
-+              <td class="room-area">{{ r.dienTich != null ? r.dienTich + ' m²' : 'Chưa cập nhật' }}</td>
-               <td class="room-desc">{{ r.moTa || '—' }}</td>
-             </tr>
-             </tbody>
-           </table>
+ // Format functions
+ const formatDate = (dateString) => {
+@@ -1184,52 +1193,58 @@ async function toggleLove(item) {
+       ? item.soLuotThich + 1
+       : item.soLuotThich - 1;
 
-           <!-- Nếu không có dữ liệu -->
-           <div v-else class="text-center text-muted py-3">
-             Chưa có thông tin
-           </div>
-
-         </div>
-       </div>
-
-       <!-- VALUATION SECTION -->
-       <div class="detail-section section-valuation">
-         <div class="section-header">
-           <div class="section-title-group">
-             <i class="fa-solid fa-chart-line section-icon"></i>
-             <h3 class="section-title">Định giá</h3>
-           </div>diff --git a/src/router/index.js b/src/router/index.js
-                 index 2a000a9aa35a8abc75c5977cca506c2c6cb2cef3..386b1403f9942f090df25a005ed51c1148a8552b 100644
-                 --- a/src/router/index.js
-                 +++ b/src/router/index.js
-                 @@ -43,113 +43,113 @@ import TransactionHistory from "../components/user/Profile/component/Transaction
-                  import PackageBenefits from "../components/user/Profile/component/PackageBenefits.vue";
-                  import Support from "../components/user/Profile/component/Support.vue";
-                  import PaymentPage from "../components/land/my-valuation/components/PaymentPage.vue";
-                  import AppointmentManager from "../components/AppointmentManager.vue";
-                  import Investments from "../components/user/Investment/Investments.vue";
-                  import InvestmentDetail from "../components/user/Investment/InvestmentDetail.vue";
-                  import Payment from "../components/user/Profile/component/Payment.vue";
-                  import ProductList from "../components/productAdmin/ProductList.vue";
-                  import ProductDetail from "../components/productAdmin/ProductDetail.vue";
-                  import Demo from "../components/productAdmin/Demo.vue";
-                  import ProductUpdate  from "../components/productAdmin/ProductUpdate.vue";
-                  import ProductDetail2 from "../components/productAdmin/ProductDetail2.vue";
-                  import ProductCreate from "../components/productAdmin/ProductCreate.vue";
-
-                  import Ga4EventExample from "../components/Ga4EventExample.vue";
-                  import PaymentPage2 from "../components/productAdmin/PaymentPage2.vue";
-
-                  const routes = [
-                          {
-                              path: "/-thg/dang-nhap",
-                              name: "LoginForm",
-                              component: LoginForm,
-                          },
-                          {
-                              path: "/-thg/quan-ly-san-pham/tao-moi",
-                 -            meta: {requiresAuth: false},
-                 +            meta: {requiresAuth: false, enableTailwind: true},
-                              name: "ProductCreate",
-                              component: ProductCreate,
-                          },
-                          {
-                              path: "/-thg/quan-ly-san-pham",
-                 -            meta: {requiresAuth: false},
-                 +            meta: {requiresAuth: false, enableTailwind: true},
-                              component: Menu,
-                              children: [
-                                  {
-                                      path: "",   // → /-thg/quan-ly-san-phams/:id
-                                      name: "ProductList",
-                                      component: ProductList,
-                                      props: true,
-                                  }
-                              ]
-                          },
-                          {
-                              path: "/-thg/quan-ly-san-pham",
-                 -            meta: {requiresAuth: false},
-                 +            meta: {requiresAuth: false, enableTailwind: true},
-                              component: Menu,
-                              children: [
-                                  {
-                                      path: "cap-nhat/:id",   // → /-thg/quan-ly-san-phams/:id
-                                      name: "ProducUpdate",
-                                      component: ProductUpdate,
-                                      props: true,
-                                  }
-                              ]
-                          },
-
-                          {
-                              path: "/san-pham-thien-ha",
-                 -            meta: {requiresAuth: false, hideFooterMap: true},
-                 +            meta: {requiresAuth: false, hideFooterMap: true, enableTailwind: true},
-                              component: MenuUser,
-                              children: [
-                                  {
-                                      path: "",   // → /-thg/quan-ly-san-phams/:id
-                                      name: "Demo",
-                                      component: Demo,
-                                      props: true,
-                                  }
-                              ]
-                          },
-                          {
-                          path: "/-thg/quan-ly-san-pham",
-                          component: Menu,       // ⭐ Bổ sung MENU tại đây
-                 -        meta: { requiresAuth: false, hideFooterMap: true },
-                 +        meta: { requiresAuth: false, hideFooterMap: true, enableTailwind: true },
-
-                          children: [
-                              {
-                                  path: ":id",   // → /-thg/quan-ly-san-phams/:id
-                                  name: "ProductDetail",
-                                  component: ProductDetail,
-                                  props: true,
-                              }
-                          ],
-
-                      },
-                      {
-                          path: "/san-pham-thien-ha",
-                          component: MenuUser,       // ⭐ Bổ sung MENU tại đây
-                 -        meta: { requiresAuth: false },
-                 +        meta: { requiresAuth: false, enableTailwind: true },
-
-                          children: [
-                              {
-                                  path: ":id",   // → /-thg/quan-ly-san-phams/:id
-                                  name: "ProductDetail2",
-                                  component: ProductDetail2,
-                                  props: true,
-                              }
-                          ],
-
-                      },
-                          {
-                              path: "/-thg/loai-hinh",
-                              component: Menu, // MenuUser là layout chính
-                              meta: {requiresAuth: true,  loginFrom: "admin"},
-                              children: [
-                                  {
-                                      path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
-                                      name: 'TypeManager',
-                                      component: TypeManager
-                                  }
-                              ]// 🔒 route này yêu cầu đăng nhập
-                          },
-                          {
-                              path: "/-thg/nhom",
-                 @@ -751,29 +751,48 @@ router.beforeEach((to, from, next) => {
-                                  localStorage.setItem("loginFrom", "admin");
-                                  return next("/-thg/dang-nhap");
-                              }
-                          }else{
-                              if (to.meta.loginFrom === "user") {
-                                  localStorage.setItem("loginFrom", "user");
-                              } else {
-                                  localStorage.setItem("loginFrom", "admin");
-                              }
-                          }
-                      }
-
-                      // Nếu đã login mà vẫn vào /-thg/dang-nhap hoặc /dang-nhap
-                      if ((to.path === "/-thg/dang-nhap" || to.path === "/dang-nhap") && isLoggedIn) {
-                          if (loginFrom === "user") {
-                              return next("/");
-                          }
-                          if (loginFrom === "admin") {
-                              return next("/-thg/quan-ly");
-                          }
-                      }
-
-                      next();
-                  });
-
-                 +const TAILWIND_STYLESHEET_ID = "tailwind-admin-css";
-                 +
-                 +router.afterEach((to) => {
-                 +    const enableTailwind = to.matched.some(route => route.meta.enableTailwind);
-                 +    const existingLink = document.getElementById(TAILWIND_STYLESHEET_ID);
-                 +
-                 +    if (enableTailwind) {
-                 +        if (!existingLink) {
-                 +            const linkElement = document.createElement("link");
-                 +            linkElement.id = TAILWIND_STYLESHEET_ID;
-                 +            linkElement.rel = "stylesheet";
-                 +            linkElement.href = "/tailwind-admin.css";
-                 +            document.head.appendChild(linkElement);
-                 +        }
-                 +    } else if (existingLink) {
-                 +        existingLink.remove();
-                 +    }
-                 +});
-                 +
-
-                  export default router;
+   try {
+     await api.post(
+         "/user.thg/product/user/love/toggle",
+         null,
+         {
+           params: {
+             idAsset: item.id
+           }
+         }
+     );
+   } catch (e) {
+     // ❌ Nếu API lỗi → rollback lại
+     item.daThich = !item.daThich;
+     item.soLuotThich = item.daThich
+         ? item.soLuotThich + 1
+         : item.soLuotThich - 1;
+   }
+ }
 
 
 
-         </div>
+ onMounted(() => {
++  updateViewportMode();
++  window.addEventListener('resize', updateViewportMode);
+   fetchFilteredAssets();
+ });
++
++onBeforeUnmount(() => {
++  window.removeEventListener('resize', updateViewportMode);
++});
+  // 'table' hoặc 'card'
+ </script>
 
-         <div v-if="!asset.valuations || asset.valuations.length === 0" class="empty-state">
-           <i class="fa-solid fa-chart-simple empty-icon"></i>
-           <p class="empty-text">Chưa có dữ liệu định giá cho tài sản này</p>
+ <style scoped>
+ /* Thêm style cho chế độ thẻ */
+ .line-clamp-2 {
+   display: -webkit-box;
+   -webkit-line-clamp: 2;
+   -webkit-box-orient: vertical;
+   overflow: hidden;
+ }
+
+ /* Hiệu ứng cho thẻ */
+ .group:hover .group-hover\:translate-x-1 {
+   transform: translateX(4px);
+ }
+
+ /* Các style hiện tại giữ nguyên... */
+ * {
+   font-size: 14px;
+ }
+
+ table * {
+   font-size: 13.5px !important;
+ }
