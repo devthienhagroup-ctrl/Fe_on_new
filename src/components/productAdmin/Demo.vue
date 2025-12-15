@@ -470,17 +470,15 @@
           <div
               v-for="item in landAssets"
               :key="item.id"
-              class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden
+              class="group flex flex-col h-full bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden
          hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
           >
             <!-- Ảnh -->
-            <div class="relative w-full overflow-hidden" style="height: 200px">
-              <div class="relative w-full h-full px-3 pt-3  rounded-3 overflow-hidden aspect-[4/3] w-full">
-                <img
-                    :src="item.imageUrl || 'https://hoangphucphoto.com/wp-content/uploads/2024/11/anh-bds-1.jpg'"
-                    class="w-full rounded-3 h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
+            <div class="relative w-full overflow-hidden aspect-[4/3] bg-slate-100">
+              <img
+                  :src="item.imageUrl || 'https://hoangphucphoto.com/wp-content/uploads/2024/11/anh-bds-1.jpg'"
+                  class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
               <!-- Tag loại tài sản -->
               <div class="absolute top-2  mt-3 ms-3 left-2 flex items-center gap-2">
 
@@ -515,18 +513,10 @@
             </div>
 
             <!-- Thông tin tài sản -->
-            <div class="p-3 leading-tight text-slate-800">
+            <div class="p-3 leading-tight text-slate-800 flex flex-col gap-2 flex-1">
               <!-- Địa chỉ chi tiết (tiêu đề) -->
               <div
-                  class="font-semibold text-slate-900 mb-1"
-                  style="
-                    font-size: 15px;
-                    font-weight: 700;
-                    text-transform: uppercase;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                  "
+                  class="font-semibold text-slate-900 mb-1 text-[15px] font-bold uppercase truncate"
               >
                 {{ formatWardCard(item.diaChi) }}, {{ formatProvinceCard(item.khuVuc) }}
               </div>
@@ -535,10 +525,10 @@
               </div>
 
               <!-- Giá + Loại mua bán/thuê -->
-              <div class="flex items-center justify-between mt-1">
+              <div class="flex items-start justify-between gap-3 mt-1">
 
                 <!-- Giá bán (bên trái) -->
-                <div style="color: #dc2626; font-weight: 700; font-size: 16px">
+                <div class="text-[16px] font-bold text-rose-600 leading-tight">
                   {{ formatMoneyVN(item.giaBan) }}
                   <span class="text-[12px] text-slate-500 font-semibold">Hoa hồng: </span>
                   <DotLottieVue
@@ -558,7 +548,7 @@
                 </div>
 
                 <!-- Đơn vị + Loại MH (bên phải) -->
-                <div class="flex items-center gap-2 mt-2">
+                <div class="flex items-center gap-2 mt-1 shrink-0">
 
                   <!-- Đơn vị -->
                   <div
@@ -646,7 +636,7 @@
               </div>
 
               <!-- Nút xem chi tiết + nút yêu thích -->
-              <div class="flex items-center gap-2 mt-3">
+              <div class="flex items-center gap-2 mt-3 pt-1 border-t border-slate-100">
                 <!-- Nút Xem chi tiết (primary) -->
                 <!-- Nút Xem chi tiết (giữ nguyên màu, chỉ bỏ border) -->
                 <button

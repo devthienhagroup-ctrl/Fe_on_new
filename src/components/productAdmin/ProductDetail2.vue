@@ -1384,9 +1384,10 @@ const openPdf = async (pdfFile) => {
 /* ========= CONTENT GRID ========= */
 .content-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(450px, 0.5fr);
+  grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.7fr);
   gap: 24px;
   margin-bottom: 24px;
+  align-items: start;
 }
 
 /* ========= GALLERY ========= */
@@ -1397,6 +1398,7 @@ const openPdf = async (pdfFile) => {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
   width: 100%;
+  min-width: 0;
 }
 
 .gallery-wrapper {
@@ -1490,6 +1492,8 @@ const openPdf = async (pdfFile) => {
 .info-section {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 520px;
   min-width: 0;
 }
 
@@ -2303,14 +2307,22 @@ const openPdf = async (pdfFile) => {
   }
 
   .main-image-container {
-    min-height: 450px;
+    width: 100%;
+    height: 280px;          /* 👈 QUAN TRỌNG: thấp hơn chiều rộng */
+    border-radius: 12px;
+    overflow: hidden;
   }
+
 
   .main-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center 60%; /* 👈 giống thumbnail */
   }
+
+
+
 
   .thumbnails-container {
     overflow-x: auto;
