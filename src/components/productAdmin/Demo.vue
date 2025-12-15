@@ -248,10 +248,10 @@
                   :class="['transition-all duration-200', idx % 2 === 0 ? 'bg-blue-50/50' : 'bg-rose-50/50']"
                   style="font-weight: 550;"
               >
-                <td class="text-center" :class="!item.unlocked ? 'blink-row' : ''">
+                <td class="text-center" :class="!item.moKhoa ? 'blink-row' : ''">
                   <div class="flex justify-center items-center pr-1 ml-3">
                     <i
-                        v-if="item.unlocked"
+                        v-if="item.moKhoa"
                         class="fa-solid fa-lock-open text-green-600 text-lg"
                         title="Đã mở khóa"
                     ></i>
@@ -501,14 +501,18 @@
                     class="px-2 py-1 rounded-full font-semibold
     flex items-center gap-1 whitespace-nowrap
     backdrop-blur-sm bg-black/20 ring-1 ring-white/20 shadow-sm"
-                    :class="item.unlocked ? 'text-green-300' : 'text-yellow-300'" style="font-size: 10px !important;"
+                    :class="item.moKhoa ? 'text-green-300' : 'text-yellow-300'" style="font-size: 10px !important;"
                 >
-                  <i :class="item.unlocked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock'" style="font-size: 10px !important;"></i>
-                  <span style="font-size: 10px !important;">{{ item.unlocked ? 'Đã mở' : 'Chưa mở' }}</span>
+                  <i :class="item.moKhoa ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock'" style="font-size: 10px !important;"></i>
+                  <span style="font-size: 10px !important;">{{ item.moKhoa ? 'Đã mở' : 'Chưa mở' }}</span>
                 </div>
               </div>
-              <div v-if="'Đã bán' === item.status" class="absolute top-5  mr-3 ms-3 right-2 flex items-center gap-2" style="width: 65px">
+              <div v-if="'Đã bán' === item.status" class="absolute top-3 mr- ms-3 right-2 flex items-center gap-2" style="width: 60px; pxposition: absolute; top: 7px; right: 3px">
                   <img src="/imgs/sold-out.png"/>
+              </div>
+              <div v-else-if="'Đã kiểm duyệt' === item.status" class="absolute top-3  mr-0 ms-3 right-2 flex items-center gap-2" style="width: 60px
+                  ; position: absolute; top: 7px; right: 3px">
+                <img src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png"/>
               </div>
             </div>
 
@@ -825,8 +829,10 @@ function formatStatusTW(status) {
 
   if ( 'Đã bán' === status ){
     return 'Đã bán';
+  }else if( 'Đã kiểm duyệt' === status ){
+    return "Đã kiểm duyệt"
   }else{
-    return 'Đang rao bán';
+    return 'Đang bán';
   }
 }
 
@@ -1144,28 +1150,59 @@ async function fetchFilteredAssets() {
     console.log("DATA BE:", res.data);
 
     landAssets.value = Array.isArray(res.data.content)
-        ? res.data.content
+        ? res.data.content.map(item => ({
+          ...item,
+          imageUrl: item.imageUrl
+              ? item.imageUrl
+              : "https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg"
+        }))
         : [];
+
+
     totalRecords.value = res.data.page?.totalElements || 0;
   } catch (err) {
     console.error("Lỗi tải dữ liệu:", err);
   }
 }
+
+const auth = useAuthStore();
+import { useRouter } from "vue-router";
+const router = useRouter();
 async function toggleLove(item) {
+  // ❌ Chưa đăng nhập → đá ra trang đăng nhập
+  localStorage.setItem("redirectAfterLogin", "/san-pham-thien-ha");
+  if (!auth.accessToken) {
+    router.push({
+      path: "/dang-nhap"
+    });
+    return;
+  }
 
+  // ✅ Optimistic update (cho mượt UX)
   item.daThich = !item.daThich;
-  item.soLuotThich = !item.daThich?item.soLuotThich -1: item.soLuotThich+1;
-  const res = await api.post(
-      `/user.thg/product/user/love/toggle`,
-      null, // body không có gì
-      {
-        params: {
-          idAsset: item.id
-        }
-      }
-  );
+  item.soLuotThich = item.daThich
+      ? item.soLuotThich + 1
+      : item.soLuotThich - 1;
 
+  try {
+    await api.post(
+        "/user.thg/product/user/love/toggle",
+        null,
+        {
+          params: {
+            idAsset: item.id
+          }
+        }
+    );
+  } catch (e) {
+    // ❌ Nếu API lỗi → rollback lại
+    item.daThich = !item.daThich;
+    item.soLuotThich = item.daThich
+        ? item.soLuotThich + 1
+        : item.soLuotThich - 1;
+  }
 }
+
 
 
 onMounted(() => {

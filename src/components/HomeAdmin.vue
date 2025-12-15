@@ -76,7 +76,15 @@ const allMenuItems = [
   { label: 'TEAM', route: '/-thg/nhom', icon: 'fa-solid fa-people-group text-success fs-2', title: 'Nhóm làm việc', desc: 'Tổ chức nhóm, theo dõi hiệu suất và cộng tác nội bộ' },
   { label: 'EMPLOYEE', route: '/-thg/nhan-vien', icon: 'fa-solid fa-user-tie text-warning fs-2', title: 'Nhân sự', desc: 'Quản lý hồ sơ, năng lực và lịch sử công tác' },
   { label: 'TYPE', route: '/-thg/loai-hinh', icon: 'fa-solid fa-layer-group text-danger fs-2', title: 'Phân loại', desc: 'Cấu hình loại công việc, dự án và hạng mục' },
-  { label: 'SERVICE', route: '/-thg/dich-vu', icon: 'fa-solid fa-gears text-secondary fs-2', title: 'Dịch vụ', desc: 'Quản lý danh mục sản phẩm và dịch vụ cung cấp' },
+  {
+    label: 'PRODUCT',
+    route: '/-thg/quan-ly-san-pham',
+    icon: 'fa-solid fa-mountain-sun text-primary fs-2',
+    title: 'Sản phẩm',
+    desc: 'Quản lý danh mục đất đai, nhà ở và tài sản bất động sản'
+  },
+
+
   { label: 'CUSTOMER', route: '/-thg/khach-hang', icon: 'fa-solid fa-address-book text-info fs-2', title: 'Khách hàng', desc: 'Theo dõi thông tin, lịch sử và chăm sóc khách hàng' },
   { label: 'AUDIT', route: '/-thg/lich-su-he-thong', icon: 'fa-solid fa-clock-rotate-left text-danger fs-2', title: 'Audit Log', desc: 'Ghi nhận và giám sát toàn bộ thao tác hệ thống' },
   { label: 'ROLE', route: '/-thg/phan-quyen', icon: 'fa-solid fa-shield-halved text-warning fs-2', title: 'Phân quyền Role', desc: 'Quản lý & cấu hình quyền truy cập cho vai trò trong hệ thống'

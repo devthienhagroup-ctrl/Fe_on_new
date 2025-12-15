@@ -2273,11 +2273,33 @@ function validateLandForm(form, errorBag) {
 
   const a = form;
 
-  // ==== VALIDATE TRƯỜNG CƠ BẢN ====
-  if (!a.address?.trim()) {
+  // ==== VALIDATE ĐỊA CHỈ (3 PHẦN BẮT BUỘC) ====
+  if (!a.address || !a.address.trim()) {
     errorBag.address = "Vui lòng chọn địa chỉ tài sản.";
     valid = false;
+  } else {
+    const parts = a.address.split("/!!").map(p => p.trim());
+
+    if (parts.length !== 3) {
+      errorBag.address = "Địa chỉ phải gồm đủ: Địa chỉ cụ thể / Phường-Xã / Tỉnh-Thành.";
+      valid = false;
+    } else {
+      const [street, ward, province] = parts;
+
+      if (!street) {
+        errorBag.address = "Vui lòng nhập địa chỉ cụ thể (số nhà, đường).";
+        valid = false;
+      } else if (!ward) {
+        errorBag.address = "Vui lòng chọn Phường / Xã.";
+        valid = false;
+      } else if (!province) {
+        errorBag.address = "Vui lòng chọn Tỉnh / Thành phố.";
+        valid = false;
+      }
+    }
   }
+
+  // ==== VALIDATE TRƯỜNG CƠ BẢN ====
   if (!a.plotNumber?.trim()) {
     errorBag.plotNumber = "Vui lòng nhập số tờ bản đồ.";
     valid = false;
@@ -2313,11 +2335,9 @@ function validateLandForm(form, errorBag) {
 
   // ==== VALIDATE FILES ====
   const files = form.files || [];
-
   const normalImages = files.filter(f => !f.isIG);
   const landBookImages = files.filter(f => f.isIG);
 
-  // 🔥 Chỉ 1 thông báo lỗi files, không chia nhiều lỗi
   if (normalImages.length < 4 || landBookImages.length < 1) {
     errorBag.files =
         `Cần ít nhất 4 hình ảnh thường và 1 ảnh sổ (hiện có ${normalImages.length} ảnh thường, ${landBookImages.length} ảnh sổ).`;
@@ -2326,6 +2346,7 @@ function validateLandForm(form, errorBag) {
 
   return valid;
 }
+
 
 
 function validateContactInfo() {

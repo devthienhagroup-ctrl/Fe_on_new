@@ -316,7 +316,180 @@ index 747027387489657291f307618e4aa91b85bb18d3..569c1932178118d1c7fa99b89fe70feb
            <div class="section-title-group">
              <i class="fa-solid fa-chart-line section-icon"></i>
              <h3 class="section-title">Định giá</h3>
-           </div>
+           </div>diff --git a/src/router/index.js b/src/router/index.js
+                 index 2a000a9aa35a8abc75c5977cca506c2c6cb2cef3..386b1403f9942f090df25a005ed51c1148a8552b 100644
+                 --- a/src/router/index.js
+                 +++ b/src/router/index.js
+                 @@ -43,113 +43,113 @@ import TransactionHistory from "../components/user/Profile/component/Transaction
+                  import PackageBenefits from "../components/user/Profile/component/PackageBenefits.vue";
+                  import Support from "../components/user/Profile/component/Support.vue";
+                  import PaymentPage from "../components/land/my-valuation/components/PaymentPage.vue";
+                  import AppointmentManager from "../components/AppointmentManager.vue";
+                  import Investments from "../components/user/Investment/Investments.vue";
+                  import InvestmentDetail from "../components/user/Investment/InvestmentDetail.vue";
+                  import Payment from "../components/user/Profile/component/Payment.vue";
+                  import ProductList from "../components/productAdmin/ProductList.vue";
+                  import ProductDetail from "../components/productAdmin/ProductDetail.vue";
+                  import Demo from "../components/productAdmin/Demo.vue";
+                  import ProductUpdate  from "../components/productAdmin/ProductUpdate.vue";
+                  import ProductDetail2 from "../components/productAdmin/ProductDetail2.vue";
+                  import ProductCreate from "../components/productAdmin/ProductCreate.vue";
+
+                  import Ga4EventExample from "../components/Ga4EventExample.vue";
+                  import PaymentPage2 from "../components/productAdmin/PaymentPage2.vue";
+
+                  const routes = [
+                          {
+                              path: "/-thg/dang-nhap",
+                              name: "LoginForm",
+                              component: LoginForm,
+                          },
+                          {
+                              path: "/-thg/quan-ly-san-pham/tao-moi",
+                 -            meta: {requiresAuth: false},
+                 +            meta: {requiresAuth: false, enableTailwind: true},
+                              name: "ProductCreate",
+                              component: ProductCreate,
+                          },
+                          {
+                              path: "/-thg/quan-ly-san-pham",
+                 -            meta: {requiresAuth: false},
+                 +            meta: {requiresAuth: false, enableTailwind: true},
+                              component: Menu,
+                              children: [
+                                  {
+                                      path: "",   // → /-thg/quan-ly-san-phams/:id
+                                      name: "ProductList",
+                                      component: ProductList,
+                                      props: true,
+                                  }
+                              ]
+                          },
+                          {
+                              path: "/-thg/quan-ly-san-pham",
+                 -            meta: {requiresAuth: false},
+                 +            meta: {requiresAuth: false, enableTailwind: true},
+                              component: Menu,
+                              children: [
+                                  {
+                                      path: "cap-nhat/:id",   // → /-thg/quan-ly-san-phams/:id
+                                      name: "ProducUpdate",
+                                      component: ProductUpdate,
+                                      props: true,
+                                  }
+                              ]
+                          },
+
+                          {
+                              path: "/san-pham-thien-ha",
+                 -            meta: {requiresAuth: false, hideFooterMap: true},
+                 +            meta: {requiresAuth: false, hideFooterMap: true, enableTailwind: true},
+                              component: MenuUser,
+                              children: [
+                                  {
+                                      path: "",   // → /-thg/quan-ly-san-phams/:id
+                                      name: "Demo",
+                                      component: Demo,
+                                      props: true,
+                                  }
+                              ]
+                          },
+                          {
+                          path: "/-thg/quan-ly-san-pham",
+                          component: Menu,       // ⭐ Bổ sung MENU tại đây
+                 -        meta: { requiresAuth: false, hideFooterMap: true },
+                 +        meta: { requiresAuth: false, hideFooterMap: true, enableTailwind: true },
+
+                          children: [
+                              {
+                                  path: ":id",   // → /-thg/quan-ly-san-phams/:id
+                                  name: "ProductDetail",
+                                  component: ProductDetail,
+                                  props: true,
+                              }
+                          ],
+
+                      },
+                      {
+                          path: "/san-pham-thien-ha",
+                          component: MenuUser,       // ⭐ Bổ sung MENU tại đây
+                 -        meta: { requiresAuth: false },
+                 +        meta: { requiresAuth: false, enableTailwind: true },
+
+                          children: [
+                              {
+                                  path: ":id",   // → /-thg/quan-ly-san-phams/:id
+                                  name: "ProductDetail2",
+                                  component: ProductDetail2,
+                                  props: true,
+                              }
+                          ],
+
+                      },
+                          {
+                              path: "/-thg/loai-hinh",
+                              component: Menu, // MenuUser là layout chính
+                              meta: {requiresAuth: true,  loginFrom: "admin"},
+                              children: [
+                                  {
+                                      path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
+                                      name: 'TypeManager',
+                                      component: TypeManager
+                                  }
+                              ]// 🔒 route này yêu cầu đăng nhập
+                          },
+                          {
+                              path: "/-thg/nhom",
+                 @@ -751,29 +751,48 @@ router.beforeEach((to, from, next) => {
+                                  localStorage.setItem("loginFrom", "admin");
+                                  return next("/-thg/dang-nhap");
+                              }
+                          }else{
+                              if (to.meta.loginFrom === "user") {
+                                  localStorage.setItem("loginFrom", "user");
+                              } else {
+                                  localStorage.setItem("loginFrom", "admin");
+                              }
+                          }
+                      }
+
+                      // Nếu đã login mà vẫn vào /-thg/dang-nhap hoặc /dang-nhap
+                      if ((to.path === "/-thg/dang-nhap" || to.path === "/dang-nhap") && isLoggedIn) {
+                          if (loginFrom === "user") {
+                              return next("/");
+                          }
+                          if (loginFrom === "admin") {
+                              return next("/-thg/quan-ly");
+                          }
+                      }
+
+                      next();
+                  });
+
+                 +const TAILWIND_STYLESHEET_ID = "tailwind-admin-css";
+                 +
+                 +router.afterEach((to) => {
+                 +    const enableTailwind = to.matched.some(route => route.meta.enableTailwind);
+                 +    const existingLink = document.getElementById(TAILWIND_STYLESHEET_ID);
+                 +
+                 +    if (enableTailwind) {
+                 +        if (!existingLink) {
+                 +            const linkElement = document.createElement("link");
+                 +            linkElement.id = TAILWIND_STYLESHEET_ID;
+                 +            linkElement.rel = "stylesheet";
+                 +            linkElement.href = "/tailwind-admin.css";
+                 +            document.head.appendChild(linkElement);
+                 +        }
+                 +    } else if (existingLink) {
+                 +        existingLink.remove();
+                 +    }
+                 +});
+                 +
+
+                  export default router;
+
+
+
          </div>
 
          <div v-if="!asset.valuations || asset.valuations.length === 0" class="empty-state">

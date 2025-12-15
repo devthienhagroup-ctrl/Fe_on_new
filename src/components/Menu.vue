@@ -87,7 +87,13 @@ const allMenuItems = [
   { label: 'TEAM', route: '/-thg/nhom', icon: 'fa-solid fa-people-group text-success fs-5', title: 'Nhóm' },
   { label: 'EMPLOYEE', route: '/-thg/nhan-vien', icon: 'fa-solid fa-user-tie text-warning fs-5', title: 'Nhân sự' },
   { label: 'TYPE', route: '/-thg/loai-hinh', icon: 'fa-solid fa-layer-group text-danger fs-5', title: 'Phân loại' },
-  { label: 'SERVICE', route: '/-thg/dich-vu', icon: 'fa-solid fa-gears text-secondary fs-5', title: 'Dịch vụ' },
+  {
+    label: 'PRODUCT',
+    route: '/-thg/quan-ly-san-pham',
+    icon: 'fa-solid fa-mountain-sun text-primary fs-5',
+    title: 'Sản phẩm'
+  },
+
   { label: 'CUSTOMER', route: '/-thg/khach-hang', icon: 'fa-solid fa-address-book text-info fs-5', title: 'Khách hàng' },
   { label: 'AUDIT', route: '/-thg/lich-su-he-thong', icon: 'fa-solid fa-clock-rotate-left text-danger fs-5', title: 'Audit Log' },
   { label: 'ROLE', route: '/-thg/phan-quyen', icon: 'fa-solid fa-shield-halved text-warning fs-5', title: 'Phân quyền' },

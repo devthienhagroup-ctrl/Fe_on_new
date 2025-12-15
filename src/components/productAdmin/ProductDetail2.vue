@@ -673,9 +673,20 @@ const formatWard = (addressDetail) => {
 
   return ward;
 };
-
+import { useAuthStore } from "/src/stores/authStore.js";
+const authStore = useAuthStore();
+const auth = useAuthStore();
 
 async function handleUnlock(asset) {
+
+  localStorage.setItem("redirectAfterLogin", "/san-pham-thien-ha/" + asset.id);
+  if (!auth.accessToken) {
+    router.push({
+      path: "/dang-nhap"
+    });
+    return;
+  }
+
   if (!asset?.id) {
     console.error("❌ Thiếu asset.id");
     return;

@@ -202,8 +202,7 @@ onMounted(async () => {
 
         if (event.type === "PAYMENT_SUCCESS") {
           status.value = "success";
-
-
+          console.log( "Lụm" )
           setTimeout(() => {
             router.push(`/san-pham-thien-ha/${assetId}`);
           }, 2000);

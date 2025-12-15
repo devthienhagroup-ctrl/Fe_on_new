@@ -62,84 +62,65 @@ const routes = [
             path: "/-thg/dang-nhap",
             name: "LoginForm",
             component: LoginForm,
-        },
-        {
-            path: "/-thg/quan-ly-san-pham/tao-moi",
-            meta: {requiresAuth: false},
-            name: "ProductCreate",
-            component: ProductCreate,
-        },
-        {
-            path: "/-thg/quan-ly-san-pham",
-            meta: {requiresAuth: false},
-            component: Menu,
-            children: [
-                {
-                    path: "",   // → /-thg/quan-ly-san-phams/:id
-                    name: "ProductList",
-                    component: ProductList,
-                    props: true,
-                }
-            ]
-        },
-        {
-            path: "/-thg/quan-ly-san-pham",
-            meta: {requiresAuth: false},
-            component: Menu,
-            children: [
-                {
-                    path: "cap-nhat/:id",   // → /-thg/quan-ly-san-phams/:id
-                    name: "ProducUpdate",
-                    component: ProductUpdate,
-                    props: true,
-                }
-            ]
-        },
-
-        {
-            path: "/san-pham-thien-ha",
-            meta: {requiresAuth: false, hideFooterMap: true},
-            component: MenuUser,
-            children: [
-                {
-                    path: "",   // → /-thg/quan-ly-san-phams/:id
-                    name: "Demo",
-                    component: Demo,
-                    props: true,
-                }
-            ]
-        },
-        {
+        },{
         path: "/-thg/quan-ly-san-pham",
-        component: Menu,       // ⭐ Bổ sung MENU tại đây
-        meta: { requiresAuth: false, hideFooterMap: true },
-
+        component: Menu,
+        meta: {
+            requiresAuth: true,
+            enableTailwind: true,
+            loginFrom: "admin",
+        },
         children: [
             {
-                path: ":id",   // → /-thg/quan-ly-san-phams/:id
+                path: "",
+                name: "ProductList",
+                component: ProductList
+            },
+            {
+                path: "tao-moi",
+                name: "ProductCreate",
+                component: ProductCreate
+            },
+            {
+                path: "cap-nhat/:id",
+                name: "ProductUpdate",
+                component: ProductUpdate,
+                props: true
+            },
+            {
+                path: ":id",
                 name: "ProductDetail",
                 component: ProductDetail,
-                props: true,
+                props: true
             }
-        ],
-
+        ]
     },
+
+
+
     {
         path: "/san-pham-thien-ha",
-        component: MenuUser,       // ⭐ Bổ sung MENU tại đây
-        meta: { requiresAuth: false },
-
+        component: MenuUser,
+        meta: {
+            requiresAuth: false,
+            hideFooterMap: true,
+            enableTailwind: true
+        },
         children: [
             {
-                path: ":id",   // → /-thg/quan-ly-san-phams/:id
+                path: "",
+                name: "Demo",
+                component: Demo
+            },
+            {
+                path: ":id",
                 name: "ProductDetail2",
                 component: ProductDetail2,
-                props: true,
+                props: true
             }
-        ],
-
+        ]
     },
-        {
+    {
             path: "/-thg/loai-hinh",
             component: Menu, // MenuUser là layout chính
             meta: {requiresAuth: true,  loginFrom: "admin"},
@@ -773,6 +754,25 @@ router.beforeEach((to, from, next) => {
     next();
 });
 
+router.afterEach((to) => {
+    const id = "tailwind-admin-css";
+    let link = document.getElementById(id);
+
+    // ⭐ CHỈ 1 DÒNG QUYẾT ĐỊNH
+    const needTailwind = to.matched.some(r => r.meta.enableTailwind);
+
+    if (needTailwind && !link) {
+        link = document.createElement("link");
+        link.id = id;
+        link.rel = "stylesheet";
+        link.href = "/tailwind-admin.css";
+        document.head.appendChild(link);
+    }
+
+    if (!needTailwind && link) {
+        link.remove();
+    }
+});
 
 export default router;
 
