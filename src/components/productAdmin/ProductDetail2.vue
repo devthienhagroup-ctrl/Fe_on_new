@@ -304,8 +304,8 @@
               <span class="info-label">Chủ sở hữu</span>
               <span v-if="asset.ownerName != null" class="info-value">
                   {{ asset.ownerName ?? 'Chưa cập nhật' }} <span>
-                  (
-                  {{ asset.ownerPhone ?? 'Chưa cập nhật' }} )</span>
+                  -
+                  {{ asset.ownerPhone ?? 'Chưa cập nhật' }} </span>
                 </span>
               <span v-else class="text-gray-600 info-value">Chưa cập nhật</span>
             </div>
@@ -1384,7 +1384,7 @@ const openPdf = async (pdfFile) => {
 /* ========= CONTENT GRID ========= */
 .content-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.7fr);
+  grid-template-columns: minmax(0, 1.33fr) minmax(320px, 0.67fr);
   gap: 24px;
   margin-bottom: 24px;
   align-items: start;
@@ -1399,6 +1399,7 @@ const openPdf = async (pdfFile) => {
   border: 1px solid #e2e8f0;
   width: 100%;
   min-width: 0;
+  height: 700px;
 }
 
 .gallery-wrapper {
@@ -1411,15 +1412,20 @@ const openPdf = async (pdfFile) => {
 .main-image-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  height: 450px;
   border-radius: 12px;
   overflow: hidden;
+  background: #000; /* hoặc #f1f5f9 cho đẹp */
 }
 
 .main-image {
   width: 100%;
   height: 100%;
+  object-fit: cover;   /* 👈 KHÔNG CẮT ẢNH */
+  object-position: center;
 }
+
+
 
 .image-counter {
   position: absolute;
@@ -1656,8 +1662,6 @@ const openPdf = async (pdfFile) => {
 }
 
 .file-section {
-  margin-top: 24px;
-  padding-top: 24px;
   border-top: 2px solid #f1f5f9;
 }
 
@@ -2155,6 +2159,7 @@ const openPdf = async (pdfFile) => {
 
   .gallery-section {
     padding: 16px;
+    height: auto;
   }
 
   .header-actions {
@@ -2191,6 +2196,11 @@ const openPdf = async (pdfFile) => {
   .press-cta {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .executive-table th,
+  .executive-table td {
+    padding: 12px 10px;
   }
 }
 
@@ -2304,6 +2314,7 @@ const openPdf = async (pdfFile) => {
 @media (max-width: 768px) {
   .gallery-section {
     padding: 12px;
+    height: auto;
   }
 
   .main-image-container {

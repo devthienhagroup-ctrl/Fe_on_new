@@ -53,6 +53,7 @@ import Demo from "../components/productAdmin/Demo.vue";
 import ProductUpdate  from "../components/productAdmin/ProductUpdate.vue";
 import ProductDetail2 from "../components/productAdmin/ProductDetail2.vue";
 import ProductCreate from "../components/productAdmin/ProductCreate.vue";
+import Test from "../components/host/Test.vue";
 
 import Ga4EventExample from "../components/Ga4EventExample.vue";
 import PaymentPage2 from "../components/productAdmin/PaymentPage2.vue";
@@ -62,7 +63,13 @@ const routes = [
             path: "/-thg/dang-nhap",
             name: "LoginForm",
             component: LoginForm,
-        },{
+        },
+        {
+            path: "/011",
+            name: "LoginForm111",
+            component: Test,
+        },
+        {
         path: "/-thg/quan-ly-san-pham",
         component: Menu,
         meta: {
