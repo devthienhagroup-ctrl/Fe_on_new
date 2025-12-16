@@ -1,10 +1,16 @@
 <template>
   <div class="container-fluid py-4 host-list-container">
     <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-1">
       <div>
         <h4 class="mb-1 fw-bold text-dark">Danh sách Host</h4>
-        <p class="text-muted mb-0">Quản lý thông tin các chủ nhà trong hệ thống</p>
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <p class="text-muted mb-0">Quản lý thông tin các chủ nhà trong hệ thống</p>
+          <button class="btn btn-primary rounded-3 btn-sm ms-2" @click="showCreateHostModal = true">
+            <i class="fas fa-plus me-1"></i>
+            Thêm Host
+          </button>
+        </div>
       </div>
       <div class="text-end">
         <span class="badge bg-light text-dark border">
@@ -317,6 +323,11 @@
         :host="selectedHost"
         @close="showDetail = false"
     />
+    <CreateHostModal
+        v-if="showCreateHostModal"
+        @close="showCreateHostModal = false"
+        @created="fetchData"
+    />
   </div>
 </template>
 
@@ -324,6 +335,7 @@
 import { ref, computed, watch, onMounted } from "vue";
 import api from "/src/api/api.js";
 import provinces from "/src/assets/js/address.json";
+import CreateHostModal from "./CreateHostModal.vue";
 
 const data = ref([]);
 const loading = ref(false);
@@ -380,6 +392,8 @@ const formatAddress = (address) => {
       .replace(/^\d+\/!!/, "")
       .replace(/\/!!/g, ", ");
 };
+
+const showCreateHostModal = ref(false);
 
 let searchTimeout = null;
 watch(

@@ -144,6 +144,9 @@
                         <span class="label">Giá bán</span>
                         <span class="value">{{ formatMoney(asset.giaBan) }}</span>
                       </div>
+                      <div class="status-tag violet">
+                        <span class="value">{{ asset.trangThai || 'Chưa rõ' }}</span>
+                      </div>
                     </div>
                   </div>
 
@@ -314,6 +317,26 @@ const handleActivate = () => {
 </script>
 
 <style scoped>
+.status-tag.violet {
+  background-color: #f3e8ff;
+  border-radius: 15px;
+  padding: 4px 8px;
+  display: inline-block;
+  font-size: 13px;
+  color: #6b21a8;
+}
+
+.status-tag.violet .label {
+  font-weight: 500;
+  font-size: 12px;
+  display: block;
+  color: #7e22ce;
+}
+
+.status-tag.violet .value {
+  font-weight: bold;
+}
+
 /* Modal Base Styles */
 .modal-overlay {
   position: fixed;
@@ -321,8 +344,9 @@ const handleActivate = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  background: rgba(6, 10, 26, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;

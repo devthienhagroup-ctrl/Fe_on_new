@@ -1,1075 +1,496 @@
-diff --git a/src/components/host/HostDetailModal.vue b/src/components/host/HostDetailModal.vue
-index 48a4eaaee6236287d1a0c8c49c88a7b49de6acc9..9200c13836537af1b7a8613de17023cc5b471f6c 100644
---- a/src/components/host/HostDetailModal.vue
-+++ b/src/components/host/HostDetailModal.vue
-@@ -1,285 +1,328 @@
- <template>
-   <div class="modal-overlay" @click.self="$emit('close')">
-     <div class="modal-container">
-
-       <!-- Header -->
-       <div class="modal-header">
-         <div class="host-profile">
-           <div class="avatar-wrapper">
-             <img
-                 :src="avatarUrl"
-                 :alt="host.fullName"
-                 class="avatar"
-                 @error="handleImageError"
-             />
-             <div class="status-indicator" :class="host.status ? 'active' : 'inactive'"></div>
-           </div>
-           <div class="host-info">
-             <h2 class="host-name">{{ host.fullName }}</h2>
-             <div class="host-meta">
-               <span class="email">
--                <i class="icon icon-email"></i>
-+                <i class="fa-solid fa-envelope"></i>
-                 {{ host.email }}
-               </span>
-               <span class="divider">•</span>
-               <span class="phone" v-if="host.phone">
--                <i class="icon icon-phone"></i>
-+                <i class="fa-solid fa-phone"></i>
-                 {{ formatPhone(host.phone) }}
-               </span>
-             </div>
-           </div>
-         </div>
-
-         <button class="close-btn" @click="$emit('close')">
--          <i class="icon icon-close"></i>
-+          <i class="fa-solid fa-xmark"></i>
-         </button>
-       </div>
-
-       <!-- Content -->
-       <div class="modal-content">
-         <!-- Personal Information Section -->
-         <section class="info-section">
-           <div class="section-header">
-             <h3 class="section-title">
--              <i class="icon icon-user"></i>
-+              <i class="fa-solid fa-id-card-clip"></i>
-               Thông tin cá nhân
-             </h3>
-           </div>
-
--          <div class="info-grid">
--            <div class="info-item">
--              <label class="info-label">Họ và tên</label>
--              <div class="info-value">{{ host.fullName }}</div>
--            </div>
--
--            <div class="info-item">
--              <label class="info-label">Giới tính</label>
--              <div class="info-value">
--                <span class="gender-badge" :class="host.gender ? 'male' : 'female'">
--                  {{ host.gender ? 'Nam' : 'Nữ' }}
--                </span>
--              </div>
--            </div>
--
--            <div class="info-item">
--              <label class="info-label">Email</label>
--              <div class="info-value">
--                <a :href="`mailto:${host.email}`" class="email-link">
--                  {{ host.email }}
--                </a>
--              </div>
--            </div>
--
--            <div class="info-item">
--              <label class="info-label">Điện thoại</label>
--              <div class="info-value">
--                <a v-if="host.phone" :href="`tel:${host.phone}`" class="phone-link">
--                  {{ formatPhone(host.phone) }}
--                </a>
--                <span v-else class="empty-state">—</span>
--              </div>
--            </div>
--
--            <div class="info-item full-width">
--              <label class="info-label">Địa chỉ hiện tại</label>
--              <div class="info-value with-icon">
--                <i class="icon icon-location"></i>
--                {{ formatAddress(host.address) }}
--              </div>
--            </div>
--
--            <div class="info-item full-width">
--              <label class="info-label">Địa chỉ trước đó</label>
--              <div class="info-value with-icon muted">
--                <i class="icon icon-history"></i>
--                {{ formatAddress(host.oldAddress) || 'Không có dữ liệu' }}
--              </div>
--            </div>
-+          <div class="info-columns">
-+            <div
-+                v-for="(column, columnIndex) in infoColumns"
-+                :key="columnIndex"
-+                class="info-column"
-+            >
-+              <div
-+                  v-for="item in column"
-+                  :key="item.label || columnIndex"
-+                  class="info-card"
-+                  :class="{ placeholder: item.placeholder, highlight: item.highlight }"
-+              >
-+                <template v-if="!item.placeholder">
-+                  <div class="info-card-header">
-+                    <div class="info-icon" :class="item.iconColor">
-+                      <i class="fa-solid" :class="item.icon"></i>
-+                    </div>
-+                    <div class="info-title">{{ item.label }}</div>
+diff --git a/src/components/host/CreateHostModal.vue b/src/components/host/CreateHostModal.vue
+new file mode 100644
+index 0000000000000000000000000000000000000000..2d27b89d0706a6b6c5d7bf562c29d270d1ee311f
+--- /dev/null
++++ b/src/components/host/CreateHostModal.vue
+@@ -0,0 +1,332 @@
++<template>
++  <div
++      class="modal fade show d-block"
++      tabindex="-1"
++      role="dialog"
++      @click.self="handleClose"
++  >
++    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
++      <div class="modal-content">
++        <div class="modal-header border-0 pb-0">
++          <h5 class="modal-title fw-bold">
++            <i class="fas fa-user-plus me-2 text-primary"></i>
++            Tạo Host mới
++          </h5>
++          <button type="button" class="btn-close" aria-label="Close" @click="handleClose"></button>
++        </div>
++
++        <div class="modal-body pt-3">
++          <div class="row g-4">
++            <div class="col-md-8">
++              <div class="card border-0 shadow-sm h-100">
++                <div class="card-body">
++                  <h6 class="fw-semibold mb-3 text-primary">
++                    <i class="fas fa-id-card me-2"></i>
++                    Thông tin cơ bản
++                  </h6>
++
++                  <div class="mb-3">
++                    <label class="form-label">Email <span class="text-danger">*</span></label>
++                    <input
++                        v-model.trim="email"
++                        type="email"
++                        class="form-control"
++                        placeholder="email@example.com"
++                    />
++                    <div v-if="emailError" class="text-danger small mt-1">{{ emailError }}</div>
 +                  </div>
-
--            <div class="info-item">
--              <label class="info-label">Trạng thái tài khoản</label>
--              <div class="info-value">
--                <div class="status-badge" :class="host.status ? 'active' : 'inactive'">
--                  <span class="status-dot"></span>
--                  {{ host.status ? 'Đang hoạt động' : 'Đã khoá' }}
--                </div>
-+                  <div class="info-card-value" :class="{ muted: item.muted }">
-+                    <template v-if="item.type === 'email'">
-+                      <a :href="`mailto:${host.email}`" class="link">{{ item.value }}</a>
-+                    </template>
-+                    <template v-else-if="item.type === 'phone'">
-+                      <a v-if="host.phone" :href="`tel:${host.phone}`" class="link">{{ item.value }}</a>
-+                      <span v-else class="empty-state">—</span>
-+                    </template>
-+                    <template v-else-if="item.type === 'status'">
-+                      <span class="status-pill" :class="host.status ? 'active' : 'inactive'">
-+                        <span class="status-dot"></span>
-+                        {{ item.value }}
-+                      </span>
-+                    </template>
-+                    <template v-else-if="item.type === 'gender'">
-+                      <span class="gender-badge" :class="host.gender ? 'male' : 'female'">
-+                        {{ item.value }}
-+                      </span>
-+                    </template>
-+                    <template v-else>
-+                      {{ item.value }}
-+                    </template>
++
++                  <div class="mb-3">
++                    <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
++                    <input
++                        v-model.trim="fullName"
++                        type="text"
++                        class="form-control"
++                        placeholder="Nguyễn Văn A"
++                    />
++                    <div v-if="fullNameError" class="text-danger small mt-1">{{ fullNameError }}</div>
 +                  </div>
-+                </template>
-               </div>
-             </div>
-           </div>
-         </section>
-
-         <!-- Assets Section -->
-         <section class="assets-section">
-           <div class="section-header">
-             <h3 class="section-title">
--              <i class="icon icon-properties"></i>
-+              <i class="fa-solid fa-warehouse"></i>
-               Tài sản đang quản lý
-               <span class="asset-count">{{ host.assets?.length || 0 }}</span>
-             </h3>
-           </div>
-
-           <div v-if="!host.assets || host.assets.length === 0" class="empty-assets">
--            <i class="icon icon-empty"></i>
-+            <i class="fa-regular fa-folder-open"></i>
-             <p>Chưa có tài sản nào</p>
-           </div>
-
--          <div v-else class="assets-grid">
-+          <div v-else class="assets-list">
-             <div
-                 v-for="(asset, index) in host.assets"
-                 :key="asset.id"
-                 class="asset-card"
--                :class="{ 'highlight': index % 2 === 0 }"
-+                :class="{ highlight: index % 2 === 0 }"
-             >
--              <div class="asset-header">
--                <h4 class="asset-title">
--                  <i class="icon icon-home"></i>
--                  {{ formatAddress(asset.address) }}
--                </h4>
--                <div class="asset-actions">
--                  <button class="action-btn" title="Xem chi tiết">
--                    <i class="icon icon-view"></i>
--                  </button>
-+              <div class="asset-main">
-+                <div class="asset-icon">
-+                  <i class="fa-solid fa-house"></i>
-                 </div>
--              </div>
--
--              <div class="asset-details">
--                <div class="detail-row">
--                  <div class="detail-item">
--                    <label>Giá mong muốn</label>
--                    <div class="price expected">
--                      {{ formatMoney(asset.giaMongMuon) }}
-+                <div class="asset-meta">
-+                  <p class="asset-label">Địa chỉ</p>
-+                  <h4 class="asset-title">{{ formatAddress(asset.address) }}</h4>
-+                  <div class="asset-prices">
-+                    <div class="price-tag expected">
-+                      <span class="label">Mong muốn</span>
-+                      <span class="value">{{ formatMoney(asset.giaMongMuon) }}</span>
-                     </div>
--                  </div>
--
--                  <div class="detail-item">
--                    <label>Giá bán hiện tại</label>
--                    <div class="price current">
--                      {{ formatMoney(asset.giaBan) }}
-+                    <div class="price-tag current">
-+                      <span class="label">Giá bán</span>
-+                      <span class="value">{{ formatMoney(asset.giaBan) }}</span>
-                     </div>
-                   </div>
-                 </div>
-+              </div>
-
--                <div class="detail-row stats">
--                  <div class="stat-item">
--                    <div class="stat-icon">
--                      <i class="icon icon-request"></i>
--                    </div>
--                    <div class="stat-content">
--                      <div class="stat-value">{{ asset.soLanYeuCauDinhGia || 0 }}</div>
--                      <div class="stat-label">Yêu cầu định giá</div>
--                    </div>
-+              <div class="asset-stats">
-+                <div class="stat-box">
-+                  <div class="stat-icon compact">
-+                    <i class="fa-solid fa-clipboard-check"></i>
-                   </div>
--
--                  <div class="stat-item">
--                    <div class="stat-icon">
--                      <i class="icon icon-valuation"></i>
--                    </div>
--                    <div class="stat-content">
--                      <div class="stat-value">{{ asset.soLanDinhGia || 0 }}</div>
--                      <div class="stat-label">Đã định giá</div>
--                    </div>
-+                  <div>
-+                    <div class="stat-value">{{ asset.soLanYeuCauDinhGia || 0 }}</div>
-+                    <div class="stat-label">Yêu cầu định giá</div>
++
++                  <div class="mb-3">
++                    <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
++                    <input
++                        v-model="phone"
++                        type="text"
++                        class="form-control"
++                        placeholder="098xxxxxxx"
++                        @input="handlePhoneInput"
++                    />
++                    <div v-if="phoneError" class="text-danger small mt-1">{{ phoneError }}</div>
++                  </div>
++
++                  <div class="mb-3">
++                    <label class="form-label">Giới tính</label>
++                    <select v-model="gender" class="form-select">
++                      <option :value="true">Nam</option>
++                      <option :value="false">Nữ</option>
++                    </select>
 +                  </div>
 +                </div>
-+                <div class="stat-box">
-+                  <div class="stat-icon compact success">
-+                    <i class="fa-solid fa-scale-balanced"></i>
++              </div>
++            </div>
++
++            <div class="col-md-4">
++              <div class="card border-0 shadow-sm h-100">
++                <div class="card-body d-flex flex-column align-items-center text-center">
++                  <div class="avatar-wrapper mb-3">
++                    <img :src="avatarPreview" alt="Avatar" class="avatar-preview" />
 +                  </div>
-+                  <div>
-+                    <div class="stat-value">{{ asset.soLanDinhGia || 0 }}</div>
-+                    <div class="stat-label">Đã định giá</div>
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div>
-         </section>
++                  <div class="w-100">
++                    <label class="form-label">Avatar</label>
++                    <input
++                        type="file"
++                        class="form-control"
++                        accept="image/jpeg,image/png,image/webp"
++                        @change="onAvatarChange"
++                    />
++                    <div v-if="avatarError" class="text-danger small mt-1">{{ avatarError }}</div>
++                  </div>
++                </div>
++              </div>
++            </div>
++          </div>
++
++          <div class="card border-0 shadow-sm mt-4">
++            <div class="card-body">
++              <h6 class="fw-semibold mb-3 text-primary">
++                <i class="fas fa-map-marker-alt me-2"></i>
++                Địa chỉ
++              </h6>
++
++              <div class="row g-3">
++                <div class="col-md-6">
++                  <label class="form-label">Tỉnh / Thành phố <span class="text-danger">*</span></label>
++                  <select v-model="province" class="form-select">
++                    <option value="">Chọn tỉnh / thành phố</option>
++                    <option v-for="p in provinces" :key="p.code" :value="p.name">{{ p.name }}</option>
++                  </select>
++                  <div v-if="provinceError" class="text-danger small mt-1">{{ provinceError }}</div>
++                </div>
++
++                <div class="col-md-6">
++                  <label class="form-label">Phường / Xã <span class="text-danger">*</span></label>
++                  <select v-model="ward" class="form-select" :disabled="!province">
++                    <option value="">Chọn phường / xã</option>
++                    <option v-for="w in wards" :key="w.code" :value="w.name">{{ w.name }}</option>
++                  </select>
++                  <div v-if="wardError" class="text-danger small mt-1">{{ wardError }}</div>
++                </div>
++
++                <div class="col-md-6">
++                  <label class="form-label">Địa chỉ chi tiết <span class="text-danger">*</span></label>
++                  <input
++                      v-model.trim="detailAddress"
++                      type="text"
++                      class="form-control"
++                      placeholder="123 Lê Lợi"
++                  />
++                  <div v-if="detailAddressError" class="text-danger small mt-1">{{ detailAddressError }}</div>
++                </div>
++
++                <div class="col-md-6">
++                  <label class="form-label">Địa chỉ cũ</label>
++                  <input
++                      v-model.trim="oldAddress"
++                      type="text"
++                      class="form-control"
++                      placeholder="Nhập địa chỉ cũ (nếu có)"
++                  />
++                </div>
++              </div>
++            </div>
++          </div>
++        </div>
++
++        <div class="modal-footer border-0 pt-0">
++          <button type="button" class="btn btn-light" @click="handleClose">
++            <i class="fas fa-times me-2"></i>
++            Huỷ
++          </button>
++          <button type="button" class="btn btn-primary" :disabled="!isFormValid" @click="handleSubmit">
++            <i class="fas fa-check me-2"></i>
++            Tạo Host
++          </button>
++        </div>
++      </div>
++    </div>
++    <div class="modal-backdrop fade show"></div>
++  </div>
++</template>
++
++<script setup>
++import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
++import provinces from "/src/assets/js/address.json";
++
++const emit = defineEmits(["close", "created"]);
++
++const email = ref("");
++const fullName = ref("");
++const phone = ref("");
++const gender = ref(true);
++const province = ref("");
++const ward = ref("");
++const detailAddress = ref("");
++const oldAddress = ref("");
++
++const avatarFile = ref(null);
++const avatarPreview = ref("https://via.placeholder.com/160x160?text=Avatar");
++const avatarError = ref("");
++
++const selectedProvince = computed(() => provinces.find((p) => p.name === province.value));
++const wards = computed(() => selectedProvince.value?.wards || []);
++
++watch(province, () => {
++  ward.value = "";
++});
++
++const emailError = computed(() => {
++  if (!email.value) return "Email bắt buộc";
++  const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/;
++  return emailRegex.test(email.value) ? "" : "Email không hợp lệ";
++});
++
++const fullNameError = computed(() => {
++  return fullName.value ? "" : "Họ và tên bắt buộc";
++});
++
++const phoneError = computed(() => {
++  if (!phone.value) return "Số điện thoại bắt buộc";
++  if (!/^\d+$/.test(phone.value)) return "SĐT chỉ được chứa số";
++  return phone.value.length >= 9 && phone.value.length <= 11
++      ? ""
++      : "Độ dài SĐT phải từ 9-11 số";
++});
++
++const provinceError = computed(() => {
++  return province.value ? "" : "Vui lòng chọn tỉnh/thành";
++});
++
++const wardError = computed(() => {
++  return ward.value ? "" : "Vui lòng chọn phường/xã";
++});
++
++const detailAddressError = computed(() => {
++  return detailAddress.value ? "" : "Địa chỉ chi tiết bắt buộc";
++});
++
++const isFormValid = computed(() => {
++  return (
++      !emailError.value &&
++      !fullNameError.value &&
++      !phoneError.value &&
++      !provinceError.value &&
++      !wardError.value &&
++      !detailAddressError.value &&
++      !avatarError.value
++  );
++});
++
++const handlePhoneInput = (event) => {
++  const onlyDigits = event.target.value.replace(/\D/g, "");
++  phone.value = onlyDigits;
++};
++
++const onAvatarChange = (event) => {
++  const file = event.target.files?.[0];
++  avatarError.value = "";
++
++  if (!file) {
++    avatarFile.value = null;
++    avatarPreview.value = "https://via.placeholder.com/160x160?text=Avatar";
++    return;
++  }
++
++  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
++  const maxSize = 2 * 1024 * 1024;
++
++  if (!allowedTypes.includes(file.type)) {
++    avatarError.value = "Chỉ chấp nhận ảnh JPG, PNG, WEBP";
++    avatarFile.value = null;
++    avatarPreview.value = "https://via.placeholder.com/160x160?text=Avatar";
++    return;
++  }
++
++  if (file.size > maxSize) {
++    avatarError.value = "Kích thước ảnh tối đa 2MB";
++    avatarFile.value = null;
++    avatarPreview.value = "https://via.placeholder.com/160x160?text=Avatar";
++    return;
++  }
++
++  avatarFile.value = file;
++  avatarPreview.value = URL.createObjectURL(file);
++};
++
++const handleClose = () => {
++  emit("close");
++};
++
++const handleSubmit = () => {
++  if (!isFormValid.value) return;
++
++  const payload = {
++    email: email.value,
++    fullName: fullName.value,
++    phone: phone.value,
++    gender: gender.value,
++    address: `${detailAddress.value}/!!${ward.value}/!!${province.value}`,
++    oldAddress: oldAddress.value,
++    avatarFile: avatarFile.value
++  };
++
++  console.log("CREATE HOST PAYLOAD:", payload);
++  emit("created");
++  emit("close");
++};
++
++const handleEsc = (event) => {
++  if (event.key === "Escape") {
++    handleClose();
++  }
++};
++
++onMounted(() => {
++  window.addEventListener("keydown", handleEsc);
++});
++
++onBeforeUnmount(() => {
++  window.removeEventListener("keydown", handleEsc);
++});
++</script>
++
++<style scoped>
++.modal-backdrop {
++  z-index: 1040;
++}
++
++.modal {
++  z-index: 1050;
++}
++
++.card {
++  border-radius: 12px;
++}
++
++.avatar-wrapper {
++  width: 160px;
++  height: 160px;
++  border-radius: 50%;
++  overflow: hidden;
++  background: #f8fafc;
++  border: 1px dashed #d1d5db;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++}
++
++.avatar-preview {
++  width: 100%;
++  height: 100%;
++  object-fit: cover;
++}
++</style>
+diff --git a/src/components/host/Test.vue b/src/components/host/Test.vue
+index db0e552064a10943f618d4174602ec174d18b7d2..20e76c6ad03b82762aa922d2702f1cc5d968c11d 100644
+--- a/src/components/host/Test.vue
++++ b/src/components/host/Test.vue
+@@ -1,32 +1,36 @@
+ <template>
+   <div class="container-fluid py-4 host-list-container">
+     <!-- HEADER -->
+     <div class="d-flex justify-content-between align-items-center mb-4">
+       <div>
+         <h4 class="mb-1 fw-bold text-dark">Danh sách Host</h4>
+         <p class="text-muted mb-0">Quản lý thông tin các chủ nhà trong hệ thống</p>
++        <button class="btn btn-primary btn-sm mt-3" @click="showCreateHostModal = true">
++          <i class="fas fa-plus me-2"></i>
++          + Thêm Host
++        </button>
        </div>
+       <div class="text-end">
+         <span class="badge bg-light text-dark border">
+           <i class="fas fa-users me-1"></i>
+           Tổng: <span class="fw-bold">{{ totalRecords }}</span> host
+         </span>
+       </div>
+     </div>
 
-       <!-- Footer -->
-       <div class="modal-footer">
-         <div class="footer-actions">
-           <button class="btn btn-secondary" @click="$emit('close')">
--            <i class="icon icon-close"></i>
-+            <i class="fa-solid fa-xmark"></i>
-             Đóng
-           </button>
-           <button class="btn btn-primary" @click="handleContact">
--            <i class="icon icon-contact"></i>
-+            <i class="fa-solid fa-headset"></i>
-             Liên hệ
-           </button>
-           <button
-               v-if="!host.status"
-               class="btn btn-success"
-               @click="handleActivate"
-           >
--            <i class="icon icon-activate"></i>
-+            <i class="fa-solid fa-bolt"></i>
-             Kích hoạt
-           </button>
+     <!-- FILTER SECTION -->
+     <div class="card shadow-sm border-0 mb-4 filter-section filter-purple">
+     <div class="card-header bg-transparent border-0 py-3">
+         <h6 class="mb-0 fw-semibold">
+           <i class="fas fa-filter me-2 text-primary"></i>
+           Bộ lọc tìm kiếm
+         </h6>
+       </div>
+       <div class="filter-full-width">
+         <div class="card-body pt-0">
+         <div class="row g-3">
+           <!-- Search -->
+           <div class="col-xl-4 col-lg-4 col-md-6">
+             <i class="fas fa-magnifying-glass text-primary me-1"></i>
+             <label class="form-label fw-medium small">Tìm kiếm</label>
+             <div class="input-group input-group-sm">
+@@ -295,57 +299,63 @@
+                 title="Trang sau"
+                 @click="pageNo++"
+             >
+               <i class="fas fa-chevron-right"></i>
+             </button>
+
+             <!-- LAST PAGE -->
+             <button
+                 class="btn btn-outline-secondary"
+                 :disabled="pageNo >= totalPages - 1"
+                 title="Trang cuối"
+                 @click="goLastPage"
+             >
+               <i class="fas fa-angles-right"></i>
+             </button>
+           </div>
+
          </div>
        </div>
      </div>
+     <HostDetailModal
+         v-if="showDetail"
+         :host="selectedHost"
+         @close="showDetail = false"
+     />
++    <CreateHostModal
++        v-if="showCreateHostModal"
++        @close="showCreateHostModal = false"
++        @created="fetchData"
++    />
    </div>
  </template>
 
  <script setup>
- import { computed } from 'vue'
+ import { ref, computed, watch, onMounted } from "vue";
+ import api from "/src/api/api.js";
+ import provinces from "/src/assets/js/address.json";
++import CreateHostModal from "./CreateHostModal.vue";
 
- const props = defineProps({
-   host: {
-     type: Object,
-     required: true
+ const data = ref([]);
+ const loading = ref(false);
+ const totalRecords = ref(0);
+ const totalPages = ref(1);
+
+ const pageNo = ref(0);
+ const pageSize = ref(10);
+
+ const goFirstPage = () => {
+   if (pageNo.value > 0) {
+     pageNo.value = 0;
    }
- })
+ };
 
- const emit = defineEmits(['close', 'contact', 'activate'])
-
- const BASE_URL = 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'
-
--const avatarUrl = computed(() => {
--  return props.host?.avatar
--      ? BASE_URL + props.host.avatar
--      : BASE_URL + 'vat-default.jpg'
--})
--
- // Format functions
- const formatAddress = (raw) => {
-   if (!raw) return '—'
-   return raw
-       .replace(/^\d+\/!!/, '')
-       .replace(/\/!!/g, ', ')
-       .split(', ')
-       .filter(Boolean)
-       .join(', ')
- }
-
- const formatMoney = (value) => {
-   if (!value || isNaN(value)) return '—'
-   const number = Number(value)
-   if (number >= 1000000000) {
-     return (number / 1000000000).toFixed(1).replace(/\.0$/, '') + ' tỷ'
-   } else if (number >= 1000000) {
-     return (number / 1000000).toFixed(1).replace(/\.0$/, '') + ' triệu'
+ const goLastPage = () => {
+   if (pageNo.value < totalPages.value - 1) {
+     pageNo.value = totalPages.value - 1;
    }
-   return number.toLocaleString('vi-VN') + ' ₫'
- }
+ };
 
- const formatPhone = (phone) => {
-   if (!phone) return '—'
-   return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
- }
+ const filters = ref({
+   search: null,
+   gender: null,
+   status: null,
+@@ -359,50 +369,52 @@ const selectedProvince = computed(() =>
 
-+const avatarUrl = computed(() => {
-+  return props.host?.avatar
-+      ? BASE_URL + props.host.avatar
-+      : BASE_URL + 'vat-default.jpg'
-+})
+ // Computed properties
+ const totalPagesComputed = computed(() => {
+   return Math.ceil(totalRecords.value / pageSize.value);
+ });
+
+ // Methods
+ const getInitials = (name) => {
+   if (!name) return '?';
+   return name
+       .split(' ')
+       .map(n => n[0])
+       .join('')
+       .toUpperCase()
+       .substring(0, 2);
+ };
+
+ const formatAddress = (address) => {
+   if (!address) return "Chưa cập nhật";
+
+   return address
+       .replace(/^\d+\/!!/, "")
+       .replace(/\/!!/g, ", ");
+ };
+
++const showCreateHostModal = ref(false);
 +
-+const infoItems = computed(() => {
-+  const items = [
-+    {
-+      label: 'Họ và tên',
-+      value: props.host.fullName || '—',
-+      icon: 'fa-id-badge',
-+      iconColor: 'info'
-+    },
-+    {
-+      label: 'Giới tính',
-+      value: props.host.gender ? 'Nam' : 'Nữ',
-+      icon: 'fa-venus-mars',
-+      iconColor: 'secondary',
-+      type: 'gender'
-+    },
-+    {
-+      label: 'Email',
-+      value: props.host.email,
-+      icon: 'fa-envelope',
-+      iconColor: 'primary',
-+      type: 'email'
-+    },
-+    {
-+      label: 'Điện thoại',
-+      value: props.host.phone ? formatPhone(props.host.phone) : '—',
-+      icon: 'fa-phone',
-+      iconColor: 'success',
-+      type: 'phone'
-+    },
-+    {
-+      label: 'Trạng thái tài khoản',
-+      value: props.host.status ? 'Đang hoạt động' : 'Đã khoá',
-+      icon: 'fa-shield-halved',
-+      iconColor: 'warning',
-+      type: 'status'
-+    },
-+    {
-+      label: 'Địa chỉ hiện tại',
-+      value: formatAddress(props.host.address),
-+      icon: 'fa-location-dot',
-+      iconColor: 'danger',
-+      highlight: true
-+    },
-+    {
-+      label: 'Địa chỉ trước đó',
-+      value: formatAddress(props.host.oldAddress) || 'Không có dữ liệu',
-+      icon: 'fa-clock-rotate-left',
-+      iconColor: 'muted',
-+      muted: true
-+    }
-+  ]
-+
-+  if (items.length % 2 !== 0) {
-+    items.push({ placeholder: true })
-+  }
-+
-+  return items
-+})
-+
-+const infoColumns = computed(() => {
-+  const midpoint = infoItems.value.length / 2
-+  return [
-+    infoItems.value.slice(0, midpoint),
-+    infoItems.value.slice(midpoint)
-+  ]
-+})
-+
- const handleImageError = (e) => {
-   e.target.src = BASE_URL + 'vat-default.jpg'
- }
-
- const handleContact = () => {
-   emit('contact', props.host)
- }
-
- const handleActivate = () => {
-   emit('activate', props.host)
- }
- </script>
-
- <style scoped>
- /* Modal Base Styles */
- .modal-overlay {
-   position: fixed;
-   top: 0;
-   left: 0;
-   right: 0;
-   bottom: 0;
-   background: rgba(0, 0, 0, 0.5);
-   backdrop-filter: blur(4px);
-   display: flex;
-   align-items: center;
-@@ -389,333 +432,359 @@ const handleActivate = () => {
-   justify-content: center;
-   cursor: pointer;
-   color: #64748b;
-   transition: all 0.2s ease;
- }
-
- .close-btn:hover {
-   background: #f1f5f9;
-   color: #475569;
- }
-
- /* Content */
- .modal-content {
-   flex: 1;
-   overflow-y: auto;
-   padding: 32px;
-   display: flex;
-   flex-direction: column;
-   gap: 32px;
- }
-
- /* Info Sections */
- .info-section, .assets-section {
-   display: flex;
-   flex-direction: column;
--  gap: 20px;
-+  gap: 16px;
- }
-
- .section-header {
-   display: flex;
-   align-items: center;
-   gap: 12px;
- }
-
- .section-title {
-   font-size: 18px;
--  font-weight: 600;
--  color: #334155;
-+  font-weight: 700;
-+  color: #1e293b;
-   margin: 0;
-   display: flex;
-   align-items: center;
-   gap: 8px;
- }
-
- .asset-count {
--  background: #3b82f6;
-+  background: #2563eb;
-   color: white;
-   font-size: 12px;
-   padding: 2px 8px;
-   border-radius: 12px;
-   margin-left: 8px;
- }
-
--/* Info Grid */
--.info-grid {
-+.info-columns {
-   display: grid;
--  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
--  gap: 20px;
-+  grid-template-columns: repeat(2, minmax(0, 1fr));
-+  gap: 12px;
- }
-
--.info-item {
-+.info-column {
-   display: flex;
-   flex-direction: column;
--  gap: 6px;
-+  gap: 12px;
- }
-
--.info-item.full-width {
--  grid-column: 1 / -1;
-+.info-card {
-+  border: 1px solid #e2e8f0;
-+  border-radius: 12px;
-+  padding: 12px 14px;
-+  background: #f8fafc;
-+  display: flex;
-+  flex-direction: column;
-+  gap: 8px;
-+  min-height: 96px;
- }
-
--.info-label {
--  font-size: 12px;
--  font-weight: 500;
--  color: #64748b;
--  text-transform: uppercase;
--  letter-spacing: 0.5px;
-+.info-card.highlight {
-+  background: #eef2ff;
-+  border-color: #c7d2fe;
- }
-
--.info-value {
--  font-size: 16px;
--  color: #1e293b;
--  font-weight: 500;
-+.info-card.placeholder {
-+  visibility: hidden;
-+  padding: 0;
-+  min-height: 0;
-+  border: none;
- }
-
--.info-value.with-icon {
-+.info-card-header {
-   display: flex;
-   align-items: center;
--  gap: 8px;
-+  gap: 10px;
-+}
-+
-+.info-icon {
-+  width: 34px;
-+  height: 34px;
-+  border-radius: 10px;
-+  display: flex;
-+  align-items: center;
-+  justify-content: center;
-+  background: #e2e8f0;
-+  color: #1f2937;
-+  font-size: 14px;
-+}
-+
-+.info-icon.primary { background: #e0f2fe; color: #1d4ed8; }
-+.info-icon.secondary { background: #fce7f3; color: #be185d; }
-+.info-icon.success { background: #dcfce7; color: #166534; }
-+.info-icon.warning { background: #fef3c7; color: #d97706; }
-+.info-icon.danger { background: #fee2e2; color: #b91c1c; }
-+.info-icon.info { background: #e0f2fe; color: #0369a1; }
-+.info-icon.muted { background: #f8fafc; color: #94a3b8; }
-+
-+.info-title {
-+  font-size: 12px;
-+  font-weight: 700;
-+  color: #475569;
-+  letter-spacing: 0.6px;
-+  text-transform: uppercase;
- }
-
--.info-value.muted {
-+.info-card-value {
-+  font-size: 15px;
-+  font-weight: 600;
-+  color: #0f172a;
-+}
-+
-+.info-card-value .link {
-+  color: #2563eb;
-+  text-decoration: none;
-+}
-+
-+.info-card-value .link:hover {
-+  text-decoration: underline;
-+}
-+
-+.info-card-value.muted {
-   color: #94a3b8;
--  font-style: italic;
-+  font-weight: 500;
- }
-
--/* Badges */
- .gender-badge {
-   display: inline-block;
-   padding: 4px 12px;
-   border-radius: 20px;
-   font-size: 13px;
--  font-weight: 500;
-+  font-weight: 600;
- }
-
--.gender-badge.male {
--  background: #dbeafe;
--  color: #1d4ed8;
--}
-+.gender-badge.male { background: #dbeafe; color: #1d4ed8; }
-+.gender-badge.female { background: #fce7f3; color: #be185d; }
-
--.gender-badge.female {
--  background: #fce7f3;
--  color: #be185d;
--}
--
--.status-badge {
-+.status-pill {
-   display: inline-flex;
-   align-items: center;
-   gap: 8px;
-   padding: 6px 12px;
-   border-radius: 20px;
-   font-size: 13px;
--  font-weight: 500;
-+  font-weight: 600;
-   background: #f8fafc;
- }
-
--.status-badge.active {
--  color: #065f46;
--}
--
--.status-badge.inactive {
--  color: #475569;
--}
-+.status-pill.active { color: #065f46; }
-+.status-pill.inactive { color: #475569; }
-
- .status-dot {
-   width: 8px;
-   height: 8px;
-   border-radius: 50%;
-+  background: currentColor;
- }
-
--.status-badge.active .status-dot {
--  background: #10b981;
--}
--
--.status-badge.inactive .status-dot {
--  background: #94a3b8;
--}
--
--/* Links */
--.email-link, .phone-link {
--  color: #3b82f6;
--  text-decoration: none;
--  transition: color 0.2s ease;
--}
--
--.email-link:hover, .phone-link:hover {
--  color: #2563eb;
--  text-decoration: underline;
-+.empty-state {
-+  color: #94a3b8;
- }
-
--/* Assets Grid */
- .empty-assets {
-   text-align: center;
-   padding: 40px 20px;
-   color: #94a3b8;
- }
-
- .empty-assets i {
-   font-size: 48px;
--  margin-bottom: 16px;
--  opacity: 0.5;
-+  margin-bottom: 12px;
-+  opacity: 0.6;
- }
-
--.assets-grid {
--  display: grid;
--  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
--  gap: 20px;
-+.assets-list {
-+  display: flex;
-+  flex-direction: column;
-+  gap: 12px;
- }
-
- .asset-card {
-   background: white;
-   border: 1px solid #e2e8f0;
--  border-radius: 12px;
--  padding: 20px;
--  transition: all 0.3s ease;
-+  border-radius: 14px;
-+  padding: 14px 16px;
-+  display: flex;
-+  flex-direction: column;
-+  gap: 12px;
-+  transition: all 0.2s ease;
- }
-
- .asset-card.highlight {
--  border-color: #3b82f6;
--  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
-+  background: #f8fafc;
-+  border-color: #dbeafe;
- }
-
- .asset-card:hover {
--  transform: translateY(-2px);
--  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-+  border-color: #2563eb;
-+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.12);
- }
-
--.asset-header {
-+.asset-main {
-   display: flex;
--  justify-content: space-between;
-+  gap: 12px;
-   align-items: flex-start;
--  margin-bottom: 16px;
- }
-
--.asset-title {
--  font-size: 16px;
--  font-weight: 600;
--  color: #1e293b;
--  margin: 0;
-+.asset-icon {
-+  width: 46px;
-+  height: 46px;
-+  border-radius: 12px;
-+  background: #2563eb;
-+  color: white;
-   display: flex;
-   align-items: center;
--  gap: 8px;
-+  justify-content: center;
-+  font-size: 20px;
-+  flex-shrink: 0;
- }
-
--.asset-actions {
-+.asset-meta {
-   display: flex;
--  gap: 8px;
-+  flex-direction: column;
-+  gap: 6px;
-+  min-width: 0;
- }
-
--.action-btn {
--  background: none;
--  border: none;
--  width: 32px;
--  height: 32px;
--  border-radius: 6px;
--  display: flex;
--  align-items: center;
--  justify-content: center;
--  cursor: pointer;
-+.asset-label {
-+  text-transform: uppercase;
-+  letter-spacing: 0.5px;
-+  font-size: 11px;
-   color: #64748b;
--  transition: all 0.2s ease;
--}
--
--.action-btn:hover {
--  background: #f1f5f9;
--  color: #3b82f6;
-+  margin: 0;
- }
-
--/* Asset Details */
--.asset-details {
--  display: flex;
--  flex-direction: column;
--  gap: 16px;
-+.asset-title {
-+  font-size: 16px;
-+  font-weight: 700;
-+  color: #0f172a;
-+  margin: 0;
-+  line-height: 1.4;
- }
-
--.detail-row {
-+.asset-prices {
-   display: flex;
--  gap: 16px;
-+  gap: 8px;
-+  flex-wrap: wrap;
- }
-
--.detail-item {
--  flex: 1;
-+.price-tag {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 8px 10px;
-+  border-radius: 10px;
-+  background: #f1f5f9;
-+  font-size: 14px;
- }
-
--.detail-item label {
--  display: block;
--  font-size: 12px;
--  color: #64748b;
--  margin-bottom: 4px;
-+.price-tag .label {
-+  color: #475569;
-+  font-weight: 600;
- }
-
--.price {
--  font-size: 18px;
-+.price-tag .value {
-   font-weight: 700;
-+  color: #111827;
- }
-
--.price.expected {
--  color: #f59e0b;
-+.price-tag.expected {
-+  background: #fef3c7;
-+  color: #b45309;
- }
-
--.price.current {
--  color: #10b981;
-+.price-tag.current {
-+  background: #dcfce7;
-+  color: #166534;
- }
-
--/* Stats */
--.stats {
--  margin-top: 8px;
-+.asset-stats {
-+  display: flex;
-+  gap: 10px;
-+  flex-wrap: wrap;
- }
-
--.stat-item {
--  flex: 1;
-+.stat-box {
-   display: flex;
-   align-items: center;
--  gap: 12px;
--  padding: 12px;
-+  gap: 10px;
-+  padding: 10px 12px;
-+  border: 1px solid #e2e8f0;
-+  border-radius: 10px;
-   background: #f8fafc;
--  border-radius: 8px;
-+  flex: 1;
-+  min-width: 220px;
- }
-
--.stat-icon {
--  width: 36px;
--  height: 36px;
-+.stat-icon.compact {
-+  width: 32px;
-+  height: 32px;
-   border-radius: 8px;
-   background: #e0e7ff;
-+  color: #4338ca;
-   display: flex;
-   align-items: center;
-   justify-content: center;
--  color: #4f46e5;
- }
-
--.stat-content {
--  display: flex;
--  flex-direction: column;
-+.stat-icon.compact.success {
-+  background: #dcfce7;
-+  color: #166534;
- }
-
- .stat-value {
--  font-size: 20px;
-+  font-size: 18px;
-   font-weight: 700;
--  color: #1e293b;
-+  color: #0f172a;
-+  margin: 0;
- }
-
- .stat-label {
-   font-size: 12px;
-   color: #64748b;
- }
-
- /* Footer */
- .modal-footer {
-   padding: 24px 32px;
-   border-top: 1px solid #e9ecef;
-   background: #f8fafc;
- }
-
- .footer-actions {
-   display: flex;
-   justify-content: flex-end;
-   gap: 12px;
- }
-
- .btn {
-   padding: 10px 24px;
-   border-radius: 8px;
-   font-size: 14px;
-   font-weight: 500;
-@@ -734,121 +803,99 @@ const handleActivate = () => {
- }
-
- .btn-secondary:hover {
-   background: #f1f5f9;
-   border-color: #94a3b8;
- }
-
- .btn-primary {
-   background: #3b82f6;
-   color: white;
- }
-
- .btn-primary:hover {
-   background: #2563eb;
- }
-
- .btn-success {
-   background: #10b981;
-   color: white;
- }
-
- .btn-success:hover {
-   background: #059669;
- }
-
--/* Icons (Using Unicode/Emoji for demo) */
--.icon {
--  display: inline-block;
--  font-style: normal;
--}
--
--.icon-email::before { content: "✉️"; }
--.icon-phone::before { content: "📱"; }
--.icon-close::before { content: "×"; }
--.icon-user::before { content: "👤"; }
--.icon-location::before { content: "📍"; }
--.icon-history::before { content: "🕒"; }
--.icon-properties::before { content: "🏠"; }
--.icon-home::before { content: "🏡"; }
--.icon-view::before { content: "👁️"; }
--.icon-request::before { content: "📝"; }
--.icon-valuation::before { content: "💰"; }
--.icon-empty::before { content: "📭"; }
--.icon-contact::before { content: "📞"; }
--.icon-activate::before { content: "✅"; }
--
- /* Animations */
- @keyframes fadeIn {
-   from { opacity: 0; }
-   to { opacity: 1; }
- }
-
- @keyframes slideUp {
-   from {
-     opacity: 0;
-     transform: translateY(20px);
-   }
-   to {
-     opacity: 1;
-     transform: translateY(0);
-   }
- }
-
- /* Responsive */
- @media (max-width: 768px) {
-   .modal-container {
-     max-height: 95vh;
-   }
-
-   .modal-header, .modal-content, .modal-footer {
-     padding: 20px;
-   }
-
-   .host-profile {
-     flex-direction: column;
-     text-align: center;
-     gap: 16px;
-   }
-
-   .host-meta {
-     flex-direction: column;
-     gap: 8px;
-     align-items: center;
-   }
-
--  .info-grid {
-+  .info-columns {
-     grid-template-columns: 1fr;
-   }
-
--  .assets-grid {
--    grid-template-columns: 1fr;
-+  .asset-main {
-+    flex-direction: column;
-   }
-
--  .detail-row {
-+  .asset-stats {
-     flex-direction: column;
--    gap: 12px;
-   }
-
-   .footer-actions {
-     flex-direction: column;
-   }
-
-   .btn {
-     width: 100%;
-     justify-content: center;
-   }
- }
-
- /* Scrollbar Styling */
- .modal-content::-webkit-scrollbar {
-   width: 6px;
- }
-
- .modal-content::-webkit-scrollbar-track {
-   background: #f1f5f9;
- }
-
- .modal-content::-webkit-scrollbar-thumb {
-   background: #cbd5e1;
-   border-radius: 3px;
- }
+ let searchTimeout = null;
+ watch(
+     () => ({ ...filters.value }),
+     (newFilters, oldFilters) => {
+       // reset page khi filter đổi
+       pageNo.value = 0;
+
+       // debounce riêng cho search
+       if (newFilters.search !== oldFilters?.search) {
+         clearTimeout(searchTimeout);
+         searchTimeout = setTimeout(() => {
+           fetchData();
+         }, 400); // 👈 300–500ms là đẹp
+       } else {
+         fetchData();
+       }
+     },
+     { deep: true }
+ );
+ watch(
+     () => filters.value.tinh,
+     (newTinh, oldTinh) => {
+       if (newTinh !== oldTinh) {
+         filters.value.phuong = ''; // 👈 luôn đưa về "Tất cả phường/quận"
+       }
