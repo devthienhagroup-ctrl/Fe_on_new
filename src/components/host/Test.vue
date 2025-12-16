@@ -268,22 +268,47 @@
           </span>
 
           <div class="btn-group btn-group-sm" role="group">
+            <!-- FIRST PAGE -->
             <button
                 class="btn btn-outline-secondary"
                 :disabled="pageNo === 0"
+                title="Trang đầu"
+                @click="goFirstPage"
+            >
+              <i class="fas fa-angles-left"></i>
+            </button>
+
+            <!-- PREV PAGE -->
+            <button
+                class="btn btn-outline-secondary"
+                :disabled="pageNo === 0"
+                title="Trang trước"
                 @click="pageNo--"
             >
               <i class="fas fa-chevron-left"></i>
             </button>
 
+            <!-- NEXT PAGE -->
             <button
                 class="btn btn-outline-secondary"
-                :disabled="data.length < pageSize"
+                :disabled="pageNo >= totalPages - 1"
+                title="Trang sau"
                 @click="pageNo++"
             >
               <i class="fas fa-chevron-right"></i>
             </button>
+
+            <!-- LAST PAGE -->
+            <button
+                class="btn btn-outline-secondary"
+                :disabled="pageNo >= totalPages - 1"
+                title="Trang cuối"
+                @click="goLastPage"
+            >
+              <i class="fas fa-angles-right"></i>
+            </button>
           </div>
+
         </div>
       </div>
     </div>
@@ -307,6 +332,18 @@ const totalPages = ref(1);
 
 const pageNo = ref(0);
 const pageSize = ref(10);
+
+const goFirstPage = () => {
+  if (pageNo.value > 0) {
+    pageNo.value = 0;
+  }
+};
+
+const goLastPage = () => {
+  if (pageNo.value < totalPages.value - 1) {
+    pageNo.value = totalPages.value - 1;
+  }
+};
 
 const filters = ref({
   search: null,
@@ -464,7 +501,7 @@ const showDetail = ref(false)
 const selectedHost = ref(null)
 
 
-import { confirmYesNo, showCenterSuccess } from '/src/assets/js/alertService.js'
+import { confirmYesNo, showCenterSuccess, showCenterError } from '/src/assets/js/alertService.js'
 
 /* =========================
    XÓA HOST
@@ -498,11 +535,7 @@ const deleteHost = (item) => {
 
           await fetchData(); // reload bảng
         } catch (e) {
-          Swal.fire({
-            icon: "error",
-            title: "Không thể xóa",
-            text: "Vui lòng kiểm tra dữ liệu liên quan",
-          });
+          showCenterError( "Không thể xóa", "Vui lòng kiểm tra dữ liệu liên quan")
         }
       }
   );

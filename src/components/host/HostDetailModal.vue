@@ -15,15 +15,23 @@
             <div class="status-indicator" :class="host.status ? 'active' : 'inactive'"></div>
           </div>
           <div class="host-info">
-            <h2 class="host-name">{{ host.fullName }}</h2>
+            <h2 class="host-name">
+              {{ host.fullName }}
+              <span
+                  class="gender-inline"
+                  :class="host.gender ? 'male' : 'female'"
+              >
+                {{ host.gender ? 'Nam' : 'Nữ' }}
+              </span>
+            </h2>
             <div class="host-meta">
               <span class="email">
-                <i class="icon icon-email"></i>
+                <i class="fa-solid fa-envelope"></i>
                 {{ host.email }}
               </span>
               <span class="divider">•</span>
               <span class="phone" v-if="host.phone">
-                <i class="icon icon-phone"></i>
+                <i class="fa-solid fa-phone"></i>
                 {{ formatPhone(host.phone) }}
               </span>
             </div>
@@ -31,7 +39,7 @@
         </div>
 
         <button class="close-btn" @click="$emit('close')">
-          <i class="icon icon-close"></i>
+          <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
@@ -41,68 +49,55 @@
         <section class="info-section">
           <div class="section-header">
             <h3 class="section-title">
-              <i class="icon icon-user"></i>
+              <i class="fa-solid fa-id-card-clip"></i>
               Thông tin cá nhân
             </h3>
           </div>
 
-          <div class="info-grid">
-            <div class="info-item">
-              <label class="info-label">Họ và tên</label>
-              <div class="info-value">{{ host.fullName }}</div>
-            </div>
+          <div class="info-columns">
+            <div
+                v-for="(column, columnIndex) in infoColumns"
+                :key="columnIndex"
+                class="info-column"
+            >
+              <div
+                  v-for="item in column"
+                  :key="item.label || columnIndex"
+                  class="info-card"
+                  :class="{ placeholder: item.placeholder, highlight: item.highlight }"
+              >
+                <template v-if="!item.placeholder">
+                  <div class="info-card-header">
+                    <div class="info-icon" :class="item.iconColor">
+                      <i class="fa-solid" :class="item.icon"></i>
+                    </div>
+                    <div class="info-title">{{ item.label }}</div>
+                  </div>
 
-            <div class="info-item">
-              <label class="info-label">Giới tính</label>
-              <div class="info-value">
-                <span class="gender-badge" :class="host.gender ? 'male' : 'female'">
-                  {{ host.gender ? 'Nam' : 'Nữ' }}
-                </span>
-              </div>
-            </div>
-
-            <div class="info-item">
-              <label class="info-label">Email</label>
-              <div class="info-value">
-                <a :href="`mailto:${host.email}`" class="email-link">
-                  {{ host.email }}
-                </a>
-              </div>
-            </div>
-
-            <div class="info-item">
-              <label class="info-label">Điện thoại</label>
-              <div class="info-value">
-                <a v-if="host.phone" :href="`tel:${host.phone}`" class="phone-link">
-                  {{ formatPhone(host.phone) }}
-                </a>
-                <span v-else class="empty-state">—</span>
-              </div>
-            </div>
-
-            <div class="info-item full-width">
-              <label class="info-label">Địa chỉ hiện tại</label>
-              <div class="info-value with-icon">
-                <i class="icon icon-location"></i>
-                {{ formatAddress(host.address) }}
-              </div>
-            </div>
-
-            <div class="info-item full-width">
-              <label class="info-label">Địa chỉ trước đó</label>
-              <div class="info-value with-icon muted">
-                <i class="icon icon-history"></i>
-                {{ formatAddress(host.oldAddress) || 'Không có dữ liệu' }}
-              </div>
-            </div>
-
-            <div class="info-item">
-              <label class="info-label">Trạng thái tài khoản</label>
-              <div class="info-value">
-                <div class="status-badge" :class="host.status ? 'active' : 'inactive'">
-                  <span class="status-dot"></span>
-                  {{ host.status ? 'Đang hoạt động' : 'Đã khoá' }}
-                </div>
+                  <div class="info-card-value" :class="{ muted: item.muted }">
+                    <template v-if="item.type === 'email'">
+                      <a :href="`mailto:${host.email}`" class="link">{{ item.value }}</a>
+                    </template>
+                    <template v-else-if="item.type === 'phone'">
+                      <a v-if="host.phone" :href="`tel:${host.phone}`" class="link">{{ item.value }}</a>
+                      <span v-else class="empty-state">—</span>
+                    </template>
+                    <template v-else-if="item.type === 'status'">
+                      <span class="status-pill" :class="host.status ? 'active' : 'inactive'">
+                        <span class="status-dot"></span>
+                        {{ item.value }}
+                      </span>
+                    </template>
+                    <template v-else-if="item.type === 'gender'">
+                      <span class="gender-badge" :class="host.gender ? 'male' : 'female'">
+                        {{ item.value }}
+                      </span>
+                    </template>
+                    <template v-else>
+                      {{ item.value }}
+                    </template>
+                  </div>
+                </template>
               </div>
             </div>
           </div>
@@ -112,72 +107,66 @@
         <section class="assets-section">
           <div class="section-header">
             <h3 class="section-title">
-              <i class="icon icon-properties"></i>
+              <i class="fa-solid fa-warehouse"></i>
               Tài sản đang quản lý
               <span class="asset-count">{{ host.assets?.length || 0 }}</span>
             </h3>
           </div>
 
           <div v-if="!host.assets || host.assets.length === 0" class="empty-assets">
-            <i class="icon icon-empty"></i>
+            <i class="fa-regular fa-folder-open"></i>
             <p>Chưa có tài sản nào</p>
           </div>
 
-          <div v-else class="assets-grid">
+          <div v-else class="assets-list">
             <div
                 v-for="(asset, index) in host.assets"
                 :key="asset.id"
                 class="asset-card"
-                :class="{ 'highlight': index % 2 === 0 }"
+                :class="{ highlight: index % 2 === 0 }"
+                @click="goToAsset(asset)"
             >
-              <div class="asset-header">
-                <h4 class="asset-title">
-                  <i class="icon icon-home"></i>
-                  {{ formatAddress(asset.address) }}
-                </h4>
-                <div class="asset-actions">
-                  <button class="action-btn" title="Xem chi tiết">
-                    <i class="icon icon-view"></i>
-                  </button>
+              <div class="asset-main">
+                <div class="asset-icon">
+                  <i class="fa-solid fa-house"></i>
+                </div>
+                <div class="asset-meta">
+                  <p class="asset-label">Địa chỉ</p>
+                  <div class="asset-title-row">
+                    <h4 class="asset-title">{{ formatAddress(asset.address) }}</h4>
+
+                    <div class="asset-prices inline">
+                      <div class="price-tag expected">
+                        <span class="label">Giá mong mốn</span>
+                        <span class="value">{{ formatMoney(asset.giaMongMuon) }}</span>
+                      </div>
+                      <div class="price-tag current">
+                        <span class="label">Giá bán</span>
+                        <span class="value">{{ formatMoney(asset.giaBan) }}</span>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
 
-              <div class="asset-details">
-                <div class="detail-row">
-                  <div class="detail-item">
-                    <label>Giá mong muốn</label>
-                    <div class="price expected">
-                      {{ formatMoney(asset.giaMongMuon) }}
-                    </div>
+              <div class="asset-stats">
+                <div class="stat-box">
+                  <div class="stat-icon compact">
+                    <i class="fa-solid fa-clipboard-check"></i>
                   </div>
-
-                  <div class="detail-item">
-                    <label>Giá bán hiện tại</label>
-                    <div class="price current">
-                      {{ formatMoney(asset.giaBan) }}
-                    </div>
+                  <div>
+                    <div class="stat-value">{{ asset.soLanYeuCauDinhGia || 0 }}</div>
+                    <div class="stat-label">Yêu cầu định giá</div>
                   </div>
                 </div>
-
-                <div class="detail-row stats">
-                  <div class="stat-item">
-                    <div class="stat-icon">
-                      <i class="icon icon-request"></i>
-                    </div>
-                    <div class="stat-content">
-                      <div class="stat-value">{{ asset.soLanYeuCauDinhGia || 0 }}</div>
-                      <div class="stat-label">Yêu cầu định giá</div>
-                    </div>
+                <div class="stat-box">
+                  <div class="stat-icon compact success">
+                    <i class="fa-solid fa-scale-balanced"></i>
                   </div>
-
-                  <div class="stat-item">
-                    <div class="stat-icon">
-                      <i class="icon icon-valuation"></i>
-                    </div>
-                    <div class="stat-content">
-                      <div class="stat-value">{{ asset.soLanDinhGia || 0 }}</div>
-                      <div class="stat-label">Đã định giá</div>
-                    </div>
+                  <div>
+                    <div class="stat-value">{{ asset.soLanDinhGia || 0 }}</div>
+                    <div class="stat-label">Đã định giá</div>
                   </div>
                 </div>
               </div>
@@ -190,20 +179,8 @@
       <div class="modal-footer">
         <div class="footer-actions">
           <button class="btn btn-secondary" @click="$emit('close')">
-            <i class="icon icon-close"></i>
+            <i class="fa-solid fa-xmark"></i>
             Đóng
-          </button>
-          <button class="btn btn-primary" @click="handleContact">
-            <i class="icon icon-contact"></i>
-            Liên hệ
-          </button>
-          <button
-              v-if="!host.status"
-              class="btn btn-success"
-              @click="handleActivate"
-          >
-            <i class="icon icon-activate"></i>
-            Kích hoạt
           </button>
         </div>
       </div>
@@ -224,12 +201,6 @@ const props = defineProps({
 const emit = defineEmits(['close', 'contact', 'activate'])
 
 const BASE_URL = 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'
-
-const avatarUrl = computed(() => {
-  return props.host?.avatar
-      ? BASE_URL + props.host.avatar
-      : BASE_URL + 'vat-default.jpg'
-})
 
 // Format functions
 const formatAddress = (raw) => {
@@ -258,12 +229,83 @@ const formatPhone = (phone) => {
   return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
 }
 
-const handleImageError = (e) => {
-  e.target.src = BASE_URL + 'vat-default.jpg'
+const avatarUrl = computed(() => {
+  return props.host?.avatar
+      ? BASE_URL + props.host.avatar
+      : BASE_URL + 'vat-default.jpg'
+})
+
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const goToAsset = (asset) => {
+  if (!asset?.id) return
+  router.push(`/-thg/quan-ly-san-pham/${asset.id}`)
 }
 
-const handleContact = () => {
-  emit('contact', props.host)
+const infoItems = computed(() => {
+  const items = [
+    {
+      label: 'Họ và tên',
+      value: props.host.fullName || '—',
+      icon: 'fa-id-badge',
+      iconColor: 'info'
+    },
+    {
+      label: 'Email',
+      value: props.host.email,
+      icon: 'fa-envelope',
+      iconColor: 'primary',
+      type: 'email'
+    },
+    {
+      label: 'Điện thoại',
+      value: props.host.phone ? formatPhone(props.host.phone) : '—',
+      icon: 'fa-phone',
+      iconColor: 'success',
+      type: 'phone'
+    },
+    {
+      label: 'Trạng thái tài khoản',
+      value: props.host.status ? 'Đang hoạt động' : 'Đã khoá',
+      icon: 'fa-shield-halved',
+      iconColor: 'warning',
+      type: 'status'
+    },
+    {
+      label: 'Địa chỉ',
+      value: formatAddress(props.host.address),
+      icon: 'fa-location-dot',
+      iconColor: 'danger',
+      highlight: true
+    },
+    {
+      label: 'Địa chỉ trước cũ',
+      value: formatAddress(props.host.oldAddress) || 'Không có dữ liệu',
+      icon: 'fa-clock-rotate-left',
+      iconColor: 'muted',
+      muted: true
+    }
+  ]
+
+  if (items.length % 2 !== 0) {
+    items.push({ placeholder: true })
+  }
+
+  return items
+})
+
+const infoColumns = computed(() => {
+  const midpoint = infoItems.value.length / 2
+  return [
+    infoItems.value.slice(0, midpoint),
+    infoItems.value.slice(midpoint)
+  ]
+})
+
+const handleImageError = (e) => {
+  e.target.src = BASE_URL + 'vat-default.jpg'
 }
 
 const handleActivate = () => {
@@ -411,7 +453,7 @@ const handleActivate = () => {
 .info-section, .assets-section {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .section-header {
@@ -422,8 +464,8 @@ const handleActivate = () => {
 
 .section-title {
   font-size: 18px;
-  font-weight: 600;
-  color: #334155;
+  font-weight: 700;
+  color: #1e293b;
   margin: 0;
   display: flex;
   align-items: center;
@@ -431,7 +473,7 @@ const handleActivate = () => {
 }
 
 .asset-count {
-  background: #3b82f6;
+  background: #2563eb;
   color: white;
   font-size: 12px;
   padding: 2px 8px;
@@ -439,113 +481,130 @@ const handleActivate = () => {
   margin-left: 8px;
 }
 
-/* Info Grid */
-.info-grid {
+.info-columns {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
 }
 
-.info-item {
+.info-column {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
 }
 
-.info-item.full-width {
-  grid-column: 1 / -1;
+.info-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 96px;
 }
 
-.info-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.info-card.highlight {
+  background: #eef2ff;
+  border-color: #c7d2fe;
 }
 
-.info-value {
-  font-size: 16px;
-  color: #1e293b;
-  font-weight: 500;
+.info-card.placeholder {
+  visibility: hidden;
+  padding: 0;
+  min-height: 0;
+  border: none;
 }
 
-.info-value.with-icon {
+.info-card-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
-.info-value.muted {
+.info-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e2e8f0;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.info-icon.primary { background: #e0f2fe; color: #1d4ed8; }
+.info-icon.secondary { background: #fce7f3; color: #be185d; }
+.info-icon.success { background: #dcfce7; color: #166534; }
+.info-icon.warning { background: #fef3c7; color: #d97706; }
+.info-icon.danger { background: #fee2e2; color: #b91c1c; }
+.info-icon.info { background: #e0f2fe; color: #0369a1; }
+.info-icon.muted { background: #f8fafc; color: #94a3b8; }
+
+.info-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.info-card-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.info-card-value .link {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.info-card-value .link:hover {
+  text-decoration: underline;
+}
+
+.info-card-value.muted {
   color: #94a3b8;
-  font-style: italic;
+  font-weight: 500;
 }
 
-/* Badges */
 .gender-badge {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
-.gender-badge.male {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
+.gender-badge.male { background: #dbeafe; color: #1d4ed8; }
+.gender-badge.female { background: #fce7f3; color: #be185d; }
 
-.gender-badge.female {
-  background: #fce7f3;
-  color: #be185d;
-}
-
-.status-badge {
+.status-pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
   border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   background: #f8fafc;
 }
 
-.status-badge.active {
-  color: #065f46;
-}
-
-.status-badge.inactive {
-  color: #475569;
-}
+.status-pill.active { color: #065f46; }
+.status-pill.inactive { color: #475569; }
 
 .status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  background: currentColor;
 }
 
-.status-badge.active .status-dot {
-  background: #10b981;
+.empty-state {
+  color: #94a3b8;
 }
 
-.status-badge.inactive .status-dot {
-  background: #94a3b8;
-}
-
-/* Links */
-.email-link, .phone-link {
-  color: #3b82f6;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.email-link:hover, .phone-link:hover {
-  color: #2563eb;
-  text-decoration: underline;
-}
-
-/* Assets Grid */
 .empty-assets {
   text-align: center;
   padding: 40px 20px;
@@ -554,146 +613,155 @@ const handleActivate = () => {
 
 .empty-assets i {
   font-size: 48px;
-  margin-bottom: 16px;
-  opacity: 0.5;
+  margin-bottom: 12px;
+  opacity: 0.6;
 }
 
-.assets-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+.assets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .asset-card {
   background: white;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 20px;
-  transition: all 0.3s ease;
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.2s ease;
 }
 
 .asset-card.highlight {
-  border-color: #3b82f6;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+  background: #f8fafc;
+  border-color: #dbeafe;
 }
 
 .asset-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-color: #2563eb;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.12);
 }
 
-.asset-header {
+.asset-main {
   display: flex;
-  justify-content: space-between;
+  gap: 12px;
   align-items: flex-start;
-  margin-bottom: 16px;
+}
+
+.asset-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: #2563eb;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.asset-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.asset-label {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 11px;
+  color: #64748b;
+  margin: 0;
 }
 
 .asset-title {
   font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
+  font-weight: 700;
+  color: #0f172a;
   margin: 0;
+  line-height: 1.4;
+}
+
+.asset-prices {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.price-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  font-size: 14px;
+}
+
+.price-tag .label {
+  color: #475569;
+  font-weight: 600;
+}
+
+.price-tag .value {
+  font-weight: 700;
+  color: #111827;
+}
+
+.price-tag.expected {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.price-tag.current {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.asset-stats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stat-box {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  flex: 1;
+  min-width: 220px;
 }
 
-.asset-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.action-btn {
-  background: none;
-  border: none;
+.stat-icon.compact {
   width: 32px;
   height: 32px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #64748b;
-  transition: all 0.2s ease;
-}
-
-.action-btn:hover {
-  background: #f1f5f9;
-  color: #3b82f6;
-}
-
-/* Asset Details */
-.asset-details {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.detail-row {
-  display: flex;
-  gap: 16px;
-}
-
-.detail-item {
-  flex: 1;
-}
-
-.detail-item label {
-  display: block;
-  font-size: 12px;
-  color: #64748b;
-  margin-bottom: 4px;
-}
-
-.price {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.price.expected {
-  color: #f59e0b;
-}
-
-.price.current {
-  color: #10b981;
-}
-
-/* Stats */
-.stats {
-  margin-top: 8px;
-}
-
-.stat-item {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: #f8fafc;
-  border-radius: 8px;
-}
-
-.stat-icon {
-  width: 36px;
-  height: 36px;
   border-radius: 8px;
   background: #e0e7ff;
+  color: #4338ca;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4f46e5;
 }
 
-.stat-content {
-  display: flex;
-  flex-direction: column;
+.stat-icon.compact.success {
+  background: #dcfce7;
+  color: #166534;
 }
 
 .stat-value {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
-  color: #1e293b;
+  color: #0f172a;
+  margin: 0;
 }
 
 .stat-label {
@@ -734,7 +802,7 @@ const handleActivate = () => {
 }
 
 .btn-secondary:hover {
-  background: #f1f5f9;
+  background: #0d44ea;
   border-color: #94a3b8;
 }
 
@@ -755,27 +823,6 @@ const handleActivate = () => {
 .btn-success:hover {
   background: #059669;
 }
-
-/* Icons (Using Unicode/Emoji for demo) */
-.icon {
-  display: inline-block;
-  font-style: normal;
-}
-
-.icon-email::before { content: "✉️"; }
-.icon-phone::before { content: "📱"; }
-.icon-close::before { content: "×"; }
-.icon-user::before { content: "👤"; }
-.icon-location::before { content: "📍"; }
-.icon-history::before { content: "🕒"; }
-.icon-properties::before { content: "🏠"; }
-.icon-home::before { content: "🏡"; }
-.icon-view::before { content: "👁️"; }
-.icon-request::before { content: "📝"; }
-.icon-valuation::before { content: "💰"; }
-.icon-empty::before { content: "📭"; }
-.icon-contact::before { content: "📞"; }
-.icon-activate::before { content: "✅"; }
 
 /* Animations */
 @keyframes fadeIn {
@@ -816,17 +863,16 @@ const handleActivate = () => {
     align-items: center;
   }
 
-  .info-grid {
+  .info-columns {
     grid-template-columns: 1fr;
   }
 
-  .assets-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .detail-row {
+  .asset-main {
     flex-direction: column;
-    gap: 12px;
+  }
+
+  .asset-stats {
+    flex-direction: column;
   }
 
   .footer-actions {
@@ -856,4 +902,55 @@ const handleActivate = () => {
 .modal-content::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+.gender-inline {
+  margin-left: 10px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.gender-inline.male {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.gender-inline.female {
+  background: #fce7f3;
+  color: #be185d;
+}
+.asset-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.asset-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.asset-prices.inline {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.price-tag {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.price-tag .label {
+  font-size: 11px;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
 </style>
