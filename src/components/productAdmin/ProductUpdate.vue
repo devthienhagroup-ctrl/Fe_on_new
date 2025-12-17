@@ -91,7 +91,15 @@
                 <span>Phí môi giới</span>
                 <i class="fa-solid fa-percent"></i>
               </div>
-              <div class="text-2xl font-bold mt-2">{{ formData.phiMoiGioi ? formData.phiMoiGioi + '%' : asset.phiMoiGioi + '%' }}</div>
+              <div class="text-2xl font-bold mt-2">
+                {{
+                  formData.phiMoiGioi != null
+                      ? formData.phiMoiGioi + '%'
+                      : asset.phiMoiGioi != null
+                          ? asset.phiMoiGioi + '%'
+                          : 'Chưa cập nhật'
+                }}
+              </div>
             </div>
           </div>
         </div>
@@ -574,7 +582,7 @@
           <span>Diện tích tổng (m²)</span>
         </span>
               </label>
-              <input v-model.number="formData.totalArea" type="number"
+              <input v-model.number="formData.totalArea" type="number" step="0.01"
                      class="w-full px-4 py-3 border border-slate-300 rounded-xl" />
             </div>
 
@@ -644,7 +652,7 @@
            bg-white shadow-sm transition-all text-sm hover:border-slate-400"
               >
                 <option value="">-- Chọn tình trạng --</option>
-                <option value="Chưa định giá sơ bộ">Mới</option>
+                <option value="Chưa định giá">Mới</option>
                 <option value="Bán nhanh 30 ngày">Bán nhanh 30 ngày</option>
                 <option value="Đã bán">Đã bán</option>
               </select>
@@ -666,7 +674,7 @@
           <span>Mặt tiền (m)</span>
         </span>
               </label>
-              <input v-model.number="formData.matTienNha" type="number"
+              <input v-model.number="formData.matTienNha" type="number" step="0.01"
                      class="w-full px-4 py-3 border border-slate-300 rounded-xl" />
             </div>
 
@@ -680,7 +688,7 @@
           <span>Chiều ngang (m)</span>
         </span>
               </label>
-              <input v-model.number="formData.chieuNgang" type="number"
+              <input v-model.number="formData.chieuNgang" type="number" step="0.01"
                      class="w-full px-4 py-3 border border-slate-300 rounded-xl" />
             </div>
 
@@ -694,7 +702,7 @@
           <span>Chiều dài (m)</span>
         </span>
               </label>
-              <input v-model.number="formData.chieuDai" type="number"
+              <input v-model.number="formData.chieuDai" type="number" step="0.01"
                      class="w-full px-4 py-3 border border-slate-300 rounded-xl" />
             </div>
 
@@ -765,6 +773,66 @@
           </div>
         </div>
 
+        <!-- SECTION: NGƯỜI BÁN THÀNH CÔNG -->
+        <div v-if="isSold" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-6">
+          <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
+            <div class="bg-gradient-to-r from-rose-500 to-pink-500 p-2.5 rounded-xl">
+              <i class="fa-solid fa-user-check text-white text-lg"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-slate-900">Người bán thành công</h2>
+              <p class="text-sm text-slate-600">Thông tin người chốt giao dịch</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Tìm người bán -->
+            <div>
+              <label class="block text-sm font-semibold mb-2">
+                Email / SĐT <span class="text-red-500">*</span>
+              </label>
+              <input
+                  v-model.trim="formData.nguoiBanSearch"
+                  @blur="handleNguoiBanLookup"
+                  class="w-full px-4 py-3 border border-slate-300 rounded-xl"
+                  placeholder="Nhập email hoặc SĐT"
+              />
+              <small v-if="errors.nguoiBanSearch" class="text-red-600">
+                {{ errors.nguoiBanSearch }}
+              </small>
+            </div>
+
+            <!-- Tên người bán -->
+            <div>
+              <label class="block text-sm font-semibold mb-2">Người bán</label>
+              <input
+                  readonly
+                  class="w-full px-4 py-3 border border-slate-300 rounded-xl bg-slate-100"
+                  v-model="formData.nguoiBanTen"
+              />
+            </div>
+
+            <!-- Giá bán thành công -->
+            <div>
+              <label class="block text-sm font-semibold mb-2">
+                Giá bán thành công <span class="text-red-500">*</span>
+              </label>
+              <input
+                  type="number"
+                  min="0"
+                  step="1000000"
+                  v-model.number="formData.giaBanThanhCong"
+                  class="w-full px-4 py-3 border border-slate-300 rounded-xl"
+              />
+              <small v-if="errors.giaBanThanhCong" class="text-red-600">
+                {{ errors.giaBanThanhCong }}
+              </small>
+              <div class="text-sm font-medium text-rose-700 bg-rose-50 p-2 rounded-lg mt-1">
+                {{ formatMoneyVN(formData.giaBanThanhCong) }}
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- SECTION 4A: THÔNG TIN NHÀ (chỉ hiện khi loại tài sản là NHA) -->
         <div v-if="isHouse" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-6">
@@ -1390,6 +1458,15 @@ const id = route.params.id;
 
 const asset = ref(null);
 const formData = ref({});
+// ===== NGƯỜI BÁN THÀNH CÔNG =====
+formData.value.nguoiBanId ??= null
+formData.value.nguoiBanTen ??= ''
+formData.value.nguoiBanSearch ??= ''
+formData.value.giaBanThanhCong ??= null
+
+const isSold = computed(() => formData.value.status === 'Đã bán')
+
+
 const originalFiles = ref([]);
 const formAddress = ref({
   street: "",
@@ -1492,6 +1569,44 @@ function findWardByName(name, province) {
   const match = (province.wards || []).find(ward => normalizeText(ward.name) === normalized);
   return match ? match.name : "";
 }
+const handleNguoiBanLookup = async () => {
+  if (!formData.value.nguoiBanSearch) {
+    errors.nguoiBanSearch = 'Nhập email hoặc số điện thoại'
+    return
+  }
+
+  errors.nguoiBanSearch = ''
+
+  try {
+    const { data } = await api.get(
+        '/admin.thg/product/admin/tim-nguoi',
+        { params: { search: formData.value.nguoiBanSearch } }
+    )
+
+    if (data) {
+      formData.value.nguoiBanId = data.id
+      formData.value.nguoiBanTen = data.fullName
+    } else {
+      formData.value.nguoiBanId = null
+      formData.value.nguoiBanTen = ''
+      errors.nguoiBanSearch = 'Không tìm thấy người bán'
+    }
+  } catch (e) {
+    errors.nguoiBanSearch = 'Lỗi tìm người bán'
+  }
+}
+watch(
+    () => formData.value.status,
+    (newVal, oldVal) => {
+      if (oldVal === 'Đã bán' && newVal !== 'Đã bán') {
+        formData.value.nguoiBanId = null
+        formData.value.nguoiBanTen = ''
+        formData.value.nguoiBanSearch = ''
+        formData.value.giaBanThanhCong = null
+      }
+    }
+)
+
 
 // Computed properties
 const isHouse = computed(() => formData.value.loaiTaiSan === "NHA");
@@ -1679,9 +1794,14 @@ async function saveChanges() {
     // 🟩 Tạo FormData
     const payload = new FormData();
 
+    const {
+      nguoiBanTen,
+      nguoiBanSearch,
+      ...cleanDto
+    } = formData.value
     // 🟩 Gửi DTO JSON
     const dtoToSend = {
-      ...formData.value,
+      ...cleanDto,
       newFiles: undefined,           // FE gửi file vào @RequestPart
       newLandBookFiles: undefined,   // FE gửi file vào @RequestPart
     };

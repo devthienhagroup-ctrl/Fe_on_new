@@ -1,383 +1,947 @@
-diff --git a/src/components/host/CreateHostModal.vue b/src/components/host/CreateHostModal.vue
+diff --git a/src/components/host/HostUpdateModal.vue b/src/components/host/HostUpdateModal.vue
 new file mode 100644
-index 0000000000000000000000000000000000000000..2d27b89d0706a6b6c5d7bf562c29d270d1ee311f
+index 0000000000000000000000000000000000000000..f620c899114f40c940be377b0676250c70863d5b
 --- /dev/null
-+++ b/src/components/host/CreateHostModal.vue
-@@ -0,0 +1,332 @@
++++ b/src/components/host/HostUpdateModal.vue
+@@ -0,0 +1,873 @@
 +<template>
-+  <div
-+      class="modal fade show d-block"
-+      tabindex="-1"
-+      role="dialog"
-+      @click.self="handleClose"
-+  >
-+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-+      <div class="modal-content">
-+        <div class="modal-header border-0 pb-0">
-+          <h5 class="modal-title fw-bold">
-+            <i class="fas fa-user-plus me-2 text-primary"></i>
-+            Tạo Host mới
-+          </h5>
-+          <button type="button" class="btn-close" aria-label="Close" @click="handleClose"></button>
++  <div class="modal-overlay" @click.self="handleClose">
++    <div class="modal-container">
++      <!-- Header -->
++      <div class="modal-header">
++        <div class="header-content">
++          <div class="title-section">
++            <div class="title-icon">
++              <i class="fas fa-user-edit"></i>
++            </div>
++            <div>
++              <h2 class="modal-title">Cập nhật Host</h2>
++              <p class="modal-subtitle">Chỉnh sửa thông tin chủ nhà</p>
++            </div>
++          </div>
++          <button class="close-button" @click="handleClose">
++            <i class="fas fa-times"></i>
++          </button>
 +        </div>
++      </div>
 +
-+        <div class="modal-body pt-3">
-+          <div class="row g-4">
-+            <div class="col-md-8">
-+              <div class="card border-0 shadow-sm h-100">
-+                <div class="card-body">
-+                  <h6 class="fw-semibold mb-3 text-primary">
-+                    <i class="fas fa-id-card me-2"></i>
-+                    Thông tin cơ bản
-+                  </h6>
-+
-+                  <div class="mb-3">
-+                    <label class="form-label">Email <span class="text-danger">*</span></label>
-+                    <input
-+                        v-model.trim="email"
-+                        type="email"
-+                        class="form-control"
-+                        placeholder="email@example.com"
-+                    />
-+                    <div v-if="emailError" class="text-danger small mt-1">{{ emailError }}</div>
-+                  </div>
-+
-+                  <div class="mb-3">
-+                    <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
-+                    <input
-+                        v-model.trim="fullName"
-+                        type="text"
-+                        class="form-control"
-+                        placeholder="Nguyễn Văn A"
-+                    />
-+                    <div v-if="fullNameError" class="text-danger small mt-1">{{ fullNameError }}</div>
-+                  </div>
-+
-+                  <div class="mb-3">
-+                    <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-+                    <input
-+                        v-model="phone"
-+                        type="text"
-+                        class="form-control"
-+                        placeholder="098xxxxxxx"
-+                        @input="handlePhoneInput"
-+                    />
-+                    <div v-if="phoneError" class="text-danger small mt-1">{{ phoneError }}</div>
-+                  </div>
-+
-+                  <div class="mb-3">
-+                    <label class="form-label">Giới tính</label>
-+                    <select v-model="gender" class="form-select">
-+                      <option :value="true">Nam</option>
-+                      <option :value="false">Nữ</option>
-+                    </select>
-+                  </div>
-+                </div>
++      <!-- Form Content -->
++      <div class="modal-content">
++        <form @submit.prevent="handleSubmit" class="host-form">
++          <!-- Basic Information Section -->
++          <div class="form-section">
++            <div class="section-header">
++              <div class="section-icon section-icon-blue">
++                <i class="fas fa-id-card"></i>
 +              </div>
++              <h3>Thông tin cơ bản</h3>
 +            </div>
 +
-+            <div class="col-md-4">
-+              <div class="card border-0 shadow-sm h-100">
-+                <div class="card-body d-flex flex-column align-items-center text-center">
-+                  <div class="avatar-wrapper mb-3">
-+                    <img :src="avatarPreview" alt="Avatar" class="avatar-preview" />
-+                  </div>
-+                  <div class="w-100">
-+                    <label class="form-label">Avatar</label>
-+                    <input
-+                        type="file"
-+                        class="form-control"
-+                        accept="image/jpeg,image/png,image/webp"
-+                        @change="onAvatarChange"
++            <div class="form-grid three-cols">
++              <!-- Full Name -->
++              <div class="form-group">
++                <label class="form-label">
++                  <i class="fas fa-user text-sky"></i>
++                  Họ và tên
++                </label>
++                <div class="input-wrapper">
++                  <i class="input-icon fas fa-user"></i>
++                  <input
++                      v-model.trim="fullName"
++                      type="text"
++                      class="form-input"
++                      placeholder="Nguyễn Văn A"
++                  />
++                </div>
++                <div v-if="fieldErrors.fullName" class="error-message">
++                  <i class="fas fa-exclamation-circle"></i>
++                  {{ fieldErrors.fullName }}
++                </div>
++              </div>
++
++              <!-- Phone -->
++              <div class="form-group">
++                <label class="form-label">
++                  <i class="fas fa-phone text-emerald"></i>
++                  Số điện thoại
++                </label>
++                <div class="input-wrapper">
++                  <i class="input-icon fas fa-phone"></i>
++                  <input
++                      v-model="phone"
++                      type="tel"
++                      class="form-input"
++                      placeholder="098xxxxxxx"
++                      @input="formatPhone"
++                  />
++                </div>
++                <div v-if="fieldErrors.phone" class="error-message">
++                  <i class="fas fa-exclamation-circle"></i>
++                  {{ fieldErrors.phone }}
++                </div>
++              </div>
++
++              <!-- Gender -->
++              <div class="form-group">
++                <label class="form-label">
++                  <i class="fas fa-venus-mars text-pink"></i>
++                  Giới tính
++                </label>
++                <div class="gender-selector">
++                  <button
++                      type="button"
++                      class="gender-option"
++                      :class="{ 'active': gender === true }"
++                      @click="gender = true"
++                  >
++                    <i class="fas fa-mars"></i>
++                    <span>Nam</span>
++                  </button>
++                  <button
++                      type="button"
++                      class="gender-option"
++                      :class="{ 'active': gender === false }"
++                      @click="gender = false"
++                  >
++                    <i class="fas fa-venus"></i>
++                    <span>Nữ</span>
++                  </button>
++                </div>
++              </div>
++
++              <!-- Avatar -->
++              <div class="form-group avatar-upload">
++                <label class="form-label">
++                  <i class="fas fa-image text-amber"></i>
++                  Avatar
++                </label>
++                <div class="upload-area" @click="triggerFileInput">
++                  <div class="upload-content">
++                    <img
++                        v-if="avatarPreview"
++                        :src="avatarPreview"
++                        alt="Avatar preview"
++                        class="avatar-preview"
++                        @error="handlePreviewError"
 +                    />
-+                    <div v-if="avatarError" class="text-danger small mt-1">{{ avatarError }}</div>
++                    <div v-else class="upload-placeholder">
++                      <i class="fas fa-cloud-upload-alt"></i>
++                      <p>Tải ảnh lên</p>
++                      <span class="upload-hint">JPG, PNG, WEBP • Tối đa 2MB</span>
++                    </div>
 +                  </div>
++                  <input
++                      ref="fileInput"
++                      type="file"
++                      class="file-input"
++                      accept="image/jpeg,image/png,image/webp"
++                      @change="onAvatarChange"
++                  />
++                </div>
++                <div v-if="avatarError" class="error-message">
++                  <i class="fas fa-exclamation-circle"></i>
++                  {{ avatarError }}
 +                </div>
 +              </div>
 +            </div>
 +          </div>
 +
-+          <div class="card border-0 shadow-sm mt-4">
-+            <div class="card-body">
-+              <h6 class="fw-semibold mb-3 text-primary">
-+                <i class="fas fa-map-marker-alt me-2"></i>
-+                Địa chỉ
-+              </h6>
++          <!-- Address Section -->
++          <div class="form-section">
++            <div class="section-header">
++              <div class="section-icon section-icon-green">
++                <i class="fas fa-map-marker-alt"></i>
++              </div>
++              <h3>Địa chỉ</h3>
++            </div>
 +
-+              <div class="row g-3">
-+                <div class="col-md-6">
-+                  <label class="form-label">Tỉnh / Thành phố <span class="text-danger">*</span></label>
-+                  <select v-model="province" class="form-select">
-+                    <option value="">Chọn tỉnh / thành phố</option>
-+                    <option v-for="p in provinces" :key="p.code" :value="p.name">{{ p.name }}</option>
++            <div class="form-grid two-cols">
++              <!-- Province -->
++              <div class="form-group">
++                <label class="form-label">
++                  <i class="fas fa-city text-indigo"></i>
++                  Tỉnh/Thành phố
++                </label>
++                <div class="select-wrapper">
++                  <i class="input-icon fas fa-city"></i>
++                  <select
++                      v-model="province"
++                      class="form-select"
++                  >
++                    <option value="">Chọn tỉnh/thành phố</option>
++                    <option v-for="p in provinces" :key="p.code" :value="p.name">
++                      {{ p.name }}
++                    </option>
 +                  </select>
-+                  <div v-if="provinceError" class="text-danger small mt-1">{{ provinceError }}</div>
++                  <i class="select-arrow fas fa-chevron-down"></i>
 +                </div>
++                <div v-if="fieldErrors.province" class="error-message">
++                  <i class="fas fa-exclamation-circle"></i>
++                  {{ fieldErrors.province }}
++                </div>
++              </div>
 +
-+                <div class="col-md-6">
-+                  <label class="form-label">Phường / Xã <span class="text-danger">*</span></label>
-+                  <select v-model="ward" class="form-select" :disabled="!province">
-+                    <option value="">Chọn phường / xã</option>
-+                    <option v-for="w in wards" :key="w.code" :value="w.name">{{ w.name }}</option>
++              <!-- Ward -->
++              <div class="form-group">
++                <label class="form-label">
++                  <i class="fas fa-map-signs text-orange"></i>
++                  Phường/Xã
++                </label>
++                <div class="select-wrapper">
++                  <i class="input-icon fas fa-map-signs"></i>
++                  <select
++                      v-model="ward"
++                      class="form-select"
++                      :class="{ 'disabled': !province }"
++                      :disabled="!province"
++                  >
++                    <option value="">Chọn phường/xã</option>
++                    <option v-for="w in wards" :key="w.code" :value="w.name">
++                      {{ w.name }}
++                    </option>
 +                  </select>
-+                  <div v-if="wardError" class="text-danger small mt-1">{{ wardError }}</div>
++                  <i class="select-arrow fas fa-chevron-down"></i>
 +                </div>
++                <div v-if="fieldErrors.ward" class="error-message">
++                  <i class="fas fa-exclamation-circle"></i>
++                  {{ fieldErrors.ward }}
++                </div>
++              </div>
 +
-+                <div class="col-md-6">
-+                  <label class="form-label">Địa chỉ chi tiết <span class="text-danger">*</span></label>
++              <!-- Detail Address -->
++              <div class="form-group">
++                <label class="form-label">
++                  <i class="fas fa-home text-purple"></i>
++                  Địa chỉ chi tiết
++                </label>
++                <div class="input-wrapper">
++                  <i class="input-icon fas fa-home"></i>
 +                  <input
 +                      v-model.trim="detailAddress"
 +                      type="text"
-+                      class="form-control"
-+                      placeholder="123 Lê Lợi"
++                      class="form-input"
++                      placeholder="123 Đường Lê Lợi"
 +                  />
-+                  <div v-if="detailAddressError" class="text-danger small mt-1">{{ detailAddressError }}</div>
 +                </div>
++                <div v-if="fieldErrors.detailAddress" class="error-message">
++                  <i class="fas fa-exclamation-circle"></i>
++                  {{ fieldErrors.detailAddress }}
++                </div>
++              </div>
 +
-+                <div class="col-md-6">
-+                  <label class="form-label">Địa chỉ cũ</label>
++              <!-- Old Address -->
++              <div class="form-group">
++                <label class="form-label">
++                  <i class="fas fa-history text-gray"></i>
++                  Địa chỉ cũ
++                </label>
++                <div class="input-wrapper">
++                  <i class="input-icon fas fa-history"></i>
 +                  <input
 +                      v-model.trim="oldAddress"
 +                      type="text"
-+                      class="form-control"
++                      class="form-input"
 +                      placeholder="Nhập địa chỉ cũ (nếu có)"
 +                  />
 +                </div>
 +              </div>
 +            </div>
 +          </div>
-+        </div>
++        </form>
++      </div>
 +
-+        <div class="modal-footer border-0 pt-0">
-+          <button type="button" class="btn btn-light" @click="handleClose">
-+            <i class="fas fa-times me-2"></i>
++      <!-- Footer -->
++      <div class="modal-footer">
++        <div class="footer-actions">
++          <button type="button" class="btn btn-secondary" @click="handleClose">
++            <i class="fas fa-times"></i>
 +            Huỷ
 +          </button>
-+          <button type="button" class="btn btn-primary" :disabled="!isFormValid" @click="handleSubmit">
-+            <i class="fas fa-check me-2"></i>
-+            Tạo Host
++          <button
++              type="submit"
++              class="btn btn-primary"
++              :disabled="isSubmitting"
++              @click="handleSubmit"
++          >
++            <i class="fas fa-save"></i>
++            <span v-if="isSubmitting">Đang lưu...</span>
++            <span v-else>Cập nhật</span>
 +          </button>
 +        </div>
 +      </div>
 +    </div>
-+    <div class="modal-backdrop fade show"></div>
 +  </div>
 +</template>
 +
 +<script setup>
-+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
-+import provinces from "/src/assets/js/address.json";
++import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
++import addressJson from '/src/assets/js/address.json'
 +
-+const emit = defineEmits(["close", "created"]);
++const props = defineProps({
++  host: {
++    type: Object,
++    required: true
++  }
++})
 +
-+const email = ref("");
-+const fullName = ref("");
-+const phone = ref("");
-+const gender = ref(true);
-+const province = ref("");
-+const ward = ref("");
-+const detailAddress = ref("");
-+const oldAddress = ref("");
++const emit = defineEmits(['close', 'reload'])
 +
-+const avatarFile = ref(null);
-+const avatarPreview = ref("https://via.placeholder.com/160x160?text=Avatar");
-+const avatarError = ref("");
++const fullName = ref('')
++const phone = ref('')
++const gender = ref(true)
++const province = ref('')
++const ward = ref('')
++const detailAddress = ref('')
++const oldAddress = ref('')
 +
-+const selectedProvince = computed(() => provinces.find((p) => p.name === province.value));
-+const wards = computed(() => selectedProvince.value?.wards || []);
++const avatarFile = ref(null)
++const avatarPreview = ref('')
++const avatarError = ref('')
++const fileInput = ref(null)
++
++const DEFAULT_AVATAR = 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/vat-default.jpg'
++
++const fieldErrors = ref({
++  fullName: '',
++  phone: '',
++  province: '',
++  ward: '',
++  detailAddress: ''
++})
++
++const isSubmitting = ref(false)
++
++const addressData = ref(addressJson)
++const provinces = computed(() => addressData.value)
++const selectedProvince = computed(() =>
++    addressData.value.find(p => p.name === province.value)
++)
++const wards = computed(() => selectedProvince.value?.wards || [])
++
++const formatPhone = (event) => {
++  let value = event.target.value.replace(/\D/g, '')
++  if (value.length > 0) {
++    if (value.startsWith('84')) {
++      value = '0' + value.slice(2)
++    }
++    value = value.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
++  }
++  phone.value = value
++}
++
++const parseAddress = (address) => {
++  if (!address) return { detail: '', ward: '', province: '' }
++  const [detail = '', wardValue = '', provinceValue = ''] = address.split('/!!')
++  return { detail, ward: wardValue, province: provinceValue }
++}
++
++const populateData = () => {
++  const parsed = parseAddress(props.host?.address)
++  fullName.value = props.host?.fullName || ''
++  phone.value = props.host?.phone ? props.host.phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3') : ''
++  gender.value = props.host?.gender ?? true
++  province.value = parsed.province
++  ward.value = parsed.ward
++  detailAddress.value = parsed.detail
++  oldAddress.value = props.host?.oldAddress || ''
++  avatarPreview.value = props.host?.avatar
++      ? `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${props.host.avatar}`
++      : DEFAULT_AVATAR
++  fieldErrors.value = { fullName: '', phone: '', province: '', ward: '', detailAddress: '' }
++}
++
++watch(() => props.host, populateData, { immediate: true, deep: true })
 +
 +watch(province, () => {
-+  ward.value = "";
-+});
++  ward.value = ''
++})
 +
-+const emailError = computed(() => {
-+  if (!email.value) return "Email bắt buộc";
-+  const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/;
-+  return emailRegex.test(email.value) ? "" : "Email không hợp lệ";
-+});
-+
-+const fullNameError = computed(() => {
-+  return fullName.value ? "" : "Họ và tên bắt buộc";
-+});
-+
-+const phoneError = computed(() => {
-+  if (!phone.value) return "Số điện thoại bắt buộc";
-+  if (!/^\d+$/.test(phone.value)) return "SĐT chỉ được chứa số";
-+  return phone.value.length >= 9 && phone.value.length <= 11
-+      ? ""
-+      : "Độ dài SĐT phải từ 9-11 số";
-+});
-+
-+const provinceError = computed(() => {
-+  return province.value ? "" : "Vui lòng chọn tỉnh/thành";
-+});
-+
-+const wardError = computed(() => {
-+  return ward.value ? "" : "Vui lòng chọn phường/xã";
-+});
-+
-+const detailAddressError = computed(() => {
-+  return detailAddress.value ? "" : "Địa chỉ chi tiết bắt buộc";
-+});
-+
-+const isFormValid = computed(() => {
-+  return (
-+      !emailError.value &&
-+      !fullNameError.value &&
-+      !phoneError.value &&
-+      !provinceError.value &&
-+      !wardError.value &&
-+      !detailAddressError.value &&
-+      !avatarError.value
-+  );
-+});
-+
-+const handlePhoneInput = (event) => {
-+  const onlyDigits = event.target.value.replace(/\D/g, "");
-+  phone.value = onlyDigits;
-+};
++const triggerFileInput = () => {
++  fileInput.value?.click()
++}
 +
 +const onAvatarChange = (event) => {
-+  const file = event.target.files?.[0];
-+  avatarError.value = "";
++  const file = event.target.files[0]
++  avatarError.value = ''
 +
 +  if (!file) {
-+    avatarFile.value = null;
-+    avatarPreview.value = "https://via.placeholder.com/160x160?text=Avatar";
-+    return;
++    resetAvatar()
++    return
 +  }
 +
-+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-+  const maxSize = 2 * 1024 * 1024;
-+
-+  if (!allowedTypes.includes(file.type)) {
-+    avatarError.value = "Chỉ chấp nhận ảnh JPG, PNG, WEBP";
-+    avatarFile.value = null;
-+    avatarPreview.value = "https://via.placeholder.com/160x160?text=Avatar";
-+    return;
++  const validTypes = ['image/jpeg', 'image/png', 'image/webp']
++  if (!validTypes.includes(file.type)) {
++    avatarError.value = 'Chỉ chấp nhận file JPG, PNG hoặc WEBP'
++    resetAvatar()
++    return
 +  }
 +
++  const maxSize = 2 * 1024 * 1024
 +  if (file.size > maxSize) {
-+    avatarError.value = "Kích thước ảnh tối đa 2MB";
-+    avatarFile.value = null;
-+    avatarPreview.value = "https://via.placeholder.com/160x160?text=Avatar";
-+    return;
++    avatarError.value = 'Kích thước file không được vượt quá 2MB'
++    resetAvatar()
++    return
 +  }
 +
-+  avatarFile.value = file;
-+  avatarPreview.value = URL.createObjectURL(file);
-+};
++  avatarFile.value = file
++  const reader = new FileReader()
++  reader.onload = (e) => {
++    avatarPreview.value = e.target.result
++  }
++  reader.readAsDataURL(file)
++}
++
++const resetAvatar = () => {
++  avatarFile.value = null
++  avatarPreview.value = props.host?.avatar
++      ? `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${props.host.avatar}`
++      : DEFAULT_AVATAR
++  if (fileInput.value) {
++    fileInput.value.value = ''
++  }
++}
++
++const handlePreviewError = () => {
++  avatarPreview.value = DEFAULT_AVATAR
++}
 +
 +const handleClose = () => {
-+  emit("close");
-+};
++  emit('close')
++}
++
++const validateForm = () => {
++  fieldErrors.value = { fullName: '', phone: '', province: '', ward: '', detailAddress: '' }
++  let isValid = true
++
++  if (!fullName.value.trim()) {
++    fieldErrors.value.fullName = 'Vui lòng nhập họ và tên'
++    isValid = false
++  }
++
++  const rawPhone = phone.value.replace(/\s/g, '')
++  if (!rawPhone) {
++    fieldErrors.value.phone = 'Vui lòng nhập số điện thoại'
++    isValid = false
++  } else if (!/^0\d{9}$/.test(rawPhone)) {
++    fieldErrors.value.phone = 'Số điện thoại phải có 10 chữ số và bắt đầu bằng 0'
++    isValid = false
++  }
++
++  if (!province.value) {
++    fieldErrors.value.province = 'Chọn tỉnh/thành phố'
++    isValid = false
++  }
++
++  if (!ward.value) {
++    fieldErrors.value.ward = 'Chọn phường/xã'
++    isValid = false
++  }
++
++  if (!detailAddress.value.trim()) {
++    fieldErrors.value.detailAddress = 'Nhập địa chỉ chi tiết'
++    isValid = false
++  }
++
++  return isValid
++}
 +
 +const handleSubmit = () => {
-+  if (!isFormValid.value) return;
++  if (isSubmitting.value) return
++  if (!validateForm()) return
++
++  isSubmitting.value = true
 +
 +  const payload = {
-+    email: email.value,
-+    fullName: fullName.value,
-+    phone: phone.value,
++    fullName: fullName.value.trim(),
++    phone: phone.value.replace(/\s/g, ''),
 +    gender: gender.value,
-+    address: `${detailAddress.value}/!!${ward.value}/!!${province.value}`,
-+    oldAddress: oldAddress.value,
-+    avatarFile: avatarFile.value
-+  };
++    address: `${detailAddress.value.trim()}/!!${ward.value}/!!${province.value}`,
++    oldAddress: oldAddress.value.trim(),
++    avatar: avatarFile.value ? 'Đã chọn file mới' : 'Giữ nguyên'
++  }
 +
-+  console.log("CREATE HOST PAYLOAD:", payload);
-+  emit("created");
-+  emit("close");
-+};
++  console.log('Host update payload:', payload)
++  emit('reload')
++  emit('close')
++  isSubmitting.value = false
++}
 +
 +const handleEsc = (event) => {
-+  if (event.key === "Escape") {
-+    handleClose();
++  if (event.key === 'Escape') {
++    handleClose()
 +  }
-+};
++}
 +
 +onMounted(() => {
-+  window.addEventListener("keydown", handleEsc);
-+});
++  window.addEventListener('keydown', handleEsc)
++})
 +
-+onBeforeUnmount(() => {
-+  window.removeEventListener("keydown", handleEsc);
-+});
++onUnmounted(() => {
++  window.removeEventListener('keydown', handleEsc)
++})
 +</script>
 +
 +<style scoped>
-+.modal-backdrop {
-+  z-index: 1040;
++.modal-overlay {
++  position: fixed;
++  inset: 0;
++  background: rgba(15, 23, 42, 0.6);
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  z-index: 1000;
++  backdrop-filter: blur(4px);
++  padding: 24px;
 +}
 +
-+.modal {
-+  z-index: 1050;
-+}
-+
-+.card {
-+  border-radius: 12px;
-+}
-+
-+.avatar-wrapper {
-+  width: 160px;
-+  height: 160px;
-+  border-radius: 50%;
-+  overflow: hidden;
++.modal-container {
++  width: min(1100px, 95vw);
 +  background: #f8fafc;
-+  border: 1px dashed #d1d5db;
++  border-radius: 24px;
++  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
++  display: flex;
++  flex-direction: column;
++  max-height: calc(100vh - 48px);
++  overflow: hidden;
++}
++
++.modal-header {
++  padding: 24px;
++  border-bottom: 1px solid #e2e8f0;
++  background: white;
++}
++
++.header-content {
++  display: flex;
++  justify-content: space-between;
++  align-items: center;
++  gap: 16px;
++}
++
++.title-section {
++  display: flex;
++  align-items: center;
++  gap: 12px;
++}
++
++.title-icon {
++  width: 44px;
++  height: 44px;
++  border-radius: 12px;
++  background: linear-gradient(135deg, #3b82f6, #6366f1);
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  color: white;
++  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
++}
++
++.modal-title {
++  margin: 0;
++  font-size: 20px;
++  color: #0f172a;
++}
++
++.modal-subtitle {
++  margin: 4px 0 0;
++  color: #64748b;
++  font-size: 14px;
++}
++
++.close-button {
++  width: 40px;
++  height: 40px;
++  border: 1px solid #e2e8f0;
++  border-radius: 12px;
++  background: white;
++  color: #94a3b8;
++  cursor: pointer;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  transition: all 0.2s ease;
++}
++
++.close-button:hover {
++  background: #f8fafc;
++  color: #1e293b;
++  transform: translateY(-1px);
++}
++
++.modal-content {
++  padding: 20px;
++  overflow-y: auto;
++  flex: 1;
++}
++
++.host-form {
++  display: flex;
++  flex-direction: column;
++  gap: 16px;
++}
++
++.form-section {
++  background: white;
++  border-radius: 18px;
++  padding: 16px;
++  border: 1px solid #e2e8f0;
++  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03);
++}
++
++.section-header {
++  display: flex;
++  align-items: center;
++  gap: 12px;
++  margin-bottom: 16px;
++}
++
++.section-icon {
++  width: 38px;
++  height: 38px;
++  border-radius: 12px;
 +  display: flex;
 +  align-items: center;
 +  justify-content: center;
 +}
 +
-+.avatar-preview {
++.section-icon-blue { background: #e0f2fe; color: #0ea5e9; }
++.section-icon-green { background: #dcfce7; color: #16a34a; }
++
++.section-header h3 {
++  margin: 0;
++  color: #0f172a;
++  font-size: 16px;
++}
++
++.form-grid {
++  display: grid;
++  gap: 12px 16px;
++}
++
++.form-grid.two-cols {
++  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
++}
++
++.form-grid.three-cols {
++  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
++}
++
++.form-group {
++  display: flex;
++  flex-direction: column;
++  gap: 8px;
++}
++
++.form-label {
++  font-size: 14px;
++  font-weight: 500;
++  color: #475569;
++}
++
++.text-sky { color: #0284c7; }
++.text-emerald { color: #059669; }
++.text-pink { color: #db2777; }
++.text-amber { color: #d97706; }
++.text-indigo { color: #4f46e5; }
++.text-orange { color: #ea580c; }
++.text-purple { color: #7c3aed; }
++.text-gray { color: #6b7280; }
++
++.input-wrapper, .select-wrapper {
++  position: relative;
++}
++
++.input-icon {
++  position: absolute;
++  left: 12px;
++  top: 50%;
++  transform: translateY(-50%);
++  color: #94a3b8;
++  font-size: 16px;
++}
++
++.form-input {
 +  width: 100%;
-+  height: 100%;
++  padding: 12px 12px 12px 40px;
++  border: 1px solid #e2e8f0;
++  border-radius: 14px;
++  font-size: 14px;
++  color: #1e293b;
++  background: white;
++  transition: all 0.2s ease;
++}
++
++.form-input:focus {
++  outline: none;
++  border-color: #3b82f6;
++  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
++}
++
++.form-select {
++  width: 100%;
++  padding: 12px 40px 12px 40px;
++  border: 1px solid #e2e8f0;
++  border-radius: 14px;
++  font-size: 14px;
++  color: #1e293b;
++  background: white;
++  appearance: none;
++  cursor: pointer;
++  transition: all 0.2s ease;
++}
++
++.form-select:focus {
++  outline: none;
++  border-color: #3b82f6;
++  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
++}
++
++.form-select.disabled {
++  background: #f1f5f9;
++  cursor: not-allowed;
++  opacity: 0.6;
++}
++
++.select-arrow {
++  position: absolute;
++  right: 12px;
++  top: 50%;
++  transform: translateY(-50%);
++  color: #64748b;
++  pointer-events: none;
++}
++
++.gender-selector {
++  display: flex;
++  gap: 10px;
++}
++
++.gender-option {
++  flex: 1;
++  padding: 10px 12px;
++  border: 1px solid #e2e8f0;
++  border-radius: 14px;
++  background: white;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  gap: 8px;
++  cursor: pointer;
++  transition: all 0.2s ease;
++}
++
++.gender-option:hover {
++  border-color: #3b82f6;
++}
++
++.gender-option.active {
++  background: #2563eb;
++  color: white;
++  border-color: #2563eb;
++  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.15);
++}
++
++.avatar-upload {
++  grid-column: span 2;
++}
++
++.upload-area {
++  border: 1px dashed #cbd5e1;
++  border-radius: 18px;
++  padding: 12px;
++  background: #f8fafc;
++  cursor: pointer;
++  transition: all 0.2s ease;
++  min-height: 120px;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++}
++
++.upload-area:hover {
++  border-color: #2563eb;
++  background: #eff6ff;
++}
++
++.upload-content {
++  text-align: center;
++}
++
++.upload-placeholder {
++  color: #64748b;
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  gap: 8px;
++}
++
++.upload-placeholder i {
++  font-size: 26px;
++}
++
++.upload-hint {
++  font-size: 12px;
++  color: #94a3b8;
++}
++
++.avatar-preview {
++  width: 120px;
++  height: 120px;
++  border-radius: 50%;
 +  object-fit: cover;
++  border: 4px solid white;
++  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
++}
++
++.file-input {
++  display: none;
++}
++
++.error-message {
++  display: flex;
++  align-items: center;
++  gap: 6px;
++  color: #ef4444;
++  font-size: 13px;
++  margin-top: 6px;
++}
++
++.modal-footer {
++  padding: 16px 24px;
++  border-top: 1px solid #e2e8f0;
++  background: white;
++  display: flex;
++  justify-content: flex-end;
++}
++
++.footer-actions {
++  display: flex;
++  gap: 12px;
++}
++
++.btn {
++  border: none;
++  border-radius: 10px;
++  padding: 12px 18px;
++  font-weight: 600;
++  cursor: pointer;
++  display: inline-flex;
++  align-items: center;
++  gap: 8px;
++  transition: all 0.2s ease;
++  font-size: 14px;
++}
++
++.btn-primary {
++  background: linear-gradient(135deg, #2563eb, #4f46e5);
++  color: white;
++  box-shadow: 0 12px 30px rgba(79, 70, 229, 0.25);
++}
++
++.btn-primary:hover {
++  transform: translateY(-1px);
++  box-shadow: 0 16px 40px rgba(79, 70, 229, 0.35);
++}
++
++.btn-primary:disabled {
++  opacity: 0.6;
++  cursor: not-allowed;
++  transform: none;
++  box-shadow: none;
++}
++
++.btn-secondary {
++  background: white;
++  color: #475569;
++  border: 1px solid #e2e8f0;
++}
++
++.btn-secondary:hover {
++  background: #f8fafc;
++  color: #0f172a;
++}
++
++@media (max-width: 768px) {
++  .modal-container {
++    width: 100%;
++    height: 100%;
++    border-radius: 0;
++  }
++
++  .modal-overlay {
++    padding: 0;
++  }
++
++  .modal-content {
++    padding: 16px;
++  }
 +}
 +</style>
 diff --git a/src/components/host/Test.vue b/src/components/host/Test.vue
-index db0e552064a10943f618d4174602ec174d18b7d2..20e76c6ad03b82762aa922d2702f1cc5d968c11d 100644
+index 2404d9c35a380f9ac347b7a9dacbe8ef5a16f058..fecc7f9b726d82adb6964bf56aec5b4703c33d4a 100644
 --- a/src/components/host/Test.vue
 +++ b/src/components/host/Test.vue
-@@ -1,32 +1,36 @@
- <template>
-   <div class="container-fluid py-4 host-list-container">
-     <!-- HEADER -->
-     <div class="d-flex justify-content-between align-items-center mb-4">
-       <div>
-         <h4 class="mb-1 fw-bold text-dark">Danh sách Host</h4>
-         <p class="text-muted mb-0">Quản lý thông tin các chủ nhà trong hệ thống</p>
-+        <button class="btn btn-primary btn-sm mt-3" @click="showCreateHostModal = true">
-+          <i class="fas fa-plus me-2"></i>
-+          + Thêm Host
-+        </button>
-       </div>
-       <div class="text-end">
-         <span class="badge bg-light text-dark border">
-           <i class="fas fa-users me-1"></i>
-           Tổng: <span class="fw-bold">{{ totalRecords }}</span> host
-         </span>
-       </div>
-     </div>
+@@ -195,50 +195,59 @@
+                         class="form-check-input status-toggle"
+                         type="checkbox"
+                         :checked="item.status"
+                         @click.stop="toggleStatus(item)"
+                     >
+                   </div>
+                   <span
+                       class="badge badge-status ms-2"
+                       :class="item.status ? 'active' : 'inactive'"
+                   >
+                       {{ item.status ? 'Hoạt động' : 'Khoá' }}
+                     </span>
+                 </div>
+               </td>
+               <td class="text-center">
+                 <div class="d-flex justify-content-center gap-1">
+                   <!-- XEM -->
+                   <button
+                       class="btn btn-sm btn-light btn-view"
+                       title="Xem chi tiết"
+                       @click.stop="viewHostDetail(item.id)"
+                   >
+                     <i class="fas fa-eye"></i>
+                   </button>
 
-     <!-- FILTER SECTION -->
-     <div class="card shadow-sm border-0 mb-4 filter-section filter-purple">
-     <div class="card-header bg-transparent border-0 py-3">
-         <h6 class="mb-0 fw-semibold">
-           <i class="fas fa-filter me-2 text-primary"></i>
-           Bộ lọc tìm kiếm
-         </h6>
-       </div>
-       <div class="filter-full-width">
-         <div class="card-body pt-0">
-         <div class="row g-3">
-           <!-- Search -->
-           <div class="col-xl-4 col-lg-4 col-md-6">
-             <i class="fas fa-magnifying-glass text-primary me-1"></i>
-             <label class="form-label fw-medium small">Tìm kiếm</label>
-             <div class="input-group input-group-sm">
-@@ -295,57 +299,63 @@
++                  <!-- CHỈNH SỬA -->
++                  <button
++                      class="btn btn-sm btn-light btn-edit"
++                      title="Chỉnh sửa host"
++                      @click.stop="openUpdateHost(item.id)"
++                  >
++                    <i class="fas fa-pen"></i>
++                  </button>
++
+                   <!-- XÓA -->
+                   <button
+                       class="btn btn-sm btn-light btn-delete"
+                       title="Xóa host"
+                       @click.stop="deleteHost(item)"
+                   >
+                     <i class="fas fa-trash text-danger"></i>
+                   </button>
+                 </div>
+               </td>
+
+             </tr>
+
+             <!-- Empty State -->
+             <tr v-if="!loading && data.length === 0">
+               <td colspan="8" class="text-center py-5">
+                 <div class="empty-state">
+                   <i class="fas fa-users-slash fa-2x text-muted mb-3"></i>
+                   <p class="text-muted mb-0">Không tìm thấy host nào</p>
+                 </div>
+               </td>
+             </tr>
+             </tbody>
+           </table>
+         </div>
+@@ -301,63 +310,70 @@
                  title="Trang sau"
                  @click="pageNo++"
              >
@@ -403,11 +967,17 @@ index db0e552064a10943f618d4174602ec174d18b7d2..20e76c6ad03b82762aa922d2702f1cc5
          :host="selectedHost"
          @close="showDetail = false"
      />
-+    <CreateHostModal
-+        v-if="showCreateHostModal"
-+        @close="showCreateHostModal = false"
-+        @created="fetchData"
++    <HostUpdateModal
++        v-if="showUpdate"
++        :host="selectedHost"
++        @close="showUpdate = false"
++        @reload="fetchData"
 +    />
+     <CreateHostModal
+         v-if="showCreateHostModal"
+         @close="showCreateHostModal = false"
+         @created="fetchData"
+     />
    </div>
  </template>
 
@@ -415,7 +985,8 @@ index db0e552064a10943f618d4174602ec174d18b7d2..20e76c6ad03b82762aa922d2702f1cc5
  import { ref, computed, watch, onMounted } from "vue";
  import api from "/src/api/api.js";
  import provinces from "/src/assets/js/address.json";
-+import CreateHostModal from "./CreateHostModal.vue";
+ import CreateHostModal from "./CreateHostModal.vue";
++import HostUpdateModal from "./HostUpdateModal.vue";
 
  const data = ref([]);
  const loading = ref(false);
@@ -441,56 +1012,221 @@ index db0e552064a10943f618d4174602ec174d18b7d2..20e76c6ad03b82762aa922d2702f1cc5
    search: null,
    gender: null,
    status: null,
-@@ -359,50 +369,52 @@ const selectedProvince = computed(() =>
+@@ -477,64 +493,81 @@ onMounted(() => {
 
- // Computed properties
- const totalPagesComputed = computed(() => {
-   return Math.ceil(totalRecords.value / pageSize.value);
- });
+ const toggleStatus = async (item) => {
+   // lưu trạng thái cũ để rollback nếu lỗi
+   const oldStatus = item.status;
 
- // Methods
- const getInitials = (name) => {
-   if (!name) return '?';
-   return name
-       .split(' ')
-       .map(n => n[0])
-       .join('')
-       .toUpperCase()
-       .substring(0, 2);
+   // update UI trước cho mượt
+   item.status = !item.status;
+
+   try {
+     const res = await api.put(`/host/${item.id}/toggle-status`);
+
+     // nếu backend trả status mới
+     if (typeof res.data === 'boolean') {
+       item.status = res.data;
+     }
+   } catch (err) {
+     console.error("Toggle status error:", err);
+
+     // rollback UI nếu lỗi
+     item.status = oldStatus;
+
+     alert("Không thể đổi trạng thái host");
+   }
+ };
+ const viewHostDetail = async (id) => {
+-  try {
+-    const res = await api.get(`/host/${id}`);
+-    console.log("HOST DETAIL:", res.data);
+-    selectedHost.value = res.data
+-    showDetail.value = true
+-  } catch (e) {
+-    console.error("Lỗi lấy chi tiết host:", e);
++  const detail = await fetchHostDetail(id);
++  if (detail) {
++    console.log("HOST DETAIL:", detail);
++    selectedHost.value = detail;
++    showDetail.value = true;
+   }
  };
 
- const formatAddress = (address) => {
-   if (!address) return "Chưa cập nhật";
+ import HostDetailModal from './HostDetailModal.vue'
 
-   return address
-       .replace(/^\d+\/!!/, "")
-       .replace(/\/!!/g, ", ");
- };
-
-+const showCreateHostModal = ref(false);
+ const showDetail = ref(false)
+ const selectedHost = ref(null)
++const showUpdate = ref(false)
 +
- let searchTimeout = null;
- watch(
-     () => ({ ...filters.value }),
-     (newFilters, oldFilters) => {
-       // reset page khi filter đổi
-       pageNo.value = 0;
++const fetchHostDetail = async (id) => {
++  try {
++    const res = await api.get(`/host/${id}`);
++    return res.data;
++  } catch (e) {
++    console.error("Lỗi lấy chi tiết host:", e);
++    return null;
++  }
++};
++
++const openUpdateHost = async (id) => {
++  const detail = await fetchHostDetail(id);
++  if (detail) {
++    selectedHost.value = detail;
++    showUpdate.value = true;
++  }
++};
 
-       // debounce riêng cho search
-       if (newFilters.search !== oldFilters?.search) {
-         clearTimeout(searchTimeout);
-         searchTimeout = setTimeout(() => {
-           fetchData();
-         }, 400); // 👈 300–500ms là đẹp
-       } else {
-         fetchData();
-       }
-     },
-     { deep: true }
- );
- watch(
-     () => filters.value.tinh,
-     (newTinh, oldTinh) => {
-       if (newTinh !== oldTinh) {
-         filters.value.phuong = ''; // 👈 luôn đưa về "Tất cả phường/quận"
-       }
+
+ import { confirmYesNo, showCenterSuccess, showCenterError } from '/src/assets/js/alertService.js'
+
+ /* =========================
+    XÓA HOST
+ ========================= */
+ const deleteHost = (item) => {
+   confirmYesNo(
+       "Xác nhận xóa",
+       `
+ <div style="
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   text-align: center;
+ ">
+   <p>Bạn có chắc chắn muốn <b>xóa chủ nhà</b>:</p>
+   <p><b>${item.fullName}</b></p>
+   <p class="text-danger small">
+     ⚠ Tất cả tài sản, dữ liệu liên quan sẽ bị xóa vĩnh viễn.
+   </p>
+ </div>
+ `
+       ,
+@@ -838,103 +871,128 @@ th {
+   color: #ea580c; /* orange */
+ }
+
+ /* Asset */
+ .icon-asset {
+   color: #f8f6f6; /* violet */
+ }
+
+ /* Icon hover nhẹ khi hover row */
+ .table-row-hover:hover .icon-email,
+ .table-row-hover:hover .icon-phone,
+ .table-row-hover:hover .icon-address,
+ .table-row-hover:hover .icon-asset {
+   filter: brightness(0.85);
+ }
+ .filter-purple {
+   background: linear-gradient(
+       135deg,
+       #3b3b8f 0%,     /* tím đậm */
+       #4b3dfa 100%   /* tím xanh */
+   );
+   color: #ffffff;
+   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+ }
+ .btn-view,
++.btn-edit,
+ .btn-delete {
+   padding: 4px 8px;
+   border-radius: 10px;          /* CỐ ĐỊNH */
+   line-height: 1;
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   transition: all 0.2s ease;
+ }
+
+
+ /* icon */
+ /* =========================
+    RESET CHUNG CHO 2 NÚT
+ ========================= */
+ .btn-view,
++.btn-edit,
+ .btn-delete {
+   padding: 6px 10px;
+   border-radius: 12px;            /* BO GÓC CỐ ĐỊNH */
+   line-height: 1;
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   background-color: #f8fafc;      /* NỀN LUÔN CÓ */
+   border: 1px solid #e5e7eb;
+   transition: all 0.18s ease;
+ }
+
+ /* =========================
+    VIEW BUTTON – XANH
+ ========================= */
+ .btn-view i {
+   color: #1d4ed8;                 /* xanh đậm */
+   font-size: 13px;
+ }
+
+ /* hover */
+ .btn-view:hover {
+   background-color: #dbeafe;
+   border-color: #bfdbfe;
+   transform: translateY(-1px);
+   box-shadow: 0 4px 8px rgba(37, 99, 235, 0.15);
+ }
+
+ .btn-view:hover i {
+   color: #1e40af;
+ }
+
+ /* active click */
+ .btn-view:active {
+   transform: scale(0.96);
+ }
+
++/* =========================
++   EDIT BUTTON – VÀNG
++========================= */
++.btn-edit i {
++  color: #d97706;                 /* vàng đậm */
++  font-size: 13px;
++}
++
++.btn-edit:hover {
++  background-color: #fef3c7;
++  border-color: #fde68a;
++  transform: translateY(-1px);
++  box-shadow: 0 4px 8px rgba(217, 119, 6, 0.15);
++}
++
++.btn-edit:hover i {
++  color: #b45309;
++}
++
++.btn-edit:active {
++  transform: scale(0.96);
++}
++
+ /* =========================
+    DELETE BUTTON – ĐỎ
+ ========================= */
+ .btn-delete i {
+   color: #dc2626;                 /* đỏ đậm */
+   font-size: 13px;
+ }
+
+ /* hover */
+ .btn-delete:hover {
+   background-color: #fee2e2;
+   border-color: #fecaca;
+   transform: translateY(-1px);
+   box-shadow: 0 4px 8px rgba(220, 38, 38, 0.15);
+ }
+
+ .btn-delete:hover i {
+   color: #b91c1c;
+ }
+
+ /* active click */
+ .btn-delete:active {
+   transform: scale(0.96);
+ }
+

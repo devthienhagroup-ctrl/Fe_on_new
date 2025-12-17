@@ -9,9 +9,14 @@
               <i class="fas fa-user-plus"></i>
             </div>
             <div>
-              <h2 class="modal-title">Tạo Host mới</h2>
-              <p class="modal-subtitle">Thêm chủ nhà vào hệ thống</p>
+              <h2 class="modal-title">
+                Tạo {{ type === 'HOST' ? 'chủ nhà' : 'môi giới' }} mới
+              </h2>
+              <p class="modal-subtitle">
+                Thêm {{ type === 'HOST' ? 'chủ nhà' : 'môi giới' }} vào hệ thống
+              </p>
             </div>
+
           </div>
           <button class="close-button" @click="handleClose">
             <i class="fas fa-times"></i>
@@ -282,6 +287,13 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 
 const emit = defineEmits(['close', 'created'])
 
+const props = defineProps({
+  type: {
+    type: String,
+    default: 'HOST' // HOST | MOI_GIOI
+  }
+})
+
 // Form Data
 const email = ref('')
 const fullName = ref('')
@@ -436,7 +448,8 @@ const handleSubmit = async () => {
       phone: phone.value.replace(/\s/g, ''),
       gender: gender.value,
       address: `${detailAddress.value.trim()}/!!${ward.value}/!!${province.value}`,
-      oldAddress: oldAddress.value.trim() || ""
+      oldAddress: oldAddress.value.trim() || "",
+      type: props.type
     }
 
     formData.append(
@@ -471,21 +484,22 @@ const handleSubmit = async () => {
       )
       return
     }
-
+    const label = props.type === 'HOST' ? 'chủ nhà' : 'môi giới'
     // ❌ Lỗi khác
     if (!result.success) {
       showCenterWarning(
-          "Không thể tạo khách hàng",
+          `Không thể tạo ${label}`,
           "Vui lòng kiểm tra lại thông tin"
       )
       return
     }
 
-    // ✅ Thành công
+// ✅ Thành công
     showCenterSuccess(
-        "Tạo khách hàng thành công",
+        `Tạo ${label} thành công`,
         "Hệ thống đã ghi nhận dữ liệu!"
     )
+
 
     emit("created", result.data)
     emit("close")

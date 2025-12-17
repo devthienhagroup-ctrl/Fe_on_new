@@ -3,13 +3,32 @@
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-1">
       <div>
-        <h4 class="mb-1 fw-bold text-dark">Danh sách Host</h4>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <h4 class="mb-0 fw-bold text-dark">
+            Danh sách {{ selectedType === 'HOST' ? 'chủ nhà' : 'môi giới' }}
+          </h4>
+
+          <!-- SWITCH TYPE -->
+          <select
+              v-model="selectedType"
+              class="form-select form-select-sm w-auto"
+              style="min-width: 130px;"
+          >
+            <option value="HOST">Chủ nhà</option>
+            <option value="MOI_GIOI">Môi giới</option>
+          </select>
+        </div>
+
         <div class="d-flex justify-content-between align-items-center mb-1">
           <p class="text-muted mb-0">Quản lý thông tin các chủ nhà trong hệ thống</p>
-          <button class="btn btn-primary rounded-3 btn-sm ms-2" @click="showCreateHostModal = true">
+          <button
+              class="btn btn-primary rounded-3 btn-sm ms-2"
+              @click="showCreateHostModal = true"
+          >
             <i class="fas fa-plus me-1"></i>
-            Thêm Host
+            Thêm {{ selectedType === 'HOST' ? 'chủ nhà' : 'môi giới' }}
           </button>
+
         </div>
       </div>
       <div class="text-end">
@@ -122,7 +141,9 @@
               <th class="py-3 border-bottom">SĐT</th>
               <th class="py-3 border-bottom">Giới tính</th>
               <th class="py-3 border-bottom">Địa chỉ</th>
-              <th class="py-3 border-bottom text-center">Tài sản</th>
+              <th class="py-3 border-bottom text-center">
+                {{ selectedType === 'HOST' ? 'Tài sản' : 'Đã bán' }}
+              </th>
               <th class="py-3 border-bottom text-center">Trạng thái</th>
               <th class="py-3 border-bottom text-center">Thao tác</th>
             </tr>
@@ -184,8 +205,17 @@
               </td>
               <td class="text-center">
                   <span class="badge badge-asset">
-                    <i class="fas fa-home icon-asset me-1"></i>
-                    {{ item.countAsset || 0 }}
+                    <i
+                        :class="selectedType === 'HOST'
+                            ? 'fas fa-home'
+                            : 'fas fa-handshake'"
+                        class="me-1"
+                    ></i>
+
+                    {{ selectedType === 'HOST'
+                      ? (item.countAsset || 0)
+                      : (item.countDaBan || 0)
+                    }}
                   </span>
               </td>
               <td class="text-center">
@@ -217,6 +247,15 @@
                     <i class="fas fa-eye"></i>
                   </button>
 
+                  <!-- CHỈNH SỬA -->
+                  <button
+                      class="btn btn-sm btn-light btn-edit"
+                      title="Chỉnh sửa host"
+                      @click.stop="openUpdateHost(item.id)"
+                  >
+                    <i class="fas fa-pen"></i>
+                  </button>
+
                   <!-- XÓA -->
                   <button
                       class="btn btn-sm btn-light btn-delete"
@@ -232,7 +271,7 @@
 
             <!-- Empty State -->
             <tr v-if="!loading && data.length === 0">
-              <td colspan="8" class="text-center py-5">
+              <td colspan="9" class="text-center py-5">
                 <div class="empty-state">
                   <i class="fas fa-users-slash fa-2x text-muted mb-3"></i>
                   <p class="text-muted mb-0">Không tìm thấy host nào</p>
@@ -246,19 +285,22 @@
     </div>
 
     <!-- PAGINATION -->
-    <div class="d-flex justify-content-between align-items-center mt-4">
+    <div class="d-flex justify-content-between align-items-center gap-3 mt-4 mb-4">
+      <!-- INFO -->
       <div class="text-muted small">
         Hiển thị <span class="fw-bold">{{ data.length }}</span> trong tổng số
         <span class="fw-bold">{{ totalRecords }}</span> bản ghi
       </div>
 
+      <!-- PAGE SIZE + PAGINATION -->
       <div class="d-flex align-items-center gap-3">
+        <!-- PAGE SIZE -->
         <div class="d-flex align-items-center gap-2">
           <span class="text-muted small">Hiển thị</span>
           <select
               v-model="pageSize"
               class="form-select form-select-sm w-auto"
-              style="min-width: 70px;"
+              style="min-width: 70px"
               @change="onPageSizeChange"
           >
             <option v-for="s in [5, 10, 20, 50]" :key="s" :value="s">
@@ -268,13 +310,13 @@
           <span class="text-muted small">bản ghi</span>
         </div>
 
+        <!-- PAGINATION -->
         <div class="d-flex align-items-center gap-2">
           <span class="text-muted small me-2">
             Trang {{ pageNo + 1 }} / {{ totalPages }}
           </span>
 
-          <div class="btn-group btn-group-sm" role="group">
-            <!-- FIRST PAGE -->
+          <div class="btn-group btn-group-sm">
             <button
                 class="btn btn-outline-secondary"
                 :disabled="pageNo === 0"
@@ -284,7 +326,6 @@
               <i class="fas fa-angles-left"></i>
             </button>
 
-            <!-- PREV PAGE -->
             <button
                 class="btn btn-outline-secondary"
                 :disabled="pageNo === 0"
@@ -294,7 +335,6 @@
               <i class="fas fa-chevron-left"></i>
             </button>
 
-            <!-- NEXT PAGE -->
             <button
                 class="btn btn-outline-secondary"
                 :disabled="pageNo >= totalPages - 1"
@@ -304,7 +344,6 @@
               <i class="fas fa-chevron-right"></i>
             </button>
 
-            <!-- LAST PAGE -->
             <button
                 class="btn btn-outline-secondary"
                 :disabled="pageNo >= totalPages - 1"
@@ -314,17 +353,85 @@
               <i class="fas fa-angles-right"></i>
             </button>
           </div>
-
         </div>
       </div>
     </div>
+    <div v-if="selectedType !== 'HOST'" class="w-100 text-center mb-4">
+      <!-- TITLE -->
+      <hr/>
+      <h4 class="fw-bold w-100 text-start">Thống kê môi giới</h4>
+      <h4 class="fw-bold mb-4">
+        TOP môi giới chuyên nghiệp tại
+        <span class="text-primary">
+      {{ filters.tinh && filters.tinh.trim() !== ''
+            ? filters.tinh
+            : 'Toàn quốc' }}
+    </span>
+      </h4>
+
+      <!-- CARD LIST -->
+      <div class="d-flex justify-content-center gap-4 flex-wrap">
+        <div
+            v-for="item in topBrokers"
+            :key="item.employeeId"
+            class="broker-card text-center"
+        >
+          <!-- AVATAR -->
+
+            <div
+                v-if="item.rank <= 3"
+                class="top-text"
+                :class="getTopClass(item.rank)"
+            >
+              TOP {{ item.rank }}
+            </div>
+            <div class="avatar-wrapper mx-auto">
+              <img
+                  :src="item.avatar
+              ? 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + item.avatar
+              :  'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + 'vat-default.jpg'"
+                  class="avatar-img"
+              />
+
+              <!-- BADGE -->
+              <img
+                  src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/huy-hieu.png"
+                  class="badge-icon"
+                  style="width: 45px; height: 45px"
+              />
+            </div>
+
+          <!-- NAME -->
+          <h6 class="fw-semibold mt-3 mb-1" style="font-size: 24px">
+            {{ item.fullName }}
+          </h6>
+
+          <!-- SOLD -->
+          <p class="text-muted small mb-0" style="font-size: 16px">
+            Đã bán {{ item.totalSold }} căn
+          </p>
+        </div>
+      </div>
+    </div>
+
+
     <HostDetailModal
         v-if="showDetail"
         :host="selectedHost"
+        :type="selectedType"
         @close="showDetail = false"
+    />
+
+    <HostUpdateModal
+        v-if="showUpdate"
+        :host="selectedHost"
+        :type="selectedType"
+        @close="showUpdate = false"
+        @reload="fetchData"
     />
     <CreateHostModal
         v-if="showCreateHostModal"
+        :type="selectedType"
         @close="showCreateHostModal = false"
         @created="fetchData"
     />
@@ -336,7 +443,10 @@ import { ref, computed, watch, onMounted } from "vue";
 import api from "/src/api/api.js";
 import provinces from "/src/assets/js/address.json";
 import CreateHostModal from "./CreateHostModal.vue";
+import HostUpdateModal from "./HostUpdateModal.vue";
 
+import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
+const selectedType = ref('HOST'); // HOST | MOI_GIOI
 const data = ref([]);
 const loading = ref(false);
 const totalRecords = ref(0);
@@ -344,6 +454,18 @@ const totalPages = ref(1);
 
 const pageNo = ref(0);
 const pageSize = ref(10);
+
+const setTopRanks = (list) => {
+  if (!Array.isArray(list)) return []
+
+  return [...list]
+      .sort((a, b) => (b.totalSold || 0) - (a.totalSold || 0))
+      .map((item, index) => ({
+        ...item,
+        rank: index + 1   // 1, 2, 3, ...
+      }))
+}
+
 
 const goFirstPage = () => {
   if (pageNo.value > 0) {
@@ -436,12 +558,58 @@ const selectHost = (host) => {
   // Add your host selection logic here
 };
 
+watch(selectedType, () => {
+  pageNo.value = 0;
+  fetchData();
+
+  console.log( selectedType.value )
+  if (selectedType.value !== 'HOST') {
+    console.log( "Chạy" )
+    fetchTopBrokers()
+  } else {
+    topBrokers.value = []
+  }
+
+});
+
+const topBrokers = ref([])
+const loadingTopBroker = ref(false)
+
+const fetchTopBrokers = async () => {
+  loadingTopBroker.value = true
+  try {
+    const res = await api.get('/moigioi/top-moi-gioi', {
+      params: {
+        area: filters.value.tinh   // ✅ dùng filters.tinh
+      }
+    })
+
+    topBrokers.value = setTopRanks(res.data || [])
+    console.log("Dữ liệu: ", topBrokers.value );
+  } catch (e) {
+    console.error('❌ Lỗi lấy top môi giới', e)
+    topBrokers.value = []
+  } finally {
+    loadingTopBroker.value = false
+  }
+}
+const getTopClass = (rank) => {
+  if (rank === 1) return 'top-1'
+  if (rank === 2) return 'top-2'
+  if (rank === 3) return 'top-3'
+  return ''
+}
 
 
 const fetchData = async () => {
   loading.value = true;
   try {
-    const res = await api.post("/host/list", {
+    const apiUrl =
+        selectedType.value === 'HOST'
+            ? '/host/list'
+            : '/moigioi/list';
+
+    const res = await api.post(apiUrl, {
       ...filters.value,
       pageNo: pageNo.value,
       pageSize: pageSize.value
@@ -499,13 +667,11 @@ const toggleStatus = async (item) => {
   }
 };
 const viewHostDetail = async (id) => {
-  try {
-    const res = await api.get(`/host/${id}`);
-    console.log("HOST DETAIL:", res.data);
-    selectedHost.value = res.data
-    showDetail.value = true
-  } catch (e) {
-    console.error("Lỗi lấy chi tiết host:", e);
+  const detail = await fetchHostDetail(id);
+  if (detail) {
+    console.log("HOST DETAIL:", detail);
+    selectedHost.value = detail;
+    showDetail.value = true;
   }
 };
 
@@ -513,6 +679,31 @@ import HostDetailModal from './HostDetailModal.vue'
 
 const showDetail = ref(false)
 const selectedHost = ref(null)
+const showUpdate = ref(false)
+
+const fetchHostDetail = async (id) => {
+  try {
+    const url =
+        selectedType.value === 'HOST'
+            ? `/host/${id}`
+            : `/moigioi/${id}`;
+
+    const res = await api.get(url);
+    return res.data;
+  } catch (e) {
+    console.error("Lỗi lấy chi tiết:", e);
+    return null;
+  }
+};
+
+
+const openUpdateHost = async (id) => {
+  const detail = await fetchHostDetail(id);
+  if (detail) {
+    selectedHost.value = detail;
+    showUpdate.value = true;
+  }
+};
 
 
 import { confirmYesNo, showCenterSuccess, showCenterError } from '/src/assets/js/alertService.js'
@@ -521,6 +712,10 @@ import { confirmYesNo, showCenterSuccess, showCenterError } from '/src/assets/js
    XÓA HOST
 ========================= */
 const deleteHost = (item) => {
+  const isHost = selectedType.value === 'HOST'
+  const label = isHost ? 'chủ nhà' : 'môi giới'
+  const apiUrl = `/host/delete/${item.id}`
+
   confirmYesNo(
       "Xác nhận xóa",
       `
@@ -530,30 +725,33 @@ const deleteHost = (item) => {
   align-items: center;
   text-align: center;
 ">
-  <p>Bạn có chắc chắn muốn <b>xóa chủ nhà</b>:</p>
+  <p>Bạn có chắc chắn muốn <b>xóa ${label}</b>:</p>
   <p><b>${item.fullName}</b></p>
   <p class="text-danger small">
-    ⚠ Tất cả tài sản, dữ liệu liên quan sẽ bị xóa vĩnh viễn.
+    ⚠ Tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn.
   </p>
 </div>
-`
-      ,
+`,
       async () => {
         try {
-          await api.delete(`/host/delete/${item.id}`);
+          await api.delete(apiUrl)
 
           showCenterSuccess(
               "Xóa thành công",
-              "Host và toàn bộ dữ liệu liên quan đã được xóa"
-          );
+              `${label.charAt(0).toUpperCase() + label.slice(1)} và toàn bộ dữ liệu liên quan đã được xóa`
+          )
 
-          await fetchData(); // reload bảng
+          await fetchData() // reload bảng
         } catch (e) {
-          showCenterError( "Không thể xóa", "Vui lòng kiểm tra dữ liệu liên quan")
+          showCenterError(
+              "Không thể xóa",
+              "Vui lòng kiểm tra dữ liệu liên quan"
+          )
         }
       }
-  );
-};
+  )
+}
+
 </script>
 
 <style scoped>
@@ -860,6 +1058,7 @@ th {
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 .btn-view,
+.btn-edit,
 .btn-delete {
   padding: 4px 8px;
   border-radius: 10px;          /* CỐ ĐỊNH */
@@ -876,6 +1075,7 @@ th {
    RESET CHUNG CHO 2 NÚT
 ========================= */
 .btn-view,
+.btn-edit,
 .btn-delete {
   padding: 6px 10px;
   border-radius: 12px;            /* BO GÓC CỐ ĐỊNH */
@@ -914,6 +1114,29 @@ th {
 }
 
 /* =========================
+   EDIT BUTTON – VÀNG
+========================= */
+.btn-edit i {
+  color: #d97706;                 /* vàng đậm */
+  font-size: 13px;
+}
+
+.btn-edit:hover {
+  background-color: #fef3c7;
+  border-color: #fde68a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(217, 119, 6, 0.15);
+}
+
+.btn-edit:hover i {
+  color: #b45309;
+}
+
+.btn-edit:active {
+  transform: scale(0.96);
+}
+
+/* =========================
    DELETE BUTTON – ĐỎ
 ========================= */
 .btn-delete i {
@@ -937,6 +1160,90 @@ th {
 .btn-delete:active {
   transform: scale(0.96);
 }
+
+/* CARD – to hơn, dáng dọc 6:4 */
+.broker-card {
+  width: 280px;         /* 👈 6 : 4 (cao hơn) */
+  background: #fff;
+  text-align: end;
+  border-radius: 24px;
+  padding: 28px 20px 28px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* AVATAR – viền xanh ngoài */
+.avatar-wrapper {
+  position: relative;
+  width: 172px;
+  height: 172px;
+  border-radius: 50%;
+  background: #2563eb;        /* xanh */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* VÒNG TRẮNG Ở GIỮA (pseudo-element) */
+.avatar-wrapper::before {
+  content: '';
+  position: absolute;
+  width: 163px;
+  height: 163px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+/* ẢNH – nằm trong vòng trắng */
+.avatar-img {
+  position: relative;
+  width: 155px;
+  height: 155px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f1f1f1;
+}
+
+
+.badge-icon {
+  position: absolute;
+  bottom: 0px;
+  right: 5px;
+  width: 48px !important;
+  height: 48px !important;
+}
+/* base */
+.top-text {
+  display: block;          /* 👈 BLOCK thật */
+  margin-bottom: 10px;     /* 👈 đẩy avatar xuống */
+
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+
+/* TOP 1 */
+.top-text.top-1 {
+  font-size: 36px;
+  color: #F59E0B; /* vàng */
+}
+
+/* TOP 2 */
+.top-text.top-2 {
+  font-size: 30px;
+  color: #6B7280; /* xám */
+}
+
+/* TOP 3 */
+.top-text.top-3 {
+  font-size: 24px;
+  color: #B45309; /* đồng */
+}
+
 
 
 </style>

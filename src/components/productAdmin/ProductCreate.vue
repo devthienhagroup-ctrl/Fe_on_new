@@ -363,7 +363,7 @@
                 </label>
                 <select class="form-select form-select-md" v-model="form.status">
                   <option value="">-- Chọn tình trạng --</option>
-                  <option value="Chưa định giá sơ bộ">Mới</option>
+                  <option value="Chưa định giá">Mới</option>
                   <option value="Bán nhanh 30 ngày">Bán nhanh 30 ngày</option>
                   <option value="Đã bán">Đã bán</option>
                 </select>
@@ -376,7 +376,7 @@
                   <span>Mặt tiền (m) <span class="text-danger">*</span></span>
                 </label>
                 <div class="input-group input-group-md">
-                  <input type="number" min="0" class="form-control" v-model.number="form.matTienNha"
+                  <input type="number" min="0" class="form-control" step="0.01" v-model.number="form.matTienNha"
                          placeholder="Mặt tiền tổng tài sản">
                   <span class="input-group-text"><i class="fas fa-home"></i></span>
                 </div>
@@ -470,7 +470,84 @@
               </div>
             </div>
           </section>
-<!-- Thông tin nhà (Chỉ hiển thị khi là nhà) -->
+
+          <!-- Người bán thành công -->
+          <section v-if="isSold" class="mb-5">
+            <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+              <div class="section-icon bg-success-light">
+                <i class="fas fa-user-check text-success"></i>
+              </div>
+              <div>
+                <h2 class="h5 fw-bold mb-1">Người bán thành công</h2>
+                <p class="text-muted small mb-0">Thông tin người chốt giao dịch</p>
+              </div>
+            </div>
+
+            <div class="row g-4">
+              <!-- Tìm người bán -->
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">
+                  Email / Số điện thoại <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+        <span class="input-group-text">
+          <i class="fas fa-search"></i>
+        </span>
+                  <input
+                      v-model.trim="form.nguoiBanSearch"
+                      @blur="handleNguoiBanLookup"
+                      type="text"
+                      class="form-control"
+                      placeholder="Nhập email hoặc SĐT"
+                  />
+                </div>
+                <small v-if="errors.nguoiBanSearch" class="text-danger">
+                  {{ errors.nguoiBanSearch }}
+                </small>
+              </div>
+
+              <!-- Tên người bán -->
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">
+                  Người bán
+                </label>
+                <input
+                    type="text"
+                    class="form-control bg-light"
+                    readonly
+                    v-model="form.nguoiBanTen"
+                    placeholder="Tự động load"
+                />
+              </div>
+
+              <!-- Giá bán thành công -->
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">
+                  Giá bán thành công <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <input
+                      type="number"
+                      min="0"
+                      step="1000000"
+                      v-model.number="form.giaBanThanhCong"
+                      class="form-control"
+                      placeholder="Giá chốt"
+                  />
+                  <span class="input-group-text">VNĐ</span>
+                </div>
+                <small v-if="errors.giaBanThanhCong" class="text-danger">
+                  {{ errors.giaBanThanhCong }}
+                </small>
+                <small v-else-if="form.giaBanThanhCong" class="text-info fw-medium mt-1 d-block">
+                  <i class="fas fa-chart-line me-1"></i>{{ formatMoneyVN(form.giaBanThanhCong) }}
+                </small>
+
+              </div>
+            </div>
+          </section>
+
+          <!-- Thông tin nhà (Chỉ hiển thị khi là nhà) -->
           <section v-if="isHouse" class="mb-5">
             <div class="d-flex align-items-center mb-4 border-bottom pb-3">
               <div class="section-icon bg-warning-light">
@@ -887,6 +964,37 @@ import addressData from '/src/assets/js/address.json'
 import {showLoading, updateAlertSuccess} from "../../assets/js/alertService.js";
 import router from "../../router/index.js";
 
+const handleNguoiBanLookup = async () => {
+  if (!form.nguoiBanSearch) {
+    errors.nguoiBanSearch = 'Nhập email hoặc số điện thoại'
+    return
+  }
+
+  errors.nguoiBanSearch = ''
+
+  try {
+    const { data } = await api.get(
+        '/admin.thg/product/admin/tim-nguoi',
+        {
+          params: { search: form.nguoiBanSearch }
+        }
+    )
+
+    if (data) {
+      form.nguoiBanId = data.id
+      form.nguoiBanTen = data.fullName || data.name
+    } else {
+      form.nguoiBanId = null
+      form.nguoiBanTen = ''
+      errors.nguoiBanSearch = 'Không tìm thấy người bán'
+    }
+  } catch (e) {
+    errors.nguoiBanSearch = 'Lỗi tìm người bán'
+  }
+}
+
+const isSold = computed(() => form.status === 'Đã bán')
+
 // Format money function
 function formatMoneyVN(value) {
   if (value == null || isNaN(value)) return "0";
@@ -949,7 +1057,12 @@ const form = reactive({
   rooms: [defaultRoom()],
   hienThongTinChuKhiMoKhoa: true,
   hienLienHeKhiMoKhoa: true,
-  lienHeMoKhoa: ''
+  lienHeMoKhoa: '',
+  nguoiBanId: null,
+  nguoiBanTen: '',
+  nguoiBanSearch: '',
+  giaBanThanhCong: null,
+
 })
 
 const formAddress = reactive({ street: '', ward: '', province: '' })
@@ -1108,6 +1221,17 @@ const validateForm = () => {
     isValid = false
   }
 
+  if (isSold.value) {
+    if (!form.nguoiBanId) {
+      errors.nguoiBanSearch = 'Bắt buộc chọn người bán'
+      isValid = false
+    }
+
+    if (!form.giaBanThanhCong || form.giaBanThanhCong <= 0) {
+      errors.giaBanThanhCong = 'Nhập giá bán thành công'
+      isValid = false
+    }
+  }
 
   if (isHouse.value) {
     track(requireNumberField(form.floorArea, 'floorArea', 'Nhập diện tích sàn hợp lệ'))
@@ -1189,6 +1313,16 @@ const handleOwnerLookup = async () => {
   }
 }
 
+watch(() => form.status, (newStatus) => {
+  if (newStatus !== 'Đã bán') {
+    form.nguoiBanId = null
+    form.nguoiBanTen = ''
+    form.nguoiBanSearch = ''
+    form.giaBanThanhCong = null
+  }
+})
+
+
 const resetForm = () => {
   Object.assign(form, {
     oldAddress: '',
@@ -1231,6 +1365,10 @@ const resetForm = () => {
     ownerFullName: '',
     ownerPhone: '',
     rooms: [defaultRoom()],
+    nguoiBanId: null,
+    nguoiBanTen: '',
+    nguoiBanSearch: '',
+    giaBanThanhCong: null,
   })
   Object.assign(formAddress, { street: '', ward: '', province: '' })
   ownerSearch.value = ''
@@ -1262,6 +1400,8 @@ const submitForm = async () => {
   ownerLookupMessage.value = ''
   if (!validateForm()) {
     // Scroll to first error
+
+
     const firstError = Object.keys(errors)[0]
     if (firstError) {
       const element = document.querySelector(`[v-model="${firstError}"]`) || document.querySelector(`select[v-model="${firstError}"]`)

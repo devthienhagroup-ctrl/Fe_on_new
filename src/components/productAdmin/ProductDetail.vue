@@ -38,7 +38,7 @@
                 <div class="meta-divider"></div>
 
                 <span class="meta-item">
-                  <span class="meta-label">Số lượt thích:</span>
+                  <span class="meta-label">Số lượt xem:</span>
                   <span class="price-internal">{{ formatMoneyVN(asset.luotXem) }}</span>
                 </span>
                 <div class="meta-divider"></div>
@@ -56,6 +56,41 @@
 
               </div>
             </div>
+            <div v-if="asset.status === 'Đã bán'" class="d-flex align-items-center gap-3 p-3 rounded-3 bg-light border mt-2">
+              <!-- ICON -->
+              <div
+                  class="d-flex align-items-center justify-content-center
+           rounded-3
+           text-white shadow"
+                  style="width: 48px; height: 48px;"
+              >
+                <i class="fa-solid fa-user-check fs-5" style="color: black"></i>
+              </div>
+
+              <!-- INFO -->
+              <div class="flex-grow-1">
+                <div class="fw-semibold text-dark">
+                  {{ asset.nguoiBanTen || 'Chưa cập nhật người bán' }}
+                </div>
+                <div class="text-muted small">
+                  Người bán thành công
+                </div>
+              </div>
+
+              <!-- PRICE -->
+              <div class="text-end">
+                <div class="fw-bold text-success fs-5">
+                  {{ asset.giaBanThanhCong
+                    ? formatMoneyVN(asset.giaBanThanhCong)
+                    : 'Chưa cập nhật'
+                  }}
+                </div>
+                <div class="text-muted small">
+                  Giá bán thành công
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <div class="header-actions">
@@ -679,7 +714,7 @@
     if (!status) return "—";
 
     const map = {
-      "Chưa định giá sơ bộ": "Chưa định giá sơ bộ",
+      "Chưa định giá": "Chưa định giá",
       "Đã định giá sơ bộ": "Đã định giá sơ bộ",
       "Đã bán": "Đã bán",
       "Bán nhanh 30 ngày": "Bán nhanh 30 ngày"
@@ -690,7 +725,7 @@
 
   function badgeStatus(status) {
     switch (status) {
-      case "Chưa định giá sơ bộ":
+      case "Chưa định giá":
         return "badge rounded-pill bg-warning-subtle text-warning-emphasis px-3 py-2";
 
       case "Đã định giá sơ bộ":

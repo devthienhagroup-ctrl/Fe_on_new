@@ -108,9 +108,15 @@
           <div class="section-header">
             <h3 class="section-title">
               <i class="fa-solid fa-warehouse"></i>
-              Tài sản đang quản lý
+
+              {{ props.type === 'HOST'
+                ? 'Tài sản đang quản lý'
+                : 'Các căn đã bán thành công'
+              }}
+
               <span class="asset-count">{{ host.assets?.length || 0 }}</span>
             </h3>
+
           </div>
 
           <div v-if="!host.assets || host.assets.length === 0" class="empty-assets">
@@ -144,16 +150,34 @@
                         <span class="label">Giá bán</span>
                         <span class="value">{{ formatMoney(asset.giaBan) }}</span>
                       </div>
-                      <div class="status-tag violet">
-                        <span class="value">{{ asset.trangThai || 'Chưa rõ' }}</span>
-                      </div>
+                      <!-- HOST -->
+                      <template v-if="props.type === 'HOST'">
+                        <div class="status-tag violet">
+                          <span class="value">{{ asset.trangThai || 'Chưa rõ' }}</span>
+                        </div>
+                      </template>
+
+                      <!-- MÔI GIỚI -->
+                      <template v-else>
+                        <div class="price-tag success sold-inline">
+                          <span class="label">
+                            <i class="fa-solid fa-sack-dollar me-1"></i>
+                            Giá bán thành công:
+                          </span>
+                                                  <span class="value">
+                            {{ formatMoney(asset.giaBanThanhCong) }}
+                          </span>
+                        </div>
+
+                      </template>
+
                     </div>
                   </div>
 
                 </div>
               </div>
 
-              <div class="asset-stats">
+              <div class="asset-stats" v-if="props.type === 'HOST'">
                 <div class="stat-box">
                   <div class="stat-icon compact">
                     <i class="fa-solid fa-clipboard-check"></i>
@@ -198,6 +222,10 @@ const props = defineProps({
   host: {
     type: Object,
     required: true
+  },
+  type: {
+    type: String,
+    default: 'HOST' // HOST | MOI_GIOI
   }
 })
 
@@ -207,11 +235,10 @@ const BASE_URL = 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'
 
 // Format functions
 const formatAddress = (raw) => {
-  if (!raw) return '—'
+  if (!raw) return 'Chưa cập nhật'
   return raw
-      .replace(/^\d+\/!!/, '')
-      .replace(/\/!!/g, ', ')
-      .split(', ')
+      .split('/!!')
+      .map(s => s.trim())
       .filter(Boolean)
       .join(', ')
 }
@@ -798,6 +825,42 @@ const handleActivate = () => {
   padding: 24px 32px;
   border-top: 1px solid #e9ecef;
   background: #f8fafc;
+}
+/* =========================
+   GIÁ BÁN THÀNH CÔNG – INLINE
+========================= */
+.sold-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  background: #fee2e2;              /* đỏ nhạt */
+  color: #991b1b;
+
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* label */
+.sold-inline .label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+/* icon */
+.sold-inline i {
+  font-size: 12px;
+  color: #b91c1c;
+}
+
+/* value */
+.sold-inline .value {
+  font-weight: 700;
+  white-space: nowrap;   /* 👈 KHÔNG XUỐNG DÒNG */
 }
 
 .footer-actions {
