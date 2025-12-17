@@ -370,9 +370,59 @@
       </h4>
 
       <!-- CARD LIST -->
-      <div class="d-flex justify-content-center gap-4 flex-wrap">
+      <div
+          v-if="podiumBrokers.length"
+          class="top-broker-podium"
+      >
         <div
-            v-for="item in topBrokers"
+            v-for="item in podiumBrokers"
+            :key="item.employeeId"
+            class="broker-card text-center podium-card"
+            :class="[`rank-${item.rank}`]"
+        >
+          <!-- AVATAR -->
+
+            <div
+                v-if="item.rank <= 3"
+                class="top-text"
+                :class="getTopClass(item.rank)"
+            >
+              TOP {{ item.rank }}
+            </div>
+            <div class="avatar-wrapper mx-auto">
+              <img
+                  :src="item.avatar
+              ? 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + item.avatar
+              :  'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + 'vat-default.jpg'"
+                  class="avatar-img"
+              />
+
+              <!-- BADGE -->
+              <img
+                  src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/huy-hieu.png"
+                  class="badge-icon"
+                  style="width: 45px; height: 45px"
+              />
+            </div>
+
+          <!-- NAME -->
+          <h6 class="fw-semibold mt-3 mb-1" style="font-size: 24px">
+            {{ item.fullName }}
+          </h6>
+
+          <!-- SOLD -->
+          <p class="text-muted small mb-0" style="font-size: 16px">
+            Đã bán {{ item.totalSold }} căn
+          </p>
+        </div>
+      </div>
+
+      <div
+          v-if="otherBrokers.length"
+          class="d-flex justify-content-center gap-4 flex-wrap mt-4"
+      >
+        <div
+            v-for="item in otherBrokers"
             :key="item.employeeId"
             class="broker-card text-center"
         >
@@ -412,6 +462,23 @@
           </p>
         </div>
       </div>
+      <!-- BIỂU ĐỒ THỐNG KÊ MÔI GIỚI -->
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold">
+          Thống kê môi giới theo khu vực
+        </div>
+
+        <div class="card-body" style="height: 320px;">
+          <Bar
+              v-if="brokerLabels.length"
+              :data="chartData"
+              :options="chartOptions"
+          />
+          <div v-else class="text-muted text-center pt-5">
+            Không có dữ liệu thống kê
+          </div>
+        </div>
+      </div>
     </div>
 
 
@@ -444,8 +511,18 @@ import api from "/src/api/api.js";
 import provinces from "/src/assets/js/address.json";
 import CreateHostModal from "./CreateHostModal.vue";
 import HostUpdateModal from "./HostUpdateModal.vue";
+import { Bar } from 'vue-chartjs'
+import {
+  Chart as ChartJS,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend
+} from 'chart.js'
 
-import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
+
+
 const selectedType = ref('HOST'); // HOST | MOI_GIOI
 const data = ref([]);
 const loading = ref(false);
@@ -542,12 +619,124 @@ watch(
       if (newTinh !== oldTinh) {
         filters.value.phuong = ''; // 👈 luôn đưa về "Tất cả phường/quận"
       }
+      if (selectedType.value !== 'HOST') {
+        fetchTopBrokers()    // 👈 hàm gọi API thống kê
+      }
     }
+
 );
 
+const brokerStatistic = ref([])
+const brokerLabels = ref([])
+const brokerValues = ref([])
 
+const fetchBrokerStatisticByArea = async () => {
+  try {
+    console.log('🚀 Gọi API thống kê môi giới theo khu vực...')
 
+    const res = await api.get('/moigioi/statistic-by-area')
 
+    console.log('📊 Data:', res.data)
+
+    // lưu raw data
+    brokerStatistic.value = res.data || []
+
+    // mapping cho chart
+    brokerLabels.value = brokerStatistic.value.map(i => i.area)
+    brokerValues.value = brokerStatistic.value.map(i => i.totalBroker)
+
+    console.log('🏷️ Labels:', brokerLabels.value)
+    console.log('📈 Values:', brokerValues.value)
+
+  } catch (error) {
+    console.error('❌ Lỗi gọi thống kê môi giới:', error)
+
+    // reset khi lỗi
+    brokerStatistic.value = []
+    brokerLabels.value = []
+    brokerValues.value = []
+  }
+}
+
+const chartData = computed(() => ({
+  labels: brokerLabels.value,
+  datasets: [
+    {
+      label: 'Số lượng môi giới',
+      data: brokerValues.value,
+
+      // 🌈 Gradient giả lập (Chart.js v3+)
+      backgroundColor: 'rgba(99, 102, 241, 0.85)', // indigo-500
+      hoverBackgroundColor: 'rgba(79, 70, 229, 0.95)',
+
+      borderRadius: 10,
+      barThickness: 48,
+      maxBarThickness: 56
+    }
+  ]
+}))
+
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+
+  layout: {
+    padding: {
+      top: 30,
+      left: 20,
+      right: 20,
+      bottom: 10
+    }
+  },
+
+  plugins: {
+    legend: {
+      display: false
+    },
+
+    tooltip: {
+      backgroundColor: '#111827', // gray-900
+      titleColor: '#fff',
+      bodyColor: '#E5E7EB',
+      padding: 12,
+      cornerRadius: 8,
+      callbacks: {
+        label: ctx => ` ${ctx.raw} môi giới`
+      }
+    }
+  },
+
+  scales: {
+    x: {
+      grid: {
+        display: false
+      },
+      ticks: {
+        color: '#374151',
+        font: {
+          size: 13,
+          weight: '600'
+        }
+      }
+    },
+
+    y: {
+      beginAtZero: true,
+      suggestedMax: Math.max(...brokerValues.value) + 1, // 👈 tránh 0–1
+      ticks: {
+        precision: 0,
+        stepSize: 1,
+        color: '#6B7280',
+        font: {
+          size: 12
+        }
+      },
+      grid: {
+        color: '#E5E7EB'
+      }
+    }
+  }
+}
 const onPageSizeChange = () => {
   pageNo.value = 0;
   fetchData();
@@ -566,6 +755,7 @@ watch(selectedType, () => {
   if (selectedType.value !== 'HOST') {
     console.log( "Chạy" )
     fetchTopBrokers()
+    fetchBrokerStatisticByArea()
   } else {
     topBrokers.value = []
   }
@@ -574,6 +764,8 @@ watch(selectedType, () => {
 
 const topBrokers = ref([])
 const loadingTopBroker = ref(false)
+const podiumBrokers = computed(() => topBrokers.value.slice(0, 3))
+const otherBrokers = computed(() => topBrokers.value.slice(3))
 
 const fetchTopBrokers = async () => {
   loadingTopBroker.value = true
@@ -1161,11 +1353,21 @@ th {
   transform: scale(0.96);
 }
 
+/* TOP BROKER PODIUM */
+.top-broker-podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
 /* CARD – to hơn, dáng dọc 6:4 */
 .broker-card {
-  width: 280px;         /* 👈 6 : 4 (cao hơn) */
-  background: #fff;
-  text-align: end;
+  width: var(--card-size, 280px);
+  background: var(--card-bg, #ffffff);
+  text-align: center;
   border-radius: 24px;
   padding: 28px 20px 28px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
@@ -1173,6 +1375,17 @@ th {
   display: flex;
   flex-direction: column;
   align-items: center;
+  align-self: flex-end;
+  transform: scale(var(--scale, 1));
+  transform-origin: bottom center;
+  transition: transform 0.2s ease;
+}
+
+.podium-card {
+  --card-size: 280px;
+  --scale: 1;
+  --order: 0;
+  order: var(--order);
 }
 
 /* AVATAR – viền xanh ngoài */
@@ -1225,23 +1438,90 @@ th {
   text-transform: uppercase;
 }
 
+/* podium ranks */
+.podium-card.rank-1 {
+  --card-size: 300px;
+  --scale: 1;
+  --order: 2;
+  --card-bg: #e6f1ff;
+}
+
+.podium-card.rank-2 {
+  --card-size: 260px;
+  --scale: 0.94;
+  --order: 1;
+  --card-bg: #ede9fe;
+}
+
+.podium-card.rank-3 {
+  --card-size: 240px;
+  --scale: 0.88;
+  --order: 3;
+  --card-bg: #e3f7f5;
+}
+
 
 /* TOP 1 */
 .top-text.top-1 {
   font-size: 36px;
-  color: #F59E0B; /* vàng */
+  background-image: linear-gradient(
+      120deg,
+      #F59E0B 20%,
+      #FDE68A 35%,
+      #F59E0B 50%,
+      #FBBF24 65%,
+      #F59E0B 80%
+  );
+  text-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
 }
+
 
 /* TOP 2 */
 .top-text.top-2 {
   font-size: 30px;
-  color: #6B7280; /* xám */
+  background-image: linear-gradient(
+      120deg,
+      #6B7280 20%,
+      #E5E7EB 40%,
+      #9CA3AF 60%,
+      #6B7280 80%
+  );
+  text-shadow: 0 0 10px rgba(156, 163, 175, 0.3);
+  animation-duration: 3.5s;
 }
+
 
 /* TOP 3 */
 .top-text.top-3 {
   font-size: 24px;
-  color: #B45309; /* đồng */
+  background-image: linear-gradient(
+      120deg,
+      #B45309 20%,
+      #FCD34D 45%,
+      #92400E 70%
+  );
+  text-shadow: 0 0 8px rgba(180, 83, 9, 0.3);
+  animation-duration: 4s;
+}
+
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+.top-text {
+  font-weight: 800;
+  position: relative;
+  display: inline-block;
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: shimmer 3s linear infinite;
 }
 
 

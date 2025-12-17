@@ -1,955 +1,8 @@
-diff --git a/src/components/host/HostUpdateModal.vue b/src/components/host/HostUpdateModal.vue
-new file mode 100644
-index 0000000000000000000000000000000000000000..f620c899114f40c940be377b0676250c70863d5b
---- /dev/null
-+++ b/src/components/host/HostUpdateModal.vue
-@@ -0,0 +1,873 @@
-+<template>
-+  <div class="modal-overlay" @click.self="handleClose">
-+    <div class="modal-container">
-+      <!-- Header -->
-+      <div class="modal-header">
-+        <div class="header-content">
-+          <div class="title-section">
-+            <div class="title-icon">
-+              <i class="fas fa-user-edit"></i>
-+            </div>
-+            <div>
-+              <h2 class="modal-title">Cập nhật Host</h2>
-+              <p class="modal-subtitle">Chỉnh sửa thông tin chủ nhà</p>
-+            </div>
-+          </div>
-+          <button class="close-button" @click="handleClose">
-+            <i class="fas fa-times"></i>
-+          </button>
-+        </div>
-+      </div>
-+
-+      <!-- Form Content -->
-+      <div class="modal-content">
-+        <form @submit.prevent="handleSubmit" class="host-form">
-+          <!-- Basic Information Section -->
-+          <div class="form-section">
-+            <div class="section-header">
-+              <div class="section-icon section-icon-blue">
-+                <i class="fas fa-id-card"></i>
-+              </div>
-+              <h3>Thông tin cơ bản</h3>
-+            </div>
-+
-+            <div class="form-grid three-cols">
-+              <!-- Full Name -->
-+              <div class="form-group">
-+                <label class="form-label">
-+                  <i class="fas fa-user text-sky"></i>
-+                  Họ và tên
-+                </label>
-+                <div class="input-wrapper">
-+                  <i class="input-icon fas fa-user"></i>
-+                  <input
-+                      v-model.trim="fullName"
-+                      type="text"
-+                      class="form-input"
-+                      placeholder="Nguyễn Văn A"
-+                  />
-+                </div>
-+                <div v-if="fieldErrors.fullName" class="error-message">
-+                  <i class="fas fa-exclamation-circle"></i>
-+                  {{ fieldErrors.fullName }}
-+                </div>
-+              </div>
-+
-+              <!-- Phone -->
-+              <div class="form-group">
-+                <label class="form-label">
-+                  <i class="fas fa-phone text-emerald"></i>
-+                  Số điện thoại
-+                </label>
-+                <div class="input-wrapper">
-+                  <i class="input-icon fas fa-phone"></i>
-+                  <input
-+                      v-model="phone"
-+                      type="tel"
-+                      class="form-input"
-+                      placeholder="098xxxxxxx"
-+                      @input="formatPhone"
-+                  />
-+                </div>
-+                <div v-if="fieldErrors.phone" class="error-message">
-+                  <i class="fas fa-exclamation-circle"></i>
-+                  {{ fieldErrors.phone }}
-+                </div>
-+              </div>
-+
-+              <!-- Gender -->
-+              <div class="form-group">
-+                <label class="form-label">
-+                  <i class="fas fa-venus-mars text-pink"></i>
-+                  Giới tính
-+                </label>
-+                <div class="gender-selector">
-+                  <button
-+                      type="button"
-+                      class="gender-option"
-+                      :class="{ 'active': gender === true }"
-+                      @click="gender = true"
-+                  >
-+                    <i class="fas fa-mars"></i>
-+                    <span>Nam</span>
-+                  </button>
-+                  <button
-+                      type="button"
-+                      class="gender-option"
-+                      :class="{ 'active': gender === false }"
-+                      @click="gender = false"
-+                  >
-+                    <i class="fas fa-venus"></i>
-+                    <span>Nữ</span>
-+                  </button>
-+                </div>
-+              </div>
-+
-+              <!-- Avatar -->
-+              <div class="form-group avatar-upload">
-+                <label class="form-label">
-+                  <i class="fas fa-image text-amber"></i>
-+                  Avatar
-+                </label>
-+                <div class="upload-area" @click="triggerFileInput">
-+                  <div class="upload-content">
-+                    <img
-+                        v-if="avatarPreview"
-+                        :src="avatarPreview"
-+                        alt="Avatar preview"
-+                        class="avatar-preview"
-+                        @error="handlePreviewError"
-+                    />
-+                    <div v-else class="upload-placeholder">
-+                      <i class="fas fa-cloud-upload-alt"></i>
-+                      <p>Tải ảnh lên</p>
-+                      <span class="upload-hint">JPG, PNG, WEBP • Tối đa 2MB</span>
-+                    </div>
-+                  </div>
-+                  <input
-+                      ref="fileInput"
-+                      type="file"
-+                      class="file-input"
-+                      accept="image/jpeg,image/png,image/webp"
-+                      @change="onAvatarChange"
-+                  />
-+                </div>
-+                <div v-if="avatarError" class="error-message">
-+                  <i class="fas fa-exclamation-circle"></i>
-+                  {{ avatarError }}
-+                </div>
-+              </div>
-+            </div>
-+          </div>
-+
-+          <!-- Address Section -->
-+          <div class="form-section">
-+            <div class="section-header">
-+              <div class="section-icon section-icon-green">
-+                <i class="fas fa-map-marker-alt"></i>
-+              </div>
-+              <h3>Địa chỉ</h3>
-+            </div>
-+
-+            <div class="form-grid two-cols">
-+              <!-- Province -->
-+              <div class="form-group">
-+                <label class="form-label">
-+                  <i class="fas fa-city text-indigo"></i>
-+                  Tỉnh/Thành phố
-+                </label>
-+                <div class="select-wrapper">
-+                  <i class="input-icon fas fa-city"></i>
-+                  <select
-+                      v-model="province"
-+                      class="form-select"
-+                  >
-+                    <option value="">Chọn tỉnh/thành phố</option>
-+                    <option v-for="p in provinces" :key="p.code" :value="p.name">
-+                      {{ p.name }}
-+                    </option>
-+                  </select>
-+                  <i class="select-arrow fas fa-chevron-down"></i>
-+                </div>
-+                <div v-if="fieldErrors.province" class="error-message">
-+                  <i class="fas fa-exclamation-circle"></i>
-+                  {{ fieldErrors.province }}
-+                </div>
-+              </div>
-+
-+              <!-- Ward -->
-+              <div class="form-group">
-+                <label class="form-label">
-+                  <i class="fas fa-map-signs text-orange"></i>
-+                  Phường/Xã
-+                </label>
-+                <div class="select-wrapper">
-+                  <i class="input-icon fas fa-map-signs"></i>
-+                  <select
-+                      v-model="ward"
-+                      class="form-select"
-+                      :class="{ 'disabled': !province }"
-+                      :disabled="!province"
-+                  >
-+                    <option value="">Chọn phường/xã</option>
-+                    <option v-for="w in wards" :key="w.code" :value="w.name">
-+                      {{ w.name }}
-+                    </option>
-+                  </select>
-+                  <i class="select-arrow fas fa-chevron-down"></i>
-+                </div>
-+                <div v-if="fieldErrors.ward" class="error-message">
-+                  <i class="fas fa-exclamation-circle"></i>
-+                  {{ fieldErrors.ward }}
-+                </div>
-+              </div>
-+
-+              <!-- Detail Address -->
-+              <div class="form-group">
-+                <label class="form-label">
-+                  <i class="fas fa-home text-purple"></i>
-+                  Địa chỉ chi tiết
-+                </label>
-+                <div class="input-wrapper">
-+                  <i class="input-icon fas fa-home"></i>
-+                  <input
-+                      v-model.trim="detailAddress"
-+                      type="text"
-+                      class="form-input"
-+                      placeholder="123 Đường Lê Lợi"
-+                  />
-+                </div>
-+                <div v-if="fieldErrors.detailAddress" class="error-message">
-+                  <i class="fas fa-exclamation-circle"></i>
-+                  {{ fieldErrors.detailAddress }}
-+                </div>
-+              </div>
-+
-+              <!-- Old Address -->
-+              <div class="form-group">
-+                <label class="form-label">
-+                  <i class="fas fa-history text-gray"></i>
-+                  Địa chỉ cũ
-+                </label>
-+                <div class="input-wrapper">
-+                  <i class="input-icon fas fa-history"></i>
-+                  <input
-+                      v-model.trim="oldAddress"
-+                      type="text"
-+                      class="form-input"
-+                      placeholder="Nhập địa chỉ cũ (nếu có)"
-+                  />
-+                </div>
-+              </div>
-+            </div>
-+          </div>
-+        </form>
-+      </div>
-+
-+      <!-- Footer -->
-+      <div class="modal-footer">
-+        <div class="footer-actions">
-+          <button type="button" class="btn btn-secondary" @click="handleClose">
-+            <i class="fas fa-times"></i>
-+            Huỷ
-+          </button>
-+          <button
-+              type="submit"
-+              class="btn btn-primary"
-+              :disabled="isSubmitting"
-+              @click="handleSubmit"
-+          >
-+            <i class="fas fa-save"></i>
-+            <span v-if="isSubmitting">Đang lưu...</span>
-+            <span v-else>Cập nhật</span>
-+          </button>
-+        </div>
-+      </div>
-+    </div>
-+  </div>
-+</template>
-+
-+<script setup>
-+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-+import addressJson from '/src/assets/js/address.json'
-+
-+const props = defineProps({
-+  host: {
-+    type: Object,
-+    required: true
-+  }
-+})
-+
-+const emit = defineEmits(['close', 'reload'])
-+
-+const fullName = ref('')
-+const phone = ref('')
-+const gender = ref(true)
-+const province = ref('')
-+const ward = ref('')
-+const detailAddress = ref('')
-+const oldAddress = ref('')
-+
-+const avatarFile = ref(null)
-+const avatarPreview = ref('')
-+const avatarError = ref('')
-+const fileInput = ref(null)
-+
-+const DEFAULT_AVATAR = 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/vat-default.jpg'
-+
-+const fieldErrors = ref({
-+  fullName: '',
-+  phone: '',
-+  province: '',
-+  ward: '',
-+  detailAddress: ''
-+})
-+
-+const isSubmitting = ref(false)
-+
-+const addressData = ref(addressJson)
-+const provinces = computed(() => addressData.value)
-+const selectedProvince = computed(() =>
-+    addressData.value.find(p => p.name === province.value)
-+)
-+const wards = computed(() => selectedProvince.value?.wards || [])
-+
-+const formatPhone = (event) => {
-+  let value = event.target.value.replace(/\D/g, '')
-+  if (value.length > 0) {
-+    if (value.startsWith('84')) {
-+      value = '0' + value.slice(2)
-+    }
-+    value = value.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
-+  }
-+  phone.value = value
-+}
-+
-+const parseAddress = (address) => {
-+  if (!address) return { detail: '', ward: '', province: '' }
-+  const [detail = '', wardValue = '', provinceValue = ''] = address.split('/!!')
-+  return { detail, ward: wardValue, province: provinceValue }
-+}
-+
-+const populateData = () => {
-+  const parsed = parseAddress(props.host?.address)
-+  fullName.value = props.host?.fullName || ''
-+  phone.value = props.host?.phone ? props.host.phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3') : ''
-+  gender.value = props.host?.gender ?? true
-+  province.value = parsed.province
-+  ward.value = parsed.ward
-+  detailAddress.value = parsed.detail
-+  oldAddress.value = props.host?.oldAddress || ''
-+  avatarPreview.value = props.host?.avatar
-+      ? `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${props.host.avatar}`
-+      : DEFAULT_AVATAR
-+  fieldErrors.value = { fullName: '', phone: '', province: '', ward: '', detailAddress: '' }
-+}
-+
-+watch(() => props.host, populateData, { immediate: true, deep: true })
-+
-+watch(province, () => {
-+  ward.value = ''
-+})
-+
-+const triggerFileInput = () => {
-+  fileInput.value?.click()
-+}
-+
-+const onAvatarChange = (event) => {
-+  const file = event.target.files[0]
-+  avatarError.value = ''
-+
-+  if (!file) {
-+    resetAvatar()
-+    return
-+  }
-+
-+  const validTypes = ['image/jpeg', 'image/png', 'image/webp']
-+  if (!validTypes.includes(file.type)) {
-+    avatarError.value = 'Chỉ chấp nhận file JPG, PNG hoặc WEBP'
-+    resetAvatar()
-+    return
-+  }
-+
-+  const maxSize = 2 * 1024 * 1024
-+  if (file.size > maxSize) {
-+    avatarError.value = 'Kích thước file không được vượt quá 2MB'
-+    resetAvatar()
-+    return
-+  }
-+
-+  avatarFile.value = file
-+  const reader = new FileReader()
-+  reader.onload = (e) => {
-+    avatarPreview.value = e.target.result
-+  }
-+  reader.readAsDataURL(file)
-+}
-+
-+const resetAvatar = () => {
-+  avatarFile.value = null
-+  avatarPreview.value = props.host?.avatar
-+      ? `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${props.host.avatar}`
-+      : DEFAULT_AVATAR
-+  if (fileInput.value) {
-+    fileInput.value.value = ''
-+  }
-+}
-+
-+const handlePreviewError = () => {
-+  avatarPreview.value = DEFAULT_AVATAR
-+}
-+
-+const handleClose = () => {
-+  emit('close')
-+}
-+
-+const validateForm = () => {
-+  fieldErrors.value = { fullName: '', phone: '', province: '', ward: '', detailAddress: '' }
-+  let isValid = true
-+
-+  if (!fullName.value.trim()) {
-+    fieldErrors.value.fullName = 'Vui lòng nhập họ và tên'
-+    isValid = false
-+  }
-+
-+  const rawPhone = phone.value.replace(/\s/g, '')
-+  if (!rawPhone) {
-+    fieldErrors.value.phone = 'Vui lòng nhập số điện thoại'
-+    isValid = false
-+  } else if (!/^0\d{9}$/.test(rawPhone)) {
-+    fieldErrors.value.phone = 'Số điện thoại phải có 10 chữ số và bắt đầu bằng 0'
-+    isValid = false
-+  }
-+
-+  if (!province.value) {
-+    fieldErrors.value.province = 'Chọn tỉnh/thành phố'
-+    isValid = false
-+  }
-+
-+  if (!ward.value) {
-+    fieldErrors.value.ward = 'Chọn phường/xã'
-+    isValid = false
-+  }
-+
-+  if (!detailAddress.value.trim()) {
-+    fieldErrors.value.detailAddress = 'Nhập địa chỉ chi tiết'
-+    isValid = false
-+  }
-+
-+  return isValid
-+}
-+
-+const handleSubmit = () => {
-+  if (isSubmitting.value) return
-+  if (!validateForm()) return
-+
-+  isSubmitting.value = true
-+
-+  const payload = {
-+    fullName: fullName.value.trim(),
-+    phone: phone.value.replace(/\s/g, ''),
-+    gender: gender.value,
-+    address: `${detailAddress.value.trim()}/!!${ward.value}/!!${province.value}`,
-+    oldAddress: oldAddress.value.trim(),
-+    avatar: avatarFile.value ? 'Đã chọn file mới' : 'Giữ nguyên'
-+  }
-+
-+  console.log('Host update payload:', payload)
-+  emit('reload')
-+  emit('close')
-+  isSubmitting.value = false
-+}
-+
-+const handleEsc = (event) => {
-+  if (event.key === 'Escape') {
-+    handleClose()
-+  }
-+}
-+
-+onMounted(() => {
-+  window.addEventListener('keydown', handleEsc)
-+})
-+
-+onUnmounted(() => {
-+  window.removeEventListener('keydown', handleEsc)
-+})
-+</script>
-+
-+<style scoped>
-+.modal-overlay {
-+  position: fixed;
-+  inset: 0;
-+  background: rgba(15, 23, 42, 0.6);
-+  display: flex;
-+  align-items: center;
-+  justify-content: center;
-+  z-index: 1000;
-+  backdrop-filter: blur(4px);
-+  padding: 24px;
-+}
-+
-+.modal-container {
-+  width: min(1100px, 95vw);
-+  background: #f8fafc;
-+  border-radius: 24px;
-+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-+  display: flex;
-+  flex-direction: column;
-+  max-height: calc(100vh - 48px);
-+  overflow: hidden;
-+}
-+
-+.modal-header {
-+  padding: 24px;
-+  border-bottom: 1px solid #e2e8f0;
-+  background: white;
-+}
-+
-+.header-content {
-+  display: flex;
-+  justify-content: space-between;
-+  align-items: center;
-+  gap: 16px;
-+}
-+
-+.title-section {
-+  display: flex;
-+  align-items: center;
-+  gap: 12px;
-+}
-+
-+.title-icon {
-+  width: 44px;
-+  height: 44px;
-+  border-radius: 12px;
-+  background: linear-gradient(135deg, #3b82f6, #6366f1);
-+  display: flex;
-+  align-items: center;
-+  justify-content: center;
-+  color: white;
-+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
-+}
-+
-+.modal-title {
-+  margin: 0;
-+  font-size: 20px;
-+  color: #0f172a;
-+}
-+
-+.modal-subtitle {
-+  margin: 4px 0 0;
-+  color: #64748b;
-+  font-size: 14px;
-+}
-+
-+.close-button {
-+  width: 40px;
-+  height: 40px;
-+  border: 1px solid #e2e8f0;
-+  border-radius: 12px;
-+  background: white;
-+  color: #94a3b8;
-+  cursor: pointer;
-+  display: flex;
-+  align-items: center;
-+  justify-content: center;
-+  transition: all 0.2s ease;
-+}
-+
-+.close-button:hover {
-+  background: #f8fafc;
-+  color: #1e293b;
-+  transform: translateY(-1px);
-+}
-+
-+.modal-content {
-+  padding: 20px;
-+  overflow-y: auto;
-+  flex: 1;
-+}
-+
-+.host-form {
-+  display: flex;
-+  flex-direction: column;
-+  gap: 16px;
-+}
-+
-+.form-section {
-+  background: white;
-+  border-radius: 18px;
-+  padding: 16px;
-+  border: 1px solid #e2e8f0;
-+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03);
-+}
-+
-+.section-header {
-+  display: flex;
-+  align-items: center;
-+  gap: 12px;
-+  margin-bottom: 16px;
-+}
-+
-+.section-icon {
-+  width: 38px;
-+  height: 38px;
-+  border-radius: 12px;
-+  display: flex;
-+  align-items: center;
-+  justify-content: center;
-+}
-+
-+.section-icon-blue { background: #e0f2fe; color: #0ea5e9; }
-+.section-icon-green { background: #dcfce7; color: #16a34a; }
-+
-+.section-header h3 {
-+  margin: 0;
-+  color: #0f172a;
-+  font-size: 16px;
-+}
-+
-+.form-grid {
-+  display: grid;
-+  gap: 12px 16px;
-+}
-+
-+.form-grid.two-cols {
-+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-+}
-+
-+.form-grid.three-cols {
-+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-+}
-+
-+.form-group {
-+  display: flex;
-+  flex-direction: column;
-+  gap: 8px;
-+}
-+
-+.form-label {
-+  font-size: 14px;
-+  font-weight: 500;
-+  color: #475569;
-+}
-+
-+.text-sky { color: #0284c7; }
-+.text-emerald { color: #059669; }
-+.text-pink { color: #db2777; }
-+.text-amber { color: #d97706; }
-+.text-indigo { color: #4f46e5; }
-+.text-orange { color: #ea580c; }
-+.text-purple { color: #7c3aed; }
-+.text-gray { color: #6b7280; }
-+
-+.input-wrapper, .select-wrapper {
-+  position: relative;
-+}
-+
-+.input-icon {
-+  position: absolute;
-+  left: 12px;
-+  top: 50%;
-+  transform: translateY(-50%);
-+  color: #94a3b8;
-+  font-size: 16px;
-+}
-+
-+.form-input {
-+  width: 100%;
-+  padding: 12px 12px 12px 40px;
-+  border: 1px solid #e2e8f0;
-+  border-radius: 14px;
-+  font-size: 14px;
-+  color: #1e293b;
-+  background: white;
-+  transition: all 0.2s ease;
-+}
-+
-+.form-input:focus {
-+  outline: none;
-+  border-color: #3b82f6;
-+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-+}
-+
-+.form-select {
-+  width: 100%;
-+  padding: 12px 40px 12px 40px;
-+  border: 1px solid #e2e8f0;
-+  border-radius: 14px;
-+  font-size: 14px;
-+  color: #1e293b;
-+  background: white;
-+  appearance: none;
-+  cursor: pointer;
-+  transition: all 0.2s ease;
-+}
-+
-+.form-select:focus {
-+  outline: none;
-+  border-color: #3b82f6;
-+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-+}
-+
-+.form-select.disabled {
-+  background: #f1f5f9;
-+  cursor: not-allowed;
-+  opacity: 0.6;
-+}
-+
-+.select-arrow {
-+  position: absolute;
-+  right: 12px;
-+  top: 50%;
-+  transform: translateY(-50%);
-+  color: #64748b;
-+  pointer-events: none;
-+}
-+
-+.gender-selector {
-+  display: flex;
-+  gap: 10px;
-+}
-+
-+.gender-option {
-+  flex: 1;
-+  padding: 10px 12px;
-+  border: 1px solid #e2e8f0;
-+  border-radius: 14px;
-+  background: white;
-+  display: flex;
-+  align-items: center;
-+  justify-content: center;
-+  gap: 8px;
-+  cursor: pointer;
-+  transition: all 0.2s ease;
-+}
-+
-+.gender-option:hover {
-+  border-color: #3b82f6;
-+}
-+
-+.gender-option.active {
-+  background: #2563eb;
-+  color: white;
-+  border-color: #2563eb;
-+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.15);
-+}
-+
-+.avatar-upload {
-+  grid-column: span 2;
-+}
-+
-+.upload-area {
-+  border: 1px dashed #cbd5e1;
-+  border-radius: 18px;
-+  padding: 12px;
-+  background: #f8fafc;
-+  cursor: pointer;
-+  transition: all 0.2s ease;
-+  min-height: 120px;
-+  display: flex;
-+  align-items: center;
-+  justify-content: center;
-+}
-+
-+.upload-area:hover {
-+  border-color: #2563eb;
-+  background: #eff6ff;
-+}
-+
-+.upload-content {
-+  text-align: center;
-+}
-+
-+.upload-placeholder {
-+  color: #64748b;
-+  display: flex;
-+  flex-direction: column;
-+  align-items: center;
-+  gap: 8px;
-+}
-+
-+.upload-placeholder i {
-+  font-size: 26px;
-+}
-+
-+.upload-hint {
-+  font-size: 12px;
-+  color: #94a3b8;
-+}
-+
-+.avatar-preview {
-+  width: 120px;
-+  height: 120px;
-+  border-radius: 50%;
-+  object-fit: cover;
-+  border: 4px solid white;
-+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
-+}
-+
-+.file-input {
-+  display: none;
-+}
-+
-+.error-message {
-+  display: flex;
-+  align-items: center;
-+  gap: 6px;
-+  color: #ef4444;
-+  font-size: 13px;
-+  margin-top: 6px;
-+}
-+
-+.modal-footer {
-+  padding: 16px 24px;
-+  border-top: 1px solid #e2e8f0;
-+  background: white;
-+  display: flex;
-+  justify-content: flex-end;
-+}
-+
-+.footer-actions {
-+  display: flex;
-+  gap: 12px;
-+}
-+
-+.btn {
-+  border: none;
-+  border-radius: 10px;
-+  padding: 12px 18px;
-+  font-weight: 600;
-+  cursor: pointer;
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 8px;
-+  transition: all 0.2s ease;
-+  font-size: 14px;
-+}
-+
-+.btn-primary {
-+  background: linear-gradient(135deg, #2563eb, #4f46e5);
-+  color: white;
-+  box-shadow: 0 12px 30px rgba(79, 70, 229, 0.25);
-+}
-+
-+.btn-primary:hover {
-+  transform: translateY(-1px);
-+  box-shadow: 0 16px 40px rgba(79, 70, 229, 0.35);
-+}
-+
-+.btn-primary:disabled {
-+  opacity: 0.6;
-+  cursor: not-allowed;
-+  transform: none;
-+  box-shadow: none;
-+}
-+
-+.btn-secondary {
-+  background: white;
-+  color: #475569;
-+  border: 1px solid #e2e8f0;
-+}
-+
-+.btn-secondary:hover {
-+  background: #f8fafc;
-+  color: #0f172a;
-+}
-+
-+@media (max-width: 768px) {
-+  .modal-container {
-+    width: 100%;
-+    height: 100%;
-+    border-radius: 0;
-+  }
-+
-+  .modal-overlay {
-+    padding: 0;
-+  }
-+
-+  .modal-content {
-+    padding: 16px;
-+  }
-+}
-+</style>
 diff --git a/src/components/host/Test.vue b/src/components/host/Test.vue
-index 2404d9c35a380f9ac347b7a9dacbe8ef5a16f058..fecc7f9b726d82adb6964bf56aec5b4703c33d4a 100644
+index 9766b9352baa1252186c85914ce4637287d794b7..3a57968a06e532b883b1e85b3cca62c4c4e22c13 100644
 --- a/src/components/host/Test.vue
 +++ b/src/components/host/Test.vue
-@@ -195,50 +195,59 @@
-                         class="form-check-input status-toggle"
-                         type="checkbox"
-                         :checked="item.status"
-                         @click.stop="toggleStatus(item)"
-                     >
-                   </div>
-                   <span
-                       class="badge badge-status ms-2"
-                       :class="item.status ? 'active' : 'inactive'"
-                   >
-                       {{ item.status ? 'Hoạt động' : 'Khoá' }}
-                     </span>
-                 </div>
-               </td>
-               <td class="text-center">
-                 <div class="d-flex justify-content-center gap-1">
-                   <!-- XEM -->
-                   <button
-                       class="btn btn-sm btn-light btn-view"
-                       title="Xem chi tiết"
-                       @click.stop="viewHostDetail(item.id)"
-                   >
-                     <i class="fas fa-eye"></i>
-                   </button>
-
-+                  <!-- CHỈNH SỬA -->
-+                  <button
-+                      class="btn btn-sm btn-light btn-edit"
-+                      title="Chỉnh sửa host"
-+                      @click.stop="openUpdateHost(item.id)"
-+                  >
-+                    <i class="fas fa-pen"></i>
-+                  </button>
-+
-                   <!-- XÓA -->
-                   <button
-                       class="btn btn-sm btn-light btn-delete"
-                       title="Xóa host"
-                       @click.stop="deleteHost(item)"
-                   >
-                     <i class="fas fa-trash text-danger"></i>
-                   </button>
-                 </div>
-               </td>
-
-             </tr>
-
-             <!-- Empty State -->
-             <tr v-if="!loading && data.length === 0">
-               <td colspan="8" class="text-center py-5">
-                 <div class="empty-state">
-                   <i class="fas fa-users-slash fa-2x text-muted mb-3"></i>
-                   <p class="text-muted mb-0">Không tìm thấy host nào</p>
-                 </div>
-               </td>
-             </tr>
-             </tbody>
-           </table>
-         </div>
-@@ -301,63 +310,70 @@
-                 title="Trang sau"
-                 @click="pageNo++"
-             >
-               <i class="fas fa-chevron-right"></i>
-             </button>
-
-             <!-- LAST PAGE -->
-             <button
+@@ -348,53 +348,103 @@
                  class="btn btn-outline-secondary"
                  :disabled="pageNo >= totalPages - 1"
                  title="Trang cuối"
@@ -958,253 +11,157 @@ index 2404d9c35a380f9ac347b7a9dacbe8ef5a16f058..fecc7f9b726d82adb6964bf56aec5b47
                <i class="fas fa-angles-right"></i>
              </button>
            </div>
-
          </div>
        </div>
      </div>
-     <HostDetailModal
-         v-if="showDetail"
-         :host="selectedHost"
-         @close="showDetail = false"
-     />
-+    <HostUpdateModal
-+        v-if="showUpdate"
-+        :host="selectedHost"
-+        @close="showUpdate = false"
-+        @reload="fetchData"
-+    />
-     <CreateHostModal
-         v-if="showCreateHostModal"
-         @close="showCreateHostModal = false"
-         @created="fetchData"
-     />
-   </div>
- </template>
+     <div v-if="selectedType !== 'HOST'" class="w-100 text-center mb-4">
+       <!-- TITLE -->
+       <hr/>
+       <h4 class="fw-bold w-100 text-start">Thống kê môi giới</h4>
+       <h4 class="fw-bold mb-4">
+         TOP môi giới chuyên nghiệp tại
+         <span class="text-primary">
+       {{ filters.tinh && filters.tinh.trim() !== ''
+             ? filters.tinh
+             : 'Toàn quốc' }}
+     </span>
+       </h4>
 
- <script setup>
- import { ref, computed, watch, onMounted } from "vue";
- import api from "/src/api/api.js";
- import provinces from "/src/assets/js/address.json";
- import CreateHostModal from "./CreateHostModal.vue";
-+import HostUpdateModal from "./HostUpdateModal.vue";
+       <!-- CARD LIST -->
+-      <div class="d-flex justify-content-center gap-4 flex-wrap">
++      <div
++          v-if="podiumBrokers.length"
++          class="top-broker-podium"
++      >
+         <div
+-            v-for="item in topBrokers"
++            v-for="item in podiumBrokers"
++            :key="item.employeeId"
++            class="broker-card text-center podium-card"
++            :class="[`rank-${item.rank}`]"
++        >
++          <!-- AVATAR -->
++
++            <div
++                v-if="item.rank <= 3"
++                class="top-text"
++                :class="getTopClass(item.rank)"
++            >
++              TOP {{ item.rank }}
++            </div>
++            <div class="avatar-wrapper mx-auto">
++              <img
++                  :src="item.avatar
++              ? 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + item.avatar
++              :  'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + 'vat-default.jpg'"
++                  class="avatar-img"
++              />
++
++              <!-- BADGE -->
++              <img
++                  src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/huy-hieu.png"
++                  class="badge-icon"
++                  style="width: 45px; height: 45px"
++              />
++            </div>
++
++          <!-- NAME -->
++          <h6 class="fw-semibold mt-3 mb-1" style="font-size: 24px">
++            {{ item.fullName }}
++          </h6>
++
++          <!-- SOLD -->
++          <p class="text-muted small mb-0" style="font-size: 16px">
++            Đã bán {{ item.totalSold }} căn
++          </p>
++        </div>
++      </div>
++
++      <div
++          v-if="otherBrokers.length"
++          class="d-flex justify-content-center gap-4 flex-wrap mt-4"
++      >
++        <div
++            v-for="item in otherBrokers"
+             :key="item.employeeId"
+             class="broker-card text-center"
+         >
+           <!-- AVATAR -->
 
- const data = ref([]);
- const loading = ref(false);
- const totalRecords = ref(0);
- const totalPages = ref(1);
+             <div
+                 v-if="item.rank <= 3"
+                 class="top-text"
+                 :class="getTopClass(item.rank)"
+             >
+               TOP {{ item.rank }}
+             </div>
+             <div class="avatar-wrapper mx-auto">
+               <img
+                   :src="item.avatar
+               ? 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + item.avatar
+               :  'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + 'vat-default.jpg'"
+                   class="avatar-img"
+               />
 
- const pageNo = ref(0);
- const pageSize = ref(10);
-
- const goFirstPage = () => {
-   if (pageNo.value > 0) {
-     pageNo.value = 0;
-   }
+               <!-- BADGE -->
+               <img
+                   src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/huy-hieu.png"
+                   class="badge-icon"
+                   style="width: 45px; height: 45px"
+@@ -552,50 +602,52 @@ const onPageSizeChange = () => {
+   pageNo.value = 0;
+   fetchData();
  };
 
- const goLastPage = () => {
-   if (pageNo.value < totalPages.value - 1) {
-     pageNo.value = totalPages.value - 1;
-   }
+ const selectHost = (host) => {
+   console.log('Selected host:', host);
+   // Add your host selection logic here
  };
 
- const filters = ref({
-   search: null,
-   gender: null,
-   status: null,
-@@ -477,64 +493,81 @@ onMounted(() => {
+ watch(selectedType, () => {
+   pageNo.value = 0;
+   fetchData();
 
- const toggleStatus = async (item) => {
-   // lưu trạng thái cũ để rollback nếu lỗi
-   const oldStatus = item.status;
+   console.log( selectedType.value )
+   if (selectedType.value !== 'HOST') {
+     console.log( "Chạy" )
+     fetchTopBrokers()
+   } else {
+     topBrokers.value = []
+   }
 
-   // update UI trước cho mượt
-   item.status = !item.status;
+ });
 
+ const topBrokers = ref([])
+ const loadingTopBroker = ref(false)
++const podiumBrokers = computed(() => topBrokers.value.slice(0, 3))
++const otherBrokers = computed(() => topBrokers.value.slice(3))
+
+ const fetchTopBrokers = async () => {
+   loadingTopBroker.value = true
    try {
-     const res = await api.put(`/host/${item.id}/toggle-status`);
+     const res = await api.get('/moigioi/top-moi-gioi', {
+       params: {
+         area: filters.value.tinh   // ✅ dùng filters.tinh
+       }
+     })
 
-     // nếu backend trả status mới
-     if (typeof res.data === 'boolean') {
-       item.status = res.data;
-     }
-   } catch (err) {
-     console.error("Toggle status error:", err);
-
-     // rollback UI nếu lỗi
-     item.status = oldStatus;
-
-     alert("Không thể đổi trạng thái host");
+     topBrokers.value = setTopRanks(res.data || [])
+     console.log("Dữ liệu: ", topBrokers.value );
+   } catch (e) {
+     console.error('❌ Lỗi lấy top môi giới', e)
+     topBrokers.value = []
+   } finally {
+     loadingTopBroker.value = false
    }
- };
- const viewHostDetail = async (id) => {
--  try {
--    const res = await api.get(`/host/${id}`);
--    console.log("HOST DETAIL:", res.data);
--    selectedHost.value = res.data
--    showDetail.value = true
--  } catch (e) {
--    console.error("Lỗi lấy chi tiết host:", e);
-+  const detail = await fetchHostDetail(id);
-+  if (detail) {
-+    console.log("HOST DETAIL:", detail);
-+    selectedHost.value = detail;
-+    showDetail.value = true;
-   }
- };
-
- import HostDetailModal from './HostDetailModal.vue'
-
- const showDetail = ref(false)
- const selectedHost = ref(null)
-+const showUpdate = ref(false)
-+
-+const fetchHostDetail = async (id) => {
-+  try {
-+    const res = await api.get(`/host/${id}`);
-+    return res.data;
-+  } catch (e) {
-+    console.error("Lỗi lấy chi tiết host:", e);
-+    return null;
-+  }
-+};
-+
-+const openUpdateHost = async (id) => {
-+  const detail = await fetchHostDetail(id);
-+  if (detail) {
-+    selectedHost.value = detail;
-+    showUpdate.value = true;
-+  }
-+};
-
-
- import { confirmYesNo, showCenterSuccess, showCenterError } from '/src/assets/js/alertService.js'
-
- /* =========================
-    XÓA HOST
- ========================= */
- const deleteHost = (item) => {
-   confirmYesNo(
-       "Xác nhận xóa",
-       `
- <div style="
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   text-align: center;
- ">
-   <p>Bạn có chắc chắn muốn <b>xóa chủ nhà</b>:</p>
-   <p><b>${item.fullName}</b></p>
-   <p class="text-danger small">
-     ⚠ Tất cả tài sản, dữ liệu liên quan sẽ bị xóa vĩnh viễn.
-   </p>
- </div>
- `
-       ,
-@@ -838,103 +871,128 @@ th {
-   color: #ea580c; /* orange */
  }
-
- /* Asset */
- .icon-asset {
-   color: #f8f6f6; /* violet */
+ const getTopClass = (rank) => {
+   if (rank === 1) return 'top-1'
+   if (rank === 2) return 'top-2'
+   if (rank === 3) return 'top-3'
+   return ''
  }
-
- /* Icon hover nhẹ khi hover row */
- .table-row-hover:hover .icon-email,
- .table-row-hover:hover .icon-phone,
- .table-row-hover:hover .icon-address,
- .table-row-hover:hover .icon-asset {
-   filter: brightness(0.85);
- }
- .filter-purple {
-   background: linear-gradient(
-       135deg,
-       #3b3b8f 0%,     /* tím đậm */
-       #4b3dfa 100%   /* tím xanh */
-   );
-   color: #ffffff;
-   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
- }
- .btn-view,
-+.btn-edit,
- .btn-delete {
-   padding: 4px 8px;
-   border-radius: 10px;          /* CỐ ĐỊNH */
-   line-height: 1;
-   display: inline-flex;
-   align-items: center;
-   justify-content: center;
-   transition: all 0.2s ease;
- }
-
-
- /* icon */
- /* =========================
-    RESET CHUNG CHO 2 NÚT
- ========================= */
- .btn-view,
-+.btn-edit,
- .btn-delete {
-   padding: 6px 10px;
-   border-radius: 12px;            /* BO GÓC CỐ ĐỊNH */
-   line-height: 1;
-   display: inline-flex;
-   align-items: center;
-   justify-content: center;
-   background-color: #f8fafc;      /* NỀN LUÔN CÓ */
-   border: 1px solid #e5e7eb;
-   transition: all 0.18s ease;
- }
-
- /* =========================
-    VIEW BUTTON – XANH
- ========================= */
- .btn-view i {
-   color: #1d4ed8;                 /* xanh đậm */
-   font-size: 13px;
- }
-
- /* hover */
- .btn-view:hover {
-   background-color: #dbeafe;
-   border-color: #bfdbfe;
-   transform: translateY(-1px);
-   box-shadow: 0 4px 8px rgba(37, 99, 235, 0.15);
- }
-
- .btn-view:hover i {
-   color: #1e40af;
- }
-
- /* active click */
- .btn-view:active {
-   transform: scale(0.96);
- }
-
-+/* =========================
-+   EDIT BUTTON – VÀNG
-+========================= */
-+.btn-edit i {
-+  color: #d97706;                 /* vàng đậm */
-+  font-size: 13px;
-+}
-+
-+.btn-edit:hover {
-+  background-color: #fef3c7;
-+  border-color: #fde68a;
-+  transform: translateY(-1px);
-+  box-shadow: 0 4px 8px rgba(217, 119, 6, 0.15);
-+}
-+
-+.btn-edit:hover i {
-+  color: #b45309;
-+}
-+
-+.btn-edit:active {
-+  transform: scale(0.96);
-+}
-+
+@@ -1139,62 +1191,83 @@ th {
  /* =========================
     DELETE BUTTON – ĐỎ
  ========================= */
@@ -1230,3 +187,135 @@ index 2404d9c35a380f9ac347b7a9dacbe8ef5a16f058..fecc7f9b726d82adb6964bf56aec5b47
    transform: scale(0.96);
  }
 
++/* TOP BROKER PODIUM */
++.top-broker-podium {
++  display: flex;
++  align-items: flex-end;
++  justify-content: center;
++  gap: 24px;
++  flex-wrap: wrap;
++  margin-bottom: 8px;
++}
++
+ /* CARD – to hơn, dáng dọc 6:4 */
+ .broker-card {
+-  width: 280px;         /* 👈 6 : 4 (cao hơn) */
+-  background: #fff;
+-  text-align: end;
++  width: var(--card-size, 280px);
++  background: var(--card-bg, #ffffff);
++  text-align: center;
+   border-radius: 24px;
+   padding: 28px 20px 28px;
+   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+   position: relative;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
++  align-self: flex-end;
++  transform: scale(var(--scale, 1));
++  transform-origin: bottom center;
++  transition: transform 0.2s ease;
++}
++
++.podium-card {
++  --card-size: 280px;
++  --scale: 1;
++  --order: 0;
++  order: var(--order);
+ }
+
+ /* AVATAR – viền xanh ngoài */
+ .avatar-wrapper {
+   position: relative;
+   width: 172px;
+   height: 172px;
+   border-radius: 50%;
+   background: #2563eb;        /* xanh */
+   display: flex;
+   align-items: center;
+   justify-content: center;
+ }
+
+ /* VÒNG TRẮNG Ở GIỮA (pseudo-element) */
+ .avatar-wrapper::before {
+   content: '';
+   position: absolute;
+   width: 163px;
+   height: 163px;
+   border-radius: 50%;
+   background: #ffffff;
+ }
+
+ /* ẢNH – nằm trong vòng trắng */
+@@ -1203,47 +1276,69 @@ th {
+   width: 155px;
+   height: 155px;
+   border-radius: 50%;
+   object-fit: cover;
+   background: #f1f1f1;
+ }
+
+
+ .badge-icon {
+   position: absolute;
+   bottom: 0px;
+   right: 5px;
+   width: 48px !important;
+   height: 48px !important;
+ }
+ /* base */
+ .top-text {
+   display: block;          /* 👈 BLOCK thật */
+   margin-bottom: 10px;     /* 👈 đẩy avatar xuống */
+
+   font-weight: 900;
+   letter-spacing: 0.5px;
+   text-transform: uppercase;
+ }
+
++/* podium ranks */
++.podium-card.rank-1 {
++  --card-size: 300px;
++  --scale: 1;
++  --order: 2;
++  --card-bg: #e6f1ff;
++}
++
++.podium-card.rank-2 {
++  --card-size: 260px;
++  --scale: 0.94;
++  --order: 1;
++  --card-bg: #ede9fe;
++}
++
++.podium-card.rank-3 {
++  --card-size: 240px;
++  --scale: 0.88;
++  --order: 3;
++  --card-bg: #e3f7f5;
++}
++
+
+ /* TOP 1 */
+ .top-text.top-1 {
+   font-size: 36px;
+   color: #F59E0B; /* vàng */
+ }
+
+ /* TOP 2 */
+ .top-text.top-2 {
+   font-size: 30px;
+   color: #6B7280; /* xám */
+ }
+
+ /* TOP 3 */
+ .top-text.top-3 {
+   font-size: 24px;
+   color: #B45309; /* đồng */
+ }
+
+
+
+ </style>
+\ No newline at end of file
