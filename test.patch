@@ -1,202 +1,1715 @@
-diff --git a/src/components/productAdmin/ProductUser.vue b/src/components/productAdmin/ProductUser.vue
-index c3ec5038770683635825122babd2ac04968a12a1..a3747e9150c24b55b837b17b199d2652c2425a0b 100644
---- a/src/components/productAdmin/ProductUser.vue
-+++ b/src/components/productAdmin/ProductUser.vue
-@@ -1,90 +1,105 @@
+diff --git a/src/components/user/News/Component/CategoryNews.vue b/src/components/user/News/Component/CategoryNews.vue
+index 310ee51580fc4983bf854cc72b84ff088302559a..dcb7719f010f3af2d1fcaacb4e2fa1e081b3d24d 100644
+--- a/src/components/user/News/Component/CategoryNews.vue
++++ b/src/components/user/News/Component/CategoryNews.vue
+@@ -1,27 +1,27 @@
  <template>
-   <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 px-4 py-3" style="padding-top: 90px!important;">
-     <div class="max-w-[1600px] mx-auto">
-       <!-- Bộ lọc nâng cao -->
-       <div class="bg-white rounded-xl shadow-lg border border-slate-300 mb-5 p-4"
-            style="
-             background-image: url('https://s3.cloudfly.vn/thg-storage/uploads-public/thienhagroup_filter_2.png');
-             background-size: cover;
-             background-position: center;
-             background-repeat: no-repeat;
-           ">
--        <div class="filter-header mb-3">
--          <div class="filter-title-wrap">
--            <h1 class="filter-title">
--              Sản Phẩm Thiên Hà Group Dành Riêng Cho Bạn
--            </h1>
--          </div>
-+          <div class="filter-header mb-3">
-+            <div class="filter-title-wrap">
-+              <h1 class="filter-title">
-+                Sản Phẩm Thiên Hà Group Dành Riêng Cho Bạn
-+              </h1>
-+            </div>
+-  <div class="news-container">
++  <div class="news-container" :style="cssVars">
+     <div class="news-layout">
+       <!-- Cột trái (66.67%) -->
+       <div class="left-column">
+         <!-- Thanh danh mục -->
+         <div class="categories-container">
+           <div class="categories-wrapper">
+             <button
+                 class="nav-arrow nav-arrow-left"
+                 @click="scrollCategories(-1)"
+                 v-if="showArrows"
+                 :style="{
+                 borderColor: config.colors.primary,
+                 color: config.colors.primary
+               }"
+             >
+               <svg data-v-b4c27b63="" width="24" height="24" viewBox="0 0 24 24" fill="none"><path data-v-b4c27b63="" d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+             </button>
 
--          <!-- Nút chuyển đổi giữa bảng và thẻ -->
--          <div class="filter-actions">
--            <button
--                @click="viewMode = 'card'"
--                :class="[
-+            <!-- Nút chuyển đổi giữa bảng và thẻ -->
-+            <div class="filter-actions">
-+              <button
-+                  @click="viewMode = 'card'"
-+                  :class="[
-         'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
-         viewMode === 'card'
-           ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-           : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-       ]"
--            >
--              <i class="fa-solid fa-grip text-sm"></i>
--              <span class="text-sm font-medium">Thẻ</span>
--            </button>
-+              >
-+                <i class="fa-solid fa-grip text-sm"></i>
-+                <span class="text-sm font-medium">Thẻ</span>
-+              </button>
-
--            <button
--                @click="viewMode = 'table'"
--                :disabled="isMobile"
--                :class="[
-+              <button
-+                  @click="viewMode = 'table'"
-+                  :disabled="isMobile"
-+                  :class="[
-         'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
-         viewMode === 'table'
-           ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-           : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50',
-         isMobile ? 'opacity-60 cursor-not-allowed' : ''
-       ]"
--            >
--              <i class="fa-solid fa-table text-sm"></i>
--              <span class="text-sm font-medium">Bảng</span>
--            </button>
-+              >
-+                <i class="fa-solid fa-table text-sm"></i>
-+                <span class="text-sm font-medium">Bảng</span>
-+              </button>
-+            </div>
-           </div>
-+
-+        <div v-if="isMobile" class="w-full flex justify-end mb-3">
-+          <button
-+              @click="showFilters = !showFilters"
-+              :class="[
-+        'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
-+        showFilters
-+          ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-+          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-+      ]"
-+          >
-+            <i :class="['fa-solid text-sm', showFilters ? 'fa-chevron-up' : 'fa-chevron-down']"></i>
-+            <span class="text-sm font-medium">{{ showFilters ? 'Thu gọn bộ lọc' : 'Hiển thị bộ lọc' }}</span>
-+          </button>
-         </div>
-
-
-         <!-- Thanh tìm kiếm -->
-         <div class="mb-3">
-           <div class="relative">
-             <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-             <input
-                 v-model="searchQuery"
-                 type="text"
-                 placeholder="Tìm kiếm theo tên chủ nhà hoặc số điện thoại, địa chỉ chi tết..."
-                 class="w-full pl-9 pr-4 py-2 border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all text-sm"
-             />
-           </div>
-         </div>
-
--        <div class="filter-row">
-+        <div class="filter-row" v-show="!isMobile || showFilters">
-
-         <!-- Mức giá -->
-           <div class="filter-item">
-             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
-               <i class="fa-solid fa-dollar-sign text-blue-600 text-xs icon-glow" ></i>
-               Mức Giá
-             </label>
-             <select v-model="filterGiaRange"
-                     class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg
-              focus:ring-2 focus:ring-blue-600 focus:border-transparent
-              bg-white shadow-sm transition-all">
-               <option value="">Tất cả</option>
-               <option value="<1>">&lt; 1 tỷ</option>
-               <option value="1-3">1 - 3 tỷ</option>
-               <option value="3-5">3 - 5 tỷ</option>
-               <option value="5-7">5 - 7 tỷ</option>
-               <option value="7-10">7 - 10 tỷ</option>
-               <option value=">10">&gt; 10 tỷ</option>
-             </select>
-           </div>
-
-           <!-- Tỉnh thành -->
-           <div class="filter-item">
-             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
-               <i class="fa-solid fa-city text-emerald-600 text-xs icon-glow"></i>
-@@ -737,60 +752,67 @@ import NotificationBell from "/src/components/NotificationBell.vue";
-
- import { useAuthStore } from "/src/stores/authStore.js";
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-
- const sidebar = useSidebarStore();
-
- // Data
- const landAssets = ref([]);
- const totalRecords = ref(0);
-
- // Filters
- const filterGiaRange = ref("");
- const filterProvince = ref("");
- const filterWard = ref("");
- const filterStreet = ref("");
- const filterLoaiMH = ref("");
- const filterDTCN = ref("");
- const filterViTri = ref("");
- const filterCreateDate = ref("");
- const filterUpdateDate = ref("");
- const searchQuery = ref("");
- const filterUnlock = ref("");
- const filterStatus = ref("");
- const filterLove = ref(null);
-+const showFilters = ref(false);
-
- // Pagination
- const page = ref(0);
- const pageSize = ref(8);
- const viewMode = ref('card');
- const isMobile = ref(false);
- const updateViewportMode = () => {
-+  const wasMobile = isMobile.value;
-   isMobile.value = typeof window !== 'undefined' && window.innerWidth < 768;
-   if (isMobile.value) {
-     viewMode.value = 'card';
-+    if (!wasMobile) {
-+      showFilters.value = false;
-+    }
-+  } else {
-+    showFilters.value = true;
+             <nav class="categories-nav" ref="categoriesNav">
+               <div
+                   v-for="(category, index) in categories"
+                   :key="index"
+                   class="category-item"
+                   :class="{ active: index === activeCategoryIndex }"
+                   :style="{
+@@ -225,50 +225,86 @@ let config = {
+   },
+   sections: {
+     recentlyViewed: {
+       title: 'Đã xem gần đây'
+     }
+   },
+   responsive: {
+     breakpoints: {
+       desktop: '1024px',
+       tablet: '768px',
+       mobile: '480px',
+       smallMobile: '640px'
+     }
    }
- };
- watch(viewMode, (mode) => {
-   pageSize.value = mode === 'card' ? 8 : 10;
- });// Mặc định 9 thẻ cho 3 cột
- const totalPages = computed(() =>
-     Math.ceil(totalRecords.value / pageSize.value || 1)
- );
+ }
 
- // Unique values
- const provinces = computed(() => addressData.map(x => x.name));
+ const props = defineProps({
+   sectionData: Object
+ })
 
- const wards = computed(() => {
-   if (!filterProvince.value) return [];
+ if(props.sectionData) {
+   config = props.sectionData;
+   console.log("Đã nhận props", config)
+ }
 
-   const province = addressData.find(p => p.name === filterProvince.value);
-   if (!province || !Array.isArray(province.wards)) return [];
++const cssVars = computed(() => ({
++  '--font-family': config.typography.fontFamily,
++  '--container-width': config.spacing.container,
++  '--container-padding': config.spacing.padding,
++  '--layout-gap': config.spacing.gap,
++  '--categories-gap': config.spacing.categoriesGap,
++  '--arrow-size': config.sizes.arrow,
++  '--color-primary': config.colors.primary,
++  '--color-active': config.colors.active,
++  '--color-white': config.colors.white,
++  '--color-border': config.colors.border,
++  '--color-hover-bg': config.colors.background.hover,
++  '--color-text-primary': config.colors.text.primary,
++  '--color-text-secondary': config.colors.text.secondary,
++  '--color-text-light': config.colors.text.light,
++  '--border-radius-round': config.borders.radius.round,
++  '--border-radius-medium': config.borders.radius.medium,
++  '--border-radius-small': config.borders.radius.small,
++  '--border-width-category': config.borders.width.categoryActive,
++  '--border-width-divider': config.borders.width.divider,
++  '--transition-default': config.transitions.default,
++  '--shadow-default': config.shadows.default,
++  '--news-image-height': config.sizes.newsImageHeight,
++  '--typography-category-size': config.typography.sizes.category,
++  '--typography-title-size': config.typography.sizes.title,
++  '--typography-subtitle-size': config.typography.sizes.subtitle,
++  '--typography-date-size': config.typography.sizes.date,
++  '--typography-recent-title-size': config.typography.sizes.recentlyViewedTitle,
++  '--typography-recent-item-title-size': config.typography.sizes.recentlyViewedItemTitle,
++  '--font-weight-bold': config.typography.weights.bold,
++  '--font-weight-medium': config.typography.weights.medium,
++  '--news-item-gap': config.spacing.itemGap,
++  '--recent-image-width': config.sizes.recentlyViewedImage.width,
++  '--recent-image-height': config.sizes.recentlyViewedImage.height
++}))
++
+ // Refs
+ const categoriesNav = ref(null)
 
-   return province.wards.map(w => w.name);
- });
- watch(filterProvince, () => {
-   filterWard.value = "";   // reset về Tất cả
- });
+ // Dữ liệu danh mục
+ const categories = ref([
+   'Tất cả',
+   'Thời sự',
+   'Kinh tế',
+   'Xã hội',
+   'Giáo dục',
+   'Khoa học',
+   'Công nghệ',
+   'Thể thao',
+   'Giải trí',
+   'Văn hóa',
+   'Du lịch',
+   'Sức khỏe',
+   'Pháp luật',
+   'Đời sống',
+   'Công nghệ mới'
+ ])
+
+ // Dữ liệu danh sách tin tức
+ const newsList = ref([
+   {
+@@ -343,370 +379,370 @@ const scrollCategories = (direction) => {
+   })
+ }
+
+ const showArrows = ref(true)
+
+ // Kiểm tra xem có thể cuộn không
+ const checkScrollButtons = () => {
+   if (!categoriesNav.value) return
+
+   const el = categoriesNav.value
+   // Nếu nội dung không vượt quá chiều rộng => không cần nút
+   showArrows.value = el.scrollWidth > el.clientWidth
+ }
+
+ onMounted(() => {
+   checkScrollButtons()
+   window.addEventListener('resize', checkScrollButtons)
+ })
+ </script>
+
+ <style scoped>
+ .news-container {
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+-  font-family: v-bind('config.typography.fontFamily');
++  font-family: var(--font-family);
+ }
+
+ .news-container {
+-  max-width: v-bind('config.spacing.container');
++  max-width: var(--container-width);
+   margin: 0 auto;
+-  padding: v-bind('config.spacing.padding');
++  padding: var(--container-padding);
+   width: 100%;
+ }
+
+ .news-layout {
+   display: flex;
+-  gap: v-bind('config.spacing.gap');
++  gap: var(--layout-gap);
+   width: 100%;
+ }
+
+ /* Cột trái (66.67% - tương đương 8/12) */
+ .left-column {
+   width: 66.67%;
+ }
+
+ /* Cột phải (33.33% - tương đương 4/12) */
+ .right-column {
+   width: 33.33%;
+ }
+
+ /* Thanh danh mục */
+ .categories-container {
+   margin-bottom: 30px;
+   width: 100%;
+   position: relative;
+ }
+
+ .categories-wrapper {
+   display: flex;
+   gap: 10px;
+   position: relative;
+ }
+
+ .categories-nav {
+   display: flex;
+   overflow-x: auto;
+-  gap: v-bind('config.spacing.categoriesGap');
++  gap: var(--categories-gap);
+   padding-bottom: 10px;
+   width: 100%;
+   scrollbar-width: none; /* Ẩn scrollbar trên Firefox */
+   -ms-overflow-style: none; /* Ẩn scrollbar trên IE và Edge */
+ }
+
+ /* Ẩn scrollbar trên Webkit browsers (Chrome, Safari) */
+ .categories-nav::-webkit-scrollbar {
+   display: none;
+ }
+
+ .nav-arrow {
+-  width: v-bind('config.sizes.arrow');
+-  height: v-bind('config.sizes.arrow');
+-  border: 2px solid v-bind('config.colors.primary');
++  width: var(--arrow-size);
++  height: var(--arrow-size);
++  border: 2px solid var(--color-primary);
+   background: white;
+-  border-radius: v-bind('config.borders.radius.round');
++  border-radius: var(--border-radius-round);
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   cursor: pointer;
+-  color: v-bind('config.colors.primary');
++  color: var(--color-primary);
+   font-size: 16px;
+-  transition: v-bind('config.transitions.default');
++  transition: var(--transition-default);
+   flex-shrink: 0;
+   z-index: 2;
+ }
+
+ .nav-arrow:hover {
+-  background: v-bind('config.colors.primary');
+-  color: v-bind('config.colors.white');
++  background: var(--color-primary);
++  color: var(--color-white);
+   transform: scale(1.05);
+ }
+
+ .nav-arrow:active {
+   transform: scale(0.95);
+ }
+
+ .nav-arrow-left {
+   order: 1;
+ }
+
+ .nav-arrow-right {
+   order: 3;
+ }
+
+ .categories-nav {
+   order: 2;
+ }
+
+ .category-item {
+-  font-size: v-bind('config.typography.sizes.category');
+-  font-weight: v-bind('config.typography.weights.bold');
+-  color: v-bind('config.colors.primary');
++  font-size: var(--typography-category-size);
++  font-weight: var(--font-weight-bold);
++  color: var(--color-primary);
+   white-space: nowrap;
+   cursor: pointer;
+   padding-bottom: 10px;
+   border-bottom: 3px solid transparent;
+-  transition: v-bind('config.transitions.default');
++  transition: var(--transition-default);
+   flex-shrink: 0;
+   position: relative;
+ }
+
+ .category-item.active {
+-  color: v-bind('config.colors.active');
+-  border-bottom: v-bind('config.borders.width.categoryActive') solid v-bind('config.colors.active');
++  color: var(--color-active);
++  border-bottom: var(--border-width-category) solid var(--color-active);
+ }
+
+ .category-item:hover {
+-  color: v-bind('config.colors.active');
++  color: var(--color-active);
+ }
+
+ .nav-divider {
+-  height: v-bind('config.borders.width.categoryActive');
+-  background-color: v-bind('config.colors.border');
++  height: var(--border-width-category);
++  background-color: var(--color-border);
+   width: 100%;
+   margin-top: -3px;
+ }
+
+ /* Danh sách tin tức */
+ .news-list {
+   margin-bottom: 30px;
+   width: 100%;
+ }
+
+ .news-item {
+   display: flex;
+   padding: 20px 0;
+   position: relative;
+   width: 100%;
+ }
+
+ .news-image {
+   width: 33%;
+   margin-right: 20px;
+   flex-shrink: 0;
+ }
+
+ .news-image img {
+   width: 100%;
+-  height: v-bind('config.sizes.newsImageHeight');
++  height: var(--news-image-height);
+   object-fit: cover;
+-  border-radius: v-bind('config.borders.radius.medium');
++  border-radius: var(--border-radius-medium);
+ }
+
+ .news-content {
+   flex: 1;
+   width: 67%;
+ }
+
+ .news-title {
+-  font-size: v-bind('config.typography.sizes.title');
+-  font-weight: v-bind('config.typography.weights.bold');
+-  color: v-bind('config.colors.text.primary');
++  font-size: var(--typography-title-size);
++  font-weight: var(--font-weight-bold);
++  color: var(--color-text-primary);
+   margin-bottom: 10px;
+   line-height: 1.3;
+ }
+
+ .news-subtitle {
+-  font-size: v-bind('config.typography.sizes.subtitle');
+-  color: v-bind('config.colors.text.secondary');
++  font-size: var(--typography-subtitle-size);
++  color: var(--color-text-secondary);
+   margin-bottom: 10px;
+   line-height: 1.5;
+ }
+
+ .news-date {
+-  font-size: v-bind('config.typography.sizes.date');
+-  color: v-bind('config.colors.text.light');
++  font-size: var(--typography-date-size);
++  color: var(--color-text-light);
+ }
+
+ .news-divider {
+   position: absolute;
+   bottom: 0;
+   left: 0;
+   width: 100%;
+-  height: v-bind('config.borders.width.divider');
+-  background-color: v-bind('config.colors.border');
++  height: var(--border-width-divider);
++  background-color: var(--color-border);
+ }
+
+ /* Phân trang */
+ .pagination {
+   display: flex;
+   justify-content: center;
+   gap: 10px;
+   width: 100%;
+ }
+
+ .page-btn {
+   padding: 8px 15px;
+-  border: 1px solid v-bind('config.colors.primary');
++  border: 1px solid var(--color-primary);
+   background-color: white;
+-  color: v-bind('config.colors.primary');
+-  border-radius: v-bind('config.borders.radius.small');
++  color: var(--color-primary);
++  border-radius: var(--border-radius-small);
+   cursor: pointer;
+-  font-weight: v-bind('config.typography.weights.medium');
+-  transition: v-bind('config.transitions.default');
++  font-weight: var(--font-weight-medium);
++  transition: var(--transition-default);
+ }
+
+ .page-btn.active {
+-  background-color: v-bind('config.colors.primary');
+-  color: v-bind('config.colors.white');
++  background-color: var(--color-primary);
++  color: var(--color-white);
+ }
+
+ .page-btn:hover {
+-  background-color: v-bind('config.colors.background.hover');
++  background-color: var(--color-hover-bg);
+ }
+
+ .page-btn.active:hover {
+-  background-color: v-bind('config.colors.primary');
++  background-color: var(--color-primary);
+ }
+
+ /* Thanh tìm kiếm */
+ .search-container {
+   margin-bottom: 30px;
+   width: 100%;
+ }
+
+ .search-box {
+   display: flex;
+-  border: 1px solid v-bind('config.colors.primary');
+-  border-radius: v-bind('config.borders.radius.small');
++  border: 1px solid var(--color-primary);
++  border-radius: var(--border-radius-small);
+   overflow: hidden;
+   width: 100%;
+ }
+
+ .search-input {
+   flex: 1;
+   padding: 10px 15px;
+   border: none;
+   outline: none;
+   font-size: 16px;
+   width: 100%;
+ }
+
+ .search-input::placeholder {
+-  color: v-bind('config.colors.text.light');
++  color: var(--color-text-light);
+ }
+
+ .search-btn {
+   padding: 10px 15px;
+-  background-color: v-bind('config.colors.primary');
++  background-color: var(--color-primary);
+   color: white;
+   border: none;
+   cursor: pointer;
+   transition: background-color 0.3s ease;
+   flex-shrink: 0;
+ }
+
+ .search-btn:hover {
+-  background-color: v-bind('config.colors.active');
++  background-color: var(--color-active);
+ }
+
+ /* Box "Đã xem gần đây" */
+ .recently-viewed {
+   background-color: white;
+-  border-radius: v-bind('config.borders.radius.medium');
+-  box-shadow: v-bind('config.shadows.default');
++  border-radius: var(--border-radius-medium);
++  box-shadow: var(--shadow-default);
+   padding: 20px;
+   width: 100%;
+ }
+
+ .recently-viewed-title {
+-  font-size: v-bind('config.typography.sizes.recentlyViewedTitle');
+-  font-weight: v-bind('config.typography.weights.bold');
+-  color: v-bind('config.colors.primary');
++  font-size: var(--typography-recent-title-size);
++  font-weight: var(--font-weight-bold);
++  color: var(--color-primary);
+   margin-bottom: 20px;
+   line-height: 1.2;
+ }
+
+ .recently-viewed-list {
+   display: flex;
+   flex-direction: column;
+-  gap: v-bind('config.spacing.itemGap');
++  gap: var(--news-item-gap);
+   width: 100%;
+ }
+
+ .recently-viewed-item {
+   display: flex;
+-  gap: v-bind('config.spacing.itemGap');
++  gap: var(--news-item-gap);
+   padding-bottom: 15px;
+-  border-bottom: v-bind('config.borders.width.divider') solid v-bind('config.colors.border');
++  border-bottom: var(--border-width-divider) solid var(--color-border);
+   width: 100%;
+ }
+
+ .recently-viewed-item:last-child {
+   border-bottom: none;
+   padding-bottom: 0;
+ }
+
+ .recently-viewed-image {
+-  width: v-bind('config.sizes.recentlyViewedImage.width');
++  width: var(--recent-image-width);
+   flex-shrink: 0;
+ }
+
+ .recently-viewed-image img {
+   width: 100%;
+-  height: v-bind('config.sizes.recentlyViewedImage.height');
++  height: var(--recent-image-height);
+   object-fit: cover;
+-  border-radius: v-bind('config.borders.radius.small');
++  border-radius: var(--border-radius-small);
+ }
+
+ .recently-viewed-content {
+   flex: 1;
+   width: calc(100% - 95px);
+ }
+
+ .recently-viewed-title-item {
+-  font-size: v-bind('config.typography.sizes.recentlyViewedItemTitle');
+-  font-weight: v-bind('config.typography.weights.bold');
+-  color: v-bind('config.colors.primary');
++  font-size: var(--typography-recent-item-title-size);
++  font-weight: var(--font-weight-bold);
++  color: var(--color-primary);
+   margin-bottom: 5px;
+   line-height: 1.3;
+ }
+
+ .recently-viewed-date {
+-  font-size: v-bind('config.typography.sizes.date');
+-  color: v-bind('config.colors.text.light');
++  font-size: var(--typography-date-size);
++  color: var(--color-text-light);
+ }
+
+ /* Responsive */
+ @media (max-width: 1024px) {
+   .news-layout {
+     flex-direction: column;
+     gap: 20px;
+   }
+
+   .left-column, .right-column {
+     width: 100%;
+   }
+
+   .search-container {
+     margin-top: 0;
+   }
+ }
+
+ @media (max-width: 768px) {
+   .news-container {
+     padding: 15px;
+   }
+
+   .categories-wrapper {
+     gap: 5px;
+diff --git a/src/components/user/News/Component/EmailSubscribe.vue b/src/components/user/News/Component/EmailSubscribe.vue
+index fa594337ca9b981a45af076e4bec8bcd99aa622a..fa3bd5a446462425baf918deca3fd2b2eda1426a 100644
+--- a/src/components/user/News/Component/EmailSubscribe.vue
++++ b/src/components/user/News/Component/EmailSubscribe.vue
+@@ -1,46 +1,45 @@
+ <template>
+-  <div class="newsletter-container" :style="containerStyle">
++  <div class="newsletter-container" :style="cssVars">
+     <div class="newsletter-content">
+       <!-- Cột trái (6/12) -->
+       <div class="left-column">
+-        <h2 class="title" :style="titleStyle">{{ config.content.title }}</h2>
+-        <p class="subtitle" :style="subtitleStyle">{{ config.content.subtitle }}</p>
++        <h2 class="title">{{ config.content.title }}</h2>
++        <p class="subtitle">{{ config.content.subtitle }}</p>
+       </div>
+
+       <!-- Cột giữa (4/12) -->
+       <div class="center-column">
+         <form @submit.prevent="handleSubmit" class="subscription-form">
+           <input
+               v-model="email"
+               type="email"
+               :placeholder="config.content.placeholder"
+               class="email-input"
+-              :style="inputStyle"
+               required
+           />
+-          <button type="submit" class="subscribe-btn" :style="buttonStyle">
++          <button type="submit" class="subscribe-btn">
+             {{ config.content.buttonText }}
+           </button>
+         </form>
+       </div>
+
+       <!-- Cột phải (2/12) -->
+       <div class="right-column">
+         <img
+             :src="baseImgaeUrl+config.content.imageSrc"
+             :alt="config.content.imageAlt"
+             class="newsletter-image"
+         />
+       </div>
+     </div>
+   </div>
+ </template>
+
+ <script setup>
+ import { ref, computed } from 'vue'
+ import {baseImgaeUrl} from "../../../../assets/js/global.js";
+
+ let config = {
+   styles: {
+     container: {
+       backgroundGradient: 'linear-gradient(135deg, #0629BE 7%, #031358 22%, #0629BE 56%, #031358 81%, #0628B9 100%)',
+@@ -87,183 +86,176 @@ let config = {
+     title: 'Luôn đồng hành cùng bạn qua mỗi bản tin mới',
+     subtitle: 'Hãy để chúng tôi gửi đến bạn những nội dung hữu ích và cập nhật theo từng giai đoạn phát triển.',
+     placeholder: 'Nhập địa chỉ email của bạn',
+     buttonText: 'Đăng ký nhận tin',
+     imageSrc: '/imgs/mail-sent-animate.svg',
+     imageAlt: 'Đăng ký nhận tin'
+   },
+   layout: {
+     maxWidth: '1400px',
+     gap: '20px',
+     padding: '0 20px'
+   }
+ }
+
+ const props = defineProps({
+   sectionData: Object
+ })
+
+ if(props.sectionData) {
+   config = props.sectionData;
+   console.log("Đã nhận props", config)
+ }
+
+ const email = ref('')
+
+-const containerStyle = computed(() => ({
+-  background: config.styles.container.backgroundGradient,
+-  boxShadow: config.styles.container.boxShadow,
+-  paddingBottom: config.styles.container.paddingBottom,
+-  paddingTop: config.styles.container.paddingTop
+-}))
+-
+-const titleStyle = computed(() => ({
+-  color: config.styles.title.color,
+-  fontSize: config.styles.title.fontSize,
+-  fontWeight: config.styles.title.fontWeight,
+-  lineHeight: config.styles.title.lineHeight,
+-  marginBottom: config.styles.title.marginBottom
+-}))
+-
+-const subtitleStyle = computed(() => ({
+-  color: config.styles.subtitle.color,
+-  fontSize: config.styles.subtitle.fontSize,
+-  lineHeight: config.styles.subtitle.lineHeight,
+-  opacity: config.styles.subtitle.opacity
+-}))
+-
+-const inputStyle = computed(() => ({
+-  padding: config.styles.input.padding,
+-  border: config.styles.input.border,
+-  borderRadius: config.styles.input.borderRadius,
+-  fontSize: config.styles.input.fontSize,
+-  boxShadow: config.styles.input.boxShadow,
+-  transition: config.styles.input.transition
+-}))
+-
+-const buttonStyle = computed(() => ({
+-  backgroundColor: config.styles.button.backgroundColor,
+-  color: config.styles.button.color,
+-  border: config.styles.button.border,
+-  padding: config.styles.button.padding,
+-  borderRadius: config.styles.button.borderRadius,
+-  fontSize: config.styles.button.fontSize,
+-  fontWeight: config.styles.button.fontWeight,
+-  transition: config.styles.button.transition,
+-  width: config.styles.button.width
++const cssVars = computed(() => ({
++  '--container-background': config.styles.container.backgroundGradient,
++  '--container-shadow': config.styles.container.boxShadow,
++  '--container-padding-bottom': config.styles.container.paddingBottom,
++  '--container-padding-top': config.styles.container.paddingTop,
++  '--layout-max-width': config.layout.maxWidth,
++  '--layout-gap': config.layout.gap,
++  '--layout-padding': config.layout.padding,
++  '--title-color': config.styles.title.color,
++  '--title-font-size': config.styles.title.fontSize,
++  '--title-font-weight': config.styles.title.fontWeight,
++  '--title-line-height': config.styles.title.lineHeight,
++  '--title-margin-bottom': config.styles.title.marginBottom,
++  '--subtitle-color': config.styles.subtitle.color,
++  '--subtitle-font-size': config.styles.subtitle.fontSize,
++  '--subtitle-line-height': config.styles.subtitle.lineHeight,
++  '--subtitle-opacity': config.styles.subtitle.opacity,
++  '--input-padding': config.styles.input.padding,
++  '--input-border': config.styles.input.border,
++  '--input-border-radius': config.styles.input.borderRadius,
++  '--input-font-size': config.styles.input.fontSize,
++  '--input-box-shadow': config.styles.input.boxShadow,
++  '--input-transition': config.styles.input.transition,
++  '--input-placeholder-color': config.styles.input.placeholderColor,
++  '--button-background': config.styles.button.backgroundColor,
++  '--button-color': config.styles.button.color,
++  '--button-border': config.styles.button.border,
++  '--button-padding': config.styles.button.padding,
++  '--button-border-radius': config.styles.button.borderRadius,
++  '--button-font-size': config.styles.button.fontSize,
++  '--button-font-weight': config.styles.button.fontWeight,
++  '--button-transition': config.styles.button.transition,
++  '--button-width': config.styles.button.width,
++  '--button-hover-background': config.styles.button.hoverBackgroundColor
+ }))
+
+ const handleSubmit = () => {
+   // Xử lý logic đăng ký ở đây
+   console.log('Email đã đăng ký:', email.value)
+   alert(`Cảm ơn bạn đã đăng ký với email: ${email.value}`)
+   email.value = '' // Reset input sau khi submit
+ }
+ </script>
+
+ <style scoped>
+ .newsletter-container {
+-  background: v-bind('config.styles.container.backgroundGradient');
+-  box-shadow: v-bind('config.styles.container.boxShadow');
+-  padding-bottom: v-bind('config.styles.container.paddingBottom');
+-  padding-top: v-bind('config.styles.container.paddingTop');
++  background: var(--container-background);
++  box-shadow: var(--container-shadow);
++  padding-bottom: var(--container-padding-bottom);
++  padding-top: var(--container-padding-top);
+ }
+
+ .newsletter-content {
+   display: flex;
+   align-items: center;
+-  max-width: v-bind('config.layout.maxWidth');
++  max-width: var(--layout-max-width);
+   margin: 0 auto;
+-  gap: v-bind('config.layout.gap');
+-  padding: v-bind('config.layout.padding');
++  gap: var(--layout-gap);
++  padding: var(--layout-padding);
+ }
+
+ /* Cột trái - 6/12 */
+ .left-column {
+   flex: 6;
+   padding-right: 20px;
+ }
+
+ .title {
+-  color: v-bind('config.styles.title.color');
+-  font-size: v-bind('config.styles.title.fontSize');
+-  font-weight: v-bind('config.styles.title.fontWeight');
+-  line-height: v-bind('config.styles.title.lineHeight');
+-  margin-bottom: v-bind('config.styles.title.marginBottom');
++  color: var(--title-color);
++  font-size: var(--title-font-size);
++  font-weight: var(--title-font-weight);
++  line-height: var(--title-line-height);
++  margin-bottom: var(--title-margin-bottom);
+ }
+
+ .subtitle {
+-  color: v-bind('config.styles.subtitle.color');
+-  font-size: v-bind('config.styles.subtitle.fontSize');
+-  line-height: v-bind('config.styles.subtitle.lineHeight');
+-  opacity: v-bind('config.styles.subtitle.opacity');
++  color: var(--subtitle-color);
++  font-size: var(--subtitle-font-size);
++  line-height: var(--subtitle-line-height);
++  opacity: var(--subtitle-opacity);
+ }
+
+ /* Cột giữa - 4/12 */
+ .center-column {
+   flex: 4;
+ }
+
+ .subscription-form {
+   display: flex;
+   flex-direction: column;
+   gap: 15px;
+ }
+
+ .email-input {
+-  padding: v-bind('config.styles.input.padding');
+-  border: v-bind('config.styles.input.border');
+-  border-radius: v-bind('config.styles.input.borderRadius');
+-  font-size: v-bind('config.styles.input.fontSize');
+-  box-shadow: v-bind('config.styles.input.boxShadow');
+-  transition: v-bind('config.styles.input.transition');
++  padding: var(--input-padding);
++  border: var(--input-border);
++  border-radius: var(--input-border-radius);
++  font-size: var(--input-font-size);
++  box-shadow: var(--input-box-shadow);
++  transition: var(--input-transition);
+ }
+
+ .email-input:focus {
+   outline: none;
+   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.15);
+ }
+
+ .email-input::placeholder {
+-  color: v-bind('config.styles.input.placeholderColor');
++  color: var(--input-placeholder-color);
+ }
+
+ .subscribe-btn {
+-  background-color: v-bind('config.styles.button.backgroundColor');
+-  color: v-bind('config.styles.button.color');
+-  border: v-bind('config.styles.button.border');
+-  padding: v-bind('config.styles.button.padding');
+-  border-radius: v-bind('config.styles.button.borderRadius');
+-  font-size: v-bind('config.styles.button.fontSize');
+-  font-weight: v-bind('config.styles.button.fontWeight');
++  background-color: var(--button-background);
++  color: var(--button-color);
++  border: var(--button-border);
++  padding: var(--button-padding);
++  border-radius: var(--button-border-radius);
++  font-size: var(--button-font-size);
++  font-weight: var(--button-font-weight);
+   cursor: pointer;
+-  transition: v-bind('config.styles.button.transition');
+-  width: v-bind('config.styles.button.width');
++  transition: var(--button-transition);
++  width: var(--button-width);
+ }
+
+ .subscribe-btn:hover {
+-  background-color: v-bind('config.styles.button.hoverBackgroundColor');
++  background-color: var(--button-hover-background);
+ }
+
+ /* Cột phải - 2/12 */
+ .right-column {
+   flex: 2;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+ }
+
+ .newsletter-image {
+   width: 100%;
+   height: auto;
+ }
+
+ /* Responsive */
+ @media (max-width: 768px) {
+   .newsletter-content {
+     flex-direction: column;
+     text-align: center;
+   }
+
+   .left-column {
+     padding-right: 0;
+     margin-bottom: 20px;
+diff --git a/src/components/user/News/Component/FeaturedNews.vue b/src/components/user/News/Component/FeaturedNews.vue
+index 05fb317f9f89e052083851222c4258bc205c3895..b8c2c928536dc5c6fbf50ec46ed049e4fd5e31d7 100644
+--- a/src/components/user/News/Component/FeaturedNews.vue
++++ b/src/components/user/News/Component/FeaturedNews.vue
+@@ -1,27 +1,27 @@
+ <template>
+-  <div class="news-container">
++  <div class="news-container" :style="cssVars">
+     <!-- Tiêu đề chính -->
+     <h1 class="main-title" :style="{ color: config.colors.primary }">TIN TỨC NỔI BẬT</h1>
+
+     <div class="content-wrapper">
+       <!-- Cột trái - Tin tức -->
+       <div class="left-column">
+         <!-- Tin nổi bật nhất -->
+         <div class="featured-news" v-if="newsArticles.length > 0">
+           <div class="featured-image-container">
+             <img :src="newsArticles[0].image" :alt="newsArticles[0].title" class="featured-image">
+             <div class="date-overlay" :style="{ backgroundColor: config.colors.dateOverlayBg, color: config.colors.primary }">{{ newsArticles[0].date }}</div>
+           </div>
+           <div class="featured-info">
+             <h2 class="featured-title" :style="{ color: config.colors.primary }">{{ newsArticles[0].title }}</h2>
+             <p class="featured-subtitle" :style="{ color: config.colors.textSecondary }">{{ newsArticles[0].subtitle }}</p>
+             <div class="category-tag" :style="{ color: config.colors.primary }">{{ newsArticles[0].category }}</div>
+           </div>
+         </div>
+
+         <!-- Các tin nổi bật khác -->
+         <div class="other-news" v-if="newsArticles.length > 1">
+           <div
+               v-for="(article, index) in newsArticles.slice(1)"
+               :key="index"
+               class="news-item"
+@@ -301,301 +301,297 @@ const cssVars = computed(() => ({
+
+ // Xử lý submit form
+ const submitForm = () => {
+   console.log('Form submitted:', formData)
+   // Xử lý gửi form ở đây
+   alert('Thông tin đã được gửi thành công!')
+
+   // Reset form
+   Object.keys(formData).forEach(key => {
+     formData[key] = ''
+   })
+ }
+ </script>
+
+ <style scoped>
+ @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
+
+ * {
+   box-sizing: border-box;
+   margin: 0;
+   padding: 0;
+   font-family: 'Ubuntu', sans-serif;
+ }
+
+ .news-container {
+-  :root {
+-    v-bind: cssVars;
+-  }
+-
+-  max-width: v-bind('config.spacing.containerMaxWidth');
+-  margin: v-bind('config.spacing.containerMarginTop') auto 0;
+-  padding: v-bind('config.spacing.containerPadding');
++  max-width: var(--spacing-container-max-width);
++  margin: var(--spacing-container-margin-top) auto 0;
++  padding: var(--spacing-container-padding);
+ }
+
+ .main-title {
+   text-align: center;
+-  color: v-bind('config.colors.primary');
+-  font-size: v-bind('config.typography.mainTitle.fontSize');
+-  font-weight: v-bind('config.typography.mainTitle.fontWeight');
++  color: var(--color-primary);
++  font-size: var(--font-size-main-title);
++  font-weight: var(--font-weight-main-title);
+   margin-bottom: 40px;
+ }
+
+ .content-wrapper {
+   display: flex;
+-  gap: v-bind('config.spacing.contentGap');
++  gap: var(--spacing-content-gap);
+ }
+
+ /* Cột trái - Tin tức */
+ .left-column {
+   flex: 8;
+ }
+
+ .featured-news {
+   margin-bottom: 30px;
+-  box-shadow: v-bind('config.shadows.card');
+-  border-radius: v-bind('config.borderRadius.medium');
++  box-shadow: var(--shadow-card);
++  border-radius: var(--border-radius-medium);
+   overflow: hidden;
+-  background-color: v-bind('config.colors.white');
++  background-color: var(--color-white);
+ }
+
+ .featured-image-container {
+   position: relative;
+   width: 100%;
+-  height: v-bind('config.spacing.featuredImageHeight');
++  height: var(--spacing-featured-image-height);
+   overflow: hidden;
+ }
+
+ .featured-image {
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+ }
+
+ .date-overlay {
+   position: absolute;
+   bottom: 15px;
+   right: 15px;
+-  background-color: v-bind('config.colors.dateOverlayBg');
+-  color: v-bind('config.colors.primary');
++  background-color: var(--color-date-overlay-bg);
++  color: var(--color-primary);
+   padding: 5px 10px;
+-  border-radius: v-bind('config.borderRadius.small');
++  border-radius: var(--border-radius-small);
+   font-size: 14px;
+   font-weight: 500;
+ }
+
+ .featured-info {
+-  background-color: v-bind('config.colors.white');
++  background-color: var(--color-white);
+   padding: 25px;
+   position: relative;
+ }
+
+ .featured-title {
+-  color: v-bind('config.colors.primary');
+-  font-size: v-bind('config.typography.featuredTitle.fontSize');
+-  font-weight: v-bind('config.typography.featuredTitle.fontWeight');
++  color: var(--color-primary);
++  font-size: var(--font-size-featured-title);
++  font-weight: var(--font-weight-featured-title);
+   margin-bottom: 15px;
+   line-height: 1.3;
+ }
+
+ .featured-subtitle {
+-  color: v-bind('config.colors.textSecondary');
+-  font-size: v-bind('config.typography.featuredSubtitle.fontSize');
++  color: var(--color-text-secondary);
++  font-size: var(--font-size-featured-subtitle);
+   line-height: 1.5;
+   margin-bottom: 20px;
+ }
+
+ .category-tag {
+   position: absolute;
+   bottom: 5px;
+   right: 5px;
+-  color: v-bind('config.colors.primary');
+-  font-size: v-bind('config.typography.categoryTag.fontSize');
+-  font-weight: v-bind('config.typography.categoryTag.fontWeight');
++  color: var(--color-primary);
++  font-size: var(--font-size-category-tag);
++  font-weight: var(--font-weight-category-tag);
+ }
+
+ /* Các tin nổi bật khác - không có đổ bóng và nền */
+ .other-news {
+   display: grid;
+   grid-template-columns: repeat(2, 1fr);
+   gap: 20px;
+ }
+
+ .news-item {
+   /* Loại bỏ đổ bóng và nền */
+   background: transparent;
+   border-radius: 0;
+   overflow: hidden;
+ }
+
+ .news-image-container {
+   position: relative;
+   width: 100%;
+-  height: v-bind('config.spacing.newsImageHeight');
++  height: var(--spacing-news-image-height);
+   overflow: hidden;
+ }
+
+ .news-image {
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+ }
+
+ .news-info {
+   /* Loại bỏ nền trắng */
+   background: transparent;
+   padding: 15px 0;
+   position: relative;
+   height: auto;
+   display: flex;
+   flex-direction: column;
+ }
+
+ .news-title {
+-  color: v-bind('config.colors.primary');
+-  font-size: v-bind('config.typography.newsTitle.fontSize');
+-  font-weight: v-bind('config.typography.newsTitle.fontWeight');
++  color: var(--color-primary);
++  font-size: var(--font-size-news-title);
++  font-weight: var(--font-weight-news-title);
+   margin-bottom: 10px;
+   line-height: 1.3;
+ }
+
+ .news-subtitle {
+-  color: v-bind('config.colors.textSecondary');
+-  font-size: v-bind('config.typography.newsSubtitle.fontSize');
++  color: var(--color-text-secondary);
++  font-size: var(--font-size-news-subtitle);
+   line-height: 1.4;
+   margin-bottom: 25px;
+   display: -webkit-box;
+   -webkit-line-clamp: 2;
+   -webkit-box-orient: vertical;
+   overflow: hidden;
+ }
+
+ /* Cột phải - Form liên hệ */
+ .right-column {
+   flex: 4;
+ }
+
+ .form-wrapper {
+   display: flex;
+   flex-direction: column;
+   height: 100%;
+   gap: 20px;
+ }
+
+ .form-container {
+-  background-color: v-bind('config.colors.white');
+-  box-shadow: v-bind('config.shadows.card');
+-  border-radius: v-bind('config.borderRadius.medium');
+-  padding: v-bind('config.spacing.formPadding');
++  background-color: var(--color-white);
++  box-shadow: var(--shadow-card);
++  border-radius: var(--border-radius-medium);
++  padding: var(--spacing-form-padding);
+ }
+
+ .form-title {
+-  color: v-bind('config.colors.primary');
+-  font-size: v-bind('config.typography.formTitle.fontSize');
+-  font-weight: v-bind('config.typography.formTitle.fontWeight');
++  color: var(--color-primary);
++  font-size: var(--font-size-form-title);
++  font-weight: var(--font-weight-form-title);
+   margin-bottom: 25px;
+   text-align: center;
+ }
+
+ .contact-form {
+   margin-bottom: 0;
+ }
+
+ .form-group {
+   position: relative;
+   margin-bottom: 30px;
+ }
+
+ .form-input {
+   width: 100%;
+-  padding: v-bind('config.spacing.buttonPadding') 0 10px 0;
++  padding: var(--spacing-button-padding) 0 10px 0;
+   border: none;
+-  border-bottom: 1px solid v-bind('config.colors.primary');
++  border-bottom: 1px solid var(--color-primary);
+   background-color: transparent;
+-  font-size: v-bind('config.typography.formLabel.fontSize');
+-  color: v-bind('config.colors.primary');
++  font-size: var(--font-size-form-label);
++  color: var(--color-primary);
+   outline: none;
+-  transition: border-color v-bind('config.transitions.default');
++  transition: border-color var(--transition-default);
+ }
+
+ .form-input:focus {
+-  border-bottom: 1px solid v-bind('config.colors.primary');
++  border-bottom: 1px solid var(--color-primary);
+ }
+
+ .form-label {
+   position: absolute;
+   top: 50%;
+   left: 0;
+-  font-size: v-bind('config.typography.formLabel.fontSize');
+-  color: v-bind('config.colors.primary');
++  font-size: var(--font-size-form-label);
++  color: var(--color-primary);
+   pointer-events: none;
+-  transition: v-bind('config.transitions.formLabel');
++  transition: var(--transition-form-label);
+   transform: translateY(-50%);
+   opacity: 0.5;
+ }
+
+ /* Hiệu ứng focus - label thu nhỏ và di chuyển lên trên */
+ .form-input:focus + .form-label,
+ .form-input:not(:placeholder-shown) + .form-label {
+   top: 0;
+-  font-size: v-bind('config.typography.formLabel.focusFontSize');
+-  color: v-bind('config.colors.primary');
++  font-size: var(--font-size-form-label-focus);
++  color: var(--color-primary);
+   transform: translateY(0);
+   opacity: 1;
+ }
+
+ select.form-input {
+   appearance: none;
+   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23031358' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+   background-repeat: no-repeat;
+   background-position: right 8px center;
+   background-size: 16px;
+ }
+
+ .submit-btn {
+   width: 100%;
+-  padding: v-bind('config.spacing.buttonPadding');
+-  background: v-bind('config.gradients.button');
+-  color: v-bind('config.colors.white');
++  padding: var(--spacing-button-padding);
++  background: var(--gradient-button);
++  color: var(--color-white);
+   border: none;
+-  border-radius: v-bind('config.borderRadius.medium');
+-  font-size: v-bind('config.typography.button.fontSize');
+-  font-weight: v-bind('config.typography.button.fontWeight');
++  border-radius: var(--border-radius-medium);
++  font-size: var(--font-size-button);
++  font-weight: var(--font-weight-button);
+   cursor: pointer;
+-  transition: transform v-bind('config.transitions.default'), box-shadow v-bind('config.transitions.default');
++  transition: transform var(--transition-default), box-shadow var(--transition-default);
+ }
+
+ .submit-btn:hover {
+   transform: translateY(-2px);
+-  box-shadow: v-bind('config.shadows.buttonHover');
++  box-shadow: var(--shadow-button-hover);
+ }
+
+ .form-image {
+   margin-top: auto;
+   width: 100%;
+   height: auto;
+-  border-radius: v-bind('config.borderRadius.medium');
++  border-radius: var(--border-radius-medium);
+ }
+
+ /* Responsive */
+ @media (max-width: 1200px) {
+   .content-wrapper {
+     gap: 20px;
+   }
+
+   .news-container {
+     padding: 15px;
+   }
+ }
+
+ @media (max-width: 992px) {
+   .content-wrapper {
+     flex-direction: column;
+   }
+
+   .other-news {
+     grid-template-columns: 1fr;
+   }
+
+   .form-wrapper {
+     flex-direction: row;
+     gap: 20px;
+diff --git a/src/components/user/News/Component/LatestNews.vue b/src/components/user/News/Component/LatestNews.vue
+index 359ea5b25db5182be35e20bc65824b66ab670373..cb04a515deab0a653615afc046c8097301aa0b0c 100644
+--- a/src/components/user/News/Component/LatestNews.vue
++++ b/src/components/user/News/Component/LatestNews.vue
+@@ -1,27 +1,27 @@
+ <template>
+-  <div class="news-section" :style="sectionStyle">
++  <div class="news-section" :style="[sectionStyle, cssVariables]">
+     <h2 class="section-title" :style="titleStyle">{{ sectionTitle }}</h2>
+     <div class="divider" :style="dividerStyle"></div>
+
+     <div class="carousel-wrapper" :style="carouselWrapperStyle">
+       <div class="carousel" ref="carouselRef" @scroll="updateProgress" :style="carouselStyle">
+         <div v-for="(item, index) in newsArticles" :key="index" class="news-item" :style="newsItemStyle">
+           <div class="image-wrapper" :style="imageWrapperStyle">
+             <img :src="item.image" :alt="item.title" class="news-image" :style="newsImageStyle" />
+             <span class="date-label" :style="dateLabelStyle">{{ item.date }}</span>
+           </div>
+
+           <div class="info" :style="infoStyle">
+             <h3 class="news-title" :style="newsTitleStyle">{{ item.title }}</h3>
+             <span class="category" :style="categoryStyle">{{ item.category }}</span>
+           </div>
+         </div>
+       </div>
+
+       <div class="carousel-controls" :style="carouselControlsStyle">
+         <button class="control-btn prev" @click="scrollCarousel(-1)" aria-label="Previous" :style="controlBtnStyle">
+           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+             <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+           </svg>
+         </button>
+         <button class="control-btn next" @click="scrollCarousel(1)" aria-label="Next" :style="controlBtnStyle">
+@@ -146,177 +146,237 @@ let config = {
+       dividerWidth: '70%',
+       carouselGap: '20px',
+       carouselPadding: '10px',
+       newsItemMinWidth: '280px',
+       newsTitleSize: '18px',
+       controlBtnSize: '44px'
+     },
+     mobile: {
+       sectionTitleSize: '28px',
+       newsItemMinWidth: '260px',
+       newsImageHeight: '180px'
+     }
+   }
+ }
+
+ const props = defineProps({
+   sectionData: Object
+ })
+
+ if(props.sectionData) {
+   config = props.sectionData;
+   console.log("Đã nhận props", config)
+ }
+
+ const sectionTitle = ref(config.sectionTitle);
++const viewportWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 0)
++
++const parsePx = (value) => {
++  if (!value) return 0
++  const parsed = Number(String(value).replace('px', ''))
++  return Number.isFinite(parsed) ? parsed : 0
++}
++
++const isTablet = computed(() => viewportWidth.value <= parsePx(config?.responsive?.tabletBreakpoint))
++const isMobile = computed(() => viewportWidth.value <= parsePx(config?.responsive?.mobileBreakpoint))
++
++const getResponsiveValue = (base, tablet, mobile) => {
++  if (isMobile.value && mobile !== undefined) return mobile
++  if (isTablet.value && tablet !== undefined) return tablet
++  return base
++}
++
++const cssVariables = computed(() => ({
++  '--font-family': config.fontFamily || "'Ubuntu', sans-serif",
++  '--hover-transform': config.transitions.hoverTransform,
++  '--hover-shadow': config.shadows.newsItemHover,
++  '--image-hover-transform': config.transitions.imageHoverTransform,
++  '--image-hover-glow': config.gradients.imageHoverGlow,
++  '--control-btn-hover-bg': config.colors.white,
++  '--control-btn-hover-transform': config.transitions.controlBtnHoverTransform,
++  '--control-btn-hover-shadow': config.shadows.controlBtnHover,
++  '--control-btn-active-transform': config.transitions.controlBtnActiveTransform
++}))
++
+ // Computed properties for styles
+ const sectionStyle = computed(() => ({
+-  fontFamily: "'Ubuntu', sans-serif",
+-  padding: config.spacing.sectionPadding,
++  padding: getResponsiveValue(config.spacing.sectionPadding, config.responsive?.tablet?.sectionPadding),
+   background: config.gradients.sectionBackground,
+   textAlign: 'center',
+   color: config.colors.white,
+   position: 'relative'
+ }))
+
+ const titleStyle = computed(() => ({
+-  fontSize: config.typography.sectionTitleSize,
++  fontSize: getResponsiveValue(
++    config.typography.sectionTitleSize,
++    config.responsive?.tablet?.sectionTitleSize,
++    config.responsive?.mobile?.sectionTitleSize
++  ),
+   fontWeight: config.typography.sectionTitleWeight,
+   marginBottom: '10px',
+   textShadow: config.shadows.sectionTitle
+ }))
+
+ const dividerStyle = computed(() => ({
+-  width: config.spacing.dividerWidth,
++  width: getResponsiveValue(
++    config.spacing.dividerWidth,
++    config.responsive?.tablet?.dividerWidth
++  ),
+   height: '1px',
+   background: config.colors.white,
+   margin: config.spacing.dividerMargin,
+   opacity: config.opacity.divider,
+   boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+ }))
+
+ const carouselWrapperStyle = computed(() => ({
+   width: '100%',
+   maxWidth: '1360px',
+   margin: '0 auto',
+   position: 'relative'
+ }))
+
+ const carouselStyle = computed(() => ({
+   display: 'flex',
+-  gap: config.spacing.carouselGap,
++  gap: getResponsiveValue(
++    config.spacing.carouselGap,
++    config.responsive?.tablet?.carouselGap
++  ),
+   overflowX: 'auto',
+   scrollBehavior: 'smooth',
+-  padding: config.spacing.carouselPadding,
++  padding: getResponsiveValue(
++    config.spacing.carouselPadding,
++    config.responsive?.tablet?.carouselPadding
++  ),
+   scrollbarWidth: 'none',
+   msOverflowStyle: 'none'
+ }))
+
+ const newsItemStyle = computed(() => ({
+   width: config.sizes.newsItemWidth,
++  minWidth: getResponsiveValue(
++    config.sizes.newsItemWidth,
++    config.responsive?.tablet?.newsItemMinWidth,
++    config.responsive?.mobile?.newsItemMinWidth
++  ),
+   background: config.colors.newsItemBg,
+   borderRadius: config.borderRadius.newsItem,
+   padding: config.spacing.newsItemPadding,
+   transition: config.transitions.default,
+   boxShadow: config.shadows.newsItem,
+   cursor: 'pointer',
+   flexShrink: '0',
+   position: 'relative'
+ }))
+
+ const imageWrapperStyle = computed(() => ({
+   position: 'relative',
+   overflow: 'hidden',
+   borderRadius: config.borderRadius.imageWrapper
+ }))
+
+ const newsImageStyle = computed(() => ({
+   width: '100%',
+-  height: config.sizes.newsImageHeight,
++  height: getResponsiveValue(
++    config.sizes.newsImageHeight,
++    config.responsive?.tablet?.newsImageHeight,
++    config.responsive?.mobile?.newsImageHeight
++  ),
+   objectFit: 'cover',
+   transition: config.transitions.image,
+   display: 'block'
+ }))
+
+ const dateLabelStyle = computed(() => ({
+   position: 'absolute',
+   bottom: '10px',
+   right: '10px',
+   background: config.colors.overlay,
+   padding: '6px 10px',
+   borderRadius: config.borderRadius.dateLabel,
+   color: config.colors.white,
+   fontSize: config.typography.dateLabelSize,
+   fontWeight: config.typography.dateLabelWeight,
+   backdropFilter: `blur(${config.opacity.backdropFilter})`
+ }))
+
+ const infoStyle = computed(() => ({
+   marginTop: config.spacing.infoMarginTop,
+   textAlign: 'left',
+   padding: '0 5px'
+ }))
+
+ const newsTitleStyle = computed(() => ({
+   color: config.colors.primary,
+-  fontSize: config.typography.newsTitleSize,
++  fontSize: getResponsiveValue(
++    config.typography.newsTitleSize,
++    config.responsive?.tablet?.newsTitleSize,
++    config.responsive?.mobile?.newsTitleSize || config.responsive?.tablet?.newsTitleSize
++  ),
+   fontWeight: config.typography.newsTitleWeight,
+   lineHeight: '1.3',
+   marginBottom: '20px',
+   display: '-webkit-box',
+   WebkitLineClamp: '3',
+   WebkitBoxOrient: 'vertical',
+   overflow: 'hidden'
+ }))
+
+ const categoryStyle = computed(() => ({
+   display: 'inline-block',
+   marginTop: '6px',
+   fontSize: config.typography.categorySize,
+   color: config.colors.primary,
+   fontWeight: config.typography.categoryWeight,
+   padding: config.spacing.categoryPadding,
+   background: config.colors.categoryBg,
+   borderRadius: config.borderRadius.category,
+   position: 'absolute',
+   bottom: '5px',
+   right: '5px'
+ }))
+
+ const carouselControlsStyle = computed(() => ({
+   display: 'flex',
+   justifyContent: 'center',
+   gap: config.spacing.controlsGap,
+   marginTop: config.spacing.controlsMarginTop
+ }))
+
+ const controlBtnStyle = computed(() => ({
+   background: config.colors.controlBtnBg,
+   border: 'none',
+   borderRadius: config.borderRadius.controlBtn,
+-  width: config.sizes.controlBtnSize,
+-  height: config.sizes.controlBtnSize,
++  width: getResponsiveValue(
++    config.sizes.controlBtnSize,
++    config.responsive?.tablet?.controlBtnSize
++  ),
++  height: getResponsiveValue(
++    config.sizes.controlBtnSize,
++    config.responsive?.tablet?.controlBtnSize
++  ),
+   display: 'flex',
+   alignItems: 'center',
+   justifyContent: 'center',
+   cursor: 'pointer',
+   transition: config.transitions.default,
+   color: config.colors.primary,
+   boxShadow: config.shadows.controlBtn
+ }))
+
+ const progressBarStyle = computed(() => ({
+   width: '100%',
+   height: config.sizes.progressBarHeight,
+   background: config.colors.progressBarBg,
+   marginTop: config.spacing.progressBarMarginTop,
+   borderRadius: config.borderRadius.progressBar,
+   overflow: 'hidden'
+ }))
+
+ const progressStyle = computed(() => ({
+   height: '100%',
+   background: config.colors.white,
+   borderRadius: config.borderRadius.progressBar,
+   transition: config.transitions.progress,
+   boxShadow: config.shadows.progress,
+   width: `${progress.value}%`
+@@ -380,159 +440,125 @@ const newsArticles = ref([
+   },
+   {
+     title: "Người trẻ chuộng mua nhà sẵn nội thất thay vì tự xây",
+     category: "Định giá Bất động sản",
+     date: "12/10/2024",
+     image: "/imgs/dangtinbds.png"
+   },
+   {
+     title: "Bất động sản xanh – Xu hướng mới dẫn đầu cuối năm 2025",
+     category: "Bất động sản",
+     date: "12/10/2024",
+     image: "/imgs/dangtinbds.png"
+   },
+   {
+     title: "Các yếu tố ảnh hưởng đến giá bất động sản năm 2025",
+     category: "Phân tích thị trường",
+     date: "12/09/2024",
+     image: "/imgs/dangtinbds.png"
+   }
+ ])
 
 
+ const progress = ref(0)
+ const carouselRef = ref(null)
+ let autoScrollInterval = null
++const updateViewportWidth = () => {
++  if (typeof window !== 'undefined') {
++    viewportWidth.value = window.innerWidth
++  }
++}
+
+ const updateProgress = () => {
+   const el = carouselRef.value
+   if (!el) return
+   const maxScroll = el.scrollWidth - el.clientWidth
+   progress.value = maxScroll > 0 ? (el.scrollLeft / maxScroll) * 100 : 0
+ }
+
+ const scrollCarousel = (direction) => {
+   const el = carouselRef.value
+   if (!el) return
+
+   const scrollAmount = el.clientWidth * 0.8
+   el.scrollBy({
+     left: direction * scrollAmount,
+     behavior: 'smooth'
+   })
+ }
+
+ const startAutoScroll = () => {
+   autoScrollInterval = setInterval(() => {
+     const el = carouselRef.value
+     if (!el) return
+
+     if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
+       el.scrollTo({
+         left: 0,
+         behavior: 'smooth'
+       })
+     } else {
+       scrollCarousel(1)
+     }
+   }, 5000)
+ }
+
+ const stopAutoScroll = () => {
+   if (autoScrollInterval) {
+     clearInterval(autoScrollInterval)
+     autoScrollInterval = null
+   }
+ }
+
+ onMounted(() => {
++  updateViewportWidth()
+   startAutoScroll()
+
++  if (typeof window !== 'undefined') {
++    window.addEventListener('resize', updateViewportWidth)
++  }
++
+   const el = carouselRef.value
+   if (el) {
+     el.addEventListener('mouseenter', stopAutoScroll)
+     el.addEventListener('mouseleave', startAutoScroll)
+   }
+ })
+
+ onUnmounted(() => {
+   stopAutoScroll()
++  if (typeof window !== 'undefined') {
++    window.removeEventListener('resize', updateViewportWidth)
++  }
+ })
+ </script>
+
+ <style scoped>
+ .news-section {
+-  font-family: v-bind('config.fontFamily || "Ubuntu, sans-serif"');
++  font-family: var(--font-family, 'Ubuntu, sans-serif');
+ }
+
+ .news-item:hover {
+-  transform: v-bind('config.transitions.hoverTransform');
+-  box-shadow: v-bind('config.shadows.newsItemHover');
++  transform: var(--hover-transform);
++  box-shadow: var(--hover-shadow);
+ }
+
+ .news-item:hover .news-image {
+-  transform: v-bind('config.transitions.imageHoverTransform');
+-  box-shadow: v-bind('config.gradients.imageHoverGlow');
++  transform: var(--image-hover-transform);
++  box-shadow: var(--image-hover-glow);
+ }
+
+ .control-btn:hover {
+-  background: v-bind('config.colors.white');
+-  transform: v-bind('config.transitions.controlBtnHoverTransform');
+-  box-shadow: v-bind('config.shadows.controlBtnHover');
++  background: var(--control-btn-hover-bg);
++  transform: var(--control-btn-hover-transform);
++  box-shadow: var(--control-btn-hover-shadow);
+ }
+
+ .control-btn:active {
+-  transform: v-bind('config.transitions.controlBtnActiveTransform');
+-}
+-
+-/* Responsive design */
+-@media (max-width: v-bind('config.responsive.tabletBreakpoint')) {
+-  .news-section {
+-    padding: v-bind('config.responsive.tablet.sectionPadding');
+-  }
+-
+-  .section-title {
+-    font-size: v-bind('config.responsive.tablet.sectionTitleSize');
+-  }
+-
+-  .divider {
+-    width: v-bind('config.responsive.tablet.dividerWidth');
+-  }
+-
+-  .carousel {
+-    gap: v-bind('config.responsive.tablet.carouselGap');
+-    padding: v-bind('config.responsive.tablet.carouselPadding');
+-  }
+-
+-  .news-item {
+-    min-width: v-bind('config.responsive.tablet.newsItemMinWidth');
+-  }
+-
+-  .news-title {
+-    font-size: v-bind('config.responsive.tablet.newsTitleSize');
+-  }
+-
+-  .control-btn {
+-    width: v-bind('config.responsive.tablet.controlBtnSize');
+-    height: v-bind('config.responsive.tablet.controlBtnSize');
+-  }
+-}
+-
+-@media (max-width: v-bind('config.responsive.mobileBreakpoint')) {
+-  .section-title {
+-    font-size: v-bind('config.responsive.mobile.sectionTitleSize');
+-  }
+-
+-  .news-item {
+-    min-width: v-bind('config.responsive.mobile.newsItemMinWidth');
+-  }
+-
+-  .news-image {
+-    height: v-bind('config.responsive.mobile.newsImageHeight');
+-  }
++  transform: var(--control-btn-active-transform);
+ }
+
+ /* Keep existing styles for browser compatibility */
+ .carousel::-webkit-scrollbar {
+   display: none;
+ }
+ </style>
+\ No newline at end of file
