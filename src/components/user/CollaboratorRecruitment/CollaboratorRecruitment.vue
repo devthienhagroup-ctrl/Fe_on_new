@@ -586,12 +586,418 @@ const availableJobs = ref([
       </ul>
     `
   },
-  // ... (giữ nguyên các job khác từ CollaboratorRecruitment.vue)
+  {
+    id: 5,
+    title: 'Tư vấn viên căn hộ ven sông',
+    salary: 16000000,
+    salaryVisible: false,
+    location: 'Quận 7, TP.HCM',
+    date: '05/11/2023',
+    image: getRandomImage(5),
+    creator: 'Công ty BĐS Riverside',
+    income: '16-32 triệu',
+    applicants: 18,
+    jobDescription: `
+      <h3>Mô tả công việc</h3>
+      <ul>
+        <li>Tư vấn sản phẩm căn hộ cao cấp ven sông</li>
+        <li>Tham gia các sự kiện mở bán định kỳ</li>
+        <li>Xây dựng và chăm sóc tệp khách hàng VIP</li>
+        <li>Phối hợp với bộ phận marketing triển khai chiến dịch</li>
+      </ul>
+
+      <h3>Quyền lợi</h3>
+      <ul>
+        <li>Thu nhập cạnh tranh, thưởng theo dự án</li>
+        <li>Được hỗ trợ chi phí truyền thông</li>
+        <li>Môi trường làm việc sáng tạo</li>
+        <li>Hỗ trợ mentor cá nhân</li>
+      </ul>
+
+      <h3>Yêu cầu</h3>
+      <ul>
+        <li>Kỹ năng thuyết trình tốt</li>
+        <li>Ưu tiên ứng viên có kinh nghiệm căn hộ cao cấp</li>
+        <li>Chủ động trong công việc</li>
+        <li>Sẵn sàng làm việc cuối tuần</li>
+      </ul>
+    `
+  },
+  {
+    id: 6,
+    title: 'Chuyên viên BĐS khu Đông',
+    salary: 17000000,
+    salaryVisible: false,
+    location: 'Thủ Đức, TP.HCM',
+    date: '10/11/2023',
+    image: getRandomImage(6),
+    creator: 'Đất Xanh Premium',
+    income: '17-34 triệu',
+    applicants: 20,
+    jobDescription: `
+      <h3>Mô tả công việc</h3>
+      <ul>
+        <li>Chuyên tư vấn các dự án khu Đông TP.HCM</li>
+        <li>Đánh giá và phân tích tiềm năng khu vực</li>
+        <li>Hỗ trợ khách hàng lựa chọn sản phẩm phù hợp</li>
+        <li>Làm việc trực tiếp với chủ đầu tư</li>
+      </ul>
+
+      <h3>Quyền lợi</h3>
+      <ul>
+        <li>Hoa hồng cao, thưởng nóng theo giao dịch</li>
+        <li>Được cung cấp data khách hàng nóng</li>
+        <li>Tham gia khóa đào tạo pháp lý định kỳ</li>
+        <li>Lộ trình thăng tiến rõ ràng</li>
+      </ul>
+
+      <h3>Yêu cầu</h3>
+      <ul>
+        <li>Am hiểu thị trường khu Đông</li>
+        <li>Có phương tiện di chuyển cá nhân</li>
+        <li>Kỹ năng đàm phán và chốt sale</li>
+        <li>Ưu tiên ứng viên biết tiếng Anh</li>
+      </ul>
+    `
+  },
+  {
+    id: 7,
+    title: 'Cộng tác viên đất nền Long An',
+    salary: 14000000,
+    salaryVisible: false,
+    location: 'Đức Hòa, Long An',
+    date: '15/11/2023',
+    image: getRandomImage(7),
+    creator: 'Công ty BĐS An Phú',
+    income: '14-28 triệu',
+    applicants: 10,
+    jobDescription: `
+      <h3>Mô tả công việc</h3>
+      <ul>
+        <li>Tìm kiếm khách hàng đầu tư đất nền</li>
+        <li>Tổ chức các buổi tham quan thực tế</li>
+        <li>Hỗ trợ thủ tục đặt cọc và chuyển nhượng</li>
+        <li>Báo cáo kết quả hàng tuần</li>
+      </ul>
+
+      <h3>Quyền lợi</h3>
+      <ul>
+        <li>Hỗ trợ chi phí xăng xe, điện thoại</li>
+        <li>Thưởng theo KPI tuần và tháng</li>
+        <li>Được tham gia các khóa học bán hàng</li>
+        <li>Chế độ hoa hồng cạnh tranh</li>
+      </ul>
+
+      <h3>Yêu cầu</h3>
+      <ul>
+        <li>Kỹ năng giao tiếp và chăm sóc khách hàng</li>
+        <li>Chịu khó di chuyển tỉnh</li>
+        <li>Có laptop và smartphone</li>
+        <li>Trung thực, cầu tiến</li>
+      </ul>
+    `
+  },
+  {
+    id: 8,
+    title: 'Tư vấn viên shophouse',
+    salary: 19000000,
+    salaryVisible: false,
+    location: 'Hà Nội',
+    date: '20/11/2023',
+    image: getRandomImage(8),
+    creator: 'Sun Property',
+    income: '19-40 triệu',
+    applicants: 14,
+    jobDescription: `
+      <h3>Mô tả công việc</h3>
+      <ul>
+        <li>Tư vấn sản phẩm shophouse trung tâm</li>
+        <li>Làm việc với khách hàng doanh nghiệp</li>
+        <li>Phối hợp tổ chức sự kiện giới thiệu dự án</li>
+        <li>Theo dõi tiến độ thanh toán và bàn giao</li>
+      </ul>
+
+      <h3>Quyền lợi</h3>
+      <ul>
+        <li>Thu nhập cao, thưởng nóng theo hợp đồng</li>
+        <li>Tham gia các hội thảo chuyên ngành</li>
+        <li>Hỗ trợ vé máy bay khi công tác</li>
+        <li>Bảo hiểm sức khỏe mở rộng</li>
+      </ul>
+
+      <h3>Yêu cầu</h3>
+      <ul>
+        <li>Kinh nghiệm tối thiểu 1 năm</li>
+        <li>Ưu tiên ứng viên biết ngoại ngữ</li>
+        <li>Kỹ năng phân tích tài chính cơ bản</li>
+        <li>Đam mê lĩnh vực bất động sản</li>
+      </ul>
+    `
+  },
+  {
+    id: 9,
+    title: 'Chuyên viên thuê căn hộ dịch vụ',
+    salary: 13000000,
+    salaryVisible: false,
+    location: 'Quận 3, TP.HCM',
+    date: '22/11/2023',
+    image: getRandomImage(9),
+    creator: 'Công ty Leasing Pro',
+    income: '13-26 triệu',
+    applicants: 9,
+    jobDescription: `
+      <h3>Mô tả công việc</h3>
+      <ul>
+        <li>Tìm kiếm khách thuê căn hộ dịch vụ</li>
+        <li>Quản lý danh mục phòng trống</li>
+        <li>Đàm phán hợp đồng thuê</li>
+        <li>Chăm sóc khách trong suốt thời gian thuê</li>
+      </ul>
+
+      <h3>Quyền lợi</h3>
+      <ul>
+        <li>Hoa hồng theo hợp đồng thuê</li>
+        <li>Hỗ trợ chi phí marketing</li>
+        <li>Làm việc giờ hành chính linh hoạt</li>
+        <li>Cơ hội làm việc lâu dài</li>
+      </ul>
+
+      <h3>Yêu cầu</h3>
+      <ul>
+        <li>Kỹ năng chăm sóc khách hàng tốt</li>
+        <li>Biết sử dụng CRM cơ bản</li>
+        <li>Ưu tiên ứng viên biết tiếng Anh</li>
+        <li>Năng động, nhanh nhẹn</li>
+      </ul>
+    `
+  },
+  {
+    id: 10,
+    title: 'Cộng tác viên môi giới BĐS công nghiệp',
+    salary: 22000000,
+    salaryVisible: false,
+    location: 'Bình Dương',
+    date: '25/11/2023',
+    image: getRandomImage(10),
+    creator: 'Industrial Land Co.',
+    income: '22-60 triệu',
+    applicants: 11,
+    jobDescription: `
+      <h3>Mô tả công việc</h3>
+      <ul>
+        <li>Tư vấn đất khu công nghiệp và nhà xưởng</li>
+        <li>Làm việc với khách hàng doanh nghiệp FDI</li>
+        <li>Hỗ trợ thủ tục pháp lý và giấy phép</li>
+        <li>Tham gia hội chợ và triển lãm ngành</li>
+      </ul>
+
+      <h3>Quyền lợi</h3>
+      <ul>
+        <li>Hoa hồng cao theo diện tích giao dịch</li>
+        <li>Hỗ trợ di chuyển và ăn ở khi công tác</li>
+        <li>Đào tạo chuyên sâu về BĐS công nghiệp</li>
+        <li>Cơ hội mở rộng mạng lưới doanh nghiệp</li>
+      </ul>
+
+      <h3>Yêu cầu</h3>
+      <ul>
+        <li>Kinh nghiệm làm việc với khách hàng doanh nghiệp</li>
+        <li>Hiểu biết về pháp lý khu công nghiệp</li>
+        <li>Khả năng sử dụng tiếng Anh giao tiếp</li>
+        <li>Chịu được áp lực doanh số</li>
+      </ul>
+    `
+  },
+  {
+    id: 11,
+    title: 'Chuyên viên tư vấn condotel',
+    salary: 15000000,
+    salaryVisible: false,
+    location: 'Đà Nẵng',
+    date: '28/11/2023',
+    image: getRandomImage(11),
+    creator: 'Ocean View Invest',
+    income: '15-33 triệu',
+    applicants: 13,
+    jobDescription: `
+      <h3>Mô tả công việc</h3>
+      <ul>
+        <li>Tư vấn sản phẩm condotel ven biển</li>
+        <li>Hỗ trợ khách hàng tính toán lợi nhuận</li>
+        <li>Tổ chức tour du lịch tham quan dự án</li>
+        <li>Chăm sóc khách hàng sau bán hàng</li>
+      </ul>
+
+      <h3>Quyền lợi</h3>
+      <ul>
+        <li>Thu nhập hấp dẫn, thưởng lễ tết</li>
+        <li>Hỗ trợ chi phí công tác</li>
+        <li>Tham gia team building hàng quý</li>
+        <li>Bảo hiểm đầy đủ</li>
+      </ul>
+
+      <h3>Yêu cầu</h3>
+      <ul>
+        <li>Yêu thích du lịch biển</li>
+        <li>Có kinh nghiệm tư vấn đầu tư</li>
+        <li>Khả năng thuyết phục và đàm phán</li>
+        <li>Ưu tiên ứng viên tiếng Trung/Anh</li>
+      </ul>
+    `
+  },
+  {
+    id: 12,
+    title: 'Cộng tác viên dự án xanh',
+    salary: 12500000,
+    salaryVisible: false,
+    location: 'Quận 9, TP.HCM',
+    date: '30/11/2023',
+    image: getRandomImage(12),
+    creator: 'Green Home Land',
+    income: '12-26 triệu',
+    applicants: 7,
+    jobDescription: `
+      <h3>Mô tả công việc</h3>
+      <ul>
+        <li>Giới thiệu các dự án nhà ở xanh</li>
+        <li>Tư vấn chính sách vay ưu đãi</li>
+        <li>Phối hợp tổ chức workshop về sống xanh</li>
+        <li>Hỗ trợ khách hàng hoàn thiện hồ sơ pháp lý</li>
+      </ul>
+
+      <h3>Quyền lợi</h3>
+      <ul>
+        <li>Hoa hồng tốt, thưởng hiệu suất</li>
+        <li>Môi trường làm việc thân thiện</li>
+        <li>Được đào tạo về xu hướng BĐS xanh</li>
+        <li>Cơ hội trở thành chuyên viên chính thức</li>
+      </ul>
+
+      <h3>Yêu cầu</h3>
+      <ul>
+        <li>Đam mê phong cách sống xanh</li>
+        <li>Kỹ năng tư vấn tài chính cá nhân</li>
+        <li>Chủ động và trách nhiệm</li>
+        <li>Ưu tiên ứng viên có kinh nghiệm BĐS</li>
+      </ul>
+    `
+  },
+  {
+    id: 13,
+    title: 'Tư vấn viên biệt thự nghỉ dưỡng',
+    salary: 25000000,
+    salaryVisible: false,
+    location: 'Nha Trang',
+    date: '02/12/2023',
+    image: getRandomImage(15),
+    creator: 'Resort Holdings',
+    income: '25-70 triệu',
+    applicants: 6,
+    jobDescription: `
+      <h3>Mô tả công việc</h3>
+      <ul>
+        <li>Kết nối khách hàng cao cấp mua biệt thự nghỉ dưỡng</li>
+        <li>Hỗ trợ khách hàng trong các gói đầu tư cho thuê</li>
+        <li>Tham gia các sự kiện giới thiệu tại resort</li>
+        <li>Theo dõi tiến độ xây dựng và bàn giao</li>
+      </ul>
+
+      <h3>Quyền lợi</h3>
+      <ul>
+        <li>Hoa hồng hấp dẫn theo giá trị hợp đồng</li>
+        <li>Được trải nghiệm dịch vụ resort miễn phí theo chính sách</li>
+        <li>Hỗ trợ chi phí công tác và lưu trú</li>
+        <li>Đào tạo chuyên sâu về sản phẩm nghỉ dưỡng</li>
+      </ul>
+
+      <h3>Yêu cầu</h3>
+      <ul>
+        <li>Kinh nghiệm chăm sóc khách hàng cao cấp</li>
+        <li>Kỹ năng giao tiếp tiếng Anh tốt</li>
+        <li>Am hiểu thị trường du lịch biển</li>
+        <li>Hình thức chỉn chu, chuyên nghiệp</li>
+      </ul>
+    `
+  },
+  {
+    id: 14,
+    title: 'Chuyên viên bán hàng officetel',
+    salary: 15500000,
+    salaryVisible: false,
+    location: 'Quận 1, TP.HCM',
+    date: '04/12/2023',
+    image: getRandomImage(16),
+    creator: 'City Office Homes',
+    income: '15-31 triệu',
+    applicants: 16,
+    jobDescription: `
+      <h3>Mô tả công việc</h3>
+      <ul>
+        <li>Tư vấn các sản phẩm officetel trung tâm</li>
+        <li>Hướng dẫn khách hàng thủ tục sang nhượng</li>
+        <li>Hỗ trợ khách hàng doanh nghiệp nhỏ</li>
+        <li>Đàm phán hợp đồng thuê và mua bán</li>
+      </ul>
+
+      <h3>Quyền lợi</h3>
+      <ul>
+        <li>Lương cứng + hoa hồng hấp dẫn</li>
+        <li>Hỗ trợ phí gửi xe, điện thoại</li>
+        <li>Đào tạo kỹ năng bán hàng B2B</li>
+        <li>Văn phòng làm việc trung tâm</li>
+      </ul>
+
+      <h3>Yêu cầu</h3>
+      <ul>
+        <li>Kinh nghiệm bán hàng bất động sản tối thiểu 6 tháng</li>
+        <li>Thái độ chuyên nghiệp, lịch sự</li>
+        <li>Khả năng giao tiếp tiếng Anh là lợi thế</li>
+        <li>Chịu được áp lực chỉ tiêu</li>
+      </ul>
+    `
+  },
+  {
+    id: 15,
+    title: 'Cộng tác viên bán đất nghỉ dưỡng Đà Lạt',
+    salary: 13500000,
+    salaryVisible: false,
+    location: 'Đà Lạt, Lâm Đồng',
+    date: '06/12/2023',
+    image: getRandomImage(17),
+    creator: 'Mountain Land',
+    income: '13-29 triệu',
+    applicants: 8,
+    jobDescription: `
+      <h3>Mô tả công việc</h3>
+      <ul>
+        <li>Tìm kiếm khách hàng mua đất nghỉ dưỡng</li>
+        <li>Tổ chức khảo sát đất và đo đạc</li>
+        <li>Hỗ trợ thủ tục công chứng và sang tên</li>
+        <li>Kết nối với cơ quan địa phương khi cần</li>
+      </ul>
+
+      <h3>Quyền lợi</h3>
+      <ul>
+        <li>Hoa hồng theo từng giao dịch</li>
+        <li>Hỗ trợ phương tiện di chuyển nội tỉnh</li>
+        <li>Được đào tạo kiến thức địa phương</li>
+        <li>Lịch làm việc linh hoạt</li>
+      </ul>
+
+      <h3>Yêu cầu</h3>
+      <ul>
+        <li>Yêu thích thiên nhiên và du lịch</li>
+        <li>Chủ động liên hệ khách hàng</li>
+        <li>Biết sử dụng công cụ bản đồ</li>
+        <li>Trung thực, cầu tiến</li>
+      </ul>
+    `
+  }
 ])
 
 const additionalAssignedJobs = [
   {
-    id: 13,
+    id: 16,
     title: 'Cộng tác viên dự án mới 1',
     salary: 20000000,
     salaryVisible: false,
@@ -603,7 +1009,7 @@ const additionalAssignedJobs = [
     applicants: 5
   },
   {
-    id: 14,
+    id: 17,
     title: 'Cộng tác viên dự án mới 2',
     salary: 18000000,
     salaryVisible: false,

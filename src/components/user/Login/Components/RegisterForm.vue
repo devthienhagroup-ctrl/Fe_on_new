@@ -377,7 +377,7 @@ const handleSendOtp = async () => {
   if (!validate()) return;
 
   try {
-    await showLoading(api.post("/thg/api/auth/send-otp", { email: registerForm.email }));
+    await showLoading(api.post("/thg/api/auth/send-otp", { email: registerForm.email, phone: registerForm.phone }));
     updateAlertSuccess("OTP đã được gửi đến email!");
 
     showOtpStep.value = true;
@@ -423,7 +423,7 @@ const verifyOtp = async (otpValue) => {
 // ===================================================
 const resendOtp = async () => {
   try {
-    await showLoading(api.post("/thg/api/auth/send-otp", { email: registerForm.email }));
+    await showLoading(api.post("/thg/api/auth/send-otp", { email: registerForm.email , phone: registerForm.phone }));
     updateAlertSuccess("OTP mới đã được gửi!");
     if (otpComponentRef.value) {
       otpComponentRef.value.resetOtp();

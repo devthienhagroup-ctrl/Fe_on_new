@@ -85,7 +85,7 @@ const allMenuItems = [
   },
 
 
-  { label: 'CUSTOMER', route: '/-thg/khach-hang', icon: 'fa-solid fa-address-book text-info fs-2', title: 'Khách hàng', desc: 'Theo dõi thông tin, lịch sử và chăm sóc khách hàng' },
+  { label: 'SYSCUSTOMER', route: '/-thg/quan-ly-nguoi-dung', icon: 'fa-solid fa-address-book text-info fs-2', title: 'Người dùng', desc: 'Theo dõi thông tin, lịch sử và chăm sóc người dùng' },
   { label: 'AUDIT', route: '/-thg/lich-su-he-thong', icon: 'fa-solid fa-clock-rotate-left text-danger fs-2', title: 'Audit Log', desc: 'Ghi nhận và giám sát toàn bộ thao tác hệ thống' },
   { label: 'ROLE', route: '/-thg/phan-quyen', icon: 'fa-solid fa-shield-halved text-warning fs-2', title: 'Phân quyền Role', desc: 'Quản lý & cấu hình quyền truy cập cho vai trò trong hệ thống'
   },

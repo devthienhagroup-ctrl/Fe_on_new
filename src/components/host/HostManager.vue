@@ -1,4 +1,28 @@
 <template>
+  <div class="d-flex justify-content-between align-items-center px-3 pb-2 " style="border-bottom: solid 0.5px rgba(0,0,0,0.3)">
+    <h5 class="fw-bold mb-0 d-flex align-items-center" style="font-size: 20px">
+      <i class="fas fa-users me-2 text-primary"></i>
+      Quản lý người dùng
+    </h5>
+
+    <div class="d-flex align-items-center justify-content-end gap-2">
+      <NotificationBell />
+      <div class="d-flex flex-column align-items-end text-end">
+        <div class="fw-semibold text-dark">{{ info.fullName }}</div>
+      </div>
+
+      <img
+          v-if="info.avatarUrl"
+          :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+          alt="avatar"
+          class="rounded-circle border"
+          style="width: 36px; height: 36px; object-fit: cover;"
+      />
+      <div v-else class="avatar-circle">
+        {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
+      </div>
+    </div>
+  </div>
   <div class="container-fluid py-4 host-list-container">
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-1">
@@ -356,64 +380,66 @@
         </div>
       </div>
     </div>
-    <div v-if="selectedType !== 'HOST'" class="w-100 text-center mb-4">
+    <div  class="w-100 text-center mb-4">
       <!-- TITLE -->
       <hr/>
-      <h4 class="fw-bold w-100 text-start">Thống kê môi giới</h4>
-      <h4 class="fw-bold mb-4">
-        TOP môi giới chuyên nghiệp tại
-        <span class="text-primary">
-      {{ filters.tinh && filters.tinh.trim() !== ''
-            ? filters.tinh
-            : 'Toàn quốc' }}
-    </span>
-      </h4>
+      <div v-if="selectedType !== 'HOST'" class=" mb-5">
+        <h4 class="fw-bold w-100 text-start">Thống kê môi giới</h4>
+        <h4 class="fw-bold mb-4 " >
+          TOP môi giới chuyên nghiệp tại
+          <span class="text-primary">
+        {{ filters.tinh && filters.tinh.trim() !== ''
+              ? filters.tinh
+              : 'Toàn quốc' }}
+      </span>
+        </h4>
 
-      <!-- CARD LIST -->
-      <div
-          v-if="podiumBrokers.length"
-          class="top-broker-podium"
-      >
+        <!-- CARD LIST -->
         <div
-            v-for="item in podiumBrokers"
-            :key="item.employeeId"
-            class="broker-card text-center podium-card"
-            :class="[`rank-${item.rank}`]"
+            v-if="podiumBrokers.length"
+            class="top-broker-podium"
         >
-          <!-- AVATAR -->
+          <div
+              v-for="item in podiumBrokers"
+              :key="item.employeeId"
+              class="broker-card text-center podium-card"
+              :class="[`rank-${item.rank}`]"
+          >
+            <!-- AVATAR -->
 
-            <div
-                v-if="item.rank <= 3"
-                class="top-text"
-                :class="getTopClass(item.rank)"
-            >
-              TOP {{ item.rank }}
-            </div>
-            <div class="avatar-wrapper mx-auto">
-              <img
-                  :src="item.avatar
-              ? 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + item.avatar
-              :  'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + 'vat-default.jpg'"
-                  class="avatar-img"
-              />
+              <div
+                  v-if="item.rank <= 3"
+                  class="top-text"
+                  :class="getTopClass(item.rank)"
+              >
+                TOP {{ item.rank }}
+              </div>
+              <div class="avatar-wrapper mx-auto">
+                <img
+                    :src="item.avatar
+                ? 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + item.avatar
+                :  'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + 'vat-default.jpg'"
+                    class="avatar-img"
+                />
 
-              <!-- BADGE -->
-              <img
-                  src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/huy-hieu.png"
-                  class="badge-icon"
-                  style="width: 45px; height: 45px"
-              />
-            </div>
+                <!-- BADGE -->
+                <img
+                    src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/huy-hieu.png"
+                    class="badge-icon"
+                    style="width: 45px; height: 45px"
+                />
+              </div>
 
-          <!-- NAME -->
-          <h6 class="fw-semibold mt-3 mb-1" style="font-size: 24px">
-            {{ item.fullName }}
-          </h6>
+            <!-- NAME -->
+            <h6 class="fw-semibold mt-3 mb-1" style="font-size: 24px">
+              {{ item.fullName }}
+            </h6>
 
-          <!-- SOLD -->
-          <p class="text-muted small mb-0" style="font-size: 16px">
-            Đã bán {{ item.totalSold }} căn
-          </p>
+            <!-- SOLD -->
+            <p class="text-muted small mb-0" style="font-size: 16px">
+              Đã bán {{ item.totalSold }} căn
+            </p>
+          </div>
         </div>
       </div>
 
@@ -463,22 +489,47 @@
         </div>
       </div>
       <!-- BIỂU ĐỒ THỐNG KÊ MÔI GIỚI -->
-      <div class="card shadow-sm">
-        <div class="card-header fw-semibold">
-          Thống kê môi giới theo khu vực
-        </div>
+      <section class="broker-chart-panel">
+        <header class="broker-chart-header">
+          <div>
+            <p class="chart-kicker mb-1">Analytics</p>
+            <h5 class="chart-title">
+              Thống kê
+              {{ selectedType === 'HOST' ? 'chủ nhà' : 'môi giới' }}
+              theo khu vực
+            </h5>
+          </div>
+          <div class="chart-statistics">
+            <div class="stat-chip primary">
+              <span class="label">
+                Tổng {{ selectedType === 'HOST' ? 'chủ nhà' : 'môi giới' }}
+              </span>
+              <strong class="value">{{ totalBrokerCount }}</strong>
+            </div>
+            <div class="stat-chip muted" v-if="brokerLabels.length">
+              <span class="label">Số khu vực</span>
+              <strong class="value">{{ brokerLabels.length }}</strong>
+            </div>
+          </div>
+        </header>
 
-        <div class="card-body" style="height: 320px;">
+        <div class="broker-chart-wrapper">
           <Bar
               v-if="brokerLabels.length"
               :data="chartData"
               :options="chartOptions"
           />
-          <div v-else class="text-muted text-center pt-5">
-            Không có dữ liệu thống kê
+          <div v-else class="chart-empty-state">
+            <div class="empty-icon">
+              <i class="fas fa-chart-column"></i>
+            </div>
+            <div>
+              <p class="mb-1 fw-semibold">Không có dữ liệu thống kê</p>
+              <small class="text-muted">Vui lòng chọn khu vực hoặc thử lại sau.</small>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
 
 
@@ -512,14 +563,31 @@ import provinces from "/src/assets/js/address.json";
 import CreateHostModal from "./CreateHostModal.vue";
 import HostUpdateModal from "./HostUpdateModal.vue";
 import { Bar } from 'vue-chartjs'
+import { useAuthStore } from "/src/stores/authStore.js";
+const authStore = useAuthStore();
+const info = authStore.userInfo;
+// src/plugins/chart.js
 import {
   Chart as ChartJS,
-  BarElement,
   CategoryScale,
   LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
   Tooltip,
   Legend
 } from 'chart.js'
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    LineElement,
+    PointElement,
+    Tooltip,
+    Legend
+)
+
 
 
 
@@ -629,12 +697,18 @@ watch(
 const brokerStatistic = ref([])
 const brokerLabels = ref([])
 const brokerValues = ref([])
+const totalBrokerCount = computed(() => brokerValues.value.reduce((sum, v) => sum + Number(v || 0), 0))
 
 const fetchBrokerStatisticByArea = async () => {
   try {
     console.log('🚀 Gọi API thống kê môi giới theo khu vực...')
+    const url =
+        selectedType.value === 'HOST'
+            ? '/host/statistic-by-area'
+            : '/moigioi/statistic-by-area'
 
-    const res = await api.get('/moigioi/statistic-by-area')
+
+    const res = await api.get(url)
 
     console.log('📊 Data:', res.data)
 
@@ -732,7 +806,7 @@ const chartOptions = {
         }
       },
       grid: {
-        color: '#E5E7EB'
+        display: false
       }
     }
   }
@@ -755,11 +829,11 @@ watch(selectedType, () => {
   if (selectedType.value !== 'HOST') {
     console.log( "Chạy" )
     fetchTopBrokers()
-    fetchBrokerStatisticByArea()
+
   } else {
     topBrokers.value = []
   }
-
+  fetchBrokerStatisticByArea()
 });
 
 const topBrokers = ref([])
@@ -833,6 +907,7 @@ onMounted(() => {
     link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
     document.head.appendChild(link);
   }
+  fetchBrokerStatisticByArea()
 });
 
 const toggleStatus = async (item) => {
@@ -867,7 +942,7 @@ const viewHostDetail = async (id) => {
   }
 };
 
-import HostDetailModal from './HostDetailModal.vue'
+
 
 const showDetail = ref(false)
 const selectedHost = ref(null)
@@ -899,6 +974,7 @@ const openUpdateHost = async (id) => {
 
 
 import { confirmYesNo, showCenterSuccess, showCenterError } from '/src/assets/js/alertService.js'
+import NotificationBell from "../NotificationBell.vue";
 
 /* =========================
    XÓA HOST
@@ -958,6 +1034,128 @@ const deleteHost = (item) => {
   letter-spacing: 0.4px;
   border-bottom: 1px solid #d6d4ff;
   vertical-align: middle;
+}
+
+/* =========================
+   BIỂU ĐỒ THỐNG KÊ MÔI GIỚI
+   ========================= */
+.broker-chart-panel {
+  margin-top: 16px;
+  padding: 18px 20px 22px;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+  color: #0f172a;
+}
+
+.broker-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.chart-kicker {
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #6366f1;
+  margin-bottom: 6px;
+}
+
+.chart-title {
+  margin: 0 0 6px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.chart-subtitle {
+  margin: 0;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.chart-statistics {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stat-chip {
+  padding: 10px 14px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 130px;
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  background: #f8fafc;
+}
+
+.stat-chip .label {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.stat-chip .value {
+  font-size: 22px;
+  color: #111827;
+}
+
+.stat-chip.primary {
+  background: #eef2ff;
+}
+
+.stat-chip.muted {
+  background: #f9fafb;
+}
+
+.broker-chart-wrapper {
+  position: relative;
+  min-height: 340px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 16px 18px;
+  overflow: hidden;
+}
+
+.broker-chart-wrapper canvas {
+  max-height: 300px;
+}
+
+.chart-empty-state {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: #4b5563;
+  text-align: left;
+}
+
+.chart-empty-state .empty-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #eef2ff;
+  display: grid;
+  place-items: center;
+  color: #6366f1;
+  font-size: 22px;
+}
+
+@media (max-width: 992px) {
+  .broker-chart-header {
+    flex-direction: column;
+  }
+
+  .chart-statistics {
+    width: 100%;
+  }
 }
 
 

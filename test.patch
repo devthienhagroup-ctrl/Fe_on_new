@@ -1,321 +1,176 @@
-diff --git a/src/components/host/Test.vue b/src/components/host/Test.vue
-index 9766b9352baa1252186c85914ce4637287d794b7..3a57968a06e532b883b1e85b3cca62c4c4e22c13 100644
---- a/src/components/host/Test.vue
-+++ b/src/components/host/Test.vue
-@@ -348,53 +348,103 @@
-                 class="btn btn-outline-secondary"
-                 :disabled="pageNo >= totalPages - 1"
-                 title="Trang cuối"
-                 @click="goLastPage"
+diff --git a/src/components/productAdmin/Demo.vue b/src/components/productAdmin/Demo.vue
+index c3ec5038770683635825122babd2ac04968a12a1..d396bed3b8400a3a30dc6e4336107ade7aa4ebc6 100644
+--- a/src/components/productAdmin/Demo.vue
++++ b/src/components/productAdmin/Demo.vue
+@@ -1,90 +1,101 @@
+ <template>
+   <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 px-4 py-3" style="padding-top: 90px!important;">
+     <div class="max-w-[1600px] mx-auto">
+       <!-- Bộ lọc nâng cao -->
+       <div class="bg-white rounded-xl shadow-lg border border-slate-300 mb-5 p-4"
+            style="
+             background-image: url('https://s3.cloudfly.vn/thg-storage/uploads-public/thienhagroup_filter_2.png');
+             background-size: cover;
+             background-position: center;
+             background-repeat: no-repeat;
+           ">
+         <div class="filter-header mb-3">
+           <div class="filter-title-wrap">
+             <h1 class="filter-title">
+               Sản Phẩm Thiên Hà Group Dành Riêng Cho Bạn
+             </h1>
+           </div>
+
+           <!-- Nút chuyển đổi giữa bảng và thẻ -->
+           <div class="filter-actions">
++            <button
++                v-if="isMobile"
++                @click="toggleFilters"
++                :class="[
++          'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2 bg-white text-slate-700 border-slate-300 hover:bg-slate-50',
++          isFilterCollapsed ? 'shadow' : 'shadow-md'
++        ]"
++            >
++              <i :class="['fa-solid text-sm', isFilterCollapsed ? 'fa-chevron-down' : 'fa-chevron-up']"></i>
++              <span class="text-sm font-medium">{{ isFilterCollapsed ? 'Mở bộ lọc' : 'Thu gọn bộ lọc' }}</span>
++            </button>
+             <button
+                 @click="viewMode = 'card'"
+                 :class="[
+         'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
+         viewMode === 'card'
+           ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+           : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+       ]"
              >
-               <i class="fas fa-angles-right"></i>
+               <i class="fa-solid fa-grip text-sm"></i>
+               <span class="text-sm font-medium">Thẻ</span>
+             </button>
+
+             <button
+                 @click="viewMode = 'table'"
+                 :disabled="isMobile"
+                 :class="[
+         'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
+         viewMode === 'table'
+           ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+           : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50',
+         isMobile ? 'opacity-60 cursor-not-allowed' : ''
+       ]"
+             >
+               <i class="fa-solid fa-table text-sm"></i>
+               <span class="text-sm font-medium">Bảng</span>
              </button>
            </div>
          </div>
-       </div>
-     </div>
-     <div v-if="selectedType !== 'HOST'" class="w-100 text-center mb-4">
-       <!-- TITLE -->
-       <hr/>
-       <h4 class="fw-bold w-100 text-start">Thống kê môi giới</h4>
-       <h4 class="fw-bold mb-4">
-         TOP môi giới chuyên nghiệp tại
-         <span class="text-primary">
-       {{ filters.tinh && filters.tinh.trim() !== ''
-             ? filters.tinh
-             : 'Toàn quốc' }}
-     </span>
-       </h4>
 
-       <!-- CARD LIST -->
--      <div class="d-flex justify-content-center gap-4 flex-wrap">
-+      <div
-+          v-if="podiumBrokers.length"
-+          class="top-broker-podium"
-+      >
-         <div
--            v-for="item in topBrokers"
-+            v-for="item in podiumBrokers"
-+            :key="item.employeeId"
-+            class="broker-card text-center podium-card"
-+            :class="[`rank-${item.rank}`]"
-+        >
-+          <!-- AVATAR -->
-+
-+            <div
-+                v-if="item.rank <= 3"
-+                class="top-text"
-+                :class="getTopClass(item.rank)"
-+            >
-+              TOP {{ item.rank }}
-+            </div>
-+            <div class="avatar-wrapper mx-auto">
-+              <img
-+                  :src="item.avatar
-+              ? 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + item.avatar
-+              :  'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + 'vat-default.jpg'"
-+                  class="avatar-img"
-+              />
-+
-+              <!-- BADGE -->
-+              <img
-+                  src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/huy-hieu.png"
-+                  class="badge-icon"
-+                  style="width: 45px; height: 45px"
-+              />
-+            </div>
-+
-+          <!-- NAME -->
-+          <h6 class="fw-semibold mt-3 mb-1" style="font-size: 24px">
-+            {{ item.fullName }}
-+          </h6>
-+
-+          <!-- SOLD -->
-+          <p class="text-muted small mb-0" style="font-size: 16px">
-+            Đã bán {{ item.totalSold }} căn
-+          </p>
-+        </div>
-+      </div>
-+
-+      <div
-+          v-if="otherBrokers.length"
-+          class="d-flex justify-content-center gap-4 flex-wrap mt-4"
-+      >
-+        <div
-+            v-for="item in otherBrokers"
-             :key="item.employeeId"
-             class="broker-card text-center"
-         >
-           <!-- AVATAR -->
 
-             <div
-                 v-if="item.rank <= 3"
-                 class="top-text"
-                 :class="getTopClass(item.rank)"
-             >
-               TOP {{ item.rank }}
-             </div>
-             <div class="avatar-wrapper mx-auto">
-               <img
-                   :src="item.avatar
-               ? 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + item.avatar
-               :  'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + 'vat-default.jpg'"
-                   class="avatar-img"
-               />
+         <!-- Thanh tìm kiếm -->
+-        <div class="mb-3">
++        <div class="mb-3" v-show="shouldShowFilters">
+           <div class="relative">
+             <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+             <input
+                 v-model="searchQuery"
+                 type="text"
+                 placeholder="Tìm kiếm theo tên chủ nhà hoặc số điện thoại, địa chỉ chi tết..."
+                 class="w-full pl-9 pr-4 py-2 border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all text-sm"
+             />
+           </div>
+         </div>
 
-               <!-- BADGE -->
-               <img
-                   src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/huy-hieu.png"
-                   class="badge-icon"
-                   style="width: 45px; height: 45px"
-@@ -552,50 +602,52 @@ const onPageSizeChange = () => {
-   pageNo.value = 0;
-   fetchData();
- };
+-        <div class="filter-row">
++        <div class="filter-row" v-show="shouldShowFilters">
 
- const selectHost = (host) => {
-   console.log('Selected host:', host);
-   // Add your host selection logic here
- };
+         <!-- Mức giá -->
+           <div class="filter-item">
+             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
+               <i class="fa-solid fa-dollar-sign text-blue-600 text-xs icon-glow" ></i>
+               Mức Giá
+             </label>
+             <select v-model="filterGiaRange"
+                     class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg
+              focus:ring-2 focus:ring-blue-600 focus:border-transparent
+              bg-white shadow-sm transition-all">
+               <option value="">Tất cả</option>
+               <option value="<1>">&lt; 1 tỷ</option>
+               <option value="1-3">1 - 3 tỷ</option>
+               <option value="3-5">3 - 5 tỷ</option>
+               <option value="5-7">5 - 7 tỷ</option>
+               <option value="7-10">7 - 10 tỷ</option>
+               <option value=">10">&gt; 10 tỷ</option>
+             </select>
+           </div>
 
- watch(selectedType, () => {
-   pageNo.value = 0;
-   fetchData();
+           <!-- Tỉnh thành -->
+           <div class="filter-item">
+             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
+               <i class="fa-solid fa-city text-emerald-600 text-xs icon-glow"></i>
+@@ -743,59 +754,67 @@ const sidebar = useSidebarStore();
 
-   console.log( selectedType.value )
-   if (selectedType.value !== 'HOST') {
-     console.log( "Chạy" )
-     fetchTopBrokers()
-   } else {
-     topBrokers.value = []
+ // Data
+ const landAssets = ref([]);
+ const totalRecords = ref(0);
+
+ // Filters
+ const filterGiaRange = ref("");
+ const filterProvince = ref("");
+ const filterWard = ref("");
+ const filterStreet = ref("");
+ const filterLoaiMH = ref("");
+ const filterDTCN = ref("");
+ const filterViTri = ref("");
+ const filterCreateDate = ref("");
+ const filterUpdateDate = ref("");
+ const searchQuery = ref("");
+ const filterUnlock = ref("");
+ const filterStatus = ref("");
+ const filterLove = ref(null);
+
+ // Pagination
+ const page = ref(0);
+ const pageSize = ref(8);
+ const viewMode = ref('card');
+ const isMobile = ref(false);
++const isFilterCollapsed = ref(false);
+ const updateViewportMode = () => {
+   isMobile.value = typeof window !== 'undefined' && window.innerWidth < 768;
+   if (isMobile.value) {
+     viewMode.value = 'card';
++  } else {
++    isFilterCollapsed.value = false;
    }
+ };
+ watch(viewMode, (mode) => {
+   pageSize.value = mode === 'card' ? 8 : 10;
+ });// Mặc định 9 thẻ cho 3 cột
++const shouldShowFilters = computed(() => !isMobile.value || !isFilterCollapsed.value);
++const toggleFilters = () => {
++  if (!isMobile.value) return;
++  isFilterCollapsed.value = !isFilterCollapsed.value;
++};
+ const totalPages = computed(() =>
+     Math.ceil(totalRecords.value / pageSize.value || 1)
+ );
 
+ // Unique values
+ const provinces = computed(() => addressData.map(x => x.name));
+
+ const wards = computed(() => {
+   if (!filterProvince.value) return [];
+
+   const province = addressData.find(p => p.name === filterProvince.value);
+   if (!province || !Array.isArray(province.wards)) return [];
+
+   return province.wards.map(w => w.name);
+ });
+ watch(filterProvince, () => {
+   filterWard.value = "";   // reset về Tất cả
  });
 
- const topBrokers = ref([])
- const loadingTopBroker = ref(false)
-+const podiumBrokers = computed(() => topBrokers.value.slice(0, 3))
-+const otherBrokers = computed(() => topBrokers.value.slice(3))
 
- const fetchTopBrokers = async () => {
-   loadingTopBroker.value = true
-   try {
-     const res = await api.get('/moigioi/top-moi-gioi', {
-       params: {
-         area: filters.value.tinh   // ✅ dùng filters.tinh
-       }
-     })
-
-     topBrokers.value = setTopRanks(res.data || [])
-     console.log("Dữ liệu: ", topBrokers.value );
-   } catch (e) {
-     console.error('❌ Lỗi lấy top môi giới', e)
-     topBrokers.value = []
-   } finally {
-     loadingTopBroker.value = false
-   }
- }
- const getTopClass = (rank) => {
-   if (rank === 1) return 'top-1'
-   if (rank === 2) return 'top-2'
-   if (rank === 3) return 'top-3'
-   return ''
- }
-@@ -1139,62 +1191,83 @@ th {
- /* =========================
-    DELETE BUTTON – ĐỎ
- ========================= */
- .btn-delete i {
-   color: #dc2626;                 /* đỏ đậm */
-   font-size: 13px;
- }
-
- /* hover */
- .btn-delete:hover {
-   background-color: #fee2e2;
-   border-color: #fecaca;
-   transform: translateY(-1px);
-   box-shadow: 0 4px 8px rgba(220, 38, 38, 0.15);
- }
-
- .btn-delete:hover i {
-   color: #b91c1c;
- }
-
- /* active click */
- .btn-delete:active {
-   transform: scale(0.96);
- }
-
-+/* TOP BROKER PODIUM */
-+.top-broker-podium {
-+  display: flex;
-+  align-items: flex-end;
-+  justify-content: center;
-+  gap: 24px;
-+  flex-wrap: wrap;
-+  margin-bottom: 8px;
-+}
-+
- /* CARD – to hơn, dáng dọc 6:4 */
- .broker-card {
--  width: 280px;         /* 👈 6 : 4 (cao hơn) */
--  background: #fff;
--  text-align: end;
-+  width: var(--card-size, 280px);
-+  background: var(--card-bg, #ffffff);
-+  text-align: center;
-   border-radius: 24px;
-   padding: 28px 20px 28px;
-   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-   position: relative;
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-+  align-self: flex-end;
-+  transform: scale(var(--scale, 1));
-+  transform-origin: bottom center;
-+  transition: transform 0.2s ease;
-+}
-+
-+.podium-card {
-+  --card-size: 280px;
-+  --scale: 1;
-+  --order: 0;
-+  order: var(--order);
- }
-
- /* AVATAR – viền xanh ngoài */
- .avatar-wrapper {
-   position: relative;
-   width: 172px;
-   height: 172px;
-   border-radius: 50%;
-   background: #2563eb;        /* xanh */
-   display: flex;
-   align-items: center;
-   justify-content: center;
- }
-
- /* VÒNG TRẮNG Ở GIỮA (pseudo-element) */
- .avatar-wrapper::before {
-   content: '';
-   position: absolute;
-   width: 163px;
-   height: 163px;
-   border-radius: 50%;
-   background: #ffffff;
- }
-
- /* ẢNH – nằm trong vòng trắng */
-@@ -1203,47 +1276,69 @@ th {
-   width: 155px;
-   height: 155px;
-   border-radius: 50%;
-   object-fit: cover;
-   background: #f1f1f1;
- }
-
-
- .badge-icon {
-   position: absolute;
-   bottom: 0px;
-   right: 5px;
-   width: 48px !important;
-   height: 48px !important;
- }
- /* base */
- .top-text {
-   display: block;          /* 👈 BLOCK thật */
-   margin-bottom: 10px;     /* 👈 đẩy avatar xuống */
-
-   font-weight: 900;
-   letter-spacing: 0.5px;
-   text-transform: uppercase;
- }
-
-+/* podium ranks */
-+.podium-card.rank-1 {
-+  --card-size: 300px;
-+  --scale: 1;
-+  --order: 2;
-+  --card-bg: #e6f1ff;
-+}
-+
-+.podium-card.rank-2 {
-+  --card-size: 260px;
-+  --scale: 0.94;
-+  --order: 1;
-+  --card-bg: #ede9fe;
-+}
-+
-+.podium-card.rank-3 {
-+  --card-size: 240px;
-+  --scale: 0.88;
-+  --order: 3;
-+  --card-bg: #e3f7f5;
-+}
-+
-
- /* TOP 1 */
- .top-text.top-1 {
-   font-size: 36px;
-   color: #F59E0B; /* vàng */
- }
-
- /* TOP 2 */
- .top-text.top-2 {
-   font-size: 30px;
-   color: #6B7280; /* xám */
- }
-
- /* TOP 3 */
- .top-text.top-3 {
-   font-size: 24px;
-   color: #B45309; /* đồng */
- }
-
-
-
- </style>
-\ No newline at end of file
+ // Format functions
+ const formatDate = (dateString) => {
+   if (!dateString) return "";
+   const date = new Date(dateString);
+   return `${String(date.getDate()).padStart(2, "0")}-${String(

@@ -94,7 +94,7 @@ const allMenuItems = [
     title: 'Sản phẩm'
   },
 
-  { label: 'CUSTOMER', route: '/-thg/khach-hang', icon: 'fa-solid fa-address-book text-info fs-5', title: 'Khách hàng' },
+  { label: 'SYSCUSTOMER', route: '/-thg/quan-ly-nguoi-dung', icon: 'fa-solid fa-address-book text-info fs-5', title: 'Người dùng' },
   { label: 'AUDIT', route: '/-thg/lich-su-he-thong', icon: 'fa-solid fa-clock-rotate-left text-danger fs-5', title: 'Audit Log' },
   { label: 'ROLE', route: '/-thg/phan-quyen', icon: 'fa-solid fa-shield-halved text-warning fs-5', title: 'Phân quyền' },
   { label: 'ADMIN', route: '/-thg/dinh-gia', icon: 'fa-solid fa-scale-balanced text-danger fs-5', title: 'Định giá' },

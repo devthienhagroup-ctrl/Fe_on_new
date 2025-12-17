@@ -2,7 +2,7 @@
   <!-- Header -->
   <div class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2 " style="border-bottom: solid 0.5px rgba(0,0,0,0.3)">
     <h5 class="fw-bold mb-0 d-flex align-items-center">
-      Quản lý phoòng ban
+      Quản lý phòng ban
     </h5>
 
     <div class="d-flex align-items-center justify-content-end gap-2">
