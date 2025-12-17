@@ -19,6 +19,7 @@ import RolePermissionManager from "../components/RolePermissionManager.vue";
 import AdminValuationManager from "../components/land/AdminValuationManager.vue";
 import ServiceSystemManager from "../components/ServiceSystemManager.vue";
 
+import NewsEditor from "../components/cms/components/home/NewsEditor.vue";
 import LandingPage from "../components/user/Home/LandingPage.vue";
 import MenuUser from "../components/user/Home/components/MenuUser.vue";
 import QuickSaleSolution from "../components/user/QuickSaleSolution/QuickSaleSolution.vue";
@@ -58,12 +59,409 @@ import HostManager from "../components/host/HostManager.vue";
 import Ga4EventExample from "../components/Ga4EventExample.vue";
 import PaymentPage2 from "../components/productAdmin/PaymentPage2.vue";
 
+import cms from "/src/components/cms/cms.vue"
+import Banner from "../components/user/Home/components/Banner.vue";
+import Stats from "../components/cms/components/home/Stats.vue";
+import Hero from "../components/cms/components/home/Hero.vue";
+import Service from "../components/cms/components/home/Service.vue";
+import OverView from "../components/cms/components/home/OverView.vue";
+import ImpressiveNumber from "../components/cms/components/home/ImpressiveNumber.vue";
+import SoldProjects from "../components/cms/components/home/SoldProjects.vue";
+import Reviews from "../components/cms/components/home/Reviews.vue";
+import SystemEvaluation from "../components/cms/components/home/SystemEvaluation.vue";
+import MediaAboutUs from "../components/cms/components/home/MediaAboutUs.vue";
+import ReviewsBackgroundImage from "../components/cms/components/home/ReviewsBackgroundImage.vue";
+import ContactEditor from "../components/cms/components/home/ContactEditor.vue";
+import QSHeader from "../components/cms/components/quickSale/QSHeader.vue";
+import QS1DinhGiaSoBo from "../components/cms/components/quickSale/QS1DinhGiaSoBo.vue";
+import QS2DongYGiaSoBo from "../components/cms/components/quickSale/QS2DongYGiaSoBo.vue";
+import QS3KhaoSat from "../components/cms/components/quickSale/QS3KhaoSat.vue";
+import QS4DanhGia from "../components/cms/components/quickSale/QS4DanhGia.vue";
+import QS5ThoaThuan from "../components/cms/components/quickSale/QS5ThoaThuan.vue";
+import QS6YTuong from "../components/cms/components/quickSale/QS6YTuong.vue";
+import QS7TrienKhai from "../components/cms/components/quickSale/QS7TrienKhai.vue";
+import QS8TuVanHoTro from "../components/cms/components/quickSale/QS8TuVanHoTro.vue";
+import QS9HoTroDamPhan from "../components/cms/components/quickSale/QS9HoTroDamPhan.vue";
+import QS10HoTroPhapLy from "../components/cms/components/quickSale/QS10HoTroPhapLy.vue";
+import Benefits from "../components/cms/components/quickSale/Benefits.vue";
+import QSPopup from "../components/cms/components/quickSale/QSPopup.vue";
+import QSImageBackground3 from "../components/cms/components/quickSale/QSImageBackground3.vue";
+import Header from "../components/cms/components/estimateProperty/Header.vue";
+import Proccess from "../components/cms/components/estimateProperty/Proccess.vue";
+import ProccessStep from "../components/cms/components/estimateProperty/ProccessStep.vue";
+import Factor from "../components/cms/components/estimateProperty/Factor.vue";
+import Reason from "../components/cms/components/estimateProperty/Reason.vue";
+import Fee from "../components/cms/components/estimateProperty/Fee.vue";
+import QuickFee from "../components/cms/components/estimateProperty/QuickFee.vue";
+import Faq from "../components/cms/components/estimateProperty/Faq.vue";
+import ApplyBtn from "../components/cms/components/recruitment/ApplyBtn.vue";
+import Form from "../components/cms/components/recruitment/Form.vue";
+import JobPosition from "../components/cms/components/recruitment/JobPosition.vue";
+import Post from "../components/cms/components/recruitment/Post.vue";
+import HeaderRC from "../components/cms/components/recruitment/Header.vue";
+import BenefitsRC from "../components/cms/components/recruitment/Benefits.vue"
+import HeroRC from "../components/cms/components/recruitment/Hero.vue"
+import Department from "../components/cms/components/recruitment/Department.vue";
+import FeaturedNewsE from "../components/cms/components/news/FeaturedNewsE.vue";
+import LatestNewsE from "../components/cms/components/news/LatestNewsE.vue";
+import CategoryNewsE from "../components/cms/components/news/CategoryNewsE.vue";
+import EmailSubscribeE from "../components/cms/components/news/EmailSubscribeE.vue";
+import ContactE from "../components/cms/components/contact/Contact.vue"
+import DetailHero from "../components/cms/components/investment/DetailHero.vue";
+import DetailPackage from "../components/cms/components/investment/DetailPackage.vue";
+import DetailInvestor from "../components/cms/components/investment/DetailInvestor.vue";
+import HeroInvm from "../components/cms/components/investment/Hero.vue";
+import InvmList from "../components/cms/components/investment/InvestmentList.vue";
+import InvmModal from "../components/cms/components/investment/InvestmentModal.vue";
+import NewsManagement from "../components/cms/news/NewsManagement.vue";
+
 const routes = [
         {
             path: "/-thg/dang-nhap",
             name: "LoginForm",
             component: LoginForm,
         },
+        {
+        path: '/-thg/quan-tri-noi-dung',
+        name: 'cms',
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: 'trang-chu',
+                name: 'CMS',
+                component: cms,
+                children: [
+                    {
+                        path: 'banner',
+                        name: 'banner',
+                        component: Banner
+                    },
+                    {
+                        path: "thong-ke",
+                        name: "stats",
+                        component: Stats
+                    },
+                    {
+                        path: 'noi-bat',
+                        name: "hero",
+                        component: Hero
+                    },
+                    {
+                        path: 'dich-vu',
+                        name: 'service',
+                        component: Service
+                    },
+                    {
+                        path: 'tong-quan',
+                        name: 'overView',
+                        component: OverView
+                    },
+                    {
+                        path: 'con-so-an-tuong',
+                        name: 'impressiveNumber',
+                        component: ImpressiveNumber
+                    },
+                    {
+                        path: 'du-an-da-ban',
+                        name: 'soldProjects',
+                        component: SoldProjects
+                    },
+                    {
+                        path: 'danh-gia-khach-hang',
+                        name: 'reviews',
+                        component: Reviews
+                    },
+                    {
+                        path: 'danh-gia-he-thong',
+                        name: 'systemEvaluation',
+                        component: SystemEvaluation
+                    },
+                    {
+                        path: 'truyen-thong',
+                        name: 'mediaAboutUs',
+                        component: MediaAboutUs
+                    },
+                    {
+                        path: 'tin-tuc',
+                        name: 'newsEditor',
+                        component: NewsEditor
+                    },
+                    {
+                        path: 'lien-he',
+                        name: 'contactEditor',
+                        component: ContactEditor
+                    },
+                    {
+                        path: 'anh-nen-danh-gia',
+                        name: 'reviewBackgroundImage',
+                        component: ReviewsBackgroundImage
+                    }
+                ]
+            },
+            {
+                path: 'ban-nhanh',
+                name: 'QuickSaleEditor',
+                component: cms,
+                children: [
+                    {
+                        path: 'header',
+                        name: 'Header',
+                        component: QSHeader
+                    },
+                    {
+                        path: 'dinh-gia-so-bo',
+                        name: 'qs1',
+                        component: QS1DinhGiaSoBo
+                    },
+                    {
+                        path: 'dong-y-gia-so-bo',
+                        name: 'qs2',
+                        component: QS2DongYGiaSoBo
+                    },
+                    {
+                        path: 'khao-sat',
+                        name: 'qs3',
+                        component: QS3KhaoSat
+                    },
+                    {
+                        path: 'danh-gia-giao-dich',
+                        name: 'qs4',
+                        component: QS4DanhGia
+                    },
+                    {
+                        path: "thoa-thuan",
+                        name: 'qs5',
+                        component: QS5ThoaThuan
+                    },
+                    {
+                        path: "y-tuong",
+                        name: 'qs6',
+                        component: QS6YTuong
+                    },
+                    {
+                        path: "trien-khai",
+                        name: 'qs7',
+                        component: QS7TrienKhai
+                    },
+                    {
+                        path: "tu-van-ho-tro",
+                        name: 'qs8',
+                        component: QS8TuVanHoTro
+                    },
+                    {
+                        path: "ho-tro-dam-phan",
+                        name: 'qs9',
+                        component: QS9HoTroDamPhan
+                    },
+                    {
+                        path: "ho-tro-phap-ly",
+                        name: 'qs10',
+                        component: QS10HoTroPhapLy
+                    },
+                    {
+                        path: "loi-ich",
+                        name: 'benefits',
+                        component: Benefits
+                    },
+                    {
+                        path: 'popup',
+                        name: 'popup',
+                        component: QSPopup
+                    },
+                    {
+                        path: 'anh-nen-3',
+                        name: 'anhNen3',
+                        component: QSImageBackground3
+                    }
+
+                ]
+            },
+            {
+                path: 'dinh-gia-bds',
+                name: 'EP',
+                component: cms,
+                children: [
+                    {
+                        path: 'header',
+                        name: 'EPHeader',
+                        component: Header
+                    },
+                    {
+                        path: 'quy-trinh-dinh-gia',
+                        name: 'EPProccess',
+                        component: Proccess
+                    },
+                    {
+                        path: 'cac-buoc-trong-quy-trinh',
+                        name: 'ProccessStep',
+                        component: ProccessStep
+                    },
+                    {
+                        path: 'gia-tri-bds-dua-tren',
+                        name: 'EPFactor',
+                        component: Factor
+                    },
+                    {
+                        path: 'ly-do',
+                        name: 'EPReason',
+                        component: Reason
+                    },
+                    {
+                        path: 'bang-phi',
+                        name: 'EPFee',
+                        component: Fee
+                    },
+                    {
+                        path: 'tinh-phi-nhanh',
+                        name: 'EPQuickFee',
+                        component: QuickFee
+                    },
+                    {
+                        path: 'cau-hoi-thuong-gap',
+                        name: 'EPFaq',
+                        component: Faq
+                    }
+
+                ]
+            },
+            {
+                path: 'tuyen-dung',
+                name: 'recruitmentEditor',
+                component: cms,
+                children: [
+                    {
+                        path: 'nut-ung-tuyen',
+                        name: 'applyBtn',
+                        component: ApplyBtn
+                    },
+                    {
+                        path: 'loi-ich',
+                        name: 'benefitsRC',
+                        component: BenefitsRC
+                    },
+                    {
+                        path: 'vi-tri-dang-tuyen',
+                        name: 'departmentRC',
+                        component: Department
+                    },
+                    {
+                        path: 'form-ung-tuyen',
+                        name: 'formRC',
+                        component: Form
+                    },
+                    {
+                        path: 'header',
+                        name: 'headerRC',
+                        component: HeaderRC
+                    },
+                    {
+                        path: 'co-hoi-viec-lam',
+                        name: 'jobPositionRC',
+                        component: JobPosition
+                    },
+                    {
+                        path: 'bai-viet-tuyen-dung',
+                        name: 'postRC',
+                        component: Post
+                    },
+                    {
+                        path: 'noi-bat',
+                        name: 'heroRC',
+                        component: HeroRC
+                    }
+                ]
+            },
+            {
+                path: 'tin-tuc',
+                name: 'NewsEditor',
+                component: cms,
+                children: [
+                    {
+                        path: 'tin-noi-bat',
+                        name: 'featuredNewsE',
+                        component: FeaturedNewsE
+                    },
+                    {
+                        path: 'tin-moi-nhat',
+                        name: 'latestNewsE',
+                        component: LatestNewsE
+                    },
+                    {
+                        path: 'danh-muc-tin-tuc',
+                        name: 'CategoryNewsE',
+                        component: CategoryNewsE
+                    },
+                    {
+                        path: 'dang-ky-nhan-tin',
+                        name: 'EmailSubcribe',
+                        component: EmailSubscribeE
+                    }
+                ]
+            },
+            {
+                path: 'lien-he',
+                name: 'contactEditor',
+                component: cms,
+                children: [
+                    {
+                        path: '',
+                        name: 'contactE',
+                        component: ContactE
+                    }
+                ]
+            },
+            {
+                path: 'hop-tac',
+                name: 'investmentEditor',
+                component: cms,
+                children: [
+                    {
+                        path: 'noi-bat',
+                        name: 'heroInvestment',
+                        component: HeroInvm
+                    },
+                    {
+                        path: 'danh-sach',
+                        name: 'invmList',
+                        component: InvmList
+                    },
+                    {
+                        path: 'hop-thoai',
+                        name: 'invmModal',
+                        component: InvmModal
+                    },
+                    {
+                        path: 'chi-tiet-noi-bat',
+                        name: 'detailHero',
+                        component: DetailHero
+                    },
+                    {
+                        path: 'chi-tiet-goi-dang-ky',
+                        name: 'detailPackage',
+                        component: DetailPackage
+                    },
+                    {
+                        path: 'chi-tiet-danh-sach-nguoi-hop-tac',
+                        name: 'detailInvestor',
+                        component: DetailInvestor
+                    }
+                ]
+            },
+            {
+                path: 'quan-ly-tin-tuc',
+                name: 'newsManagement',
+                component: cms,
+                children: [
+                    {
+                        path: '',
+                        name: 'newsM',
+                        component: NewsManagement
+                    }
+                ]
+            }
+        ]
+    },
         {
         path: "/-thg/quan-ly-nguoi-dung",
         component: Menu,

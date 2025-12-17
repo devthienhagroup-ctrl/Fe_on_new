@@ -1,26 +1,44 @@
 <template>
   <div class="benefits-container">
-    <h1 class="main-title">LỢI ÍCH KHI CHỌN DỊCH VỤ BÁN NHANH BĐS CỦA THIÊN HÀ GROUP?</h1>
+    <h1
+        class="main-title"
+        :style="{
+        color: sectionData.titleColor,
+        fontSize: sectionData.titleFontSize
+      }"
+    >
+      {{ sectionData.sectionTitle }}
+    </h1>
 
     <div class="benefits-content">
       <!-- Cột bên trái - Danh sách lợi ích -->
       <div class="benefits-list">
         <div
-            v-for="(benefit, index) in benefits"
+            v-for="(benefit, index) in sectionData.benefits"
             :key="benefit.id"
             class="benefit-item"
             :class="{ active: activeBenefit?.id === benefit.id }"
             @click="setActiveBenefit(benefit)"
+            :style="{
+              '--border-color': sectionData.borderColor,
+              '--active-border-color': sectionData.activeBorderColor,
+              '--hover-shadow': sectionData.benefitItemHoverShadow,
+              '--active-background': sectionData.activeBackground
+            }"
         >
           <div class="benefit-header">
             <div class="benefit-number">
               {{ String(index + 1).padStart(2, '0') }}
             </div>
             <div class="benefit-title-wrapper">
-              <div class="progress-bar">
+              <div
+                  class="progress-bar"
+                  :style="{ background: sectionData.progressBarColor }"
+              >
                 <div
                     class="progress-fill"
                     :class="{ active: activeBenefit?.id === benefit.id }"
+                    :style="{ background: sectionData.progressFillColor }"
                 ></div>
               </div>
               <h3 class="benefit-title">{{ benefit.title }}</h3>
@@ -39,21 +57,31 @@
       </div>
 
       <!-- Cột bên phải - Hình ảnh -->
-      <div class="benefit-image-container">
+      <div
+          class="benefit-image-container"
+          :style="{ height: sectionData.imageContainerHeight }"
+      >
         <transition name="fade" mode="out-in">
           <div
               v-if="activeBenefit"
               :key="activeBenefit.id"
               class="benefit-image"
-              :style="{ backgroundImage: `url(/imgs/${activeBenefit.image})` }"
+              :style="{ backgroundImage: `url(${baseImgaeUrl+activeBenefit.image})` }"
           >
-            <div class="image-overlay"></div>
+            <div
+                class="image-overlay"
+                :style="{ background: sectionData.imageOverlayGradient }"
+            ></div>
             <div class="image-content">
               <i :class="activeBenefit.icon"></i>
               <h3>{{ activeBenefit.title }}</h3>
             </div>
           </div>
-          <div v-else class="placeholder-image">
+          <div
+              v-else
+              class="placeholder-image"
+              :style="{ background: sectionData.placeholderBackground }"
+          >
             <i class="fas fa-home"></i>
             <p>Chọn một lợi ích để xem chi tiết</p>
           </div>
@@ -65,44 +93,66 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
 
-const benefits = [
-  {
-    id: 1,
-    title: "Bán nhanh bất động sản trong thời gian ngắn",
-    description: "Chúng tôi cam kết giúp bạn bán bất động sản trong vòng 30 ngày nhờ vào chiến lược marketing mạnh mẽ và đội ngũ chuyên gia giàu kinh nghiệm.",
-    icon: "fas fa-clock",
-    image: "benefit1.jpg"
-  },
-  {
-    id: 2,
-    title: "Tiết kiệm thời gian và công sức",
-    description: "Bạn không cần phải lo lắng về quá trình quảng bá, chúng tôi sẽ xử lý mọi khía cạnh từ việc xây dựng chiến lược đến triển khai, giúp bạn tiết kiệm thời gian quý báu.",
-    icon: "fas fa-user-clock",
-    image: "benefit2.jpg"
-  },
-  {
-    id: 3,
-    title: "Quy trình bán hàng tối ưu và chuyên nghiệp",
-    description: "Với phương pháp bài bản, Thiên Hà Group giúp bạn đẩy nhanh tiến độ giao dịch mà vẫn đảm bảo tính minh bạch, uy tín, và hiệu quả.",
-    icon: "fas fa-clipboard-check",
-    image: "benefit3.jpg"
-  },
-  {
-    id: 4,
-    title: "Tiếp cận rộng rãi và chính xác khách hàng tiềm năng",
-    description: "Chúng tôi sử dụng các kênh quảng cáo tối ưu, kết hợp với nghiên cứu đối tượng khách hàng, giúp bất động sản của bạn được tiếp cận đúng người và đúng thời điểm.",
-    icon: "fas fa-bullseye",
-    image: "benefit4.png"
-  },
-  {
-    id: 5,
-    title: "Tối ưu hóa chi phí marketing",
-    description: "Dịch vụ bán nhanh của chúng tôi giúp bạn tiết kiệm chi phí quảng cáo không hiệu quả, đồng thời mang lại kết quả cao nhất với nguồn lực tối ưu.",
-    icon: "fas fa-chart-line",
-    image: "benefit5.jpg"
-  }
-]
+const props = defineProps({
+  sectionData: Object,
+})
+
+// Dữ liệu động từ CMS
+const sectionData = ref({
+  sectionTitle: "LỢI ÍCH KHI CHỌN DỊCH VỤ BÁN NHANH BĐS CỦA THIÊN HÀ GROUP?",
+  titleColor: "#031358",
+  titleFontSize: "40px",
+  borderColor: "#e8ecff",
+  activeBorderColor: "#002FFF",
+  progressBarColor: "#e8ecff",
+  progressFillColor: "linear-gradient(90deg, #002FFF 0%, #4d74ff 100%)",
+  benefitItemHoverShadow: "0 8px 25px rgba(3, 19, 88, 0.1)",
+  activeBackground: "linear-gradient(135deg, #f8faff 0%, #ffffff 100%)",
+  imageOverlayGradient: "linear-gradient(to top, rgba(3, 19, 88, 0.8) 0%, rgba(3, 19, 88, 0.4) 50%, rgba(3, 19, 88, 0.2) 100%)",
+  placeholderBackground: "linear-gradient(135deg, #031358 0%, #002FFF 100%)",
+  imageContainerHeight: "500px",
+  benefits: [
+    {
+      id: 1,
+      title: "Bán nhanh bất động sản trong thời gian ngắn",
+      description: "Chúng tôi cam kết giúp bạn bán bất động sản trong vòng 30 ngày nhờ vào chiến lược marketing mạnh mẽ và đội ngũ chuyên gia giàu kinh nghiệm.",
+      icon: "fas fa-clock",
+      image: "benefit12222222.jpg"
+    },
+    {
+      id: 2,
+      title: "Tiết kiệm thời gian và công sức",
+      description: "Bạn không cần phải lo lắng về quá trình quảng bá, chúng tôi sẽ xử lý mọi khía cạnh từ việc xây dựng chiến lược đến triển khai, giúp bạn tiết kiệm thời gian quý báu.",
+      icon: "fas fa-user-clock",
+      image: "benefit2.jpg"
+    },
+    {
+      id: 3,
+      title: "Quy trình bán hàng tối ưu và chuyên nghiệp",
+      description: "Với phương pháp bài bản, Thiên Hà Group giúp bạn đẩy nhanh tiến độ giao dịch mà vẫn đảm bảo tính minh bạch, uy tín, và hiệu quả.",
+      icon: "fas fa-clipboard-check",
+      image: "benefit3.jpg"
+    },
+    {
+      id: 4,
+      title: "Tiếp cận rộng rãi và chính xác khách hàng tiềm năng",
+      description: "Chúng tôi sử dụng các kênh quảng cáo tối ưu, kết hợp với nghiên cứu đối tượng khách hàng, giúp bất động sản của bạn được tiếp cận đúng người và đúng thời điểm.",
+      icon: "fas fa-bullseye",
+      image: "benefit4.png"
+    },
+    {
+      id: 5,
+      title: "Tối ưu hóa chi phí marketing",
+      description: "Dịch vụ bán nhanh của chúng tôi giúp bạn tiết kiệm chi phí quảng cáo không hiệu quả, đồng thời mang lại kết quả cao nhất với nguồn lực tối ưu.",
+      icon: "fas fa-chart-line",
+      image: "benefit5.jpg"
+    }
+  ]
+})
+
+if(props.sectionData) sectionData.value = props.sectionData
 
 const activeBenefit = ref(null)
 
@@ -112,8 +162,8 @@ const setActiveBenefit = (benefit) => {
 
 onMounted(() => {
   // Tự động chọn benefit đầu tiên khi component được mount
-  if (benefits.length > 0) {
-    activeBenefit.value = benefits[0]
+  if (sectionData.value.benefits.length > 0) {
+    activeBenefit.value = sectionData.value.benefits[0]
   }
 })
 </script>
@@ -129,8 +179,6 @@ onMounted(() => {
 }
 
 .main-title {
-  font-size: 40px;
-  color: #031358;
   text-align: center;
   margin-bottom: 60px;
   font-weight: 700;
@@ -152,7 +200,7 @@ onMounted(() => {
 }
 
 .benefit-item {
-  border: 2px solid #e8ecff;
+  border: 2px solid var(--border-color);
   border-radius: 12px;
   padding: 20px;
   cursor: pointer;
@@ -163,14 +211,14 @@ onMounted(() => {
 }
 
 .benefit-item:hover {
-  border-color: #002FFF;
+  border-color: var(--active-border-color);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(3, 19, 88, 0.1);
+  box-shadow: var(--hover-shadow);
 }
 
 .benefit-item.active {
-  border-color: #002FFF;
-  background: linear-gradient(135deg, #f8faff 0%, #ffffff 100%);
+  border-color: var(--active-border-color);
+  background: var(--active-background);
 }
 
 .benefit-header {
@@ -197,7 +245,6 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: #e8ecff;
   border-radius: 6px;
   overflow: hidden;
 }
@@ -208,7 +255,6 @@ onMounted(() => {
   left: 0;
   width: 0%;
   height: 100%;
-  background: linear-gradient(90deg, #002FFF 0%, #4d74ff 100%);
   border-radius: 6px;
   transition: width 0.5s ease;
 }
@@ -272,7 +318,6 @@ onMounted(() => {
 
 /* Cột hình ảnh */
 .benefit-image-container {
-  height: 500px;
   border-radius: 16px;
   overflow: hidden;
   position: sticky;
@@ -296,12 +341,6 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(
-      to top,
-      rgba(3, 19, 88, 0.8) 0%,
-      rgba(3, 19, 88, 0.4) 50%,
-      rgba(3, 19, 88, 0.2) 100%
-  );
 }
 
 .image-content {
@@ -326,7 +365,6 @@ onMounted(() => {
 
 .placeholder-image {
   height: 100%;
-  background: linear-gradient(135deg, #031358 0%, #002FFF 100%);
   display: flex;
   flex-direction: column;
   align-items: center;

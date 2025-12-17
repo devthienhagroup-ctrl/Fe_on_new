@@ -5,24 +5,16 @@
       <div class="columns-wrapper">
         <!-- Left Column (Foreground Card) -->
         <div class="left-column">
-          <h2 class="title">ĐÁNH GIÁ HỆ THỐNG</h2>
-          <ol class="numbered-list">
-            <li>"Chúng tôi đánh giá toàn diện hệ thống hiện tại của bạn"</li>
-            <li>"Phân tích các điểm mạnh và điểm cần cải thiện"</li>
-            <li>"Đề xuất giải pháp tối ưu phù hợp với nhu cầu"</li>
-            <li>"Triển khai công nghệ hiện đại và hiệu quả"</li>
-            <li>"Hỗ trợ và bảo trì liên tục sau triển khai"</li>
-          </ol>
-          <img class="left-img" alt="" src="/imgs/anhnencot.png">
+          <h2 class="title">{{ cmsConfig.content.title }}</h2>
+          <div class="rich-text-editor-wrapper">
+            <div class="numbered-list tiptap" v-html="cmsConfig.content.listItems"></div>
+          </div>
+          <img class="left-img" alt="" :src="baseImgaeUrl+cmsConfig.content.imageUrl">
         </div>
 
         <!-- Right Column (Background Card) -->
         <div class="right-column">
-          <div class="right-column-content">
-            <p>Với kinh nghiệm 15 năm trong lĩnh vực mua bán, đầu tư bất động sản với hơn 130 căn bán gấp 30 ngày trong năm 2024 với giá cao nhất thị trường, cùng với đó là 329 bất động sản đã cho thuê thành công trong năm 2024.</p>
-            <p>Và chúng tôi tin rằng con số đó sẽ còn tăng mạnh mẽ hơn nữa trong những năm tiếp theo. Từ nền tảng vững chắc tại TP.HCM, Thiên Hà Group đang mở rộng hành trình chinh phục thị trường bất động sản Việt Nam.</p>
-            <p>Với đội ngũ chuyên nghiệp và quy trình bán nhanh tối ưu, chúng tôi cam kết mang lại giá trị thực cho khách hàng ở nhiều tỉnh thành hơn trong tương lai gần.</p>
-          </div>
+          <div class="right-column-content" v-html="cmsConfig.content.paragraphs"></div>
         </div>
       </div>
     </div>
@@ -30,6 +22,54 @@
 </template>
 
 <script setup>
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
+const props = defineProps({
+  content: Object,
+});
+
+// Biến cấu hình cho CMS - người dùng không biết code có thể chỉnh sửa ở đây
+let cmsConfig = {
+  content: {
+    title: "ĐÁNH GIÁ HỆ THỐNG",
+    listItems: "<ol><li>Chúng tôi đánh giá toàn diện hệ thống hiện tại của bạn</li><li>Phân tích các điểm mạnh và điểm cần cải thiện</li><li>Đề xuất giải pháp tối ưu phù hợp với nhu cầu</li><li>Triển khai công nghệ hiện đại và hiệu quả</li><li>Hỗ trợ và bảo trì liên tục sau triển khai</li></ol>",
+    paragraphs: "<p>Với kinh nghiệm 15 năm trong lĩnh vực mua bán, đầu tư bất động sản với hơn 130 căn bán gấp 30 ngày trong năm 2024 với giá cao nhất thị trường, cùng với đó là 329 bất động sản đã cho thuê thành công trong năm 2024.</p><p>Và chúng tôi tin rằng con số đó sẽ còn tăng mạnh mẽ hơn nữa trong những năm tiếp theo. Từ nền tảng vững chắc tại TP.HCM, Thiên Hà Group đang mở rộng hành trình chinh phục thị trường bất động sản Việt Nam.</p><p>Với đội ngũ chuyên nghiệp và quy trình bán nhanh tối ưu, chúng tôi cam kết mang lại giá trị thực cho khách hàng ở nhiều tỉnh thành hơn trong tương lai gần.</p>",
+    imageUrl: "/imgs/anhnencot.png"
+  },
+
+// Biến cấu hình CSS cho CMS - người dùng không biết code có thể chỉnh sửa màu sắc, kích thước
+  styles: {
+    colors: {
+      primary: "#031358",
+      lightBackground: "#F3F5FC",
+      lightText: "#FFFFFF"
+    },
+    spacing: {
+      desktop: {
+        leftPadding: "60px 40px",
+        rightPadding: "80px 40px 50px 40px",
+        rightMarginLeft: "-10%",
+        rightMarginTop: "60px"
+      },
+      tablet: {
+        padding: "40px",
+        imageWidth: "200px"
+      },
+      mobile: {
+        padding: "30px 25px",
+        imageWidth: "180px"
+      }
+    },
+    typography: {
+      titleSize: "33px",
+      textSize: "17px",
+      lineHeight: "1.8"
+    }
+  }
+};
+if (props.content) cmsConfig = props.content.contentJson;
+else console.log("SE không có props lấy dữ liệu mặc định")
+// console.log(JSON.stringify(cmsConfig));
+
 
 </script>
 
@@ -57,9 +97,9 @@
 /* Left Column Styles */
 .left-column {
   width: 45%;
-  background-color: #F3F5FC;
-  color: #031358;
-  padding: 60px 40px;
+  background-color: v-bind('cmsConfig.styles.colors.lightBackground');
+  color: v-bind('cmsConfig.styles.colors.primary');
+  padding: v-bind('cmsConfig.styles.spacing.desktop.leftPadding');
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   z-index: 2;
@@ -83,15 +123,15 @@
 /* Right Column Styles */
 .right-column {
   width: 65%;
-  background-color: #031358;
-  color: #FFFFFF;
-  padding: 80px 40px 50px 40px;
+  background-color: v-bind('cmsConfig.styles.colors.primary');
+  color: v-bind('cmsConfig.styles.colors.lightText');
+  padding: v-bind('cmsConfig.styles.spacing.desktop.rightPadding');
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   z-index: 1;
   box-sizing: border-box;
-  margin-left: -10%;
-  margin-top: 60px;
+  margin-left: v-bind('cmsConfig.styles.spacing.desktop.rightMarginLeft');
+  margin-top: v-bind('cmsConfig.styles.spacing.desktop.rightMarginTop');
   position: relative;
 }
 
@@ -101,18 +141,23 @@
 
 /* Typography Styles */
 .title {
-  font-size: 33px;
+  font-size: v-bind('cmsConfig.styles.typography.titleSize');
   font-weight: bold;
   text-transform: uppercase;
-  color: #031358;
+  color: v-bind('cmsConfig.styles.colors.primary');
   margin-bottom: 25px;
   margin-top: 0;
   line-height: 1.2;
 }
 
 .numbered-list {
-  font-size: 17px;
-  line-height: 1.8;
+  font-size: v-bind('cmsConfig.styles.typography.textSize');
+  line-height: v-bind('cmsConfig.styles.typography.lineHeight');
+  margin: 0;
+  padding-left: 20px;
+}
+
+.numbered-list ol {
   margin: 0;
   padding-left: 20px;
 }
@@ -125,14 +170,14 @@
   margin-bottom: 0;
 }
 
-.right-column p {
-  font-size: 17px;
-  line-height: 1.8;
+.right-column-content p {
+  font-size: v-bind('cmsConfig.styles.typography.textSize');
+  line-height: v-bind('cmsConfig.styles.typography.lineHeight');
   margin-bottom: 20px;
   margin-top: 0;
 }
 
-.right-column p:last-child {
+.right-column-content p:last-child {
   margin-bottom: 0;
 }
 
@@ -195,7 +240,7 @@
   .left-column {
     width: 100%;
     margin-bottom: 20px;
-    padding: 40px;
+    padding: v-bind('cmsConfig.styles.spacing.tablet.padding');
     position: relative;
   }
 
@@ -203,7 +248,7 @@
     position: relative;
     right: auto;
     bottom: auto;
-    width: 200px;
+    width: v-bind('cmsConfig.styles.spacing.tablet.imageWidth');
     margin: 30px auto 0 auto;
     display: block;
   }
@@ -212,7 +257,7 @@
     width: 100%;
     margin-left: 0;
     margin-top: 0;
-    padding: 40px;
+    padding: v-bind('cmsConfig.styles.spacing.tablet.padding');
   }
 
   .right-column-content {
@@ -227,7 +272,7 @@
 @media (max-width: 768px) {
   .left-column,
   .right-column {
-    padding: 30px 25px;
+    padding: v-bind('cmsConfig.styles.spacing.mobile.padding');
   }
 
   .title {
@@ -235,13 +280,13 @@
   }
 
   .numbered-list,
-  .right-column p {
+  .right-column-content p {
     font-size: 16px;
     line-height: 1.6;
   }
 
   .left-column .left-img {
-    width: 180px;
+    width: v-bind('cmsConfig.styles.spacing.mobile.imageWidth');
     margin-top: 25px;
   }
 }
@@ -258,7 +303,7 @@
   }
 
   .numbered-list,
-  .right-column p {
+  .right-column-content p {
     font-size: 15px;
     line-height: 1.5;
   }

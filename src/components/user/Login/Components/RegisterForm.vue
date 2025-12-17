@@ -28,7 +28,6 @@
       <!-- =============== BƯỚC 1: ĐĂNG KÝ ====================== -->
       <!-- ===================================================== -->
       <form v-else @submit.prevent="handleSendOtp" class="register-form" ref="formRef">
-
         <!-- Email -->
         <div class="form-group" ref="emailRef">
           <label for="register-email">Email</label>
@@ -302,7 +301,6 @@ const showValidationError = async () => {
     emit('scrollToError', firstErrorRef.value);
   }
 };
-
 // ===============================
 // VALIDATE
 // ===============================
@@ -357,7 +355,6 @@ const validate = () => {
     errors.password = "Mật khẩu chưa đáp ứng yêu cầu bảo mật";
     ok = false;
   }
-
   if (registerForm.confirmPassword !== registerForm.password) {
     errors.confirmPassword = "Mật khẩu không khớp";
     ok = false;
@@ -377,7 +374,7 @@ const handleSendOtp = async () => {
   if (!validate()) return;
 
   try {
-    await showLoading(api.post("/thg/api/auth/send-otp", { email: registerForm.email, phone: registerForm.phone }));
+    await showLoading(api.post("/thg/api/auth/send-otp", { email: registerForm.email }));
     updateAlertSuccess("OTP đã được gửi đến email!");
 
     showOtpStep.value = true;
@@ -423,7 +420,7 @@ const verifyOtp = async (otpValue) => {
 // ===================================================
 const resendOtp = async () => {
   try {
-    await showLoading(api.post("/thg/api/auth/send-otp", { email: registerForm.email , phone: registerForm.phone }));
+    await showLoading(api.post("/thg/api/auth/send-otp", { email: registerForm.email }));
     updateAlertSuccess("OTP mới đã được gửi!");
     if (otpComponentRef.value) {
       otpComponentRef.value.resetOtp();
@@ -548,6 +545,10 @@ input[type="password"] {
   padding-right: 14px !important;
 }
 
+.password-input {
+  position: relative;
+}
+
 input:focus,
 select:focus {
   outline: none;
@@ -588,7 +589,6 @@ select:focus {
   font-size: 18px;
   z-index: 2;
 }
-
 
 /* Password conditions */
 .password-conditions {
@@ -658,10 +658,6 @@ select:focus {
   animation: shake 0.5s ease-in-out;
 }
 
-.password-input {
-  position: relative;
-}
-
 .condition-item.invalid .condition-icon {
   background-color: #dc3545;
   color: white;
@@ -676,7 +672,6 @@ select:focus {
 .condition-text {
   flex: 1;
 }
-
 /* Buttons */
 .switch-btn {
   width: 100%;

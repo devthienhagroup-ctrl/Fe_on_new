@@ -104,6 +104,12 @@ const allMenuItems = [
     route: '/-thg/lich-hen',
     icon: 'fa-solid fa-calendar-check text-primary fs-5',
     title: 'Lịch hẹn'
+  },
+  {
+    label: 'EDITER',
+    route: '/-thg/quan-tri-noi-dung/trang-chu/noi-bat',
+    icon: 'fa-solid fa-file-lines text-primary fs-5',
+    title: 'Nội dung'
   }
 
 ]

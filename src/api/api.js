@@ -4,7 +4,7 @@ import { useAuthStore } from '../stores/authStore'
 import router from "../router/index.js"
 import { showAlert, showError } from "../assets/js/alertService.js";
 const api = axios.create({
-    baseURL: 'http://localhost:8084/apithienha',
+    baseURL: 'https://thienhagroup.vn/apithienha',
     withCredentials: true, // để gửi kèm cookie refreshToken
 })
 

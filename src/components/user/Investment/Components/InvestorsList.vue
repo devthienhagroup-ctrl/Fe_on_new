@@ -1,69 +1,73 @@
 <template>
   <div class="investment-group">
-    <h1 class="main-title">NHÓM ĐẦU TƯ</h1>
+    <h1 class="main-title" :style="mainTitleStyle">{{ config.mainTitle }}</h1>
 
     <div class="content-wrapper">
       <!-- Bên trái: Top investors và bảng -->
       <div class="left-section">
         <!-- Phần top 3 nhà đầu tư thu gọn -->
-        <div class="top-investors-compact">
-          <div class="top-investors-title">TOP NHÀ ĐẦU TƯ</div>
+        <div class="top-investors-compact" :style="topInvestorsCompactStyle">
+          <div class="top-investors-title" :style="topInvestorsTitleStyle">
+            {{ config.topInvestorsTitle }}
+          </div>
           <div class="top-investors-grid">
-            <div class="top-investor-compact top-1">
+            <div class="top-investor-compact top-1" :style="top1Style">
               <div class="compact-avatar-wrapper">
-                <div class="compact-avatar">
+                <div class="compact-avatar" :style="compactAvatarStyle">
                   <img :src="topInvestors[0].avatar" alt="Avatar"/>
-                  <i class="fas fa-crown crown-icon"></i>
+                  <i class="fas fa-crown crown-icon" :style="crownIconStyle"></i>
                 </div>
               </div>
               <div class="compact-info">
-                <h4 class="compact-name">{{ topInvestors[0].name }}</h4>
-                <p class="compact-package"><span>Gói: </span>{{topInvestors[0].package + ' - ' + topInvestors[0].rate }}</p>
+                <h4 class="compact-name" :style="compactNameStyle">{{ topInvestors[0].name }}</h4>
+                <p class="compact-package" :style="compactPackageStyle">
+                  <span>{{ config.packageLabel }}</span>{{ topInvestors[0].package + ' - ' + topInvestors[0].rate }}
+                </p>
               </div>
-              <div class="compact-badge">Top 1</div>
+              <div class="compact-badge" :style="top1BadgeStyle">{{ config.top1Badge }}</div>
             </div>
 
-            <div class="top-investor-compact top-2">
+            <div class="top-investor-compact top-2" :style="top2Style">
               <div class="compact-avatar-wrapper">
-                <div class="compact-avatar">
+                <div class="compact-avatar" :style="compactAvatarStyle">
                   <img :src="topInvestors[1].avatar" alt="Avatar"/>
                 </div>
               </div>
               <div class="compact-info">
-                <h4 class="compact-name">{{ topInvestors[1].name }}</h4>
-                <p class="compact-package"><span>Gói: </span>{{topInvestors[0].package + ' - ' + topInvestors[0].rate }}</p>
+                <h4 class="compact-name" :style="compactNameStyle">{{ topInvestors[1].name }}</h4>
+                <p class="compact-package" :style="compactPackageStyle">
+                  <span>{{ config.packageLabel }}</span>{{ topInvestors[1].package + ' - ' + topInvestors[1].rate }}
+                </p>
               </div>
-              <div class="compact-badge">2</div>
+              <div class="compact-badge" :style="top2BadgeStyle">{{ config.top2Badge }}</div>
             </div>
 
-            <div class="top-investor-compact top-3">
+            <div class="top-investor-compact top-3" :style="top3Style">
               <div class="compact-avatar-wrapper">
-                <div class="compact-avatar">
+                <div class="compact-avatar" :style="compactAvatarStyle">
                   <img :src="topInvestors[2].avatar" alt="Avatar"/>
                 </div>
               </div>
               <div class="compact-info">
-                <h4 class="compact-name">{{ topInvestors[2].name }}</h4>
-                <p class="compact-package"><span>Gói: </span>{{topInvestors[0].package + ' - ' + topInvestors[0].rate }}</p>
+                <h4 class="compact-name" :style="compactNameStyle">{{ topInvestors[2].name }}</h4>
+                <p class="compact-package" :style="compactPackageStyle">
+                  <span>{{ config.packageLabel }}</span>{{ topInvestors[2].package + ' - ' + topInvestors[2].rate }}
+                </p>
               </div>
-              <div class="compact-badge">3</div>
+              <div class="compact-badge" :style="top3BadgeStyle">{{ config.top3Badge }}</div>
             </div>
           </div>
         </div>
 
         <!-- Bảng thông tin -->
-        <div class="table-container">
+        <div class="table-container" :style="tableContainerStyle">
           <table>
-            <thead>
+            <thead :style="tableHeadStyle">
             <tr>
-              <th>STT</th>
-              <th>Họ Tên</th>
-              <th>Ngày góp vốn</th>
-              <th>Gói góp vốn</th>
-              <th>Tỷ lệ</th>
+              <th v-for="header in config.tableHeaders" :key="header">{{ header }}</th>
             </tr>
             </thead>
-            <tbody>
+            <tbody :style="tableBodyStyle">
             <tr v-for="(person, index) in investors" :key="index">
               <td>{{ index + 4 }}</td>
               <td>{{ person.name }}</td>
@@ -78,50 +82,60 @@
 
       <!-- Bên phải: Form đăng ký -->
       <div class="right-section">
-        <div class="form-container">
-          <h2 class="form-title">Đăng ký góp vốn ngay</h2>
+        <div class="form-container" :style="formContainerStyle">
+          <h2 class="form-title" :style="formTitleStyle">{{ config.formTitle }}</h2>
 
           <form @submit.prevent="submitForm">
             <div class="form-group">
-              <label for="name">Họ và tên <span class="required">*</span></label>
+              <label for="name" :style="labelStyle">
+                {{ config.nameLabel }} <span class="required" :style="requiredStyle">*</span>
+              </label>
               <input
                   type="text"
                   id="name"
                   v-model="formData.name"
+                  :style="inputStyle"
                   required
               >
             </div>
 
             <div class="form-group">
-              <label for="phone">Số điện thoại <span class="required">*</span></label>
+              <label for="phone" :style="labelStyle">
+                {{ config.phoneLabel }} <span class="required" :style="requiredStyle">*</span>
+              </label>
               <input
                   type="tel"
                   id="phone"
                   v-model="formData.phone"
+                  :style="inputStyle"
                   required
               >
             </div>
 
             <div class="form-group">
-              <label for="email">Email</label>
+              <label for="email" :style="labelStyle">{{ config.emailLabel }}</label>
               <input
                   type="email"
                   id="email"
                   v-model="formData.email"
+                  :style="inputStyle"
               >
             </div>
 
             <div class="form-group">
-              <label for="package">Gói đầu tư dự kiến đăng ký <span class="required">*</span></label>
+              <label for="package" :style="labelStyle">
+                {{ config.packageSelectLabel }} <span class="required" :style="requiredStyle">*</span>
+              </label>
               <div class="custom-select">
                 <select
                     id="package"
                     v-model="formData.selectedPackage"
+                    :style="inputStyle"
                     required
                     @focus="showOptions = true"
                     @blur="hideOptions"
                 >
-                  <option value="" disabled>Chọn gói đầu tư</option>
+                  <option value="" disabled>{{ config.packagePlaceholder }}</option>
                   <option
                       v-for="(pkg, index) in packagesText"
                       :key="index"
@@ -130,24 +144,27 @@
                     {{ pkg }}
                   </option>
                 </select>
-                <div class="select-arrow" :class="{ rotated: showOptions }">▼</div>
+                <div class="select-arrow" :class="{ rotated: showOptions }" :style="selectArrowStyle">▼</div>
               </div>
             </div>
 
             <div class="form-group">
-              <label for="note">Ghi chú</label>
+              <label for="note" :style="labelStyle">{{ config.noteLabel }}</label>
               <textarea
                   id="note"
                   v-model="formData.note"
                   rows="4"
+                  :style="textareaStyle"
               ></textarea>
             </div>
 
-            <button type="submit" class="submit-btn">Đăng ký ngay</button>
+            <button type="submit" class="submit-btn" :style="submitBtnStyle">
+              {{ config.submitButtonText }}
+            </button>
 
-            <div class="call-to-action">
-              <span class="check-icon">✓</span>
-              <span>Đăng ký ngay để được liên hệ tư vấn sớm nhất</span>
+            <div class="call-to-action" :style="callToActionStyle">
+              <span class="check-icon" :style="checkIconStyle">{{ config.checkIcon }}</span>
+              <span>{{ config.callToActionText }}</span>
             </div>
           </form>
         </div>
@@ -159,6 +176,246 @@
 <script setup>
 import {ref, reactive, computed} from 'vue'
 
+// Config object
+let config = reactive({
+  // Text content
+  mainTitle: 'NHÓM ĐẦU TƯ',
+  topInvestorsTitle: 'TOP NHÀ ĐẦU TƯ',
+  packageLabel: 'Gói: ',
+  top1Badge: 'Top 1',
+  top2Badge: '2',
+  top3Badge: '3',
+  formTitle: 'Đăng ký góp vốn ngay',
+  nameLabel: 'Họ và tên',
+  phoneLabel: 'Số điện thoại',
+  emailLabel: 'Email',
+  packageSelectLabel: 'Gói đầu tư dự kiến đăng ký',
+  packagePlaceholder: 'Chọn gói đầu tư',
+  noteLabel: 'Ghi chú',
+  submitButtonText: 'Đăng ký ngay',
+  checkIcon: '✓',
+  callToActionText: 'Đăng ký ngay để được liên hệ tư vấn sớm nhất',
+  tableHeaders: ['STT', 'Họ Tên', 'Ngày góp vốn', 'Gói góp vốn', 'Tỷ lệ'],
+
+  // Colors
+  primaryColor: '#031358',
+  secondaryColor: '#2a5298',
+  accentColor: '#e53e3e',
+  goldColor: 'gold',
+  silverColor: '#c0c0c0',
+  bronzeColor: '#cd7f32',
+  whiteColor: '#ffffff',
+  lightBlueBg: 'rgba(240, 245, 255, 0.7)',
+  hoverBlueBg: 'rgba(219, 234, 254, 0.7)',
+  textColor: '#031358',
+  requiredColor: '#e53e3e',
+
+  // Gradients
+  primaryGradient: 'linear-gradient(135deg, #031358, #2a5298)',
+  goldGradient: 'linear-gradient(135deg, gold, #ffd700)',
+
+  // Sizes
+  mainTitleFontSize: '33px',
+  formTitleFontSize: '25px',
+  tableHeaderFontSize: '20px',
+  topInvestorsTitleFontSize: '20px',
+  compactNameFontSize: '16px',
+  compactPackageFontSize: '12px',
+  top1CompactNameFontSize: '18px',
+  top1CompactPackageFontSize: '13px',
+  labelFontSize: '12px',
+  callToActionFontSize: '10px',
+
+  // Spacing
+  containerPadding: '30px 20px',
+  formPadding: '30px',
+  tableCellPadding: '15px',
+  tableHeaderPadding: '18px 15px',
+  compactPadding: '12px',
+
+  // Border
+  borderLeftWidth: '4px',
+  borderLeftColor: '#2a5298',
+  avatarBorderWidth: '2px',
+
+  // Shadows
+  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+  hoverShadow: '0 4px 8px rgba(3, 19, 88, 0.15)',
+  submitBtnHoverShadow: '0 6px 12px rgba(3, 19, 88, 0.3)',
+
+  // Borders
+  borderRadius: '15px',
+  inputBorderRadius: '6px',
+  avatarBorderRadius: '50%',
+
+  // Animation
+  transitionDuration: '0.3s',
+
+  // Specific styles
+  top1Background: 'linear-gradient(135deg, #fff9e6, #fff)',
+  top2BorderColor: '#0030ff',
+  top3BorderColor: '#031358',
+
+  // Avatar sizes
+  compactAvatarSize: '50px',
+  top1CompactAvatarSize: '55px',
+
+  // Badge sizes
+  compactBadgeSize: '35px'
+})
+
+const props = defineProps({
+  sectionData: Object
+});
+
+if(props.sectionData) {
+  config = props.sectionData;
+  console.log("Đã lấy data từ cha");
+}
+
+// Computed styles
+const mainTitleStyle = computed(() => ({
+  fontSize: config.mainTitleFontSize,
+  background: config.primaryGradient,
+  color: 'transparent'
+}))
+
+const topInvestorsCompactStyle = computed(() => ({
+  background: config.whiteColor,
+  borderRadius: config.borderRadius,
+  boxShadow: config.boxShadow,
+  padding: '20px'
+}))
+
+const topInvestorsTitleStyle = computed(() => ({
+  fontSize: config.topInvestorsTitleFontSize,
+  color: config.primaryColor
+}))
+
+const compactAvatarStyle = computed(() => ({
+  width: config.compactAvatarSize,
+  height: config.compactAvatarSize,
+  borderRadius: config.avatarBorderRadius,
+  border: `${config.avatarBorderWidth} solid ${config.secondaryColor}`
+}))
+
+const crownIconStyle = computed(() => ({
+  color: config.goldColor
+}))
+
+const compactNameStyle = computed(() => ({
+  color: config.textColor,
+  fontSize: config.compactNameFontSize
+}))
+
+const compactPackageStyle = computed(() => ({
+  color: config.accentColor,
+  fontSize: config.compactPackageFontSize
+}))
+
+const top1Style = computed(() => ({
+  background: config.top1Background,
+  borderColor: config.goldColor
+}))
+
+const top2Style = computed(() => ({
+  borderColor: config.top2BorderColor
+}))
+
+const top3Style = computed(() => ({
+  borderColor: config.top3BorderColor
+}))
+
+const top1BadgeStyle = computed(() => ({
+  background: config.goldGradient,
+  color: config.textColor,
+  width: config.compactBadgeSize,
+  height: config.compactBadgeSize
+}))
+
+const top2BadgeStyle = computed(() => ({
+  background: config.primaryGradient,
+  color: config.whiteColor,
+  width: config.compactBadgeSize,
+  height: config.compactBadgeSize
+}))
+
+const top3BadgeStyle = computed(() => ({
+  background: config.primaryGradient,
+  color: config.whiteColor,
+  width: config.compactBadgeSize,
+  height: config.compactBadgeSize
+}))
+
+const tableContainerStyle = computed(() => ({
+  background: config.whiteColor,
+  borderRadius: config.borderRadius,
+  boxShadow: config.boxShadow
+}))
+
+const tableHeadStyle = computed(() => ({
+  background: config.primaryGradient
+}))
+
+const tableBodyStyle = computed(() => ({
+  backgroundColor: config.lightBlueBg
+}))
+
+const formContainerStyle = computed(() => ({
+  backgroundColor: config.lightBlueBg,
+  borderRadius: config.borderRadius,
+  boxShadow: config.boxShadow,
+  padding: config.formPadding
+}))
+
+const formTitleStyle = computed(() => ({
+  fontSize: config.formTitleFontSize,
+  color: config.textColor
+}))
+
+const labelStyle = computed(() => ({
+  color: config.textColor,
+  fontSize: config.labelFontSize
+}))
+
+const requiredStyle = computed(() => ({
+  color: config.requiredColor
+}))
+
+const inputStyle = computed(() => ({
+  borderLeft: `${config.borderLeftWidth} solid ${config.borderLeftColor}`,
+  borderRadius: config.inputBorderRadius,
+  backgroundColor: config.whiteColor,
+  color: config.textColor
+}))
+
+const textareaStyle = computed(() => ({
+  borderLeft: `${config.borderLeftWidth} solid ${config.borderLeftColor}`,
+  borderRadius: config.inputBorderRadius,
+  backgroundColor: config.whiteColor,
+  color: config.textColor
+}))
+
+const selectArrowStyle = computed(() => ({
+  color: config.secondaryColor
+}))
+
+const submitBtnStyle = computed(() => ({
+  background: config.primaryGradient,
+  color: config.whiteColor,
+  borderRadius: config.inputBorderRadius
+}))
+
+const callToActionStyle = computed(() => ({
+  fontSize: config.callToActionFontSize,
+  color: config.textColor
+}))
+
+const checkIconStyle = computed(() => ({
+  background: config.primaryGradient,
+  color: config.whiteColor
+}))
+
 // Dữ liệu bảng nhà đầu tư
 const allInvestors = ref([
   {name: 'Nguyễn Thanh Tùng', date: '10/03/2024', package: '300.000.000', rate: '15%'},
@@ -169,7 +426,6 @@ const allInvestors = ref([
   {name: 'Đỗ Ngọc Phương', date: '12/04/2024', package: '150.000.000', rate: '7.5%'},
   {name: 'Vũ Quốc Đạt', date: '18/04/2024', package: '200.000.000', rate: '10%'},
   {name: 'Vũ Hoàng Minh', date: '25/04/2024', package: '300.000.000', rate: '15%'},
-
   {name: 'Nguyễn Thanh Bình', date: '02/05/2024', package: '50.000.000', rate: '2.5%'},
   {name: 'Phạm Minh Khang', date: '08/05/2024', package: '70.000.000', rate: '3.5%'},
   {name: 'Lê Thảo Nhi', date: '14/05/2024', package: '150.000.000', rate: '7.5%'},
@@ -259,20 +515,20 @@ const submitForm = () => {
 .investment-group {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 30px 20px;
+  padding: v-bind('config.containerPadding');
   font-family: 'Ubuntu', sans-serif;
 }
 
 .main-title {
-  font-size: 33px;
   text-align: center;
   margin-bottom: 40px;
-  background: linear-gradient(135deg, #031358, #2a5298);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
   font-weight: 700;
   position: relative;
+  -webkit-background-clip: text;
+  background-clip: text;
+  font-size: v-bind('config.mainTitleFontSize');
+  background: v-bind('config.primaryGradient');
+  color: transparent;
 }
 
 .main-title::after {
@@ -283,7 +539,7 @@ const submitForm = () => {
   transform: translateX(-50%);
   width: 120px;
   height: 4px;
-  background: linear-gradient(135deg, #031358, #2a5298);
+  background: v-bind('config.primaryGradient');
   border-radius: 2px;
 }
 
@@ -302,18 +558,18 @@ const submitForm = () => {
 
 /* Phần top investors thu gọn */
 .top-investors-compact {
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background: v-bind('config.whiteColor');
+  border-radius: v-bind('config.borderRadius');
+  box-shadow: v-bind('config.boxShadow');
   padding: 20px;
   margin-bottom: 20px;
 }
 
 .top-investors-title {
-  font-size: 20px;
+  font-size: v-bind('config.topInvestorsTitleFontSize');
   text-align: center;
   margin-bottom: 15px;
-  color: #031358;
+  color: v-bind('config.primaryColor');
   font-weight: 700;
   position: relative;
 }
@@ -326,7 +582,7 @@ const submitForm = () => {
   transform: translateX(-50%);
   width: 60px;
   height: 2px;
-  background: linear-gradient(135deg, #031358, #2a5298);
+  background: v-bind('config.primaryGradient');
   border-radius: 1px;
 }
 
@@ -339,43 +595,43 @@ const submitForm = () => {
 .top-investor-compact {
   display: flex;
   align-items: center;
-  background: rgba(240, 245, 255, 0.7);
+  background: v-bind('config.lightBlueBg');
   border-radius: 10px;
-  padding: 12px;
+  padding: v-bind('config.compactPadding');
   position: relative;
-  transition: all 0.3s ease;
+  transition: all v-bind('config.transitionDuration') ease;
   border: 2px solid transparent;
 }
 
 .top-investor-compact:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(3, 19, 88, 0.15);
+  box-shadow: v-bind('config.hoverShadow');
 }
 
 .top-investor-compact.top-1 {
-  background: linear-gradient(135deg, #fff9e6, #fff);
-  border-color: gold;
+  background: v-bind('config.top1Background');
+  border-color: v-bind('config.goldColor');
   order: 2;
 }
 
 .top-investor-compact.top-2 {
   order: 1;
   margin-top: 30px;
-  border-color: #0030ff;
+  border-color: v-bind('config.top2BorderColor');
 }
 
 .top-investor-compact.top-3 {
   order: 3;
   margin-top: 40px;
-  border-color: #031358;
+  border-color: v-bind('config.top3BorderColor');
 }
 
 .compact-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  width: v-bind('config.compactAvatarSize');
+  height: v-bind('config.compactAvatarSize');
+  border-radius: v-bind('config.avatarBorderRadius');
   overflow: hidden;
-  border: 2px solid #2a5298;
+  border: v-bind('config.avatarBorderWidth') solid v-bind('config.secondaryColor');
   flex-shrink: 0;
 }
 
@@ -385,9 +641,9 @@ const submitForm = () => {
 }
 
 .top-1 .compact-avatar {
-  border-color: gold;
-  width: 55px;
-  height: 55px;
+  border-color: v-bind('config.goldColor');
+  width: v-bind('config.top1CompactAvatarSize');
+  height: v-bind('config.top1CompactAvatarSize');
 }
 
 .compact-avatar img {
@@ -401,7 +657,7 @@ const submitForm = () => {
   top: -8px;
   left: 50%;
   transform: translateX(-50%);
-  color: gold;
+  color: v-bind('config.goldColor');
   font-size: 16px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   z-index: 10;
@@ -413,8 +669,8 @@ const submitForm = () => {
 }
 
 .compact-name {
-  color: #031358;
-  font-size: 16px;
+  color: v-bind('config.textColor');
+  font-size: v-bind('config.compactNameFontSize');
   font-weight: 700;
   margin-bottom: 4px;
   white-space: nowrap;
@@ -423,12 +679,12 @@ const submitForm = () => {
 }
 
 .top-1 .compact-name {
-  font-size: 18px;
+  font-size: v-bind('config.top1CompactNameFontSize');
 }
 
 .compact-package {
-  color: #e53e3e;
-  font-size: 12px;
+  color: v-bind('config.accentColor');
+  font-size: v-bind('config.compactPackageFontSize');
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
@@ -436,17 +692,17 @@ const submitForm = () => {
 }
 
 .top-1 .compact-package {
-  font-size: 13px;
+  font-size: v-bind('config.top1CompactPackageFontSize');
 }
 
 .compact-badge {
   position: absolute;
   top: -10px;
   right: -10px;
-  background: linear-gradient(135deg, #031358, #2a5298);
-  color: white;
-  width: 35px;
-  height: 35px;
+  background: v-bind('config.primaryGradient');
+  color: v-bind('config.whiteColor');
+  width: v-bind('config.compactBadgeSize');
+  height: v-bind('config.compactBadgeSize');
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -456,14 +712,14 @@ const submitForm = () => {
 }
 
 .top-1 .compact-badge {
-  background: linear-gradient(135deg, gold, #ffd700);
-  color: #031358;
+  background: v-bind('config.goldGradient');
+  color: v-bind('config.textColor');
 }
 
 .table-container {
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background: v-bind('config.whiteColor');
+  border-radius: v-bind('config.borderRadius');
+  box-shadow: v-bind('config.boxShadow');
   overflow: hidden;
 }
 
@@ -473,48 +729,48 @@ table {
 }
 
 thead {
-  background: linear-gradient(135deg, #031358, #2a5298);
+  background: v-bind('config.primaryGradient');
 }
 
 thead th {
-  color: white;
-  font-size: 20px;
-  padding: 18px 15px;
+  color: v-bind('config.whiteColor');
+  font-size: v-bind('config.tableHeaderFontSize');
+  padding: v-bind('config.tableHeaderPadding');
   text-align: left;
   font-weight: 500;
 }
 
 tbody {
-  background-color: rgba(240, 245, 255, 0.7);
+  background-color: v-bind('config.lightBlueBg');
 }
 
 tbody tr {
   border-bottom: 1px solid #e2e8f0;
-  transition: all 0.3s ease;
+  transition: all v-bind('config.transitionDuration') ease;
 }
 
 tbody tr:hover {
-  background-color: rgba(219, 234, 254, 0.7);
+  background-color: v-bind('config.hoverBlueBg');
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(3, 19, 88, 0.1);
 }
 
 tbody td {
-  padding: 15px;
-  color: #031358;
+  padding: v-bind('config.tableCellPadding');
+  color: v-bind('config.textColor');
 }
 
 .form-container {
-  background-color: rgba(240, 245, 255, 0.7);
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  padding: 30px;
+  background-color: v-bind('config.lightBlueBg');
+  border-radius: v-bind('config.borderRadius');
+  box-shadow: v-bind('config.boxShadow');
+  padding: v-bind('config.formPadding');
   min-height: 100%;
 }
 
 .form-title {
-  font-size: 25px;
-  color: #031358;
+  font-size: v-bind('config.formTitleFontSize');
+  color: v-bind('config.textColor');
   font-weight: 700;
   margin-bottom: 25px;
   text-align: center;
@@ -526,27 +782,27 @@ tbody td {
 
 label {
   display: block;
-  color: #031358;
-  font-size: 12px;
+  color: v-bind('config.textColor');
+  font-size: v-bind('config.labelFontSize');
   margin-bottom: 5px;
   text-align: left;
   font-weight: 500;
 }
 
 .required {
-  color: #e53e3e;
+  color: v-bind('config.requiredColor');
 }
 
 input, textarea, select {
   width: 100%;
   padding: 12px 15px;
   border: none;
-  border-left: 4px solid #2a5298;
-  border-radius: 6px;
-  background-color: white;
+  border-left: v-bind('config.borderLeftWidth') solid v-bind('config.borderLeftColor');
+  border-radius: v-bind('config.inputBorderRadius');
+  background-color: v-bind('config.whiteColor');
   font-family: 'Ubuntu', sans-serif;
-  transition: all 0.3s ease;
-  color: #031358;
+  transition: all v-bind('config.transitionDuration') ease;
+  color: v-bind('config.textColor');
 }
 
 input:focus, textarea:focus, select:focus {
@@ -570,8 +826,8 @@ input:focus, textarea:focus, select:focus {
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  transition: transform 0.3s ease;
-  color: #2a5298;
+  transition: transform v-bind('config.transitionDuration') ease;
+  color: v-bind('config.secondaryColor');
 }
 
 .select-arrow.rotated {
@@ -586,14 +842,14 @@ textarea {
 .submit-btn {
   width: 100%;
   padding: 15px;
-  background: linear-gradient(135deg, #031358, #2a5298);
-  color: white;
+  background: v-bind('config.primaryGradient');
+  color: v-bind('config.whiteColor');
   border: none;
-  border-radius: 6px;
+  border-radius: v-bind('config.inputBorderRadius');
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all v-bind('config.transitionDuration') ease;
   margin-top: 10px;
   position: relative;
   overflow: hidden;
@@ -601,7 +857,7 @@ textarea {
 
 .submit-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(3, 19, 88, 0.3);
+  box-shadow: v-bind('config.submitBtnHoverShadow');
 }
 
 .submit-btn:active {
@@ -613,8 +869,8 @@ textarea {
   align-items: center;
   justify-content: center;
   margin-top: 15px;
-  font-size: 10px;
-  color: #031358;
+  font-size: v-bind('config.callToActionFontSize');
+  color: v-bind('config.textColor');
 }
 
 .check-icon {
@@ -623,8 +879,8 @@ textarea {
   justify-content: center;
   width: 16px;
   height: 16px;
-  background: linear-gradient(135deg, #031358, #2a5298);
-  color: white;
+  background: v-bind('config.primaryGradient');
+  color: v-bind('config.whiteColor');
   border-radius: 50%;
   margin-right: 8px;
   font-size: 8px;

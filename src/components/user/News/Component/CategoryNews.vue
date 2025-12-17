@@ -6,7 +6,15 @@
         <!-- Thanh danh mục -->
         <div class="categories-container">
           <div class="categories-wrapper">
-            <button class="nav-arrow nav-arrow-left" @click="scrollCategories(-1)"   v-if="showArrows">
+            <button
+                class="nav-arrow nav-arrow-left"
+                @click="scrollCategories(-1)"
+                v-if="showArrows"
+                :style="{
+                borderColor: config.colors.primary,
+                color: config.colors.primary
+              }"
+            >
               <svg data-v-b4c27b63="" width="24" height="24" viewBox="0 0 24 24" fill="none"><path data-v-b4c27b63="" d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </button>
 
@@ -16,12 +24,23 @@
                   :key="index"
                   class="category-item"
                   :class="{ active: index === activeCategoryIndex }"
+                  :style="{
+                    color: index === activeCategoryIndex ? config.colors.active : config.colors.primary
+                  }"
               >
                 {{ category }}
               </div>
             </nav>
 
-            <button class="nav-arrow nav-arrow-right" @click="scrollCategories(1)"   v-if="showArrows">
+            <button
+                class="nav-arrow nav-arrow-right"
+                @click="scrollCategories(1)"
+                v-if="showArrows"
+                :style="{
+                borderColor: config.colors.primary,
+                color: config.colors.primary
+              }"
+            >
               <svg data-v-b4c27b63="" width="24" height="24" viewBox="0 0 24 24" fill="none"><path data-v-b4c27b63="" d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </button>
           </div>
@@ -49,10 +68,42 @@
 
         <!-- Phân trang -->
         <div class="pagination">
-          <button class="page-btn"><i class="fa-solid fa-arrow-left"></i></button>
-          <button class="page-btn active">1</button>
-          <button class="page-btn">2</button>
-          <button class="page-btn"><i class="fa-solid fa-arrow-right"></i></button>
+          <button
+              class="page-btn"
+              :style="{
+              borderColor: config.colors.primary,
+              color: config.colors.primary
+            }"
+          >
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <button
+              class="page-btn active"
+              :style="{
+              backgroundColor: config.colors.primary,
+              color: config.colors.white
+            }"
+          >
+            1
+          </button>
+          <button
+              class="page-btn"
+              :style="{
+              borderColor: config.colors.primary,
+              color: config.colors.primary
+            }"
+          >
+            2
+          </button>
+          <button
+              class="page-btn"
+              :style="{
+              borderColor: config.colors.primary,
+              color: config.colors.primary
+            }"
+          >
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
         </div>
       </div>
 
@@ -60,21 +111,30 @@
       <div class="right-column">
         <!-- Thanh tìm kiếm -->
         <div class="search-container">
-          <div class="search-box">
+          <div
+              class="search-box"
+              :style="{ borderColor: config.colors.primary }"
+          >
             <input
                 type="text"
                 placeholder="Nhập từ khóa để tìm kiếm"
                 class="search-input"
             >
-            <button class="search-btn">
+            <button
+                class="search-btn"
+                :style="{ backgroundColor: config.colors.primary }"
+            >
               <i class="fa-solid fa-magnifying-glass"></i>
             </button>
           </div>
         </div>
 
         <!-- Box "Đã xem gần đây" -->
-        <div class="recently-viewed">
-          <h3 class="recently-viewed-title">Đã xem gần đây</h3>
+        <div
+            class="recently-viewed"
+            :style="{ boxShadow: config.shadows.default }"
+        >
+          <h3 class="recently-viewed-title">{{ config.sections.recentlyViewed.title }}</h3>
           <div class="recently-viewed-list">
             <div
                 v-for="(news, index) in recentlyViewed"
@@ -97,7 +157,95 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+
+// CONFIG OBJECT
+let config = {
+  colors: {
+    primary: '#031358',
+    active: '#0030FF',
+    white: '#FFFFFF',
+    text: {
+      primary: '#031358',
+      secondary: '#6B7280',
+      light: '#9CA3AF',
+    },
+    border: '#e0e0e0',
+    background: {
+      hover: '#f0f0f0',
+      searchBtn: '#031358',
+    }
+  },
+  typography: {
+    fontFamily: "'Ubuntu', sans-serif",
+    sizes: {
+      category: '20px',
+      title: '20px',
+      subtitle: '15px',
+      date: '14px',
+      recentlyViewedTitle: '33px',
+      recentlyViewedItemTitle: '18px'
+    },
+    weights: {
+      bold: 700,
+      medium: 500
+    }
+  },
+  spacing: {
+    container: '1400px',
+    padding: '20px',
+    gap: '30px',
+    categoriesGap: '25px',
+    itemGap: '15px'
+  },
+  borders: {
+    radius: {
+      small: '4px',
+      medium: '8px',
+      round: '50%'
+    },
+    width: {
+      categoryActive: '3px',
+      divider: '1px'
+    }
+  },
+  shadows: {
+    default: '0 4px 6px rgba(0, 0, 0, 0.1)'
+  },
+  transitions: {
+    default: 'all 0.3s ease'
+  },
+  sizes: {
+    arrow: '40px',
+    newsImageHeight: '150px',
+    recentlyViewedImage: {
+      width: '80px',
+      height: '60px'
+    }
+  },
+  sections: {
+    recentlyViewed: {
+      title: 'Đã xem gần đây'
+    }
+  },
+  responsive: {
+    breakpoints: {
+      desktop: '1024px',
+      tablet: '768px',
+      mobile: '480px',
+      smallMobile: '640px'
+    }
+  }
+}
+
+const props = defineProps({
+  sectionData: Object
+})
+
+if(props.sectionData) {
+  config = props.sectionData;
+  console.log("Đã nhận props", config)
+}
 
 // Refs
 const categoriesNav = ref(null)
@@ -197,7 +345,6 @@ const scrollCategories = (direction) => {
 
 const showArrows = ref(true)
 
-
 // Kiểm tra xem có thể cuộn không
 const checkScrollButtons = () => {
   if (!categoriesNav.value) return
@@ -214,24 +361,23 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
- .news-container {
+.news-container {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Ubuntu', sans-serif;
+  font-family: v-bind('config.typography.fontFamily');
 }
 
 .news-container {
-  max-width: 1400px;
+  max-width: v-bind('config.spacing.container');
   margin: 0 auto;
-  padding: 20px;
+  padding: v-bind('config.spacing.padding');
   width: 100%;
 }
 
 .news-layout {
   display: flex;
-  gap: 30px;
+  gap: v-bind('config.spacing.gap');
   width: 100%;
 }
 
@@ -261,7 +407,7 @@ onMounted(() => {
 .categories-nav {
   display: flex;
   overflow-x: auto;
-  gap: 25px;
+  gap: v-bind('config.spacing.categoriesGap');
   padding-bottom: 10px;
   width: 100%;
   scrollbar-width: none; /* Ẩn scrollbar trên Firefox */
@@ -274,25 +420,25 @@ onMounted(() => {
 }
 
 .nav-arrow {
-  width: 40px;
-  height: 40px;
-  border: 2px solid #031358;
+  width: v-bind('config.sizes.arrow');
+  height: v-bind('config.sizes.arrow');
+  border: 2px solid v-bind('config.colors.primary');
   background: white;
-  border-radius: 50%;
+  border-radius: v-bind('config.borders.radius.round');
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #031358;
+  color: v-bind('config.colors.primary');
   font-size: 16px;
-  transition: all 0.3s ease;
+  transition: v-bind('config.transitions.default');
   flex-shrink: 0;
   z-index: 2;
 }
 
 .nav-arrow:hover {
-  background: #031358;
-  color: white;
+  background: v-bind('config.colors.primary');
+  color: v-bind('config.colors.white');
   transform: scale(1.05);
 }
 
@@ -313,30 +459,30 @@ onMounted(() => {
 }
 
 .category-item {
-  font-size: 20px;
-  font-weight: 700;
-  color: #031358;
+  font-size: v-bind('config.typography.sizes.category');
+  font-weight: v-bind('config.typography.weights.bold');
+  color: v-bind('config.colors.primary');
   white-space: nowrap;
   cursor: pointer;
   padding-bottom: 10px;
   border-bottom: 3px solid transparent;
-  transition: all 0.3s ease;
+  transition: v-bind('config.transitions.default');
   flex-shrink: 0;
   position: relative;
 }
 
 .category-item.active {
-  color: #0030FF;
-  border-bottom: 3px solid #0030FF;
+  color: v-bind('config.colors.active');
+  border-bottom: v-bind('config.borders.width.categoryActive') solid v-bind('config.colors.active');
 }
 
 .category-item:hover {
-  color: #0030FF;
+  color: v-bind('config.colors.active');
 }
 
 .nav-divider {
-  height: 3px;
-  background-color: #e0e0e0;
+  height: v-bind('config.borders.width.categoryActive');
+  background-color: v-bind('config.colors.border');
   width: 100%;
   margin-top: -3px;
 }
@@ -362,9 +508,9 @@ onMounted(() => {
 
 .news-image img {
   width: 100%;
-  height: 150px;
+  height: v-bind('config.sizes.newsImageHeight');
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: v-bind('config.borders.radius.medium');
 }
 
 .news-content {
@@ -373,23 +519,23 @@ onMounted(() => {
 }
 
 .news-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #031358;
+  font-size: v-bind('config.typography.sizes.title');
+  font-weight: v-bind('config.typography.weights.bold');
+  color: v-bind('config.colors.text.primary');
   margin-bottom: 10px;
   line-height: 1.3;
 }
 
 .news-subtitle {
-  font-size: 15px;
-  color: #6B7280;
+  font-size: v-bind('config.typography.sizes.subtitle');
+  color: v-bind('config.colors.text.secondary');
   margin-bottom: 10px;
   line-height: 1.5;
 }
 
 .news-date {
-  font-size: 14px;
-  color: #9CA3AF;
+  font-size: v-bind('config.typography.sizes.date');
+  color: v-bind('config.colors.text.light');
 }
 
 .news-divider {
@@ -397,8 +543,8 @@ onMounted(() => {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 1px;
-  background-color: #e0e0e0;
+  height: v-bind('config.borders.width.divider');
+  background-color: v-bind('config.colors.border');
 }
 
 /* Phân trang */
@@ -411,26 +557,26 @@ onMounted(() => {
 
 .page-btn {
   padding: 8px 15px;
-  border: 1px solid #031358;
+  border: 1px solid v-bind('config.colors.primary');
   background-color: white;
-  color: #031358;
-  border-radius: 4px;
+  color: v-bind('config.colors.primary');
+  border-radius: v-bind('config.borders.radius.small');
   cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  font-weight: v-bind('config.typography.weights.medium');
+  transition: v-bind('config.transitions.default');
 }
 
 .page-btn.active {
-  background-color: #031358;
-  color: white;
+  background-color: v-bind('config.colors.primary');
+  color: v-bind('config.colors.white');
 }
 
 .page-btn:hover {
-  background-color: #f0f0f0;
+  background-color: v-bind('config.colors.background.hover');
 }
 
 .page-btn.active:hover {
-  background-color: #031358;
+  background-color: v-bind('config.colors.primary');
 }
 
 /* Thanh tìm kiếm */
@@ -441,8 +587,8 @@ onMounted(() => {
 
 .search-box {
   display: flex;
-  border: 1px solid #031358;
-  border-radius: 4px;
+  border: 1px solid v-bind('config.colors.primary');
+  border-radius: v-bind('config.borders.radius.small');
   overflow: hidden;
   width: 100%;
 }
@@ -457,12 +603,12 @@ onMounted(() => {
 }
 
 .search-input::placeholder {
-  color: #9CA3AF;
+  color: v-bind('config.colors.text.light');
 }
 
 .search-btn {
   padding: 10px 15px;
-  background-color: #031358;
+  background-color: v-bind('config.colors.primary');
   color: white;
   border: none;
   cursor: pointer;
@@ -471,22 +617,22 @@ onMounted(() => {
 }
 
 .search-btn:hover {
-  background-color: #0030FF;
+  background-color: v-bind('config.colors.active');
 }
 
 /* Box "Đã xem gần đây" */
 .recently-viewed {
   background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: v-bind('config.borders.radius.medium');
+  box-shadow: v-bind('config.shadows.default');
   padding: 20px;
   width: 100%;
 }
 
 .recently-viewed-title {
-  font-size: 33px;
-  font-weight: 700;
-  color: #031358;
+  font-size: v-bind('config.typography.sizes.recentlyViewedTitle');
+  font-weight: v-bind('config.typography.weights.bold');
+  color: v-bind('config.colors.primary');
   margin-bottom: 20px;
   line-height: 1.2;
 }
@@ -494,15 +640,15 @@ onMounted(() => {
 .recently-viewed-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: v-bind('config.spacing.itemGap');
   width: 100%;
 }
 
 .recently-viewed-item {
   display: flex;
-  gap: 15px;
+  gap: v-bind('config.spacing.itemGap');
   padding-bottom: 15px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: v-bind('config.borders.width.divider') solid v-bind('config.colors.border');
   width: 100%;
 }
 
@@ -512,15 +658,15 @@ onMounted(() => {
 }
 
 .recently-viewed-image {
-  width: 80px;
+  width: v-bind('config.sizes.recentlyViewedImage.width');
   flex-shrink: 0;
 }
 
 .recently-viewed-image img {
   width: 100%;
-  height: 60px;
+  height: v-bind('config.sizes.recentlyViewedImage.height');
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: v-bind('config.borders.radius.small');
 }
 
 .recently-viewed-content {
@@ -529,16 +675,16 @@ onMounted(() => {
 }
 
 .recently-viewed-title-item {
-  font-size: 18px;
-  font-weight: 700;
-  color: #031358;
+  font-size: v-bind('config.typography.sizes.recentlyViewedItemTitle');
+  font-weight: v-bind('config.typography.weights.bold');
+  color: v-bind('config.colors.primary');
   margin-bottom: 5px;
   line-height: 1.3;
 }
 
 .recently-viewed-date {
-  font-size: 14px;
-  color: #9CA3AF;
+  font-size: v-bind('config.typography.sizes.date');
+  color: v-bind('config.colors.text.light');
 }
 
 /* Responsive */

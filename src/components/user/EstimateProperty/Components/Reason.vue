@@ -1,11 +1,14 @@
 <template>
-  <section class="why-choose-section">
+  <section class="why-choose-section" :style="sectionStyles">
     <div class="background-overlay">
-      <div class="background-image"></div>
-      <div class="overlay"></div>
+      <div
+          class="background-image"
+          :style="{ backgroundImage: `url('${baseImgaeUrl+sectionData.backgroundImage}')` }"
+      ></div>
+      <div class="overlay" :style="{ backgroundColor: themeColors.primary }"></div>
 
       <!-- Floating Icons Container -->
-      <div class="floating-icons-container">
+      <div class="floating-icons-container" v-if="floatingConfig.enabled">
         <div
             v-for="(icon, index) in floatingIcons"
             :key="index"
@@ -20,7 +23,7 @@
     <div class="container">
       <!-- Rest of your existing code -->
       <div class="title-section fade-up">
-        <h1>Tại sao nên định giá tại Thiên Hà Group?</h1>
+        <h1 :style="titleStyles">{{ sectionData.sectionTitle }}</h1>
       </div>
 
       <div class="content-wrapper">
@@ -30,24 +33,29 @@
               v-for="(advantage, index) in leftColumnAdvantages"
               :key="index"
               class="advantage-item fade-right"
+              :style="advantageItemStyles"
           >
-            <div class="icon-wrapper">
+            <div class="icon-wrapper" :style="iconWrapperStyles">
               <i :class="advantage.icon"></i>
             </div>
             <div class="text-content">
-              <h3>{{ advantage.title }}</h3>
-              <p>{{ advantage.content }}</p>
+              <h3 :style="advantageTitleStyles">{{ advantage.title }}</h3>
+              <p :style="advantageContentStyles">{{ advantage.content }}</p>
             </div>
           </div>
         </div>
 
         <!-- Right Column -->
         <div class="column right-column">
-          <div class="logo-section fade-in">
+          <div
+              class="logo-section fade-in"
+              :style="logoSectionStyles"
+          >
             <img
-                src="/imgs/logoTHG.png"
+                :src="sectionData.logoUrl"
                 alt="Thiên Hà Group Logo"
                 class="logo"
+                :style="logoStyles"
             />
           </div>
 
@@ -56,13 +64,14 @@
                 v-for="(advantage, index) in rightColumnAdvantages"
                 :key="index"
                 class="advantage-item fade-left"
+                :style="advantageItemStyles"
             >
-              <div class="icon-wrapper">
-                <i :class="advantage.icon" ></i>
+              <div class="icon-wrapper" :style="iconWrapperStyles">
+                <i :class="advantage.icon"></i>
               </div>
               <div class="text-content">
-                <h3>{{ advantage.title }}</h3>
-                <p>{{ advantage.content }}</p>
+                <h3 :style="advantageTitleStyles">{{ advantage.title }}</h3>
+                <p :style="advantageContentStyles">{{ advantage.content }}</p>
               </div>
             </div>
           </div>
@@ -73,65 +82,159 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, reactive, watch } from 'vue'
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
 
-const advantages = [
-  {
-    icon: "fa-solid fa-laptop-house",
-    title: "Tiện lợi đánh giá mọi lúc mọi nơi",
-    content: "Không cần phải hẹn chuyên viên hay di chuyển, người dùng chỉ cần nhập thông tin tài sản (vị trí, diện tích, số tầng, hướng...) là có thể nhận được kết quả định giá ngay lập tức — tiết kiệm thời gian và công sức."
-  },
-  {
-    icon: "fa-solid fa-bolt",
-    title: "Nhanh chóng có kết quả trong vài giây",
-    content: "Hệ thống tự động phân tích dữ liệu thị trường, so sánh với các bất động sản tương tự để đưa ra mức giá ước tính tức thì và chính xác — nhanh hơn hàng chục lần so với định giá thủ công."
-  },
-  {
-    icon: "fa-solid fa-database",
-    title: "Độ chính xác cao nhờ dữ liệu lớn",
-    content: "Công cụ sử dụng dữ liệu thực tế từ hàng nghìn giao dịch, tin rao và giá trị trung cấp nhất liên tục — giúp kết quả phản ánh sát với giá trị thật của tài sản."
-  },
-  {
-    icon: "fa-solid fa-chart-line",
-    title: "Hỗ trợ ra quyết định đầu tư hiệu quả",
-    content: "Kết quả định giá giúp người dùng so sánh giá bán, xác định cơ hội đầu tư hoặc thương lượng tốt hơn, tránh mua hớ hoặc bán lỗ."
-  },
-  {
-    icon: "fa-solid fa-shield-halved",
-    title: "Bảo mật và minh bạch thông tin",
-    content: "Thông tin cá nhân và dữ liệu bất động sản của người dùng được mã hóa, chỉ phục vụ cho mục đích định giá — đảm bảo tính riêng tư và bảo mật."
-  }
-]
+const props = defineProps({
+  sectionData: String // Nhận chuỗi JSON từ component cha
+})
 
-// Split advantages into left (3 items) and right (2 items)
-const leftColumnAdvantages = computed(() => advantages.slice(0, 3))
-const rightColumnAdvantages = computed(() => advantages.slice(3, 5))
+// Dữ liệu mặc định
+const defaultSectionData = {
+  sectionTitle: "Tại sao nên định giá tại Thiên Hà Group?",
+  logoUrl: "/imgs/logoTHG.png",
+  backgroundImage: "/imgs/bg-gia-tri.jpg",
+  advantages: [
+    {
+      icon: "fa-solid fa-laptop-house",
+      title: "Tiện lợi đánh giá mọi lúc mọi nơi",
+      content: "Không cần phải hẹn chuyên viên hay di chuyển, người dùng chỉ cần nhập thông tin tài sản (vị trí, diện tích, số tầng, hướng...) là có thể nhận được kết quả định giá ngay lập tức — tiết kiệm thời gian và công sức."
+    },
+    {
+      icon: "fa-solid fa-bolt",
+      title: "Nhanh chóng có kết quả trong vài giây",
+      content: "Hệ thống tự động phân tích dữ liệu thị trường, so sánh với các bất động sản tương tự để đưa ra mức giá ước tính tức thì và chính xác — nhanh hơn hàng chục lần so với định giá thủ công."
+    },
+    {
+      icon: "fa-solid fa-database",
+      title: "Độ chính xác cao nhờ dữ liệu lớn",
+      content: "Công cụ sử dụng dữ liệu thực tế từ hàng nghìn giao dịch, tin rao và giá trị trung cấp nhất liên tục — giúp kết quả phản ánh sát với giá trị thật của tài sản."
+    },
+    {
+      icon: "fa-solid fa-chart-line",
+      title: "Hỗ trợ ra quyết định đầu tư hiệu quả",
+      content: "Kết quả định giá giúp người dùng so sánh giá bán, xác định cơ hội đầu tư hoặc thương lượng tốt hơn, tránh mua hớ hoặc bán lỗ."
+    },
+    {
+      icon: "fa-solid fa-shield-halved",
+      title: "Bảo mật và minh bạch thông tin",
+      content: "Thông tin cá nhân và dữ liệu bất động sản của người dùng được mã hóa, chỉ phục vụ cho mục đích định giá — đảm bảo tính riêng tư và bảo mật."
+    }
+  ]
+}
+
+// Dữ liệu động - sẽ bị ghi đè nếu có props
+const sectionData = reactive({ ...defaultSectionData })
+
+// Cấu hình theme mặc định
+const defaultThemeColors = {
+  primary: "#031358",
+  secondary: "#F8BD0D",
+  textLight: "#FFFFFF",
+  textDark: "#031358",
+  overlayOpacity: 0.5,
+  glassOpacity: 0.15,
+  glassHoverOpacity: 0.2
+}
+
+const themeColors = reactive({ ...defaultThemeColors })
+
+// Cấu hình floating icons mặc định
+const defaultFloatingConfig = {
+  enabled: true,
+  count: 5,
+  minSize: 20,
+  maxSize: 40,
+  minOpacity: 0.2,
+  maxOpacity: 0.5,
+  minDuration: 10,
+  maxDuration: 20
+}
+
+const floatingConfig = reactive({ ...defaultFloatingConfig })
+
+// Cấu hình layout mặc định
+const defaultLayoutConfig = {
+  leftColumnItems: 3,
+  rightColumnItems: 2
+}
+
+const layoutConfig = reactive({ ...defaultLayoutConfig })
+
+// Computed styles
+const sectionStyles = computed(() => ({
+  '--primary-color': themeColors.primary,
+  '--secondary-color': themeColors.secondary,
+  '--text-light': themeColors.textLight,
+  '--text-dark': themeColors.textDark,
+  '--glass-opacity': themeColors.glassOpacity,
+  '--glass-hover-opacity': themeColors.glassHoverOpacity
+}))
+
+const titleStyles = computed(() => ({
+  color: themeColors.textDark,
+  backgroundColor: themeColors.secondary
+}))
+
+const advantageItemStyles = computed(() => ({
+  background: `rgba(255, 255, 255, ${themeColors.glassOpacity})`,
+  border: `1px solid rgba(255, 255, 255, 0.2)`
+}))
+
+const iconWrapperStyles = computed(() => ({
+  background: `rgba(3, 19, 88, 0.9)`,
+  color: themeColors.secondary,
+  border: `1px solid rgba(255, 255, 255, 0.3)`
+}))
+
+const advantageTitleStyles = computed(() => ({
+  color: themeColors.textLight
+}))
+
+const advantageContentStyles = computed(() => ({
+  color: `rgba(255, 255, 255, 0.9)`
+}))
+
+const logoSectionStyles = computed(() => ({
+  background: `rgba(255, 255, 255, ${themeColors.glassOpacity})`,
+  border: `1px solid rgba(255, 255, 255, 0.2)`
+}))
+
+const logoStyles = computed(() => ({
+  filter: 'brightness(0) invert(1)'
+}))
+
+// Split advantages based on layout config
+const leftColumnAdvantages = computed(() =>
+    sectionData.advantages.slice(0, layoutConfig.leftColumnItems)
+)
+
+const rightColumnAdvantages = computed(() =>
+    sectionData.advantages.slice(
+        layoutConfig.leftColumnItems,
+        layoutConfig.leftColumnItems + layoutConfig.rightColumnItems
+    )
+)
 
 // Floating icons data
 const floatingIcons = ref([])
 
 // Initialize floating icons
 const initFloatingIcons = () => {
-  // Get all icon classes from advantages
-  const iconClasses = advantages.map(adv => adv.icon)
+  if (!floatingConfig.enabled) return
 
-  // Create floating icons with random positions and animations
-  floatingIcons.value = iconClasses.map((iconClass, index) => {
-    // Random position
-    const left = Math.random() * 90 + 5 // 5% to 95%
-    const top = Math.random() * 90 + 5 // 5% to 95%
+  const iconClasses = sectionData.advantages.map(adv => adv.icon)
 
-    // Random animation duration (10-20s)
-    const duration = Math.random() * 10 + 10
+  // Limit number of icons if needed
+  const iconsToShow = iconClasses.slice(0, floatingConfig.count)
 
-    // Random delay (0-5s)
+  floatingIcons.value = iconsToShow.map((iconClass, index) => {
+    const left = Math.random() * 90 + 5
+    const top = Math.random() * 90 + 5
+    const duration = Math.random() * (floatingConfig.maxDuration - floatingConfig.minDuration) + floatingConfig.minDuration
     const delay = Math.random() * 5
-
-    // Random size (20-40px)
-    const size = Math.random() * 20 + 20
-
-    // Random opacity (0.-0.3)
-    const opacity = Math.random() * 0.3 + 0.2
+    const size = Math.random() * (floatingConfig.maxSize - floatingConfig.minSize) + floatingConfig.minSize
+    const opacity = Math.random() * (floatingConfig.maxOpacity - floatingConfig.minOpacity) + floatingConfig.minOpacity
 
     return {
       class: iconClass,
@@ -147,12 +250,97 @@ const initFloatingIcons = () => {
   })
 }
 
+// Hàm cập nhật dữ liệu từ props
+const updateFromProps = () => {
+  console.log("Kiểm tra props")
+  if (props.sectionData) {
+    console.log("có nhận được props", props.sectionData)
+    try {
+      const parsedData = JSON.parse(props.sectionData)
+
+      // Cập nhật sectionData
+      Object.assign(sectionData, {
+        sectionTitle: parsedData.sectionTitle,
+        logoUrl: parsedData.logoUrl,
+        backgroundImage: parsedData.backgroundImage,
+        advantages: parsedData.advantages
+      })
+
+      // Cập nhật themeColors
+      if (parsedData.themeColors) {
+        Object.assign(themeColors, {
+          primary: parsedData.themeColors.primary,
+          secondary: parsedData.themeColors.secondary,
+          textLight: parsedData.themeColors.textLight,
+          textDark: parsedData.themeColors.textDark
+          // Giữ nguyên các giá trị opacity nếu không có trong JSON
+        })
+      }
+
+      // Cập nhật floatingConfig
+      if (parsedData.floatingIcons) {
+        Object.assign(floatingConfig, parsedData.floatingIcons)
+      }
+
+      // Cập nhật layoutConfig
+      if (parsedData.layout) {
+        Object.assign(layoutConfig, parsedData.layout)
+      }
+
+      // Khởi tạo lại floating icons
+      initFloatingIcons()
+
+    } catch (error) {
+      console.error('Error parsing JSON from props:', error)
+    }
+  } else console.log("Không nhận được props")
+}
+
+// Watch for props changes
+watch(() => props.sectionData, () => {
+  updateFromProps()
+})
+
 onMounted(() => {
+  // Cập nhật từ props khi component được mount
+  updateFromProps()
   initFloatingIcons()
+})
+
+// Function to update data (for future CMS integration)
+const updateSectionData = (newData) => {
+  Object.assign(sectionData, newData)
+  initFloatingIcons()
+}
+
+const updateThemeColors = (newColors) => {
+  Object.assign(themeColors, newColors)
+}
+
+const updateFloatingConfig = (newConfig) => {
+  Object.assign(floatingConfig, newConfig)
+  initFloatingIcons()
+}
+
+const updateLayoutConfig = (newConfig) => {
+  Object.assign(layoutConfig, newConfig)
+}
+
+// Expose functions for future CMS integration
+defineExpose({
+  updateSectionData,
+  updateThemeColors,
+  updateFloatingConfig,
+  updateLayoutConfig,
+  sectionData,
+  themeColors,
+  floatingConfig,
+  layoutConfig
 })
 </script>
 
 <style scoped>
+/* Giữ nguyên phần style không thay đổi */
 .why-choose-section {
   position: relative;
   min-height: 100vh;
@@ -175,7 +363,6 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('/imgs/bg-gia-tri.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -187,8 +374,7 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: #031358;
-  opacity: 0.5;
+  opacity: v-bind('themeColors.overlayOpacity');
 }
 
 /* Floating Icons Styles */
@@ -243,8 +429,6 @@ onMounted(() => {
 
 .title-section h1 {
   font-size: 40px;
-  color: #031358;
-  background-color: #F8BD0D;
   display: inline-block;
   padding: 20px 40px;
   margin: 0;
@@ -260,7 +444,7 @@ onMounted(() => {
   transform: translateX(-50%);
   width: 20%;
   height: 3px;
-  background-color: #031358;
+  background-color: var(--primary-color);
   border-radius: 2px;
 }
 
@@ -294,8 +478,6 @@ onMounted(() => {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
   flex: 1;
   min-height: 200px;
   transition: all 0.3s ease;
@@ -320,23 +502,20 @@ onMounted(() => {
 .advantage-item:hover {
   transform: translateY(-5px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, var(--glass-hover-opacity)) !important;
 }
 
 .icon-wrapper {
   flex-shrink: 0;
   width: 70px;
   height: 70px;
-  background: rgba(3, 19, 88, 0.9);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #F8BD0D;
   font-size: 28px;
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .text-content {
@@ -344,7 +523,6 @@ onMounted(() => {
 }
 
 .text-content h3 {
-  color: #FFFFFF;
   font-size: 20px;
   font-weight: 600;
   margin: 0 0 15px 0;
@@ -352,7 +530,6 @@ onMounted(() => {
 }
 
 .text-content p {
-  color: rgba(255, 255, 255, 0.9);
   font-size: 15px;
   line-height: 1.7;
   margin: 0;
@@ -364,12 +541,10 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 15px;
   padding: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
   min-height: 200px;
 }
 
@@ -377,7 +552,6 @@ onMounted(() => {
   width: 100%;
   height: auto;
   max-width: 300px;
-  filter: brightness(0) invert(1);
 }
 
 .advantages-right {

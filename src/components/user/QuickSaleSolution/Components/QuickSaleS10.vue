@@ -2,41 +2,37 @@
   <div class="section section10">
     <div class="st-title">
       <TitleComponent
-          :circle-size="100"
-          :icon-height="90"
-          :icon-width="109"
-          :order-number="10"
+          :circle-size="sectionData.circleSize"
+          :icon-height="sectionData.iconHeight"
+          :icon-width="sectionData.iconWidth"
+          :order-number="sectionData.orderNumber"
           component-height="120px"
           component-width="100%"
-          icon-url="/imgs/icon-phap-ly.png"
-          title="Hỗ trợ pháp lý 100% đến khi hoàn tất giao dịch"
-          :is-right="true"
+          :icon-url="baseImgaeUrl+sectionData.iconUrl"
+          :title="sectionData.title"
+          :is-right="sectionData.isRight"
       >
       </TitleComponent>
     </div>
     <div class="main-content-wrapper">
       <div class="left-content-section">
         <div class="left-img fade-left">
-          <img src="/imgs/anh-phap-ly-1.png" alt="">
+          <img :src="baseImgaeUrl+sectionData.images.leftImage" alt="">
         </div>
-        <div class="text-content-wrapper fade-up">
-          <div class="text-content">
-            <p>
-              Đơn vị hỗ trợ trọn gói hồ sơ pháp lý: công chứng, sang tên, kiểm tra quy hoạch, hoàn tất thủ tục chuyển
-              nhượng.
-              Khách hàng chỉ cần ký hợp đồng và nhận tiền — mọi thủ tục còn lại đều được xử lý chuyên nghiệp, an toàn,
-              đúng quy định pháp luật.
-            </p>
+        <div class="text-content-wrapper fade-up" :style="textWrapperStyle">
+          <div class="text-content rich-text-editor-wrapper">
+            <div class="tiptap" v-html="sectionData.content.paragraph">
+            </div>
           </div>
         </div>
-        <div class="center-img">
-          <img class="fade-up" src="/imgs/anh-phap-ly-3.png" alt="">
+        <div class="center-img" :style="centerImageStyle">
+          <img class="fade-up" :src="baseImgaeUrl+sectionData.images.centerImage" alt="">
         </div>
       </div>
 
       <div class="right-content-section">
         <div class="right-img">
-          <img class="fade-right" src="/imgs/anh-phap-ly-2.png" alt="">
+          <img class="fade-right" :src="baseImgaeUrl+sectionData.images.rightImage" alt="">
         </div>
       </div>
     </div>
@@ -45,6 +41,62 @@
 
 <script setup>
 import TitleComponent from "./TitleQickSale.vue";
+import { computed } from 'vue';
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
+
+// Dữ liệu động - có thể fetch từ API hoặc import từ JSON
+let sectionData = {
+  title: "Hỗ trợ pháp lý 100% đến khi hoàn tất giao dịch",
+  iconUrl: "/imgs/icon-phap-ly.png",
+  orderNumber: 10,
+  circleSize: 100,
+  iconHeight: 90,
+  iconWidth: 109,
+  isRight: true,
+  content: {
+    paragraph: "Đơn vị hỗ trợ trọn gói hồ sơ pháp lý: công chứng, sang tên, kiểm tra quy hoạch, hoàn tất thủ tục chuyển nhượng. Khách hàng chỉ cần ký hợp đồng và nhận tiền — mọi thủ tục còn lại đều được xử lý chuyên nghiệp, an toàn, đúng quy định pháp luật."
+  },
+  images: {
+    leftImage: "/imgs/anh-phap-ly-1.png",
+    centerImage: "/imgs/anh-phap-ly-3.png",
+    rightImage: "/imgs/anh-phap-ly-2.png"
+  },
+  styles: {
+    dashColor: "#C2CBF0",
+    titleWidth: "43%",
+    textWrapperWidth: "80%",
+    textWrapperRight: "-25%",
+    textWrapperBottom: "-10%",
+    centerImageWidth: "300px",
+    centerImageRight: "-150px",
+    centerImageTop: "-70px",
+    circleSize: "350px"
+  }
+};
+
+const props = defineProps({
+  sectionData: Object
+})
+if(props.sectionData) {
+  sectionData = props.sectionData.section10;
+  console.log("Đã nhận được data từ cha", sectionData)
+}
+
+// Computed style cho text wrapper
+const textWrapperStyle = computed(() => ({
+  '--dash-color': sectionData.styles.dashColor,
+  width: sectionData.styles.textWrapperWidth,
+  right: sectionData.styles.textWrapperRight,
+  bottom: sectionData.styles.textWrapperBottom
+}));
+
+// Computed style cho center image
+const centerImageStyle = computed(() => ({
+  '--circle-size': sectionData.styles.circleSize,
+  width: sectionData.styles.centerImageWidth,
+  right: sectionData.styles.centerImageRight,
+  top: sectionData.styles.centerImageTop
+}));
 </script>
 
 <style scoped>
@@ -67,15 +119,15 @@ import TitleComponent from "./TitleQickSale.vue";
 
 .st-title {
   display: block;
-  width: 100%;
+  width: v-bind('sectionData.styles.titleWidth');
   margin-left: auto;
 }
 
 .st-title::before {
   content: "";
   position: absolute;
-  border-top: 5px dashed #C2CBF0;
-  border-right: 5px dashed #C2CBF0;
+  border-top: 5px dashed var(--dash-color, #C2CBF0);
+  border-right: 5px dashed var(--dash-color, #C2CBF0);
   width: 29.7%;
   height: 20%;
   top: -130px;
@@ -86,12 +138,12 @@ import TitleComponent from "./TitleQickSale.vue";
   border-left: 0;
   border-radius: 20px;
   position: absolute;
-  width: 80%;
+  width: v-bind('sectionData.styles.textWrapperWidth');
   padding: 20px;
   background-color: white;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  right: -25%;
-  bottom: -10%;
+  right: v-bind('sectionData.styles.textWrapperRight');
+  bottom: v-bind('sectionData.styles.textWrapperBottom');
   z-index: 2;
 }
 
@@ -117,19 +169,19 @@ import TitleComponent from "./TitleQickSale.vue";
 }
 
 .center-img {
-  width: 300px;
+  width: v-bind('sectionData.styles.centerImageWidth');
   position: absolute;
-  top: -70px;
-  right: -150px;
+  top: v-bind('sectionData.styles.centerImageTop');
+  right: v-bind('sectionData.styles.centerImageRight');
   z-index: 3;
 }
 
 /* Vòng tròn nét đứt */
 .center-img::before {
   content: "";
-  width: 350px;
-  height: 350px;
-  border: 5px dashed #C2CBF0;
+  width: var(--circle-size, 350px);
+  height: var(--circle-size, 350px);
+  border: 5px dashed var(--dash-color, #C2CBF0);
   border-radius: 50%;
   position: absolute;
   top: 50%;
@@ -145,8 +197,8 @@ import TitleComponent from "./TitleQickSale.vue";
 .section10::before {
   content: "";
   position: absolute;
-  border-right: 5px dashed #C2CBF0;
-  border-bottom: 5px dashed #C2CBF0;
+  border-right: 5px dashed var(--dash-color, #C2CBF0);
+  border-bottom: 5px dashed var(--dash-color, #C2CBF0);
   width: 35%;
   height: 20%;
   right: 68px;
@@ -185,11 +237,7 @@ import TitleComponent from "./TitleQickSale.vue";
   text-align: justify;
 }
 
-.st-title {
-  width: 43%;
-}
-
-/* Responsive Design */
+/* Responsive Design - Các giá trị động sẽ được ghi đè ở breakpoint */
 @media (max-width: 1400px) {
   .main-content-wrapper {
     margin-top: 50px;
@@ -221,14 +269,12 @@ import TitleComponent from "./TitleQickSale.vue";
   .st-title::before {
     display: none;
   }
-
 }
 
 @media (max-width: 1200px) {
   .section {
     padding: 40px 30px;
   }
-
 
   .text-content-wrapper {
     width: 95%;

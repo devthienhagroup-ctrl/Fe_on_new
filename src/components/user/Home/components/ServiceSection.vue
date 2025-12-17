@@ -1,10 +1,10 @@
 <template>
   <div class="services-container">
-    <h1 class="services-title">DỊCH VỤ NỔI BẬT</h1>
+    <h1 class="services-title">{{ sectionData.title }}</h1>
 
     <!-- Vòng tròn xoay (chỉ hiển thị trên desktop) -->
-    <div class="rotating-circle desktop-only">
-      <img src="/imgs/Circle.svg" alt="Rotating Circle" />
+    <div class="rotating-circle desktop-only" v-if="sectionData.decorations.rotatingCircle.enabled">
+      <img :src="baseImgaeUrl+sectionData.decorations.rotatingCircle.image" alt="Rotating Circle" />
     </div>
 
     <!-- Layout desktop -->
@@ -14,7 +14,7 @@
         <div
             class="service-detail-container"
             :class="{ 'active': activeIndex === index }"
-            v-for="(service, index) in services"
+            v-for="(service, index) in sectionData.services"
             :key="index"
         >
           <!-- Tam giác chỉ vào menu -->
@@ -23,7 +23,7 @@
           <!-- Ảnh dịch vụ -->
           <div class="service-detail-image">
             <img
-                :src="service.image"
+                :src="baseImgaeUrl+service.image"
                 :alt="service.title"
                 class="service-detail-img"
                 :ref="el => { if (el) imageRefs[index] = el }"
@@ -48,8 +48,8 @@
                     'light-btn': textColors[index] === 'light'
                   }"
                 >
-                  <span>Tìm hiểu thêm</span>
-                  <i class="fas fa-arrow-right"></i>
+                  <span>{{ sectionData.buttonText }}</span>
+                  <i :class="sectionData.buttonIcon"></i>
                 </button>
               </div>
             </div>
@@ -61,7 +61,7 @@
       <div class="service-menu-col">
         <div class="service-menu">
           <div
-              v-for="(service, index) in services"
+              v-for="(service, index) in sectionData.services"
               :key="index"
               class="service-menu-item"
               :class="{ 'active': activeIndex === index }"
@@ -75,7 +75,7 @@
               {{ service.title }}
             </div>
             <div class="service-menu-arrow">
-              <i class="fas fa-chevron-right"></i>
+              <i :class="sectionData.menuArrowIcon"></i>
             </div>
           </div>
         </div>
@@ -86,7 +86,7 @@
     <div class="services-collapse mobile-only">
       <div
           class="service-collapse-item"
-          v-for="(service, index) in services"
+          v-for="(service, index) in sectionData.services"
           :key="index"
           :class="{ 'active': activeMobileIndex === index }"
       >
@@ -98,18 +98,18 @@
             {{ service.title }}
           </div>
           <div class="service-collapse-arrow">
-            <i class="fas" :class="activeMobileIndex === index ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            <i class="fas" :class="activeMobileIndex === index ? sectionData.mobileExpandIcon : sectionData.mobileCollapseIcon"></i>
           </div>
         </div>
         <div class="service-collapse-content" v-show="activeMobileIndex === index">
           <div class="service-collapse-image">
-            <img :src="service.image" :alt="service.title" />
+            <img :src="baseImgaeUrl+service.image" :alt="service.title" />
           </div>
           <div class="service-collapse-detail">
             <p class="service-collapse-text">{{ service.content }}</p>
             <button class="service-collapse-btn">
-              <span>Tìm hiểu thêm</span>
-              <i class="fas fa-arrow-right"></i>
+              <span>{{ sectionData.buttonText }}</span>
+              <i :class="sectionData.buttonIcon"></i>
             </button>
           </div>
         </div>
@@ -120,45 +120,133 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
 
-const services = ref([
-  {
-    title: "Khảo sát bất động sản",
-    content: "Khảo sát, tìm kiếm thông tin đối thủ, lên chiến lược marketing hiệu quả trên từng bất động sản.",
-    image: "/imgs/khaosatbds.jpg",
-    icon: "fa-solid fa-magnifying-glass-chart"
-  },
-  {
-    title: "Đăng tin bất động sản",
-    content: "Dịch vụ đăng tin bất động sản lên 20-50 trang phù thị trường tiếp cận khách hàng tiềm năng.",
-    image: "/imgs/dangtinbds.jpg",
-    icon: "fa-solid fa-newspaper"
-  },
-  {
-    title: "Giải pháp bán gấp BĐS",
-    content: "Giải pháp bán gấp bất động sản từ 3 - 6 tháng là gói tiết kiệm chi phí.",
-    image: "/imgs/bangapbds.jpg",
-    icon: "fa-solid fa-bolt"
-  },
-  {
-    title: "Định giá bất động sản",
-    content: "Định giá chuẩn bán nhanh hơn, bằng phương pháp so sánh, phương pháp đầu tư...trên mỗi bất động sản.",
-    image: "/imgs/dinhgiabds.jpg",
-    icon: "fa-solid fa-chart-line"
-  },
-  {
-    title: "Bán nhanh BĐS 30 ngày",
-    content: "Giải pháp bán nhanh bất động sản trong 30 ngày tại Thiên Hà Group có cam kết",
-    image: "/imgs/bannhanh30d.jpg",
-    icon: "fa-solid fa-stopwatch"
-  },
-  {
-    title: "Truyền thông bất động sản",
-    content: "Xuất thân tử Công Nghệ và Digital Marketing Thiên Hà Group triển khai truyền thông bđs hiệu quả.",
-    image: "/imgs/truyenthongbds.jpg",
-    icon: "fa-solid fa-bullhorn"
+
+const props = defineProps({
+  content: {
+    type: Object
   }
-])
+});
+
+// Dữ liệu cấu hình section - Có thể được CMS quản lý
+const sectionData = ref({
+  title: "DỊCH VỤ NỔI BẬT",
+  buttonText: "Tìm hiểu thêm",
+  buttonIcon: "fas fa-arrow-right",
+  menuArrowIcon: "fas fa-chevron-right",
+  mobileExpandIcon: "fa-chevron-up",
+  mobileCollapseIcon: "fa-chevron-down",
+
+  // Dữ liệu các dịch vụ - Có thể được CMS quản lý
+  services: [
+    {
+      title: "Khảo sát bất động sản",
+      content: "Khảo sát, tìm kiếm thông tin đối thủ, lên chiến lược marketing hiệu quả trên từng bất động sản.",
+      image: "/imgs/khaosatbds.jpg",
+      icon: "fa-solid fa-magnifying-glass-chart"
+    },
+    {
+      title: "Đăng tin bất động sản",
+      content: "Dịch vụ đăng tin bất động sản lên 20-50 trang phù thị trường tiếp cận khách hàng tiềm năng.",
+      image: "/imgs/dangtinbds.jpg",
+      icon: "fa-solid fa-newspaper"
+    },
+    {
+      title: "Giải pháp bán gấp BĐS",
+      content: "Giải pháp bán gấp bất động sản từ 3 - 6 tháng là gói tiết kiệm chi phí.",
+      image: "/imgs/bangapbds.jpg",
+      icon: "fa-solid fa-bolt"
+    },
+    {
+      title: "Định giá bất động sản",
+      content: "Định giá chuẩn bán nhanh hơn, bằng phương pháp so sánh, phương pháp đầu tư...trên mỗi bất động sản.",
+      image: "/imgs/dinhgiabds.jpg",
+      icon: "fa-solid fa-chart-line"
+    },
+    {
+      title: "Bán nhanh BĐS 30 ngày",
+      content: "Giải pháp bán nhanh bất động sản trong 30 ngày tại Thiên Hà Group có cam kết",
+      image: "/imgs/bannhanh30d.jpg",
+      icon: "fa-solid fa-stopwatch"
+    },
+    {
+      title: "Truyền thông bất động sản",
+      content: "Xuất thân tử Công Nghệ và Digital Marketing Thiên Hà Group triển khai truyền thông bđs hiệu quả.",
+      image: "/imgs/truyenthongbds.jpg",
+      icon: "fa-solid fa-bullhorn"
+    }
+  ],
+
+  // Cấu hình layout
+  layout: {
+    columnRatio: "2fr 1fr", // Tỷ lệ độ rộng 2 cột
+    menuGap: "12px", // Khoảng cách giữa các item menu
+  },
+
+  // Cấu hình màu sắc
+  colors: {
+    primary: "#031358", // Màu chính
+    secondary: "#3a53b9", // Màu phụ
+    light: "#ffffff", // Màu sáng
+    dark: "#031358", // Màu tối
+    text: {
+      title: "#031358", // Màu tiêu đề
+      normal: "#333333", // Màu chữ bình thường
+      light: "#ffffff", // Màu chữ sáng
+    },
+    background: {
+      overlayLight: "rgba(255, 255, 255, 0)", // Nền overlay sáng
+      overlayDark: "rgba(0, 0, 0, 0)", // Nền overlay tối
+      buttonLight: "rgba(255, 255, 255, 0.2)", // Nền nút sáng
+      buttonDark: "rgba(3, 19, 88, 0.9)", // Nền nút tối
+    }
+  },
+
+  // Cấu hình typography
+  typography: {
+    title: {
+      size: "33px", // Kích thước tiêu đề section
+      weight: "bolder", // Độ đậm tiêu đề
+      family: "'Ubuntu', sans-serif", // Font chữ tiêu đề
+    },
+    serviceTitle: {
+      size: "28px", // Kích thước tiêu đề dịch vụ
+      weight: "700", // Độ đậm tiêu đề dịch vụ
+    },
+    content: {
+      size: "16px", // Kích thước nội dung
+      mobileSize: "14px", // Kích thước nội dung mobile
+      lineHeight: "1.6", // Chiều cao dòng
+    },
+    button: {
+      size: "14px", // Kích thước chữ nút
+      weight: "600", // Độ đậm chữ nút
+    }
+  },
+
+  // Cấu hình khoảng cách
+  spacing: {
+    titleBottom: "60px", // Khoảng cách dưới tiêu đề
+    columnGap: "40px", // Khoảng cách giữa 2 cột
+    overlayPadding: "40px", // Padding overlay
+    buttonPadding: "12px 24px", // Padding nút
+    menuPadding: "20px 25px", // Padding menu item
+    mobileTitleBottom: "40px", // Khoảng cách dưới tiêu đề mobile
+    collapseItemMargin: "10px", // Margin item collapse
+  },
+
+  decorations: {
+    rotatingCircle: {
+      enabled: true,
+      image: "/imgs/Circle.svg"
+    }
+  }
+})
+
+if(props.content) sectionData.value = props.content.contentJson;
+else console.log("Dịch vụ không có props lấy dữ liệu mặc định")
+// console.log(JSON.stringify(sectionData.value));
 
 const activeIndex = ref(0)
 const activeMobileIndex = ref(null)
@@ -168,41 +256,48 @@ const pointerPosition = ref(0)
 const textColors = ref([]) // 'light' hoặc 'dark'
 
 // Phân tích màu sắc của ảnh để xác định màu chữ phù hợp
+// const analyzeImageColor = (index) => {
+//   if (!imageRefs.value[index]) return
+//
+//   const img = imageRefs.value[index]
+//   const canvas = document.createElement('canvas')
+//   const ctx = canvas.getContext('2d')
+//
+//   canvas.width = img.naturalWidth
+//   canvas.height = img.naturalHeight
+//
+//   ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+//
+//   // Lấy dữ liệu pixel từ vùng dưới cùng (nơi đặt overlay)
+//   const imageData = ctx.getImageData(0, canvas.height * 0.7, canvas.width, canvas.height * 0.3)
+//   const data = imageData.data
+//
+//   let totalBrightness = 0
+//   let sampleCount = 0
+//
+//   // Lấy mẫu một số pixel để tính độ sáng trung bình
+//   for (let i = 0; i < data.length; i += 16) { // Lấy mẫu 1/16 pixel
+//     const r = data[i]
+//     const g = data[i + 1]
+//     const b = data[i + 2]
+//
+//     // Tính độ sáng (luminance) theo công thức tiêu chuẩn
+//     const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+//     totalBrightness += brightness
+//     sampleCount++
+//   }
+//
+//   const averageBrightness = totalBrightness / sampleCount
+//
+//   // Nếu độ sáng trung bình > 0.6, sử dụng chữ tối, ngược lại dùng chữ sáng
+//   textColors.value[index] = averageBrightness > 0.6 ? 'dark' : 'light'
+// }
 const analyzeImageColor = (index) => {
-  if (!imageRefs.value[index]) return
+  // Luôn sử dụng chữ sáng cho overlay (hoặc tối tùy bạn chọn)
+  textColors.value[index] = 'light' // hoặc 'dark'
 
-  const img = imageRefs.value[index]
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
-
-  canvas.width = img.naturalWidth
-  canvas.height = img.naturalHeight
-
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-
-  // Lấy dữ liệu pixel từ vùng dưới cùng (nơi đặt overlay)
-  const imageData = ctx.getImageData(0, canvas.height * 0.7, canvas.width, canvas.height * 0.3)
-  const data = imageData.data
-
-  let totalBrightness = 0
-  let sampleCount = 0
-
-  // Lấy mẫu một số pixel để tính độ sáng trung bình
-  for (let i = 0; i < data.length; i += 16) { // Lấy mẫu 1/16 pixel
-    const r = data[i]
-    const g = data[i + 1]
-    const b = data[i + 2]
-
-    // Tính độ sáng (luminance) theo công thức tiêu chuẩn
-    const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-    totalBrightness += brightness
-    sampleCount++
-  }
-
-  const averageBrightness = totalBrightness / sampleCount
-
-  // Nếu độ sáng trung bình > 0.6, sử dụng chữ tối, ngược lại dùng chữ sáng
-  textColors.value[index] = averageBrightness > 0.6 ? 'dark' : 'light'
+  // Hoặc luân phiên cho đẹp
+  // textColors.value[index] = index % 2 === 0 ? 'light' : 'dark'
 }
 
 const selectService = (index) => {
@@ -226,7 +321,7 @@ onMounted(() => {
   selectService(0)
 
   // Đặt màu mặc định cho tất cả dịch vụ
-  services.value.forEach((_, index) => {
+  sectionData.value.services.forEach((_, index) => {
     textColors.value[index] = 'light' // Mặc định là chữ sáng
   })
 })
@@ -238,26 +333,25 @@ onMounted(() => {
   margin: 0 auto;
   position: relative;
   padding: 0 20px 60px;
-
   display: flex;
   flex-direction: column;
 }
 
 .services-title {
-  font-family: 'Ubuntu', sans-serif;
-  font-size: 33px;
-  color: #031358;
+  font-family: v-bind('sectionData.typography.title.family');
+  font-size: v-bind('sectionData.typography.title.size');
+  color: v-bind('sectionData.colors.text.title');
   text-align: center;
-  margin-bottom: 60px;
-  font-weight: bolder;
+  margin-bottom: v-bind('sectionData.spacing.titleBottom');
+  font-weight: v-bind('sectionData.typography.title.weight');
   flex-shrink: 0;
 }
 
 /* Desktop Layout */
 .services-layout {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 40px;
+  grid-template-columns: v-bind('sectionData.layout.columnRatio');
+  gap: v-bind('sectionData.spacing.columnGap');
   position: relative;
   z-index: 2;
   flex: 1;
@@ -331,30 +425,30 @@ onMounted(() => {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 40px;
+  padding: v-bind('sectionData.spacing.overlayPadding');
   transform: translateY(0);
   transition: all 0.4s ease;
 }
 
 /* Overlay cho nền sáng - chữ tối */
 .service-detail-overlay.dark-text {
-  background: rgba(255, 255, 255, 0);
-  color: #031358;
+  background: v-bind('sectionData.colors.background.overlayLight');
+  color: v-bind('sectionData.colors.text.title');
 }
 
 .service-detail-overlay.dark-text .service-detail-content {
-  color: #031358;
+  color: v-bind('sectionData.colors.text.title');
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 /* Overlay cho nền tối - chữ sáng */
 .service-detail-overlay.light-text {
-  background: rgba(0, 0, 0, 0);
-  color: #fff;
+  background: v-bind('sectionData.colors.background.overlayDark');
+  color: v-bind('sectionData.colors.text.light');
 }
 
 .service-detail-overlay.light-text .service-detail-content {
-  color: #fff;
+  color: v-bind('sectionData.colors.text.light');
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
@@ -363,17 +457,17 @@ onMounted(() => {
 }
 
 .service-detail-title {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: v-bind('sectionData.typography.serviceTitle.size');
+  font-weight: v-bind('sectionData.typography.serviceTitle.weight');
   margin: 0 0 20px 0;
-  font-family: 'Ubuntu', sans-serif;
+  font-family: v-bind('sectionData.typography.title.family');
   line-height: 1.2;
 }
 
 .service-detail-text {
-  font-size: 16px;
-  line-height: 1.6;
-  font-family: 'Ubuntu', sans-serif;
+  font-size: v-bind('sectionData.typography.content.size');
+  line-height: v-bind('sectionData.typography.content.lineHeight');
+  font-family: v-bind('sectionData.typography.title.family');
   margin: 0 0 30px 0;
   opacity: 0.9;
 }
@@ -383,11 +477,11 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 24px;
+  padding: v-bind('sectionData.spacing.buttonPadding');
   border-radius: 8px;
-  font-family: 'Ubuntu', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
+  font-family: v-bind('sectionData.typography.title.family');
+  font-size: v-bind('sectionData.typography.button.size');
+  font-weight: v-bind('sectionData.typography.button.weight');
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid transparent;
@@ -395,24 +489,24 @@ onMounted(() => {
 
 /* Nút cho nền sáng */
 .service-detail-btn.dark-btn {
-  background: rgba(3, 19, 88, 0.9);
-  color: #fff;
+  background: v-bind('sectionData.colors.background.buttonDark');
+  color: v-bind('sectionData.colors.text.light');
   border: 1px solid rgba(3, 19, 88, 0.5);
 }
 
 .service-detail-btn.dark-btn:hover {
-  background: rgba(3, 19, 88, 1);
+  background: v-bind('sectionData.colors.primary');
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(3, 19, 88, 0.3);
 }
 
 /* Nút cho nền tối */
 .service-detail-btn.light-btn {
-  background: rgba(255, 255, 255, 0.2);
+  background: v-bind('sectionData.colors.background.buttonLight');
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #fff;
+  color: v-bind('sectionData.colors.text.light');
 }
 
 .service-detail-btn.light-btn:hover {
@@ -420,8 +514,6 @@ onMounted(() => {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
-
-/* Phần còn lại của CSS giữ nguyên... */
 
 /* Cột menu dịch vụ */
 .service-menu-col {
@@ -434,13 +526,13 @@ onMounted(() => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: v-bind('sectionData.layout.menuGap');
 }
 
 .service-menu-item {
   display: flex;
   align-items: center;
-  padding: 20px 25px;
+  padding: v-bind('sectionData.spacing.menuPadding');
   border-radius: 12px;
   background: #fff;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
@@ -459,9 +551,9 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg,
-  rgba(3, 19, 88, 0.9) 0%,
-  rgba(58, 83, 185, 0.8) 50%,
-  rgba(3, 19, 88, 0.9) 100%);
+  v-bind('sectionData.colors.primary + "e6"') 0%,
+  v-bind('sectionData.colors.secondary + "cc"') 50%,
+  v-bind('sectionData.colors.primary + "e6"') 100%);
   transition: left 0.6s ease;
   z-index: 1;
 }
@@ -492,17 +584,17 @@ onMounted(() => {
 }
 
 .service-menu-item.active .service-menu-title {
-  color: #fff;
+  color: v-bind('sectionData.colors.text.light');
   font-weight: 600;
 }
 
 .service-menu-item.active .service-menu-icon i {
-  color: #fff;
+  color: v-bind('sectionData.colors.text.light');
   transform: scale(1.1);
 }
 
 .service-menu-item.active .service-menu-arrow i {
-  color: #fff;
+  color: v-bind('sectionData.colors.text.light');
   transform: translateX(5px);
 }
 
@@ -516,7 +608,7 @@ onMounted(() => {
 
 .service-menu-icon i {
   font-size: 24px;
-  color: #031358;
+  color: v-bind('sectionData.colors.primary');
   transition: all 0.3s ease;
 }
 
@@ -524,8 +616,8 @@ onMounted(() => {
   flex: 1;
   font-size: 16px;
   font-weight: 500;
-  font-family: 'Ubuntu', sans-serif;
-  color: #031358;
+  font-family: v-bind('sectionData.typography.title.family');
+  color: v-bind('sectionData.colors.primary');
   transition: all 0.3s ease;
 }
 
@@ -538,7 +630,7 @@ onMounted(() => {
 
 .service-menu-arrow i {
   font-size: 14px;
-  color: #031358;
+  color: v-bind('sectionData.colors.primary');
   transition: all 0.3s ease;
 }
 
@@ -560,7 +652,7 @@ onMounted(() => {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   transition: all 0.3s ease;
-  margin-bottom: 10px;
+  margin-bottom: v-bind('sectionData.spacing.collapseItemMargin');
 }
 
 .service-collapse-item.active {
@@ -585,9 +677,9 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg,
-  rgba(3, 19, 88, 0.9) 0%,
-  rgba(58, 83, 185, 0.8) 50%,
-  rgba(3, 19, 88, 0.9) 100%);
+  v-bind('sectionData.colors.primary + "e6"') 0%,
+  v-bind('sectionData.colors.secondary + "cc"') 50%,
+  v-bind('sectionData.colors.primary + "e6"') 100%);
   transition: left 0.6s ease;
   z-index: 1;
 }
@@ -602,7 +694,7 @@ onMounted(() => {
 }
 
 .service-collapse-item.active .service-collapse-header > * {
-  color: #fff;
+  color: v-bind('sectionData.colors.text.light');
 }
 
 .service-collapse-icon {
@@ -615,12 +707,12 @@ onMounted(() => {
 
 .service-collapse-icon i {
   font-size: 24px;
-  color: #031358;
+  color: v-bind('sectionData.colors.primary');
   transition: all 0.3s ease;
 }
 
 .service-collapse-item.active .service-collapse-icon i {
-  color: #fff;
+  color: v-bind('sectionData.colors.text.light');
   transform: scale(1.1);
 }
 
@@ -628,8 +720,8 @@ onMounted(() => {
   flex: 1;
   font-size: 16px;
   font-weight: 500;
-  font-family: 'Ubuntu', sans-serif;
-  color: #031358;
+  font-family: v-bind('sectionData.typography.title.family');
+  color: v-bind('sectionData.colors.primary');
   transition: all 0.3s ease;
 }
 
@@ -646,12 +738,12 @@ onMounted(() => {
 
 .service-collapse-arrow i {
   font-size: 14px;
-  color: #031358;
+  color: v-bind('sectionData.colors.primary');
   transition: all 0.3s ease;
 }
 
 .service-collapse-item.active .service-collapse-arrow i {
-  color: #fff;
+  color: v-bind('sectionData.colors.text.light');
 }
 
 .service-collapse-content {
@@ -681,10 +773,10 @@ onMounted(() => {
 }
 
 .service-collapse-text {
-  font-size: 14px;
-  line-height: 1.6;
-  font-family: 'Ubuntu', sans-serif;
-  color: #333;
+  font-size: v-bind('sectionData.typography.content.mobileSize');
+  line-height: v-bind('sectionData.typography.content.lineHeight');
+  font-family: v-bind('sectionData.typography.title.family');
+  color: v-bind('sectionData.colors.text.normal');
   margin-bottom: 20px;
 }
 
@@ -693,13 +785,13 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
   padding: 10px 20px;
-  background: linear-gradient(135deg, #031358, #3a53b9);
+  background: linear-gradient(135deg, v-bind('sectionData.colors.primary'), v-bind('sectionData.colors.secondary'));
   border: none;
   border-radius: 8px;
-  color: #fff;
-  font-family: 'Ubuntu', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
+  color: v-bind('sectionData.colors.text.light');
+  font-family: v-bind('sectionData.typography.title.family');
+  font-size: v-bind('sectionData.typography.button.size');
+  font-weight: v-bind('sectionData.typography.button.weight');
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -759,7 +851,7 @@ onMounted(() => {
 
   .services-title {
     font-size: 28px;
-    margin-bottom: 40px;
+    margin-bottom: v-bind('sectionData.spacing.mobileTitleBottom');
   }
 }
 

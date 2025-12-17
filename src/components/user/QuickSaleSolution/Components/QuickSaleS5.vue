@@ -1,33 +1,114 @@
 <template>
-  <div class="section section5">
+  <div class="section section5" :style="sectionStyle">
     <div class="st-title">
       <TitleComponent
-          :circle-size="100"
-          :icon-height="80"
-          :icon-width="90"
-          :order-number="5"
-          component-height="120px"
-          component-width="100%"
-          icon-url="/imgs/icon-thoa-thuan.png"
-          title="Thỏa thuận & ký kết hợp đồng triển khai bán trong 30 ngày"
+          :circle-size="sectionData.title.circleSize"
+          :icon-height="sectionData.title.iconHeight"
+          :icon-width="sectionData.title.iconWidth"
+          :order-number="sectionData.title.orderNumber"
+          :component-height="sectionData.title.componentHeight"
+          :component-width="sectionData.title.componentWidth"
+          :icon-url="baseImgaeUrl+sectionData.title.iconUrl"
+          :title="sectionData.title.titleText"
       ></TitleComponent>
     </div>
     <div class="main-content-wrapper">
-      <div class="text-content fade-in">
-        <p>
-          Khách hàng và đơn vị triển khai thống nhất ký kết hợp đồng dịch vụ trong 30 ngày. Hợp đồng nêu rõ lộ trình,
-          cam kết và quyền lợi của khách hàng, đảm bảo tính minh bạch và hiệu quả xuyên suốt quá trình bán.
-        </p>
+      <div class="text-content fade-in" :style="textContentStyle">
+        <div class="rich-text-editor-wrapper">
+        <div class="tiptap" v-html="sectionData.content.description"
+            :style="{ fontSize: sectionData.styles.fontSizeDesktop }">
+        </div>
+        </div>
 
-        <img class="img1 fade-up" src="/imgs/anh-thoa-thuan-2.png" alt="">
-        <img class="img2 fade-right" src="/imgs/anh-thoa-thuan-1.png" alt="">
+        <img
+            class="img1 fade-up"
+            :src="baseImgaeUrl+sectionData.content.image1"
+            :alt="sectionData.content.image1Alt"
+            :style="imageStyle1"
+        >
+        <img
+            class="img2 fade-right"
+            :src="baseImgaeUrl+sectionData.content.image2"
+            :alt="sectionData.content.image2Alt"
+            :style="imageStyle2"
+        >
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref, computed } from 'vue';
 import TitleComponent from "./TitleQickSale.vue";
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
+
+// Dữ liệu động (sẽ được lấy từ CMS/API)
+let sectionData = ref({
+  title: {
+    iconUrl: "/imgs/icon-thoa-thuan.png",
+    orderNumber: 5,
+    titleText: "Thỏa thuận & ký kết hợp đồng triển khai bán trong 30 ngày",
+    circleSize: 100,
+    iconHeight: 80,
+    iconWidth: 90,
+    componentHeight: "120px",
+    componentWidth: "100%"
+  },
+  content: {
+    description: "Khách hàng và đơn vị triển khai thống nhất ký kết hợp đồng dịch vụ trong 30 ngày. Hợp đồng nêu rõ lộ trình, cam kết và quyền lợi của khách hàng, đảm bảo tính minh bạch và hiệu quả xuyên suốt quá trình bán.",
+    image1: "/imgs/anh-thoa-thuan-2.png",
+    image2: "/imgs/anh-thoa-thuan-1.png",
+    image1Alt: "Ảnh thỏa thuận 2",
+    image2Alt: "Ảnh thỏa thuận 1"
+  },
+  styles: {
+    borderColor: "#C2CBF0",
+    borderWidth: "5px",
+    borderStyle: "dashed",
+    textColor: "#000000",
+    backgroundColor: "#ffffff",
+    shadowColor: "rgba(0, 0, 0, 0.1)",
+    borderRadius: "20px",
+    fontSizeDesktop: "17px",
+    fontSizeTablet: "16px",
+    fontSizeMobile: "15px",
+    fontSizeSmallMobile: "14px"
+  }
+});
+
+const props = defineProps({
+  sectionData: Object
+})
+if(props.sectionData) {
+  sectionData.value = props.sectionData.section5;
+  console.log("Nhận được: ", props.sectionData.section5)
+}
+
+// Computed styles
+const sectionStyle = computed(() => ({
+  '--border-color': sectionData.value.styles.borderColor,
+  '--border-width': sectionData.value.styles.borderWidth,
+  '--border-style': sectionData.value.styles.borderStyle,
+  '--text-color': sectionData.value.styles.textColor,
+  '--bg-color': sectionData.value.styles.backgroundColor,
+  '--shadow-color': sectionData.value.styles.shadowColor,
+  '--border-radius': sectionData.value.styles.borderRadius
+}));
+
+const textContentStyle = computed(() => ({
+  backgroundColor: sectionData.value.styles.backgroundColor,
+  boxShadow: `0 0 10px ${sectionData.value.styles.shadowColor}`,
+  borderRadius: sectionData.value.styles.borderRadius,
+  color: sectionData.value.styles.textColor
+}));
+
+const imageStyle1 = computed(() => ({
+  borderColor: sectionData.value.styles.borderColor
+}));
+
+const imageStyle2 = computed(() => ({
+  borderColor: sectionData.value.styles.borderColor
+}));
 </script>
 
 <style scoped>
@@ -48,8 +129,8 @@ import TitleComponent from "./TitleQickSale.vue";
   left: -8px;
   width: 80%;
   height: 120%;
-  border-left: 5px dashed #C2CBF0;
-  border-bottom: 5px dashed #C2CBF0;
+  border-left: var(--border-width) var(--border-style) var(--border-color);
+  border-bottom: var(--border-width) var(--border-style) var(--border-color);
   margin-left: 75px;
   z-index: 0;
 }
@@ -73,7 +154,7 @@ import TitleComponent from "./TitleQickSale.vue";
 .section5 .img1 {
   position: absolute;
   z-index: 2;
-  width: 50%%;
+  width: 50%;
 }
 
 .section5 .img2 {
@@ -88,14 +169,10 @@ import TitleComponent from "./TitleQickSale.vue";
 }
 
 .section5 p {
-  font-size: 17px;
   text-align: justify;
 }
 
 .section5 .text-content {
-  background-color: white;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  border-radius: 20px;
   width: 100%;
   margin-left: 12%;
   margin-right: 25%;
@@ -141,6 +218,10 @@ import TitleComponent from "./TitleQickSale.vue";
     top: -80px;
     width: 40%;
   }
+
+  .section5 p {
+    font-size: v-bind('sectionData.styles.fontSizeTablet');
+  }
 }
 
 /* Mobile */
@@ -151,23 +232,16 @@ import TitleComponent from "./TitleQickSale.vue";
     margin-bottom: 20px;
   }
 
-
-
-
-
-  /* Tăng chiều cao cho TitleComponent trên mobile */
   .section5 .st-title :deep(.title-component) {
     height: 150px !important;
   }
 
-  /* Đặt tất cả về static trên mobile */
   .section5 .img1,
   .section5 .img2,
   .section5 .text-content {
     position: static;
   }
 
-  /* Canh giữa và điều chỉnh kích thước ảnh */
   .section5 .img1 {
     display: block;
     margin: 20px auto 0;
@@ -182,21 +256,19 @@ import TitleComponent from "./TitleQickSale.vue";
     width: 80%;
   }
 
-  /* Điều chỉnh text-content */
   .section5 .text-content {
     padding: 20px;
     width: 100%;
     box-sizing: border-box;
   }
 
-  /* Điều chỉnh main content wrapper */
   .main-content-wrapper {
     flex-direction: column;
     gap: 15px;
   }
 
   .section5 p {
-    font-size: 15px;
+    font-size: v-bind('sectionData.styles.fontSizeMobile');
     text-align: left;
   }
 }
@@ -217,7 +289,7 @@ import TitleComponent from "./TitleQickSale.vue";
   }
 
   .section5 p {
-    font-size: 14px;
+    font-size: v-bind('sectionData.styles.fontSizeSmallMobile');
   }
 
   .section5 .img1,

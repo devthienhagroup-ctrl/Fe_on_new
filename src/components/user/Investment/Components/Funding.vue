@@ -1,6 +1,8 @@
 <template>
   <div class="funding-container">
-    <h1 class="page-title">Danh sách chi nhánh cần góp vốn</h1>
+    <h1 class="page-title">
+      {{ config.text.pageTitle }}
+    </h1>
 
     <div class="branches-list">
       <div
@@ -25,7 +27,7 @@
           <div class="branch-info">
             <div class="capital-info">
               <span class="label">
-                Tổng vốn cần:
+                {{ config.text.totalCapital }}
               </span>
               <span class="value">{{ formatCurrency(branch.totalCapital) }}</span>
             </div>
@@ -33,15 +35,18 @@
             <div class="progress-section">
               <div class="progress-info">
                 <span class="label">
-                  <i class="fas fa-chart-line icon"></i>
-                  Tiến độ:
+                  <i :class="config.icons.progress" class="icon"></i>
+                  {{ config.text.progress }}
                 </span>
                 <span class="value">{{ branch.progress }}%</span>
               </div>
               <div class="progress-bar">
                 <div
                     class="progress-fill"
-                    :style="{ width: branch.currentProgress + '%' }"
+                    :style="{
+                    width: branch.currentProgress + '%',
+                    background: config.gradient.progress
+                  }"
                     :class="{ 'animating': branch.isAnimating }"
                 ></div>
               </div>
@@ -49,12 +54,12 @@
 
             <div class="additional-info">
               <div class="time-left">
-                <i class="fas fa-clock icon"></i>
+                <i :class="config.icons.time" class="icon"></i>
                 <span>{{ branch.timeLeft }}</span>
               </div>
               <div class="contributors">
-                <i class="fas fa-users icon"></i>
-                <span>{{ branch.contributors }} người đã góp</span>
+                <i :class="config.icons.contributors" class="icon"></i>
+                <span>{{ branch.contributors }} {{ config.text.contributorsText }}</span>
               </div>
             </div>
           </div>
@@ -63,13 +68,27 @@
               class="action-buttons"
               :class="{ 'visible': branch.isHovered }"
           >
-            <button class="btn contribute-btn" @click="$emit('openModal', branch)">
-              <i class="fas fa-hand-holding-usd icon"></i>
-              Góp vốn
+            <button
+                class="btn contribute-btn"
+                @click="$emit('openModal', branch)"
+                :style="{
+                border: `2px solid ${config.colors.primary}`,
+                color: config.colors.primary
+              }"
+            >
+              <i :class="config.icons.contribute" class="icon"></i>
+              {{ config.buttons.contribute }}
             </button>
-            <button class="btn details-btn" @click="$emit('viewDetails', index)">
-              <i class="fas fa-info-circle icon"></i>
-              Xem chi tiết
+            <button
+                class="btn details-btn"
+                @click="$emit('viewDetails', index)"
+                :style="{
+                background: config.gradient.buttonSecondary,
+                color: config.colors.buttonSecondaryText
+              }"
+            >
+              <i :class="config.icons.details" class="icon"></i>
+              {{ config.buttons.details }}
             </button>
           </div>
         </div>
@@ -83,6 +102,53 @@ import { ref, onUnmounted } from 'vue'
 
 // Định nghĩa emits
 const emit = defineEmits(['openModal', 'viewDetails'])
+
+// CONFIG OBJECT - Có thể quản lý qua CMS
+let config = {
+  text: {
+    pageTitle: "Danh sách chi nhánh cần góp vốn",
+    totalCapital: "Tổng vốn cần:",
+    progress: "Tiến độ:",
+    contributorsText: "người đã góp"
+  },
+  buttons: {
+    contribute: "Góp vốn",
+    details: "Xem chi tiết"
+  },
+  icons: {
+    progress: "fas fa-chart-line",
+    time: "fas fa-clock",
+    contributors: "fas fa-users",
+    contribute: "fas fa-hand-holding-usd",
+    details: "fas fa-info-circle"
+  },
+  colors: {
+    primary: "#031358",
+    secondary: "#64748b",
+    border: "#e2e8f0",
+    progressBg: "#e2e8f0",
+    buttonSecondaryText: "#475569"
+  },
+  gradient: {
+    text: "linear-gradient(135deg, #031358, #283593)",
+    progress: "linear-gradient(90deg, #283593, #031358)",
+    buttonSecondary: "linear-gradient(135deg, #f1f5f9, #e2e8f0)",
+    buttonSecondaryHover: "linear-gradient(135deg, #e2e8f0, #cbd5e1)"
+  },
+  animation: {
+    duration: 800,
+    resetDelay: 50
+  }
+}
+
+const props = defineProps({
+  sectionData: Object
+});
+
+if(props.sectionData) {
+  config = props.sectionData;
+  console.log("Đã lấy data từ cha");
+}
 
 // Tạo danh sách chi nhánh mẫu
 const branches = ref([
@@ -175,7 +241,7 @@ const hoverItem = (index) => {
   setTimeout(() => {
     let startTime = null
     const targetProgress = branch.progress
-    const duration = 800 // 0.8 giây
+    const duration = config.animation.duration
 
     const animateProgress = (timestamp) => {
       if (!startTime) startTime = timestamp
@@ -196,7 +262,7 @@ const hoverItem = (index) => {
     }
 
     animationFrameIds.value[index] = requestAnimationFrame(animateProgress)
-  }, 50)
+  }, config.animation.resetDelay)
 }
 
 // Hàm easing để animation mượt mà
@@ -246,10 +312,10 @@ onUnmounted(() => {
 .page-title {
   text-align: center;
   margin-bottom: 30px;
-  color: #1e3a8a;
+  color: v-bind('config.colors.primary');
   font-weight: 700;
   font-size: 2rem;
-  background: linear-gradient(135deg, #031358, #283593);
+  background: v-bind('config.gradient.text');
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -296,7 +362,7 @@ onUnmounted(() => {
 }
 
 .branch-title {
-  color: #031358;
+  color: v-bind('config.colors.primary');
   margin-bottom: 15px;
   font-size: 1.2rem;
   font-weight: 600;
@@ -312,11 +378,11 @@ onUnmounted(() => {
   justify-content: space-between;
   margin-bottom: 15px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid v-bind('config.colors.border');
 }
 
 .label {
-  color: #64748b;
+  color: v-bind('config.colors.secondary');
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -324,7 +390,7 @@ onUnmounted(() => {
 }
 
 .value {
-  color: #031358;
+  color: v-bind('config.colors.primary');
   font-weight: 600;
 }
 
@@ -340,7 +406,7 @@ onUnmounted(() => {
 
 .progress-bar {
   height: 8px;
-  background-color: #e2e8f0;
+  background-color: v-bind('config.colors.progressBg');
   border-radius: 4px;
   overflow: hidden;
   position: relative;
@@ -348,7 +414,6 @@ onUnmounted(() => {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #283593, #031358);
   border-radius: 4px;
   transition: width 0.3s ease; /* Transition mượt mà hơn */
 }
@@ -361,7 +426,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   font-size: 0.85rem;
-  color: #64748b;
+  color: v-bind('config.colors.secondary');
 }
 
 .time-left, .contributors {
@@ -406,23 +471,16 @@ onUnmounted(() => {
 
 .contribute-btn {
   background: transparent;
-  color: #031358;
-  border: 2px solid #031358;
 }
 
 .contribute-btn:hover {
-  background: #031358;
-  color: white;
+  background: v-bind('config.colors.primary');
+  color: white !important;
   transform: translateY(-2px);
 }
 
-.details-btn {
-  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-  color: #475569;
-}
-
 .details-btn:hover {
-  background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+  background: v-bind('config.gradient.buttonSecondaryHover');
   transform: translateY(-2px);
 }
 

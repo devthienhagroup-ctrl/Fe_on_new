@@ -1,37 +1,48 @@
 <template>
-  <div class="section section9">
+  <div class="section section9" :id="sectionData.id">
     <div class="st-title">
       <TitleComponent
-          :circle-size="100"
-          :icon-height="109"
-          :icon-width="109"
-          :order-number="9"
+          :circle-size="sectionData.circleSize"
+          :icon-height="sectionData.icon.height"
+          :icon-width="sectionData.icon.width"
+          :order-number="sectionData.orderNumber"
           component-height="100px"
           component-width="100%"
-          icon-url="/imgs/icon-ho-tro.png"
-          title="Hỗ trợ đàm phán để bán được giá cao nhất"
+          :icon-url="baseImgaeUrl+sectionData.icon.url"
+          :title="sectionData.title"
       />
     </div>
 
     <div class="main-content-wrapper">
       <div class="left-content-section">
-        <div class="top-img"><img class="fade-left" src="/imgs/anh-ho-tro-1.png" alt=""></div>
-        <div class="mid-img"><img class="fade-left" src="/imgs/anh-ho-tro-2.png" alt=""></div>
-        <div class="bot-img"><img class="fade-left" src="/imgs/anh-ho-tro-3.png" alt=""></div>
-        <img src="/imgs/bg-s4.png" alt="" class="bottom-left-img">
+        <div v-for="img in sectionData.images.filter(img => img.class.includes('fade-left'))"
+             :key="img.id"
+             :class="img.class.split(' ')[0]"
+             :style="{ transform: img.transform }">
+          <img :class="img.class.split(' ')[1]" :src="baseImgaeUrl+img.src" :alt="img.alt">
+        </div>
+        <img :src="baseImgaeUrl+sectionData.backgroundImages.left" alt="" class="bottom-left-img">
       </div>
 
       <div class="right-content-section">
-        <div class="right-img fade-up"><img src="/imgs/anh-ho-tro-4.png" alt=""></div>
+        <div class="right-img fade-up">
+          <img :src="baseImgaeUrl+sectionData.images.find(img => img.id === 'image4').src"
+               :alt="sectionData.images.find(img => img.id === 'image4').alt">
+        </div>
         <div class="text-content-wrapper">
           <div class="text-content fade-right">
-            <p>
-              Các chuyên viên giàu kinh nghiệm đại diện chủ nhà tham gia đàm phán, giúp thương lượng giá tối ưu nhất
-              dựa trên dữ liệu thị trường, đảm bảo giao dịch nhanh mà vẫn có lợi nhất cho khách hàng.
+            <p :style="{
+              marginBottom: '20px',
+              lineHeight: sectionData.content.styles.lineHeight,
+              fontSize: sectionData.content.styles.fontSize,
+              color: sectionData.content.styles.color,
+              textAlign: 'justify'
+            }">
+              {{ sectionData.content.text }}
             </p>
           </div>
         </div>
-        <img class="bottom-right-img" src="/imgs/bg-s3.png" alt="">
+        <img class="bottom-right-img" :src="baseImgaeUrl+sectionData.backgroundImages.right" alt="">
       </div>
     </div>
   </div>
@@ -39,12 +50,83 @@
 
 <script setup>
 import TitleComponent from "./TitleQickSale.vue";
+import { ref, onMounted } from 'vue';
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
+
+// Dữ liệu mặc định
+let defaultData = {
+  id: "section9",
+  orderNumber: 9,
+  title: "Hỗ trợ đàm phán để bán được giá cao nhất",
+  icon: {
+    url: "/imgs/icon-ho-tro.png",
+    width: 109,
+    height: 109
+  },
+  circleSize: 100,
+  backgroundImages: {
+    left: "/imgs/bg-s4.png",
+    right: "/imgs/bg-s3.png"
+  },
+  images: [
+    {
+      id: "image1",
+      src: "/imgs/anh-ho-tro-1.png",
+      alt: "Hỗ trợ đàm phán 1",
+      class: "top-img fade-left"
+    },
+    {
+      id: "image2",
+      src: "/imgs/anh-ho-tro-2.png",
+      alt: "Hỗ trợ đàm phán 2",
+      class: "mid-img fade-left",
+      transform: "translate(100px, -100px)"
+    },
+    {
+      id: "image3",
+      src: "/imgs/anh-ho-tro-3.png",
+      alt: "Hỗ trợ đàm phán 3",
+      class: "bot-img fade-left",
+      transform: "translate(200px, -200px)"
+    },
+    {
+      id: "image4",
+      src: "/imgs/anh-ho-tro-4.png",
+      alt: "Hỗ trợ đàm phán 4",
+      class: "right-img fade-up"
+    }
+  ],
+  content: {
+    text: "Các chuyên viên giàu kinh nghiệm đại diện chủ nhà tham gia đàm phán, giúp thương lượng giá tối ưu nhất dựa trên dữ liệu thị trường, đảm bảo giao dịch nhanh mà vẫn có lợi nhất cho khách hàng.",
+    styles: {
+      backgroundColor: "white",
+      maxWidth: "500px",
+      fontSize: "17px",
+      lineHeight: "1.6",
+      color: "#333"
+    }
+  }
+};
+
+// Props để nhận dữ liệu từ CMS
+const props = defineProps({
+  sectionData: {
+    type: Object,
+  }
+});
+
+// Dữ liệu section - ưu tiên dữ liệu từ CMS
+const sectionData = ref({defaultData});
+if(props.sectionData) {
+  sectionData.value = props.sectionData.section9;
+}
+
 </script>
 
 <style scoped>
 .section {
-  padding: 50px 50px 0;
-  margin-top: 250px;
+  padding: v-bind('sectionData.styles?.sectionPadding || "50px 50px 0"');
+  margin-top: v-bind('sectionData.styles?.sectionMarginTop || "250px"');
   position: relative;
   overflow: visible;
 }
@@ -58,7 +140,9 @@ import TitleComponent from "./TitleQickSale.vue";
 .st-title::before {
   content: "";
   position: absolute;
-  border-left: 5px dashed #C2CBF0;
+  border-left: v-bind('sectionData.styles?.borderWidth || "5px"')
+  v-bind('sectionData.styles?.borderStyle || "dashed"')
+  v-bind('sectionData.styles?.borderColor || "#C2CBF0"');
   width: 100%;
   height: 243%;
   bottom: 070px;
@@ -67,7 +151,9 @@ import TitleComponent from "./TitleQickSale.vue";
 .st-title::after {
   content: "";
   position: absolute;
-  border-right: 5px dashed #C2CBF0;
+  border-right: v-bind('sectionData.styles?.borderWidth || "5px"')
+  v-bind('sectionData.styles?.borderStyle || "dashed"')
+  v-bind('sectionData.styles?.borderColor || "#C2CBF0"');
   width: 100%;
   height: 175%;
   top: -30px;
@@ -94,8 +180,12 @@ import TitleComponent from "./TitleQickSale.vue";
 .bot-img::before {
   content: "";
   position: absolute;
-  border-top: 5px dashed #C2CBF0;
-  border-right: 5px dashed #C2CBF0;
+  border-top: v-bind('sectionData.styles?.borderWidth || "5px"')
+  v-bind('sectionData.styles?.borderStyle || "dashed"')
+  v-bind('sectionData.styles?.borderColor || "#C2CBF0"');
+  border-right: v-bind('sectionData.styles?.borderWidth || "5px"')
+  v-bind('sectionData.styles?.borderStyle || "dashed"')
+  v-bind('sectionData.styles?.borderColor || "#C2CBF0"');
 }
 .top-img::before { width: 21%; height: 34%; top: 50px; right: 0; }
 .mid-img::before { width: 18%; height: 62.7%; top: -20px; right: -20px; }
@@ -107,8 +197,6 @@ import TitleComponent from "./TitleQickSale.vue";
   display: block;
   margin-left: auto;
 }
-.mid-img { transform: translate(100px, -100px); }
-.bot-img { transform: translate(200px, -200px); }
 
 .right-img img {
   display: block;
@@ -122,16 +210,8 @@ import TitleComponent from "./TitleQickSale.vue";
   border-top-right-radius: 50px;
   display: block;
   margin: 5px auto;
-  max-width: 500px;
-  background-color: white;
-}
-.section9 .text-content p {
-  margin-bottom: 20px;
-  line-height: 1.6;
-  font-size: 17px;
-  color: #333;
-  text-align: justify;
-
+  max-width: v-bind('sectionData.content.styles.maxWidth || "500px"');
+  background-color: v-bind('sectionData.content.styles.backgroundColor || "white"');
 }
 
 .section9 .title-component { transform: translateY(-70px); }
@@ -154,15 +234,16 @@ import TitleComponent from "./TitleQickSale.vue";
   transform: translateY(-50px);
 }
 
-/* Responsive */
+/* Responsive - giữ nguyên CSS gốc */
 @media (max-width: 1400px) {
-
   .section9::before {
     content: "";
     position: absolute;
     height: 105%;
     width: 2px;
-    border-left: 5px dashed #C2CBF0;
+    border-left: v-bind('sectionData.styles?.borderWidth || "5px"')
+    v-bind('sectionData.styles?.borderStyle || "dashed"')
+    v-bind('sectionData.styles?.borderColor || "#C2CBF0"');
     top: 0;
     left: 100px;
   }
@@ -174,7 +255,6 @@ import TitleComponent from "./TitleQickSale.vue";
     display: none !important;
   }
 
-  /* Ẩn tất cả các đường viền dashed */
   .st-title::before,
   .st-title::after,
   .top-img::before,
@@ -183,7 +263,6 @@ import TitleComponent from "./TitleQickSale.vue";
     display: none;
   }
 
-  /* Chỉ giữ lại border-left */
   .st-title {
     position: relative;
   }
@@ -191,7 +270,7 @@ import TitleComponent from "./TitleQickSale.vue";
     display: block;
     content: "";
     position: absolute;
-    border-left: 2px dashed #C2CBF0;
+    border-left: 2px dashed v-bind('sectionData.styles?.borderColor || "#C2CBF0"');
     width: 2px;
     height: 100%;
     left: 0;
@@ -199,23 +278,10 @@ import TitleComponent from "./TitleQickSale.vue";
     bottom: 0;
   }
 
-  /* Điều chỉnh kích thước và vị trí ảnh */
   .top-img img,
   .mid-img img,
   .bot-img img {
     max-width: 80%;
-    height: auto;
-  }
-
-  .mid-img {
-    transform: translate(50px, -50px);
-  }
-  .bot-img {
-    transform: translate(100px, -100px);
-  }
-
-  .right-img img {
-    max-width: 90%;
     height: auto;
   }
 }
@@ -258,14 +324,6 @@ import TitleComponent from "./TitleQickSale.vue";
     height: 100%;
   }
   .right-img { height: 100%; }
-
-  /* Điều chỉnh vị trí ảnh cho tablet */
-  .mid-img {
-    transform: translate(30px, -30px);
-  }
-  .bot-img {
-    transform: translate(60px, -60px);
-  }
 }
 
 @media (max-width: 768px) {
@@ -274,7 +332,7 @@ import TitleComponent from "./TitleQickSale.vue";
     margin-bottom: 30px;
     margin-top: 150px;
   }
-  /* Điều chỉnh vị trí ảnh cho mobile */
+
   .top-img,
   .mid-img,
   .bot-img {

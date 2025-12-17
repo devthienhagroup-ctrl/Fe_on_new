@@ -92,16 +92,138 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
 
 const hoverIndex = ref(-1)
-const autoHoverIndex = ref(0) // Mặc định hover mục đầu tiên
+const autoHoverIndex = ref(0)
 const isTouchDevice = ref(false)
 
-// Phát hiện thiết bị touch
+// Config object
+const config = ref({
+  // Section settings
+  section: {
+    maxWidth: '1400px',
+    gridGap: '40px',
+    columnGap: '40px',
+  },
+
+  // Benefits data
+  benefits: [
+    {
+      title: "Khen thưởng",
+      image: "khen-thuong.jpg",
+      description: "Tại Thiên Hà Group, mọi nỗ lực và thành tích đều được ghi nhận xứng đáng. Những phần thưởng hấp dẫn, kịp thời dành cho các cá nhân có đóng góp nổi bật hay ý tưởng sáng tạo được áp dụng thành công – chính là cách chúng tôi lan tỏa tinh thần cống hiến và khuyến khích sự khác biệt."
+    },
+    {
+      title: "Phát triển sự nghiệp",
+      image: "phat-trien.jpg",
+      description: "Thiên Hà Group tin rằng con người là nền tảng của mọi thành công. Chúng tôi xây dựng lộ trình phát triển rõ ràng, cơ hội thăng tiến rộng mở cùng các khóa đào tạo chuyên sâu giúp bạn không ngừng hoàn thiện bản thân. Cùng chúng tôi, bạn không chỉ có công việc – mà còn là một hành trình sự nghiệp bền vững."
+    },
+    {
+      title: "Môi trường làm việc",
+      image: "moi-truong.png",
+      description: "Chúng tôi mang đến không gian làm việc hiện đại, trang thiết bị đầy đủ, cùng văn hóa thân thiện và đội ngũ quản lý chuyên nghiệp. Thiên Hà Group là nơi bạn có thể phát huy năng lực, học hỏi không ngừng và tận hưởng bầu không khí làm việc năng động – hiệu quả mỗi ngày."
+    },
+    {
+      title: "Chăm sóc sức khỏe",
+      image: "suc-khoe.png",
+      description: "Sức khỏe luôn là ưu tiên hàng đầu. Nhân viên Thiên Hà Group được hưởng các quyền lợi như bảo hiểm xã hội, bảo hiểm quốc tế, chương trình khám sức khỏe định kỳ cùng nhiều hoạt động thể thao – giúp giữ gìn cân bằng cuộc sống. Chúng tôi mong muốn mỗi thành viên đều an tâm, khỏe mạnh và tràn đầy năng lượng để phát triển lâu dài."
+    }
+  ],
+
+  // Item settings
+  item: {
+    height: '700px',
+    borderRadius: '8px',
+    shadow: {
+      normal: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      hover: '0 10px 25px rgba(0, 0, 0, 0.2)'
+    }
+  },
+
+  // Column settings
+  columns: {
+    rightPaddingTop: '145px',
+    leftPaddingTop: '0'
+  },
+
+  // Typography settings
+  typography: {
+    fontFamily: "'Ubuntu', sans-serif",
+    title: {
+      fontSize: '33px',
+      color: 'white',
+      hoverColor: '#031358',
+      fontWeight: 'bolder'
+    },
+    description: {
+      fontSize: '20px',
+      color: 'white',
+      hoverColor: '#031358',
+      lineHeight: '1.6',
+      maxWidth: '700px'
+    }
+  },
+
+  // Colors
+  colors: {
+    primary: '#031358',
+    overlay: 'rgba(255, 255, 255, 0.95)',
+    descriptionLine: {
+      normal: 'white',
+      hover: '#031358'
+    }
+  },
+
+  // Spacing
+  spacing: {
+    containerPadding: '0 20px',
+    contentPadding: '40px',
+    contentPaddingBottom: '60px',
+    titleMarginBottom: {
+      normal: '0px',
+      hover: '30px'
+    },
+    lineWidth: '50px',
+    lineHeight: '2px',
+    lineMargin: '0 auto 20px'
+  },
+
+  // Animations
+  animations: {
+    duration: '0.5s',
+    timing: 'ease'
+  },
+
+  // Responsive breakpoints
+  responsive: {
+    maxWidth: '1200px',
+    itemHeight: '400px',
+    titleFontSize: '28px',
+    descriptionFontSize: '18px'
+  }
+})
+
+const props = defineProps({
+  sectionData: Object
+})
+
+if(props.sectionData) {
+  config.value = props.sectionData;
+  console.log("Đã nhận props từ cha", config);
+}
+
+// Computed properties
+const benefits = computed(() => config.value.benefits)
+const leftColumnBenefits = computed(() => [config.value.benefits[0], config.value.benefits[2]])
+const rightColumnBenefits = computed(() => [config.value.benefits[1], config.value.benefits[3]])
+
+// Device detection
 const checkTouchDevice = () => {
   return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0)
 }
 
+// Event handlers
 const handleMouseEnter = (index) => {
   hoverIndex.value = index
 }
@@ -113,7 +235,6 @@ const handleMouseLeave = () => {
 const handleTouchStart = (index) => {
   if (isTouchDevice.value) {
     hoverIndex.value = index
-    // Reset sau 5 giây để quay về trạng thái auto hover
     setTimeout(() => {
       if (hoverIndex.value === index) {
         hoverIndex.value = -1
@@ -122,97 +243,65 @@ const handleTouchStart = (index) => {
   }
 }
 
+// Image URL helper
+const getImageUrl = (imageName) => {
+  return baseImgaeUrl+imageName;
+}
+
 onMounted(() => {
   isTouchDevice.value = checkTouchDevice()
 })
-
-const benefits = [
-  {
-    title: "Khen thưởng",
-    image: "khen-thuong.jpg",
-    description:
-        "Tại Thiên Hà Group, mọi nỗ lực và thành tích đều được ghi nhận xứng đáng. Những phần thưởng hấp dẫn, kịp thời dành cho các cá nhân có đóng góp nổi bật hay ý tưởng sáng tạo được áp dụng thành công – chính là cách chúng tôi lan tỏa tinh thần cống hiến và khuyến khích sự khác biệt."
-  },
-  {
-    title: "Phát triển sự nghiệp",
-    image: "phat-trien.jpg",
-    description:
-        "Thiên Hà Group tin rằng con người là nền tảng của mọi thành công. Chúng tôi xây dựng lộ trình phát triển rõ ràng, cơ hội thăng tiến rộng mở cùng các khóa đào tạo chuyên sâu giúp bạn không ngừng hoàn thiện bản thân. Cùng chúng tôi, bạn không chỉ có công việc – mà còn là một hành trình sự nghiệp bền vững."
-  },
-  {
-    title: "Môi trường làm việc",
-    image: "moi-truong.png",
-    description:
-        "Chúng tôi mang đến không gian làm việc hiện đại, trang thiết bị đầy đủ, cùng văn hóa thân thiện và đội ngũ quản lý chuyên nghiệp. Thiên Hà Group là nơi bạn có thể phát huy năng lực, học hỏi không ngừng và tận hưởng bầu không khí làm việc năng động – hiệu quả mỗi ngày."
-  },
-  {
-    title: "Chăm sóc sức khỏe",
-    image: "suc-khoe.png",
-    description:
-        "Sức khỏe luôn là ưu tiên hàng đầu. Nhân viên Thiên Hà Group được hưởng các quyền lợi như bảo hiểm xã hội, bảo hiểm quốc tế, chương trình khám sức khỏe định kỳ cùng nhiều hoạt động thể thao – giúp giữ gìn cân bằng cuộc sống. Chúng tôi mong muốn mỗi thành viên đều an tâm, khỏe mạnh và tràn đầy năng lượng để phát triển lâu dài."
-  }
-]
-
-// Tách benefits thành 2 cột
-const leftColumnBenefits = computed(() => [benefits[0], benefits[2]])
-const rightColumnBenefits = computed(() => [benefits[1], benefits[3]])
-
-const getImageUrl = (imageName) => {
-  return(`/imgs/${imageName}`);
-}
 </script>
 
 <style scoped>
 .benefits-section {
-  font-family: 'Ubuntu', sans-serif;
   width: 100%;
   display: flex;
   justify-content: center;
-
 }
 
 .benefits-container {
-  max-width: 1400px;
+  max-width: v-bind('config.section.maxWidth');
   width: 100%;
-  padding: 0 20px;
+  padding: v-bind('config.spacing.containerPadding');
 }
 
 .benefits-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  gap: v-bind('config.section.gridGap');
   width: 100%;
 }
 
-/* Cột trái - cách lề trên 145px */
+/* Cột trái */
 .benefits-left-column {
-  padding-top: 0;
+  padding-top: v-bind('config.columns.leftPaddingTop');
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: v-bind('config.section.columnGap');
 }
 
-/* Cột phải - không có padding-top */
+/* Cột phải */
 .benefits-right-column {
-  padding-top: 145px;
+  padding-top: v-bind('config.columns.rightPaddingTop');
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: v-bind('config.section.columnGap');
 }
 
 .benefit-item {
   width: 100%;
-  height: 700px;
+  height: v-bind('config.item.height');
   position: relative;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: v-bind('config.item.borderRadius');
   cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.5s ease;
+  box-shadow: v-bind('config.item.shadow.normal');
+  transition: box-shadow v-bind('config.animations.duration') v-bind('config.animations.timing');
 }
 
 .benefit-item:hover {
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: v-bind('config.item.shadow.hover');
 }
 
 .benefit-image {
@@ -223,7 +312,7 @@ const getImageUrl = (imageName) => {
   position: relative;
   display: flex;
   align-items: flex-end;
-  transition: all 0.5s ease;
+  transition: all v-bind('config.animations.duration') v-bind('config.animations.timing');
 }
 
 /* Overlay trắng mở rộng từ trên xuống */
@@ -233,8 +322,8 @@ const getImageUrl = (imageName) => {
   left: 0;
   width: 100%;
   height: 0;
-  background-color: rgba(255, 255, 255, 0.95);
-  transition: height 0.5s ease;
+  background-color: v-bind('config.colors.overlay');
+  transition: height v-bind('config.animations.duration') v-bind('config.animations.timing');
   z-index: 1;
 }
 
@@ -250,42 +339,41 @@ const getImageUrl = (imageName) => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; /* Căn giữa theo chiều dọc */
-  align-items: center; /* Căn giữa theo chiều ngang */
+  justify-content: flex-end;
+  align-items: center;
   text-align: center;
-  padding: 40px;
-  padding-bottom: 60px;
-  transition: all 0.5s ease;
+  padding: v-bind('config.spacing.contentPadding');
+  padding-bottom: v-bind('config.spacing.contentPaddingBottom');
+  transition: all v-bind('config.animations.duration') v-bind('config.animations.timing');
   box-sizing: border-box;
 }
 
-/* Thêm class active cho benefit-content khi hover */
 .benefit-content.active {
-  justify-content: center; /* Căn giữa khi hover */
+  justify-content: center;
 }
 
 .benefit-title {
-  color: white;
-  font-size: 33px;
+  color: v-bind('config.typography.title.color');
+  font-size: v-bind('config.typography.title.fontSize');
   text-align: center;
-  margin-bottom: 0px;
-  transition: all 0.5s ease;
+  margin-bottom: v-bind('config.spacing.titleMarginBottom.normal');
+  transition: all v-bind('config.animations.duration') v-bind('config.animations.timing');
   width: 100%;
-  font-weight: bolder;
+  font-weight: v-bind('config.typography.title.fontWeight');
 }
 
 .benefit-title.hovered {
-  color: #031358; /* Màu chữ đậm khi hover */
-  margin-bottom: 30px;
+  color: v-bind('config.typography.title.hoverColor');
+  margin-bottom: v-bind('config.spacing.titleMarginBottom.hover');
 }
 
 .benefit-description {
   opacity: 0;
   max-height: 0;
   overflow: hidden;
-  transition: all 0.5s ease;
+  transition: all v-bind('config.animations.duration') v-bind('config.animations.timing');
   width: 100%;
-  max-width: 700px; /* Giới hạn chiều rộng tối đa */
+  max-width: v-bind('config.typography.description.maxWidth');
   text-align: justify;
 }
 
@@ -295,37 +383,37 @@ const getImageUrl = (imageName) => {
 }
 
 .description-line {
-  width: 50px;
-  height: 2px;
-  background-color: white;
-  margin: 0 auto 20px;
-  transition: background-color 0.5s ease;
+  width: v-bind('config.spacing.lineWidth');
+  height: v-bind('config.spacing.lineHeight');
+  background-color: v-bind('config.colors.descriptionLine.normal');
+  margin: v-bind('config.spacing.lineMargin');
+  transition: background-color v-bind('config.animations.duration') v-bind('config.animations.timing');
 }
 
 .benefit-description.active .description-line {
-  background-color: #031358; /* Màu đậm khi hover */
+  background-color: v-bind('config.colors.descriptionLine.hover');
 }
 
 .benefit-description p {
-  color: white;
-  font-size: 20px;
-  line-height: 1.6;
-  transition: color 0.5s ease;
+  color: v-bind('config.typography.description.color');
+  font-size: v-bind('config.typography.description.fontSize');
+  line-height: v-bind('config.typography.description.lineHeight');
+  transition: color v-bind('config.animations.duration') v-bind('config.animations.timing');
   margin: 0;
 }
 
 .benefit-description.active p {
-  color: #031358; /* Màu đậm khi hover */
+  color: v-bind('config.typography.description.hoverColor');
 }
 
-/* Responsive Styles */
+/* Responsive Styles - Giữ nguyên breakpoints */
 @media (max-width: 1200px) {
   .benefits-container {
     padding: 0 30px;
   }
 
   .benefit-item {
-    height: 400px;
+    height: v-bind('config.responsive.itemHeight');
   }
 
   .benefit-content {
@@ -333,11 +421,11 @@ const getImageUrl = (imageName) => {
   }
 
   .benefit-title {
-    font-size: 28px;
+    font-size: v-bind('config.responsive.titleFontSize');
   }
 
   .benefit-description p {
-    font-size: 18px;
+    font-size: v-bind('config.responsive.descriptionFontSize');
   }
 }
 

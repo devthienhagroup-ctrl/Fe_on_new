@@ -1,7 +1,7 @@
 <template>
   <div class="news-container">
     <!-- Tiêu đề chính -->
-    <h1 class="main-title">TIN TỨC NỔI BẬT</h1>
+    <h1 class="main-title" :style="{ color: config.colors.primary }">TIN TỨC NỔI BẬT</h1>
 
     <div class="content-wrapper">
       <!-- Cột trái - Tin tức -->
@@ -10,12 +10,12 @@
         <div class="featured-news" v-if="newsArticles.length > 0">
           <div class="featured-image-container">
             <img :src="newsArticles[0].image" :alt="newsArticles[0].title" class="featured-image">
-            <div class="date-overlay">{{ newsArticles[0].date }}</div>
+            <div class="date-overlay" :style="{ backgroundColor: config.colors.dateOverlayBg, color: config.colors.primary }">{{ newsArticles[0].date }}</div>
           </div>
           <div class="featured-info">
-            <h2 class="featured-title">{{ newsArticles[0].title }}</h2>
-            <p class="featured-subtitle">{{ newsArticles[0].subtitle }}</p>
-            <div class="category-tag">{{ newsArticles[0].category }}</div>
+            <h2 class="featured-title" :style="{ color: config.colors.primary }">{{ newsArticles[0].title }}</h2>
+            <p class="featured-subtitle" :style="{ color: config.colors.textSecondary }">{{ newsArticles[0].subtitle }}</p>
+            <div class="category-tag" :style="{ color: config.colors.primary }">{{ newsArticles[0].category }}</div>
           </div>
         </div>
 
@@ -28,12 +28,12 @@
           >
             <div class="news-image-container">
               <img :src="article.image" :alt="article.title" class="news-image">
-              <div class="date-overlay">{{ article.date }}</div>
+              <div class="date-overlay" :style="{ backgroundColor: config.colors.dateOverlayBg, color: config.colors.primary }">{{ article.date }}</div>
             </div>
             <div class="news-info">
-              <h3 class="news-title">{{ article.title }}</h3>
-              <p class="news-subtitle">{{ article.subtitle }}</p>
-              <div class="category-tag">{{ article.category }}</div>
+              <h3 class="news-title" :style="{ color: config.colors.primary }">{{ article.title }}</h3>
+              <p class="news-subtitle" :style="{ color: config.colors.textSecondary }">{{ article.subtitle }}</p>
+              <div class="category-tag" :style="{ color: config.colors.primary }">{{ article.category }}</div>
             </div>
           </div>
         </div>
@@ -43,7 +43,7 @@
       <div class="right-column">
         <div class="form-wrapper">
           <div class="form-container">
-            <h2 class="form-title">Liên hệ hợp tác ngay!</h2>
+            <h2 class="form-title" :style="{ color: config.colors.primary }">Liên hệ hợp tác ngay!</h2>
 
             <form @submit.prevent="submitForm" class="contact-form">
               <div class="form-group">
@@ -55,7 +55,7 @@
                     class="form-input"
                     placeholder=" "
                 >
-                <label for="fullName" class="form-label">Họ và tên</label>
+                <label for="fullName" class="form-label" :style="{ color: config.colors.primary }">Họ và tên</label>
               </div>
 
               <div class="form-group">
@@ -67,7 +67,7 @@
                     class="form-input"
                     placeholder=" "
                 >
-                <label for="phone" class="form-label">Số điện thoại</label>
+                <label for="phone" class="form-label" :style="{ color: config.colors.primary }">Số điện thoại</label>
               </div>
 
               <div class="form-group">
@@ -82,7 +82,7 @@
                   <option value="rent">Bán gấp</option>
                   <option value="consult">Bán giá mong muốn</option>
                 </select>
-                <label for="needs" class="form-label">Nhu cầu</label>
+                <label for="needs" class="form-label" :style="{ color: config.colors.primary }">Nhu cầu</label>
               </div>
 
               <div class="form-group">
@@ -94,7 +94,7 @@
                     class="form-input"
                     placeholder=" "
                 >
-                <label for="price" class="form-label">Giá bán</label>
+                <label for="price" class="form-label" :style="{ color: config.colors.primary }">Giá bán</label>
               </div>
 
               <div class="form-group">
@@ -106,7 +106,7 @@
                     class="form-input"
                     placeholder=" "
                 >
-                <label for="area" class="form-label">Khu vực</label>
+                <label for="area" class="form-label" :style="{ color: config.colors.primary }">Khu vực</label>
               </div>
 
               <button type="submit" class="submit-btn">Gửi thông tin</button>
@@ -121,7 +121,89 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
+
+// Object config cho CMS
+let config = {
+  colors: {
+    primary: '#031358',
+    secondary: '#0030FF',
+    textSecondary: '#6B7280',
+    white: '#FFFFFF',
+    dateOverlayBg: 'rgba(255, 255, 255, 0.8)',
+    buttonShadow: 'rgba(3, 19, 88, 0.3)'
+  },
+  typography: {
+    mainTitle: {
+      fontSize: '36px',
+      fontWeight: '700'
+    },
+    featuredTitle: {
+      fontSize: '25px',
+      fontWeight: '700'
+    },
+    featuredSubtitle: {
+      fontSize: '20px'
+    },
+    newsTitle: {
+      fontSize: '18px',
+      fontWeight: '700'
+    },
+    newsSubtitle: {
+      fontSize: '16px'
+    },
+    formTitle: {
+      fontSize: '33px',
+      fontWeight: '700'
+    },
+    formLabel: {
+      fontSize: '16px',
+      focusFontSize: '12px'
+    },
+    button: {
+      fontSize: '18px',
+      fontWeight: '700'
+    },
+    categoryTag: {
+      fontSize: '14px',
+      fontWeight: '500'
+    }
+  },
+  spacing: {
+    containerMaxWidth: '1400px',
+    containerMarginTop: '80px',
+    containerPadding: '20px',
+    contentGap: '30px',
+    featuredImageHeight: '400px',
+    newsImageHeight: '200px',
+    formPadding: '25px',
+    buttonPadding: '15px'
+  },
+  borderRadius: {
+    small: '4px',
+    medium: '8px'
+  },
+  shadows: {
+    card: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    buttonHover: '0 4px 12px rgba(3, 19, 88, 0.3)'
+  },
+  gradients: {
+    button: 'linear-gradient(to right, #031358, #0030FF)'
+  },
+  transitions: {
+    default: '0.3s',
+    formLabel: 'all 0.3s ease'
+  }
+}
+
+const props = defineProps({
+  sectionData: Object
+})
+
+if(props.sectionData) {
+  config = props.sectionData;
+  console.log("Đã nhận props", config)
+}
 
 // Dữ liệu tin tức
 const newsArticles = ref([
@@ -170,6 +252,53 @@ const formData = reactive({
   area: ''
 })
 
+// Computed properties từ config
+const cssVars = computed(() => ({
+  '--color-primary': config.colors.primary,
+  '--color-secondary': config.colors.secondary,
+  '--color-text-secondary': config.colors.textSecondary,
+  '--color-white': config.colors.white,
+  '--color-date-overlay-bg': config.colors.dateOverlayBg,
+  '--color-button-shadow': config.colors.buttonShadow,
+
+  '--font-size-main-title': config.typography.mainTitle.fontSize,
+  '--font-weight-main-title': config.typography.mainTitle.fontWeight,
+  '--font-size-featured-title': config.typography.featuredTitle.fontSize,
+  '--font-weight-featured-title': config.typography.featuredTitle.fontWeight,
+  '--font-size-featured-subtitle': config.typography.featuredSubtitle.fontSize,
+  '--font-size-news-title': config.typography.newsTitle.fontSize,
+  '--font-weight-news-title': config.typography.newsTitle.fontWeight,
+  '--font-size-news-subtitle': config.typography.newsSubtitle.fontSize,
+  '--font-size-form-title': config.typography.formTitle.fontSize,
+  '--font-weight-form-title': config.typography.formTitle.fontWeight,
+  '--font-size-form-label': config.typography.formLabel.fontSize,
+  '--font-size-form-label-focus': config.typography.formLabel.focusFontSize,
+  '--font-size-button': config.typography.button.fontSize,
+  '--font-weight-button': config.typography.button.fontWeight,
+  '--font-size-category-tag': config.typography.categoryTag.fontSize,
+  '--font-weight-category-tag': config.typography.categoryTag.fontWeight,
+
+  '--spacing-container-max-width': config.spacing.containerMaxWidth,
+  '--spacing-container-margin-top': config.spacing.containerMarginTop,
+  '--spacing-container-padding': config.spacing.containerPadding,
+  '--spacing-content-gap': config.spacing.contentGap,
+  '--spacing-featured-image-height': config.spacing.featuredImageHeight,
+  '--spacing-news-image-height': config.spacing.newsImageHeight,
+  '--spacing-form-padding': config.spacing.formPadding,
+  '--spacing-button-padding': config.spacing.buttonPadding,
+
+  '--border-radius-small': config.borderRadius.small,
+  '--border-radius-medium': config.borderRadius.medium,
+
+  '--shadow-card': config.shadows.card,
+  '--shadow-button-hover': config.shadows.buttonHover,
+
+  '--gradient-button': config.gradients.button,
+
+  '--transition-default': config.transitions.default,
+  '--transition-form-label': config.transitions.formLabel
+}))
+
 // Xử lý submit form
 const submitForm = () => {
   console.log('Form submitted:', formData)
@@ -194,22 +323,26 @@ const submitForm = () => {
 }
 
 .news-container {
-  max-width: 1400px;
-  margin: 80px auto 0;
-  padding: 20px;
+  :root {
+    v-bind: cssVars;
+  }
+
+  max-width: v-bind('config.spacing.containerMaxWidth');
+  margin: v-bind('config.spacing.containerMarginTop') auto 0;
+  padding: v-bind('config.spacing.containerPadding');
 }
 
 .main-title {
   text-align: center;
-  color: #031358;
-  font-size: 36px;
-  font-weight: 700;
+  color: v-bind('config.colors.primary');
+  font-size: v-bind('config.typography.mainTitle.fontSize');
+  font-weight: v-bind('config.typography.mainTitle.fontWeight');
   margin-bottom: 40px;
 }
 
 .content-wrapper {
   display: flex;
-  gap: 30px;
+  gap: v-bind('config.spacing.contentGap');
 }
 
 /* Cột trái - Tin tức */
@@ -219,16 +352,16 @@ const submitForm = () => {
 
 .featured-news {
   margin-bottom: 30px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  box-shadow: v-bind('config.shadows.card');
+  border-radius: v-bind('config.borderRadius.medium');
   overflow: hidden;
-  background-color: white;
+  background-color: v-bind('config.colors.white');
 }
 
 .featured-image-container {
   position: relative;
   width: 100%;
-  height: 400px;
+  height: v-bind('config.spacing.featuredImageHeight');
   overflow: hidden;
 }
 
@@ -242,31 +375,31 @@ const submitForm = () => {
   position: absolute;
   bottom: 15px;
   right: 15px;
-  background-color: rgba(255, 255, 255, 0.8);
-  color: #031358;
+  background-color: v-bind('config.colors.dateOverlayBg');
+  color: v-bind('config.colors.primary');
   padding: 5px 10px;
-  border-radius: 4px;
+  border-radius: v-bind('config.borderRadius.small');
   font-size: 14px;
   font-weight: 500;
 }
 
 .featured-info {
-  background-color: white;
+  background-color: v-bind('config.colors.white');
   padding: 25px;
   position: relative;
 }
 
 .featured-title {
-  color: #031358;
-  font-size: 25px;
-  font-weight: 700;
+  color: v-bind('config.colors.primary');
+  font-size: v-bind('config.typography.featuredTitle.fontSize');
+  font-weight: v-bind('config.typography.featuredTitle.fontWeight');
   margin-bottom: 15px;
   line-height: 1.3;
 }
 
 .featured-subtitle {
-  color: #6B7280;
-  font-size: 20px;
+  color: v-bind('config.colors.textSecondary');
+  font-size: v-bind('config.typography.featuredSubtitle.fontSize');
   line-height: 1.5;
   margin-bottom: 20px;
 }
@@ -275,9 +408,9 @@ const submitForm = () => {
   position: absolute;
   bottom: 5px;
   right: 5px;
-  color: #031358;
-  font-size: 14px;
-  font-weight: 500;
+  color: v-bind('config.colors.primary');
+  font-size: v-bind('config.typography.categoryTag.fontSize');
+  font-weight: v-bind('config.typography.categoryTag.fontWeight');
 }
 
 /* Các tin nổi bật khác - không có đổ bóng và nền */
@@ -297,7 +430,7 @@ const submitForm = () => {
 .news-image-container {
   position: relative;
   width: 100%;
-  height: 200px;
+  height: v-bind('config.spacing.newsImageHeight');
   overflow: hidden;
 }
 
@@ -318,16 +451,16 @@ const submitForm = () => {
 }
 
 .news-title {
-  color: #031358;
-  font-size: 18px;
-  font-weight: 700;
+  color: v-bind('config.colors.primary');
+  font-size: v-bind('config.typography.newsTitle.fontSize');
+  font-weight: v-bind('config.typography.newsTitle.fontWeight');
   margin-bottom: 10px;
   line-height: 1.3;
 }
 
 .news-subtitle {
-  color: #6B7280;
-  font-size: 16px;
+  color: v-bind('config.colors.textSecondary');
+  font-size: v-bind('config.typography.newsSubtitle.fontSize');
   line-height: 1.4;
   margin-bottom: 25px;
   display: -webkit-box;
@@ -349,16 +482,16 @@ const submitForm = () => {
 }
 
 .form-container {
-  background-color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  padding: 25px;
+  background-color: v-bind('config.colors.white');
+  box-shadow: v-bind('config.shadows.card');
+  border-radius: v-bind('config.borderRadius.medium');
+  padding: v-bind('config.spacing.formPadding');
 }
 
 .form-title {
-  color: #031358;
-  font-size: 33px;
-  font-weight: 700;
+  color: v-bind('config.colors.primary');
+  font-size: v-bind('config.typography.formTitle.fontSize');
+  font-weight: v-bind('config.typography.formTitle.fontWeight');
   margin-bottom: 25px;
   text-align: center;
 }
@@ -374,28 +507,28 @@ const submitForm = () => {
 
 .form-input {
   width: 100%;
-  padding: 15px 0 10px 0;
+  padding: v-bind('config.spacing.buttonPadding') 0 10px 0;
   border: none;
-  border-bottom: 1px solid #031358;
+  border-bottom: 1px solid v-bind('config.colors.primary');
   background-color: transparent;
-  font-size: 16px;
-  color: #031358;
+  font-size: v-bind('config.typography.formLabel.fontSize');
+  color: v-bind('config.colors.primary');
   outline: none;
-  transition: border-color 0.3s;
+  transition: border-color v-bind('config.transitions.default');
 }
 
 .form-input:focus {
-  border-bottom: 1px solid #031358;
+  border-bottom: 1px solid v-bind('config.colors.primary');
 }
 
 .form-label {
   position: absolute;
   top: 50%;
   left: 0;
-  font-size: 16px;
-  color: #031358;
+  font-size: v-bind('config.typography.formLabel.fontSize');
+  color: v-bind('config.colors.primary');
   pointer-events: none;
-  transition: all 0.3s ease;
+  transition: v-bind('config.transitions.formLabel');
   transform: translateY(-50%);
   opacity: 0.5;
 }
@@ -404,8 +537,8 @@ const submitForm = () => {
 .form-input:focus + .form-label,
 .form-input:not(:placeholder-shown) + .form-label {
   top: 0;
-  font-size: 12px;
-  color: #031358;
+  font-size: v-bind('config.typography.formLabel.focusFontSize');
+  color: v-bind('config.colors.primary');
   transform: translateY(0);
   opacity: 1;
 }
@@ -420,27 +553,27 @@ select.form-input {
 
 .submit-btn {
   width: 100%;
-  padding: 15px;
-  background: linear-gradient(to right, #031358, #0030FF);
-  color: white;
+  padding: v-bind('config.spacing.buttonPadding');
+  background: v-bind('config.gradients.button');
+  color: v-bind('config.colors.white');
   border: none;
-  border-radius: 8px;
-  font-size: 18px;
-  font-weight: 700;
+  border-radius: v-bind('config.borderRadius.medium');
+  font-size: v-bind('config.typography.button.fontSize');
+  font-weight: v-bind('config.typography.button.fontWeight');
   cursor: pointer;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: transform v-bind('config.transitions.default'), box-shadow v-bind('config.transitions.default');
 }
 
 .submit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(3, 19, 88, 0.3);
+  box-shadow: v-bind('config.shadows.buttonHover');
 }
 
 .form-image {
   margin-top: auto;
   width: 100%;
   height: auto;
-  border-radius: 8px;
+  border-radius: v-bind('config.borderRadius.medium');
 }
 
 /* Responsive */

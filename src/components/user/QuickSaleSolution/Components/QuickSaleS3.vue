@@ -2,32 +2,37 @@
   <div class="section section3">
     <div class="st-title">
       <TitleComponent
-          :circle-size="100"
-          :icon-height="109"
-          :icon-width="109"
-          :order-number="3"
-          component-height="80px"
-          component-width="100%"
-          icon-url="/imgs/icon-khao-sat.png"
-          title="Khảo sát"
+          :circle-size="sectionData.circleSize"
+          :icon-height="sectionData.iconHeight"
+          :icon-width="sectionData.iconWidth"
+          :order-number="sectionData.id"
+          :component-height="sectionData.componentHeight"
+          :component-width="sectionData.componentWidth"
+          :icon-url="baseImgaeUrl+sectionData.iconUrl"
+          :title="sectionData.title"
       >
       </TitleComponent>
     </div>
-    <div class="main-content-wrapper ">
+    <div class="main-content-wrapper">
       <div class="left-content-section">
-        <img src="/imgs/anh-khao-sat-1.png" alt="dgsb">
+        <img
+            :src="baseImgaeUrl+sectionData.image.src"
+            :alt="sectionData.image.alt"
+            :style="{ borderRadius: sectionData.image.borderRadius }"
+        >
       </div>
 
       <div class="right-content-section">
         <div class="text-content-wrapper">
-          <div class="text-content fade-up">
-            <p>
-              Chuyên viên tiến hành khảo sát trực tiếp bất động sản để xác minh tình trạng, pháp lý, vị trí, môi
-              trường
-              sống và giá trị xung quanh. Bước này giúp củng cố tính chính xác của giá định và nâng cao niềm tin của
-              người
-              mua.
-            </p>
+          <div class="text-content fade-up rich-text-editor-wrapper">
+            <div v-html="sectionData.content.text" class="tiptap"
+                :style="{
+              fontSize: sectionData.content.fontSize,
+              lineHeight: sectionData.content.lineHeight,
+              color: sectionData.content.color,
+              textAlign: sectionData.content.textAlign
+            }">
+            </div>
           </div>
         </div>
       </div>
@@ -37,6 +42,82 @@
 
 <script setup>
 import TitleComponent from "./TitleQickSale.vue";
+import { ref, onMounted } from 'vue';
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
+
+// Dữ liệu động - có thể fetch từ API hoặc CMS
+let sectionData = ref({
+  id: 3,
+  title: "Khảo sát",
+  iconUrl: "/imgs/icon-khao-sat.png",
+  iconWidth: 109,
+  iconHeight: 109,
+  circleSize: 100,
+  componentHeight: "80px",
+  componentWidth: "100%",
+
+  image: {
+    src: "/imgs/anh-khao-sat-1.png",
+    alt: "Khảo sát bất động sản",
+    borderRadius: "10px"
+  },
+
+  content: {
+    text: "Chuyên viên tiến hành khảo sát trực tiếp bất động sản để xác minh tình trạng, pháp lý, vị trí, môi trường sống và giá trị xung quanh. Bước này giúp củng cố tính chính xác của giá định và nâng cao niềm tin của người mua.",
+    fontSize: "17px",
+    lineHeight: 1.6,
+    color: "#000000",
+    textAlign: "justify"
+  },
+
+  border: {
+    color: "#C2CBF0",
+    width: "5px",
+    style: "dashed"
+  },
+
+  layout: {
+    gap: "30px",
+    imageTranslateX: "70px",
+    rightSectionPadding: "0 70px",
+    textPaddingRight: "60px"
+  },
+
+  responsive: {
+    tabletImageMaxHeight: "400px",
+    mobileImageMaxHeight: "300px",
+    smallMobileImageMaxHeight: "250px"
+  }
+});
+
+const props = defineProps({
+  sectionData: Object
+})
+if(props.sectionData) {
+  sectionData = props.sectionData.section3;
+  console.log("Đã nhận được data từ cha")
+}
+
+// Hàm để cập nhật dữ liệu từ CMS/API
+const updateSectionData = (newData) => {
+  sectionData.value = { ...sectionData.value, ...newData };
+};
+
+// Ví dụ: Fetch dữ liệu từ API
+onMounted(async () => {
+  try {
+    // const response = await fetch('/api/section3-data');
+    // const data = await response.json();
+    // sectionData.value = data;
+  } catch (error) {
+    console.error('Error fetching section data:', error);
+  }
+});
+
+// Export hàm update để có thể sử dụng từ component cha
+defineExpose({
+  updateSectionData
+});
 </script>
 
 <style scoped>
@@ -59,9 +140,9 @@ import TitleComponent from "./TitleQickSale.vue";
   right: 30px;
   width: 60%;
   height: 350px;
-  border-top: 5px dashed #C2CBF0;
-  border-right: 5px dashed #C2CBF0;
-  border-bottom: 5px dashed #C2CBF0;
+  border-top: v-bind('sectionData.border.width') v-bind('sectionData.border.style') v-bind('sectionData.border.color');
+  border-right: v-bind('sectionData.border.width') v-bind('sectionData.border.style') v-bind('sectionData.border.color');
+  border-bottom: v-bind('sectionData.border.width') v-bind('sectionData.border.style') v-bind('sectionData.border.color');
   z-index: 1;
 }
 
@@ -70,14 +151,13 @@ import TitleComponent from "./TitleQickSale.vue";
   padding: 30px 40px;
 }
 
-
 .text-content-wrapper::before {
   content: "";
   position: absolute;
   top: -70px;
   left: 0;
-  border-left: 5px dashed #C2CBF0;
-  border-top: 5px dashed #C2CBF0;
+  border-left: v-bind('sectionData.border.width') v-bind('sectionData.border.style') v-bind('sectionData.border.color');
+  border-top: v-bind('sectionData.border.width') v-bind('sectionData.border.style') v-bind('sectionData.border.color');
   width: 103.5%;
   height: 350px;
   z-index: -1;
@@ -90,13 +170,12 @@ import TitleComponent from "./TitleQickSale.vue";
 .right-content-section::before {
   content: "";
   position: absolute;
-  border-right: 5px dashed #C2CBF0;
+  border-right: v-bind('sectionData.border.width') v-bind('sectionData.border.style') v-bind('sectionData.border.color');
   width: 100%;
   height: 130%;
   right: 48px;
   top: -70px;
 }
-
 
 .section3 .title-component {
   transform: translateY(-70px);
@@ -104,14 +183,14 @@ import TitleComponent from "./TitleQickSale.vue";
 
 .main-content-wrapper {
   display: flex;
-  gap: 30px;
+  gap: v-bind('sectionData.layout.gap');
 }
 
 .left-content-section {
   flex: 1;
   min-width: 0;
   z-index: 3;
-  transform: translateX(70px);
+  transform: translateX(v-bind('sectionData.layout.imageTranslateX'));
 }
 
 /* CSS cho ảnh - đã thêm responsive */
@@ -121,7 +200,7 @@ import TitleComponent from "./TitleQickSale.vue";
   display: block;
   max-width: 100%;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: v-bind('sectionData.image.borderRadius');
   transform: translateX(60px);
 }
 
@@ -129,16 +208,12 @@ import TitleComponent from "./TitleQickSale.vue";
   flex: 1;
   min-width: 0;
   z-index: 2;
-  padding: 0 70px;
+  padding: v-bind('sectionData.layout.rightSectionPadding');
 }
 
 .section3 .text-content p {
   margin-bottom: 20px;
-  line-height: 1.6;
-  font-size: 17px;
-  color: #000000;
-  text-align: justify;
-  padding-right: 60px;
+  padding-right: v-bind('sectionData.layout.textPaddingRight');
 }
 
 .detail-button {
@@ -167,13 +242,11 @@ import TitleComponent from "./TitleQickSale.vue";
   .st-title {
     width: 100%;
   }
-
-
 }
 
 @media (max-width: 1200px) {
   .left-content-section img {
-    max-height: 400px;
+    max-height: v-bind('sectionData.responsive.tabletImageMaxHeight');
     object-fit: cover;
   }
 }
@@ -196,7 +269,7 @@ import TitleComponent from "./TitleQickSale.vue";
   }
 
   .left-content-section img {
-    max-height: 350px;
+    max-height: v-bind('sectionData.responsive.tabletImageMaxHeight');
     width: auto;
     max-width: 100%;
     margin: 0 auto;
@@ -237,7 +310,7 @@ import TitleComponent from "./TitleQickSale.vue";
   }
 
   .left-content-section img {
-    max-height: 300px;
+    max-height: v-bind('sectionData.responsive.mobileImageMaxHeight');
     width: 100%;
     transform: translateX(0);
   }
@@ -245,7 +318,7 @@ import TitleComponent from "./TitleQickSale.vue";
 
 @media (max-width: 576px) {
   .left-content-section img {
-    max-height: 250px;
+    max-height: v-bind('sectionData.responsive.smallMobileImageMaxHeight');
     transform: translateX(0);
   }
 

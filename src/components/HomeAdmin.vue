@@ -20,7 +20,7 @@
           <div class="text-secondary small"> {{ info.role}} </div>
         </div>
         <img
-        :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+        :src="' https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
         alt="Avatar"
             class="rounded-circle border border-light-subtle"
             width="46"
@@ -100,7 +100,7 @@ const allMenuItems = [
     route: '/-thg/goi-he-thong',
     icon: 'fa-solid fa-boxes-stacked text-primary fs-2',
     title: 'Dịch vụ hệ thống',
-    desc: 'QUản lý các gói dịch vụ của hệ thống'
+    desc: 'Quản lý các gói dịch vụ của hệ thống'
   },
   {
     label: 'APPOINTMENT',
@@ -108,7 +108,14 @@ const allMenuItems = [
     icon: 'fa-solid fa-calendar-check text-primary fs-2',
     title: 'Lịch hẹn',
     desc: 'Quản lý lịch hẹn, phân công và theo dõi kết quả'
-  }
+  },
+  {
+    label: 'EDITER',
+    route: '/-thg/quan-tri-noi-dung/trang-chu/noi-bat',
+    icon: 'fa-solid fa-file-lines text-primary fs-2',
+    title: 'Quản trị nội dung',
+    desc: 'Quản lý các trang nội dung'
+  },
 
 
 ]

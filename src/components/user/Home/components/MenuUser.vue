@@ -220,7 +220,8 @@ import {ref, onMounted, onUnmounted, nextTick, computed, watch} from "vue";
 import {useRoute, useRouter} from 'vue-router'
 import Footer from "./Footer.vue";
 import {useAuthStore} from "../../../../stores/authStore.js";
-import PopupQuickSale from "./PopupQuickSale.vue"; useAuthStore()
+import PopupQuickSale from "../../QuickSaleSolution/Components/PopupQuickSale.vue";
+useAuthStore()
 
 const auth = useAuthStore();
 const menuRef = ref(null);

@@ -6,7 +6,7 @@
           :key="index"
           class="menu-item"
           :class="{ active: isActive(item.link) }"
-          @click="navigateTo(item.link)"
+          @click="navigateTo(item)"
       >
         <div class="item-content">
           <div class="icon-wrapper">
@@ -45,6 +45,17 @@ const menuItems = ref([
     icon: "fas fa-shield-alt",
     link: "/bao-mat"
   },
+  // {
+  //   label: "Thanh toán",
+  //   icon: "fa-solid fa-credit-card",
+  //   link: "/thanh-toan"
+  // },
+  {
+    label: "Phát triển đội nhóm của bạn",
+    icon: "fa-solid fa-people-group",
+    link: "/nhom-cua-toi",
+    notParentRoute: true
+  },
   {
     label: "Thanh toán",
     icon: "fa-solid fa-credit-card",
@@ -58,6 +69,12 @@ const menuItems = ref([
     label: "Gói dịch vụ",
     icon: "fa-solid fa-gem",
     link: "/goi-dich-vu"
+  },
+  {
+    label: "Quản lý tài sản",
+    icon: "fa-solid fa-city",
+    link: "/bao-cao-dinh-gia",
+    notParentRoute: true
   },
   {
     label: "Hỗ trợ",
@@ -74,12 +91,12 @@ const isActive = (link) => {
   return route.path.startsWith("/ho-so" + link);
 };
 
-const navigateTo = (link) => {
+const navigateTo = (item) => {
 
-  if (link === "/nhom-cua-toi") {
-    router.push("/nhom-cua-toi");
+  if (item.notParentRoute) {
+    router.push(item.link);
   } else {
-    router.push("/ho-so" + link);
+    router.push("/ho-so" + item.link);
   }
 
   emit("link-clicked");
@@ -96,7 +113,7 @@ const navigateTo = (link) => {
 .menu-container {
   background: white;
   border-radius: 12px;
-  padding:50px 20px;
+  padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;

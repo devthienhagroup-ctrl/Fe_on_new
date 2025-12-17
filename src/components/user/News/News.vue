@@ -1,48 +1,34 @@
 <template>
-  <FeaturedNews></FeaturedNews>
-  <LatestNews></LatestNews>
-  <CategoryNews></CategoryNews>
-  <EmailSubscribe></EmailSubscribe>
+  <div v-if="isLoaded">
+    <FeaturedNews :sectionData="JSON.parse(pageData.sections[0].contentJson)"></FeaturedNews>
+    <LatestNews :sectionData="JSON.parse(pageData.sections[1].contentJson)"></LatestNews>
+    <CategoryNews :sectionData="JSON.parse(pageData.sections[2].contentJson)"></CategoryNews>
+    <EmailSubscribe :sectionData="JSON.parse(pageData.sections[3].contentJson)"></EmailSubscribe>
+  </div>
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted } from "vue";
 import FeaturedNews from "./Component/FeaturedNews.vue";
 import LatestNews from "./Component/LatestNews.vue";
 import CategoryNews from "./Component/CategoryNews.vue";
 import EmailSubscribe from "./Component/EmailSubscribe.vue";
-import { removeJsonLd, setJsonLd } from "../../../utils/structuredData.js";
+import api from "../../../api/api.js";
+import {onMounted, ref} from "vue";
 
-const newsJsonLdId = "jsonld-news-itemlist";
+const isLoaded = ref(false);
+const pageData = ref({});
+const fetchData = async () => {
+  const response = await api.get('/thg/public/cms/contentPage/news')
 
-onMounted(() => {
-  setJsonLd(newsJsonLdId, {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        url: "http://localhost:8084/tin-tuc"
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        url: "http://localhost:8084/tin-tuc/1"
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        url: "http://localhost:8084/tin-tuc/2"
-      },
-      {
-        "@type": "ListItem",
-        position: 4,
-        url: "http://localhost:8084/tin-tuc/3"
-      }
-    ]
-  });
-});
+  if (response.status===200) {
+    pageData.value= response.data;
+    isLoaded.value=true;
+  }
+}
 
-onBeforeUnmount(() => removeJsonLd(newsJsonLdId));
+onMounted(async () => {
+  await fetchData();
+  console.log("Đã gọi API", pageData.value)
+})
+
 </script>

@@ -1,35 +1,64 @@
 <template>
-  <div class="section section8">
+  <div
+      class="section section8"
+      :id="sectionData.id"
+      :style="{
+      marginTop: sectionData.styles.section.marginTop,
+      padding: sectionData.styles.section.padding,
+      marginBottom: sectionData.styles.section.marginBottom
+    }"
+  >
     <div class="st-title">
       <TitleComponent
-          :circle-size="100"
-          :icon-height="80"
-          :icon-width="90"
-          :order-number="8"
-          component-height="80px"
-          component-width="100%"
-          icon-url="/imgs/icon-tu-van.png"
-          title="Tư vấn hỗ trợ chủ nhà và khách hàng"
-          :is-right="true"
+          :circle-size="sectionData.titleComponent.circleSize"
+          :icon-height="sectionData.titleComponent.iconHeight"
+          :icon-width="sectionData.titleComponent.iconWidth"
+          :order-number="sectionData.titleComponent.orderNumber"
+          :component-height="sectionData.titleComponent.componentHeight"
+          :component-width="sectionData.titleComponent.componentWidth"
+          :icon-url="baseImgaeUrl+sectionData.icon"
+          :title="sectionData.title"
+          :is-right="sectionData.titleComponent.isRight"
       ></TitleComponent>
     </div>
     <div class="main-content-wrapper">
 
-      <div class="text-content">
-        <div class="text-wrapper fade-left">
-          <p>
-            Trong suốt quá trình bán, chuyên viên luôn đồng hành, hỗ trợ cả hai bên:
-          </p>
-          <ul>
-            <li>Giải đáp mọi thắc mắc về thủ tục</li>
-            <li>Tư vấn chiến lược giá linh hoạt</li>
-            <li>Hỗ trợ giao tiếp, thương lượng hiệu quả</li>
-          </ul>
+      <div
+          class="text-content fade-left"
+          :style="{
+          backgroundColor: sectionData.styles.backgroundColor,
+          border: `2px solid ${sectionData.styles.borderColor}`,
+          borderRadius: sectionData.styles.borderRadius,
+          marginLeft: sectionData.styles.textContent.marginLeft,
+          marginRight: sectionData.styles.textContent.marginRight,
+          paddingLeft: sectionData.styles.textContent.paddingLeft,
+          minHeight: sectionData.styles.textContent.minHeight
+        }"
+      >
+        <div class="text-wrapper rich-text-editor-wrapper">
+          <div class="tiptap" v-html="sectionData.content">
+          </div>
         </div>
 
-        <img class="img1 fade-up" src="/imgs/anh-tu-van-1.png" alt="">
+        <img
+            class="img1 fade-up"
+            :src="baseImgaeUrl+sectionData.images.img1.src"
+            :alt="sectionData.images.img1.alt"
+            :style="{
+            right: sectionData.images.img1.position.right,
+            top: sectionData.images.img1.position.top
+          }"
+        >
       </div>
-      <img class="img2 fade-up" src="/imgs/anh-tu-van-2.png" alt="">
+      <img
+          class="img2 fade-up"
+          :src="baseImgaeUrl+sectionData.images.img2.src"
+          :alt="sectionData.images.img2.alt"
+          :style="{
+          right: sectionData.images.img2.position.right,
+          top: sectionData.images.img2.position.top
+        }"
+      >
 
     </div>
   </div>
@@ -37,14 +66,83 @@
 
 <script setup>
 import TitleComponent from "./TitleQickSale.vue";
+import { ref, onMounted } from 'vue';
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
+
+// Dữ liệu mẫu - có thể fetch từ API hoặc CMS
+const sectionData = ref({
+  id: "quick-sale-section-8",
+  title: "Tư vấn hỗ trợ chủ nhà và khách hàng",
+  icon: "/imgs/icon-tu-van.png",
+  titleComponent: {
+    circleSize: 100,
+    iconHeight: 80,
+    iconWidth: 90,
+    orderNumber: 8,
+    componentHeight: "80px",
+    componentWidth: "100%",
+    isRight: true
+  },
+  content: {
+    description: "Trong suốt quá trình bán, chuyên viên luôn đồng hành, hỗ trợ cả hai bên:",
+    listItems: [
+      "Giải đáp mọi thắc mắc về thủ tục",
+      "Tư vấn chiến lược giá linh hoạt",
+      "Hỗ trợ giao tiếp, thương lượng hiệu quả"
+    ]
+  },
+  images: {
+    img1: {
+      src: "/imgs/anh-tu-van-1.png",
+      alt: "Tư vấn 1",
+      position: {
+        right: "-15%",
+        top: "-15%"
+      }
+    },
+    img2: {
+      src: "/imgs/anh-tu-van-2.png",
+      alt: "Tư vấn 2",
+      position: {
+        right: "50%",
+        top: "90%"
+      }
+    }
+  },
+  styles: {
+    borderColor: "#031358",
+    borderRadius: "20px",
+    backgroundColor: "white",
+    dashedLineColor: "#C2CBF0",
+    textContent: {
+      marginLeft: "12%",
+      marginRight: "20%",
+      paddingLeft: "10px",
+      minHeight: "200px"
+    },
+    section: {
+      marginTop: "150px",
+      padding: "30px 20px 100px",
+      marginBottom: "80px"
+    }
+  }
+});
+
+const props = defineProps({
+  sectionData: Object
+})
+if(props.sectionData) {
+  sectionData.value = props.sectionData.section8;
+  console.log("Đã nhận được data từ cha", sectionData.value)
+}
+
+
+onMounted(() => {
+  // fetchSectionData();
+});
 </script>
 
 <style scoped>
-
-* {
-  font-family: 'Ubuntu', sans-serif;
-}
-
 .st-title {
   display: block;
   margin-left: auto;
@@ -56,27 +154,22 @@ import TitleComponent from "./TitleQickSale.vue";
   gap: 30px;
 }
 
-
 .section8::before {
   content: "";
   position: absolute;
   top: 0;
   right: 79px;
-  width: 87.6%; /* nửa chiều rộng */
+  width: 87.6%;
   height: 118%;
-  border-right: 5px dashed #C2CBF0;
-  border-bottom: 5px dashed #C2CBF0;
-
+  border-right: 5px dashed v-bind('sectionData.styles.dashedLineColor');
+  border-bottom: 5px dashed v-bind('sectionData.styles.dashedLineColor');
   margin-left: 75px;
   z-index: 0;
 }
 
 .section8 {
-  margin-top: 150px;
   position: relative;
   overflow: visible;
-  padding: 30px 20px 100px;
-  margin-bottom: 80px;
 }
 
 .section8 .title-component {
@@ -87,17 +180,12 @@ import TitleComponent from "./TitleQickSale.vue";
   width: 40%;
 }
 
-
 .img2 {
   position: absolute;
-  right: 50%;
-  top: 90%;
 }
 
 .section8 .img1 {
   position: absolute;
-  right: -15%;
-  top: -15%;
 }
 
 .section8 .main-content-wrapper {
@@ -110,21 +198,14 @@ import TitleComponent from "./TitleQickSale.vue";
 }
 
 .section8 .text-content {
-  background-color: white;
-  border: 2px solid #031358;
-  border-radius: 20px;
+  border: 2px solid v-bind('sectionData.styles.borderColor');
+  border-radius: v-bind('sectionData.styles.borderRadius');
+  background-color: v-bind('sectionData.styles.backgroundColor');
   width: 100%;
-  margin-left: 12%;
-  margin-right: 20%;
-
-  padding-left: 10px;
   z-index: 2;
   position: relative;
-
-  /* Thêm các thuộc tính này để căn giữa theo chiều dọc */
   display: flex;
-  align-items: center; /* Căn giữa theo chiều dọc */
-  min-height: 200px; /* Đặt chiều cao tối thiểu để thấy rõ hiệu ứng */
+  align-items: center;
 }
 
 @media (max-width: 1400px) {
@@ -145,30 +226,29 @@ import TitleComponent from "./TitleQickSale.vue";
 /* Tablet styles */
 @media (min-width: 769px) and (max-width: 1200px) {
   .section8 {
-    margin-top: 120px;
-    padding: 25px 25px 80px;
-    margin-bottom: 60px;
+    margin-top: 120px !important;
+    padding: 25px 25px 80px !important;
+    margin-bottom: 60px !important;
   }
 
-
   .section8 .text-content {
-    margin-left: 8%;
-    margin-right: 15%;
-    padding-right: 35%;
-    padding-left: 20px;
-    min-height: 180px;
+    margin-left: 8% !important;
+    margin-right: 15% !important;
+    padding-right: 35% !important;
+    padding-left: 20px !important;
+    min-height: 180px !important;
   }
 
   .section8 .img1 {
-    right: -10%;
-    top: -10%;
-    max-width: 280px;
+    right: -10% !important;
+    top: -10% !important;
+    max-width: 280px !important;
   }
 
   .img2 {
-    right: 45%;
-    top: 85%;
-    max-width: 200px;
+    right: 45% !important;
+    top: 85% !important;
+    max-width: 200px !important;
   }
 
   .section8 p {
@@ -179,9 +259,9 @@ import TitleComponent from "./TitleQickSale.vue";
 /* Mobile styles */
 @media (max-width: 768px) {
   .section8 {
-    margin-top: 80px;
-    padding: 20px 15px 60px;
-    margin-bottom: 40px;
+    margin-top: 80px !important;
+    padding: 20px 15px 60px !important;
+    margin-bottom: 40px !important;
   }
 
   .section8::before {
@@ -200,11 +280,11 @@ import TitleComponent from "./TitleQickSale.vue";
   }
 
   .section8 .text-content {
-    margin: 0;
-    padding: 25px 20px;
+    margin: 0 !important;
+    padding: 25px 20px !important;
     width: 100%;
     display: block;
-    min-height: auto;
+    min-height: auto !important;
     text-align: center;
   }
 
@@ -221,18 +301,18 @@ import TitleComponent from "./TitleQickSale.vue";
   }
 
   .section8 .img1 {
-    position: static;
+    position: static !important;
     display: block;
     margin: 20px auto 0;
-    max-width: 280px;
+    max-width: 280px !important;
     width: 100%;
   }
 
   .img2 {
-    position: static;
+    position: static !important;
     display: block;
     margin: 0 auto;
-    max-width: 200px;
+    max-width: 200px !important;
     width: 100%;
   }
 }
@@ -240,13 +320,13 @@ import TitleComponent from "./TitleQickSale.vue";
 /* Small mobile styles */
 @media (max-width: 480px) {
   .section8 {
-    margin-top: 60px;
-    padding: 15px 10px 40px;
-    margin-bottom: 30px;
+    margin-top: 60px !important;
+    padding: 15px 10px 40px !important;
+    margin-bottom: 30px !important;
   }
 
   .section8 .text-content {
-    padding: 20px 15px;
+    padding: 20px 15px !important;
   }
 
   .section8 p {
@@ -254,11 +334,11 @@ import TitleComponent from "./TitleQickSale.vue";
   }
 
   .section8 .img1 {
-    max-width: 250px;
+    max-width: 250px !important;
   }
 
   .img2 {
-    max-width: 180px;
+    max-width: 180px !important;
   }
 
   .section8::before{
@@ -270,13 +350,13 @@ import TitleComponent from "./TitleQickSale.vue";
 /* Large desktop adjustments */
 @media (min-width: 1600px) {
   .section8 .text-content {
-    margin-left: 15%;
-    margin-right: 25%;
+    margin-left: 15% !important;
+    margin-right: 25% !important;
   }
 
   .section8 .img1 {
-    right: -12%;
-    top: -12%;
+    right: -12% !important;
+    top: -12% !important;
   }
 }
 </style>

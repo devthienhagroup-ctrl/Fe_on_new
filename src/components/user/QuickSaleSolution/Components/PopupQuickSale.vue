@@ -4,8 +4,8 @@
       <!-- Header -->
       <div class="popup-header">
         <div class="header-left">
-          <img src="/imgs/logoTHG.png" alt="Logo" class="logo" />
-          <span class="title">Bán nhanh 30 ngày</span>
+          <img :src="data.logo" :alt="data.logoAlt" class="logo" />
+          <span class="title">{{ data.title }}</span>
         </div>
         <button class="close-btn" @click="closePopup">
           <i class="fas fa-times"></i>
@@ -14,52 +14,76 @@
 
       <!-- Content -->
       <div class="popup-content">
-        <p class="main-text">
-          Để đảm bảo quá trình bán được thực hiện nhanh chóng và hiệu quả, chúng tôi chỉ triển khai dịch vụ <b>'bán nhanh trong 30 ngày'</b> khi quý khách đưa ra mức giá kỳ vọng phù hợp với mặt bằng giá thị trường.
-        </p>
+        <p class="main-text" v-html="data.mainText"></p>
 
-        <p class="sub-text">
-          Việc đồng thuận về giá ngay từ đầu sẽ giúp:
-        </p>
+        <p class="sub-text">{{ data.subText }}</p>
 
         <div class="content-columns">
           <div class="left-col">
             <ul class="benefits-list">
-              <li class="benefit-item">
-                <i class="fas fa-check-circle"></i>
-                <span>Quy trình thẩm định được thực hiện nhanh chóng và rõ ràng</span>
-              </li>
-              <li class="benefit-item">
-                <i class="fas fa-chart-line"></i>
-                <span>Hoạt động marketing được triển khai tập trung và hiệu quả hơn</span>
-              </li>
-              <li class="benefit-item">
-                <i class="fas fa-users"></i>
-                <span>Tiếp cận đúng nhóm khách mua thực, hạn chế mất thời gian</span>
-              </li>
-              <li class="benefit-item">
-                <i class="fas fa-bullseye"></i>
-                <span>Tối ưu tỷ lệ chốt giao dịch trong thời gian cam kết</span>
+              <li
+                  v-for="(benefit, index) in data.benefits"
+                  :key="index"
+                  class="benefit-item"
+              >
+                <i :class="benefit.icon"></i>
+                <span>{{ benefit.text }}</span>
               </li>
             </ul>
           </div>
 
           <div class="right-col">
-            <img src="/imgs/house-searching-animate.svg" alt="House Searching">
+            <img :src="data.image.src" :alt="data.image.alt" />
           </div>
         </div>
       </div>
 
       <!-- Footer -->
       <div class="popup-footer">
-        <button class="ok-btn" @click="closePopup">OK</button>
+        <button class="ok-btn" @click="closePopup">
+          {{ data.buttonText }}
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  configData: {
+    type: Object,
+    default: () => ({})
+  }
+})
+
 const emit = defineEmits(['close'])
+
+const data = computed(() => ({
+  logo: props.configData?.logo || '/imgs/logoTHG.png',
+  logoAlt: props.configData?.logoAlt || 'Logo',
+  title: props.configData?.title || 'Bán nhanh 30 ngày',
+  mainText: props.configData?.mainText || 'Để đảm bảo quá trình bán được thực hiện nhanh chóng và hiệu quả, chúng tôi chỉ triển khai dịch vụ <b>\'bán nhanh trong 30 ngày\'</b> khi quý khách đưa ra mức giá kỳ vọng phù hợp với mặt bằng giá thị trường.',
+  subText: props.configData?.subText || 'Việc đồng thuận về giá ngay từ đầu sẽ giúp:',
+  image: {
+    src: props.configData?.image?.src || '/imgs/house-searching-animate.svg',
+    alt: props.configData?.image?.alt || 'House Searching'
+  },
+  benefits: props.configData?.benefits || [
+    { icon: 'fas fa-check-circle', text: 'Quy trình thẩm định được thực hiện nhanh chóng và rõ ràng' },
+    { icon: 'fas fa-chart-line', text: 'Hoạt động marketing được triển khai tập trung và hiệu quả hơn' },
+    { icon: 'fas fa-users', text: 'Tiếp cận đúng nhóm khách mua thực, hạn chế mất thời gian' },
+    { icon: 'fas fa-bullseye', text: 'Tối ưu tỷ lệ chốt giao dịch trong thời gian cam kết' }
+  ],
+  buttonText: props.configData?.buttonText || 'OK',
+  styles: {
+    primaryColor: props.configData?.styles?.primaryColor || '#031358',
+    hoverColor: props.configData?.styles?.hoverColor || '#0056b3',
+    iconColor: props.configData?.styles?.iconColor || '#0030ff',
+    backgroundColor: props.configData?.styles?.backgroundColor || '#f8f9fa'
+  }
+}))
 
 const closePopup = () => {
   emit('close')
@@ -95,7 +119,7 @@ const closePopup = () => {
   align-items: center;
   padding: 16px 20px;
   border-bottom: 1px solid #e5e5e5;
-  background-color: #f8f9fa;
+  background-color: v-bind('data.styles.backgroundColor');
 }
 
 .header-left {
@@ -186,7 +210,7 @@ const closePopup = () => {
 }
 
 .benefit-item i {
-  color: #0030ff;
+  color: v-bind('data.styles.iconColor');
   margin-top: 6px;
   flex-shrink: 0;
 }
@@ -200,11 +224,11 @@ const closePopup = () => {
   border-top: 1px solid #e5e5e5;
   display: flex;
   justify-content: flex-end;
-  background-color: #f8f9fa;
+  background-color: v-bind('data.styles.backgroundColor');
 }
 
 .ok-btn {
-  background-color: #031358;
+  background-color: v-bind('data.styles.primaryColor');
   color: white;
   border: none;
   padding: 10px 24px;
@@ -215,7 +239,7 @@ const closePopup = () => {
 }
 
 .ok-btn:hover {
-  background-color: #0056b3;
+  background-color: v-bind('data.styles.hoverColor');
 }
 
 /* Responsive */

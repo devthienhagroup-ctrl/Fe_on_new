@@ -2,38 +2,21 @@
   <div class="intro-section" :style="backgroundStyle">
     <div class="intro-container">
       <div class="intro-header">
-        <img src="/imgs/logoTHG.png" alt="Thiên Hà Group" class="intro-logo">
+        <img src="/imgs/logoTHG.png" alt="Logo Thiên Hà Group" class="intro-logo">
         <h1 class="intro-title">
-          <span class="title-line">Cùng Thiên Hà Group mở rộng mạng lưới –</span>
-          <span class="title-line">Chung tay phát triển hệ thống chi nhánh BĐS trên toàn quốc</span>
+          <span class="title-line">{{ config.titleLine1 }}</span>
+          <span class="title-line">{{ config.titleLine2 }}</span>
         </h1>
       </div>
 
       <div class="intro-content">
-        <p class="intro-text">
-          <b>Thiên Hà Group</b> hướng đến mục tiêu phát triển một hệ sinh thái kinh doanh bất động sản bền vững – nơi giá trị
-          tài sản được mở rộng, vận hành minh bạch và tạo ra lợi nhuận ổn định cho nhà đầu tư.
-          Chúng tôi đang mở cơ hội góp vốn mở chi nhánh mới, dành cho những cá nhân & đối tác muốn đồng hành phát triển
-          cùng doanh nghiệp trong giai đoạn mở rộng quy mô.
-        </p>
-
-        <p class="intro-text">
-          Với mỗi chi nhánh triển khai, Thiên Hà Group sẽ công bố kế hoạch kinh doanh, dự toán dòng tiền, tỷ suất lợi
-          nhuận dự kiến và báo cáo theo từng giai đoạn, đảm bảo nhà đầu tư dễ dàng nắm bắt hiệu quả hoạt động của từng
-          dự án. Tỷ lệ lợi nhuận và phương án chia sẽ được quy định rõ trong từng dự án chi tiết – minh bạch, tách bạch,
-          dễ theo dõi.
-        </p>
-
-        <p class="intro-text">
-          Chúng tôi cam kết luôn đặt hiệu quả đầu tư & sự an toàn của nguồn vốn lên hàng đầu. Mọi dự án đều được triển
-          khai theo quy trình rõ ràng, có hợp đồng pháp lý ràng buộc, hệ thống báo cáo minh bạch, cùng chuyên môn vận
-          hành từ đội ngũ giàu kinh nghiệm.
-        </p>
-
+        <div class="rich-text-editor-wrapper">
+        <div class="intro-text tiptap" v-html="config.contentHTML"></div>
+      </div>
         <div class="benefits-section">
-          <h3 class="benefits-title">Vì sao nên góp vốn cùng Thiên Hà Group?</h3>
+          <h3 class="benefits-title">{{ config.benefitsTitle }}</h3>
           <div class="benefits-grid">
-            <div class="benefit-card" v-for="(benefit, index) in benefits" :key="index"
+            <div class="benefit-card" v-for="(benefit, index) in config.benefits" :key="index"
                  @mouseenter="hoveredBenefit = index" @mouseleave="hoveredBenefit = null">
               <div class="benefit-card-inner">
                 <div class="benefit-icon">
@@ -47,7 +30,7 @@
             </div>
             <div class="benefit-card">
               <div class="benefit-card-inner">
-                <img src="/imgs/logoTHG.png" alt="Thiên Hà Group">
+                <img src="/imgs/logoTHG.png" alt="Logo Thiên Hà Group">
               </div>
             </div>
           </div>
@@ -58,12 +41,110 @@
 </template>
 
 <script setup>
-import {ref, onMounted, onUnmounted, computed} from 'vue'
+import {ref, computed} from 'vue'
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
 
-// Sử dụng ảnh nền thay vì gradient
+// CONFIG OBJECT
+let config = {
+  // Logo
+
+  // Title
+  titleLine1: 'Cùng Thiên Hà Group mở rộng mạng lưới –',
+  titleLine2: 'Chung tay phát triển hệ thống chi nhánh BĐS trên toàn quốc',
+
+  // Background
+  backgroundImage: '/imgs/bg-investment.jpg',
+
+  // Content HTML - mỗi thẻ p là một đoạn văn
+  contentHTML: `
+<p><b>Thiên Hà Group</b> hướng đến mục tiêu phát triển một hệ sinh thái kinh doanh bất động sản bền vững – nơi giá trị tài sản được mở rộng, vận hành minh bạch và tạo ra lợi nhuận ổn định cho nhà đầu tư. Chúng tôi đang mở cơ hội góp vốn mở chi nhánh mới, dành cho những cá nhân & đối tác muốn đồng hành phát triển cùng doanh nghiệp trong giai đoạn mở rộng quy mô.</p>
+<p>Với mỗi chi nhánh triển khai, Thiên Hà Group sẽ công bố kế hoạch kinh doanh, dự toán dòng tiền, tỷ suất lợi nhuận dự kiến và báo cáo theo từng giai đoạn, đảm bảo nhà đầu tư dễ dàng nắm bắt hiệu quả hoạt động của từng dự án. Tỷ lệ lợi nhuận và phương án chia sẽ được quy định rõ trong từng dự án chi tiết – minh bạch, tách bạch, dễ theo dõi.</p>
+<p>Chúng tôi cam kết luôn đặt hiệu quả đầu tư & sự an toàn của nguồn vốn lên hàng đầu. Mọi dự án đều được triển khai theo quy trình rõ ràng, có hợp đồng pháp lý ràng buộc, hệ thống báo cáo minh bạch, cùng chuyên môn vận hành từ đội ngũ giàu kinh nghiệm.</p>
+  `,
+
+  // Benefits section
+  benefitsTitle: 'Vì sao nên góp vốn cùng Thiên Hà Group?',
+  benefits: [
+    {
+      icon: 'fa-chart-line',
+      heading: 'Mở rộng chi nhánh tiềm năng',
+      description: 'Mở rộng chi nhánh ở các khu vực tiềm năng – dữ liệu cập nhật động theo từng đợt phát hành'
+    },
+    {
+      icon: 'fa-file-invoice-dollar',
+      heading: 'Minh bạch tài chính',
+      description: 'Minh bạch dòng tiền, báo cáo định kỳ rõ ràng'
+    },
+    {
+      icon: 'fa-hand-holding-usd',
+      heading: 'Chính sách lợi nhuận rõ ràng',
+      description: 'Mỗi dự án đều có chính sách lợi nhuận riêng, tỷ lệ chia cụ thể – công khai ngay trong trang chi tiết'
+    },
+    {
+      icon: 'fa-handshake',
+      heading: 'Đồng hành dài hạn',
+      description: 'Đồng hành dài hạn cùng doanh nghiệp bất động sản đang tăng trưởng mạnh'
+    },
+    {
+      icon: 'fa-sitemap',
+      heading: 'Đa dạng hóa đầu tư',
+      description: 'Cơ hội sở hữu phần lợi nhuận từ nhiều chi nhánh khác nhau nếu đầu tư đa dự án'
+    }
+  ],
+
+  // CSS Properties
+  styles: {
+    // Colors
+    primaryColor: '#fbbf24',
+    textColor: 'white',
+
+    // Background
+    overlayOpacity: 0.6,
+    contentBgOpacity: 0.1,
+    contentBorderOpacity: 0.2,
+
+    // Spacing
+    sectionPadding: '50px 0',
+    mobileSectionPadding: '30px 0',
+    contentPadding: '30px',
+    mobileContentPadding: '20px',
+
+    // Typography
+    titleFontSize: '2.2rem',
+    mobileTitleFontSize: '1.6rem',
+    smallMobileTitleFontSize: '1.4rem',
+    textFontSize: '1.1rem',
+    mobileTextFontSize: '1rem',
+    benefitsTitleFontSize: '1.4rem',
+    benefitHeadingFontSize: '1.1rem',
+    benefitDescriptionFontSize: '0.95rem',
+
+    // Sizes
+    logoHeight: '80px',
+    mobileLogoHeight: '60px',
+    benefitCardMaxHeight: '150px',
+    benefitIconSize: '1.8rem',
+    mobileBenefitIconSize: '1.5rem',
+
+    // Effects
+    blurIntensity: '10px',
+    hoverTransform: 'translateY(-5px)'
+  }
+};
+
+const props = defineProps({
+  sectionData: Object
+});
+
+if(props.sectionData) {
+  config = props.sectionData;
+  console.log("Đã lấy data từ cha");
+}
+
+// Computed background style
 const backgroundStyle = computed(() => {
   return {
-    backgroundImage: 'url(/imgs/bg-investment.jpg)',
+    backgroundImage: `url(${baseImgaeUrl+config.backgroundImage})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundAttachment: 'fixed',
@@ -71,36 +152,8 @@ const backgroundStyle = computed(() => {
   };
 });
 
-// Dữ liệu lợi ích
+// Reactive hover state
 const hoveredBenefit = ref(null);
-
-const benefits = [
-  {
-    icon: 'fa-chart-line',
-    heading: 'Mở rộng chi nhánh tiềm năng',
-    description: 'Mở rộng chi nhánh ở các khu vực tiềm năng – dữ liệu cập nhật động theo từng đợt phát hành'
-  },
-  {
-    icon: 'fa-file-invoice-dollar',
-    heading: 'Minh bạch tài chính',
-    description: 'Minh bạch dòng tiền, báo cáo định kỳ rõ ràng'
-  },
-  {
-    icon: 'fa-hand-holding-usd',
-    heading: 'Chính sách lợi nhuận rõ ràng',
-    description: 'Mỗi dự án đều có chính sách lợi nhuận riêng, tỷ lệ chia cụ thể – công khai ngay trong trang chi tiết'
-  },
-  {
-    icon: 'fa-handshake',
-    heading: 'Đồng hành dài hạn',
-    description: 'Đồng hành dài hạn cùng doanh nghiệp bất động sản đang tăng trưởng mạnh'
-  },
-  {
-    icon: 'fa-sitemap',
-    heading: 'Đa dạng hóa đầu tư',
-    description: 'Cơ hội sở hữu phần lợi nhuận từ nhiều chi nhánh khác nhau nếu đầu tư đa dự án'
-  }
-];
 </script>
 
 <style scoped>
@@ -208,6 +261,14 @@ const benefits = [
   margin-bottom: 20px;
   text-align: justify;
   animation: fadeIn 0.8s ease-out 0.8s both;
+}
+
+.intro-text p {
+  margin-bottom: 20px;
+}
+
+.intro-text p:last-child {
+  margin-bottom: 0;
 }
 
 @keyframes fadeIn {

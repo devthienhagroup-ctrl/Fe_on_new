@@ -74,7 +74,7 @@ const user_info = ref({
 const parseAddress = (address) => {
   if (!address) return { detailAddress: "", ward: "", province: "" };
 
-  const parts = address.split('/');
+  const parts = address.split('}|').map(part => part.trim());
   return {
     detailAddress: parts[0] || "",
     ward: parts[1] || "",

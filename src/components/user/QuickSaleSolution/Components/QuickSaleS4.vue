@@ -1,35 +1,64 @@
 <template>
-  <div class="section section4">
-    <div class="st-title">
+  <div
+      class="section section4"
+      :style="{
+      padding: sectionData.styles.section.padding,
+      marginBottom: sectionData.styles.section.marginBottom,
+      maxWidth: sectionData.styles.section.maxWidth
+    }"
+  >
+    <div class="st-title" :style="{ width: sectionData.styles.titleWrapper.width }">
       <TitleComponent
-          :circle-size="100"
-          :icon-height="109"
-          :icon-width="109"
-          :order-number="4"
-          component-height="80px"
-          component-width="100%"
-          icon-url="/imgs/icon-danh-gia-giao-dich.png"
-          title="Đánh giá giao dịch thực tế"
-          :is-right="true"
+          :circle-size="sectionData.title.circleSize"
+          :icon-height="sectionData.title.iconHeight"
+          :icon-width="sectionData.title.iconWidth"
+          :order-number="sectionData.title.orderNumber"
+          :component-height="sectionData.title.componentHeight"
+          :component-width="sectionData.title.componentWidth"
+          :icon-url="baseImgaeUrl+sectionData.title.iconUrl"
+          :title="sectionData.title.text"
+          :is-right="sectionData.title.isRight"
       >
       </TitleComponent>
     </div>
     <div class="main-content-wrapper">
-      <div class="left-content-section fade-left">
-        <img src="/imgs/anh-danh-gia-giao-dich-1.png" alt="dgsb">
+      <div class="left-content-section" :class="sectionData.content.leftImage.class">
+        <img
+            :src="baseImgaeUrl+sectionData.content.leftImage.url"
+            :alt="sectionData.content.leftImage.alt"
+        >
       </div>
 
-      <div class="right-content-section">
-        <div class="text-content-wrapper">
-          <div class="text-content fade-right">
-            <p>
-              Sau khi khảo sát, đội ngũ chuyên môn sẽ cập nhật lại giá trị thực tế của bất động sản – đảm bảo mức giá
-              vừa cạnh tranh, vừa giúp chủ nhà đạt lợi nhuận tối ưu khi giao dịch.
-            </p>
+      <div class="right-content-section" :style="{ paddingRight: sectionData.styles.rightSection.paddingRight }">
+        <div
+            class="text-content-wrapper"
+            :class="sectionData.content.textContent.wrapperClass"
+            :style="{
+            padding: sectionData.content.textContent.padding,
+            border: `3px solid ${sectionData.content.textContent.borderColor}`,
+            borderLeft: '0',
+            borderTopRightRadius: sectionData.content.textContent.borderRadius,
+            backgroundColor: sectionData.content.textContent.backgroundColor
+          }"
+        >
+          <div class="text-content">
+            <div class="rich-text-editor-wrapper">
+              <div class="tiptap" v-html="sectionData.content.textContent.paragraph"
+                  :style="{
+              lineHeight: sectionData.styles.text.lineHeight,
+              fontSize: sectionData.styles.text.fontSize,
+              color: sectionData.styles.text.color,
+              textAlign: sectionData.styles.text.textAlign
+              }">
+              </div>
+            </div>
           </div>
         </div>
-        <div class="img-right fade-up">
-          <img src="/imgs/anh-danh-gia-giao-dich-2.png" alt="">
+        <div class="img-right" :class="sectionData.content.rightImage.class">
+          <img
+              :src="baseImgaeUrl+sectionData.content.rightImage.url"
+              :alt="sectionData.content.rightImage.alt"
+          >
         </div>
       </div>
     </div>
@@ -38,17 +67,87 @@
 
 <script setup>
 import TitleComponent from "./TitleQickSale.vue";
+import {ref} from 'vue';
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
+
+// Dữ liệu động
+let sectionData = ref({
+  id: "section4",
+  title: {
+    orderNumber: 4,
+    text: "Đánh giá giao dịch thực tế",
+    iconUrl: "/imgs/icon-danh-gia-giao-dich.png",
+    circleSize: 100,
+    iconWidth: 109,
+    iconHeight: 109,
+    isRight: true,
+    componentWidth: "100%",
+    componentHeight: "80px"
+  },
+  content: {
+    leftImage: {
+      url: "/imgs/anh-danh-gia-giao-dich-1.png",
+      alt: "dgsb",
+      class: "fade-left"
+    },
+    textContent: {
+      paragraph: "Sau khi khảo sát, đội ngũ chuyên môn sẽ cập nhật lại giá trị thực tế của bất động sản – đảm bảo mức giá vừa cạnh tranh, vừa giúp chủ nhà đạt lợi nhuận tối ưu khi giao dịch.",
+      wrapperClass: "text-content-wrapper fade-right",
+      borderColor: "#031358",
+      backgroundColor: "white",
+      borderRadius: "50px",
+      padding: "30px 40px"
+    },
+    rightImage: {
+      url: "/imgs/anh-danh-gia-giao-dich-2.png",
+      alt: "",
+      class: "img-right fade-up"
+    }
+  },
+  styles: {
+    section: {
+      padding: "50px 20px",
+      marginBottom: "40px",
+      maxWidth: "1400px"
+    },
+    titleWrapper: {
+      width: "40%",
+      mobileWidth: "100%"
+    },
+    rightSection: {
+      paddingRight: "130px",
+      mobilePaddingRight: "0"
+    },
+    text: {
+      fontSize: "17px",
+      mobileFontSize: "15px",
+      lineHeight: "1.6",
+      color: "#333",
+      textAlign: "justify"
+    },
+    dashedBorder: {
+      color: "#C2CBF0",
+      width: "5px"
+    }
+  }
+});
+
+const props = defineProps({
+  sectionData: Object
+})
+if (props.sectionData) {
+  sectionData = props.sectionData.section4;
+  console.log("Đã nhận được data từ cha")
+}
+
 </script>
 
 <style scoped>
 .section {
-  padding: 50px 20px;
-  margin-bottom: 40px;
-  position: relative;
-  overflow: visible;
-  max-width: 1400px;
   margin-left: auto;
   margin-right: auto;
+  position: relative;
+  overflow: visible;
 }
 
 .main-content-wrapper {
@@ -57,24 +156,17 @@ import TitleComponent from "./TitleQickSale.vue";
 
 .title-component {
   z-index: 1;
-
 }
 
 .st-title {
   display: block;
-  width: 100%;
   margin-left: auto;
 }
-
 
 .text-content-wrapper {
   margin-top: 5px;
   position: relative;
-  padding: 30px 40px;
-  border: 3px solid #031358;
   border-left: 0;
-  border-top-right-radius: 50px;
-  background-color: white;
 }
 
 .text-content-wrapper::before {
@@ -86,7 +178,6 @@ import TitleComponent from "./TitleQickSale.vue";
   height: 155%;
   right: -85px;
   top: -60px;
-
 }
 
 .img-right {
@@ -101,29 +192,15 @@ import TitleComponent from "./TitleQickSale.vue";
   height: 125%;
   left: 24px;
   top: 21px;
-
 }
 
 .right-content-section {
   position: relative;
 }
 
-/*
-.right-content-section::before {
-  content: "";
-  position: absolute;
-  border-right: 5px dashed #C2CBF0;
-  width: 100%;
-  height: 120%;
-  right: 75px;
-  top: -70px;
-}
-*/
-
 .section4 .title-component {
   transform: translateY(-70px);
 }
-
 
 .main-content-wrapper {
   display: flex;
@@ -139,19 +216,10 @@ import TitleComponent from "./TitleQickSale.vue";
   flex: 1;
   min-width: 0;
   z-index: 2;
-  padding-right: 130px;
 }
 
 .left-content-section img {
   width: 100%;
-}
-
-.section4 .text-content p {
-  margin-bottom: 20px;
-  line-height: 1.6;
-  font-size: 17px;
-  color: #333;
-  text-align: justify;
 }
 
 .st-title {
@@ -164,12 +232,9 @@ import TitleComponent from "./TitleQickSale.vue";
 }
 
 /* Responsive Design */
-
-
-
 @media (max-width: 1400px) {
   .st-title {
-    width: 100%;
+    width: v-bind('sectionData.styles.titleWrapper.mobileWidth');
   }
 }
 
@@ -184,7 +249,7 @@ import TitleComponent from "./TitleQickSale.vue";
   }
 
   .img-right img {
-    transform: translate(0,0);
+    transform: translate(0, 0);
     height: 100%;
   }
 
@@ -210,7 +275,6 @@ import TitleComponent from "./TitleQickSale.vue";
     max-width: 80%;
   }
 
-  /* ĐÃ SỬA: Bỏ display: none và thay bằng hiển thị bình thường */
   .text-content-wrapper {
     display: block;
     margin-bottom: 20px;
@@ -255,11 +319,14 @@ import TitleComponent from "./TitleQickSale.vue";
     height: 100%;
   }
 
-  /* Thêm style cho text trên mobile */
   .text-content p {
-    font-size: 16px;
+    font-size: v-bind('sectionData.styles.text.mobileFontSize');
     line-height: 1.5;
     text-align: left;
+  }
+
+  .right-content-section {
+    padding-right: v-bind('sectionData.styles.rightSection.mobilePaddingRight');
   }
 }
 
@@ -274,11 +341,10 @@ import TitleComponent from "./TitleQickSale.vue";
     z-index: 2;
   }
 
-  .section4::before{
+  .section4::before {
     right: 69px;
   }
 
-  /* Tối ưu cho mobile nhỏ */
   .text-content-wrapper {
     padding: 15px;
     margin-bottom: 15px;

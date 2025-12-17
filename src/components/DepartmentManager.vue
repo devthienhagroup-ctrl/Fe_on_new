@@ -13,7 +13,7 @@
 
       <img
           v-if="info.avatarUrl"
-          :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+          :src="' https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
           alt="avatar"
           class="rounded-circle border"
           style="width: 36px; height: 36px; object-fit: cover;"
@@ -38,8 +38,8 @@
               :src="
     previewImage
       || (departmentForm.profileImage
-          ? ` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${departmentForm.profileImage}`
-          : ' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default-image_730.jpg')
+          ? ` https://s3.cloudfly.vn/thg-storage/uploads-public/${departmentForm.profileImage}`
+          : ' https://s3.cloudfly.vn/thg-storage/uploads-public/default-image_730.jpg')
   "
               alt="Department"
               class="avatar-form"
@@ -187,14 +187,14 @@
             <td>{{ String(index + 1).padStart(2, '0') }}</td>
             <td>{{ dept.departmentName }}</td>
             <td>
-              <img :src="` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${dept.profileImage}`" class="avatar-table" />
+              <img :src="` https://s3.cloudfly.vn/thg-storage/uploads-public/${dept.profileImage}`" class="avatar-table" />
             </td>
             <td class="text-truncate address-cell" :title="dept.address">{{ formatAddress(dept.address) }}</td>
             <td>
               <div class="d-flex align-items-center gap-2">
                 <img v-if="dept.manager"
                     class="avatar-small"
-                    :src="dept?.manager?.avatar ? ` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${dept.manager.avatar}` : '/images/default-avatar.png'"
+                    :src="dept?.manager?.avatar ? ` https://s3.cloudfly.vn/thg-storage/uploads-public/${dept.manager.avatar}` : '/images/default-avatar.png'"
                     alt=""
                 />
                 <div>

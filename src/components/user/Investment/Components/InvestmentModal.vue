@@ -3,7 +3,7 @@
     <div class="modal-content" @click.stop>
       <!-- Header sticky -->
       <div class="modal-header sticky-header">
-        <h2 class="modal-title">Góp vốn đầu tư</h2>
+        <h2 class="modal-title">{{ config.modalTitle }}</h2>
         <button class="close-btn" @click="closeModal">
           <i class="fas fa-times"></i>
         </button>
@@ -17,26 +17,26 @@
           <div class="project-details">
             <div class="detail-item">
               <i class="fas fa-clock"></i>
-              <span>Thời gian còn lại: {{ projectData.timeLeft }}</span>
+              <span>{{ config.labels.timeLeft }}: {{ projectData.timeLeft }}</span>
             </div>
             <div class="detail-item">
               <i class="fas fa-money-bill-wave"></i>
-              <span>Tổng vốn cần: {{ formatCurrency(projectData.totalCapital) }}</span>
+              <span>{{ config.labels.totalCapital }}: {{ formatCurrency(projectData.totalCapital) }}</span>
             </div>
             <div class="detail-item">
               <i class="fas fa-chart-line"></i>
-              <span>Tiến độ: {{ projectData.progress }}%</span>
+              <span>{{ config.labels.progress }}: {{ projectData.progress }}%</span>
             </div>
             <div class="detail-item">
               <i class="fas fa-users"></i>
-              <span>{{ projectData.contributors }} người đã góp</span>
+              <span>{{ projectData.contributors }} {{ config.labels.contributors }}</span>
             </div>
           </div>
 
           <!-- Progress bar -->
           <div class="progress-section">
             <div class="progress-info">
-              <span>Tiến độ góp vốn</span>
+              <span>{{ config.labels.fundingProgress }}</span>
               <span>{{ projectData.progress }}%</span>
             </div>
             <div class="progress-bar">
@@ -51,15 +51,15 @@
         <!-- Chọn gói đầu tư -->
         <div class="investment-section">
           <div class="investment-header">
-            <h3 class="section-title">Chọn gói đầu tư</h3>
+            <h3 class="section-title">{{ config.labels.choosePackage }}</h3>
 
             <div class="format-toggle">
-              <span class="toggle-label">Hiển thị số: </span>
+              <span class="toggle-label">{{ config.labels.displayFormat }}: </span>
               <label class="toggle-switch">
                 <input type="checkbox" v-model="useShortFormat">
                 <span class="slider"></span>
               </label>
-              <span class="toggle-label">{{ useShortFormat ? 'Chữ viết' : 'Số nguyên' }}</span>
+              <span class="toggle-label">{{ useShortFormat ? config.labels.wordFormat : config.labels.numberFormat }}</span>
             </div>
           </div>
 
@@ -79,11 +79,11 @@
               </div>
               <div class="package-details">
                 <div class="package-item">
-                  <span class="label">Gói đầu tư:</span>
+                  <span class="label">{{ config.labels.investmentPackage }}:</span>
                   <span class="value">{{ formatCurrency(pkg.goiDauTu, useShortFormat) }}</span>
                 </div>
                 <div class="package-item">
-                  <span class="label">Phần trăm sở hữu:</span>
+                  <span class="label">{{ config.labels.ownershipPercentage }}:</span>
                   <span class="value highlight">{{ pkg.phanTramGoi }}%</span>
                 </div>
               </div>
@@ -93,18 +93,18 @@
 
         <!-- Thông tin thanh toán -->
         <div class="payment-section" v-if="selectedPackage !== null">
-          <h3 class="section-title">Thông tin thanh toán</h3>
+          <h3 class="section-title">{{ config.labels.paymentInfo }}</h3>
           <div class="payment-summary">
             <div class="summary-item">
-              <span class="label">Gói đã chọn:</span>
+              <span class="label">{{ config.labels.selectedPackage }}:</span>
               <span class="value">{{ packagesText[selectedPackage] }}</span>
             </div>
             <div class="summary-item">
-              <span class="label">Số tiền góp:</span>
+              <span class="label">{{ config.labels.contributionAmount }}:</span>
               <span class="value highlight">{{ formatCurrency(packagesData[selectedPackage].goiDauTu) }}</span>
             </div>
             <div class="summary-item">
-              <span class="label">Tỷ lệ sở hữu:</span>
+              <span class="label">{{ config.labels.ownershipRate }}:</span>
               <span class="value">{{ packagesData[selectedPackage].phanTramGoi }}%</span>
             </div>
           </div>
@@ -115,7 +115,7 @@
       <div class="modal-actions">
         <button class="btn btn-secondary" @click="closeModal">
           <i class="fas fa-times"></i>
-          Hủy bỏ
+          {{ config.buttons.cancel }}
         </button>
         <button
             class="btn btn-primary"
@@ -123,7 +123,7 @@
             @click="handlePayment"
         >
           <i class="fas fa-credit-card"></i>
-          Thanh toán ngay
+          {{ config.buttons.payment }}
         </button>
       </div>
     </div>
@@ -131,7 +131,71 @@
 </template>
 
 <script setup>
-import {ref, defineProps, defineEmits, watch} from 'vue'
+import {ref, defineProps, defineEmits, watch, computed} from 'vue'
+
+// Config object
+let config = {
+  modalTitle: 'Góp vốn đầu tư',
+  labels: {
+    timeLeft: 'Thời gian còn lại',
+    totalCapital: 'Tổng vốn cần',
+    progress: 'Tiến độ',
+    contributors: 'người đã góp',
+    fundingProgress: 'Tiến độ góp vốn',
+    choosePackage: 'Chọn gói đầu tư',
+    displayFormat: 'Hiển thị số',
+    wordFormat: 'Chữ viết',
+    numberFormat: 'Số nguyên',
+    investmentPackage: 'Gói đầu tư',
+    ownershipPercentage: 'Phần trăm sở hữu',
+    paymentInfo: 'Thông tin thanh toán',
+    selectedPackage: 'Gói đã chọn',
+    contributionAmount: 'Số tiền góp',
+    ownershipRate: 'Tỷ lệ sở hữu'
+  },
+  buttons: {
+    cancel: 'Hủy bỏ',
+    payment: 'Thanh toán ngay'
+  },
+  styles: {
+    colors: {
+      primary: '#2563eb',
+      primaryDark: '#031358',
+      secondary: '#f1f5f9',
+      success: '#10b981',
+      successDark: '#059669',
+      danger: '#dc2626',
+      textPrimary: '#031358',
+      textSecondary: '#475569',
+      textMuted: '#64748b',
+      border: '#e2e8f0',
+      background: '#f8faff',
+      white: '#ffffff'
+    },
+    gradients: {
+      header: 'linear-gradient(135deg, #031358, #2563eb)',
+      button: 'linear-gradient(135deg, #2563eb, #031358)',
+      buttonHover: 'linear-gradient(135deg, #1e40af, #031358)',
+      progressBar: 'linear-gradient(90deg, #2563eb, #031358)',
+      selectedPackage: 'linear-gradient(135deg, #f0f7ff, #e6f0ff)'
+    },
+    sizes: {
+      borderRadius: '12px',
+      borderRadiusSmall: '8px',
+      borderRadiusRound: '50%',
+      fontSizeTitle: '1.5rem',
+      fontSizeSection: '1.2rem',
+      fontSizeNormal: '0.95rem',
+      fontSizeSmall: '0.85rem'
+    },
+    shadows: {
+      modal: '0 20px 60px rgba(0, 0, 0, 0.3)',
+      button: '0 4px 12px rgba(37, 99, 235, 0.3)',
+      packageHover: '0 4px 12px rgba(37, 99, 235, 0.1)',
+      packageSelected: '0 4px 15px rgba(37, 99, 235, 0.15)'
+    }
+  }
+}
 
 // Props
 const props = defineProps({
@@ -148,9 +212,15 @@ const props = defineProps({
       progress: 0,
       contributors: 0
     })
-  }
+  },
+  sectionData: Object
 })
 
+
+if(props.sectionData) {
+  config = props.sectionData;
+  console.log("Đã lấy data từ cha");
+}
 // Emits
 const emit = defineEmits(['close', 'payment'])
 
@@ -195,18 +265,12 @@ const packagesData = ref([
 ])
 
 // Text hiển thị cho các gói
-const packagesText = ref([
-  "Gói 20 triệu - 1%",
-  "Gói 30 triệu - 1,5%",
-  "Gói 50 triệu - 2,5%",
-  "Gói 70 triệu - 3,5%",
-  "Gói 100 triệu - 5%",
-  "Gói 150 triệu - 7,5%",
-  "Gói 200 triệu - 10%",
-  "Gói 300 triệu - 15%"
-])
-
-
+const packagesText = computed(() => {
+  return packagesData.value.map(pkg => {
+    const amountInMillions = pkg.goiDauTu / 1000000;
+    return `Gói ${amountInMillions} triệu - ${pkg.phanTramGoi}%`;
+  });
+})
 
 // Theo dõi sự thay đổi của visible prop
 watch(() => props.visible, (newVal) => {
@@ -281,13 +345,13 @@ const formatCurrency = (amount, useShortFormat = false) => {
 
 .modal-content {
   background: white;
-  border-radius: 12px;
+  border-radius: v-bind('config.styles.sizes.borderRadius');
   width: 100%;
   max-width: 800px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: v-bind('config.styles.shadows.modal');
 }
 
 /* Sticky Header */
@@ -296,10 +360,10 @@ const formatCurrency = (amount, useShortFormat = false) => {
   justify-content: space-between;
   align-items: center;
   padding: 25px 30px;
-  border-bottom: 1px solid #e2e8f0;
-  background: linear-gradient(135deg, #031358, #2563eb);
-  color: white;
-  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid v-bind('config.styles.colors.border');
+  background: v-bind('config.styles.gradients.header');
+  color: v-bind('config.styles.colors.white');
+  border-radius: v-bind('config.styles.sizes.borderRadius') v-bind('config.styles.sizes.borderRadius') 0 0;
 }
 
 .sticky-header {
@@ -310,18 +374,18 @@ const formatCurrency = (amount, useShortFormat = false) => {
 
 .modal-title {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: v-bind('config.styles.sizes.fontSizeTitle');
   font-weight: 600;
 }
 
 .close-btn {
   background: none;
   border: none;
-  color: white;
+  color: v-bind('config.styles.colors.white');
   font-size: 1.3rem;
   cursor: pointer;
   padding: 5px;
-  border-radius: 50%;
+  border-radius: v-bind('config.styles.sizes.borderRadiusRound');
   width: 35px;
   height: 35px;
   display: flex;
@@ -357,7 +421,7 @@ const formatCurrency = (amount, useShortFormat = false) => {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #2563eb, #031358);
+  background: v-bind('config.styles.gradients.progressBar');
   border-radius: 4px;
   border: 2px solid #f1f5f9;
 }
@@ -369,11 +433,11 @@ const formatCurrency = (amount, useShortFormat = false) => {
 /* Project Info */
 .project-info {
   padding: 25px 30px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid v-bind('config.styles.colors.border');
 }
 
 .project-name {
-  color: #031358;
+  color: v-bind('config.styles.colors.textPrimary');
   margin: 0 0 15px 0;
   font-size: 1.3rem;
   font-weight: 600;
@@ -390,21 +454,21 @@ const formatCurrency = (amount, useShortFormat = false) => {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #475569;
-  font-size: 0.95rem;
+  color: v-bind('config.styles.colors.textSecondary');
+  font-size: v-bind('config.styles.sizes.fontSizeNormal');
 }
 
 .detail-item i {
-  color: #2563eb;
+  color: v-bind('config.styles.colors.primary');
   width: 16px;
 }
 
 /* Progress Bar */
 .progress-section {
-  background: #f8faff;
+  background: v-bind('config.styles.colors.background');
   padding: 15px;
-  border-radius: 8px;
-  border-left: 4px solid #2563eb;
+  border-radius: v-bind('config.styles.sizes.borderRadiusSmall');
+  border-left: 4px solid v-bind('config.styles.colors.primary');
 }
 
 .progress-info {
@@ -413,7 +477,7 @@ const formatCurrency = (amount, useShortFormat = false) => {
   align-items: center;
   margin-bottom: 8px;
   font-size: 0.9rem;
-  color: #475569;
+  color: v-bind('config.styles.colors.textSecondary');
 }
 
 .progress-bar {
@@ -425,7 +489,7 @@ const formatCurrency = (amount, useShortFormat = false) => {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #2563eb, #031358);
+  background: v-bind('config.styles.gradients.progressBar');
   border-radius: 4px;
   transition: width 0.5s ease;
 }
@@ -433,7 +497,7 @@ const formatCurrency = (amount, useShortFormat = false) => {
 /* Investment Section */
 .investment-section {
   padding: 25px 30px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid v-bind('config.styles.colors.border');
 }
 
 .investment-header {
@@ -442,9 +506,9 @@ const formatCurrency = (amount, useShortFormat = false) => {
 }
 
 .section-title {
-  color: #031358;
+  color: v-bind('config.styles.colors.textPrimary');
   margin: 0 0 20px 0;
-  font-size: 1.2rem;
+  font-size: v-bind('config.styles.sizes.fontSizeSection');
   font-weight: 600;
 }
 
@@ -457,7 +521,7 @@ const formatCurrency = (amount, useShortFormat = false) => {
 
 .toggle-label {
   font-weight: 500;
-  color: #475569;
+  color: v-bind('config.styles.colors.textSecondary');
   font-size: 0.9rem;
 }
 
@@ -499,7 +563,7 @@ const formatCurrency = (amount, useShortFormat = false) => {
 }
 
 input:checked + .slider {
-  background-color: #2563eb;
+  background-color: v-bind('config.styles.colors.primary');
 }
 
 input:checked + .slider:before {
@@ -513,24 +577,24 @@ input:checked + .slider:before {
 }
 
 .package-card {
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
+  border: 2px solid v-bind('config.styles.colors.border');
+  border-radius: v-bind('config.styles.sizes.borderRadiusSmall');
   padding: 18px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: white;
+  background: v-bind('config.styles.colors.white');
 }
 
 .package-card:hover {
-  border-color: #2563eb;
+  border-color: v-bind('config.styles.colors.primary');
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+  box-shadow: v-bind('config.styles.shadows.packageHover');
 }
 
 .package-card.selected {
-  border-color: #2563eb;
-  background: linear-gradient(135deg, #f0f7ff, #e6f0ff);
-  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.15);
+  border-color: v-bind('config.styles.colors.primary');
+  background: v-bind('config.styles.gradients.selectedPackage');
+  box-shadow: v-bind('config.styles.shadows.packageSelected');
 }
 
 .package-header {
@@ -541,16 +605,16 @@ input:checked + .slider:before {
 }
 
 .package-name {
-  color: #031358;
+  color: v-bind('config.styles.colors.textPrimary');
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
 }
 
 .checkmark {
-  background: #10b981;
-  color: white;
-  border-radius: 50%;
+  background: v-bind('config.styles.colors.success');
+  color: v-bind('config.styles.colors.white');
+  border-radius: v-bind('config.styles.sizes.borderRadiusRound');
   width: 24px;
   height: 24px;
   display: flex;
@@ -572,32 +636,32 @@ input:checked + .slider:before {
 }
 
 .package-item .label {
-  color: #64748b;
-  font-size: 0.85rem;
+  color: v-bind('config.styles.colors.textMuted');
+  font-size: v-bind('config.styles.sizes.fontSizeSmall');
 }
 
 .package-item .value {
-  color: #031358;
+  color: v-bind('config.styles.colors.textPrimary');
   font-weight: 500;
   font-size: 0.9rem;
 }
 
 .package-item .value.highlight {
-  color: #059669;
+  color: v-bind('config.styles.colors.successDark');
   font-weight: 600;
 }
 
 /* Payment Section */
 .payment-section {
   padding: 25px 30px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid v-bind('config.styles.colors.border');
 }
 
 .payment-summary {
-  background: #f8faff;
+  background: v-bind('config.styles.colors.background');
   padding: 20px;
-  border-radius: 8px;
-  border-left: 4px solid #2563eb;
+  border-radius: v-bind('config.styles.sizes.borderRadiusSmall');
+  border-left: 4px solid v-bind('config.styles.colors.primary');
 }
 
 .summary-item {
@@ -612,17 +676,17 @@ input:checked + .slider:before {
 }
 
 .summary-item .label {
-  color: #475569;
+  color: v-bind('config.styles.colors.textSecondary');
   font-weight: 500;
 }
 
 .summary-item .value {
-  color: #031358;
+  color: v-bind('config.styles.colors.textPrimary');
   font-weight: 600;
 }
 
 .summary-item .value.highlight {
-  color: #dc2626;
+  color: v-bind('config.styles.colors.danger');
   font-size: 1.1rem;
 }
 
@@ -632,21 +696,21 @@ input:checked + .slider:before {
   display: flex;
   gap: 15px;
   justify-content: flex-end;
-  background: #f8faff;
-  border-radius: 0 0 12px 12px;
+  background: v-bind('config.styles.colors.background');
+  border-radius: 0 0 v-bind('config.styles.sizes.borderRadius') v-bind('config.styles.sizes.borderRadius');
 }
 
 .btn {
   padding: 12px 24px;
   border: none;
-  border-radius: 8px;
+  border-radius: v-bind('config.styles.sizes.borderRadiusSmall');
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.95rem;
+  font-size: v-bind('config.styles.sizes.fontSizeNormal');
 }
 
 .btn:disabled {
@@ -656,8 +720,8 @@ input:checked + .slider:before {
 }
 
 .btn-secondary {
-  background: #f1f5f9;
-  color: #475569;
+  background: v-bind('config.styles.colors.secondary');
+  color: v-bind('config.styles.colors.textSecondary');
 }
 
 .btn-secondary:hover {
@@ -666,14 +730,14 @@ input:checked + .slider:before {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #2563eb, #031358);
-  color: white;
+  background: v-bind('config.styles.gradients.button');
+  color: v-bind('config.styles.colors.white');
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1e40af, #031358);
+  background: v-bind('config.styles.gradients.buttonHover');
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  box-shadow: v-bind('config.styles.shadows.button');
 }
 
 /* Responsive */

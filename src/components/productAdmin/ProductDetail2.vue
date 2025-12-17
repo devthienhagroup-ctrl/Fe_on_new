@@ -614,7 +614,7 @@ import Spam from "./Spam.vue";
 
 const thumbnailImage = computed(() => {
   return asset.anhMacDinh
-      || 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg';
+      || 'https://s3.cloudfly.vn/thg-storage/uploads-public/default.jpg';
 });
 
 async function loadDetail(id) {
@@ -637,7 +637,7 @@ const typeColor = (type) => {
 
 const lockedImage = computed(() => {
   return asset.anhMacDinh
-      || 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg';
+      || 'https://s3.cloudfly.vn/thg-storage/uploads-public/default.jpg';
 });
 
 

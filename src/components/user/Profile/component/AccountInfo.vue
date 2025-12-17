@@ -7,7 +7,7 @@
         <div class="avatar-section">
           <div class="avatar-container">
             <img
-                :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+user_info.avatar || '/default-avatar.png'"
+                :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/'+user_info.avatar || '/default-avatar.png'"
                 alt="Avatar"
                 class="avatar"
             />
@@ -146,6 +146,7 @@
                     class="avatar-input"
                 />
               </div>
+              <div v-if="errors.avatar" class="error-message">{{ errors.avatar }}</div>
             </div>
 
             <!-- Các trường thông tin -->
@@ -155,15 +156,18 @@
                   type="text"
                   v-model="editedInfo.fullName"
                   class="form-input"
+                  :class="{ 'error': errors.fullName }"
               />
+              <div v-if="errors.fullName" class="error-message">{{ errors.fullName }}</div>
             </div>
 
             <div class="form-group">
               <label>Giới tính</label>
-              <select v-model="editedInfo.gender" class="form-input">
+              <select v-model="editedInfo.gender" class="form-input" :class="{ 'error': errors.gender }">
                 <option :value="true">Nam</option>
                 <option :value="false">Nữ</option>
               </select>
+              <div v-if="errors.gender" class="error-message">{{ errors.gender }}</div>
             </div>
 
             <div class="form-group">
@@ -172,7 +176,9 @@
                   type="tel"
                   v-model="editedInfo.phone"
                   class="form-input"
+                  :class="{ 'error': errors.phone }"
               />
+              <div v-if="errors.phone" class="error-message">{{ errors.phone }}</div>
             </div>
 
             <!-- Địa chỉ trong modal - Chia 2 cột -->
@@ -189,16 +195,10 @@
                   <AddressSelector2
                       v-model="currentAddress"
                   />
+                  <div v-if="errors.address" class="error-message">{{ errors.address }}</div>
+                  <div v-if="errors.ward" class="error-message">{{ errors.ward }}</div>
+                  <div v-if="errors.province" class="error-message">{{ errors.province }}</div>
 
-                  <div class="form-group">
-                    <label>Địa chỉ cụ thể</label>
-                    <textarea
-                        v-model="editedInfo.address"
-                        class="form-input"
-                        rows="3"
-                        placeholder="Nhập địa chỉ cụ thể..."
-                    ></textarea>
-                  </div>
                 </div>
 
                 <div class="address-form-column">
@@ -254,6 +254,8 @@ import AddressSelector2 from "../../../land/my-valuation/components/AddressSelec
 import api from "../../../../api/api.js";
 import {eventBus} from "../../../../assets/js/event-bus.js";
 
+const ADDRESS_DELIMITER = '}|'
+
 // Props nhận từ component cha
 const props = defineProps({
   user_info: {
@@ -280,15 +282,120 @@ const showModal = ref(false)
 const editedInfo = reactive({})
 const isLoading = ref(false)
 const currentAddress = ref('')
+const errors = reactive({})
 
 // Thêm computed property cho avatar URL
 const avatarUrl = computed(() => {
   if (editedInfo.avatarFile) {
     return URL.createObjectURL(editedInfo.avatarFile)
   } else {
-    return ' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + (editedInfo.avatar || props.user_info.avatar)
+    return 'https://s3.cloudfly.vn/thg-storage/uploads-public/' + (editedInfo.avatar || props.user_info.avatar)
   }
 })
+
+// Hàm validate dữ liệu
+const validateForm = () => {
+  // Reset errors
+  Object.keys(errors).forEach(key => delete errors[key])
+
+  let isValid = true
+
+  // Validate Họ tên
+  if (!editedInfo.fullName || editedInfo.fullName.trim() === '') {
+    errors.fullName = 'Họ tên không được để trống'
+    isValid = false
+  } else if (editedInfo.fullName.length < 2) {
+    errors.fullName = 'Họ tên phải có ít nhất 2 ký tự'
+    isValid = false
+  } else if (editedInfo.fullName.length > 50) {
+    errors.fullName = 'Họ tên không được vượt quá 50 ký tự'
+    isValid = false
+  }
+
+  // Validate Giới tính
+  if (editedInfo.gender === undefined || editedInfo.gender === null) {
+    errors.gender = 'Vui lòng chọn giới tính'
+    isValid = false
+  }
+
+  // Validate Số điện thoại
+  const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/
+  if (!editedInfo.phone || editedInfo.phone.trim() === '') {
+    errors.phone = 'Số điện thoại không được để trống'
+    isValid = false
+  } else if (!phoneRegex.test(editedInfo.phone)) {
+    errors.phone = 'Số điện thoại không hợp lệ. Ví dụ: 0912345678'
+    isValid = false
+  }
+
+  // Validate Avatar (nếu có file mới)
+  if (editedInfo.avatarFile) {
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
+    const maxSize = 5 * 1024 * 1024 // 5MB
+
+    if (!allowedTypes.includes(editedInfo.avatarFile.type)) {
+      errors.avatar = 'Chỉ chấp nhận file ảnh (JPEG, JPG, PNG, GIF)'
+      isValid = false
+    } else if (editedInfo.avatarFile.size > maxSize) {
+      errors.avatar = 'Kích thước file không được vượt quá 5MB'
+      isValid = false
+    }
+  }
+
+  // Validate Địa chỉ
+  if (!currentAddress.value || currentAddress.value.trim() === '') {
+    errors.province = 'Vui lòng chọn đầy đủ tỉnh/thành phố và phường/xã'
+    isValid = false
+  } else {
+    const parts = currentAddress.value.split(ADDRESS_DELIMITER).map(part => part.trim())
+
+    // Kiểm tra có đủ 3 phần
+    if (parts.length < 3) {
+      errors.address = 'Vui lòng nhập đầy đủ địa chỉ cụ thể, phường/xã và tỉnh/thành phố'
+      isValid = false
+    } else {
+      const address = parts[0] || ''
+      const ward = parts[1] || ''
+      const province = parts[2] || ''
+
+      // Validate từng phần
+      if (!province) {
+        errors.province = 'Tỉnh/thành phố không được để trống'
+        isValid = false
+      }
+
+      if (!ward) {
+        errors.ward = 'Phường/xã không được để trống'
+        isValid = false
+      }
+
+      if (!address || address.trim() === '') {
+        errors.address = 'Địa chỉ cụ thể không được để trống'
+        isValid = false
+      } else if (address.length < 5) {
+        errors.address = 'Địa chỉ cụ thể phải có ít nhất 5 ký tự'
+        isValid = false
+      }
+    }
+  }
+
+  return isValid
+}
+
+// Hàm hiển thị thông báo lỗi
+const showErrorAlert = (message) => {
+  if (typeof alertSweet2 === 'function') {
+    alertSweet2('error', 'Lỗi', message)
+  } else {
+    // Fallback nếu alertSweet2 không tồn tại
+    Swal.fire({
+      title: 'Lỗi!',
+      text: message,
+      icon: 'error',
+      confirmButtonColor: '#d33'
+    })
+  }
+}
 
 // Hàm handleAvatarChange
 const handleAvatarChange = (event) => {
@@ -326,7 +433,7 @@ const initializeEditedInfo = () => {
       props.user_info.province
     ].filter(Boolean)
 
-    currentAddress.value = addressParts.join('/')
+    currentAddress.value = addressParts.join(ADDRESS_DELIMITER)
   } else {
     currentAddress.value = ''
   }
@@ -335,7 +442,7 @@ const initializeEditedInfo = () => {
 // Watch cho currentAddress từ AddressSelect2
 watch(currentAddress, (newAddress) => {
   if (newAddress) {
-    const parts = newAddress.split('/')
+    const parts = newAddress.split(ADDRESS_DELIMITER).map(part => part.trim())
     if (parts.length >= 3) {
       editedInfo.address = parts[0] || ''
       editedInfo.ward = parts[1] || ''
@@ -345,14 +452,18 @@ watch(currentAddress, (newAddress) => {
     editedInfo.address = ''
     editedInfo.ward = ''
     editedInfo.province = ''
-    // Nếu không, dùng ảnh từ server
-    return 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + (editedInfo.avatar || props.user_info.avatar)
   }
 })
 
 // Xử lý lưu thông tin
 const handleSave = async () => {
   try {
+    // Validate form trước khi gửi
+    if (!validateForm()) {
+      showErrorAlert('Vui lòng kiểm tra lại thông tin đã nhập')
+      return
+    }
+
     isLoading.value = true;
 
     const formData = new FormData();
@@ -361,7 +472,7 @@ const handleSave = async () => {
     formData.append('phone', editedInfo.phone);
 
     // Format địa chỉ theo định dạng mong muốn
-    const formattedAddress = `${editedInfo.address}/${editedInfo.ward}/${editedInfo.province}`
+    const formattedAddress = `${editedInfo.address}${ADDRESS_DELIMITER}${editedInfo.ward}${ADDRESS_DELIMITER}${editedInfo.province}`
     formData.append('address', formattedAddress);
 
     formData.append('oldAddress', editedInfo.oldAddress);
@@ -697,6 +808,11 @@ onMounted(() => {
   box-shadow: 0 0 0 2px rgba(3, 19, 88, 0.1);
 }
 
+.form-input.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+}
+
 .avatar-upload {
   display: flex;
   align-items: center;
@@ -771,6 +887,21 @@ onMounted(() => {
   transform: translateY(-1px);
 }
 
+/* Error message styles */
+.error-message {
+  color: #dc3545;
+  font-size: 14px;
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.error-message::before {
+  content: "⚠";
+  font-size: 12px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .address-container,
@@ -808,27 +939,6 @@ onMounted(() => {
   }
 }
 
-
-.save-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.fa-spin {
-  animation: fa-spin 1s infinite linear;
-}
-
-@keyframes fa-spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Thêm vào phần style hiện có */
 .save-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -862,5 +972,259 @@ onMounted(() => {
   font-size: 14px;
   margin-bottom: 6px;
   color: #000;
+}
+
+/* GHI ĐÈ CSS CHO ADDRESSSELECTOR2 COMPONENT */
+.address-form-column :deep(.address-selector) {
+  width: 100%;
+  font-family: 'Ubuntu', sans-serif !important;
+}
+
+/* Ghi đè layout row */
+.address-form-column :deep(.form-row) {
+  display: block;
+  gap: 15px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.address-form-column :deep(.form-group-half) {
+  flex: 1;
+  min-width: 0; /* Quan trọng: cho phép thu nhỏ */
+}
+
+/* Ghi đè label */
+.address-form-column :deep(label) {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #000;
+  font-size: 15px !important;
+  font-family: 'Ubuntu', sans-serif !important;
+  white-space: normal !important; /* Cho phép xuống dòng */
+}
+
+/* Ghi đè input và select box */
+.address-form-column :deep(.input-box),
+.address-form-column :deep(.select-box) {
+  width: 100% !important;
+  padding: 12px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 6px !important;
+  font-size: 16px !important;
+  font-family: 'Ubuntu', sans-serif !important;
+  box-sizing: border-box !important;
+  background-color: white !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  transition: all 0.3s ease !important;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+/* Ghi đè focus states */
+.address-form-column :deep(.input-box:focus),
+.address-form-column :deep(.select-box:focus),
+.address-form-column :deep(.search-enabled:focus) {
+  outline: none !important;
+  border-color: #031358 !important;
+  box-shadow: 0 0 0 2px rgba(3, 19, 88, 0.1) !important;
+  background-color: white !important;
+}
+
+/* Ghi đè search input */
+.address-form-column :deep(.search-enabled) {
+  cursor: text !important;
+  border-color: #031358 !important;
+  background-color: white !important;
+}
+
+/* Ghi đè disabled state */
+.address-form-column :deep(.select-box.disabled) {
+  background-color: #f8f9fa !important;
+  color: #6c757d !important;
+  cursor: not-allowed !important;
+  opacity: 0.7 !important;
+}
+
+/* Ghi đè dropdown menu */
+.address-form-column :deep(.dropdown-menu-box) {
+  position: absolute !important;
+  z-index: 1000 !important;
+  width: 100% !important;
+  background: white !important;
+  border: 1px solid #ddd !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  max-height: 200px !important;
+  overflow-y: auto !important;
+  margin-top: 4px !important;
+}
+
+/* Ghi đè dropdown items */
+.address-form-column :deep(.dropdown-item) {
+  padding: 10px 12px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  font-family: 'Ubuntu', sans-serif !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+  transition: all 0.2s ease !important;
+  white-space: normal !important; /* Cho phép xuống dòng */
+  line-height: 1.4;
+}
+
+.address-form-column :deep(.dropdown-item:hover) {
+  background: #031358 !important;
+  color: white !important;
+}
+
+.address-form-column :deep(.dropdown-item:last-child) {
+  border-bottom: none !important;
+}
+
+/* Ghi đè empty state */
+.address-form-column :deep(.empty) {
+  padding: 12px !important;
+  text-align: center !important;
+  color: #666 !important;
+  font-size: 14px !important;
+  font-family: 'Ubuntu', sans-serif !important;
+}
+
+/* Ghi đè select wrapper */
+.address-form-column :deep(.select-wrapper) {
+  position: relative !important;
+  width: 100% !important;
+}
+
+/* ERROR STATES - Đồng bộ với validation cha */
+.address-form-column :deep(.input-box.error),
+.address-form-column :deep(.select-box.error) {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1) !important;
+}
+
+/* Ghi đè cho street input */
+.address-form-column :deep(.mt-3) {
+  margin-top: 15px !important;
+  width: 100%;
+}
+
+/* Đảm bảo container không bị overflow */
+.address-form-column :deep(.address-selector) {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Responsive cho mobile */
+@media (max-width: 768px) {
+  .address-form-column :deep(.form-row) {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .address-form-column :deep(.form-group-half) {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  .address-form-column :deep(.input-box),
+  .address-form-column :deep(.select-box) {
+    font-size: 14px !important;
+    padding: 10px !important;
+    min-height: 42px;
+  }
+
+  .address-form-column :deep(label) {
+    font-size: 14px !important;
+  }
+
+  .address-form-column :deep(.dropdown-menu-box) {
+    max-height: 180px !important;
+  }
+
+  .address-form-column :deep(.dropdown-item) {
+    padding: 8px 10px !important;
+    font-size: 13px !important;
+  }
+}
+
+/* Custom scrollbar cho dropdown */
+.address-form-column :deep(.dropdown-menu-box) {
+  scrollbar-width: thin;
+  scrollbar-color: #031358 #f1f1f1;
+}
+
+.address-form-column :deep(.dropdown-menu-box::-webkit-scrollbar) {
+  width: 6px;
+}
+
+.address-form-column :deep(.dropdown-menu-box::-webkit-scrollbar-track) {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.address-form-column :deep(.dropdown-menu-box::-webkit-scrollbar-thumb) {
+  background: #031358;
+  border-radius: 3px;
+}
+
+.address-form-column :deep(.dropdown-menu-box::-webkit-scrollbar-thumb:hover) {
+  background: #0020CC;
+}
+
+/* Placeholder styling */
+.address-form-column :deep(.input-box::placeholder),
+.address-form-column :deep(.select-box::placeholder) {
+  color: #999 !important;
+  font-size: 14px !important;
+  font-family: 'Ubuntu', sans-serif !important;
+}
+
+/* Text ellipsis cho selected values */
+.address-form-column :deep(.select-box:not(.search-enabled)) {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Hover states */
+.address-form-column :deep(.select-box:not(.disabled):hover) {
+  border-color: #031358 !important;
+  background-color: #f8f9fa !important;
+}
+
+/* Focus-visible for accessibility */
+.address-form-column :deep(.input-box:focus-visible),
+.address-form-column :deep(.select-box:focus-visible) {
+  outline: 2px solid #031358 !important;
+  outline-offset: 2px !important;
+}
+
+/* Loading state (nếu có) */
+.address-form-column :deep(.loading) {
+  opacity: 0.7;
+  pointer-events: none;
+  position: relative;
+}
+
+.address-form-column :deep(.loading::after) {
+  content: "";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #031358;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translateY(-50%) rotate(0deg); }
+  100% { transform: translateY(-50%) rotate(360deg); }
 }
 </style>

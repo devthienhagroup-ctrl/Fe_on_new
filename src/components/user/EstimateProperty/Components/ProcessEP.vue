@@ -2,10 +2,27 @@
   <div class="quy-trinh-container">
     <!-- Tiêu đề -->
     <div class="header-section fade-up">
-      <h1 class="main-title">Quy trình</h1> <br>
+      <h1
+          class="main-title"
+          :style="{
+          color: processData.styles.mainTitleColor,
+          background: processData.styles.mainTitleBg
+        }"
+      >
+        {{ processData.title }}
+      </h1>
+      <br>
       <div class="subtitle-section">
-        <h2 class="subtitle">7 BƯỚC ĐỊNH GIÁ SƠ BỘ BẤT ĐỘNG SẢN</h2>
-        <div class="underline"></div>
+        <h2
+            class="subtitle"
+            :style="{ color: processData.styles.subtitleColor }"
+        >
+          {{ processData.subtitle }}
+        </h2>
+        <div
+            class="underline"
+            :style="{ background: processData.styles.underlineBg }"
+        ></div>
       </div>
     </div>
 
@@ -13,12 +30,16 @@
     <div class="content-wrapper">
       <!-- Cột trái - Danh sách quy trình -->
       <div class="left-column">
+        <div
+            class="dashed-line-main"
+            :style="{ borderLeftColor: processData.styles.dashedLineColor }"
+        ></div>
         <ProcessStep
-            v-for="step in quyTrinhDinhGia"
-            :key="step.sothutu"
-            :number="step.sothutu"
-            :title="step.tieude"
-            :content="step.noidung"
+            v-for="step in processData.steps"
+            :key="step.id"
+            :number="step.order"
+            :title="step.title"
+            :content="step.content"
             :icon="step.icon"
         />
       </div>
@@ -26,9 +47,13 @@
       <!-- Cột phải - Ảnh -->
       <div class="right-column">
         <img
-            src="/imgs/bg-quy-trinh-7.png"
-            alt="Quy trình định giá bất động sản"
+            :src="baseImgaeUrl+processData.image"
+            :alt="processData.imageAlt"
             class="process-image"
+            :style="{
+              borderRadius: processData.styles.imageBorderRadius,
+              boxShadow: processData.styles.imageShadow
+            }"
         />
       </div>
     </div>
@@ -36,53 +61,109 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import ProcessStep from './ProcessStep.vue'
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
 
-const quyTrinhDinhGia = ref([
-  {
-    sothutu: 1,
-    icon: "fas fa-user-plus",
-    tieude: "Khách hàng đăng ký tài khoản",
-    noidung: "Khách hàng bắt đầu bằng việc tạo tài khoản trên hệ thống. Việc này giúp quản lý thông tin, lịch sử định giá và hỗ trợ quá trình thanh toán nhanh và tiện lợi. Đây là bước đầu tiên để đảm bảo mọi giao dịch đều minh bạch, chuyên nghiệp."
-  },
-  {
-    sothutu: 2,
-    icon: "fas fa-building",
-    tieude: "Nhập thông tin bất động sản",
-    noidung: "Khách hàng cung cấp các thông tin cơ bản về bất động sản như địa chỉ, diện tích, loại hình (đất nền, căn hộ, nhà phố, biệt thự...), hình trong thực tế và hiện trạng. Các dữ liệu này giúp đội ngũ định giá có cơ sở để tiến hành phân tích và đánh giá chính xác."
-  },
-  {
-    sothutu: 3,
-    icon: "fas fa-scale-balanced",
-    tieude: "Định giá sơ bộ",
-    noidung: "Sau khi nhận được kết quả định giá, khách hàng và chuyên viên thống nhất mức giá đề xuất. Việc đồng thuận này giúp toàn bộ kế hoạch triển khai bán hàng sau đó được xây dựng trên cơ sở chính xác, phù hợp với thị trường."
-  },
-  {
-    sothutu: 4,
-    icon: "fas fa-credit-card",
-    tieude: "Thanh toán phí",
-    noidung: "Khách hàng tiến hành thanh toán chi phí định giá theo quy định. Quy trình thanh toán được bảo mật tuyệt đối và hỗ trợ nhiều hình thức khác nhau, đảm bảo thuận tiện – nhanh chóng – an toàn."
-  },
-  {
-    sothutu: 5,
-    icon: "fas fa-file-download",
-    tieude: "Nhận file trên tài khoản",
-    noidung: "Khách hàng tiến hành thanh toán chi phí định giá theo quy định. Quy trình thanh toán được bảo mật tuyệt đối và hỗ trợ nhiều hình thức khác nhau, đảm bảo thuận tiện – nhanh chóng – an toàn."
-  },
-  {
-    sothutu: 6,
-    icon: "fas fa-comment-dots",
-    tieude: "Nhận file qua Zalo",
-    noidung: "Để thuận tiện hơn, khách hàng sẽ được gửi thêm bản báo cáo định giá qua Zalo. Hình thức này giúp người dùng dễ dàng lưu trữ, tra cứu và theo dõi thông tin chuyển đến ở bất cứ đâu."
-  },
-  {
-    sothutu: 7,
-    icon: "fas fa-bolt",
-    tieude: "Đăng ký bán nhanh 30 ngày",
-    noidung: "Khi đã có giá trị định hướng rõ ràng, khách hàng có thể chọn gói dịch vụ \"Đăng ký gói Định giá và Bán Nhanh Bất Động Sản Trong 30 Ngày\". Đây là chương trình hỗ trợ toàn diện giúp khách hàng tiếp cận đúng đối tượng và chốt giao dịch nhanh chóng."
+// Dữ liệu mặc định (có thể thay thế bằng API call sau này)
+let defaultData = {
+  title: "Quy trình",
+  subtitle: "7 BƯỚC ĐỊNH GIÁ SƠ BỘ BẤT ĐỘNG SẢN",
+  image: "/imgs/bg-quy-trinh-7.png",
+  imageAlt: "Quy trình định giá bất động sản",
+  steps: [
+    // ... giữ nguyên các step ...
+  ],
+  styles: {
+    mainTitleBg: "linear-gradient(90deg, #031358, #000a85)",
+    mainTitleColor: "#fff",
+    subtitleColor: "#031358",
+    underlineBg: "linear-gradient(90deg, #031358, #000a85)",
+    dashedLineColor: "#002FFF",
+    imageBorderRadius: "12px",
+    imageShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+    // Thêm styles cho ProcessStep
+    stepStyles: {
+      circle: {
+        border: '2px solid #002FFF',
+        backgroundColor: 'white',
+        color: '#002FFF',
+        fontSize: '20px',
+        width: '60px',
+        height: '60px',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: 'bold',
+        flexShrink: '0',
+        marginTop: '20px'
+      },
+      title: {
+        color: '#031358',
+        fontSize: '20px',
+        height: '68px',
+        paddingLeft: '70px',
+        display: 'flex',
+        alignItems: 'center',
+        fontWeight: 'bold'
+      },
+      border: {
+        borderBottom: '5px solid #002FFF',
+        borderBottomRightRadius: '32px',
+        height: '68px',
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        right: '0',
+        pointerEvents: 'none'
+      },
+      icon: {
+        fontSize: '40px',
+        color: '#002FFF'
+      },
+      dashedLine: {
+        borderLeft: '2px dashed #002FFF',
+        height: '50px',
+        left: '76px',
+        top: '-30px',
+        width: '2px',
+        position: 'absolute'
+      },
+      content: {
+        backgroundColor: 'white',
+        color: '#031358',
+        fontSize: '17px',
+        padding: '20px',
+        marginTop: '30px',
+        marginLeft: '30px',
+        borderRadius: '8px',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+        lineHeight: '1.5',
+        position: 'relative',
+        zIndex: '1'
+      }
+    }
   }
-])
+}
+
+const props = defineProps({
+  sectionData: String
+})
+
+if(props.sectionData) {
+  const sectionData = JSON.parse(props.sectionData);
+  defaultData = sectionData.processData;
+  console.log("Đã lấy dữ liệu từ props", defaultData);
+}
+
+// Dữ liệu động - có thể thay thế bằng API call
+const processData = ref(defaultData)
+
+// Export data để sử dụng ở component khác nếu cần
+defineExpose({
+  processData
+})
 </script>
 
 <style scoped>
@@ -102,8 +183,6 @@ const quyTrinhDinhGia = ref([
 .main-title {
   display: inline-block;
   font-size: 13px;
-  color: #fff;
-  background: linear-gradient(90deg, #031358, #000a85);
   padding: 4px 10px;
   border-radius: 6px;
   font-weight: 600;
@@ -117,7 +196,6 @@ const quyTrinhDinhGia = ref([
 
 .subtitle {
   font-size: 40px;
-  color: #031358;
   font-weight: 700;
   margin: 0;
 }
@@ -127,7 +205,6 @@ const quyTrinhDinhGia = ref([
   height: 3px;
   margin: 6px auto 0;
   border-radius: 5px;
-  background: linear-gradient(90deg, #031358, #000a85);
 }
 
 /* Content Layout */
@@ -146,11 +223,10 @@ const quyTrinhDinhGia = ref([
   position: relative;
 }
 
-.left-column::before {
-  content: "";
+.dashed-line-main {
   width: 2px;
   height: 87%;
-  border-left: 2px dashed #002FFF;
+  border-left: 2px dashed;
   position: absolute;
   left: 30px;
   top: 40px;
@@ -172,8 +248,72 @@ const quyTrinhDinhGia = ref([
   width: 100%;
   height: auto;
   object-fit: contain;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Deep CSS cho ProcessStep component */
+:deep(.circle-number) {
+  border: 2px solid #002FFF !important;
+  background-color: white !important;
+  color: #002FFF !important;
+  font-size: 20px !important;
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: bold !important;
+  flex-shrink: 0 !important;
+  margin-top: 20px !important;
+}
+
+:deep(.title-text) {
+  color: #031358 !important;
+  font-size: 20px !important;
+  height: 68px !important;
+  padding-left: 70px !important;
+  display: flex !important;
+  align-items: center !important;
+  font-weight: bold !important;
+}
+
+:deep(.rectangle-border) {
+  border-bottom: 5px solid #002FFF !important;
+  border-bottom-right-radius: 32px !important;
+  height: 68px !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  pointer-events: none !important;
+}
+
+:deep(.step-icon) {
+  font-size: 40px !important;
+  color: #002FFF !important;
+}
+
+:deep(.dashed-line) {
+  border-left: 2px dashed #002FFF !important;
+  height: 50px !important;
+  left: 76px !important;
+  top: -30px !important;
+  width: 2px !important;
+  position: absolute !important;
+}
+
+:deep(.content-text) {
+  background-color: white !important;
+  color: #031358 !important;
+  font-size: 17px !important;
+  padding: 20px !important;
+  margin-top: 30px !important;
+  margin-left: 30px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  line-height: 1.5 !important;
+  position: relative !important;
+  z-index: 1 !important;
 }
 
 /* Responsive Design - Tablet */
@@ -202,7 +342,7 @@ const quyTrinhDinhGia = ref([
     max-width: 450px;
   }
 
-  .left-column::before {
+  .dashed-line {
     left: 25px;
   }
 }
@@ -229,8 +369,30 @@ const quyTrinhDinhGia = ref([
     max-width: 100%;
   }
 
-  .left-column::before {
+  .dashed-line {
     left: 20px;
+  }
+
+  /* Responsive cho ProcessStep */
+  :deep(.circle-number) {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 18px !important;
+  }
+
+  :deep(.title-text) {
+    font-size: 18px !important;
+    height: 60px !important;
+  }
+
+  :deep(.rectangle-border) {
+    height: 60px !important;
+    border-bottom-right-radius: 60px !important;
+  }
+
+  :deep(.content-text) {
+    font-size: 16px !important;
+    padding: 16px !important;
   }
 }
 
@@ -256,12 +418,11 @@ const quyTrinhDinhGia = ref([
     gap: 25px;
   }
 
-
   .left-column {
     gap: 15px;
   }
 
-  .left-column::before {
+  .dashed-line {
     left: 18px;
     top: 30px;
   }
@@ -272,12 +433,8 @@ const quyTrinhDinhGia = ref([
     font-size: 22px;
   }
 
-
-  .left-column::before {
+  .dashed-line {
     height: 86%;
   }
-
-
-
 }
 </style>

@@ -9,7 +9,7 @@
         <div class="avatar-section">
           <div class="avatar-wrapper">
             <img
-                :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + memberData.avatar"
+                :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/' + memberData.avatar"
                 :alt="memberData.fullName"
                 class="avatar"
             />
@@ -36,7 +36,7 @@
         <div class="avatar-section">
           <div class="avatar-wrapper">
             <img
-                :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + memberData.avatar"
+                :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/' + memberData.avatar"
                 :alt="memberData.fullName"
                 class="avatar"
             />
@@ -62,7 +62,7 @@
         <div class="avatar-section">
           <div class="avatar-wrapper">
             <img
-                :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + memberData.avatar"
+                :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/' + memberData.avatar"
                 :alt="memberData.fullName"
                 class="avatar"
             />

@@ -1,46 +1,328 @@
 <template>
-  <div class="news-section">
-    <h2 class="section-title">TIN TỨC MỚI NHẤT</h2>
-    <div class="divider"></div>
+  <div class="news-section" :style="sectionStyle">
+    <h2 class="section-title" :style="titleStyle">{{ sectionTitle }}</h2>
+    <div class="divider" :style="dividerStyle"></div>
 
-    <div class="carousel-wrapper">
-      <div class="carousel" ref="carouselRef" @scroll="updateProgress">
-        <div v-for="(item, index) in newsArticles" :key="index" class="news-item">
-          <div class="image-wrapper">
-            <img :src="item.image" :alt="item.title" class="news-image" />
-            <span class="date-label">{{ item.date }}</span>
+    <div class="carousel-wrapper" :style="carouselWrapperStyle">
+      <div class="carousel" ref="carouselRef" @scroll="updateProgress" :style="carouselStyle">
+        <div v-for="(item, index) in newsArticles" :key="index" class="news-item" :style="newsItemStyle">
+          <div class="image-wrapper" :style="imageWrapperStyle">
+            <img :src="item.image" :alt="item.title" class="news-image" :style="newsImageStyle" />
+            <span class="date-label" :style="dateLabelStyle">{{ item.date }}</span>
           </div>
 
-          <div class="info">
-            <h3 class="news-title">{{ item.title }}</h3>
-            <span class="category">{{ item.category }}</span>
+          <div class="info" :style="infoStyle">
+            <h3 class="news-title" :style="newsTitleStyle">{{ item.title }}</h3>
+            <span class="category" :style="categoryStyle">{{ item.category }}</span>
           </div>
         </div>
       </div>
 
-      <div class="carousel-controls">
-        <button class="control-btn prev" @click="scrollCarousel(-1)" aria-label="Previous">
+      <div class="carousel-controls" :style="carouselControlsStyle">
+        <button class="control-btn prev" @click="scrollCarousel(-1)" aria-label="Previous" :style="controlBtnStyle">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-        <button class="control-btn next" @click="scrollCarousel(1)" aria-label="Next">
+        <button class="control-btn next" @click="scrollCarousel(1)" aria-label="Next" :style="controlBtnStyle">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
       </div>
 
-      <div class="progress-bar">
-        <div class="progress" :style="{ width: progress + '%' }"></div>
+      <div class="progress-bar" :style="progressBarStyle">
+        <div class="progress" :style="progressStyle"></div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 
+// Config object - có thể quản lý qua CMS
+let config = {
+  sectionTitle: "TIN TỨC MỚI NHẤT",
+  // Colors
+  colors: {
+    primary: '#031358',
+    secondary: '#0629BE',
+    tertiary: '#0628B9',
+    white: '#ffffff',
+    black: '#000000',
+    overlay: 'rgba(0, 0, 0, 0.7)',
+    categoryBg: 'rgba(3, 19, 88, 0.1)',
+    progressBarBg: 'rgba(255, 255, 255, 0.3)',
+    controlBtnBg: 'rgba(255, 255, 255, 0.9)',
+    newsItemBg: 'rgba(255, 255, 255, 0.95)'
+  },
+
+  // Typography
+  typography: {
+    sectionTitleSize: '40px',
+    sectionTitleWeight: '700',
+    newsTitleSize: '20px',
+    newsTitleWeight: '600',
+    categorySize: '14px',
+    categoryWeight: '500',
+    dateLabelSize: '12px',
+    dateLabelWeight: '500'
+  },
+
+  // Spacing
+  spacing: {
+    sectionPadding: '60px 20px',
+    dividerWidth: '50%',
+    dividerMargin: '0 auto 40px auto',
+    carouselGap: '30px',
+    carouselPadding: '10px 20px',
+    newsItemPadding: '10px',
+    infoMarginTop: '12px',
+    categoryPadding: '4px 10px',
+    controlsGap: '20px',
+    controlsMarginTop: '20px',
+    progressBarMarginTop: '20px'
+  },
+
+  // Sizes
+  sizes: {
+    newsItemWidth: '500px',
+    newsImageHeight: '300px',
+    controlBtnSize: '50px',
+    progressBarHeight: '4px'
+  },
+
+  // Border Radius
+  borderRadius: {
+    newsItem: '12px',
+    imageWrapper: '10px',
+    dateLabel: '6px',
+    category: '20px',
+    controlBtn: '50%',
+    progressBar: '10px'
+  },
+
+  // Shadows
+  shadows: {
+    sectionTitle: '0 2px 4px rgba(0, 0, 0, 0.2)',
+    newsItem: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    newsItemHover: '0 8px 20px rgba(0, 0, 0, 0.15)',
+    controlBtn: '0 2px 8px rgba(0, 0, 0, 0.15)',
+    controlBtnHover: '0 4px 12px rgba(0, 0, 0, 0.2)',
+    progress: '0 0 8px rgba(255, 255, 255, 0.5)'
+  },
+
+  // Transitions
+  transitions: {
+    default: 'all 0.3s ease',
+    image: '0.35s ease',
+    progress: 'width 0.2s ease',
+    hoverTransform: 'translateY(-5px)',
+    imageHoverTransform: 'scale(1.05)',
+    controlBtnHoverTransform: 'scale(1.05)',
+    controlBtnActiveTransform: 'scale(0.95)'
+  },
+
+  // Gradients
+  gradients: {
+    sectionBackground: 'linear-gradient(135deg, #0629BE 7%, #031358 22%, #0629BE 56%, #031358 81%, #0628B9 100%)',
+    imageHoverGlow: '0 0 20px rgba(255, 255, 255, 0.4)'
+  },
+
+  // Opacity
+  opacity: {
+    divider: '0.7',
+    backdropFilter: 'blur(4px)'
+  },
+
+  // Responsive
+  responsive: {
+    tabletBreakpoint: '768px',
+    mobileBreakpoint: '480px',
+    tablet: {
+      sectionPadding: '40px 15px',
+      sectionTitleSize: '32px',
+      dividerWidth: '70%',
+      carouselGap: '20px',
+      carouselPadding: '10px',
+      newsItemMinWidth: '280px',
+      newsTitleSize: '18px',
+      controlBtnSize: '44px'
+    },
+    mobile: {
+      sectionTitleSize: '28px',
+      newsItemMinWidth: '260px',
+      newsImageHeight: '180px'
+    }
+  }
+}
+
+const props = defineProps({
+  sectionData: Object
+})
+
+if(props.sectionData) {
+  config = props.sectionData;
+  console.log("Đã nhận props", config)
+}
+
+const sectionTitle = ref(config.sectionTitle);
+// Computed properties for styles
+const sectionStyle = computed(() => ({
+  fontFamily: "'Ubuntu', sans-serif",
+  padding: config.spacing.sectionPadding,
+  background: config.gradients.sectionBackground,
+  textAlign: 'center',
+  color: config.colors.white,
+  position: 'relative'
+}))
+
+const titleStyle = computed(() => ({
+  fontSize: config.typography.sectionTitleSize,
+  fontWeight: config.typography.sectionTitleWeight,
+  marginBottom: '10px',
+  textShadow: config.shadows.sectionTitle
+}))
+
+const dividerStyle = computed(() => ({
+  width: config.spacing.dividerWidth,
+  height: '1px',
+  background: config.colors.white,
+  margin: config.spacing.dividerMargin,
+  opacity: config.opacity.divider,
+  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+}))
+
+const carouselWrapperStyle = computed(() => ({
+  width: '100%',
+  maxWidth: '1360px',
+  margin: '0 auto',
+  position: 'relative'
+}))
+
+const carouselStyle = computed(() => ({
+  display: 'flex',
+  gap: config.spacing.carouselGap,
+  overflowX: 'auto',
+  scrollBehavior: 'smooth',
+  padding: config.spacing.carouselPadding,
+  scrollbarWidth: 'none',
+  msOverflowStyle: 'none'
+}))
+
+const newsItemStyle = computed(() => ({
+  width: config.sizes.newsItemWidth,
+  background: config.colors.newsItemBg,
+  borderRadius: config.borderRadius.newsItem,
+  padding: config.spacing.newsItemPadding,
+  transition: config.transitions.default,
+  boxShadow: config.shadows.newsItem,
+  cursor: 'pointer',
+  flexShrink: '0',
+  position: 'relative'
+}))
+
+const imageWrapperStyle = computed(() => ({
+  position: 'relative',
+  overflow: 'hidden',
+  borderRadius: config.borderRadius.imageWrapper
+}))
+
+const newsImageStyle = computed(() => ({
+  width: '100%',
+  height: config.sizes.newsImageHeight,
+  objectFit: 'cover',
+  transition: config.transitions.image,
+  display: 'block'
+}))
+
+const dateLabelStyle = computed(() => ({
+  position: 'absolute',
+  bottom: '10px',
+  right: '10px',
+  background: config.colors.overlay,
+  padding: '6px 10px',
+  borderRadius: config.borderRadius.dateLabel,
+  color: config.colors.white,
+  fontSize: config.typography.dateLabelSize,
+  fontWeight: config.typography.dateLabelWeight,
+  backdropFilter: `blur(${config.opacity.backdropFilter})`
+}))
+
+const infoStyle = computed(() => ({
+  marginTop: config.spacing.infoMarginTop,
+  textAlign: 'left',
+  padding: '0 5px'
+}))
+
+const newsTitleStyle = computed(() => ({
+  color: config.colors.primary,
+  fontSize: config.typography.newsTitleSize,
+  fontWeight: config.typography.newsTitleWeight,
+  lineHeight: '1.3',
+  marginBottom: '20px',
+  display: '-webkit-box',
+  WebkitLineClamp: '3',
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden'
+}))
+
+const categoryStyle = computed(() => ({
+  display: 'inline-block',
+  marginTop: '6px',
+  fontSize: config.typography.categorySize,
+  color: config.colors.primary,
+  fontWeight: config.typography.categoryWeight,
+  padding: config.spacing.categoryPadding,
+  background: config.colors.categoryBg,
+  borderRadius: config.borderRadius.category,
+  position: 'absolute',
+  bottom: '5px',
+  right: '5px'
+}))
+
+const carouselControlsStyle = computed(() => ({
+  display: 'flex',
+  justifyContent: 'center',
+  gap: config.spacing.controlsGap,
+  marginTop: config.spacing.controlsMarginTop
+}))
+
+const controlBtnStyle = computed(() => ({
+  background: config.colors.controlBtnBg,
+  border: 'none',
+  borderRadius: config.borderRadius.controlBtn,
+  width: config.sizes.controlBtnSize,
+  height: config.sizes.controlBtnSize,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  transition: config.transitions.default,
+  color: config.colors.primary,
+  boxShadow: config.shadows.controlBtn
+}))
+
+const progressBarStyle = computed(() => ({
+  width: '100%',
+  height: config.sizes.progressBarHeight,
+  background: config.colors.progressBarBg,
+  marginTop: config.spacing.progressBarMarginTop,
+  borderRadius: config.borderRadius.progressBar,
+  overflow: 'hidden'
+}))
+
+const progressStyle = computed(() => ({
+  height: '100%',
+  background: config.colors.white,
+  borderRadius: config.borderRadius.progressBar,
+  transition: config.transitions.progress,
+  boxShadow: config.shadows.progress,
+  width: `${progress.value}%`
+}))
+
+// Original data and logic (unchanged)
 const newsArticles = ref([
   {
     title: "Bất động sản Thiên Hà Group vinh dự đón nhận giải thưởng top 10 thương hiệu xuất sắc châu á 2024",
@@ -116,6 +398,7 @@ const newsArticles = ref([
   }
 ])
 
+
 const progress = ref(0)
 const carouselRef = ref(null)
 let autoScrollInterval = null
@@ -143,18 +426,15 @@ const startAutoScroll = () => {
     const el = carouselRef.value
     if (!el) return
 
-    // Kiểm tra xem đã cuộn đến cuối chưa
     if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
-      // Quay lại đầu
       el.scrollTo({
         left: 0,
         behavior: 'smooth'
       })
     } else {
-      // Cuộn tiếp
       scrollCarousel(1)
     }
-  }, 5000) // Cuộn tự động mỗi 5 giây
+  }, 5000)
 }
 
 const stopAutoScroll = () => {
@@ -165,10 +445,8 @@ const stopAutoScroll = () => {
 }
 
 onMounted(() => {
-  // Bắt đầu tự động cuộn sau khi component được mount
   startAutoScroll()
 
-  // Dừng tự động cuộn khi hover vào carousel
   const el = carouselRef.value
   if (el) {
     el.addEventListener('mouseenter', stopAutoScroll)
@@ -183,230 +461,78 @@ onUnmounted(() => {
 
 <style scoped>
 .news-section {
-  font-family: 'Ubuntu', sans-serif;
-  padding: 60px 20px;
-  background: linear-gradient(135deg,
-  #0629BE 7%,
-  #031358 22%,
-  #0629BE 56%,
-  #031358 81%,
-  #0628B9 100%);
-  text-align: center;
-  color: white;
-  position: relative;
-}
-
-.section-title {
-  font-size: 40px;
-  font-weight: 700;
-  margin-bottom: 10px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.divider {
-  width: 50%;
-  height: 1px;
-  background: white;
-  margin: 0 auto 40px auto;
-  opacity: 0.7;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.carousel-wrapper {
-  width: 100%;
-  max-width: 1360px;
-  margin: 0 auto;
-  position: relative;
-}
-
-.carousel {
-  display: flex;
-  gap: 30px;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  padding: 10px 20px;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-}
-
-.carousel::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
-}
-
-.news-item {
-  width: 500px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
-  padding: 10px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  flex-shrink: 0;
-  position: relative;
+  font-family: v-bind('config.fontFamily || "Ubuntu, sans-serif"');
 }
 
 .news-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-}
-
-.image-wrapper {
-  position: relative;
-  overflow: hidden;
-  border-radius: 10px;
-}
-
-.news-image {
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-  transition: 0.35s ease;
-  display: block;
-}
-
-.date-label {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background: rgba(0, 0, 0, 0.7);
-  padding: 6px 10px;
-  border-radius: 6px;
-  color: white;
-  font-size: 12px;
-  font-weight: 500;
-  backdrop-filter: blur(4px);
+  transform: v-bind('config.transitions.hoverTransform');
+  box-shadow: v-bind('config.shadows.newsItemHover');
 }
 
 .news-item:hover .news-image {
-  transform: scale(1.05);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-}
-
-.info {
-  margin-top: 12px;
-  text-align: left;
-  padding: 0 5px;
-}
-
-.news-title {
-  color: #031358;
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 1.3;
-  margin-bottom: 20px;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.category {
-  display: inline-block;
-  margin-top: 6px;
-  font-size: 14px;
-  color: #031358;
-  font-weight: 500;
-  padding: 4px 10px;
-  background: rgba(3, 19, 88, 0.1);
-  border-radius: 20px;
-  position: absolute;
-  bottom: 5px ;
-  right: 5px;
-}
-
-.carousel-controls {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.control-btn {
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: #031358;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transform: v-bind('config.transitions.imageHoverTransform');
+  box-shadow: v-bind('config.gradients.imageHoverGlow');
 }
 
 .control-btn:hover {
-  background: white;
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: v-bind('config.colors.white');
+  transform: v-bind('config.transitions.controlBtnHoverTransform');
+  box-shadow: v-bind('config.shadows.controlBtnHover');
 }
 
 .control-btn:active {
-  transform: scale(0.95);
-}
-
-.progress-bar {
-  width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.3);
-  margin-top: 20px;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.progress {
-  height: 100%;
-  background: white;
-  border-radius: 10px;
-  transition: width 0.2s ease;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  transform: v-bind('config.transitions.controlBtnActiveTransform');
 }
 
 /* Responsive design */
-@media (max-width: 768px) {
+@media (max-width: v-bind('config.responsive.tabletBreakpoint')) {
   .news-section {
-    padding: 40px 15px;
+    padding: v-bind('config.responsive.tablet.sectionPadding');
   }
 
   .section-title {
-    font-size: 32px;
+    font-size: v-bind('config.responsive.tablet.sectionTitleSize');
   }
 
   .divider {
-    width: 70%;
+    width: v-bind('config.responsive.tablet.dividerWidth');
   }
 
   .carousel {
-    gap: 20px;
-    padding: 10px;
+    gap: v-bind('config.responsive.tablet.carouselGap');
+    padding: v-bind('config.responsive.tablet.carouselPadding');
   }
 
   .news-item {
-    min-width: 280px;
+    min-width: v-bind('config.responsive.tablet.newsItemMinWidth');
   }
 
   .news-title {
-    font-size: 18px;
+    font-size: v-bind('config.responsive.tablet.newsTitleSize');
   }
 
   .control-btn {
-    width: 44px;
-    height: 44px;
+    width: v-bind('config.responsive.tablet.controlBtnSize');
+    height: v-bind('config.responsive.tablet.controlBtnSize');
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: v-bind('config.responsive.mobileBreakpoint')) {
   .section-title {
-    font-size: 28px;
+    font-size: v-bind('config.responsive.mobile.sectionTitleSize');
   }
 
   .news-item {
-    min-width: 260px;
+    min-width: v-bind('config.responsive.mobile.newsItemMinWidth');
   }
 
   .news-image {
-    height: 180px;
+    height: v-bind('config.responsive.mobile.newsImageHeight');
   }
+}
+
+/* Keep existing styles for browser compatibility */
+.carousel::-webkit-scrollbar {
+  display: none;
 }
 </style>

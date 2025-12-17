@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import gsap from 'gsap';
+import { ref, onMounted, computed } from 'vue';
+import gsap from 'gsap'
+import { baseImgaeUrl } from '../../../../assets/js/global';
+
+const props = defineProps({
+  content: Object
+});
 
 interface Customer {
   baseImage: string;
@@ -9,26 +14,191 @@ interface Customer {
   name: string;
 }
 
-const customers: Customer[] = [
-  {
-    baseImage: '/imgs/khach1.png',
-    foregroundImage: '/imgs/khach1rb.png',
-    text: 'Tôi đã bán nhà của tôi hơn 1 năm không có khách hàng nào quan tâm, nhờ biết đến Thiên Hà Group qua kênh Facebook tôi đã bán nhanh bất động sản chỉ trong 30 ngày.',
-    name: 'Anh Lê Văn Thiện (Chủ nhà)'
+// ====== CẤU HÌNH MẶC ĐỊNH ======
+const defaultConfig = {
+  // Tiêu đề
+  title: "KHÁCH HÀNG NÓI GÌ VỀ CHÚNG TÔI",
+
+  // Màu sắc chủ đạo
+  colors: {
+    primary: "#031358",
+    secondary: "#f8f9ff",
+    textDark: "#000000",
+    textLight: "#ffffff",
+    buttonBg: "transparent",
+    buttonHoverBg: "rgba(3, 19, 88, 0.05)",
+    buttonDisabled: "rgba(3, 19, 88, 0.3)"
   },
-  {
-    baseImage: '/imgs/khach2.png',
-    foregroundImage: '/imgs/khach2rb.png',
-    text: 'Tôi bán nhà từ năm 2020 giá còn rất cao, nhờ sự tư vấn tận tình của Thiên Hà Group tôi đã nắm được giá trị bất động sản của mình. Nhờ đó tôi đã bán được nhanh hơn chỉ trong 27 ngày.',
-    name: 'Chị Nguyễn Thị Lan (Nhà đầu tư)'
+
+  // Font chữ
+  fonts: {
+    titleSize: "33px",
+    titleWeight: "600",
+    textSize: "17px",
+    authorSize: "20px",
+    authorWeight: "600",
+    buttonSize: "18px"
   },
-  {
-    baseImage: '/imgs/khach3.png',
-    foregroundImage: '/imgs/khach3rb.png',
-    text: 'Trong quá trình bán đất tại Đà Lạt, tôi bị quá nhiều môi giới báo giá ảo nhằm kéo giá tôi xuống, một phần tôi cũng đưa giá quá cao. Sau khi biết đến Thiên Hà Group qua các trang báo chí, tôi đã hợp tác và bán thành công bất động sản của mình.',
-    name: 'Anh Trần Quang Huy (Chủ đất)'
+
+  // Kích thước & khoảng cách
+  spacing: {
+    containerPadding: "60px 20px",
+    reviewBoxPadding: "25px",
+    bubblePadding: "25px",
+    gapColumns: "40px",
+    buttonPadding: "8px",
+    buttonMarginTop: "20px",
+    buttonGap: "10px"
+  },
+
+  // Hiệu ứng border
+  borderEffects: {
+    borderRadius: "20px",
+    shadow: "0 10px 30px rgba(3, 19, 88, 0.1)",
+    gradientColors: "rgba(3, 19, 88, 0.1), rgba(194, 203, 240, 0.3), rgba(3, 19, 88, 0.1)"
+  },
+
+  // Khách hàng (có thể thêm/xóa/sửa dễ dàng)
+  customers: [
+    {
+      baseImage: '/imgs/khach1.png',
+      foregroundImage: '/imgs/khach1rb.png',
+      text: 'Tôi đã bán nhà của tôi hơn 1 năm không có khách hàng nào quan tâm, nhờ biết đến Thiên Hà Group qua kênh Facebook tôi đã bán nhanh bất động sản chỉ trong 30 ngày.',
+      name: 'Anh Lê Văn Thiện (Chủ nhà)'
+    },
+    {
+      baseImage: '/imgs/khach2.png',
+      foregroundImage: '/imgs/khach2rb.png',
+      text: 'Tôi bán nhà từ năm 2020 giá còn rất cao, nhờ sự tư vấn tận tình của Thiên Hà Group tôi đã nắm được giá trị bất động sản của mình. Nhờ đó tôi đã bán được nhanh hơn chỉ trong 27 ngày.',
+      name: 'Chị Nguyễn Thị Lan (Nhà đầu tư)'
+    },
+    {
+      baseImage: '/imgs/khach3.png',
+      foregroundImage: '/imgs/khach3rb.png',
+      text: 'Trong quá trình bán đất tại Đà Lạt, tôi bị quá nhiều môi giới báo giá ảo nhằm kéo giá tôi xuống, một phần tôi cũng đưa giá quá cao. Sau khi biết đến Thiên Hà Group qua các trang báo chí, tôi đã hợp tác và bán thành công bất động sản của mình.',
+      name: 'Anh Trần Quang Huy (Chủ đất)'
+    }
+  ],
+
+  // Kích thước ảnh
+  imageSizes: {
+    containerHeight: "400px",
+    baseImageHeight: "330px",
+    foregroundImageHeight: "400px"
+  },
+
+  // Hiệu ứng animation
+  animation: {
+    borderLightSpeed: 3, // giây
+    borderLightColors: "rgba(194, 203, 240, 0.8), rgba(3, 19, 88, 0.6), rgba(194, 203, 240, 0.8)"
+  },
+
+  // Cấu hình nút điều hướng
+  navigation: {
+    position: "right",
+    buttonSize: "40px",
+    buttonBorderRadius: "50%",
+    buttonColor: "#031358",
+    buttonHoverColor: "#031358",
+    buttonBgColor: "transparent",
+    buttonHoverBgColor: "rgba(3, 19, 88, 0.05)",
+    buttonDisabledColor: "rgba(3, 19, 88, 0.3)",
+    iconSize: "18px",
+    showDots: true,
+    dotsSize: "8px",
+    dotsActiveSize: "10px",
+    dotsColor: "rgba(3, 19, 88, 0.2)",
+    dotsActiveColor: "#031358",
+    dotsSpacing: "6px"
+  },
+
+  // ====== CẤU HÌNH RESPONSIVE CHO ĐIỆN THOẠI ======
+  responsive: {
+    tablet: {
+      titleSize: "26px",
+      containerPadding: "40px 15px",
+      imageHeight: "300px",
+      baseImageHeight: "250px",
+      foregroundImageHeight: "300px",
+      reviewBoxPadding: "20px",
+      bubblePadding: "20px",
+      reviewTextSize: "16px",
+      authorSize: "18px",
+      buttonSize: "36px",
+      iconSize: "16px",
+      buttonPosition: "center",
+      dotsSize: "7px",
+      dotsActiveSize: "9px"
+    },
+
+    mobile: {
+      titleSize: "22px",
+      containerPadding: "30px 10px",
+      imageHeight: "250px",
+      baseImageHeight: "200px",
+      foregroundImageHeight: "250px",
+      reviewBoxPadding: "15px",
+      bubblePadding: "15px",
+      reviewTextSize: "15px",
+      authorSize: "16px",
+      buttonSize: "32px",
+      iconSize: "14px",
+      buttonPosition: "center",
+      dotsSize: "6px",
+      dotsActiveSize: "8px",
+      dotsSpacing: "5px"
+    },
+
+    smallMobile: {
+      titleSize: "20px",
+      containerPadding: "25px 8px",
+      imageHeight: "200px",
+      baseImageHeight: "160px",
+      foregroundImageHeight: "200px",
+      reviewBoxPadding: "12px",
+      bubblePadding: "12px",
+      reviewTextSize: "14px",
+      authorSize: "15px",
+      buttonSize: "30px",
+      iconSize: "13px",
+      dotsSize: "5px",
+      dotsActiveSize: "7px"
+    },
+
+    xSmallMobile: {
+      titleSize: "18px",
+      imageHeight: "180px",
+      baseImageHeight: "140px",
+      foregroundImageHeight: "180px",
+      buttonSize: "28px",
+      iconSize: "12px"
+    }
   }
-];
+};
+
+// Sử dụng computed để đảm bảo cmsConfig luôn có giá trị hợp lệ
+const cmsConfig = computed(() => {
+  if (props.content && props.content.contentJson) {
+    return {
+      ...defaultConfig,
+      ...props.content.contentJson,
+      // Merge nested objects để tránh mất cấu trúc
+      colors: { ...defaultConfig.colors, ...(props.content.contentJson.colors || {}) },
+      fonts: { ...defaultConfig.fonts, ...(props.content.contentJson.fonts || {}) },
+      spacing: { ...defaultConfig.spacing, ...(props.content.contentJson.spacing || {}) },
+      borderEffects: { ...defaultConfig.borderEffects, ...(props.content.contentJson.borderEffects || {}) },
+      imageSizes: { ...defaultConfig.imageSizes, ...(props.content.contentJson.imageSizes || {}) },
+      animation: { ...defaultConfig.animation, ...(props.content.contentJson.animation || {}) },
+      navigation: { ...defaultConfig.navigation, ...(props.content.contentJson.navigation || {}) },
+      responsive: { ...defaultConfig.responsive, ...(props.content.contentJson.responsive || {}) },
+      // Đảm bảo customers luôn là mảng
+      customers: props.content.contentJson.customers || defaultConfig.customers
+    };
+  }
+  return defaultConfig;
+});
+
+const customers = computed(() => cmsConfig.value.customers || []);
 
 const currentIndex = ref(0);
 const isAnimating = ref(false);
@@ -39,11 +209,15 @@ const reviewTextRef = ref<HTMLDivElement | null>(null);
 const reviewAuthorRef = ref<HTMLDivElement | null>(null);
 const reviewBoxRef = ref<HTMLDivElement | null>(null);
 
-const currentCustomer = ref(customers[0]);
+const currentCustomer = computed(() => {
+  return customers.value[currentIndex.value] || customers.value[0];
+});
 
 onMounted(() => {
-  animateIn();
-  animateBorderLight();
+  if (customers.value.length > 0) {
+    animateIn();
+    animateBorderLight();
+  }
 });
 
 const animateIn = () => {
@@ -87,25 +261,24 @@ const animateBorderLight = () => {
 
   gsap.to(borderLight, {
     rotation: 360,
-    duration: 3,
+    duration: cmsConfig.value.animation.borderLightSpeed,
     repeat: -1,
     ease: 'linear'
   });
 };
 
 const switchCustomer = (direction: 'next' | 'prev') => {
-  if (isAnimating.value) return;
+  if (isAnimating.value || customers.value.length === 0) return;
 
   isAnimating.value = true;
 
   const tl = gsap.timeline({
     onComplete: () => {
       if (direction === 'next') {
-        currentIndex.value = (currentIndex.value + 1) % customers.length;
+        currentIndex.value = (currentIndex.value + 1) % customers.value.length;
       } else {
-        currentIndex.value = (currentIndex.value - 1 + customers.length) % customers.length;
+        currentIndex.value = (currentIndex.value - 1 + customers.value.length) % customers.value.length;
       }
-      currentCustomer.value = customers[currentIndex.value];
 
       gsap.set([baseImageRef.value, foregroundImageRef.value], { y: 100, opacity: 0, scale: 1 });
       gsap.set([reviewTextRef.value, reviewAuthorRef.value], { opacity: 0, y: 20 });
@@ -139,23 +312,61 @@ const switchCustomer = (direction: 'next' | 'prev') => {
 
 const nextCustomer = () => switchCustomer('next');
 const prevCustomer = () => switchCustomer('prev');
-</script>
 
+const goToCustomer = (index: number) => {
+  if (isAnimating.value || index === currentIndex.value || customers.value.length === 0) return;
+
+  isAnimating.value = true;
+
+  const tl = gsap.timeline({
+    onComplete: () => {
+      currentIndex.value = index;
+
+      gsap.set([baseImageRef.value, foregroundImageRef.value], { y: 100, opacity: 0, scale: 1 });
+      gsap.set([reviewTextRef.value, reviewAuthorRef.value], { opacity: 0, y: 20 });
+
+      animateIn();
+      isAnimating.value = false;
+    }
+  });
+
+  tl.to([reviewTextRef.value, reviewAuthorRef.value], {
+    opacity: 0,
+    y: -20,
+    duration: 0.3,
+    stagger: 0.1
+  });
+
+  tl.to(foregroundImageRef.value, {
+    scale: 1,
+    duration: 0.3,
+    ease: 'power2.in'
+  }, '-=0.2');
+
+  tl.to([baseImageRef.value, foregroundImageRef.value], {
+    y: -100,
+    opacity: 0,
+    duration: 0.5,
+    ease: 'power2.in',
+    stagger: 0.1
+  }, '-=0.2');
+};
+</script>
 <template>
   <div class="customer-reviews">
-    <h2 class="title">KHÁCH HÀNG NÓI GÌ VỀ CHÚNG TÔI</h2>
+    <h2 class="title">{{ cmsConfig.title }}</h2>
     <div class="content">
       <div class="left-column">
         <div class="image-container">
           <img
               ref="baseImageRef"
-              :src="currentCustomer.baseImage"
+              :src="baseImgaeUrl+currentCustomer.baseImage"
               :alt="currentCustomer.name"
               class="base-image"
           />
           <img
               ref="foregroundImageRef"
-              :src="currentCustomer.foregroundImage"
+              :src="baseImgaeUrl+currentCustomer.foregroundImage"
               :alt="currentCustomer.name"
               class="foreground-image"
           />
@@ -171,17 +382,41 @@ const prevCustomer = () => switchCustomer('prev');
               <p ref="reviewAuthorRef" class="review-author">{{ currentCustomer.name }}</p>
             </div>
           </div>
-          <div class="navigation">
-            <button @click="prevCustomer" class="nav-button" :disabled="isAnimating">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            <button @click="nextCustomer" class="nav-button" :disabled="isAnimating">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
+
+          <!-- Dots Navigation (luôn canh giữa) -->
+          <div v-if="cmsConfig.navigation.showDots" class="dots-navigation">
+            <button
+                v-for="(customer, index) in customers"
+                :key="index"
+                class="dot-button"
+                :class="{ active: index === currentIndex }"
+                @click="goToCustomer(index)"
+                :disabled="isAnimating || index === currentIndex"
+                :aria-label="`Go to review ${index + 1}`"
+            ></button>
+          </div>
+
+          <!-- Navigation Container -->
+          <div class="navigation-container">
+            <!-- Navigation Buttons -->
+            <div class="navigation-buttons">
+              <button
+                  @click="prevCustomer"
+                  class="nav-button"
+                  :disabled="isAnimating"
+                  :aria-label="'Previous review'"
+              >
+                <i class="fas fa-chevron-left"></i>
+              </button>
+              <button
+                  @click="nextCustomer"
+                  class="nav-button"
+                  :disabled="isAnimating"
+                  :aria-label="'Next review'"
+              >
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -193,14 +428,14 @@ const prevCustomer = () => switchCustomer('prev');
 .customer-reviews {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 60px 20px;
+  padding: v-bind('cmsConfig.spacing.containerPadding');
   font-family: 'Ubuntu', sans-serif;
 }
 
 .title {
-  font-size: 33px;
-  font-weight: 600;
-  color: #031358;
+  font-size: v-bind('cmsConfig.fonts.titleSize');
+  font-weight: v-bind('cmsConfig.fonts.titleWeight');
+  color: v-bind('cmsConfig.colors.primary');
   text-align: center;
   text-transform: uppercase;
   margin-bottom: 50px;
@@ -209,7 +444,7 @@ const prevCustomer = () => switchCustomer('prev');
 
 .content {
   display: flex;
-  gap: 40px;
+  gap: v-bind('cmsConfig.spacing.gapColumns');
   align-items: center;
 }
 
@@ -218,14 +453,14 @@ const prevCustomer = () => switchCustomer('prev');
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 400px;
+  min-height: v-bind('cmsConfig.imageSizes.containerHeight');
   width: 30%;
 }
 
 .image-container {
   position: relative;
   width: 100%;
-  height: 400px;
+  height: v-bind('cmsConfig.imageSizes.containerHeight');
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -244,12 +479,12 @@ const prevCustomer = () => switchCustomer('prev');
 }
 
 .base-image {
-  max-height: 330px;
+  max-height: v-bind('cmsConfig.imageSizes.baseImageHeight');
   z-index: 1;
 }
 
 .foreground-image {
-  max-height: 400px;
+  max-height: v-bind('cmsConfig.imageSizes.foregroundImageHeight');
   z-index: 2;
   transform-origin: bottom center;
 }
@@ -260,14 +495,14 @@ const prevCustomer = () => switchCustomer('prev');
 
 .review-box {
   position: relative;
-  border-radius: 20px;
-  padding: 25px;
+  border-radius: v-bind('cmsConfig.borderEffects.borderRadius');
+  padding: v-bind('cmsConfig.spacing.reviewBoxPadding');
   min-height: 250px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
-  box-shadow: 0 10px 30px rgba(3, 19, 88, 0.1);
+  background: linear-gradient(135deg, v-bind('cmsConfig.colors.secondary') 0%, #ffffff 100%);
+  box-shadow: v-bind('cmsConfig.borderEffects.shadow');
   overflow: hidden;
 }
 
@@ -275,7 +510,7 @@ const prevCustomer = () => switchCustomer('prev');
   position: relative;
   background: white;
   border-radius: 18px;
-  padding: 25px;
+  padding: v-bind('cmsConfig.spacing.bubblePadding');
   box-shadow: 0 4px 15px rgba(3, 19, 88, 0.08);
 }
 
@@ -296,51 +531,93 @@ const prevCustomer = () => switchCustomer('prev');
 }
 
 .review-text {
-  font-size: 17px;
+  font-size: v-bind('cmsConfig.fonts.textSize');
   line-height: 1.7;
-  color: #000;
+  color: v-bind('cmsConfig.colors.textDark');
   margin-bottom: 20px;
   text-align: justify;
 }
 
 .review-author {
-  font-size: 20px;
-  font-weight: 600;
-  color: #031358;
+  font-size: v-bind('cmsConfig.fonts.authorSize');
+  font-weight: v-bind('cmsConfig.fonts.authorWeight');
+  color: v-bind('cmsConfig.colors.primary');
   margin-top: 15px;
 }
 
-.navigation {
+/* Dots Navigation (Luôn canh giữa) */
+.dots-navigation {
   display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 20px;
+  justify-content: center;
+  align-items: center;
+  gap: v-bind('cmsConfig.navigation.dotsSpacing');
+  margin: 15px 0;
+}
+
+.dot-button {
+  width: v-bind('cmsConfig.navigation.dotsSize');
+  height: v-bind('cmsConfig.navigation.dotsSize');
+  border-radius: 50%;
+  border: none;
+  background-color: v-bind('cmsConfig.navigation.dotsColor');
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+
+.dot-button.active {
+  background-color: v-bind('cmsConfig.navigation.dotsActiveColor');
+  width: v-bind('cmsConfig.navigation.dotsActiveSize');
+  height: v-bind('cmsConfig.navigation.dotsActiveSize');
+}
+
+.dot-button:hover:not(:disabled) {
+  transform: scale(1.2);
+}
+
+.dot-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Navigation Styles */
+.navigation-container {
+  display: flex;
+  margin-top: v-bind('cmsConfig.spacing.buttonMarginTop');
+  justify-content: v-bind('cmsConfig.navigation.position');
+}
+
+.navigation-buttons {
+  display: flex;
+  gap: v-bind('cmsConfig.spacing.buttonGap');
 }
 
 .nav-button {
-  background: none;
+  background-color: v-bind('cmsConfig.navigation.buttonBgColor');
   border: none;
-  color: #031358;
+  color: v-bind('cmsConfig.navigation.buttonColor');
   cursor: pointer;
-  padding: 8px;
+  padding: v-bind('cmsConfig.spacing.buttonPadding');
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.3s ease;
+  transition: all 0.3s ease;
+  width: v-bind('cmsConfig.navigation.buttonSize');
+  height: v-bind('cmsConfig.navigation.buttonSize');
+  border-radius: v-bind('cmsConfig.navigation.buttonBorderRadius');
+  font-size: v-bind('cmsConfig.navigation.iconSize');
 }
 
 .nav-button:hover:not(:disabled) {
-  opacity: 0.7;
+  opacity: 0.8;
+  background-color: v-bind('cmsConfig.navigation.buttonHoverBgColor');
+  color: v-bind('cmsConfig.navigation.buttonHoverColor');
 }
 
 .nav-button:disabled {
   opacity: 0.3;
   cursor: not-allowed;
-}
-
-.nav-button svg {
-  width: 24px;
-  height: 24px;
+  color: v-bind('cmsConfig.navigation.buttonDisabledColor');
 }
 
 /* Hiệu ứng tia sáng chạy quanh viền */
@@ -350,12 +627,10 @@ const prevCustomer = () => switchCustomer('prev');
   left: -2px;
   right: -2px;
   bottom: -2px;
-  border-radius: 22px;
+  border-radius: calc(v-bind('cmsConfig.borderEffects.borderRadius') + 2px);
   background: linear-gradient(90deg,
   transparent,
-  rgba(194, 203, 240, 0.8),
-  rgba(3, 19, 88, 0.6),
-  rgba(194, 203, 240, 0.8),
+  v-bind('cmsConfig.animation.borderLightColors'),
   transparent);
   z-index: 0;
   pointer-events: none;
@@ -369,24 +644,26 @@ const prevCustomer = () => switchCustomer('prev');
   left: -2px;
   right: -2px;
   bottom: -2px;
-  border-radius: 22px;
+  border-radius: calc(v-bind('cmsConfig.borderEffects.borderRadius') + 2px);
   background: linear-gradient(135deg,
-  rgba(3, 19, 88, 0.1) 0%,
-  rgba(194, 203, 240, 0.3) 50%,
-  rgba(3, 19, 88, 0.1) 100%);
+  v-bind('cmsConfig.borderEffects.gradientColors'));
   z-index: -1;
   opacity: 0.7;
 }
 
-/* Responsive styles */
-@media (max-width: 1200px) {
-  .content {
-    gap: 30px;
+/* ====== RESPONSIVE STYLES ====== */
+
+/* Tablet: max-width: 992px */
+@media (max-width: 992px) {
+  .customer-reviews {
+    padding: v-bind('cmsConfig.responsive.tablet.containerPadding');
   }
 
-}
+  .title {
+    font-size: v-bind('cmsConfig.responsive.tablet.titleSize');
+    margin-bottom: 30px;
+  }
 
-@media (max-width: 992px) {
   .content {
     flex-direction: column;
     gap: 30px;
@@ -399,11 +676,11 @@ const prevCustomer = () => switchCustomer('prev');
   }
 
   .left-column {
-    min-height: 300px;
+    min-height: v-bind('cmsConfig.responsive.tablet.imageHeight');
   }
 
   .image-container {
-    height: 300px;
+    height: v-bind('cmsConfig.responsive.tablet.imageHeight');
     align-items: center;
   }
 
@@ -413,11 +690,11 @@ const prevCustomer = () => switchCustomer('prev');
   }
 
   .base-image {
-    max-height: 250px;
+    max-height: v-bind('cmsConfig.responsive.tablet.baseImageHeight');
   }
 
   .foreground-image {
-    max-height: 300px;
+    max-height: v-bind('cmsConfig.responsive.tablet.foregroundImageHeight');
   }
 
   .bubble-tail {
@@ -425,119 +702,218 @@ const prevCustomer = () => switchCustomer('prev');
     top: -15px;
     transform: translateX(-50%) rotate(90deg);
   }
-}
-
-@media (max-width: 768px) {
-  .customer-reviews {
-    padding: 40px 15px;
-  }
-
-  .title {
-    font-size: 26px;
-    margin-bottom: 30px;
-  }
-
-  .left-column {
-    min-height: 250px;
-  }
-
-  .image-container {
-    height: 250px;
-  }
-
-  .base-image {
-    max-height: 200px;
-  }
-
-  .foreground-image {
-    max-height: 250px;
-  }
 
   .review-box {
-    padding: 20px;
+    padding: v-bind('cmsConfig.responsive.tablet.reviewBoxPadding');
     min-height: 200px;
   }
 
   .message-bubble {
-    padding: 20px;
+    padding: v-bind('cmsConfig.responsive.tablet.bubblePadding');
   }
 
   .review-text {
-    font-size: 16px;
+    font-size: v-bind('cmsConfig.responsive.tablet.reviewTextSize');
     line-height: 1.6;
   }
 
   .review-author {
-    font-size: 18px;
+    font-size: v-bind('cmsConfig.responsive.tablet.authorSize');
+  }
+
+  .navigation-container {
+    justify-content: v-bind('cmsConfig.responsive.tablet.buttonPosition');
+  }
+
+  .nav-button {
+    width: v-bind('cmsConfig.responsive.tablet.buttonSize');
+    height: v-bind('cmsConfig.responsive.tablet.buttonSize');
+    font-size: v-bind('cmsConfig.responsive.tablet.iconSize');
+  }
+
+  .dots-navigation {
+    margin: 12px 0;
+  }
+
+  .dot-button {
+    width: v-bind('cmsConfig.responsive.tablet.dotsSize');
+    height: v-bind('cmsConfig.responsive.tablet.dotsSize');
+  }
+
+  .dot-button.active {
+    width: v-bind('cmsConfig.responsive.tablet.dotsActiveSize');
+    height: v-bind('cmsConfig.responsive.tablet.dotsActiveSize');
   }
 }
 
-@media (max-width: 576px) {
+/* Mobile: max-width: 768px */
+@media (max-width: 768px) {
   .customer-reviews {
-    padding: 30px 10px;
+    padding: v-bind('cmsConfig.responsive.mobile.containerPadding');
   }
 
   .title {
-    font-size: 22px;
+    font-size: v-bind('cmsConfig.responsive.mobile.titleSize');
     margin-bottom: 25px;
   }
 
   .left-column {
-    min-height: 200px;
+    min-height: v-bind('cmsConfig.responsive.mobile.imageHeight');
   }
 
   .image-container {
-    height: 200px;
+    height: v-bind('cmsConfig.responsive.mobile.imageHeight');
   }
 
   .base-image {
-    max-height: 160px;
+    max-height: v-bind('cmsConfig.responsive.mobile.baseImageHeight');
   }
 
   .foreground-image {
-    max-height: 200px;
+    max-height: v-bind('cmsConfig.responsive.mobile.foregroundImageHeight');
   }
 
   .review-box {
-    padding: 15px;
-    min-height: auto;
+    padding: v-bind('cmsConfig.responsive.mobile.reviewBoxPadding');
   }
 
   .message-bubble {
-    padding: 15px;
+    padding: v-bind('cmsConfig.responsive.mobile.bubblePadding');
   }
 
   .review-text {
-    font-size: 15px;
+    font-size: v-bind('cmsConfig.responsive.mobile.reviewTextSize');
     line-height: 1.5;
     margin-bottom: 15px;
   }
 
   .review-author {
-    font-size: 16px;
+    font-size: v-bind('cmsConfig.responsive.mobile.authorSize');
     margin-top: 10px;
   }
 
-  .navigation {
-    margin-top: 15px;
+  .navigation-container {
+    margin-top: 10px;
+    justify-content: v-bind('cmsConfig.responsive.mobile.buttonPosition');
+  }
+
+  .nav-button {
+    width: v-bind('cmsConfig.responsive.mobile.buttonSize');
+    height: v-bind('cmsConfig.responsive.mobile.buttonSize');
+    font-size: v-bind('cmsConfig.responsive.mobile.iconSize');
+  }
+
+  .dots-navigation {
+    margin: 10px 0;
+    gap: v-bind('cmsConfig.responsive.mobile.dotsSpacing');
+  }
+
+  .dot-button {
+    width: v-bind('cmsConfig.responsive.mobile.dotsSize');
+    height: v-bind('cmsConfig.responsive.mobile.dotsSize');
+  }
+
+  .dot-button.active {
+    width: v-bind('cmsConfig.responsive.mobile.dotsActiveSize');
+    height: v-bind('cmsConfig.responsive.mobile.dotsActiveSize');
   }
 }
 
-@media (max-width: 400px) {
+/* Small Mobile: max-width: 576px */
+@media (max-width: 576px) {
+  .customer-reviews {
+    padding: v-bind('cmsConfig.responsive.smallMobile.containerPadding');
+  }
+
+  .title {
+    font-size: v-bind('cmsConfig.responsive.smallMobile.titleSize');
+    margin-bottom: 20px;
+  }
+
   .left-column {
-    min-height: 180px;
+    min-height: v-bind('cmsConfig.responsive.smallMobile.imageHeight');
   }
 
   .image-container {
-    height: 180px;
+    height: v-bind('cmsConfig.responsive.smallMobile.imageHeight');
   }
 
   .base-image {
-    max-height: 140px;
+    max-height: v-bind('cmsConfig.responsive.smallMobile.baseImageHeight');
   }
 
   .foreground-image {
-    max-height: 180px;
+    max-height: v-bind('cmsConfig.responsive.smallMobile.foregroundImageHeight');
+  }
+
+  .review-box {
+    padding: v-bind('cmsConfig.responsive.smallMobile.reviewBoxPadding');
+  }
+
+  .message-bubble {
+    padding: v-bind('cmsConfig.responsive.smallMobile.bubblePadding');
+  }
+
+  .review-text {
+    font-size: v-bind('cmsConfig.responsive.smallMobile.reviewTextSize');
+    line-height: 1.4;
+  }
+
+  .review-author {
+    font-size: v-bind('cmsConfig.responsive.smallMobile.authorSize');
+  }
+
+  .nav-button {
+    width: v-bind('cmsConfig.responsive.smallMobile.buttonSize');
+    height: v-bind('cmsConfig.responsive.smallMobile.buttonSize');
+    font-size: v-bind('cmsConfig.responsive.smallMobile.iconSize');
+  }
+
+  .dots-navigation {
+    margin: 8px 0;
+  }
+
+  .dot-button {
+    width: v-bind('cmsConfig.responsive.smallMobile.dotsSize');
+    height: v-bind('cmsConfig.responsive.smallMobile.dotsSize');
+  }
+
+  .dot-button.active {
+    width: v-bind('cmsConfig.responsive.smallMobile.dotsActiveSize');
+    height: v-bind('cmsConfig.responsive.smallMobile.dotsActiveSize');
+  }
+}
+
+/* X-Small Mobile: max-width: 400px */
+@media (max-width: 400px) {
+  .title {
+    font-size: v-bind('cmsConfig.responsive.xSmallMobile.titleSize');
+  }
+
+  .left-column {
+    min-height: v-bind('cmsConfig.responsive.xSmallMobile.imageHeight');
+  }
+
+  .image-container {
+    height: v-bind('cmsConfig.responsive.xSmallMobile.imageHeight');
+  }
+
+  .base-image {
+    max-height: v-bind('cmsConfig.responsive.xSmallMobile.baseImageHeight');
+  }
+
+  .foreground-image {
+    max-height: v-bind('cmsConfig.responsive.xSmallMobile.foregroundImageHeight');
+  }
+
+  .nav-button {
+    width: v-bind('cmsConfig.responsive.xSmallMobile.buttonSize');
+    height: v-bind('cmsConfig.responsive.xSmallMobile.buttonSize');
+    font-size: v-bind('cmsConfig.responsive.xSmallMobile.iconSize');
+  }
+
+  .dots-navigation {
+    margin: 6px 0;
   }
 }
 </style>

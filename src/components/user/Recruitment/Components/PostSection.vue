@@ -1,24 +1,29 @@
 <template>
   <section class="related-posts">
-    <h2 class="section-title fade-up">CÁC BÀI VIẾT LIÊN QUAN</h2>
+    <h2 class="section-title fade-up">{{ config.sectionTitle }}</h2>
     <div class="carousel-container">
       <div class="carousel" ref="carousel">
         <div
-            v-for="(post, index) in posts"
+            v-for="(post, index) in config.posts"
             :key="index"
             class="post-card fade-up"
             @mouseenter="hoverIndex = index"
             @mouseleave="hoverIndex = -1"
+            :style="postCardStyle"
         >
-          <div class="image-container">
-            <img :src="post.image" :alt="post.title" class="post-image" />
-            <div class="date-badge">{{ post.date }}</div>
+          <div class="image-container" :style="imageContainerStyle">
+            <img :src="baseImgaeUrl+post.image" :alt="post.title" class="post-image" />
+            <div class="date-badge" :style="dateBadgeStyle">{{ post.date }}</div>
           </div>
-          <div class="post-content">
-            <h3 class="post-title">{{ post.title }}</h3>
-            <p class="post-excerpt">{{ post.excerpt }}</p>
-            <button class="read-more-btn" :class="{ 'hovered': hoverIndex === index }">
-              Xem chi tiết
+          <div class="post-content" :style="postContentStyle">
+            <h3 class="post-title" :style="postTitleStyle">{{ post.title }}</h3>
+            <p class="post-excerpt" :style="postExcerptStyle">{{ post.excerpt }}</p>
+            <button
+                class="read-more-btn"
+                :class="{ 'hovered': hoverIndex === index }"
+                :style="readMoreBtnStyle"
+            >
+              {{ config.buttonText }}
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M3.3335 8H12.6668" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M8 3.33331L12.6667 7.99998L8 12.6666" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -30,23 +35,23 @@
     </div>
 
     <!-- Progress indicator with navigation buttons -->
-    <div class="progress-container">
-      <button class="carousel-btn prev" @click="scrollCarousel(-1)">
+    <div class="progress-container" :style="progressContainerStyle">
+      <button class="carousel-btn prev" @click="scrollCarousel(-1)" :style="carouselBtnStyle">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M15 18L9 12L15 6" stroke="#031358" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M15 18L9 12L15 6" :stroke="config.colors.primary" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
 
-      <div class="progress-bar">
+      <div class="progress-bar" :style="progressBarStyle">
         <div
             class="progress-fill"
-            :style="{ width: scrollProgress + '%' }"
+            :style="progressFillStyle"
         ></div>
       </div>
 
-      <button class="carousel-btn next" @click="scrollCarousel(1)">
+      <button class="carousel-btn next" @click="scrollCarousel(1)" :style="carouselBtnStyle">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M9 18L15 12L9 6" stroke="#031358" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 18L15 12L9 6" :stroke="config.colors.primary" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     </div>
@@ -54,7 +59,112 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
+
+// CONFIG OBJECT - Có thể quản lý qua CMS
+let config = {
+  // Text content
+  sectionTitle: "CÁC BÀI VIẾT LIÊN QUAN",
+  buttonText: "Xem chi tiết",
+
+  // Colors
+  colors: {
+    primary: "#031358",
+    secondary: "#0030FF",
+    textDark: "#031358",
+    textLight: "#555",
+    background: "#ffffff",
+    progressBg: "#e0e0e0",
+    buttonHover: "#0030FF"
+  },
+
+  // Typography
+  typography: {
+    fontFamily: "'Ubuntu', sans-serif",
+    sectionTitleSize: "40px",
+    postTitleSize: "20px",
+    excerptSize: "17px",
+    dateSize: "14px",
+    buttonSize: "16px"
+  },
+
+  // Spacing
+  spacing: {
+    sectionPadding: "60px 20px",
+    cardPadding: "20px",
+    cardGap: "20px",
+    cardBorderRadius: "12px",
+    buttonBorderRadius: "6px"
+  },
+
+  // Sizes
+  sizes: {
+    cardWidth: "400px",
+    cardWidthMobile: "280px",
+    cardWidthSmallMobile: "260px",
+    imageHeight: "200px",
+    progressBarHeight: "6px",
+    buttonWidth: "36px",
+    buttonWidthMobile: "32px",
+    buttonWidthSmallMobile: "28px"
+  },
+
+  // Shadows
+  shadows: {
+    cardShadow: "0 4px 12px rgba(3, 19, 88, 0.1)",
+    cardHoverShadow: "0 12px 24px rgba(3, 19, 88, 0.15)"
+  },
+
+  // Posts data
+  posts: [
+    {
+      title: "Tuyển Dụng Chuyên Viên Tư Vấn Bất Động Sản Cao Cấp",
+      excerpt: "Tìm kiếm ứng viên có kinh nghiệm trong lĩnh vực BĐS cao cấp, khả năng giao tiếp tốt và am hiểu thị trường.",
+      image: "/imgs/hr1.jpg",
+      date: "15/10/2023"
+    },
+    {
+      title: "Cơ Hội Nghề Nghiệp: Quản Lý Dự Án Bất Động Sản",
+      excerpt: "Vị trí quản lý dự án yêu cầu kinh nghiệm 3+ năm, kỹ năng lãnh đạo và kiến thức chuyên sâu về pháp lý BĐS.",
+      image: "/imgs/hr2.jpg",
+      date: "12/10/2023"
+    },
+    {
+      title: "Tuyển Gấp Nhân Viên Kinh Doanh Bất Động Sản",
+      excerpt: "Công ty mở rộng quy mô, cần tuyển nhân viên kinh doanh có đam mê, năng động và mong muốn thu nhập cao.",
+      image: "/imgs/hr3.png",
+      date: "10/10/2023"
+    },
+    {
+      title: "Chuyên Viên Pháp Lý Bất Động Sản - Mức Lương Hấp Dẫn",
+      excerpt: "Tìm kiếm chuyên viên pháp lý có kinh nghiệm xử lý hồ sơ, hợp đồng và các vấn đề pháp lý liên quan đến BĐS.",
+      image: "/imgs/hr4.jpg",
+      date: "08/10/2023"
+    },
+    {
+      title: "Trưởng Phòng Kinh Doanh Bất Động Sản Thương Mại",
+      excerpt: "Vị trí lãnh đạo đội ngũ kinh doanh BĐS thương mại, yêu cầu kinh nghiệm quản lý và thành tích bán hàng ấn tượng.",
+      image: "/imgs/hr5.jpg",
+      date: "05/10/2023"
+    },
+    {
+      title: "Nhân Viên Marketing Bất Động Sản - Môi Trường Năng Động",
+      excerpt: "Tuyển dụng chuyên viên marketing có kinh nghiệm trong ngành BĐS, sáng tạo và am hiểu digital marketing.",
+      image: "/imgs/hr6.jpg",
+      date: "01/10/2023"
+    }
+  ]
+}
+
+const props = defineProps({
+  sectionData: Object
+})
+
+if(props.sectionData) {
+  config = props.sectionData.config;
+  console.log("Đã nhận props từ cha", config);
+}
 
 // State
 const carousel = ref(null)
@@ -62,85 +172,62 @@ const hoverIndex = ref(-1)
 const scrollProgress = ref(0)
 const currentSlide = ref(1)
 const totalSlides = ref(0)
-const getImgUrl =(filename, tag) => {
-  if(tag) return "/imgs/"+ filename + tag;
-  return "/imgs/"+ filename;
-}
-// Sample data for real estate recruitment posts
-const posts = ref([
-  {
-    title: "Tuyển Dụng Chuyên Viên Tư Vấn Bất Động Sản Cao Cấp",
-    excerpt: "Tìm kiếm ứng viên có kinh nghiệm trong lĩnh vực BĐS cao cấp, khả năng giao tiếp tốt và am hiểu thị trường.",
-    image: getImgUrl("hr1",".jpg"),
-    date: "15/10/2023"
-  },
-  {
-    title: "Cơ Hội Nghề Nghiệp: Quản Lý Dự Án Bất Động Sản",
-    excerpt: "Vị trí quản lý dự án yêu cầu kinh nghiệm 3+ năm, kỹ năng lãnh đạo và kiến thức chuyên sâu về pháp lý BĐS.",
-    image: getImgUrl("hr2",".jpg"),
-    date: "12/10/2023"
-  },
-  {
-    title: "Tuyển Gấp Nhân Viên Kinh Doanh Bất Động Sản",
-    excerpt: "Công ty mở rộng quy mô, cần tuyển nhân viên kinh doanh có đam mê, năng động và mong muốn thu nhập cao.",
-    image: getImgUrl("hr3",".png"),
-    date: "10/10/2023"
-  },
-  {
-    title: "Chuyên Viên Pháp Lý Bất Động Sản - Mức Lương Hấp Dẫn",
-    excerpt: "Tìm kiếm chuyên viên pháp lý có kinh nghiệm xử lý hồ sơ, hợp đồng và các vấn đề pháp lý liên quan đến BĐS.",
-    image: getImgUrl("hr4",".jpg"),
-    date: "08/10/2023"
-  },
-  {
-    title: "Trưởng Phòng Kinh Doanh Bất Động Sản Thương Mại",
-    excerpt: "Vị trí lãnh đạo đội ngũ kinh doanh BĐS thương mại, yêu cầu kinh nghiệm quản lý và thành tích bán hàng ấn tượng.",
-    image: getImgUrl("hr5",".jpg"),
-    date: "05/10/2023"
-  },
-  {
-    title: "Nhân Viên Marketing Bất Động Sản - Môi Trường Năng Động",
-    excerpt: "Tuyển dụng chuyên viên marketing có kinh nghiệm trong ngành BĐS, sáng tạo và am hiểu digital marketing.",
-    image: getImgUrl("hr6",".jpg"),
-    date: "01/10/2023"
-  },
-  {
-    title: "Tuyển Dụng Chuyên Viên Tư Vấn Bất Động Sản Cao Cấp",
-    excerpt: "Tìm kiếm ứng viên có kinh nghiệm trong lĩnh vực BĐS cao cấp, khả năng giao tiếp tốt và am hiểu thị trường.",
-    image: getImgUrl("hr1",".jpg"),
-    date: "15/10/2023"
-  },
-  {
-    title: "Cơ Hội Nghề Nghiệp: Quản Lý Dự Án Bất Động Sản",
-    excerpt: "Vị trí quản lý dự án yêu cầu kinh nghiệm 3+ năm, kỹ năng lãnh đạo và kiến thức chuyên sâu về pháp lý BĐS.",
-    image: getImgUrl("hr2",".jpg"),
-    date: "12/10/2023"
-  },
-  {
-    title: "Tuyển Gấp Nhân Viên Kinh Doanh Bất Động Sản",
-    excerpt: "Công ty mở rộng quy mô, cần tuyển nhân viên kinh doanh có đam mê, năng động và mong muốn thu nhập cao.",
-    image: getImgUrl("hr3",".png"),
-    date: "10/10/2023"
-  },
-  {
-    title: "Chuyên Viên Pháp Lý Bất Động Sản - Mức Lương Hấp Dẫn",
-    excerpt: "Tìm kiếm chuyên viên pháp lý có kinh nghiệm xử lý hồ sơ, hợp đồng và các vấn đề pháp lý liên quan đến BĐS.",
-    image: getImgUrl("hr4",".jpg"),
-    date: "08/10/2023"
-  },
-  {
-    title: "Trưởng Phòng Kinh Doanh Bất Động Sản Thương Mại",
-    excerpt: "Vị trí lãnh đạo đội ngũ kinh doanh BĐS thương mại, yêu cầu kinh nghiệm quản lý và thành tích bán hàng ấn tượng.",
-    image: getImgUrl("hr5",".jpg"),
-    date: "05/10/2023"
-  },
-  {
-    title: "Nhân Viên Marketing Bất Động Sản - Môi Trường Năng Động",
-    excerpt: "Tuyển dụng chuyên viên marketing có kinh nghiệm trong ngành BĐS, sáng tạo và am hiểu digital marketing.",
-    image: getImgUrl("hr6",".jpg"),
-    date: "01/10/2023"
-  }
-])
+
+// Computed styles
+const postCardStyle = computed(() => ({
+  width: config.sizes.cardWidth,
+  borderRadius: config.spacing.cardBorderRadius,
+  boxShadow: config.shadows.cardShadow
+}))
+
+const imageContainerStyle = computed(() => ({
+  height: config.sizes.imageHeight
+}))
+
+const dateBadgeStyle = computed(() => ({
+  color: config.colors.primary,
+  fontSize: config.typography.dateSize
+}))
+
+const postContentStyle = computed(() => ({
+  padding: config.spacing.cardPadding
+}))
+
+const postTitleStyle = computed(() => ({
+  color: config.colors.textDark,
+  fontSize: config.typography.postTitleSize
+}))
+
+const postExcerptStyle = computed(() => ({
+  color: config.colors.textLight,
+  fontSize: config.typography.excerptSize
+}))
+
+const readMoreBtnStyle = computed(() => ({
+  backgroundColor: config.colors.primary,
+  borderRadius: config.spacing.buttonBorderRadius,
+  fontSize: config.typography.buttonSize
+}))
+
+const progressContainerStyle = computed(() => ({
+  maxWidth: '400px'
+}))
+
+const progressBarStyle = computed(() => ({
+  height: config.sizes.progressBarHeight,
+  backgroundColor: config.colors.progressBg
+}))
+
+const progressFillStyle = computed(() => ({
+  background: `linear-gradient(90deg, ${config.colors.primary}, ${config.colors.secondary})`,
+  width: `${scrollProgress.value}%`
+}))
+
+const carouselBtnStyle = computed(() => ({
+  width: config.sizes.buttonWidth,
+  height: config.sizes.buttonWidth,
+  border: `2px solid ${config.colors.primary}`
+}))
 
 // Update progress and current slide
 const updateProgress = () => {
@@ -158,7 +245,7 @@ const updateProgress = () => {
   // Calculate current slide based on scroll position
   const cardWidth = 320 // Width of each card including gap
   const slidePosition = Math.round(scrollLeft / cardWidth) + 1
-  currentSlide.value = Math.min(slidePosition, posts.value.length)
+  currentSlide.value = Math.min(slidePosition, config.posts.length)
 }
 
 // Carousel navigation
@@ -177,7 +264,7 @@ const scrollCarousel = (direction) => {
 onMounted(() => {
   if (carousel.value) {
     carousel.value.addEventListener('scroll', updateProgress)
-    totalSlides.value = posts.value.length
+    totalSlides.value = config.posts.length
     updateProgress() // Initial progress calculation
   }
 })
@@ -191,20 +278,15 @@ onUnmounted(() => {
 
 <style scoped>
 
-* {
-  font-family: 'Ubuntu', sans-serif;
-  box-sizing: border-box;
-}
-
 .related-posts {
-  padding: 60px 20px;
+  padding: v-bind('config.spacing.sectionPadding');
   max-width: 1400px;
   margin: 0 auto;
 }
 
 .section-title {
-  font-size: 40px;
-  color: #031358;
+  font-size: v-bind('config.typography.sectionTitleSize');
+  color: v-bind('config.colors.primary');
   margin-bottom: 40px;
   text-align: center;
   font-weight: 700;
@@ -220,7 +302,7 @@ onUnmounted(() => {
   display: flex;
   overflow-x: auto;
   scroll-behavior: smooth;
-  gap: 20px;
+  gap: v-bind('config.spacing.cardGap');
   padding: 10px 0;
   scrollbar-width: none; /* Firefox */
   width: 100%;
@@ -232,24 +314,24 @@ onUnmounted(() => {
 
 /* FIX: Đảm bảo post-card có width cố định */
 .post-card {
-  width: 400px; /* Thay min-width bằng width cố định */
+  width: v-bind('config.sizes.cardWidth');
   flex: 0 0 auto; /* Quan trọng: không cho phép co giãn */
-  background: white;
-  border-radius: 12px;
+  background: v-bind('config.colors.background');
+  border-radius: v-bind('config.spacing.cardBorderRadius');
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(3, 19, 88, 0.1);
+  box-shadow: v-bind('config.shadows.cardShadow');
   transition: all 0.3s ease;
   cursor: pointer;
 }
 
 .post-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 12px 24px rgba(3, 19, 88, 0.15);
+  box-shadow: v-bind('config.shadows.cardHoverShadow');
 }
 
 .image-container {
   position: relative;
-  height: 200px;
+  height: v-bind('config.sizes.imageHeight');
   overflow: hidden;
 }
 
@@ -271,26 +353,26 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.9);
   padding: 6px 12px;
   border-radius: 20px;
-  font-size: 14px;
-  color: #031358;
+  font-size: v-bind('config.typography.dateSize');
+  color: v-bind('config.colors.primary');
   font-weight: 500;
 }
 
 .post-content {
-  padding: 20px;
+  padding: v-bind('config.spacing.cardPadding');
 }
 
 .post-title {
-  font-size: 20px;
-  color: #031358;
+  font-size: v-bind('config.typography.postTitleSize');
+  color: v-bind('config.colors.textDark');
   margin-bottom: 12px;
   font-weight: 600;
   line-height: 1.3;
 }
 
 .post-excerpt {
-  font-size: 17px;
-  color: #555;
+  font-size: v-bind('config.typography.excerptSize');
+  color: v-bind('config.colors.textLight');
   margin-bottom: 20px;
   line-height: 1.5;
 }
@@ -299,19 +381,19 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #031358;
+  background: v-bind('config.colors.primary');
   color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 16px;
+  border-radius: v-bind('config.spacing.buttonBorderRadius');
+  font-size: v-bind('config.typography.buttonSize');
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .read-more-btn.hovered {
-  background: #0030FF;
+  background: v-bind('config.colors.buttonHover');
   transform: translateX(5px);
 }
 
@@ -322,15 +404,15 @@ onUnmounted(() => {
   justify-content: center;
   gap: 15px;
   margin-top: 30px;
-  max-width: 400px;
+  max-width: v-bind('progressContainerStyle.maxWidth');
   margin-left: auto;
   margin-right: auto;
 }
 
 .progress-bar {
   flex: 1;
-  height: 6px;
-  background: #e0e0e0;
+  height: v-bind('config.sizes.progressBarHeight');
+  background: v-bind('config.colors.progressBg');
   border-radius: 3px;
   overflow: hidden;
   position: relative;
@@ -338,7 +420,7 @@ onUnmounted(() => {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #031358, #0030FF);
+  background: linear-gradient(90deg, v-bind('config.colors.primary'), v-bind('config.colors.secondary'));
   border-radius: 3px;
   transition: width 0.3s ease;
   position: relative;
@@ -358,10 +440,10 @@ onUnmounted(() => {
 /* Updated carousel buttons - smaller and positioned around progress bar */
 .carousel-btn {
   background: white;
-  border: 2px solid #031358;
+  border: v-bind('carouselBtnStyle.border');
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: v-bind('config.sizes.buttonWidth');
+  height: v-bind('config.sizes.buttonWidth');
   display: flex;
   align-items: center;
   justify-content: center;
@@ -372,7 +454,7 @@ onUnmounted(() => {
 }
 
 .carousel-btn:hover {
-  background: #031358;
+  background: v-bind('config.colors.primary');
 }
 
 .carousel-btn:hover svg path {
@@ -386,7 +468,7 @@ onUnmounted(() => {
   }
 
   .post-card {
-    width: 280px; /* Điều chỉnh width cho mobile */
+    width: v-bind('config.sizes.cardWidthMobile');
   }
 
   .progress-container {
@@ -395,8 +477,8 @@ onUnmounted(() => {
   }
 
   .carousel-btn {
-    width: 32px;
-    height: 32px;
+    width: v-bind('config.sizes.buttonWidthMobile');
+    height: v-bind('config.sizes.buttonWidthMobile');
   }
 
   .carousel-btn svg {
@@ -411,7 +493,7 @@ onUnmounted(() => {
   }
 
   .post-card {
-    width: 260px; /* Điều chỉnh width cho mobile nhỏ */
+    width: v-bind('config.sizes.cardWidthSmallMobile');
   }
 
   .post-title {
@@ -432,8 +514,8 @@ onUnmounted(() => {
   }
 
   .carousel-btn {
-    width: 28px;
-    height: 28px;
+    width: v-bind('config.sizes.buttonWidthSmallMobile');
+    height: v-bind('config.sizes.buttonWidthSmallMobile');
   }
 
   .carousel-btn svg {

@@ -1,8 +1,8 @@
-diff --git a/src/components/productAdmin/Demo.vue b/src/components/productAdmin/Demo.vue
-index c3ec5038770683635825122babd2ac04968a12a1..d396bed3b8400a3a30dc6e4336107ade7aa4ebc6 100644
---- a/src/components/productAdmin/Demo.vue
-+++ b/src/components/productAdmin/Demo.vue
-@@ -1,90 +1,101 @@
+diff --git a/src/components/productAdmin/ProductUser.vue b/src/components/productAdmin/ProductUser.vue
+index c3ec5038770683635825122babd2ac04968a12a1..a3747e9150c24b55b837b17b199d2652c2425a0b 100644
+--- a/src/components/productAdmin/ProductUser.vue
++++ b/src/components/productAdmin/ProductUser.vue
+@@ -1,90 +1,105 @@
  <template>
    <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 px-4 py-3" style="padding-top: 90px!important;">
      <div class="max-w-[1600px] mx-auto">
@@ -14,60 +14,86 @@ index c3ec5038770683635825122babd2ac04968a12a1..d396bed3b8400a3a30dc6e4336107ade
              background-position: center;
              background-repeat: no-repeat;
            ">
-         <div class="filter-header mb-3">
-           <div class="filter-title-wrap">
-             <h1 class="filter-title">
-               Sản Phẩm Thiên Hà Group Dành Riêng Cho Bạn
-             </h1>
-           </div>
+-        <div class="filter-header mb-3">
+-          <div class="filter-title-wrap">
+-            <h1 class="filter-title">
+-              Sản Phẩm Thiên Hà Group Dành Riêng Cho Bạn
+-            </h1>
+-          </div>
++          <div class="filter-header mb-3">
++            <div class="filter-title-wrap">
++              <h1 class="filter-title">
++                Sản Phẩm Thiên Hà Group Dành Riêng Cho Bạn
++              </h1>
++            </div>
 
-           <!-- Nút chuyển đổi giữa bảng và thẻ -->
-           <div class="filter-actions">
-+            <button
-+                v-if="isMobile"
-+                @click="toggleFilters"
-+                :class="[
-+          'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2 bg-white text-slate-700 border-slate-300 hover:bg-slate-50',
-+          isFilterCollapsed ? 'shadow' : 'shadow-md'
-+        ]"
-+            >
-+              <i :class="['fa-solid text-sm', isFilterCollapsed ? 'fa-chevron-down' : 'fa-chevron-up']"></i>
-+              <span class="text-sm font-medium">{{ isFilterCollapsed ? 'Mở bộ lọc' : 'Thu gọn bộ lọc' }}</span>
-+            </button>
-             <button
-                 @click="viewMode = 'card'"
-                 :class="[
+-          <!-- Nút chuyển đổi giữa bảng và thẻ -->
+-          <div class="filter-actions">
+-            <button
+-                @click="viewMode = 'card'"
+-                :class="[
++            <!-- Nút chuyển đổi giữa bảng và thẻ -->
++            <div class="filter-actions">
++              <button
++                  @click="viewMode = 'card'"
++                  :class="[
          'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
          viewMode === 'card'
            ? 'bg-blue-600 text-white border-blue-600 shadow-md'
            : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
        ]"
-             >
-               <i class="fa-solid fa-grip text-sm"></i>
-               <span class="text-sm font-medium">Thẻ</span>
-             </button>
+-            >
+-              <i class="fa-solid fa-grip text-sm"></i>
+-              <span class="text-sm font-medium">Thẻ</span>
+-            </button>
++              >
++                <i class="fa-solid fa-grip text-sm"></i>
++                <span class="text-sm font-medium">Thẻ</span>
++              </button>
 
-             <button
-                 @click="viewMode = 'table'"
-                 :disabled="isMobile"
-                 :class="[
+-            <button
+-                @click="viewMode = 'table'"
+-                :disabled="isMobile"
+-                :class="[
++              <button
++                  @click="viewMode = 'table'"
++                  :disabled="isMobile"
++                  :class="[
          'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
          viewMode === 'table'
            ? 'bg-blue-600 text-white border-blue-600 shadow-md'
            : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50',
          isMobile ? 'opacity-60 cursor-not-allowed' : ''
        ]"
-             >
-               <i class="fa-solid fa-table text-sm"></i>
-               <span class="text-sm font-medium">Bảng</span>
-             </button>
+-            >
+-              <i class="fa-solid fa-table text-sm"></i>
+-              <span class="text-sm font-medium">Bảng</span>
+-            </button>
++              >
++                <i class="fa-solid fa-table text-sm"></i>
++                <span class="text-sm font-medium">Bảng</span>
++              </button>
++            </div>
            </div>
++
++        <div v-if="isMobile" class="w-full flex justify-end mb-3">
++          <button
++              @click="showFilters = !showFilters"
++              :class="[
++        'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
++        showFilters
++          ? 'bg-blue-600 text-white border-blue-600 shadow-md'
++          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
++      ]"
++          >
++            <i :class="['fa-solid text-sm', showFilters ? 'fa-chevron-up' : 'fa-chevron-down']"></i>
++            <span class="text-sm font-medium">{{ showFilters ? 'Thu gọn bộ lọc' : 'Hiển thị bộ lọc' }}</span>
++          </button>
          </div>
 
 
          <!-- Thanh tìm kiếm -->
--        <div class="mb-3">
-+        <div class="mb-3" v-show="shouldShowFilters">
+         <div class="mb-3">
            <div class="relative">
              <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
              <input
@@ -80,7 +106,7 @@ index c3ec5038770683635825122babd2ac04968a12a1..d396bed3b8400a3a30dc6e4336107ade
          </div>
 
 -        <div class="filter-row">
-+        <div class="filter-row" v-show="shouldShowFilters">
++        <div class="filter-row" v-show="!isMobile || showFilters">
 
          <!-- Mức giá -->
            <div class="filter-item">
@@ -106,7 +132,13 @@ index c3ec5038770683635825122babd2ac04968a12a1..d396bed3b8400a3a30dc6e4336107ade
            <div class="filter-item">
              <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
                <i class="fa-solid fa-city text-emerald-600 text-xs icon-glow"></i>
-@@ -743,59 +754,67 @@ const sidebar = useSidebarStore();
+@@ -737,60 +752,67 @@ import NotificationBell from "/src/components/NotificationBell.vue";
+
+ import { useAuthStore } from "/src/stores/authStore.js";
+ const authStore = useAuthStore();
+ const info = authStore.userInfo;
+
+ const sidebar = useSidebarStore();
 
  // Data
  const landAssets = ref([]);
@@ -126,29 +158,28 @@ index c3ec5038770683635825122babd2ac04968a12a1..d396bed3b8400a3a30dc6e4336107ade
  const filterUnlock = ref("");
  const filterStatus = ref("");
  const filterLove = ref(null);
++const showFilters = ref(false);
 
  // Pagination
  const page = ref(0);
  const pageSize = ref(8);
  const viewMode = ref('card');
  const isMobile = ref(false);
-+const isFilterCollapsed = ref(false);
  const updateViewportMode = () => {
++  const wasMobile = isMobile.value;
    isMobile.value = typeof window !== 'undefined' && window.innerWidth < 768;
    if (isMobile.value) {
      viewMode.value = 'card';
++    if (!wasMobile) {
++      showFilters.value = false;
++    }
 +  } else {
-+    isFilterCollapsed.value = false;
++    showFilters.value = true;
    }
  };
  watch(viewMode, (mode) => {
    pageSize.value = mode === 'card' ? 8 : 10;
  });// Mặc định 9 thẻ cho 3 cột
-+const shouldShowFilters = computed(() => !isMobile.value || !isFilterCollapsed.value);
-+const toggleFilters = () => {
-+  if (!isMobile.value) return;
-+  isFilterCollapsed.value = !isFilterCollapsed.value;
-+};
  const totalPages = computed(() =>
      Math.ceil(totalRecords.value / pageSize.value || 1)
  );
@@ -169,8 +200,3 @@ index c3ec5038770683635825122babd2ac04968a12a1..d396bed3b8400a3a30dc6e4336107ade
  });
 
 
- // Format functions
- const formatDate = (dateString) => {
-   if (!dateString) return "";
-   const date = new Date(dateString);
-   return `${String(date.getDate()).padStart(2, "0")}-${String(

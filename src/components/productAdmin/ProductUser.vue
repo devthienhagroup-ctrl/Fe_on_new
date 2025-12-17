@@ -9,43 +9,58 @@
             background-position: center;
             background-repeat: no-repeat;
           ">
-        <div class="filter-header mb-3">
-          <div class="filter-title-wrap">
-            <h1 class="filter-title">
-              Sản Phẩm Thiên Hà Group Dành Riêng Cho Bạn
-            </h1>
-          </div>
+          <div class="filter-header mb-3">
+            <div class="filter-title-wrap">
+              <h1 class="filter-title">
+                Sản Phẩm Thiên Hà Group Dành Riêng Cho Bạn
+              </h1>
+            </div>
 
-          <!-- Nút chuyển đổi giữa bảng và thẻ -->
-          <div class="filter-actions">
-            <button
-                @click="viewMode = 'card'"
-                :class="[
+            <!-- Nút chuyển đổi giữa bảng và thẻ -->
+            <div class="filter-actions">
+              <button
+                  @click="viewMode = 'card'"
+                  :class="[
         'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
         viewMode === 'card'
           ? 'bg-blue-600 text-white border-blue-600 shadow-md'
           : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
       ]"
-            >
-              <i class="fa-solid fa-grip text-sm"></i>
-              <span class="text-sm font-medium">Thẻ</span>
-            </button>
+              >
+                <i class="fa-solid fa-grip text-sm"></i>
+                <span class="text-sm font-medium">Thẻ</span>
+              </button>
 
-            <button
-                @click="viewMode = 'table'"
-                :disabled="isMobile"
-                :class="[
+              <button
+                  @click="viewMode = 'table'"
+                  :disabled="isMobile"
+                  :class="[
         'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
         viewMode === 'table'
           ? 'bg-blue-600 text-white border-blue-600 shadow-md'
           : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50',
         isMobile ? 'opacity-60 cursor-not-allowed' : ''
       ]"
-            >
-              <i class="fa-solid fa-table text-sm"></i>
-              <span class="text-sm font-medium">Bảng</span>
-            </button>
+              >
+                <i class="fa-solid fa-table text-sm"></i>
+                <span class="text-sm font-medium">Bảng</span>
+              </button>
+            </div>
           </div>
+
+        <div v-if="isMobile" class="w-full flex justify-end mb-3">
+          <button
+              @click="showFilters = !showFilters"
+              :class="[
+        'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
+        showFilters
+          ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+      ]"
+          >
+            <i :class="['fa-solid text-sm', showFilters ? 'fa-chevron-up' : 'fa-chevron-down']"></i>
+            <span class="text-sm font-medium">{{ showFilters ? 'Thu gọn bộ lọc' : 'Hiển thị bộ lọc' }}</span>
+          </button>
         </div>
 
 
@@ -62,7 +77,7 @@
           </div>
         </div>
 
-        <div class="filter-row">
+        <div class="filter-row" v-show="!isMobile || showFilters">
 
         <!-- Mức giá -->
           <div class="filter-item">
@@ -508,7 +523,7 @@
               </div>
               <div v-else-if="'Đã kiểm duyệt' === item.status" class="absolute top-3  mr-0 ms-3 right-2 flex items-center gap-2" style="width: 60px
                   ; position: absolute; top: 7px; right: 3px">
-                <img src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png"/>
+                <img src="https://s3.cloudfly.vn/thg-storage/uploads-public/icon-kiem-duỵet.png"/>
               </div>
             </div>
 
@@ -759,6 +774,7 @@ const searchQuery = ref("");
 const filterUnlock = ref("");
 const filterStatus = ref("");
 const filterLove = ref(null);
+const showFilters = ref(false);
 
 // Pagination
 const page = ref(0);
@@ -766,9 +782,15 @@ const pageSize = ref(8);
 const viewMode = ref('card');
 const isMobile = ref(false);
 const updateViewportMode = () => {
+  const wasMobile = isMobile.value;
   isMobile.value = typeof window !== 'undefined' && window.innerWidth < 768;
   if (isMobile.value) {
     viewMode.value = 'card';
+    if (!wasMobile) {
+      showFilters.value = false;
+    }
+  } else {
+    showFilters.value = true;
   }
 };
 watch(viewMode, (mode) => {
@@ -1168,7 +1190,7 @@ async function fetchFilteredAssets() {
           ...item,
           imageUrl: item.imageUrl
               ? item.imageUrl
-              : "https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg"
+              : "https://s3.cloudfly.vn/thg-storage/uploads-public/default.jpg"
         }))
         : [];
 

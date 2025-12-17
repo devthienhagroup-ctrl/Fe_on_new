@@ -1,16 +1,19 @@
 <template>
-  <div class="qfc-quick-calculator">
+  <div
+      class="qfc-quick-calculator"
+      :style="containerStyles"
+  >
     <h2 class="qfc-calculator-title">
-      <i class="fas fa-calculator"></i>
-      Tính nhanh phí định giá sơ bộ
+      <i :class="config.calculatorConfig.icon"></i>
+      {{ config.calculatorConfig.title }}
     </h2>
 
     <div class="qfc-calculator-content">
       <div class="qfc-input-section">
         <div class="qfc-input-group">
           <label for="propertyValue">
-            <i class="fas fa-home"></i>
-            Giá trị tài sản (tỷ VNĐ):
+            <i :class="config.inputConfig.icon"></i>
+            {{ config.inputConfig.label }}
           </label>
           <div class="qfc-input-wrapper">
             <input
@@ -18,37 +21,42 @@
                 id="propertyValue"
                 v-model="inputValue"
                 @input="handleInputChange"
-                min="1"
-                step="0.1"
+                :min="config.calculatorConfig.minValue"
+                :max="config.calculatorConfig.maxValue"
+                :step="config.calculatorConfig.step"
                 class="qfc-value-input"
+                :placeholder="config.inputConfig.placeholder"
             >
-            <span class="qfc-unit">tỷ</span>
+            <span class="qfc-unit">{{ config.calculatorConfig.unit }}</span>
           </div>
         </div>
       </div>
 
       <div class="qfc-slider-section">
         <div class="qfc-slider-group">
-          <label>Kéo để điều chỉnh giá mong muốn (tỷ VNĐ):</label>
+          <label>{{ config.sliderConfig.label }}</label>
           <div class="qfc-slider-container">
             <input
                 type="range"
                 :value="inputValue"
                 @input="handleSliderChange"
-                min="1"
-                max="150"
-                step="0.1"
+                :min="config.calculatorConfig.minValue"
+                :max="config.calculatorConfig.maxValue"
+                :step="config.calculatorConfig.step"
                 class="qfc-value-slider"
-                :style="sliderProgressStyle"
+                :style="sliderStyles"
             >
-            <div class="qfc-slider-labels">
+            <div
+                v-if="config.sliderConfig.showQuickValues"
+                class="qfc-slider-labels"
+            >
               <div
                   v-for="value in sliderQuickValues"
                   :key="value"
                   class="qfc-slider-label-value"
                   :class="{ active: inputValue === value }"
                   @click="selectQuickValue(value)"
-                  :style="{ left: calculatePosition(value) + '%' }"
+                  :style="getLabelPosition(value)"
               >
                 {{ value }}
               </div>
@@ -59,13 +67,21 @@
     </div>
 
     <div class="qfc-result-section">
-      <div class="qfc-result-card">
+      <div
+          class="qfc-result-card"
+          :style="resultCardStyles"
+      >
         <div class="qfc-result-icon">
-          <i class="fas fa-money-bill-wave"></i>
+          <i :class="config.resultConfig.icon"></i>
         </div>
         <div class="qfc-result-content">
-          <h3>Phí dịch vụ ước tính:</h3>
-          <div class="qfc-fee-result">{{ formatCurrency(calculatedFee) }} VNĐ</div>
+          <h3>{{ config.resultConfig.title }}</h3>
+          <div class="qfc-fee-result">
+            {{ formatCurrency(calculatedFee) }}
+            <span v-if="config.resultConfig.showCurrency">
+              {{ config.calculatorConfig.currency }}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -73,46 +89,120 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
 
 const props = defineProps({
   feeRates: {
     type: Array,
-    required: true
+    required: true,
+    default: () => []
+  },
+  config: {
+    type: Object,
+    required: true,
+    default: () => ({
+      calculatorConfig: {
+        title: 'Tính nhanh phí định giá sơ bộ',
+        icon: 'fas fa-calculator',
+        minValue: 1,
+        maxValue: 150,
+        step: 0.1,
+        defaultValue: 5,
+        quickValues: [1, 5, 10, 20, 50, 100],
+        unit: 'tỷ',
+        currency: 'VNĐ',
+        locale: 'vi-VN'
+      },
+      inputConfig: {
+        label: 'Giá trị tài sản (tỷ VNĐ):',
+        icon: 'fas fa-home',
+        placeholder: 'Nhập giá trị...'
+      },
+      sliderConfig: {
+        label: 'Kéo để điều chỉnh giá mong muốn (tỷ VNĐ):',
+        showQuickValues: true,
+        thumbIcon: '/imgs/logoTHG.png',
+        thumbSize: 32
+      },
+      resultConfig: {
+        title: 'Phí dịch vụ ước tính:',
+        icon: 'fas fa-money-bill-wave',
+        showCurrency: true
+      },
+      styles: {
+        gradientStart: '#3b82f6',
+        gradientEnd: '#1e40af',
+        primaryColor: '#ffffff',
+        secondaryColor: 'rgba(255, 255, 255, 0.3)',
+        cardBackground: 'rgba(255, 255, 255, 0.15)',
+        borderRadius: '20px',
+        shadow: '0 10px 30px rgba(59, 130, 246, 0.3)'
+      }
+    })
   }
 })
 
 const emit = defineEmits(['valueChanged'])
 
-const inputValue = ref(5)
-const calculatedFee = ref(350000)
-const quickValues = ref([1, 5, 10, 20, 50, 100])
+// Reactive state
+const inputValue = ref(props.config.calculatorConfig.defaultValue)
+const calculatedFee = ref(0)
 
-// Thêm 150 vào các giá trị hiển thị trên slider
-const sliderQuickValues = computed(() => [...quickValues.value, 150])
+// Computed properties
+const sliderQuickValues = computed(() => [
+  ...props.config.calculatorConfig.quickValues,
+  props.config.calculatorConfig.maxValue
+])
 
-// Tính toán progress cho slider background
-const sliderProgressStyle = computed(() => {
-  const progress = ((inputValue.value - 1) / (150 - 1)) * 100
+const containerStyles = computed(() => ({
+  background: `linear-gradient(135deg, ${props.config.styles.gradientStart} 0%, ${props.config.styles.gradientEnd} 100%)`,
+  borderRadius: props.config.styles.borderRadius,
+  boxShadow: props.config.styles.shadow,
+  color: props.config.styles.primaryColor
+}))
+
+const sliderStyles = computed(() => {
+  const progress = ((inputValue.value - props.config.calculatorConfig.minValue) /
+      (props.config.calculatorConfig.maxValue - props.config.calculatorConfig.minValue)) * 100
+
   return {
-    '--slider-progress': `${progress}%`
+    '--slider-progress': `${progress}%`,
+    '--thumb-size': `${props.config.sliderConfig.thumbSize}px`,
+    '--thumb-icon': `url('${baseImgaeUrl+props.config.sliderConfig.thumbIcon}')`
   }
 })
 
+const resultCardStyles = computed(() => ({
+  background: props.config.styles.cardBackground,
+  border: `1px solid ${props.config.styles.secondaryColor.replace('0.3', '0.2')}`
+}))
+
+// Methods
 const calculatePosition = (value) => {
-  const min = 1
-  const max = 150
+  const min = props.config.calculatorConfig.minValue
+  const max = props.config.calculatorConfig.maxValue
   return ((value - min) / (max - min)) * 100
 }
+
+const getLabelPosition = (value) => ({
+  left: `${calculatePosition(value)}%`
+})
 
 const calculateFee = (value) => {
   const numericValue = parseFloat(value)
 
-  // Tìm mức phí phù hợp - ĐÃ SỬA
+  // Kiểm tra nếu không có feeRates
+  if (!props.feeRates || props.feeRates.length === 0) {
+    console.warn('No fee rates provided from parent')
+    return 0
+  }
+
+  // Tìm mức phí phù hợp từ feeRates được truyền từ cha
   const rate = props.feeRates.find(rate => {
     if (rate.max === null) {
-      // Mức "> 100 tỷ" - chỉ áp dụng khi value > 100
-      return numericValue > 100
+      // Mức cuối cùng (không có max)
+      return numericValue >= rate.min
     }
 
     // Xử lý đặc biệt cho mốc 50-100 tỷ - bao gồm cả 100
@@ -129,7 +219,10 @@ const calculateFee = (value) => {
 
 const handleInputChange = (event) => {
   const value = parseFloat(event.target.value)
-  if (!isNaN(value) && value >= 1) {
+  const min = props.config.calculatorConfig.minValue
+  const max = props.config.calculatorConfig.maxValue
+
+  if (!isNaN(value) && value >= min && value <= max) {
     inputValue.value = value
     calculatedFee.value = calculateFee(value)
     emit('valueChanged', value)
@@ -137,9 +230,10 @@ const handleInputChange = (event) => {
 }
 
 const handleSliderChange = (event) => {
-  inputValue.value = parseFloat(event.target.value)
-  calculatedFee.value = calculateFee(inputValue.value)
-  emit('valueChanged', inputValue.value)
+  const value = parseFloat(event.target.value)
+  inputValue.value = value
+  calculatedFee.value = calculateFee(value)
+  emit('valueChanged', value)
 }
 
 const selectQuickValue = (value) => {
@@ -149,21 +243,30 @@ const selectQuickValue = (value) => {
 }
 
 const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('vi-VN').format(amount)
+  return new Intl.NumberFormat(props.config.calculatorConfig.locale).format(amount)
 }
 
-// Tính toán phí ban đầu
-calculatedFee.value = calculateFee(inputValue.value)
+// Watch feeRates để tính toán lại phí khi dữ liệu thay đổi
+watch(
+    () => props.feeRates,
+    () => {
+      calculatedFee.value = calculateFee(inputValue.value)
+    },
+    { deep: true }
+)
+
+// Lifecycle
+onMounted(() => {
+  // Tính toán phí ban đầu dựa trên feeRates từ cha
+  calculatedFee.value = calculateFee(inputValue.value)
+})
 </script>
 
 <style scoped>
 .qfc-quick-calculator {
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-  border-radius: 20px;
   padding: 25px;
   margin-bottom: 40px;
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
-  color: white;
+  transition: all 0.3s ease;
 }
 
 .qfc-calculator-title {
@@ -216,6 +319,12 @@ calculatedFee.value = calculateFee(inputValue.value)
   font-size: 1rem;
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.qfc-value-input:focus {
+  outline: 2px solid var(--primary-color, #3b82f6);
+  outline-offset: 2px;
 }
 
 .qfc-unit {
@@ -236,7 +345,7 @@ calculatedFee.value = calculateFee(inputValue.value)
 .qfc-slider-container {
   position: relative;
   width: 100%;
-  padding: 0 16px; /* Thêm padding để cân bằng với thumb của slider */
+  padding: 0 16px;
 }
 
 .qfc-value-slider {
@@ -245,35 +354,46 @@ calculatedFee.value = calculateFee(inputValue.value)
   border-radius: 5px;
   background: linear-gradient(
       to right,
-      #ffffff var(--slider-progress, 0%),
-      rgba(255, 255, 255, 0.3) var(--slider-progress, 0%)
+      var(--primary-color, #ffffff) var(--slider-progress, 0%),
+      var(--secondary-color, rgba(255, 255, 255, 0.3)) var(--slider-progress, 0%)
   );
   outline: none;
   margin: 15px 0;
   -webkit-appearance: none;
 }
 
-/* Thumb cho Webkit browsers (Chrome, Safari, Edge) */
+/* Thumb cho Webkit browsers */
 .qfc-value-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 32px;
-  height: 32px;
+  width: var(--thumb-size, 32px);
+  height: var(--thumb-size, 32px);
   border-radius: 50%;
-  background: url('/imgs/logoTHG.png') center/contain no-repeat;
-  background-color: #ffffff;
+  background: var(--thumb-icon, url('/imgs/logoTHG.png')) center/contain no-repeat;
+  background-color: var(--primary-color, #ffffff);
   cursor: pointer;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.qfc-value-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
 }
 
 /* Thumb cho Firefox */
 .qfc-value-slider::-moz-range-thumb {
-  width: 32px;
-  height: 32px;
+  width: var(--thumb-size, 32px);
+  height: var(--thumb-size, 32px);
   border-radius: 50%;
-  background: url('/imgs/logoTHG.png') center/contain no-repeat;
-  background-color: #ffffff;
+  background: var(--thumb-icon, url('/imgs/logoTHG.png')) center/contain no-repeat;
+  background-color: var(--primary-color, #ffffff);
   cursor: pointer;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  border: none;
+  transition: transform 0.2s ease;
+}
+
+.qfc-value-slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
 }
 
 /* Track cho Firefox */
@@ -281,30 +401,30 @@ calculatedFee.value = calculateFee(inputValue.value)
   width: 100%;
   height: 6px;
   border-radius: 5px;
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--secondary-color, rgba(255, 255, 255, 0.3));
   border: none;
 }
 
 .qfc-value-slider::-moz-range-progress {
-  background: #ffffff;
+  background: var(--primary-color, #ffffff);
   height: 6px;
   border-radius: 5px;
 }
 
 /* Thumb cho Edge */
 .qfc-value-slider::-ms-thumb {
-  width: 32px;
-  height: 32px;
+  width: var(--thumb-size, 32px);
+  height: var(--thumb-size, 32px);
   border-radius: 50%;
-  background: url('/imgs/logoTHG.png') center/contain no-repeat;
-  background-color: #ffffff;
+  background: var(--thumb-icon, url('/imgs/logoTHG.png')) center/contain no-repeat;
+  background-color: var(--primary-color, #ffffff);
   cursor: pointer;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .qfc-slider-labels {
   position: relative;
-  width: calc(100% - 32px); /* Trừ đi kích thước thumb */
+  width: calc(100% - var(--thumb-size, 32px));
   margin: 0 auto;
   height: 20px;
 }
@@ -318,6 +438,7 @@ calculatedFee.value = calculateFee(inputValue.value)
   border-radius: 4px;
   font-size: 0.8rem;
   white-space: nowrap;
+  user-select: none;
 }
 
 .qfc-slider-label-value:hover {
@@ -325,33 +446,35 @@ calculatedFee.value = calculateFee(inputValue.value)
 }
 
 .qfc-slider-label-value.active {
-  background: rgba(255, 255, 255, 0.9);
-  color: #1e40af;
+  background: var(--primary-color, #ffffff);
+  color: var(--gradient-end, #1e40af);
   font-weight: 600;
 }
 
 .qfc-result-card {
-  background: rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   padding: 10px;
   display: flex;
   align-items: center;
   gap: 15px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
 }
 
 .qfc-result-icon {
   font-size: 1.5rem;
-  color: #ffffff;
+  color: var(--primary-color, #ffffff);
 }
 
 .qfc-result-content {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .qfc-result-content h3 {
-  margin: auto;
+  margin: 0;
   font-size: 1rem;
   opacity: 0.9;
 }
@@ -359,8 +482,10 @@ calculatedFee.value = calculateFee(inputValue.value)
 .qfc-fee-result {
   font-size: 1.6rem;
   font-weight: bold;
-  color: #ffffff;
-  margin-left: 5px;
+  color: var(--primary-color, #ffffff);
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 /* Responsive Design */
@@ -388,6 +513,7 @@ calculatedFee.value = calculateFee(inputValue.value)
 @media (max-width: 480px) {
   .qfc-slider-label-value {
     font-size: 0.7rem;
+    padding: 1px 4px;
   }
 
   .qfc-result-card {
@@ -396,19 +522,28 @@ calculatedFee.value = calculateFee(inputValue.value)
     gap: 10px;
   }
 
+  .qfc-result-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .qfc-fee-result {
+    font-size: 1.4rem;
+  }
+
   .qfc-value-slider::-webkit-slider-thumb {
-    width: 28px;
-    height: 28px;
+    width: calc(var(--thumb-size, 32px) * 0.875);
+    height: calc(var(--thumb-size, 32px) * 0.875);
   }
 
   .qfc-value-slider::-moz-range-thumb {
-    width: 28px;
-    height: 28px;
+    width: calc(var(--thumb-size, 32px) * 0.875);
+    height: calc(var(--thumb-size, 32px) * 0.875);
   }
 
   .qfc-value-slider::-ms-thumb {
-    width: 28px;
-    height: 28px;
+    width: calc(var(--thumb-size, 32px) * 0.875);
+    height: calc(var(--thumb-size, 32px) * 0.875);
   }
 }
 </style>
