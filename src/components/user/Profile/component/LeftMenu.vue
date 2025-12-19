@@ -62,10 +62,6 @@ const menuItems = ref([
     link: "/thanh-toan"
   },
   {
-    label: "Phát triển đội nhóm của bạn",
-    icon: "fa-solid fa-people-group",
-    link: "/nhom-cua-toi"
-  },  {
     label: "Gói dịch vụ",
     icon: "fa-solid fa-gem",
     link: "/goi-dich-vu"

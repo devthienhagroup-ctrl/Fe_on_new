@@ -23,7 +23,7 @@
 
         <img
             v-if="info.avatarUrl"
-            :src="' https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
+            :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
             alt="avatar"
             class="rounded-circle border"
             style="width: 36px; height: 36px; object-fit: cover;"
@@ -781,7 +781,7 @@ import NotificationBell from "./NotificationBell.vue";
 const authStore = useAuthStore();
 const info = authStore.userInfo;
 
-const AVATAR_BASE_URL = " https://s3.cloudfly.vn/thg-storage/uploads-public/";
+const AVATAR_BASE_URL = " https://s3.cloudfly.vn/thg-storage-dev/uploads-public/";
 
 const router = useRouter();
 const route = useRoute();

@@ -485,7 +485,7 @@ onUnmounted(() => {
 }
 
 /* Responsive design */
-@media (max-width: v-bind('config.responsive.tabletBreakpoint')) {
+@media (max-width: 768px) {
   .news-section {
     padding: v-bind('config.responsive.tablet.sectionPadding');
   }
@@ -517,7 +517,7 @@ onUnmounted(() => {
   }
 }
 
-@media (max-width: v-bind('config.responsive.mobileBreakpoint')) {
+@media (max-width: 480px) {
   .section-title {
     font-size: v-bind('config.responsive.mobile.sectionTitleSize');
   }

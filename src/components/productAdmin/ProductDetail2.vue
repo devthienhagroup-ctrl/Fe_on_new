@@ -320,9 +320,11 @@
               <span class="info-label">Đơn vị sở hữu</span>
               <span class="info-value owner-unit">
                   <img v-if="asset.donViSoHuu === 'THG'" src="/imgs/logokn.png" alt="THG" class="unit-logo">
-                  <i v-else-if="asset.donViSoHuu === 'DT'" class="fa-solid fa-handshake unit-icon"></i>
-                  <span>{{ asset.donViSoHuu ?? 'Chưa cập nhật' }}</span>
-                </span>
+                  <span  v-else-if="asset.donViSoHuu === 'DT'">
+                     <i class="fa-solid fa-handshake unit-icon"></i> Đối tác
+                  </span>
+
+              </span>
             </div>
 
             <div class="info-row">
@@ -614,7 +616,7 @@ import Spam from "./Spam.vue";
 
 const thumbnailImage = computed(() => {
   return asset.anhMacDinh
-      || 'https://s3.cloudfly.vn/thg-storage/uploads-public/default.jpg';
+      || 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg';
 });
 
 async function loadDetail(id) {
@@ -637,7 +639,7 @@ const typeColor = (type) => {
 
 const lockedImage = computed(() => {
   return asset.anhMacDinh
-      || 'https://s3.cloudfly.vn/thg-storage/uploads-public/default.jpg';
+      || 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg';
 });
 
 
@@ -1652,8 +1654,6 @@ const openPdf = async (pdfFile) => {
   width: 50px;
   height: 30px;
   object-fit: contain;
-  border-radius: 16px;
-  border: 1px solid #2563eb;
 }
 
 .unit-icon {

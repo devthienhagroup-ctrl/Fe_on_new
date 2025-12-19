@@ -66,7 +66,7 @@ async function searchEmployee() {
     employees.value = res.data.map(emp => ({
       ...emp,
       avatar: emp.avatar
-          ? `https://s3.cloudfly.vn/thg-storage/uploads-public/${emp.avatar}`
+          ? `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${emp.avatar}`
           : "/imgs/default-user.png"
     }));
 

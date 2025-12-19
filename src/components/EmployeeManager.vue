@@ -22,7 +22,7 @@
 
         <img
             v-if="info.avatarUrl"
-            :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
+            :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
             alt="avatar"
             class="rounded-circle border"
             style="width: 36px; height: 36px; object-fit: cover;"
@@ -137,7 +137,7 @@
             <div class="d-flex align-items-center">
               <img
                   v-if="nv.avatar"
-                  :src="` https://s3.cloudfly.vn/thg-storage/uploads-public/${nv.avatar}`"
+                  :src="` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${nv.avatar}`"
                   alt="avatar"
                   class="avatar-img"
               />
@@ -168,7 +168,7 @@
             <div class="d-flex align-items-center gap-2">
               <img
                   v-if="nv.departmentAvatar"
-                  :src="` https://s3.cloudfly.vn/thg-storage/uploads-public/${nv.departmentAvatar}`"
+                  :src="` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${nv.departmentAvatar}`"
                   class="avatar-img"
               />
               <div
@@ -188,7 +188,7 @@
             <template v-if="nv.teams && nv.teams.length">
               <div class="d-flex align-items-center gap-2">
                 <img
-                    :src="` https://s3.cloudfly.vn/thg-storage/uploads-public/${nv.teams[0].avatar}`"
+                    :src="` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${nv.teams[0].avatar}`"
                     class="avatar-img"
                 />
                 <span>{{ nv.teams[0].name }}</span>
@@ -319,7 +319,7 @@
             <strong>Nhóm:</strong>
             <template  v-if=" detail.teams && detail.teams.length">
               <div v-for="t in detail.teams" :key="t.id" class="d-flex align-items-center gap-1">
-                <img :src="' https://s3.cloudfly.vn/thg-storage/uploads-public/'+t.avatar" class="rounded-circle border" width="28" height="28" />
+                <img :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+t.avatar" class="rounded-circle border" width="28" height="28" />
                 <span>{{ t.name }}</span>
               </div>
             </template>
@@ -547,7 +547,7 @@
                   class="d-flex align-items-center border rounded p-2 bg-light"
               >
                 <img
-                    :src="team.avatar ? ' https://s3.cloudfly.vn/thg-storage/uploads-public/' + team.avatar : '/images/default-team.png'"
+                    :src="team.avatar ? ' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + team.avatar : '/images/default-team.png'"
                     alt="avatar"
                     class="me-3"
                     style="width: 20px; height: 20px; object-fit: cover; border-radius: 8px;"
@@ -959,7 +959,7 @@ async function openDetail(empOrId) {
     })
 
     // Chuẩn hóa đường dẫn ảnh
-    const baseUrl = " https://s3.cloudfly.vn/thg-storage/uploads-public/"
+    const baseUrl = " https://s3.cloudfly.vn/thg-storage-dev/uploads-public/"
     detail.value = {
       ...data,
       avatarUrl: baseUrl + data.avatar,
@@ -1125,7 +1125,7 @@ watch(
     () => detailUpdate.value.avatar,
     (newAvatar) => {
       previewAvatar.value = newAvatar
-          ? ` https://s3.cloudfly.vn/thg-storage/uploads-public/${newAvatar}`
+          ? ` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${newAvatar}`
           : "https://png.pngtree.com/element_our/20200610/ourmid/pngtree-character-default-avatar-image_2237203.jpg";
     },
     { immediate: true }

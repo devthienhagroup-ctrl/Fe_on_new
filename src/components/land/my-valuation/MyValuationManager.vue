@@ -1521,7 +1521,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body text-center">
-            <img :src="  ' https://s3.cloudfly.vn/thg-storage/uploads-public/' + selectedImage.url" class="img-fluid rounded-3"
+            <img :src="  ' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + selectedImage.url" class="img-fluid rounded-3"
                  :alt="selectedImage.alt" style="max-height: 70vh; object-fit: contain;">
           </div>
         </div>

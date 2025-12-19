@@ -59,8 +59,8 @@ import HostManager from "../components/host/HostManager.vue";
 import Ga4EventExample from "../components/Ga4EventExample.vue";
 import PaymentPage2 from "../components/productAdmin/PaymentPage2.vue";
 
-import cms from "/src/components/cms/cms.vue"
-import Banner from "../components/user/Home/components/Banner.vue";
+import cms from "/src/components/cms/cms.vue";
+import Banner from "../components/cms/components/home/Banner.vue";
 import Stats from "../components/cms/components/home/Stats.vue";
 import Hero from "../components/cms/components/home/Hero.vue";
 import Service from "../components/cms/components/home/Service.vue";
@@ -114,12 +114,18 @@ import HeroInvm from "../components/cms/components/investment/Hero.vue";
 import InvmList from "../components/cms/components/investment/InvestmentList.vue";
 import InvmModal from "../components/cms/components/investment/InvestmentModal.vue";
 import NewsManagement from "../components/cms/news/NewsManagement.vue";
+import moigioi from "../components/user/MoiGioi/moigioi.vue"
 
 const routes = [
         {
             path: "/-thg/dang-nhap",
             name: "LoginForm",
             component: LoginForm,
+        },
+        {
+            path: "/01",
+            name: "LoginForm11111",
+            component: moigioi,
         },
         {
         path: '/-thg/quan-tri-noi-dung',

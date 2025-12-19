@@ -63,7 +63,7 @@ export const logout = async (accessToken) => {
         }
     )
 }
-export const baseImgaeUrl="https://s3.cloudfly.vn/thg-storage/uploads-public/";
+export const baseImgaeUrl="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/";
 
 
 

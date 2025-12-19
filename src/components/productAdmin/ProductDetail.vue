@@ -194,9 +194,11 @@
                 <span class="info-label">Đơn vị sở hữu</span>
                 <span class="info-value owner-unit">
                   <img v-if="asset.donViSoHuu === 'THG'" src="/imgs/logokn.png" alt="THG" class="unit-logo">
-                  <i v-else-if="asset.donViSoHuu === 'DT'" class="fa-solid fa-handshake unit-icon"></i>
-                    <span>{{ asset.donViSoHuu ?? 'Chưa cập nhật' }}</span>
-                </span>
+                  <span  v-else-if="asset.donViSoHuu === 'DT'">
+                     <i class="fa-solid fa-handshake unit-icon"></i> Đối tác
+                  </span>
+
+              </span>
               </div>
 
               <div class="info-row">
@@ -1115,8 +1117,6 @@
   width: 50px;
   height: 30px;
   object-fit: contain;
-  border-radius: 16px;
-  border: 1px solid #2563eb;
 }
 
 .unit-icon {

@@ -93,7 +93,6 @@ const allMenuItems = [
     icon: 'fa-solid fa-mountain-sun text-primary fs-5',
     title: 'Sản phẩm'
   },
-
   { label: 'SYSCUSTOMER', route: '/-thg/quan-ly-nguoi-dung', icon: 'fa-solid fa-address-book text-info fs-5', title: 'Người dùng' },
   { label: 'AUDIT', route: '/-thg/lich-su-he-thong', icon: 'fa-solid fa-clock-rotate-left text-danger fs-5', title: 'Audit Log' },
   { label: 'ROLE', route: '/-thg/phan-quyen', icon: 'fa-solid fa-shield-halved text-warning fs-5', title: 'Phân quyền' },

@@ -485,7 +485,7 @@ onUnmounted(() => {
 }
 
 /* Responsive Design */
-@media (max-width: v-bind('config.mobileBreakpoint')) {
+@media (max-width: 768px) {
   .media-section {
     padding: 40px 15px;
   }

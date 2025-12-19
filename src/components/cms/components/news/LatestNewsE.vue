@@ -360,24 +360,6 @@
           <div class="setting-section">
             <h3><i class="fas fa-mobile-alt"></i> Responsive</h3>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label for="tablet-breakpoint">Breakpoint tablet</label>
-                <div class="input-with-unit">
-                  <input type="text" id="tablet-breakpoint" v-model="content.responsive.tabletBreakpoint"
-                         placeholder="768px"/>
-                  <span class="unit">px</span>
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="mobile-breakpoint">Breakpoint mobile</label>
-                <div class="input-with-unit">
-                  <input type="text" id="mobile-breakpoint" v-model="content.responsive.mobileBreakpoint"
-                         placeholder="480px"/>
-                  <span class="unit">px</span>
-                </div>
-              </div>
-            </div>
 
             <div class="form-group">
               <label for="tablet-section-title-size">Kích thước tiêu đề tablet</label>

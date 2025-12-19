@@ -406,6 +406,7 @@
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { buildPublicAvatarUrl, isImageFile } from '../../utils/fileUrl.js'
 import { useAuthStore } from "../../stores/authStore.js";
+import {getCachedFileDataUrl, loadPrivateFileDataUrl, resolveFileId} from "../../api/fileApi.js";
 
 const props = defineProps({
   tasks: { type: Array, default: () => [] },
@@ -531,7 +532,44 @@ const statusBadgeClass = (status) => {
     'badge-done-bg': status === 'DONE',
   }
 }
+const loadAttachment = (file) => {
+  const id = resolveFileId(file)
+  if (!id) return null
 
+  const cached = attachmentUrls.value[id] || getCachedFileDataUrl(id)
+  if (cached) {
+    setAttachmentUrl(id, cached)
+    return cached
+  }
+
+  if (attachmentPromises.has(id)) return attachmentPromises.get(id)
+
+  const promise = loadPrivateFileDataUrl(id)
+      .then((dataUrl) => {
+        setAttachmentUrl(id, dataUrl || '')
+        return dataUrl
+      })
+      .catch(() => null)
+      .finally(() => attachmentPromises.delete(id))
+
+  attachmentPromises.set(id, promise)
+  return promise
+}
+const attachmentElements = new Map()
+const attachmentObserver = typeof IntersectionObserver !== 'undefined'
+    ? new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return
+
+        const file = attachmentElements.get(entry.target)
+        if (file) {
+          loadAttachment(file)
+          attachmentObserver.unobserve(entry.target)
+          attachmentElements.delete(entry.target)
+        }
+      })
+    }, { rootMargin: '200px' })
+    : null
 onBeforeUnmount(() => {
   attachmentObserver?.disconnect()
   attachmentElements.clear()
