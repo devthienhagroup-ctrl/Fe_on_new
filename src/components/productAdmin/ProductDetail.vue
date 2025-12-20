@@ -172,22 +172,20 @@
 
               <div class="info-row">
                 <span class="info-label">Liên hệ</span>
-                <span class="info-value"> <i class="fa-solid fa-phone text-danger"></i> {{ asset.lienHe ?? 'Chưa cập nhật' }}</span>
+                <span class="info-value"> <i class="fa-solid fa-phone text-danger"></i> {{ asset.lienHe ?? ' Chưa cập nhật' }}</span>
               </div>
 
               <div class="info-row">
                 <span class="info-label">Chủ sở hữu</span>
                 <span v-if="asset.ownerName != null" class="info-value">
-                  {{ asset.ownerName ?? 'Chưa cập nhật' }} <span>
-                  (
-                  {{ asset.ownerPhone ?? 'Chưa cập nhật' }} )</span>
+                  {{ asset.ownerName ?? 'Chưa cập nhật' }}
                 </span>
                 <span v-else class="text-gray-600 info-value">Chưa cập nhật</span>
               </div>
 
               <div class="info-row">
-                <span class="info-label">Loại đất</span>
-                <span class="info-value">{{ asset.loaiDat ?? 'Chưa cập nhật' }}</span>
+                <span class="info-label">SĐT chủ sở hữu</span>
+                <span class="info-value"> {{ asset.ownerPhone ?? 'Chưa cập nhật' }}</span>
               </div>
 
               <div class="info-row">
@@ -239,12 +237,12 @@
             <span class="detail-value">{{ asset.oldAddress ?? 'Chưa cập nhật' }}</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">Số tờ bản đồ</span>
-            <span class="detail-value">{{ asset.plotNumber ?? 'Chưa cập nhật' }}</span>
+            <span class="detail-label">Số tờ bản đồ & Số thửa đất</span>
+            <span class="detail-value">{{ asset.plotNumber ?? 'Chưa cập nhật' }} && {{ asset.parcelNumber ?? 'Chưa cập nhật' }}</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">Số thửa đất</span>
-            <span class="detail-value">{{ asset.parcelNumber ?? 'Chưa cập nhật' }}</span>
+            <span class="detail-label">Loại đất</span>
+            <span class="detail-value">{{ asset.loaiDat }}</span>
           </div>
 
           <div class="detail-item">

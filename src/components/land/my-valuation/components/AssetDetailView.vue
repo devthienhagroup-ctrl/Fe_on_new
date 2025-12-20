@@ -63,10 +63,13 @@
           </div>
 
           <div class="col-12 col-lg-4">
-            <div class="info-panel p-3 p-md-4 rounded-3 rounded-md-4 shadow-sm bg-white h-100">
-              <h6 class="fw-semibold text-primary mb-2 mb-md-3 fs-6">Thông tin sở hữu</h6>
+            <div class="info-panel p-3 p-md-4 rounded-3 rounded-md-4 shadow-sm bg-white h-100" style="font-size: 17px">
+              <h6 class="fw-semibold text-primary mb-2 mb-md-3 fs-5">Thông tin sở hữu</h6>
               <ul class="list-unstyled text-muted small">
                 <li class="mb-1 mb-md-2"><strong>Chủ sở hữu:</strong> {{ assetDetail.ownerFullName }}</li>
+                <li class="mb-1 mb-md-2"><strong>Số điện thoại chủ:</strong> {{ assetDetail.ownerPhone }}</li>
+                <li class="mb-1 mb-md-2"><strong>Địa chỉ chủ:</strong> {{ formatAddress(assetDetail.ownerNewAddress) }}</li>
+                <li class="mb-1 mb-md-2"><strong>Địa chỉ cũ :</strong> {{ assetDetail.ownerOldAddress || '-'}}</li>
                 <li class="mb-1 mb-md-2"><strong>Giá trị mong muốn:</strong> <i style="color: #1762bd; font-size: 18px"> {{ formatCurrency(assetDetail.desire) }}</i></li>
                 <li class="mb-1 mb-md-2"><strong>Số tờ:</strong> {{ assetDetail.plotNumber }}</li>
                 <li class="mb-1 mb-md-2"><strong>Số thửa:</strong> {{ assetDetail.parcelNumber }}</li>

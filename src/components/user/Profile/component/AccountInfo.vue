@@ -103,7 +103,7 @@
               <span class="address-title">Địa chỉ cũ (không bắt buộc)</span>
             </div>
             <div class="address-content">
-              <p class="old-address-text">{{ user_info.oldAddress }}</p>
+              <p class="old-address-text">{{ user_info.oldAddress || 'Không có' }}</p>
             </div>
           </div>
         </div>
@@ -192,7 +192,7 @@
                   </h4>
 
                   <!-- Sử dụng AddressSelect2 cho Tỉnh/Thành phố và Phường/Xã -->
-                  <AddressSelector2
+                  <AddressSelector3
                       v-model="currentAddress"
                   />
                   <div v-if="errors.address" class="error-message">{{ errors.address }}</div>
@@ -250,11 +250,11 @@
 <script setup>
 import { ref, reactive, watch, computed, onMounted } from 'vue'
 import addressData from "/src/assets/js/address.json";
-import AddressSelector2 from "../../../land/my-valuation/components/AddressSelector2.vue";
+import AddressSelector3 from "../../../land/my-valuation/components/AddressSelector2.vue";
 import api from "../../../../api/api.js";
 import {eventBus} from "../../../../assets/js/event-bus.js";
 
-const ADDRESS_DELIMITER = '}|'
+const ADDRESS_DELIMITER = '/!!'
 
 // Props nhận từ component cha
 const props = defineProps({

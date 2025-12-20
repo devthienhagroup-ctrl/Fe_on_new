@@ -91,18 +91,22 @@
                   <!-- ẢNH -->
                   <!-- ẢNH -->
                   <a v-if="isImageFile(file)"
-                     :href="file.tempUrl || '#'"
+                     :href="getAttachmentUrl(file) || '#'"
                      target="_blank"
-                     class="attachment-image">
-                    <img :src="file.tempUrl || '/placeholder-image.jpg'"
+                     class="attachment-image"
+                     :class="{ 'disabled-attachment': !getAttachmentUrl(file) }"
+                     :ref="(el) => observeAttachment(file, el)">
+                    <img :src="getAttachmentUrl(file) || '/placeholder-image.jpg'"
                          :alt="file.fileName || file.name || 'attachment'" />
                   </a>
 
                   <!-- FILE -->
                   <a v-else
-                     :href="file.tempUrl || '#'"
+                     :href="getAttachmentUrl(file) || '#'"
                      target="_blank"
-                     class="attachment-file">
+                     class="attachment-file"
+                     :class="{ 'disabled-attachment': !getAttachmentUrl(file) }"
+                     :ref="(el) => observeAttachment(file, el)">
                     <i class="fa-solid fa-paperclip me-2"></i>
                     {{ file.fileName || file.name || 'Tập tin đính kèm' }}
                   </a>
@@ -292,6 +296,7 @@ import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import {useAuthStore} from "../../stores/authStore.js";
 import { buildPublicAvatarUrl, isImageFile } from '../../utils/fileUrl.js'
 import {showError, showSuccess} from "../../assets/js/alertService.js";
+import {getCachedFileDataUrl, loadPrivateFileDataUrl, resolveFileId} from "../../api/fileApi.js";
 
 const authStore = useAuthStore();
 
@@ -316,6 +321,9 @@ const messageContainer = ref(null)
 const messageInput = ref(null)
 const messageRefs = new Map()
 const fileInput = ref(null)
+const attachmentUrls = ref({})
+const attachmentPromises = new Map()
+const attachmentElements = new Map()
 
 // Mention functionality
 const showMentionDropdown = ref(false)
@@ -489,6 +497,83 @@ const formatContent = (content) => {
       .replace(/\n/g, '<br />')
       // highlight all @tag
       .replace(/@([a-zA-Z0-9._-]+)/g, '<span class="mention-text">@$1</span>')
+}
+
+const setAttachmentUrl = (id, value) => {
+  attachmentUrls.value = { ...attachmentUrls.value, [id]: value || '' }
+}
+
+const loadAttachment = (file) => {
+  if (file?.tempUrl) return file.tempUrl
+
+  const id = resolveFileId(file)
+  if (!id) return null
+
+  const cached = attachmentUrls.value[id] || getCachedFileDataUrl(id)
+  if (cached) {
+    setAttachmentUrl(id, cached)
+    return cached
+  }
+
+  if (attachmentPromises.has(id)) return attachmentPromises.get(id)
+
+  const promise = loadPrivateFileDataUrl(id)
+      .then((dataUrl) => {
+        setAttachmentUrl(id, dataUrl || '')
+        return dataUrl
+      })
+      .catch(() => null)
+      .finally(() => attachmentPromises.delete(id))
+
+  attachmentPromises.set(id, promise)
+  return promise
+}
+
+const attachmentObserver = typeof IntersectionObserver !== 'undefined'
+    ? new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return
+
+        const file = attachmentElements.get(entry.target)
+        if (file) {
+          loadAttachment(file)
+          attachmentObserver.unobserve(entry.target)
+          attachmentElements.delete(entry.target)
+        }
+      })
+    }, { rootMargin: '200px' })
+    : null
+
+const getAttachmentUrl = (file) => {
+  if (file?.tempUrl) return file.tempUrl
+
+  const id = resolveFileId(file)
+  if (!id) return null
+
+  const cached = attachmentUrls.value[id] || getCachedFileDataUrl(id)
+  if (cached) {
+    setAttachmentUrl(id, cached)
+    return cached
+  }
+
+  return null
+}
+
+const observeAttachment = (file, el) => {
+  const id = resolveFileId(file)
+  if (!id) return
+
+  if (!attachmentObserver) {
+    loadAttachment(file)
+    return
+  }
+
+  if (el) {
+    attachmentElements.set(el, file)
+    attachmentObserver.observe(el)
+  } else {
+    attachmentElements.delete(el)
+  }
 }
 
 

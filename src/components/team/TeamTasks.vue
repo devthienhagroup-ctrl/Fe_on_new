@@ -121,11 +121,12 @@
                         :key="file.id || file.url"
                         class="attachment-chip"
                         @click.stop
+                        :ref="(el) => observeAttachment(file, el)"
                     >
                       <!-- ⭐ Tự nhận ra file ảnh -->
                       <img
                           v-if="isImageFile(file)"
-                          :src="file.tempUrl || '/placeholder-image.jpg'"
+                          :src="getAttachmentViewUrl(file) || '/placeholder-image.jpg'"
                           :alt="file.fileName"
                       />
 
@@ -205,10 +206,11 @@
                         :key="file.id || file.url"
                         class="attachment-chip"
                         @click.stop
+                        :ref="(el) => observeAttachment(file, el)"
                     >
                       <img
                           v-if="isImageFile(file)"
-                          :src="file.tempUrl || '/placeholder-image.jpg'"
+                          :src="getAttachmentViewUrl(file) || '/placeholder-image.jpg'"
                           :alt="file.fileName"
                       />
                       <div v-else class="file-chip">
@@ -282,11 +284,12 @@
                       :key="file.id || file.url"
                       class="attachment-chip"
                       @click.stop
+                      :ref="(el) => observeAttachment(file, el)"
                   >
                     <!-- ⭐ Tự nhận ra file ảnh -->
                     <img
                         v-if="isImageFile(file)"
-                        :src="file.tempUrl || '/placeholder-image.jpg'"
+                        :src="getAttachmentViewUrl(file) || '/placeholder-image.jpg'"
                         :alt="file.fileName"
                     />
 
@@ -429,6 +432,9 @@ const groupByLabel = ref(true)
 
 // Danh sách nhãn được chọn
 const selectedLabels = ref(['TODO', 'IN_PROGRESS', 'IN_PREVIEW', 'DONE'])
+const attachmentUrls = ref({})
+const attachmentPromises = new Map()
+const attachmentElements = new Map()
 
 const columns = [
   { status: 'TODO', label: 'Cần làm' },
@@ -532,7 +538,13 @@ const statusBadgeClass = (status) => {
     'badge-done-bg': status === 'DONE',
   }
 }
+const setAttachmentUrl = (id, value) => {
+  attachmentUrls.value = { ...attachmentUrls.value, [id]: value || '' }
+}
+
 const loadAttachment = (file) => {
+  if (file?.tempUrl) return file.tempUrl
+
   const id = resolveFileId(file)
   if (!id) return null
 
@@ -555,7 +567,6 @@ const loadAttachment = (file) => {
   attachmentPromises.set(id, promise)
   return promise
 }
-const attachmentElements = new Map()
 const attachmentObserver = typeof IntersectionObserver !== 'undefined'
     ? new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -570,6 +581,37 @@ const attachmentObserver = typeof IntersectionObserver !== 'undefined'
       })
     }, { rootMargin: '200px' })
     : null
+const getAttachmentViewUrl = (file) => {
+  if (file?.tempUrl) return file.tempUrl
+
+  const id = resolveFileId(file)
+  if (!id) return null
+
+  const cached = attachmentUrls.value[id] || getCachedFileDataUrl(id)
+  if (cached) {
+    setAttachmentUrl(id, cached)
+    return cached
+  }
+
+  return null
+}
+
+const observeAttachment = (file, el) => {
+  const id = resolveFileId(file)
+  if (!id) return
+
+  if (!attachmentObserver) {
+    loadAttachment(file)
+    return
+  }
+
+  if (el) {
+    attachmentElements.set(el, file)
+    attachmentObserver.observe(el)
+  } else {
+    attachmentElements.delete(el)
+  }
+}
 onBeforeUnmount(() => {
   attachmentObserver?.disconnect()
   attachmentElements.clear()

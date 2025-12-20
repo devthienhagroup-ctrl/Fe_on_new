@@ -75,6 +75,15 @@
                         <h5 class="fw-semibold text-dark mb-1 fs-6 fs-md-5">Gửi yêu cầu định giá mới</h5>
                         <p class="text-muted small mb-0">Chọn tài sản có sẵn hoặc mô tả tài sản mới để chúng tôi hỗ
                           trợ.</p>
+                        <div v-if="requestForm.assetOption === 'new'" class="form-check mt-2">
+                          <input
+                              id="on-behalf-checkbox"
+                              v-model="requestForm.onBehalf"
+                              class="form-check-input"
+                              type="checkbox"
+                          />
+                          <label class="form-check-label small" for="on-behalf-checkbox">Nhập hộ</label>
+                        </div>
                       </div>
                       <form class="card border-0 shadow-sm" @submit.prevent>
                         <div class="card-body p-3 p-md-4">
@@ -409,7 +418,7 @@
                             </div>
                           </div>
 
-                          <div class="row g-2 g-md-3 mb-3">
+                          <div v-if="requestForm.assetOption === 'existing' || !requestForm.onBehalf" class="row g-2 g-md-3 mb-3">
                             <div
                                 class="col-12 col-md-6 field-group"
                                 :class="{ 'has-error': requestErrors.contact.name }"
@@ -470,11 +479,124 @@
                               />
                             </div>
                           </div>
+                          <div v-else class="mb-3 p-3 border rounded-4 bg-light">
+                            <div class="d-flex gap-3 flex-wrap mb-3">
+                              <div class="form-check">
+                                <input
+                                    id="owner-existing"
+                                    v-model="requestForm.ownerOption"
+                                    class="form-check-input"
+                                    type="radio"
+                                    value="existing"
+                                />
+                                <label class="form-check-label small" for="owner-existing">Chọn chủ đã có</label>
+                              </div>
+                              <div class="form-check">
+                                <input
+                                    id="owner-new"
+                                    v-model="requestForm.ownerOption"
+                                    class="form-check-input"
+                                    type="radio"
+                                    value="new"
+                                />
+                                <label class="form-check-label small" for="owner-new">Nhập chủ mới</label>
+                              </div>
+                            </div>
+                            <div v-if="requestForm.ownerOption === 'existing'" class="row g-2 align-items-end">
+                              <div class="col-12 col-md-9">
+                                <label class="form-label small mb-1">Tìm chủ theo SĐT</label>
+                                <input
+                                    v-model="requestForm.existingOwnerPhone"
+                                    type="tel"
+                                    class="form-control form-control-sm"
+                                    placeholder="Nhập số điện thoại chủ"
+                                />
+                              </div>
+                              <div class="col-12 col-md-3 d-flex align-items-end ">
+                                <button type="button" style="padding: 7px 0; border-radius: 12px !important;"
+                                        class="btn btn-primary btn-sm w-100" @click="handleExistingOwnerLookup">
+                                  OK
+                                </button>
+                              </div>
+                                <div v-if="requestForm.existingOwner !== null && thongBao === null">
+                                  <strong>
+                                    <span v-if="requestForm.existingOwner.gender === true">Anh</span>
+                                    <span v-else-if="requestForm.existingOwner.gender === false">Chị</span>
+                                    <span v-else>Anh/Chị</span>
+                                    {{ requestForm.existingOwner.fullName }}
+                                  </strong>
+                                  <br>
+
+                                  <div class="mb-1">
+                                    <i class="fa-solid fa-phone text-primary me-1"></i>
+                                    {{ requestForm.existingOwner.phone }}
+                                  </div>
+
+                                  <div class="mb-1">
+                                    <i class="fa-solid fa-location-dot text-danger me-1"></i>
+                                    {{ formatAddress(requestForm.existingOwner.newAddress) }}
+                                  </div>
+
+                                  <div v-if="requestForm.existingOwner.oldAddress" class="text-muted">
+                                    <i class="fa-solid fa-house text-secondary me-1"></i>
+                                    Địa chỉ cũ: {{ requestForm.existingOwner.oldAddress }}
+                                  </div>
+                                </div>
+
+                                <div v-if="requestForm.existingOwner === null && thongBao !== null">
+                                    <span class="d-inline-flex align-items-center text-danger" style="font-size:16px;">
+                                      <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                                      {{ thongBao }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div v-else class="row g-2 g-md-3">
+                              <div class="col-12 col-md-6 field-group">
+                                <label class="form-label small field-label">Họ và tên chủ mới</label>
+                                <input
+                                    v-model="requestForm.newOwner.fullName"
+                                    type="text"
+                                    class="form-control form-control-sm"
+                                    placeholder="Nhập họ tên chủ mới"
+                                />
+                              </div>
+                              <div class="col-12 col-md-6 field-group">
+                                <label class="form-label small field-label">Số điện thoại</label>
+                                <input
+                                    v-model="requestForm.newOwner.phone"
+                                    type="tel"
+                                    class="form-control form-control-sm"
+                                    placeholder="Nhập số điện thoại chủ mới"
+                                />
+                              </div>
+                              <div class="col-12 col-md-6 field-group">
+                                <label class="form-label small field-label">Giới tính</label>
+                                <select v-model="requestForm.newOwner.gender" class="form-select form-select-sm">
+                                  <option :value="null">Không xác định</option>
+                                  <option :value="true">Nam</option>
+                                  <option :value="false">Nữ</option>
+                                </select>
+                              </div>
+                              <div class="col-12 field-group">
+                                <label class="form-label small field-label">Địa chỉ mới</label>
+                                <AddressSelector4 v-model="requestForm.newOwner.newAddress"/>
+                              </div>
+                              <div class="col-12 field-group">
+                                <label class="form-label small field-label">Địa chỉ cũ (nếu có)</label>
+                                <input
+                                    v-model="requestForm.newOwner.oldAddress"
+                                    type="text"
+                                    class="form-control form-control-sm"
+                                    placeholder="Nhập địa chỉ cũ"
+                                />
+                              </div>
+                            </div>
+                          </div>
                         </div>
                         <div
                             class="card-footer bg-white border-0 px-3 px-md-4 py-3 d-flex flex-wrap gap-2 justify-content-between">
                           <div class="text-muted small">
-                            <i class="fa-regular fa-clock me-1 me-md-2"></i>Phản hồi: 1-2h giờ làm việc.
+                            <i class="fa-regular fa-clock me-1 me-md-2"></i>Phản hồi: 1-2 phút giờ làm việc.
                           </div>
                           <button v-if="requestForm.assetOption === 'existing'" type="button"
                                   class="btn btn-primary btn-sm rounded-3" @click="submitRequest">
@@ -1521,7 +1643,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body text-center">
-            <img :src="  ' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + selectedImage.url" class="img-fluid rounded-3"
+            <img :src="selectedImage.tempUrl" class="img-fluid rounded-3"
                  :alt="selectedImage.alt" style="max-height: 70vh; object-fit: contain;">
           </div>
         </div>
@@ -1590,7 +1712,7 @@ const profile = reactive({
 });
 
 const viewMode = ref("list");
-const activeTab = ref("assets");
+const activeTab = ref("request");
 const selectedAsset = ref(null);
 const selectedValuation = ref(null);
 const selectedValuationOrigin = ref("results");
@@ -1675,9 +1797,9 @@ const particleOptions = ref({
 });
 
 const tabs = [
-  {key: "assets", label: "Tài sản của bạn", icon: "fa-solid fa-building"},
-  {key: "results", label: "Lịch sử định giá", icon: "fa-solid fa-scroll"},
   {key: "request", label: "Yêu cầu định giá", icon: "fa-solid fa-pen-to-square"},
+  {key: "results", label: "Lịch sử định giá", icon: "fa-solid fa-scroll"},
+  {key: "assets", label: "Tài sản của bạn", icon: "fa-solid fa-building"}
 ];
 
 const LAND_USE_OPTIONS = [
@@ -2179,7 +2301,7 @@ function isIGFile(file) {
 }
 
 const requestForm = reactive({
-  assetOption: "existing",
+  assetOption: "new",
   assetId: "",
   newAsset: {
     address: "",
@@ -2196,6 +2318,17 @@ const requestForm = reactive({
     files: [],
     desire: null
   },
+  onBehalf: false,
+  ownerOption: "existing",
+  existingOwnerPhone: "",
+  existingOwner: null,
+  newOwner: {
+    fullName: "",
+    phone: "",
+    gender: null,
+    newAddress: "",
+    oldAddress: ""
+  },
   contactName: "",
   contactPhone: "",
   contactEmail: "",
@@ -2203,6 +2336,8 @@ const requestForm = reactive({
   note: "",
   realFile: [] // 🔥 FILE THẬT MỚI THÊM (cho request)
 });
+
+const thongBao = ref(null);
 
 const createLandErrorState = () => ({
   address: "",
@@ -2244,9 +2379,26 @@ watch(
     (option) => {
       if (option === "existing") {
         clearLandErrors(requestErrors.newAsset);
+        requestForm.onBehalf = false;
+        resetOnBehalfInfo();
       } else {
         requestForm.assetId = "";
         requestErrors.assetId = "";
+      }
+    }
+);
+
+watch(
+    () => requestForm.onBehalf,
+    (val) => {
+      if (val) {
+        clearContactErrors();
+      } else {
+        resetOnBehalfInfo();
+        const user = authStore.userInfo;
+        requestForm.contactName = user?.fullName || "";
+        requestForm.contactPhone = user?.phone || "";
+        requestForm.contactEmail = user?.email || "";
       }
     }
 );
@@ -2261,6 +2413,16 @@ function clearContactErrors() {
   requestErrors.contact.name = "";
   requestErrors.contact.phone = "";
   requestErrors.contact.email = "";
+}
+
+function resetOnBehalfInfo() {
+  requestForm.ownerOption = "existing";
+  requestForm.existingOwnerPhone = "";
+  requestForm.newOwner.fullName = "";
+  requestForm.newOwner.phone = "";
+  requestForm.newOwner.gender = null;
+  requestForm.newOwner.newAddress = "";
+  requestForm.newOwner.oldAddress = "";
 }
 
 function countImageFiles(list = []) {
@@ -2376,7 +2538,12 @@ function validateContactInfo() {
 }
 
 function validateRequestForm(option = requestForm.assetOption) {
-  let isValid = validateContactInfo();
+  let isValid = true;
+  if (!(option === "new" && requestForm.onBehalf)) {
+    isValid = validateContactInfo();
+  } else {
+    clearContactErrors();
+  }
   requestErrors.assetId = "";
   if (option === "existing") {
     clearLandErrors(requestErrors.newAsset);
@@ -2394,6 +2561,40 @@ function formatAddress(address) {
   if (!address) return "";
   return address.replace(/\s*\/!!\s*/g, ", ");
 }
+
+async function handleExistingOwnerLookup() {
+  try {
+    // reset UI
+    requestForm.existingOwner = null;
+    thongBao.value = null;
+
+    const phone = requestForm.existingOwnerPhone?.trim();
+
+    // 🔥 VALIDATE TRƯỚC
+    if (!phone || !/^[0-9]{9,11}$/.test(phone)) {
+      requestForm.existingOwner = null;
+      thongBao.value = 'Số điện thoại không hợp lệ';
+      return; // ⛔ KHÔNG GỌI API
+    }
+
+    const res = await api.get(
+        "/thg.user/my-land/tim-chu-nha-tam",
+        { params: { phone } }
+    );
+
+    // 🔥 CHECK CHẶT
+    if (res.data && res.data.id) {
+      requestForm.existingOwner = res.data;
+    } else {
+      thongBao.value = 'Không tìm thấy chủ nhà';
+    }
+
+  } catch (e) {
+    thongBao.value = 'Có lỗi khi tìm chủ nhà';
+    console.error(e);
+  }
+}
+
 
 // Hàm submit yêu cầu định giá
 async function submitRequest() {
@@ -2475,6 +2676,45 @@ function classifyDeletedFiles(deletedFileIds, allFiles) {
 
 async function submitNewAssetAndRequest() {
   if (!validateRequestForm("new")) return;
+  if (requestForm.onBehalf) {
+    if (!validateRequestForm("new")) return;
+
+    const payload = {
+      asset: { ...requestForm.newAsset },
+      owner:
+          requestForm.ownerOption === "existing"
+              ? { type: "existing", id: requestForm.existingOwner.id }
+              : { type: "new", info: { ...requestForm.newOwner } }
+    };
+
+    console.log("📝 Thông tin nhập hộ:", payload);
+
+    try {
+      const res = await submitMultipart(payload);
+
+      if (res.data?.success === false) {
+        updateAlertError(res.data.message || "Không thể xử lý yêu cầu");
+        return; // ⛔ DỪNG TẠI ĐÂY
+      }
+
+
+      if (res.data?.usageLeft === false) {
+        updateAlertError(res.data.message || "Bạn đã hết lượt sử dụng!");
+        setTimeout(() => {
+          router.push({ path: "/feature-in-development" });
+        }, 1200);
+      } else {
+        resetRequestForm();
+        activeTab.value = "results";
+        updateAlertSuccess("Yêu cầu định giá và thêm tài sản thành công");
+        await getViewLandAsset();
+      }
+    } catch (e) {
+      console.error("❌ Lỗi khi gửi (onBehalf):", e);
+    }
+
+    return;
+  }
   try {
     const formData = new FormData();
 
@@ -2528,6 +2768,48 @@ async function submitNewAssetAndRequest() {
   }
 }
 
+async function submitMultipart(dto) {
+  const formData = new FormData();
+  // owner.info.tpye = 'new' với trường hợp nhập mới
+  // owner.info.tpye = 'existing' với truường hợp khách cũ , dùng
+  // gắn DTO
+  formData.append(
+      "dto",
+      new Blob([JSON.stringify(dto)], { type: "application/json" })
+  );
+
+  // 🔥 phân loại file
+  const normalFiles = [];
+  const landBookFiles = [];
+
+  requestForm.realFile.forEach(f => {
+    if (
+        f.isIG ||
+        f.fileName?.includes("landbook") ||
+        f.fileName?.includes("sổ") ||
+        f.fileName?.includes("land_book")
+    ) {
+      landBookFiles.push(f);
+    } else {
+      normalFiles.push(f);
+    }
+  });
+
+  normalFiles.forEach(f => formData.append("files", f.file));
+  landBookFiles.forEach(f => formData.append("landBookFiles", f.file));
+
+  return showLoading(
+      api.post(
+          "/thg.user/my-land/request-report-new-asset-2",
+          formData,
+          {
+            withCredentials: true,
+            headers: { "Content-Type": "multipart/form-data" }
+          }
+      )
+  );
+}
+
 
 // Hàm xử lý chuyển thanh toán
 function handleOpenReport(valuation) {
@@ -2556,6 +2838,8 @@ function resetRequestForm() {
   requestForm.realFile = [];
   requestForm.desiredPrice = null;
   requestForm.note = "";
+  requestForm.onBehalf = false;
+  resetOnBehalfInfo();
   const user = authStore.userInfo;
   requestForm.contactName = user?.fullName || "";
   requestForm.contactPhone = user?.phone || "";

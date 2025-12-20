@@ -67,15 +67,27 @@
               <th>Sở hữu tài sản</th>
               <th>Quyền sử dụng</th>
               <th>Trạng thái</th>
-              <th>Số lần định giá</th>
+              <th>Số lần ĐG</th>
               <th class="text-end">#</th>
             </tr>
             </thead>
             <tbody>
             <tr v-for="asset in assetsData.content" :key="asset.id">
               <td>
-                <div class="fw-semibold">{{ formatAddress(asset.address) }}</div>
-                <div class="text-muted small">{{ asset.oldAddress || '—' }}</div>
+                <div class="fw-semibold">
+                  {{
+                    formatAddress(asset.address)?.length > 45
+                        ? formatAddress(asset.address).slice(0, 45) + "..."
+                        : formatAddress(asset.address)
+                  }}
+                </div>
+                <div class="text-muted small">
+                  {{
+                    formatAddress(asset.oldAddress)?.length > 45
+                        ? formatAddress(asset.oldAddress).slice(0, 45) + '...'
+                        : formatAddress(asset.oldAddress) || '—'
+                  }}
+                </div>
               </td>
               <td>{{ asset.plotNumber || '-' }}</td>
               <td>{{ asset.parcelNumber || '-' }}</td>
@@ -90,7 +102,7 @@
               </td>
               <td>{{ asset.valuationRound || 0 }}</td>
               <td class="text-end">
-                <button class="btn btn-sm btn-outline-secondary me-2" @click="viewAssetDetail(asset)">Chi tiết</button>
+                <button class="btn btn-sm btn-outline-secondary me-2 rounded-3" @click="viewAssetDetail(asset)">Chi tiết</button>
               </td>
             </tr>
             <tr v-if="!assetsData.content.length">
@@ -309,7 +321,8 @@
                   <li><strong>Tên chủ sở hữu:</strong> {{ selectedAsset.ownerOfLand.fullName || '—' }}</li>
                   <li><strong>Địa chỉ:</strong> {{ formatAddress(selectedAsset.ownerOfLand.address) || '—' }}</li>
                   <li><strong>Số điện thoại:</strong> {{ selectedAsset.ownerOfLand.phone || '—' }}</li>
-                  <li><strong>Email:</strong> {{ selectedAsset.ownerOfLand.email || '—' }}</li>
+                  <li><strong>Email:</strong> {{ selectedAsset.ownerOfLand.email || 'Không có' }}</li>
+                  <li><strong>Người tạo tài sản:</strong> {{ selectedAsset.nguoiTao || 'Chính chủ' }}</li>
                 </ul>
               </div>
             </div>
@@ -494,8 +507,9 @@
             <thead class="table-light">
             <tr>
               <th>#</th>
-              <th>Khách hàng</th>
+              <th>Tên chủ</th>
               <th>SĐT</th>
+              <th>Người yêu cầu</th>
               <th>Địa chỉ tài sản</th>
               <th>Diện tích</th>
               <th>Mong muốn</th>
@@ -509,6 +523,7 @@
               <td>{{ index + 1 }}</td>
               <td>{{ request.ownerFullName }}</td>
               <td>{{ request.ownerPhone }}</td>
+              <td>{{ request.nguoiYeuCau }}</td>
               <td>{{ formatAddress(request.address) }}</td>
               <td>{{ numberFormat(request.totalArea) }} m²</td>
               <td>{{ numberFormat(request.desire) || '—' }}</td>
@@ -520,11 +535,17 @@
               <td>{{ formatTimeAgo(request.assignedDate) }}</td>
               <td class="text-end col-actions">
                 <div class="d-flex justify-content-start align-items-center gap-2">
-                  <button
+                  <button v-if=" request.statusService === 'NEW' "
                       class="btn btn-sm btn-primary rounded-3"
                       @click="startValuationFromRequest(request)"
                   >
                     Tiếp nhận
+                  </button>
+                  <button v-else
+                          class="btn btn-sm btn-primary rounded-3" style="min-width: 78.68px"
+                          @click="startValuationFromRequest(request)"
+                  >
+                    Tiếp tục
                   </button>
 
                   <!-- Nút XÓA -->
@@ -577,7 +598,7 @@
 
               <div class="col-md-3">
                 <div class="small text-muted mb-1">Email</div>
-                <div class="fw-semibold">{{ valuationDraft.ownerEmail || '—' }}</div>
+                <div class="fw-semibold">{{ valuationDraft.ownerEmail || 'Không có' }}</div>
               </div>
 
               <div class="col-md-3">
@@ -1608,22 +1629,33 @@ function formatAssetStatus(status) {
     case "CHƯA ĐỊNH GIÁ":
       return {
         text: "Chưa định giá",
-        class: "badge badge-red-subtle text-danger fw-semibold "
+        class: "badge badge-red-subtle text-danger fw-semibold"
       };
+
     case "ĐÃ ĐỊNH GIÁ SƠ BỘ":
       return {
         text: "Đã định giá sơ bộ",
         class: "badge badge-green-subtle text-success fw-semibold"
       };
+
     case "BÁN NHANH 30 NGÀY":
       return {
         text: "Bán nhanh 30 ngày",
         class: "badge badge-purple-subtle fw-semibold"
       };
+
+    case "ĐÃ BÁN":
+      return {
+        text: "Đã bán",
+        class: "badge badge-info-subtle fw-semibold"
+      };
+
+
     default:
       return { text: status, class: "badge bg-light text-dark" };
   }
 }
+
 
 
 function handleCustomLandTypeInput(row) {
@@ -2184,8 +2216,8 @@ async function generateValuationPDF(asset, report) {
   // Thêm link dẫn ngược về hệ thống
   noteY += 12;
   const linkColor = rgb(0.1, 0.1, 0.1); // gần đen
-  const link1 = "http://thienhagroup.vn/";    // đường dẫn thật bạn có thể thay
-  const link2 = "http://thienhagroup.vn/";    // đường dẫn thật bạn có thể thay
+  const link1 = "https://thienhagroup.vn";    // đường dẫn thật bạn có thể thay
+  const link2 = "https://thienhagroup.vn/giai-phap-ban-nhanh";    // đường dẫn thật bạn có thể thay
 
   page.drawText("Khảo sát thực tế - ", { x: 40, y: toY(noteY), font: fB, size: 10, color: linkColor });
   const link1X = 40 + fB.widthOfTextAtSize("Khảo sát thực tế - ", 10);
@@ -2918,6 +2950,9 @@ h6.fw-bold {
   background: rgba(231, 76, 60, 0.15);
   color: #c0392b;
   border: 1px solid rgba(231, 76, 60, 0.35);
+  border-radius: 20px;
+  padding: 5px 5px;
+  font-size: 13px;
 }
 
 /* XANH subtle */
@@ -2925,6 +2960,9 @@ h6.fw-bold {
   background: rgba(46, 204, 113, 0.15);
   color: #27ae60;
   border: 1px solid rgba(46, 204, 113, 0.35);
+  border-radius: 20px;
+  padding: 5px 5px;
+  font-size: 13px;
 }
 
 /* TÍM subtle */
@@ -2932,12 +2970,18 @@ h6.fw-bold {
   background: rgba(155, 89, 182, 0.15);
   color: #8e44ad;
   border: 1px solid rgba(155, 89, 182, 0.35);
+  border-radius: 20px;
+  padding: 5px 5px;
+  font-size: 13px;
 }
 
 .badge-info-subtle {
   background: rgba(13, 110, 253, 0.15);
   color: #0d6efd;
   border: 1px solid rgba(13, 110, 253, 0.35);
+  border-radius: 20px;
+  padding: 5px 5px;
+  font-size: 13px;
 }
 
 
