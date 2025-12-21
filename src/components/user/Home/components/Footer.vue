@@ -1,10 +1,23 @@
 <template>
   <footer class="footer">
-    <!-- Nội dung chính footer -->
+    <!-- Hàng 1: Google Map -->
+    <div class="map-section" v-if="showMap">
+      <div id="map"></div>
+    </div>
+
+    <!-- Hàng 2: Nội dung chính footer -->
     <div class="footer-main">
       <div class="footer-container">
         <!-- Cột 1: Thông tin liên hệ -->
         <div class="footer-column contact-column">
+          <div class="logo-section">
+            <img
+                src="/imgs/logoTHG.png"
+                alt="Thiên Hà Group Logo"
+                class="logo"
+            />
+          </div>
+
           <h4 class="column-title">
             <i class="icon fas fa-map-marker-alt"></i> LIÊN HỆ
           </h4>
@@ -22,13 +35,21 @@
 
             <div class="contact-item">
               <div class="contact-icon">
+                <i class="fas fa-building"></i>
+              </div>
+              <div class="contact-text">
+                <strong>Chi nhánh:</strong>
+                <p>01 Hoa Lài, Phường 7, Quận Phú Nhuận, TP. Hồ Chí Minh</p>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon">
                 <i class="fas fa-clock"></i>
               </div>
               <div class="contact-text">
                 <strong>Giờ làm việc:</strong>
-                <p>Thứ 2 - Thứ 7: 8:00 - 18:00</p>
-                <p>Chủ nhật: 8:00 - 12:00</p>
-              </div>
+                <p>Thứ 2 - Thứ 7: 8:30 - 17:00</p></div>
             </div>
 
             <div class="contact-item">
@@ -37,13 +58,20 @@
               </div>
               <div class="contact-text">
                 <strong>Hotline hỗ trợ:</strong>
-                <p class="hotline">1900 1234</p>
-                <p>091.123.1882 (Zalo/Viber)</p>
+                <p>091.123.1882</p>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <div class="contact-text">
+                <strong>Email:</strong>
+                <p>thienhagroup@gmail.com</p>
               </div>
             </div>
           </div>
-
-
         </div>
 
         <!-- Cột 2: Dịch vụ -->
@@ -136,23 +164,23 @@
               <i class="icon fas fa-share-alt"></i> KẾT NỐI
             </h4>
             <div class="social-icons">
-              <a href="https://facebook.com" class="social-icon facebook" target="_blank">
+              <a href="https://www.facebook.com/profile.php?id=61557872978828" class="social-icon facebook" target="_blank">
                 <i class="fab fa-facebook-f"></i>
               </a>
-              <a href="https://zalo.me" class="social-icon zalo" target="_blank">
+              <a href="#" class="social-icon zalo" target="_blank">
                 <i class="fas fa-comment-dots"></i>
               </a>
-              <a href="https://youtube.com" class="social-icon youtube" target="_blank">
+              <a href="https://www.youtube.com/channel/UCGC_o-bDRF8xT3riQRw9g6A" class="social-icon youtube" target="_blank">
                 <i class="fab fa-youtube"></i>
               </a>
-              <a href="https://tiktok.com" class="social-icon tiktok" target="_blank">
+              <a href="#" class="social-icon tiktok" target="_blank">
                 <i class="fab fa-tiktok"></i>
+              </a>
+              <a href="https://maps.app.goo.gl/R6hF1jWKM3HASqKPA?g_st=ipc" class="social-icon map" target="_blank">
+                <i class="fab fa-google"></i>
               </a>
               <a href="tel:19001234" class="social-icon phone">
                 <i class="fas fa-phone-alt"></i>
-              </a>
-              <a href="https://goo.gl/maps" class="social-icon map" target="_blank">
-                <i class="fas fa-map-marker-alt"></i>
               </a>
             </div>
           </div>
@@ -192,7 +220,14 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+
+const props = defineProps({
+  showMap: {
+    type: Boolean,
+    default: true
+  }
+})
 
 const email = ref('');
 const contact = ref({
@@ -216,6 +251,106 @@ const submitContact = () => {
 const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
+
+const initMap = () => {
+  // Khởi tạo bản đồ với scroll wheel zoom bị vô hiệu hóa
+  const map = L.map('map', {
+    scrollWheelZoom: false // Tắt scroll zoom mặc định
+  }).setView([10.840568825680299, 106.70976902627369], 130);
+
+  // Thêm tile layer từ OpenStreetMap
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+  }).addTo(map);
+
+  // Tọa độ chính xác của 2 địa điểm
+  const headOfficeCoords = [10.840568825680299, 106.70976902627369]; // Trụ sở chính
+  const branchCoords = [10.798316327341794, 106.69152447838239]; // Chi nhánh
+
+  // Marker 1 - Trụ sở chính
+  const headOfficeMarker = L.marker(headOfficeCoords)
+      .addTo(map)
+      .bindPopup(`
+        <div style="text-align: center;">
+          <h5 style="margin: 0 0 8px 0; color: #0066cc;">TRỤ SỞ CHÍNH</h5>
+          <p style="margin: 0; font-size: 14px;">14 đường 15, KĐT Vạn Phúc<br>Phường Hiệp Bình Phước, TP. Thủ Đức<br>TP. Hồ Chí Minh</p>
+        </div>
+      `)
+      .openPopup(); // Mở popup ngay khi load
+
+  // Marker 2 - Chi nhánh
+  const branchMarker = L.marker(branchCoords)
+      .addTo(map)
+      .bindPopup(`
+        <div style="text-align: center;">
+          <h5 style="margin: 0 0 8px 0; color: #0066cc;">CHI NHÁNH</h5>
+          <p style="margin: 0; font-size: 14px;">01 Hoa Lài, Phường 7<br>Quận Phú Nhuận<br>TP. Hồ Chí Minh</p>
+        </div>
+      `);
+
+  // Thêm đường nối giữa 2 marker với tọa độ chính xác
+  const polyline = L.polyline([
+    headOfficeCoords,
+    branchCoords
+  ], {
+    color: '#0066cc',
+    weight: 4,
+    opacity: 0.7,
+    dashArray: '8, 8',
+    lineJoin: 'round'
+  }).addTo(map);
+
+  // Fit bounds để hiển thị cả 2 marker và đường nối
+  const bounds = L.latLngBounds([headOfficeCoords, branchCoords]);
+  map.fitBounds(bounds, { padding: [20, 20] });
+
+  // Xử lý sự kiện scroll với Ctrl
+  let isCtrlPressed = false;
+
+  // Lắng nghe sự kiện keydown để phát hiện Ctrl
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey) {
+      isCtrlPressed = true;
+      map.scrollWheelZoom.enable(); // Bật scroll zoom khi nhấn Ctrl
+    }
+  });
+
+  // Lắng nghe sự kiện keyup để tắt khi nhả Ctrl
+  document.addEventListener('keyup', (e) => {
+    if (e.key === 'Control') {
+      isCtrlPressed = false;
+      map.scrollWheelZoom.disable(); // Tắt scroll zoom khi nhả Ctrl
+    }
+  });
+
+  // Tự động tắt scroll zoom khi chuột rời khỏi map
+  map.on('mouseout', () => {
+    map.scrollWheelZoom.disable();
+  });
+}
+
+onMounted(() => {
+  if (props.showMap) {
+    // Đảm bảo Leaflet CSS đã được tải
+    if (!document.querySelector('link[href*="leaflet"]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+    }
+
+    // Đảm bảo Leaflet JS đã được tải
+    if (typeof L === 'undefined') {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = initMap;
+      document.head.appendChild(script);
+    } else {
+      initMap();
+    }
+  }
+});
 </script>
 
 <style scoped>
@@ -232,6 +367,44 @@ const scrollToTop = () => {
   font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif;
   color: var(--text-color);
   line-height: 1.6;
+  background-color: #f7f7f7;
+}
+
+.contact-column .logo-section {
+  display: flex;
+}
+
+.contact-column .logo-section img{
+  margin: 0 auto;
+}
+
+/* ========== Map Section ========== */
+.map-section {
+  width: 100%;
+  border-bottom: 1px solid #e0e0e0;
+  height: 450px;
+  position: relative;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+.map-section::after {
+  content: "Giữ Ctrl + cuộn chuột để zoom bản đồ";
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 1000;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 /* ========== Footer Main ========== */
@@ -242,7 +415,7 @@ const scrollToTop = () => {
 }
 
 .footer-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px;
   display: grid;
@@ -262,6 +435,17 @@ const scrollToTop = () => {
     grid-template-columns: 1fr;
     gap: 30px;
   }
+}
+
+/* Logo Section */
+.contact-column .logo-section {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.contact-column .logo {
+  max-width: 160px;
+  height: auto;
 }
 
 /* Column Titles */
@@ -292,10 +476,12 @@ const scrollToTop = () => {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 20px;
-  padding: 12px;
+  margin-bottom: 15px;
+  padding: 10px;
   border-radius: 8px;
   transition: background-color 0.2s ease;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .contact-item:hover {
@@ -329,30 +515,6 @@ const scrollToTop = () => {
   font-size: 16px;
 }
 
-/* Certification */
-.certification {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.cert-badge {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: #f8f9fa;
-  border-radius: 6px;
-  font-size: 12.5px;
-  color: #666;
-  border-left: 3px solid var(--accent-color);
-}
-
-.cert-badge i {
-  color: var(--accent-color);
-  font-size: 13px;
-}
-
 /* Footer Links */
 .footer-links {
   list-style: none;
@@ -361,7 +523,6 @@ const scrollToTop = () => {
 }
 
 .footer-links li {
-  margin-bottom: 12px;
 }
 
 .footer-links a {
@@ -433,7 +594,7 @@ const scrollToTop = () => {
 }
 
 .newsletter-form button:hover {
-  background: #16a085;
+  background: #0f2b7a;
 }
 
 .form-note {
@@ -627,6 +788,18 @@ const scrollToTop = () => {
     text-align: center;
     gap: 15px;
   }
+
+  .map-section {
+    height: 350px;
+  }
+
+  .contact-column .logo-section {
+    text-align: center;
+  }
+
+  .contact-column .logo {
+    margin: 0 auto;
+  }
 }
 
 @media (max-width: 480px) {
@@ -638,6 +811,7 @@ const scrollToTop = () => {
     flex-direction: column;
     text-align: center;
     align-items: center;
+    margin-bottom: 5px;
   }
 
   .contact-icon {
@@ -651,5 +825,29 @@ const scrollToTop = () => {
   .newsletter-form button {
     padding: 12px;
   }
+
+  .map-section {
+    height: 300px;
+  }
+
+  .map-section::after {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+/* Leaflet map styles */
+:deep(.leaflet-popup-content-wrapper) {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+:deep(.leaflet-popup-content) {
+  margin: 12px 16px;
+  font-family: 'Segoe UI', 'Inter', sans-serif;
+}
+
+:deep(.leaflet-popup-tip) {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 </style>

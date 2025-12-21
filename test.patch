@@ -1,629 +1,1683 @@
-diff --git a/src/components/land/my-valuation/MyValuationManager.vue b/src/components/land/my-valuation/MyValuationManager.vue
-index 1fe9aee772c0ec83cb7c3a016ae567c4658be3ac..d406bf629806f947a90b223f364df12f9d451ae8 100644
---- a/src/components/land/my-valuation/MyValuationManager.vue
-+++ b/src/components/land/my-valuation/MyValuationManager.vue
-@@ -53,50 +53,59 @@
-                       @view-detail="openAssetDetail"
-                       @request-valuation="openRequestFromAsset"
-                   />
-                 </div>
-                 <!-- TAB: VALUATION RESULTS -->
-                 <div v-else-if="activeTab === 'results'" key="results">
-                   <ValuationResultsView
-                       :valuations="filteredValuations"
-                       :filter-status="filterStatus"
-                       :status-badge-class="statusBadgeClass"
-                       :format-date="formatDate"
-                       @toggle-filter="toggleResultFilter"
-                       @view-detail="openAssetDetail"
-                       @open-report="openValuationDetail"
-                       @request-open-report="handleOpenReport"
-                   />
-                 </div>
-                 <!-- TAB: REQUEST VALUATION -->
-                 <div v-else key="request">
-                   <div class="row g-3 g-md-4 align-items-start">
-                     <div class="col-12 col-lg-7">
-                       <div class="mb-3 mb-md-4">
-                         <h5 class="fw-semibold text-dark mb-1 fs-6 fs-md-5">Gửi yêu cầu định giá mới</h5>
-                         <p class="text-muted small mb-0">Chọn tài sản có sẵn hoặc mô tả tài sản mới để chúng tôi hỗ
-                           trợ.</p>
-+                        <div v-if="requestForm.assetOption === 'new'" class="form-check mt-2">
-+                          <input
-+                              id="on-behalf-checkbox"
-+                              v-model="requestForm.onBehalf"
-+                              class="form-check-input"
-+                              type="checkbox"
-+                          />
-+                          <label class="form-check-label small" for="on-behalf-checkbox">Nhập hộ</label>
-+                        </div>
-                       </div>
-                       <form class="card border-0 shadow-sm" @submit.prevent>
-                         <div class="card-body p-3 p-md-4">
-                           <div class="mb-3">
-                             <label class="form-label fw-semibold small">Chọn tài sản</label>
-                             <div class="d-flex gap-2 gap-md-3 flex-wrap">
-                               <div class="form-check">
-                                 <input
-                                     class="form-check-input"
-                                     type="radio"
-                                     id="asset-existing"
-                                     value="existing"
-                                     v-model="requestForm.assetOption"
-                                 />
-                                 <label class="form-check-label small" for="asset-existing">Sử dụng tài sản đã có</label>
-                               </div>
-                               <div class="form-check">
-                                 <input
-                                     class="form-check-input"
-                                     type="radio"
-                                     id="asset-new"
-                                     value="new"
-                                     v-model="requestForm.assetOption"
-                                 />
-                                 <label class="form-check-label small" for="asset-new">Mô tả tài sản mới</label>
-@@ -387,51 +396,51 @@
-                                 :class="{ 'has-error': requestErrors.newAsset.files }"
-                             >
-                               <label
-                                   class="form-label small d-flex align-items-center justify-content-between required-label">
-                                 <span class="d-none d-sm-inline">Hình ảnh & tài liệu</span>
-                                 <span class="d-inline d-sm-none"><i class="fa-solid fa-paperclip me-1"></i>Tệp</span>
-                                 <span class="text-muted fw-normal">{{ requestForm.newAsset.files.length }} tệp</span>
-                               </label>
-                               <small v-if="requestErrors.newAsset.files" class="invalid-hint">
-                                 {{ requestErrors.newAsset.files }}
-                               </small>
-                               <FileOrLand
-                                   :key="'request-new-asset'"
-                                   :fileList="requestForm.newAsset.files"
-                                   :entityId="null"
-                                   :allow-download-all="false"
-                                   entityType="land"
-                                   :canEdit="true"
-                                   @update:files="handleRequestAssetFilesUpdate"
-                                   class="mt-2"
-                               />
+diff --git a/src/components/user/Home/components/SoldSection.vue b/src/components/user/Home/components/SoldSection.vue
+index 591fd3a96021274a2441b1c93099fd26fd1817e1..4a0300c790ecaeeec756c15e126235fa4fa29465 100644
+--- a/src/components/user/Home/components/SoldSection.vue
++++ b/src/components/user/Home/components/SoldSection.vue
+@@ -1,379 +1,862 @@
+ <template>
+-  <section class="success-sales-section" :class="{ 'no-scroll': lightboxVisible }">
++  <section class="success-sales-section">
+     <div class="ellipse-bg"></div>
+     <div class="container">
+       <!-- Phần elip trên cùng -->
+       <div class="ellipse-section">
+         <div class="section-header">
+           <h2 class="section-title">{{ title ? title : "DỰ ÁN ĐÃ BÁN THÀNH CÔNG" }}</h2>
+           <p class="section-subtitle">Tổng hợp các dự án đã bán thành công nhờ định giá đúng</p>
+         </div>
 
-                             </div>
-                           </div>
+         <div class="stats-overview">
+-          <div class="stat-card" v-for="(stat, index) in stats" :key="stat.title" :id="'stat'+index">
++          <div class="stat-card" v-for="(stat, index) in stats" :key="stat.title" :id="'stat' + index">
+             <div class="stat-icon stat-value" v-html="stat.icon"></div>
+             <div class="stat-value">{{ stat.value }}</div>
+             <div class="stat-title">{{ stat.title }}</div>
+           </div>
+         </div>
+       </div>
 
--                          <div class="row g-2 g-md-3 mb-3">
-+                          <div v-if="requestForm.assetOption === 'existing' || !requestForm.onBehalf" class="row g-2 g-md-3 mb-3">
-                             <div
-                                 class="col-12 col-md-6 field-group"
-                                 :class="{ 'has-error': requestErrors.contact.name }"
-                             >
-                               <label class="form-label small field-label required-label">
-                                 <span class="d-none d-sm-inline">Họ và tên</span>
-                                 <span class="d-inline d-sm-none"><i class="fa-solid fa-user me-1"></i>Họ tên</span>
-                               </label>
-                               <small v-if="requestErrors.contact.name" class="invalid-hint">
-                                 {{ requestErrors.contact.name }}
-                               </small>
-                               <input
-                                   type="text"
-                                   class="form-control form-control-sm"
-                                   :class="{ 'is-invalid': requestErrors.contact.name }"
-                                   v-model="requestForm.contactName"
-                                   readonly
-                               />
-                             </div>
-                             <div
-                                 class="col-12 col-md-6 field-group"
-                                 :class="{ 'has-error': requestErrors.contact.phone }"
-                             >
-                               <label class="form-label small field-label required-label">
-                                 <span class="d-none d-sm-inline">Số điện thoại</span>
-@@ -448,50 +457,131 @@
-                                   :class="{ 'is-invalid': requestErrors.contact.phone }"
-                                   v-model="requestForm.contactPhone"
-                                   readonly
-                               />
-                             </div>
-                             <div
-                                 class="col-12 field-group"
-                                 :class="{ 'has-error': requestErrors.contact.email }"
-                             >
-                               <label class="form-label small field-label required-label">
-                                 <span class="d-none d-sm-inline">Email</span>
-                                 <span class="d-inline d-sm-none"><i class="fa-solid fa-envelope me-1"></i>Email</span>
-                               </label>
-                               <small v-if="requestErrors.contact.email" class="invalid-hint">
-                                 {{ requestErrors.contact.email }}
-                               </small>
-                               <input
-                                   type="email"
-                                   class="form-control form-control-sm"
-                                   :class="{ 'is-invalid': requestErrors.contact.email }"
-                                   v-model="requestForm.contactEmail"
-                                   readonly
-                               />
-                             </div>
-                           </div>
-+                          <div v-else class="mb-3 p-3 border rounded-3 bg-light">
-+                            <div class="d-flex gap-3 flex-wrap mb-3">
-+                              <div class="form-check">
-+                                <input
-+                                    id="owner-existing"
-+                                    v-model="requestForm.ownerOption"
-+                                    class="form-check-input"
-+                                    type="radio"
-+                                    value="existing"
-+                                />
-+                                <label class="form-check-label small" for="owner-existing">Chọn chủ đã có</label>
-+                              </div>
-+                              <div class="form-check">
-+                                <input
-+                                    id="owner-new"
-+                                    v-model="requestForm.ownerOption"
-+                                    class="form-check-input"
-+                                    type="radio"
-+                                    value="new"
-+                                />
-+                                <label class="form-check-label small" for="owner-new">Nhập chủ mới</label>
-+                              </div>
-+                            </div>
-+                            <div v-if="requestForm.ownerOption === 'existing'" class="row g-2 align-items-end">
-+                              <div class="col-12 col-md-8">
-+                                <label class="form-label small mb-1">Tìm chủ theo SĐT</label>
-+                                <input
-+                                    v-model="requestForm.existingOwnerPhone"
-+                                    type="tel"
-+                                    class="form-control form-control-sm"
-+                                    placeholder="Nhập số điện thoại chủ"
-+                                />
-+                              </div>
-+                              <div class="col-12 col-md-4 d-flex align-items-end">
-+                                <button type="button" class="btn btn-primary btn-sm w-100" @click="handleExistingOwnerLookup">
-+                                  OK
-+                                </button>
-+                              </div>
-+                            </div>
-+                            <div v-else class="row g-2 g-md-3">
-+                              <div class="col-12 col-md-6 field-group">
-+                                <label class="form-label small field-label">Họ và tên chủ mới</label>
-+                                <input
-+                                    v-model="requestForm.newOwner.fullName"
-+                                    type="text"
-+                                    class="form-control form-control-sm"
-+                                    placeholder="Nhập họ tên chủ mới"
-+                                />
-+                              </div>
-+                              <div class="col-12 col-md-6 field-group">
-+                                <label class="form-label small field-label">Số điện thoại</label>
-+                                <input
-+                                    v-model="requestForm.newOwner.phone"
-+                                    type="tel"
-+                                    class="form-control form-control-sm"
-+                                    placeholder="Nhập số điện thoại chủ mới"
-+                                />
-+                              </div>
-+                              <div class="col-12 col-md-6 field-group">
-+                                <label class="form-label small field-label">Giới tính</label>
-+                                <select v-model="requestForm.newOwner.gender" class="form-select form-select-sm">
-+                                  <option :value="null">Không xác định</option>
-+                                  <option :value="true">Nam</option>
-+                                  <option :value="false">Nữ</option>
-+                                </select>
-+                              </div>
-+                              <div class="col-12 field-group">
-+                                <label class="form-label small field-label">Địa chỉ mới</label>
-+                                <AddressSelector4 v-model="requestForm.newOwner.newAddress"/>
-+                              </div>
-+                              <div class="col-12 field-group">
-+                                <label class="form-label small field-label">Địa chỉ cũ (nếu có)</label>
-+                                <input
-+                                    v-model="requestForm.newOwner.oldAddress"
-+                                    type="text"
-+                                    class="form-control form-control-sm"
-+                                    placeholder="Nhập địa chỉ cũ"
-+                                />
-+                              </div>
-+                            </div>
-+                          </div>
-                         </div>
-                         <div
-                             class="card-footer bg-white border-0 px-3 px-md-4 py-3 d-flex flex-wrap gap-2 justify-content-between">
-                           <div class="text-muted small">
-                             <i class="fa-regular fa-clock me-1 me-md-2"></i>Phản hồi: 1-2h giờ làm việc.
-                           </div>
-                           <button v-if="requestForm.assetOption === 'existing'" type="button"
-                                   class="btn btn-primary btn-sm rounded-3" @click="submitRequest">
-                             <i class="fa-solid fa-paper-plane me-1 me-md-2"></i>Gửi yêu cầu
-                           </button>
-                           <button v-else class="btn btn-primary btn-sm rounded-3" type="button"
-                                   @click="submitNewAssetAndRequest">
-                             <i class="fa-solid fa-paper-plane me-1 me-md-2"></i>Gửi yêu cầu
-                           </button>
-                         </div>
-                       </form>
-                     </div>
-                     <div class="col-12 col-lg-5">
-                       <aside class="request-aside card border-0 bg-light h-100">
-                         <div class="card-body p-3 p-md-4">
-                           <h6 class="fw-semibold text-primary mb-2 mb-md-3 fs-6">Mẹo để định giá chính xác</h6>
-                           <ul class="list-unstyled text-muted small mb-3 mb-md-4">
-                             <li class="mb-2 mb-md-3">
-                               <i class="fa-solid fa-circle-check me-2 text-success"></i>Cập nhật giấy tờ pháp lý và hình
-                               ảnh mới nhất của tài sản.
-@@ -2174,117 +2264,154 @@ function isIGFile(file) {
-       file.fileName?.includes('land_book') ||
-       file.fileName?.includes('so') ||
-       file.fileName?.includes('certificate') ||
-       file.fileName?.includes('red_book') ||
-       file.fileName?.includes('pink_book');
- }
+       <!-- Phần dự án -->
+       <h2 class="project-title">Một số dự án đã bán thành công trong năm 2025</h2>
 
- const requestForm = reactive({
-   assetOption: "existing",
-   assetId: "",
-   newAsset: {
-     address: "",
-     oldAddress: "",
-     plotNumber: "",
-     parcelNumber: "",
-     totalArea: null,
-     floorArea: null,
-     ownershipRelation: "",
-     landUseRight: "",
-     landPosition: "",
-     status: "Chưa định giá",
-     structure: "",
-     files: [],
-     desire: null
-   },
-+  onBehalf: false,
-+  ownerOption: "existing",
-+  existingOwnerPhone: "",
-+  newOwner: {
-+    fullName: "",
-+    phone: "",
-+    gender: null,
-+    newAddress: "",
-+    oldAddress: ""
-+  },
-   contactName: "",
-   contactPhone: "",
-   contactEmail: "",
-   desiredPrice: null,
-   note: "",
-   realFile: [] // 🔥 FILE THẬT MỚI THÊM (cho request)
++      <div class="sold-products-panel">
++        <!-- Bộ lọc nâng cao (chỉ chế độ thẻ) -->
++        <div
++          class="bg-white rounded-xl shadow-lg border border-slate-300 mb-5 p-4 filter-card"
++          style="
++            background-image: url('https://s3.cloudfly.vn/thg-storage-dev/uploads-public/thienhagroup_filter_2.png');
++            background-size: cover;
++            background-position: center;
++            background-repeat: no-repeat;
++          "
++        >
++          <div class="filter-header mb-3">
++            <div class="filter-title-wrap">
++              <h1 class="filter-title">
++                Sản phẩm đã bán dành riêng cho bạn
++              </h1>
++            </div>
++          </div>
+
+-    </div>
++          <div v-if="isFilterMobile" class="flex justify-end mb-3">
++            <button
++              @click="showFilterPanel = !showFilterPanel"
++              class="px-3 py-1.5 rounded-lg border flex items-center gap-2 transition-all"
++              :class="showFilterPanel
++                ? 'bg-blue-600 text-white border-blue-600 shadow-md'
++                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'"
++            >
++              <i
++                :class="[
++                  'fa-solid text-sm',
++                  showFilterPanel ? 'fa-chevron-up' : 'fa-chevron-down'
++                ]"
++              ></i>
++              <span class="text-sm font-medium">
++                {{ showFilterPanel ? 'Thu gọn bộ lọc' : 'Hiển thị bộ lọc' }}
++              </span>
++            </button>
++          </div>
+
+-    <!-- Lightbox Overlay -->
+-    <div class="lightbox-overlay" v-if="lightboxVisible" @click="closeLightbox">
+-      <div class="lightbox-container" @click.stop>
+-        <!-- Nút đóng -->
+-        <button class="lightbox-close" @click="closeLightbox">
+-          <i class="fa-solid fa-times"></i>
+-        </button>
+-
+-        <!-- Ảnh lớn -->
+-        <div class="lightbox-image-container">
+-          <img
+-              class="lightbox-image"
+-              :src="getImageUrl(getCurrentImage(lightboxProject).src)"
+-              :alt="lightboxProject.name"
+-          />
+-        </div>
++          <!-- Thanh tìm kiếm -->
++          <div class="mb-3">
++            <div class="relative">
++              <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
++              <input
++                v-model="searchQuery"
++                type="text"
++                placeholder="Tìm kiếm theo tên chủ nhà hoặc số điện thoại, địa chỉ chi tiết..."
++                class="w-full pl-9 pr-4 py-2 border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all text-sm"
++              />
++            </div>
++          </div>
++
++          <div class="filter-row" v-show="!isFilterMobile || showFilterPanel">
++            <!-- Mức giá -->
++            <div class="filter-item">
++              <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
++                <i class="fa-solid fa-dollar-sign text-blue-600 text-xs icon-glow"></i>
++                Mức Giá
++              </label>
++              <select
++                v-model="filterGiaRange"
++                class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all"
++              >
++                <option value="">Tất cả</option>
++                <option value="<1">&lt; 1 tỷ</option>
++                <option value="1-3">1 - 3 tỷ</option>
++                <option value="3-5">3 - 5 tỷ</option>
++                <option value="5-7">5 - 7 tỷ</option>
++                <option value="7-10">7 - 10 tỷ</option>
++                <option value=">10">&gt; 10 tỷ</option>
++              </select>
++            </div>
++
++            <!-- Tỉnh thành -->
++            <div class="filter-item">
++              <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
++                <i class="fa-solid fa-city text-emerald-600 text-xs icon-glow"></i>
++                Tỉnh Thành
++              </label>
++              <select
++                v-model="filterProvince"
++                class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all"
++              >
++                <option value="">Tất cả</option>
++                <option v-for="p in provinces" :key="p" :value="p">
++                  {{ formatProvinceShort(p) }}
++                </option>
++              </select>
++            </div>
++
++            <!-- Phường/Xã -->
++            <div class="filter-item">
++              <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
++                <i class="fa-solid fa-location-dot text-violet-600 text-xs icon-glow"></i>
++                Phường/Xã
++              </label>
++              <select
++                v-model="filterWard"
++                class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all"
++              >
++                <option value="">Tất cả</option>
++                <option v-for="w in wards" :key="w" :value="w">{{ w }}</option>
++              </select>
++            </div>
++
++            <!-- Loại mặt hàng -->
++            <div class="filter-item">
++              <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
++                <i class="fa-solid fa-tag text-rose-600 text-xs icon-glow"></i>
++                Loại Mặt Hàng
++              </label>
++              <select
++                v-model="filterLoaiMH"
++                class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all"
++              >
++                <option value="">Tất cả</option>
++                <option value="BN30N">Bán nhanh 30 ngày</option>
++                <option value="HOPTAC">Hàng hợp tác</option>
++                <option value="HTT">Hàng thị trường</option>
++              </select>
++            </div>
++
++            <!-- Vị trí -->
++            <div class="filter-item">
++              <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
++                <i class="fa-solid fa-location-arrow text-cyan-400 text-xs icon-glow"></i>
++                Vị Trí
++              </label>
++              <input
++                list="landPositions"
++                v-model="filterViTri"
++                placeholder="Chọn hoặc nhập vị trí..."
++                class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all"
++              />
++              <datalist id="landPositions">
++                <option value="Mặt tiền đường chính"></option>
++                <option value="Góc 2 mặt tiền"></option>
++                <option value="Hẻm xe hơi"></option>
++                <option value="Khu dân cư"></option>
++              </datalist>
++            </div>
+
+-        <!-- Nút điều hướng -->
+-        <button class="lightbox-nav lightbox-prev" @click="prevImage(lightboxProject)" v-if="lightboxProject.images.length > 1">
+-          <i class="fa-solid fa-chevron-left"></i>
+-        </button>
+-        <button class="lightbox-nav lightbox-next" @click="nextImage(lightboxProject)" v-if="lightboxProject.images.length > 1">
+-          <i class="fa-solid fa-chevron-right"></i>
+-        </button>
+-
+-        <!-- Thông tin và thumbnails -->
+-        <div class="lightbox-info">
+-          <div class="lightbox-text">
+-            <h3>{{ lightboxProject.name }}</h3>
+-            <p>{{ lightboxProject.service }} - {{ getPrice(lightboxProject.price) }}</p>
++            <!-- Mở khóa -->
++            <div class="filter-item">
++              <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
++                <i class="fa-solid fa-unlock text-yellow-500 text-xs icon-glow"></i>
++                Mở khóa
++              </label>
++              <select
++                v-model="filterUnlock"
++                class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all"
++              >
++                <option value="">Tất cả</option>
++                <option value="yes">Đã mở</option>
++                <option value="no">Chưa mở</option>
++              </select>
++            </div>
++
++            <!-- Trạng thái -->
++            <div class="filter-item">
++              <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
++                <i class="fa-solid fa-circle-info text-pink-500 text-xs icon-glow"></i>
++                Trạng thái
++              </label>
++              <select
++                v-model="filterStatus"
++                class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all"
++              >
++                <option value="">Tất cả</option>
++                <option value="Đã bán">Đã bán</option>
++                <option value="Đã kiểm duyệt">Đã kiểm duyệt</option>
++                <option value="Đang bán">Đang bán</option>
++              </select>
++            </div>
++
++            <!-- Đã thích -->
++            <div class="filter-item">
++              <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
++                <i class="fa-solid fa-heart text-black text-xs icon-glow"></i>
++                Đã thích
++              </label>
++              <select
++                v-model="filterLove"
++                class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm transition-all"
++              >
++                <option :value="null">Tất cả</option>
++                <option :value="true">Đã thích</option>
++                <option :value="false">Chưa thích</option>
++              </select>
++            </div>
+           </div>
+-          <div class="lightbox-thumbnails" v-if="lightboxProject.images.length > 1">
+-            <div
+-                v-for="(img, index) in lightboxProject.images"
+-                :key="index"
+-                class="thumbnail-item"
+-                :class="{ active: getCurrentImageIndex(lightboxProject) === index }"
+-                @click="goToImage(lightboxProject, index)"
++        </div>
++
++        <!-- Chế độ thẻ -->
++        <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
++          <h3 class="text-lg font-bold text-slate-800">
++            Tổng số: {{ totalRecords }} bất động sản
++          </h3>
++          <div class="flex flex-nowrap items-center gap-2 sm:gap-3">
++            <div class="text-sm text-slate-600 font-bold">
++              {{ displayedRangeStart }} - {{ displayedRangeEnd }} của {{ totalRecords }}
++            </div>
++            <select
++              v-model.number="pageSize"
++              @change="updatePageSize"
++              class="px-2 py-1.5 border border-slate-400 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm"
+             >
+-              <img :src="getImageUrl(img.src)" :alt="lightboxProject.name" />
++              <option value="8">8 thẻ/trang</option>
++              <option value="12">12 thẻ/trang</option>
++              <option value="16">16 thẻ/trang</option>
++              <option value="20">20 thẻ/trang</option>
++            </select>
++          </div>
++        </div>
++
++        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
++          <div
++            v-for="item in landAssets"
++            :key="item.id"
++            class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
++          >
++            <div @click="goToDetail(item.id)" style="cursor: pointer;">
++              <div class="relative w-full overflow-hidden" style="height: 200px">
++                <div class="relative w-full h-full px-3 pt-3 rounded-3 overflow-hidden aspect-[4/3] w-full">
++                  <img
++                    :src="item.imageUrl || 'https://hoangphucphoto.com/wp-content/uploads/2024/11/anh-bds-1.jpg'"
++                    class="w-full rounded-3 h-full object-cover transition-transform duration-300 group-hover:scale-105"
++                  />
++                </div>
++                <div class="absolute top-2 mt-3 ms-3 left-2 flex items-center gap-2">
++                  <div
++                    class="px-2 py-1 rounded-full font-semibold flex items-center gap-1 whitespace-nowrap backdrop-blur-sm bg-black/20 ring-1 ring-white/20 shadow-sm text-white"
++                    style="font-size: 10px !important;"
++                  >
++                    <i :class="getAssetTypeIcon(item)" style="font-size: 13px !important;"></i>
++                    {{ getLoai(item) || '—' }}
++                  </div>
++
++                  <div
++                    class="px-2 py-1 rounded-full font-semibold flex items-center gap-1 whitespace-nowrap backdrop-blur-sm bg-black/20 ring-1 ring-white/20 shadow-sm"
++                    :class="item.moKhoa ? 'text-green-300' : 'text-yellow-300'"
++                    style="font-size: 10px !important;"
++                  >
++                    <i :class="item.moKhoa ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock'" style="font-size: 10px !important;"></i>
++                    <span style="font-size: 10px !important;">{{ item.moKhoa ? 'Đã mở' : 'Chưa mở' }}</span>
++                  </div>
++                </div>
++                <div
++                  v-if="'Đã bán' === item.status"
++                  class="absolute top-3 mr- ms-3 right-2 flex items-center gap-2"
++                  style="width: 60px; position: absolute; top: 7px; right: 3px"
++                >
++                  <img src="/imgs/sold-out.png" />
++                </div>
++                <div
++                  v-else-if="'Đã kiểm duyệt' === item.status"
++                  class="absolute top-3 mr-0 ms-3 right-2 flex items-center gap-2"
++                  style="width: 60px; position: absolute; top: 7px; right: 3px"
++                >
++                  <img src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png" />
++                </div>
++              </div>
++
++              <div class="p-3 leading-tight text-slate-800">
++                <div
++                  class="font-semibold text-slate-900 mb-1"
++                  style="
++                    font-size: 15px;
++                    font-weight: 700;
++                    text-transform: uppercase;
++                    white-space: nowrap;
++                    overflow: hidden;
++                    text-overflow: ellipsis;
++                  "
++                >
++                  {{ formatWardCard(item.diaChi) }}, {{ formatProvinceCard(item.khuVuc) }}
++                </div>
++                <div class="font-semibold text-slate-500" style="font-size: 13px">
++                  Ngày cập nhật: {{ formatDate(item.capNhatNgay) }}
++                </div>
++
++                <div class="flex items-center justify-between mt-1">
++                  <div style="color: #dc2626; font-weight: 700; font-size: 16px">
++                    {{ formatMoneyVN(item.giaBan) }}
++                    <div class="inline-flex items-center gap-1 text-[12px] text-slate-500 font-semibold ms-1">
++                      <span>Hoa hồng:</span>
++                      <DotLottieVue
++                        src="https://lottie.host/a94085b1-dc72-4753-88d0-4bdfad75c588/NgBvXtuOwE.lottie"
++                        autoplay
++                        loop
++                        style="width: 20px; height: 26px; display: inline-block; vertical-align: bottom;"
++                      />
++                      <span class="font-semibold text-blue-700 text-[14px]">
++                        {{ item.phiMoiGioi != null ? item.phiMoiGioi + '%' : '-' }}
++                      </span>
++                    </div>
++                  </div>
++                  <div class="flex items-center gap-2 mt-2">
++                    <div
++                      class="px-2.5 py-0.5 rounded-full text-white shadow-sm"
++                      :class="item.donVi === 'THG' ? 'bg-[#6A0DAD]' : 'bg-[#0057D9]'"
++                      style="font-weight: 550; font-size: 12.5px !important;"
++                    >
++                      {{ item.donVi }}
++                    </div>
++                    <span
++                      class="px-2 py-0.5 rounded-full"
++                      :class="badgeClass(item.loaiMH)"
++                      style="font-weight: 550; font-size: 12.5px !important;"
++                    >
++                      {{ item.loaiMH }}
++                    </span>
++                  </div>
++                </div>
++
++                <div class="flex items-center justify-between mt-2 text-[14px]">
++                  <span class="font-semibold text-slate-700 truncate max-w-[55%]">
++                    <template v-if="!item.giaDinhGia">
++                      Chưa định giá
++                    </template>
++                    <template v-else-if="item.giaDinhGia == -1.1">
++                      *********** (Giá định)
++                    </template>
++                    <template v-else>
++                      {{ formatMoneyVN(item.giaDinhGia) }} (Giá định)
++                    </template>
++                  </span>
++
++                  <div class="flex items-center gap-3 text-slate-500 text-[12px] shrink-0">
++                    <div class="flex items-center gap-1 font-medium">
++                      <span class="font-medium text-slate-700">
++                        {{ item.soLuotXem ?? 0 }}
++                      </span>đã xem
++                    </div>
++                    <div class="flex items-center gap-1 font-medium">
++                      <span class="font-medium text-slate-700">
++                        {{ item.soLuotThich ?? 0 }}
++                      </span>đã thích
++                    </div>
++                  </div>
++                </div>
++
++                <div class="grid grid-cols-2 gap-2 mt-2">
++                  <div class="p-2 bg-blue-50 rounded-lg">
++                    <div class="text-[12px] text-slate-500 font-semibold">Chủ nhà</div>
++                    <div class="text-[14px] font-semibold text-slate-800 mt-0.5 truncate">
++                      {{ item.tenChuNha || '—' }}
++                    </div>
++                  </div>
++                  <div class="p-2 bg-slate-50 rounded-lg">
++                    <div class="text-[12px] text-slate-500 font-semibold">Liên hệ</div>
++                    <div class="text-[14px] font-semibold text-blue-700 mt-0.5 flex items-center gap-1">
++                      <i class="fa-solid fa-phone text-blue-500"></i>
++                      {{ item.soDienThoai || '—' }}
++                    </div>
++                  </div>
++                </div>
++
++                <div class="grid grid-cols-2 gap-2 mt-2 text-start">
++                  <div>
++                    <div class="text-[12px] text-slate-500 font-semibold">Diện tích</div>
++                    <div class="font-bold">{{ item.dtcn }}m²</div>
++                  </div>
++                  <div>
++                    <div class="text-[12px] text-slate-500 font-semibold">Vị trí</div>
++                    <div class="text-slate-800 text-[13px] truncate font-bold">{{ item.viTri || '—' }}</div>
++                  </div>
++                </div>
++              </div>
++            </div>
++
++            <div class="flex items-center gap-2 px-3 pb-3">
++              <button
++                @click="goToDetail(item.id)"
++                class="flex-1 py-2.5 bg-gradient-to-r from-slate-900 to-black text-white rounded-full text-[14px] font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all"
++              >
++                <i class="fa-regular fa-eye text-sm"></i>
++                Xem chi tiết
++              </button>
++
++              <button
++                @click="toggleLove(item)"
++                class="w-10 h-10 rounded-full bg-slate-100 text-slate-800 shadow-sm hover:bg-slate-200 flex items-center justify-center transition"
++              >
++                <i
++                  :class="item.daThich
++                    ? 'fa-solid fa-heart text-black text-base'
++                    : 'fa-regular fa-heart text-base'"
++                ></i>
++              </button>
+             </div>
+           </div>
+         </div>
+
+-        <!-- Counter -->
+-        <div class="lightbox-counter" v-if="lightboxProject.images.length > 1">
+-          {{ getCurrentImageIndex(lightboxProject) + 1 }} / {{ lightboxProject.images.length }}
++        <div v-if="!landAssets.length" class="empty-state">
++          <p>Chưa có dữ liệu phù hợp với bộ lọc hiện tại.</p>
++        </div>
++
++        <div class="flex flex-col items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-slate-300 sm:flex-row sm:items-center sm:justify-between">
++          <div class="flex items-center gap-1">
++            <button
++              @click="goToPage(0)"
++              :disabled="page === 0"
++              class="p-2 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
++            >
++              <i class="fa-solid fa-angles-left text-sm"></i>
++            </button>
++            <button
++              @click="goToPage(page - 1)"
++              :disabled="page === 0"
++              class="p-2 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
++            >
++              <i class="fa-solid fa-angle-left text-sm"></i>
++            </button>
++
++            <div class="px-4 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg shadow-md">
++              <span class="text-sm font-bold">
++                Trang {{ page + 1 }} / {{ totalPages }}
++              </span>
++            </div>
++
++            <button
++              @click="goToPage(page + 1)"
++              :disabled="page >= totalPages - 1"
++              class="p-2 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
++            >
++              <i class="fa-solid fa-angle-right text-sm"></i>
++            </button>
++            <button
++              @click="goToPage(totalPages - 1)"
++              :disabled="page >= totalPages - 1"
++              class="p-2 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
++            >
++              <i class="fa-solid fa-angles-right text-sm"></i>
++            </button>
++          </div>
++
++          <div class="text-sm text-slate-700 sm:text-right flex items-center justify-center sm:justify-end" style="font-weight: 600">
++            Hiển thị {{ displayedRangeEnd }} / {{ totalRecords }} bất động sản
++          </div>
+         </div>
+       </div>
+     </div>
+   </section>
+ </template>
+
+ <script setup>
+-import { ref, onMounted, onUnmounted } from 'vue'
++import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
++import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
++import { useRouter } from 'vue-router';
++import addressData from '/src/assets/js/address.json';
++import api from '/src/api/api.js';
++import { useAuthStore } from '/src/stores/authStore.js';
+
+ const props = defineProps({
+   title: String
  });
 
- const createLandErrorState = () => ({
-   address: "",
-   plotNumber: "",
-   parcelNumber: "",
-   totalArea: "",
-   landUseRight: "",
-   landPosition: "",
-   ownershipRelation: "",
-   structure: "",
-   desire: "",
-   files: ""
- });
+-const hoverProject = ref(null)
+-const lightboxVisible = ref(false)
+-const lightboxProject = ref(null)
+-
+-// Định nghĩa dữ liệu soldProjects
+-const soldProjects = [
+-  {
+-    name: "Anh Nhân - Quận 9",
+-    price: 1.15,
+-    service: "Bán nhanh 30 ngày",
+-    viewCount: 17,
+-    offerCount: 11,
+-    images: [
+-      { src: "nhan-q9-main.jpg", isMain: true },
+-      { src: "nhan-q9-1.jpg", isMain: false },
+-      { src: "nhan-q9-2.jpg", isMain: false }
+-    ]
+-  },
+-  {
+-    name: "Chị Thủy - Vĩnh Long",
+-    price: 6,
+-    service: "Bán nhanh 30 ngày",
+-    viewCount: 9,
+-    offerCount: 5,
+-    images: [
+-      { src: "thuy-vinhlong-main.jpg", isMain: true },
+-      { src: "thuy-vinhlong-1.jpg", isMain: false },
+-      { src: "thuy-vinhlong-2.jpg", isMain: false },
+-      { src: "thuy-vinhlong-3.jpg", isMain: false },
+-      { src: "thuy-vinhlong-4.jpg", isMain: false },
+-    ]
+-  },
+-  {
+-    name: "Chị Nguyên - Đồng Tháp",
+-    price: 4.5,
+-    service: "Bán nhanh 30 ngày",
+-    viewCount: 11,
+-    offerCount: 6,
+-    images: [
+-      { src: "nguyen-dongthap-main.jpg", isMain: true },
+-      { src: "nguyen-dongthap-1.jpg", isMain: false },
+-      { src: "nguyen-dongthap-2.jpg", isMain: false },
+-      { src: "nguyen-dongthap-3.jpg", isMain: false },
+-      { src: "nguyen-dongthap-4.jpg", isMain: false },
+-      { src: "nguyen-dongthap-5.jpg", isMain: false },
+-    ]
+-  },
+-  {
+-    name: "Anh Phước - Dĩ An",
+-    price: 5.2,
+-    service: "Giải pháp 3-6 tháng",
+-    viewCount: 15,
+-    offerCount: 10,
+-    images: [
+-      { src: "phuoc-dian-main.jpg", isMain: true },
+-      { src: "phuoc-dian-1.jpg", isMain: false },
+-      { src: "phuoc-dian-2.jpg", isMain: false },
+-      { src: "phuoc-dian-3.jpg", isMain: false },
+-      { src: "phuoc-dian-4.jpg", isMain: false },
+-      { src: "phuoc-dian-5.jpg", isMain: false },
+-    ]
+-  },
+-  {
+-    name: "Chị Hà - Quận 12",
+-    price: 7,
+-    service: "Giải pháp 3-6 tháng",
+-    viewCount: 10,
+-    offerCount: 4,
+-    images: [
+-      { src: "ha-q12-main.jpg", isMain: true },
+-      { src: "ha-q12-1.jpg", isMain: false },
+-      { src: "ha-q12-2.jpg", isMain: false },
+-      { src: "ha-q12-3.jpg", isMain: false },
+-      { src: "ha-q12-4.jpg", isMain: false },
+-      { src: "ha-q12-5.jpg", isMain: false }
+-    ]
+-  },
+-  {
+-    name: "Chú Thanh - Bình Dương",
+-    price: 10,
+-    service: "Giải pháp 3-6 tháng",
+-    viewCount: 12,
+-    offerCount: 7,
+-    images: [
+-      { src: "thanh-binhduong-main.jpg", isMain: true },
+-      { src: "thanh-binhduong-1.jpg", isMain: false },
+-      { src: "thanh-binhduong-2.jpg", isMain: false }
+-    ]
+-  }
+-];
+-
+-const getPrice = (price) => {
+-  return price + " tỷ VNĐ";
+-}
+-
+-// Thêm currentImageIndex cho mỗi project
+-const projectsWithIndex = ref(soldProjects.map(project => ({
+-  ...project,
+-  currentImageIndex: 0
+-})))
+-
+ const stats = ref([
+   { icon: '<i class="fa-solid fa-house"></i>', value: '1,250+', title: 'Bất động sản đã bán' },
+   { icon: '<i class="fa-solid fa-star"></i>', value: '4.9/5', title: 'Đánh giá từ khách hàng' },
+   { icon: '<i class="fa-solid fa-users"></i>', value: '2,500+', title: 'Khách hàng hài lòng' },
+   { icon: '<i class="fa-solid fa-trophy"></i>', value: '15+', title: 'Giải thưởng uy tín' }
+-])
++]);
 
- const requestErrors = reactive({
-   assetId: "",
-   newAsset: createLandErrorState(),
-   contact: {
-     name: "",
-     phone: "",
-     email: ""
-   }
- });
+-// Tính toán mức độ quan tâm dựa trên lượt xem và đề nghị
+-const calculateInterestLevel = (project) => {
+-  const maxViews = Math.max(...soldProjects.map(p => p.viewCount));
+-  const maxOffers = Math.max(...soldProjects.map(p => p.offerCount));
++const landAssets = ref([]);
++const totalRecords = ref(0);
 
- const addAssetErrors = reactive(createLandErrorState());
+-  const viewRatio = (project.viewCount / maxViews) * 50;
+-  const offerRatio = (project.offerCount / maxOffers) * 50;
++const filterGiaRange = ref('');
++const filterProvince = ref('');
++const filterWard = ref('');
++const filterLoaiMH = ref('');
++const filterViTri = ref('');
++const filterUnlock = ref('');
++const filterStatus = ref('Đã bán');
++const filterLove = ref(null);
++const searchQuery = ref('');
 
- watch(
-     () => authStore.userInfo,
-     (user) => {
-       requestForm.contactName = user?.fullName || "";
-       requestForm.contactPhone = user?.phone || "";
-       requestForm.contactEmail = user?.email || "";
-     },
-     {immediate: true, deep: true}
- );
+-  return Math.min(Math.round(viewRatio + offerRatio), 100);
+-}
++const isFilterMobile = ref(false);
++const showFilterPanel = ref(true);
 
- watch(
-     () => requestForm.assetOption,
-     (option) => {
-       if (option === "existing") {
-         clearLandErrors(requestErrors.newAsset);
-+        requestForm.onBehalf = false;
-+        resetOnBehalfInfo();
-       } else {
-         requestForm.assetId = "";
-         requestErrors.assetId = "";
-       }
-     }
- );
+-// Lấy URL ảnh
+-const getImageUrl = (filename) => {
+-  // Giả sử ảnh được lưu trong thư mục /imgs/
+-  return `/imgs/${filename}`;
+-}
++const page = ref(0);
++const pageSize = ref(8);
 
-+watch(
-+    () => requestForm.onBehalf,
-+    (val) => {
-+      if (val) {
-+        clearContactErrors();
-+      } else {
-+        resetOnBehalfInfo();
-+        const user = authStore.userInfo;
-+        requestForm.contactName = user?.fullName || "";
-+        requestForm.contactPhone = user?.phone || "";
-+        requestForm.contactEmail = user?.email || "";
-+      }
-+    }
-+);
+-// Lấy ảnh hiện tại của project
+-const getCurrentImage = (project) => {
+-  const projectWithIndex = projectsWithIndex.value.find(p => p.name === project.name);
+-  return projectWithIndex.images[projectWithIndex.currentImageIndex];
+-}
++const totalPages = computed(() => Math.max(Math.ceil(totalRecords.value / pageSize.value) || 1, 1));
++const displayedRangeStart = computed(() => (totalRecords.value === 0 ? 0 : page.value * pageSize.value + 1));
++const displayedRangeEnd = computed(() => Math.min((page.value + 1) * pageSize.value, totalRecords.value));
+
+-// Lấy index ảnh hiện tại
+-const getCurrentImageIndex = (project) => {
+-  const projectWithIndex = projectsWithIndex.value.find(p => p.name === project.name);
+-  return projectWithIndex.currentImageIndex;
+-}
++const provinces = computed(() => addressData.map((x) => x.name));
++const wards = computed(() => {
++  if (!filterProvince.value) return [];
+
+-// Chuyển đến ảnh tiếp theo
+-const nextImage = (project) => {
+-  const projectWithIndex = projectsWithIndex.value.find(p => p.name === project.name);
+-  projectWithIndex.currentImageIndex = (projectWithIndex.currentImageIndex + 1) % projectWithIndex.images.length;
+-}
++  const province = addressData.find((p) => p.name === filterProvince.value);
++  if (!province || !Array.isArray(province.wards)) return [];
+
+-// Chuyển đến ảnh trước
+-const prevImage = (project) => {
+-  const projectWithIndex = projectsWithIndex.value.find(p => p.name === project.name);
+-  projectWithIndex.currentImageIndex = projectWithIndex.currentImageIndex === 0
+-      ? projectWithIndex.images.length - 1
+-      : projectWithIndex.currentImageIndex - 1;
+-}
++  return province.wards.map((w) => w.name);
++});
+
+-// Chuyển đến ảnh cụ thể
+-const goToImage = (project, index) => {
+-  const projectWithIndex = projectsWithIndex.value.find(p => p.name === project.name);
+-  projectWithIndex.currentImageIndex = index;
+-}
++watch(filterProvince, () => {
++  filterWard.value = '';
++});
+
+-// Mở lightbox
+-const openLightbox = (project) => {
+-  lightboxProject.value = project;
+-  lightboxVisible.value = true;
+-  document.body.style.overflow = 'hidden';
+-}
++const formatDate = (dateString) => {
++  if (!dateString) return '';
++  const date = new Date(dateString);
++  return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getFullYear()).slice(-2)}`;
++};
 +
- function clearLandErrors(target) {
-   Object.keys(target).forEach((key) => {
-     target[key] = "";
-   });
- }
-
- function clearContactErrors() {
-   requestErrors.contact.name = "";
-   requestErrors.contact.phone = "";
-   requestErrors.contact.email = "";
- }
-
-+function resetOnBehalfInfo() {
-+  requestForm.ownerOption = "existing";
-+  requestForm.existingOwnerPhone = "";
-+  requestForm.newOwner.fullName = "";
-+  requestForm.newOwner.phone = "";
-+  requestForm.newOwner.gender = null;
-+  requestForm.newOwner.newAddress = "";
-+  requestForm.newOwner.oldAddress = "";
-+}
++const formatWardCard = (addressDetail) => {
++  const raw = addressDetail || '';
++  const parts = raw.split('/!!');
++  return parts[1]?.trim() || '';
++};
 +
- function countImageFiles(list = []) {
-   return list.filter((item) => isImageFileEntry(item)).length;
- }
-
- function validateLandForm(form, errorBag) {
-   clearLandErrors(errorBag);
-   let valid = true;
-
-   const a = form;
-
-   // ==== VALIDATE ĐỊA CHỈ (3 PHẦN BẮT BUỘC) ====
-   if (!a.address || !a.address.trim()) {
-     errorBag.address = "Vui lòng chọn địa chỉ tài sản.";
-     valid = false;
-   } else {
-     const parts = a.address.split("/!!").map(p => p.trim());
-
-     if (parts.length !== 3) {
-       errorBag.address = "Địa chỉ phải gồm đủ: Địa chỉ cụ thể / Phường-Xã / Tỉnh-Thành.";
-       valid = false;
-     } else {
-       const [street, ward, province] = parts;
-
-       if (!street) {
-         errorBag.address = "Vui lòng nhập địa chỉ cụ thể (số nhà, đường).";
-@@ -2354,69 +2481,78 @@ function validateContactInfo() {
-   let valid = true;
-   const name = (requestForm.contactName || "").trim();
-   const phone = (requestForm.contactPhone || "").replace(/\s+/g, "");
-   const email = (requestForm.contactEmail || "").trim();
-
-   if (!name) {
-     requestErrors.contact.name = "Vui lòng cung cấp họ tên.";
-     valid = false;
-   }
-   if (!phoneRegex.test(phone)) {
-     requestErrors.contact.phone = "Số điện thoại không hợp lệ.";
-     valid = false;
-   }
-   if (!emailRegex.test(email)) {
-     requestErrors.contact.email = "Email không hợp lệ.";
-     valid = false;
-   }
-
-   requestForm.contactName = name;
-   requestForm.contactPhone = phone;
-   requestForm.contactEmail = email;
-   return valid;
- }
-
- function validateRequestForm(option = requestForm.assetOption) {
--  let isValid = validateContactInfo();
-+  let isValid = true;
-+  if (!(option === "new" && requestForm.onBehalf)) {
-+    isValid = validateContactInfo();
-+  } else {
-+    clearContactErrors();
-+  }
-   requestErrors.assetId = "";
-   if (option === "existing") {
-     clearLandErrors(requestErrors.newAsset);
-     if (!requestForm.assetId) {
-       requestErrors.assetId = "Vui lòng chọn tài sản trong danh sách.";
-       isValid = false;
-     }
-     return isValid;
-   }
-   const landValid = validateLandForm(requestForm.newAsset, requestErrors.newAsset);
-   return isValid && landValid;
- }
-
- function formatAddress(address) {
-   if (!address) return "";
-   return address.replace(/\s*\/!!\s*/g, ", ");
- }
-
-+function handleExistingOwnerLookup() {
-+  console.log("🔍 Tìm chủ đã có theo SĐT:", requestForm.existingOwnerPhone);
-+}
++const formatProvinceCard = (province) => {
++  if (typeof province !== 'string') return province || '';
++  return province;
++};
 +
- // Hàm submit yêu cầu định giá
- async function submitRequest() {
-   if (!validateRequestForm("existing")) return;
-   try {
-     const res = await showLoading(api.post("/thg.user/my-land/request-report", requestForm.assetId, {
-       headers: {"Content-Type": "application/json"},
-       withCredentials: true,
-     }));
-     resetRequestForm();
-     console.log("Kết quả:", res.data);
-     activeTab.value = 'results';
-     if (res.data?.usageLeft === false) {
-       updateAlertError(res.data.message || "Bạn đã hết lượt sử dụng!");
-       setTimeout(() => {
-         router.push({path: "/feature-in-development"});
-       }, 1200);
-     } else {
-       updateAlertSuccess("Yêu cầu định giá thành công và tài sản mới của bạn đã được lưu");
-     }
-   } catch (err) {
-     console.error("Lỗi khi gửi yêu cầu:", err);
-   }
- }
-
- // 🔥 HÀM PHÂN LOẠI FILE
-@@ -2453,50 +2589,63 @@ function classifyDeletedFiles(deletedFileIds, allFiles) {
-   deletedFileIds.forEach(id => {
-     const file = allFiles.find(f => f.id === id);
-     if (file) {
-       const isIG = file.isIG ||
-           file.fileName?.includes('landbook') ||
-           file.fileName?.includes('sổ') ||
-           file.fileName?.includes('land_book') ||
-           file.fileName?.includes('so') ||
-           file.fileName?.includes('certificate') ||
-           file.fileName?.includes('red_book') ||
-           file.fileName?.includes('pink_book');
-
-       if (isIG) {
-         deletedLandBookIds.push(id);
-       } else {
-         deletedNormalIds.push(id);
-       }
-     }
-   });
-
-   return {deletedNormalIds, deletedLandBookIds};
- }
-
- async function submitNewAssetAndRequest() {
-   if (!validateRequestForm("new")) return;
-+  if (requestForm.onBehalf) {
-+    const payload = {
-+      asset: {...requestForm.newAsset},
-+      owner:
-+          requestForm.ownerOption === "existing"
-+              ? {type: "existing", phone: requestForm.existingOwnerPhone}
-+              : {type: "new", info: {...requestForm.newOwner}},
-+      files: requestForm.realFile
++const formatProvinceShort = (province) => {
++  if (!province || typeof province !== 'string') return province || '';
++  return province.replace(/^Thành phố\s+/i, 'TP.').replace(/^Tỉnh\s+/i, 'T.');
++};
++
++const getAssetType = (item) => {
++  const dtcnValue = parseFloat(item.dtcn) || 0;
++  const ketCau = (item.ketCau || '').toLowerCase();
++
++  if (item.loaiTaiSan) {
++    const map = {
++      NHA: 'house',
++      DAT: 'land',
++      DATLON: 'land-large'
 +    };
-+    console.log("📝 Thông tin nhập hộ:", payload);
-+    updateAlertSuccess("Đã ghi nhận thông tin nhập hộ (xem console).");
++
++    if (map[item.loaiTaiSan]) {
++      return map[item.loaiTaiSan];
++    }
++  }
++
++  const houseKeywords = [
++    'lầu', 'trệt', 'tầng', 'hầm', 'gác',
++    'nhà cấp', 'cấp 1', 'cấp 2', 'cấp 3', 'cấp 4',
++    'biệt thự', 'villa', 'shophouse', 'townhouse', 'nhà',
++    'chung cư', 'căn hộ', 'chcc', 'studio',
++    'condotel', 'officetel', 'apartment', 'can ho',
++    'chung cu', 'tower', 'block'
++  ];
++
++  if (houseKeywords.some((keyword) => ketCau.includes(keyword))) {
++    return 'house';
++  }
++
++  if (dtcnValue > 1000) return 'land-large';
++
++  return 'land';
++};
++
++const getLoai = (item) => {
++  const dtcnValue = parseFloat(item.dtcn) || 0;
++  const structure = (item.structure || '').toLowerCase();
++
++  if (item.loaiTaiSan) {
++    const map = {
++      NHA: 'Nhà',
++      DAT: 'Đất',
++      DATLON: 'Đất lớn'
++    };
+
+-// Đóng lightbox
+-const closeLightbox = () => {
+-  lightboxVisible.value = false;
+-  lightboxProject.value = null;
+-  document.body.style.overflow = '';
++    if (map[item.loaiTaiSan]) {
++      return map[item.loaiTaiSan];
++    }
++  }
++
++  const houseKeywords = [
++    'lầu', 'trệt', 'tầng', 'hầm', 'gác',
++    'nhà cấp', 'cấp 1', 'cấp 2', 'cấp 3', 'cấp 4',
++    'biệt thự', 'villa', 'shophouse', 'townhouse', 'nhà',
++    'chung cư', 'căn hộ', 'chcc', 'studio',
++    'condotel', 'officetel', 'apartment', 'can ho',
++    'chung cu', 'tower', 'block'
++  ];
++
++  if (houseKeywords.some((keyword) => structure.includes(keyword))) {
++    return 'Nhà';
++  }
++
++  if (dtcnValue > 10000) return 'Đất lớn';
++
++  return 'Đất';
++};
++
++const getAssetTypeIcon = (item) => {
++  const type = getAssetType(item);
++  switch (type) {
++    case 'house':
++      return 'fa-solid fa-house-chimney';
++    case 'land-large':
++      return 'fa-solid fa-mountain-city';
++    default:
++      return 'fa-solid fa-map-location-dot';
++  }
++};
++
++const badgeClass = (code) => {
++  const map = {
++    BN30N: 'bg-green-500 text-white font-semibold ',
++    HTT: 'bg-yellow-500 text-white font-semibold',
++    HOPTAC: 'bg-orange-500 text-white font-semibold'
++  };
++
++  return map[code] || 'bg-slate-400 text-white font-semibold';
++};
++
++function formatMoneyVN(value) {
++  if (value == null || isNaN(value)) return '0';
++  const num = Number(value);
++
++  if (num < 1_000_000) {
++    return num.toLocaleString('vi-VN');
++  }
++
++  if (num < 1_000_000_000) {
++    const trieu = num / 1_000_000;
++    return `${trieu.toFixed(trieu % 1 === 0 ? 0 : 1)} triệu`;
++  }
++
++  const ty = num / 1_000_000_000;
++  return `${ty.toFixed(ty % 1 === 0 ? 0 : 2)} tỷ`;
++}
++
++const goToPage = (p) => {
++  if (p < 0) p = 0;
++  if (p >= totalPages.value) p = totalPages.value - 1;
++  page.value = p;
++};
++
++const updatePageSize = () => {
++  if (pageSize.value < 1) pageSize.value = 1;
++  page.value = 0;
++};
++
++function debounce(fn, delay = 300) {
++  let timeout;
++  return (...args) => {
++    clearTimeout(timeout);
++    timeout = setTimeout(() => fn(...args), delay);
++  };
++}
++
++async function fetchFilteredAssets() {
++  const payload = {
++    trangSo: page.value,
++    soDong: pageSize.value,
++    tuKhoa: searchQuery.value || null,
++    mucGia: filterGiaRange.value || null,
++    phuongXa: filterWard.value || null,
++    khuVuc: filterProvince.value || null,
++    viTri: filterViTri.value || null,
++    loaiMH: filterLoaiMH.value || null,
++    moKhoa: filterUnlock.value === '' ? null : filterUnlock.value === 'yes',
++    trangThai: filterStatus.value || null,
++    daThich: filterLove.value === null ? null : filterLove.value
++  };
++
++  try {
++    const res = await api.post('/user.thg/product/user/bang-du-lieu', payload);
++
++    landAssets.value = Array.isArray(res.data.content)
++      ? res.data.content.map((item) => ({
++          ...item,
++          imageUrl: item.imageUrl
++            ? item.imageUrl
++            : 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg'
++        }))
++      : [];
++
++    totalRecords.value = res.data.page?.totalElements || 0;
++
++    const maxPage = Math.max(Math.ceil(totalRecords.value / pageSize.value) - 1, 0);
++    if (page.value > maxPage) {
++      page.value = maxPage;
++    }
++  } catch (err) {
++    console.error('Lỗi tải dữ liệu:', err);
++  }
+ }
+
+-// Xử lý sự kiện keyboard
+-const handleKeydown = (event) => {
+-  if (!lightboxVisible.value || !lightboxProject.value) return;
++const debouncedFilter = debounce(fetchFilteredAssets, 300);
++
++watch(
++  [filterGiaRange, filterProvince, filterWard, filterLoaiMH, filterViTri, filterUnlock, filterStatus, filterLove, searchQuery],
++  () => {
++    page.value = 0;
++    debouncedFilter();
++  },
++  { immediate: true }
++);
+
+-  switch(event.key) {
+-    case 'Escape':
+-      closeLightbox();
+-      break;
+-    case 'ArrowLeft':
+-      prevImage(lightboxProject.value);
+-      break;
+-    case 'ArrowRight':
+-      nextImage(lightboxProject.value);
+-      break;
++watch([page, pageSize], () => {
++  debouncedFilter();
++});
++
++const auth = useAuthStore();
++const router = useRouter();
++
++const goToDetail = (id) => {
++  router.push(`/san-pham-thien-ha/${id}`);
++};
++
++async function toggleLove(item) {
++  localStorage.setItem('redirectAfterLogin', '/san-pham-thien-ha');
++  if (!auth.accessToken) {
++    router.push({
++      path: '/dang-nhap'
++    });
 +    return;
 +  }
-   try {
-     const formData = new FormData();
-
-     // ✅ Tạo bản sao newAsset, bỏ trường files
-     const dto = {...requestForm.newAsset};
-     delete dto.files;
-
-     // 1️⃣ Gắn DTO (JSON)
-     formData.append("dto", new Blob([JSON.stringify(dto)], {type: "application/json"}));
-
-     // 🔥 PHÂN LOẠI FILE: ảnh thường vs ảnh sổ
-     const normalFiles = [];
-     const landBookFiles = [];
-
-     requestForm.realFile.forEach(f => {
-       if (f.isIG || f.fileName?.includes('landbook') || f.fileName?.includes('sổ') || f.fileName?.includes('land_book')) {
-         landBookFiles.push(f);
-       } else {
-         normalFiles.push(f);
-       }
-     });
-
-     // Gắn file (phân loại)
-     normalFiles.forEach(f => formData.append("files", f.file));
-     landBookFiles.forEach(f => formData.append("landBookFiles", f.file));
-@@ -2534,50 +2683,52 @@ function handleOpenReport(valuation) {
-   console.log("Nhận valuation:", valuation);
-   router.push("/thanh-toan")
++
++  item.daThich = !item.daThich;
++  item.soLuotThich = item.daThich ? item.soLuotThich + 1 : item.soLuotThich - 1;
++
++  try {
++    await api.post('/user.thg/product/user/love/toggle', null, {
++      params: {
++        idAsset: item.id
++      }
++    });
++  } catch (e) {
++    item.daThich = !item.daThich;
++    item.soLuotThich = item.daThich ? item.soLuotThich + 1 : item.soLuotThich - 1;
+   }
  }
 
+-// Thêm event listener cho keyboard
++const updateViewportMode = () => {
++  const w = typeof window !== 'undefined' ? window.innerWidth : 0;
++  if (w < 736) {
++    isFilterMobile.value = true;
++    showFilterPanel.value = false;
++  } else {
++    isFilterMobile.value = false;
++    showFilterPanel.value = true;
++  }
++};
++
+ onMounted(() => {
+-  document.addEventListener('keydown', handleKeydown);
++  updateViewportMode();
++  window.addEventListener('resize', updateViewportMode);
+ });
 
- // Hàm reset form yêu cầu
- function resetRequestForm() {
-   requestForm.assetOption = "existing";
-   requestForm.assetId = "";
-   requestForm.newAsset.address = "";
-   requestForm.newAsset.oldAddress = "";
-   requestForm.newAsset.totalArea = null;
-   requestForm.newAsset.floorArea = null;
-   requestForm.newAsset.plotNumber = "";
-   requestForm.newAsset.parcelNumber = "";
-   requestForm.newAsset.ownershipRelation = "";
-   requestForm.newAsset.landUseRight = "";
-   requestForm.newAsset.landPosition = "";
-   requestForm.newAsset.status = "Chờ duyệt";
-   requestForm.newAsset.structure = "";
-   requestForm.newAsset.desire = null;
-   requestForm.newAsset.files = [];
-   requestForm.realFile = [];
-   requestForm.desiredPrice = null;
-   requestForm.note = "";
-+  requestForm.onBehalf = false;
-+  resetOnBehalfInfo();
-   const user = authStore.userInfo;
-   requestForm.contactName = user?.fullName || "";
-   requestForm.contactPhone = user?.phone || "";
-   requestForm.contactEmail = user?.email || "";
-   landUseChoice.value = "";
-   landPositionChoice.value = "";
-   ownershipChoice.value = "";
-   clearLandErrors(requestErrors.newAsset);
-   clearContactErrors();
-   requestErrors.assetId = "";
-   formattedPrice.value = "";
+-onUnmounted(() => {
+-  document.removeEventListener('keydown', handleKeydown);
++onBeforeUnmount(() => {
++  window.removeEventListener('resize', updateViewportMode);
+ });
+-
+-const viewDetails = (project) => {
+-  console.log(`Xem chi tiết dự án: ${project.name}`);
+-  // Có thể thêm logic điều hướng hoặc hiển thị modal chi tiết ở đây
+-}
+ </script>
+
+ <style scoped>
+ .success-sales-section {
+   background: linear-gradient(135deg, #f8f9ff 0%, #eef1ff 100%);
+   position: relative;
+   overflow: visible;
+   padding: 0 20px 60px;
  }
 
- // Hàm xáo trộn tài sản
- function shuffleAssets() {
-   assets.value = [...assets.value].sort(() => Math.random() - 0.5);
+-.success-sales-section.no-scroll {
+-  overflow: hidden;
+-  height: 100vh;
+-}
+-
+ .container {
+   max-width: 1400px;
+   margin: 0 auto;
+   position: relative;
  }
 
- // Hàm tải PDF
- function downloadPDF(valuation) {
-   successMessage.value = `Đang tải báo cáo PDF: ${valuation.title}`;
-   setTimeout(() => {
-     successMessage.value = "Tải xuống báo cáo PDF thành công!";
-   }, 1500);
-   setTimeout(() => {
-@@ -3688,26 +3839,26 @@ onMounted(async () => {
-   height: 100%;
-   background: linear-gradient(
-       90deg,
-       transparent,
-       rgba(255, 255, 255, 0.45),
-       rgba(255, 224, 135, 0.65),   /* ⭐ vàng nhẹ đẹp */
-       transparent
-   );
-   transform: skewX(-20deg);
-   animation: fastOrangeShine 2.2s infinite ease-in-out;
-   pointer-events: none; /* tránh lỗi click */
+-/* Phần elip */
+ .ellipse-section {
+   position: relative;
+-  margin-bottom: 100px;
++  margin-bottom: 80px;
+   padding-top: 60px;
  }
 
- @keyframes fastOrangeShine {
-   0% { left: -120%; }
-   60% { left: 130%; }
-   100% { left: 160%; }
+ .ellipse-bg {
+   position: absolute;
+   top: 0;
+   left: 50%;
+   transform: translateX(-50%);
+   width: 100%;
+   height: 400px;
+   background: linear-gradient(135deg, #031358 0%, #012cd3 100%);
+   z-index: 1;
  }
 
- /* Hover nảy */
- .btn-fast-orange-history:hover {
-   background: linear-gradient(135deg, #ffae59, #ff8d3d);
-   transform: translateY(-3px) scale(1.04);
-   box-shadow: 0 8px 20px rgba(255, 126, 41, 0.45);
+ .section-header {
+   text-align: center;
+-  margin-bottom: 180px;
++  margin-bottom: 160px;
+   position: relative;
+   z-index: 2;
+ }
+
+ .project-title {
+   text-align: center;
+   color: #031358;
++  margin-bottom: 20px;
+ }
+
+ .section-title {
+   font-size: 2.5rem;
+   color: white;
+   margin-bottom: 15px;
+   font-weight: 700;
+   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+ }
+
+ .section-subtitle {
+   font-size: 1.2rem;
+   color: rgba(255, 255, 255, 0.9);
+   max-width: 600px;
+   margin: 0 auto;
+ }
+
+-/* Stats nằm trên viền elip */
+ #stat0, #stat3 {
+   transform: translateY(20px);
+ }
+
+ #stat1, #stat2 {
+   transform: translateY(60px);
+ }
+
+ .stats-overview {
+   display: grid;
+   grid-template-columns: repeat(4, 1fr);
+   gap: 50px;
+   position: relative;
+   z-index: 3;
+   margin-top: -100px;
+ }
+
+ .stat-card {
+   background: white;
+   border-radius: 16px;
+   padding: 30px 20px;
+   text-align: center;
+   box-shadow: 0 15px 35px rgba(3, 19, 88, 0.15);
+   transition: transform 0.3s ease, box-shadow 0.3s ease;
+   border: 1px solid rgba(3, 19, 88, 0.08);
+@@ -382,529 +865,176 @@ const viewDetails = (project) => {
+ }
+
+ .stat-card:hover {
+   transform: translateY(-8px);
+   box-shadow: 0 20px 40px rgba(3, 19, 88, 0.2);
+ }
+
+ .stat-icon {
+   font-size: 2.5rem;
+   margin-bottom: 15px;
+ }
+
+ .stat-value {
+   font-size: 2.2rem;
+   font-weight: 700;
+   color: #031358;
+   margin-bottom: 8px;
+ }
+
+ .stat-title {
+   color: #5a6ab1;
+   font-size: 1rem;
+   font-weight: 500;
+ }
+
+-/* Phần dự án */
+-.projects-grid {
+-  display: grid;
+-  grid-template-columns: repeat(3, 1fr);
+-  gap: 30px;
+-  margin-bottom: 60px;
+-  padding-top: 40px;
+-}
+-
+-.project-card {
+-  background: white;
+-  border-radius: 20px;
+-  overflow: hidden;
+-  box-shadow: 0 10px 30px rgba(3, 19, 88, 0.08);
+-  transition: transform 0.4s ease, box-shadow 0.4s ease;
+-  border: 1px solid rgba(3, 19, 88, 0.05);
+-}
+-
+-.project-card:hover {
+-  transform: translateY(-8px);
+-  box-shadow: 0 20px 40px rgba(3, 19, 88, 0.15);
+-}
+-
+-.project-image {
++.sold-products-panel {
+   position: relative;
+-  height: 300px;
+-  overflow: hidden;
+-  cursor: pointer;
+-}
+-
+-.project-image .main-image {
+-  width: 100%;
+-  height: 100%;
+-  object-fit: cover;
+-  transition: transform 0.5s ease;
+-}
+-
+-.project-card:hover .project-image .main-image {
+-  transform: scale(1.05);
++  z-index: 5;
+ }
+
+-.sold-badge {
+-  position: absolute;
+-  top: 5px;
+-  right: 5px;
+-  z-index: 3;
+-  width: 70px;
++.line-clamp-2 {
++  display: -webkit-box;
++  -webkit-line-clamp: 2;
++  -webkit-box-orient: vertical;
++  overflow: hidden;
+ }
+
+-/* Navigation buttons */
+-.image-nav-buttons {
+-  position: absolute;
+-  top: 0;
+-  left: 0;
+-  width: 100%;
+-  height: 100%;
+-  display: flex;
+-  justify-content: space-between;
+-  align-items: center;
+-  padding: 0 15px;
+-  z-index: 2;
++* {
++  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
++  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
++  transition-duration: 150ms;
+ }
+
+-.nav-btn {
+-  background: rgba(255, 255, 255, 0.8);
+-  border: none;
+-  width: 40px;
+-  height: 40px;
+-  border-radius: 50%;
++.filter-row {
+   display: flex;
+-  align-items: center;
+-  justify-content: center;
+-  cursor: pointer;
+-  transition: all 0.3s ease;
+-  color: #031358;
+-  font-size: 1.2rem;
++  flex-wrap: wrap;
++  gap: 12px;
+ }
+
+-.nav-btn:hover {
+-  background: white;
+-  transform: scale(1.1);
+-}
+-
+-.image-overlay {
+-  position: absolute;
+-  top: 0;
+-  left: 0;
++.filter-item {
+   width: 100%;
+-  height: 100%;
+-  background: linear-gradient(to bottom, transparent 60%, rgba(3, 19, 88, 0.7));
+-  opacity: 0;
+-  transition: opacity 0.4s ease;
+-  z-index: 1;
+-}
+-
+-.image-overlay.active {
+-  opacity: 1;
+ }
+
+-.project-info {
+-  padding: 25px;
+-}
+-
+-.project-name {
+-  font-size: 1.4rem;
+-  color: #031358;
+-  margin-bottom: 8px;
+-  font-weight: 700;
+-}
+-
+-.project-location {
+-  color: #5a6ab1;
+-  margin-bottom: 20px;
+-  display: flex;
+-  align-items: center;
+-  gap: 5px;
+-}
+-
+-.project-details {
+-  margin-bottom: 20px;
+-}
+-
+-.detail-item {
+-  display: flex;
+-  justify-content: space-between;
+-  margin-bottom: 10px;
+-  padding-bottom: 10px;
+-  border-bottom: 1px solid rgba(3, 19, 88, 0.1);
+-}
+-
+-.detail-label {
+-  color: #5a6ab1;
+-  font-weight: 500;
+-}
+-
+-.detail-value {
+-  color: #031358;
+-  font-weight: 600;
+-}
+-
+-.progress-info {
+-  display: flex;
+-  align-items: center;
+-  gap: 15px;
+-  margin-top: 20px;
+-}
+-
+-.progress-label {
+-  color: #5a6ab1;
+-  font-size: 0.9rem;
+-  flex: 1;
+-}
+-
+-.progress-bar {
+-  flex: 2;
+-  height: 8px;
+-  background: #e0e5ff;
+-  border-radius: 10px;
+-  overflow: hidden;
+-}
+-
+-.progress-fill {
+-  height: 100%;
+-  background: linear-gradient(90deg, #031358, #2d44b0);
+-  border-radius: 10px;
+-  transition: width 1s ease;
+-}
+-
+-.progress-percent {
+-  color: #031358;
+-  font-weight: 700;
+-  font-size: 0.9rem;
+-  min-width: 40px;
++@media (min-width: 640px) {
++  .filter-item {
++    width: calc(50% - 12px);
++  }
+ }
+
+-/* Nút xem chi tiết */
+-.detail-button {
+-  width: 100%;
+-  background: linear-gradient(135deg, #031358, #1a2f8a);
+-  color: white;
+-  border: none;
+-  padding: 12px 20px;
+-  border-radius: 10px;
+-  font-weight: 600;
+-  font-size: 1rem;
+-  cursor: pointer;
+-  transition: all 0.3s ease;
+-  margin-top: 20px;
+-  box-shadow: 0 4px 10px rgba(3, 19, 88, 0.2);
+-  min-width: 120px;
++@media (min-width: 768px) {
++  .filter-item {
++    width: calc(25% - 12px);
++  }
+ }
+
+-.detail-button:hover {
+-  background: linear-gradient(135deg, #1a2f8a, #031358);
+-  transform: translateY(-2px);
+-  box-shadow: 0 6px 15px rgba(3, 19, 88, 0.3);
+-}
++@media (min-width: 1024px) {
++  .filter-row {
++    flex-wrap: nowrap;
++  }
+
+-/* Lightbox Overlay */
+-.lightbox-overlay {
+-  position: fixed;
+-  top: 0;
+-  left: 0;
+-  width: 100%;
+-  height: 100%;
+-  background: rgba(0, 0, 0, 0.9);
+-  display: flex;
+-  align-items: center;
+-  justify-content: center;
+-  z-index: 1000;
+-  padding: 20px;
+-  backdrop-filter: blur(5px);
++  .filter-item {
++    flex: 1;
++    min-width: 100px;
++  }
+ }
+
+-.lightbox-container {
+-  position: relative;
+-  max-width: 90vw;
+-  max-height: 90vh;
+-  background: white;
+-  border-radius: 15px;
+-  overflow: hidden;
++.filter-header {
+   display: flex;
+   flex-direction: column;
+-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
++  gap: 12px;
+ }
+
+-.lightbox-close {
+-  position: absolute;
+-  top: 15px;
+-  right: 15px;
+-  background: rgba(0, 0, 0, 0.7);
+-  color: white;
+-  border: none;
+-  width: 45px;
+-  height: 45px;
+-  border-radius: 50%;
++.filter-title-wrap {
+   display: flex;
+   align-items: center;
+-  justify-content: center;
+-  cursor: pointer;
+-  z-index: 10;
+-  font-size: 1.3rem;
+-  transition: all 0.3s ease;
+-}
+-
+-.lightbox-close:hover {
+-  background: rgba(0, 0, 0, 0.9);
+-  transform: scale(1.1);
+ }
+
+-.lightbox-image-container {
+-  flex: 1;
+-  display: flex;
+-  align-items: center;
+-  justify-content: center;
+-  background: #f8f9fa;
+-  min-height: 60vh;
+-  max-height: 70vh;
+-}
+-
+-.lightbox-image {
+-  max-width: 100%;
+-  max-height: 100%;
+-  object-fit: contain;
+-}
+-
+-/* Lightbox Navigation */
+-.lightbox-nav {
+-  position: absolute;
+-  top: 50%;
+-  transform: translateY(-50%);
+-  background: rgba(0, 0, 0, 0.7);
++.filter-title {
++  font-weight: 700;
++  font-size: 20px;
+   color: white;
+-  border: none;
+-  width: 60px;
+-  height: 60px;
+-  border-radius: 50%;
+-  display: flex;
+-  align-items: center;
+-  justify-content: center;
+-  cursor: pointer;
+-  font-size: 1.5rem;
+-  transition: all 0.3s ease;
+-  z-index: 5;
++  text-shadow: 0 0 6px rgba(10, 10, 10, 0.9);
+ }
+
+-.lightbox-nav:hover {
+-  background: rgba(0, 0, 0, 0.9);
+-  transform: translateY(-50%) scale(1.1);
+-}
++@media (min-width: 768px) {
++  .filter-header {
++    flex-direction: row;
++    align-items: center;
++  }
+
+-.lightbox-prev {
+-  left: 20px;
++  .filter-title {
++    font-size: 22px;
++  }
+ }
+
+-.lightbox-next {
+-  right: 20px;
++.label-glow,
++.icon-glow {
++  text-shadow:
++    0 0 6px rgba(9, 9, 9, 0.9),
++    0 0 12px rgba(10, 10, 10, 0.8);
+ }
+
+-/* Lightbox Info */
+-.lightbox-info {
++.empty-state {
+   padding: 20px;
++  text-align: center;
+   background: white;
+-  border-top: 1px solid #eaeaea;
+-}
+-
+-.lightbox-text h3 {
+-  color: #031358;
+-  margin-bottom: 5px;
+-  font-size: 1.3rem;
+-}
+-
+-.lightbox-text p {
+-  color: #5a6ab1;
+-  margin: 0;
+-}
+-
+-.lightbox-thumbnails {
+-  display: flex;
+-  gap: 10px;
+-  margin-top: 15px;
+-  overflow-x: auto;
+-  padding: 5px 0;
+-}
+-
+-.thumbnail-item {
+-  width: 60px;
+-  height: 60px;
+-  border-radius: 8px;
+-  overflow: hidden;
+-  cursor: pointer;
+-  opacity: 0.6;
+-  transition: all 0.3s ease;
+-  flex-shrink: 0;
+-  border: 2px solid transparent;
+-}
+-
+-.thumbnail-item.active {
+-  opacity: 1;
+-  border-color: #031358;
+-}
+-
+-.thumbnail-item:hover {
+-  opacity: 1;
+-}
+-
+-.thumbnail-item img {
+-  width: 100%;
+-  height: 100%;
+-  object-fit: cover;
+-}
+-
+-/* Lightbox Counter */
+-.lightbox-counter {
+-  position: absolute;
+-  top: 20px;
+-  left: 20px;
+-  background: rgba(0, 0, 0, 0.7);
+-  color: white;
+-  padding: 8px 15px;
+-  border-radius: 20px;
+-  font-size: 0.9rem;
+-  font-weight: 600;
+-  z-index: 5;
+-}
+-
+-/* Responsive */
+-@media (max-width: 1200px) {
+-  .projects-grid {
+-    grid-template-columns: repeat(3, 1fr);
+-  }
++  border: 1px dashed #cbd5e1;
++  border-radius: 12px;
++  color: #475569;
++  margin-bottom: 16px;
+ }
+
+ @media (max-width: 1024px) {
+   .stats-overview {
+     grid-template-columns: repeat(2, 1fr);
+     margin-top: -50px;
+   }
+
+   .ellipse-bg {
+     height: 500px;
+   }
+
+   #stat0, #stat1, #stat2, #stat3 {
+     transform: translateY(0);
+   }
+-
+-  .projects-grid {
+-    grid-template-columns: repeat(2, 1fr);
+-  }
+ }
+
+ @media (max-width: 768px) {
+   .section-title {
+     font-size: 2rem;
+   }
+
+   .ellipse-section {
+     margin-bottom: 60px;
+     padding-top: 40px;
+   }
+
+   .ellipse-bg {
+     height: 400px;
+   }
+
+   .section-header {
+     margin-bottom: 120px;
+   }
+
+   .stats-overview {
+     grid-template-columns: 1fr;
+     position: static;
+     margin-top: 30px;
+   }
+
+   .stat-card {
+     position: static;
+   }
+-
+-  .projects-grid {
+-    grid-template-columns: 1fr;
+-  }
+-
+-  .progress-info {
+-    flex-direction: column;
+-    align-items: flex-start;
+-    gap: 10px;
+-  }
+-
+-  .progress-bar {
+-    width: 100%;
+-  }
+-
+-  .lightbox-container {
+-    max-width: 95vw;
+-    max-height: 95vh;
+-  }
+-
+-  .lightbox-nav {
+-    width: 50px;
+-    height: 50px;
+-    font-size: 1.2rem;
+-  }
+-
+-  .lightbox-prev {
+-    left: 10px;
+-  }
+-
+-  .lightbox-next {
+-    right: 10px;
+-  }
+-
+-  .lightbox-thumbnails {
+-    gap: 8px;
+-  }
+-
+-  .thumbnail-item {
+-    width: 50px;
+-    height: 50px;
+-  }
+ }
+
+ @media (max-width: 480px) {
+   .ellipse-bg {
+     height: 250px;
+   }
+
+   .section-header {
+     margin-bottom: 100px;
+   }
+-
+-  .image-nav-buttons {
+-    padding: 0 10px;
+-  }
+-
+-  .nav-btn {
+-    width: 35px;
+-    height: 35px;
+-    font-size: 1rem;
+-  }
+-
+-  .lightbox-image-container {
+-    min-height: 50vh;
+-  }
+-
+-  .lightbox-info {
+-    padding: 15px;
+-  }
+-
+-  .lightbox-text h3 {
+-    font-size: 1.1rem;
+-  }
+-
+-  .lightbox-thumbnails {
+-    gap: 5px;
+-  }
+-
+-  .thumbnail-item {
+-    width: 45px;
+-    height: 45px;
+-  }
  }
 -</style>
 \ No newline at end of file

@@ -25,20 +25,6 @@
       >
         <i class="fas fa-cog"></i> Cài đặt chung
       </button>
-      <button
-          class="tab-button"
-          :class="{ active: activeTab === 'solutions' }"
-          @click="activeTab = 'solutions'"
-      >
-        <i class="fas fa-lightbulb"></i> Giải pháp ({{ settings.solutionItems.length }})
-      </button>
-      <button
-          class="tab-button"
-          :class="{ active: activeTab === 'news' }"
-          @click="activeTab = 'news'"
-      >
-        <i class="fas fa-newspaper"></i> Tin tức ({{ settings.newsItems.length }})
-      </button>
     </div>
 
     <!-- Nội dung tab -->
@@ -68,61 +54,6 @@
               />
             </div>
           </div>
-
-          <!-- Văn bản -->
-<!--          <div class="setting-section">-->
-<!--            <h3><i class="fas fa-font"></i> Văn bản</h3>-->
-<!--            <div class="form-group">-->
-<!--              <label for="view-all-text">Xem tất cả</label>-->
-<!--              <input-->
-<!--                  type="text"-->
-<!--                  id="view-all-text"-->
-<!--                  v-model="settings.viewAllText"-->
-<!--                  placeholder="Xem tất cả"-->
-<!--              />-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--              <label for="read-more-text">Xem thêm</label>-->
-<!--              <input-->
-<!--                  type="text"-->
-<!--                  id="read-more-text"-->
-<!--                  v-model="settings.readMoreText"-->
-<!--                  placeholder="Xem thêm"-->
-<!--              />-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--              <label for="new-tag-text">Nhãn Tin mới</label>-->
-<!--              <input-->
-<!--                  type="text"-->
-<!--                  id="new-tag-text"-->
-<!--                  v-model="settings.newTagText"-->
-<!--                  placeholder="Tin mới"-->
-<!--              />-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--              <label for="hot-tag-text">Nhãn Tin nổi bật</label>-->
-<!--              <input-->
-<!--                  type="text"-->
-<!--                  id="hot-tag-text"-->
-<!--                  v-model="settings.hotTagText"-->
-<!--                  placeholder="Tin nổi bật"-->
-<!--              />-->
-<!--            </div>-->
-<!--          </div>-->
-
-          <!-- Liên kết -->
-<!--          <div class="setting-section">-->
-<!--            <h3><i class="fas fa-link"></i> Liên kết</h3>-->
-<!--            <div class="form-group">-->
-<!--              <label for="news-link">Liên kết tin tức</label>-->
-<!--              <input-->
-<!--                  type="text"-->
-<!--                  id="news-link"-->
-<!--                  v-model="settings.newsLink"-->
-<!--                  placeholder="/tin-tuc"-->
-<!--              />-->
-<!--            </div>-->
-<!--          </div>-->
 
           <!-- Màu sắc -->
           <div class="setting-section">

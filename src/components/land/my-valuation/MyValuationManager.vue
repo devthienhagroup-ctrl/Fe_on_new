@@ -75,7 +75,7 @@
                         <h5 class="fw-semibold text-dark mb-1 fs-6 fs-md-5">Gửi yêu cầu định giá mới</h5>
                         <p class="text-muted small mb-0">Chọn tài sản có sẵn hoặc mô tả tài sản mới để chúng tôi hỗ
                           trợ.</p>
-                        <div v-if="requestForm.assetOption === 'new'" class="form-check mt-2">
+                        <div v-if="requestForm.assetOption === 'new' && authStore.hasPermission('PRODUCT_INSERT_SUPPORT')" class="form-check mt-2">
                           <input
                               id="on-behalf-checkbox"
                               v-model="requestForm.onBehalf"
@@ -2318,7 +2318,7 @@ const requestForm = reactive({
     files: [],
     desire: null
   },
-  onBehalf: false,
+  onBehalf: authStore.hasPermission('PRODUCT_INSERT_SUPPORT'),
   ownerOption: "existing",
   existingOwnerPhone: "",
   existingOwner: null,

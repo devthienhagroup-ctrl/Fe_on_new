@@ -4,20 +4,6 @@
     <div class="editor-header">
       <h2>Quản lý Banner</h2>
       <div class="header-controls">
-        <!--        <div class="search-box">-->
-        <!--          <i class="fas fa-search"></i>-->
-        <!--          <input-->
-        <!--              type="text"-->
-        <!--              v-model="searchQuery"-->
-        <!--              placeholder="Tìm kiếm cài đặt (màu sắc, kích thước, vị trí...)"-->
-        <!--              @input="handleSearch"-->
-        <!--              @focus="expandSearch = true"-->
-        <!--              @blur="expandSearch = false"-->
-        <!--          />-->
-        <!--          <button v-if="searchQuery" class="btn-clear-search" @click="clearSearch">-->
-        <!--            <i class="fas fa-times"></i>-->
-        <!--          </button>-->
-        <!--        </div>-->
         <button class="btn btn-primary" @click="addNewBanner">
           <i class="fas fa-plus"></i> Thêm Banner Mới
         </button>

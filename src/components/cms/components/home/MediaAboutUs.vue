@@ -226,7 +226,13 @@
                 </div>
               </div>
             </div>
-
+            <div class="form-group">
+              <label for="mobile-breakpoint">Breakpoint mobile</label>
+              <div class="input-with-unit">
+                <input type="text" id="mobile-breakpoint" v-model="settings.mobileBreakpoint" placeholder="768px" />
+                <span class="unit">px</span>
+              </div>
+            </div>
           </div>
 
           <!-- Modal Settings -->

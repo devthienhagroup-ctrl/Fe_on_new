@@ -63,7 +63,7 @@
       </div>
 
       <!-- Nút quay lại -->
-      <router-link to="/cong-viec-cong-tac-vien" class="back-btn">
+      <router-link to="/collaborator-jobs" class="back-btn">
         Quay lại
       </router-link>
     </div>

@@ -504,7 +504,8 @@ defineExpose({
 }
 
 /* Đảm bảo transition hoạt động tốt trên mobile */
-@media (max-width: 768px ) {
+/*@media (max-width: v-bind('config.style.mobileBreakpoint')) {*/
+@media (max-width: 768px) {
   .answer-wrapper {
     transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }

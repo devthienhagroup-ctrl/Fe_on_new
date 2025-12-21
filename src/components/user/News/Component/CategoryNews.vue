@@ -20,15 +20,16 @@
 
             <nav class="categories-nav" ref="categoriesNav">
               <div
-                  v-for="(category, index) in categories"
-                  :key="index"
+                  v-for="(category, index) in categoryList"
+                  :key="category.id"
                   class="category-item"
-                  :class="{ active: index === activeCategoryIndex }"
+                  :class="{ active: category.id === activeCategoryId }"
+                  @click="selectCategory(category.id)"
                   :style="{
-                    color: index === activeCategoryIndex ? config.colors.active : config.colors.primary
+                    color: category.id === activeCategoryId ? config.colors.active : config.colors.primary
                   }"
               >
-                {{ category }}
+                {{ category.name }}
               </div>
             </nav>
 
@@ -47,29 +48,73 @@
           <div class="nav-divider"></div>
         </div>
 
+        <!-- Bộ lọc -->
+        <div class="filter-container">
+          <div class="filter-row">
+            <select v-model="filter.sortBy" class="filter-select" @change="applyFilter">
+              <option value="" disabled>Sắp xếp theo</option>
+              <option value="VIEW_COUNT">Lượt xem</option>
+              <option value="CREATED_AT">Ngày đăng</option>
+              <option value="UPDATED_AT">Ngày cập nhật</option>
+            </select>
+
+            <select v-model="filter.sortDirection" class="filter-select" @change="applyFilter">
+              <option value="DESC">Giảm dần</option>
+              <option value="ASC">Tăng dần</option>
+            </select>
+
+            <button class="filter-btn" @click="applyFilter" :style="{ backgroundColor: config.colors.primary }">
+              <i class="fa-solid fa-filter"></i> Lọc
+            </button>
+          </div>
+        </div>
+
         <!-- Danh sách tin tức -->
         <div class="news-list">
           <div
               v-for="(news, index) in newsList"
-              :key="index"
+              :key="news.id"
               class="news-item"
+              @click="goToNews(news)"
           >
             <div class="news-image">
-              <img :src="news.image" :alt="news.title">
+              <img :src="news.thumbnail || '/imgs/default-news.jpg'" :alt="news.title">
             </div>
             <div class="news-content">
+              <div class="news-meta">
+                <span class="news-category">{{ news.categoryName }}</span>
+                <span class="news-dot">•</span>
+                <span class="news-date">{{ formatDate(news.createAt || news.updateAt) }}</span>
+                <span class="news-dot">•</span>
+                <span class="news-views">{{ news.viewCount }} lượt xem</span>
+              </div>
               <h3 class="news-title">{{ news.title }}</h3>
-              <p class="news-subtitle">{{ news.subtitle }}</p>
-              <span class="news-date">{{ news.date }}</span>
+              <p class="news-subtitle">{{ news.summary }}</p>
+              <div class="news-footer">
+                <span class="news-author">Tác giả: {{ news.employeeName }}</span>
+              </div>
             </div>
             <div class="news-divider"></div>
+          </div>
+
+          <!-- Trạng thái loading -->
+          <div v-if="loading" class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Đang tải tin tức...</p>
+          </div>
+
+          <!-- Trạng thái không có dữ liệu -->
+          <div v-if="!loading && newsList.length === 0" class="empty-state">
+            <p>Không có tin tức nào được tìm thấy.</p>
           </div>
         </div>
 
         <!-- Phân trang -->
-        <div class="pagination">
+        <div class="pagination" v-if="totalPages > 1">
           <button
               class="page-btn"
+              @click="goToPage(currentPage - 1)"
+              :disabled="currentPage === 1"
               :style="{
               borderColor: config.colors.primary,
               color: config.colors.primary
@@ -77,26 +122,26 @@
           >
             <i class="fa-solid fa-arrow-left"></i>
           </button>
+
           <button
-              class="page-btn active"
-              :style="{
-              backgroundColor: config.colors.primary,
-              color: config.colors.white
-            }"
-          >
-            1
-          </button>
-          <button
+              v-for="page in visiblePages"
+              :key="page"
               class="page-btn"
+              :class="{ active: page === currentPage }"
+              @click="goToPage(page)"
               :style="{
+              backgroundColor: page === currentPage ? config.colors.primary : 'white',
               borderColor: config.colors.primary,
-              color: config.colors.primary
+              color: page === currentPage ? config.colors.white : config.colors.primary
             }"
           >
-            2
+            {{ page }}
           </button>
+
           <button
               class="page-btn"
+              @click="goToPage(currentPage + 1)"
+              :disabled="currentPage === totalPages"
               :style="{
               borderColor: config.colors.primary,
               color: config.colors.primary
@@ -117,11 +162,14 @@
           >
             <input
                 type="text"
+                v-model="searchKeyword"
                 placeholder="Nhập từ khóa để tìm kiếm"
                 class="search-input"
+                @keyup.enter="performSearch"
             >
             <button
                 class="search-btn"
+                @click="performSearch"
                 :style="{ backgroundColor: config.colors.primary }"
             >
               <i class="fa-solid fa-magnifying-glass"></i>
@@ -129,25 +177,91 @@
           </div>
         </div>
 
-        <!-- Box "Đã xem gần đây" -->
+        <!-- Box "Đã xem gần đây / Kết quả tìm kiếm" -->
         <div
             class="recently-viewed"
             :style="{ boxShadow: config.shadows.default }"
         >
-          <h3 class="recently-viewed-title">{{ config.sections.recentlyViewed.title }}</h3>
-          <div class="recently-viewed-list">
+          <!-- Tab chuyển đổi - Chỉ hiển thị khi có cả 2 dữ liệu -->
+          <div class="tab-container">
+            <button
+                class="tab-btn"
+                :class="{ active: activeTab === 'recent' }"
+                @click="activeTab = 'recent'"
+                :style="{
+                color: activeTab === 'recent' ? config.colors.active : config.colors.primary,
+                borderBottomColor: activeTab === 'recent' ? config.colors.active : 'transparent'
+              }"
+            >
+              Đã xem gần đây
+            </button>
+            <button
+                class="tab-btn"
+                :class="{ active: activeTab === 'search' }"
+                @click="activeTab = 'search'"
+                :style="{
+                color: activeTab === 'search' ? config.colors.active : config.colors.primary,
+                borderBottomColor: activeTab === 'search' ? config.colors.active : 'transparent'
+              }"
+            >
+              Kết quả tìm kiếm
+            </button>
+
+          </div>
+
+          <!-- Tiêu đề -->
+          <h3 class="recently-viewed-title">
+            {{ activeTab === 'search' ? 'Kết quả tìm kiếm' : 'Đã xem gần đây' }}
+          </h3>
+
+          <!-- Danh sách kết quả tìm kiếm -->
+          <div class="recently-viewed-list" v-if="activeTab === 'search'">
             <div
-                v-for="(news, index) in recentlyViewed"
+                v-for="(news, index) in searchResults"
                 :key="index"
                 class="recently-viewed-item"
+                @click="goToNews(news)"
             >
               <div class="recently-viewed-image">
-                <img :src="news.image" :alt="news.title">
+                <img :src="news.thumbnail || '/imgs/default-news.jpg'" :alt="news.title">
               </div>
               <div class="recently-viewed-content">
                 <h4 class="recently-viewed-title-item">{{ news.title }}</h4>
-                <span class="recently-viewed-date">{{ news.date }}</span>
+                <span class="recently-viewed-date">{{ formatDate(news.createAt) }}</span>
               </div>
+            </div>
+
+            <!-- Trạng thái không có kết quả tìm kiếm -->
+            <div v-if="searchResults.length === 0 && searchPerformed" class="empty-search">
+              <p>Không tìm thấy kết quả nào.</p>
+            </div>
+
+            <!-- Trạng thái chưa tìm kiếm -->
+            <div v-if="searchResults.length === 0 && !searchPerformed" class="empty-search">
+              <p>Nhập từ khóa để tìm kiếm tin tức.</p>
+            </div>
+          </div>
+
+          <!-- Danh sách đã xem gần đây -->
+          <div class="recently-viewed-list" v-if="activeTab === 'recent'">
+            <div
+                v-for="(news, index) in recentNewsList"
+                :key="'recent-' + news.id"
+                class="recently-viewed-item"
+                @click="goToNews(news)"
+            >
+              <div class="recently-viewed-image">
+                <img :src="news.thumbnail || '/imgs/default-news.jpg'" :alt="news.title">
+              </div>
+              <div class="recently-viewed-content">
+                <h4 class="recently-viewed-title-item">{{ news.title }}</h4>
+                <span class="recently-viewed-date">{{ formatTime(news.viewedAt) }}</span>
+              </div>
+            </div>
+
+            <!-- Trạng thái không có tin đã xem -->
+            <div v-if="recentNewsList.length === 0" class="empty-search">
+              <p>Chưa có tin nào được xem gần đây.</p>
             </div>
           </div>
         </div>
@@ -157,7 +271,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
+import api from "../../../../api/api.js";
+
+const emit = defineEmits(['goToNews'])
+
+const goToNews = (news) => {
+  const newsDTO = {
+    id: news.id,
+    slug: news.slug,
+    title: news.title,
+    thumbnail: news.thumbnail,
+    viewAt: new Date().toISOString()
+  }
+
+  emit('goToNews', newsDTO)
+}
 
 // CONFIG OBJECT
 let config = {
@@ -239,8 +368,15 @@ let config = {
 }
 
 const props = defineProps({
-  sectionData: Object
+  sectionData: Object,
+  news: Object,
+  categories: Array,
+  recentNews: Array // Nhận props recentNews
 })
+
+console.log("props.news", props.news)
+console.log("props.categories", props.categories)
+console.log("props.recentNews", props.recentNews)
 
 if(props.sectionData) {
   config = props.sectionData;
@@ -249,86 +385,72 @@ if(props.sectionData) {
 
 // Refs
 const categoriesNav = ref(null)
+const loading = ref(false)
+const searchPerformed = ref(false)
 
 // Dữ liệu danh mục
-const categories = ref([
-  'Tất cả',
-  'Thời sự',
-  'Kinh tế',
-  'Xã hội',
-  'Giáo dục',
-  'Khoa học',
-  'Công nghệ',
-  'Thể thao',
-  'Giải trí',
-  'Văn hóa',
-  'Du lịch',
-  'Sức khỏe',
-  'Pháp luật',
-  'Đời sống',
-  'Công nghệ mới'
-])
+const categoryList = ref(props.categories || [])
 
-// Dữ liệu danh sách tin tức
-const newsList = ref([
-  {
-    title: "Bất động sản Thiên Hà Group vinh dự đón nhận giải thưởng top 10 thương hiệu xuất sắc châu á 2024",
-    subtitle: "Giải thưởng danh giá này là minh chứng cho nỗ lực không ngừng của Thiên Hà Group trong việc phát triển các dự án bền vững, mang lại giá trị thật cho khách hàng và đóng góp tích cực cho sự phát triển của ngành bất động sản Việt Nam....",
-    category: "Tin tức | Hoạt động",
-    date: "12/11/2024",
-    image: "/imgs/hd6.jpg"
-  },
-  {
-    title: "Thị trường bất động sản phục hồi mạnh mẽ cuối năm 2025",
-    subtitle: "Sau giai đoạn trầm lắng, thị trường đang ghi nhận tín hiệu tích cực với sự quay trở lại của dòng vốn đầu tư và nhu cầu nhà ở tăng cao......",
-    category: "Giải pháp Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/bannhanhbds.png"
-  },
-  {
-    title: "Dòng tiền đầu tư quay lại bất động sản: Cơ hội vàng cho DN Việt",
-    subtitle: "Các chính sách hỗ trợ, cùng tín hiệu tích cực từ thị trường tài chính, đang mở ra giai đoạn tăng trưởng mới cho ngành bất động sản trong nước....",
-    category: "Đăng tin Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/bannhanhbds.png"
-  },
-  {
-    title: "Người trẻ chuộng mua nhà sẵn nội thất thay vì tự xây",
-    subtitle: "Xu hướng 'sống tiện nghi ngay khi nhận nhà' đang được thế hệ trẻ ưa chuộng. Các dự án căn hộ bàn giao hoàn thiện nội thất trở thành....",
-    category: "Định giá Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/bannhanhbds.png"
-  },
-  {
-    title: "Bất động sản xanh – Xu hướng mới dẫn đầu cuối năm 2025",
-    subtitle: "Mô hình đô thị xanh, thân thiện môi trường đang trở thành lựa chọn hàng đầu của người mua nhà....",
-    category: "Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/bannhanhbds.png"
-  }
-])
 
-// Dữ liệu tin đã xem gần đây
-const recentlyViewed = ref([
-  {
-    title: 'Công nghệ AI đang thay đổi ngành công nghiệp như thế nào',
-    date: '15/10/2023',
-    image: 'https://picsum.photos/300/200?random=1'
-  },
-  {
-    title: 'Xu hướng du lịch bền vững năm 2023',
-    date: '14/10/2023',
-    image: 'https://picsum.photos/300/200?random=2'
-  },
-  {
-    title: 'Thị trường chứng khoán có dấu hiệu phục hồi',
-    date: '13/10/2023',
-    image: 'https://picsum.photos/300/200?random=3'
-  }
-])
+// Dữ liệu tin tức
+const newsList = ref([])
+const searchResults = ref([]) // Kết quả tìm kiếm
+const recentNewsList = ref(props.recentNews || []) // Tin đã xem gần đây
+
+// Tab control
+const activeTab = ref('recent') // 'search' hoặc 'recent'
+
+// Tính toán có nên hiển thị tab không
+const showTabs = computed(() => {
+  return searchPerformed.value && recentNewsList.value.length > 0
+})
+
+// Phân trang
+const currentPage = ref(1)
+const pageSize = ref(10)
+const totalPages = ref(0)
+const totalElements = ref(0)
+
+// Bộ lọc
+const filter = ref({
+  keyword: '',
+  categoryId: 0,
+  sortBy: '',
+  sortDirection: 'DESC'
+})
+
+// Tìm kiếm
+const searchKeyword = ref('')
 
 // Danh mục đang chọn
-const activeCategoryIndex = ref(0)
+const activeCategoryId = ref(0)
+
+// Format date
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('vi-VN')
+}
+
+// Format thời gian đã xem
+const formatTime = (isoString) => {
+  if (!isoString) return '';
+
+  const date = new Date(isoString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 60) {
+    return `${diffMins} phút trước`;
+  } else if (diffHours < 24) {
+    return `${diffHours} giờ trước`;
+  } else {
+    return `${diffDays} ngày trước`;
+  }
+}
 
 // Hàm cuộn danh mục
 const scrollCategories = (direction) => {
@@ -350,17 +472,229 @@ const checkScrollButtons = () => {
   if (!categoriesNav.value) return
 
   const el = categoriesNav.value
-  // Nếu nội dung không vượt quá chiều rộng => không cần nút
   showArrows.value = el.scrollWidth > el.clientWidth
 }
 
+// Chọn danh mục
+const selectCategory = (categoryId) => {
+  activeCategoryId.value = categoryId
+  filter.value.categoryId = categoryId
+  currentPage.value = 1
+  fetchNews()
+}
+
+// Áp dụng bộ lọc
+const applyFilter = () => {
+  currentPage.value = 1
+  fetchNews()
+}
+
+// Thực hiện tìm kiếm
+const performSearch = async () => {
+  searchPerformed.value = true
+  loading.value = true
+  activeTab.value = 'search' // Chuyển sang tab tìm kiếm
+
+  try {
+    const response = await api.post("/thg/public/news/filter", {
+      keyword: searchKeyword.value,
+      categoryId: null,
+      status: null,
+      featured: null,
+      recentlyCreated: null,
+      recentlyUpdated: null,
+      sorts: filter.value.sortBy ? [{
+        sortBy: filter.value.sortBy,
+        sortDirection: filter.value.sortDirection
+      }] : []
+    }, {
+      params: {
+        page: 0,
+        size: 5
+      }
+    })
+
+    searchResults.value = response.data.content || []
+  } catch (error) {
+    console.error('Lỗi tìm kiếm:', error)
+    searchResults.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+// Lấy tin tức
+const fetchNews = async () => {
+  loading.value = true
+
+  try {
+    const sortArray = []
+
+    if (filter.value.sortBy) {
+      sortArray.push({
+        sortBy: filter.value.sortBy,
+        sortDirection: filter.value.sortDirection
+      })
+    }
+
+    const response = await api.post("/thg/public/news/filter", {
+      keyword: filter.value.keyword,
+      categoryId: filter.value.categoryId === 0 ? null : filter.value.categoryId,
+      status: null,
+      featured: null,
+      recentlyCreated: null,
+      recentlyUpdated: null,
+      sorts: sortArray
+    }, {
+      params: {
+        page: currentPage.value - 1,
+        size: pageSize.value
+      }
+    })
+
+    const data = response.data
+    newsList.value = data.content || []
+    totalPages.value = data.page?.totalPages || 0
+    totalElements.value = data.page?.totalElements || 0
+
+  } catch (error) {
+    console.error('Lỗi lấy tin tức:', error)
+    newsList.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+// Chuyển trang
+const goToPage = (page) => {
+  if (page < 1 || page > totalPages.value) return
+  currentPage.value = page
+  fetchNews()
+}
+
+// Tính toán các trang hiển thị
+const visiblePages = computed(() => {
+  const pages = []
+  const maxVisible = 5
+
+  let start = Math.max(1, currentPage.value - Math.floor(maxVisible / 2))
+  let end = Math.min(totalPages.value, start + maxVisible - 1)
+
+  if (end - start + 1 < maxVisible) {
+    start = Math.max(1, end - maxVisible + 1)
+  }
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
+  }
+
+  return pages
+})
+
+// Khởi tạo dữ liệu từ props
+const initializeFromProps = () => {
+  if (props.news?.content) {
+    newsList.value = props.news.content
+    totalPages.value = props.news.page?.totalPages || 0
+    totalElements.value = props.news.page?.totalElements || 0
+    currentPage.value = (props.news.page?.number || 0) + 1
+    pageSize.value = props.news.page?.size || 10
+  }
+
+  if (props.categories) {
+    categoryList.value = [...props.categories]
+    if (categoryList.value.length > 0) {
+      categoryList.value.unshift({
+        id: 0,
+        name: 'Tất cả',
+        isActive: true
+      })
+    }
+  }
+
+  // Khởi tạo recentNews từ props
+  if (props.recentNews) {
+    recentNewsList.value = props.recentNews
+  }
+}
+
 onMounted(() => {
+  initializeFromProps()
   checkScrollButtons()
   window.addEventListener('resize', checkScrollButtons)
+
+  // Tự động load tin tức nếu chưa có
+  if (newsList.value.length === 0) {
+    fetchNews()
+  }
+})
+
+// Watch props changes
+watch(() => props.news, initializeFromProps)
+watch(() => props.categories, initializeFromProps)
+watch(() => props.recentNews, (newVal) => {
+  recentNewsList.value = newVal || []
 })
 </script>
 
 <style scoped>
+/* Các style hiện tại giữ nguyên... */
+
+/* Tab Container */
+.tab-container {
+  display: flex;
+  border-bottom: 1px solid v-bind('config.colors.border');
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: v-bind('config.typography.weights.medium');
+  color: v-bind('config.colors.primary');
+  transition: v-bind('config.transitions.default');
+  border-bottom: 3px solid transparent;
+  text-align: center;
+}
+
+.tab-btn:hover {
+  color: v-bind('config.colors.active');
+  background-color: rgba(0, 48, 255, 0.05);
+}
+
+.tab-btn.active {
+  color: v-bind('config.colors.active');
+  border-bottom-color: v-bind('config.colors.active');
+  font-weight: v-bind('config.typography.weights.bold');
+}
+
+/* Điều chỉnh tiêu đề khi có tab */
+.tab-container + .recently-viewed-title {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+/* Responsive cho tab */
+@media (max-width: 768px) {
+  .tab-btn {
+    font-size: 14px;
+    padding: 10px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .tab-btn {
+    font-size: 12px;
+    padding: 8px 0;
+  }
+}
+
+/* Các style khác giữ nguyên... */
 .news-container {
   margin: 0;
   padding: 0;
@@ -410,11 +744,10 @@ onMounted(() => {
   gap: v-bind('config.spacing.categoriesGap');
   padding-bottom: 10px;
   width: 100%;
-  scrollbar-width: none; /* Ẩn scrollbar trên Firefox */
-  -ms-overflow-style: none; /* Ẩn scrollbar trên IE và Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-/* Ẩn scrollbar trên Webkit browsers (Chrome, Safari) */
 .categories-nav::-webkit-scrollbar {
   display: none;
 }
@@ -487,10 +820,64 @@ onMounted(() => {
   margin-top: -3px;
 }
 
+/* Bộ lọc */
+.filter-container {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: v-bind('config.borders.radius.medium');
+}
+
+.filter-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.filter-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 12px;
+  border: 1px solid v-bind('config.colors.border');
+  border-radius: v-bind('config.borders.radius.small');
+  font-size: 14px;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border: 1px solid v-bind('config.colors.border');
+  border-radius: v-bind('config.borders.radius.small');
+  font-size: 14px;
+  background-color: white;
+  min-width: 150px;
+}
+
+.filter-btn {
+  padding: 8px 20px;
+  background-color: v-bind('config.colors.primary');
+  color: white;
+  border: none;
+  border-radius: v-bind('config.borders.radius.small');
+  cursor: pointer;
+  font-weight: v-bind('config.typography.weights.medium');
+  transition: v-bind('config.transitions.default');
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-btn:hover {
+  background-color: v-bind('config.colors.active');
+  transform: translateY(-1px);
+}
+
 /* Danh sách tin tức */
 .news-list {
   margin-bottom: 30px;
   width: 100%;
+  min-height: 300px;
 }
 
 .news-item {
@@ -498,6 +885,12 @@ onMounted(() => {
   padding: 20px 0;
   position: relative;
   width: 100%;
+  transition: v-bind('config.transitions.default');
+  cursor: pointer;
+}
+
+.news-item:hover {
+  background-color: rgba(3, 19, 88, 0.05);
 }
 
 .news-image {
@@ -518,6 +911,38 @@ onMounted(() => {
   width: 67%;
 }
 
+.news-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.news-category {
+  font-size: 12px;
+  font-weight: v-bind('config.typography.weights.medium');
+  color: v-bind('config.colors.active');
+  background-color: rgba(0, 48, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.news-dot {
+  color: v-bind('config.colors.text.light');
+  font-size: 10px;
+}
+
+.news-date {
+  font-size: 12px;
+  color: v-bind('config.colors.text.light');
+}
+
+.news-views {
+  font-size: 12px;
+  color: v-bind('config.colors.text.light');
+}
+
 .news-title {
   font-size: v-bind('config.typography.sizes.title');
   font-weight: v-bind('config.typography.weights.bold');
@@ -531,11 +956,20 @@ onMounted(() => {
   color: v-bind('config.colors.text.secondary');
   margin-bottom: 10px;
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.news-date {
-  font-size: v-bind('config.typography.sizes.date');
+.news-footer {
+  margin-top: 10px;
+}
+
+.news-author {
+  font-size: 13px;
   color: v-bind('config.colors.text.light');
+  font-style: italic;
 }
 
 .news-divider {
@@ -547,12 +981,49 @@ onMounted(() => {
   background-color: v-bind('config.colors.border');
 }
 
+/* Loading state */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid v-bind('config.colors.border');
+  border-top: 3px solid v-bind('config.colors.primary');
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-state p {
+  color: v-bind('config.colors.text.secondary');
+}
+
+/* Empty state */
+.empty-state, .empty-search {
+  text-align: center;
+  padding: 40px 20px;
+  color: v-bind('config.colors.text.secondary');
+  font-size: 16px;
+}
+
 /* Phân trang */
 .pagination {
   display: flex;
   justify-content: center;
   gap: 10px;
   width: 100%;
+  margin-top: 30px;
 }
 
 .page-btn {
@@ -564,6 +1035,7 @@ onMounted(() => {
   cursor: pointer;
   font-weight: v-bind('config.typography.weights.medium');
   transition: v-bind('config.transitions.default');
+  min-width: 40px;
 }
 
 .page-btn.active {
@@ -571,12 +1043,18 @@ onMounted(() => {
   color: v-bind('config.colors.white');
 }
 
-.page-btn:hover {
+.page-btn:hover:not(:disabled) {
   background-color: v-bind('config.colors.background.hover');
+  transform: translateY(-1px);
 }
 
-.page-btn.active:hover {
+.page-btn.active:hover:not(:disabled) {
   background-color: v-bind('config.colors.primary');
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Thanh tìm kiếm */
@@ -647,9 +1125,14 @@ onMounted(() => {
 .recently-viewed-item {
   display: flex;
   gap: v-bind('config.spacing.itemGap');
-  padding-bottom: 15px;
+  padding: 15px;
   border-bottom: v-bind('config.borders.width.divider') solid v-bind('config.colors.border');
   width: 100%;
+  cursor: pointer;
+}
+
+.recently-viewed-item:hover {
+  background-color: rgba(3, 19, 88, 0.05);
 }
 
 .recently-viewed-item:last-child {
@@ -680,6 +1163,10 @@ onMounted(() => {
   color: v-bind('config.colors.primary');
   margin-bottom: 5px;
   line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .recently-viewed-date {
@@ -743,6 +1230,15 @@ onMounted(() => {
   .recently-viewed-title {
     font-size: 28px;
   }
+
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-input, .filter-select, .filter-btn {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -774,6 +1270,10 @@ onMounted(() => {
 
   .pagination {
     flex-wrap: wrap;
+  }
+
+  .news-meta {
+    font-size: 11px;
   }
 }
 

@@ -1,5 +1,5 @@
 <template>
-  <section class="success-sales-section" :class="{ 'no-scroll': lightboxVisible }">
+  <section class="success-sales-section">
     <div class="ellipse-bg"></div>
     <div class="container">
       <!-- Phần elip trên cùng -->
@@ -10,7 +10,7 @@
         </div>
 
         <div class="stats-overview">
-          <div class="stat-card" v-for="(stat, index) in stats" :key="stat.title" :id="'stat'+index">
+          <div class="stat-card" v-for="(stat, index) in stats" :key="stat.title" :id="'stat' + index">
             <div class="stat-icon stat-value" v-html="stat.icon"></div>
             <div class="stat-value">{{ stat.value }}</div>
             <div class="stat-title">{{ stat.title }}</div>
@@ -19,272 +19,583 @@
       </div>
 
       <!-- Phần dự án -->
-      <h2 class="project-title">Một số dự án đã bán thành công trong năm 2025</h2>
+      <h2 class="project-title">Một số dự án đã bán thành công trong năm {{ year }}</h2>
 
+      <div class="sold-products-panel">
+        <!-- Bộ lọc nâng cao (chỉ chế độ thẻ) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+          <div
+            v-for="item in landAssets"
+            :key="item.id"
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
+          >
+            <div @click="goToDetail(item.id)" style="cursor: pointer;">
+              <div class="relative w-full overflow-hidden" style="height: 200px">
+                <div class="relative w-full h-full px-3 pt-3 rounded-3 overflow-hidden aspect-[4/3] w-full">
+                  <img
+                    :src="item.imageUrl || 'https://hoangphucphoto.com/wp-content/uploads/2024/11/anh-bds-1.jpg'"
+                    class="w-full rounded-3 h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+                <div class="absolute top-2 mt-3 ms-3 left-2 flex items-center gap-2">
+                  <div
+                    class="px-2 py-1 rounded-full font-semibold flex items-center gap-1 whitespace-nowrap backdrop-blur-sm bg-black/20 ring-1 ring-white/20 shadow-sm text-white"
+                    style="font-size: 10px !important;"
+                  >
+                    <i :class="getAssetTypeIcon(item)" style="font-size: 13px !important;"></i>
+                    {{ getLoai(item) || '—' }}
+                  </div>
+                </div>
+                <div
+                  v-if="'Đã bán' === item.status"
+                  class="absolute top-3 mr- ms-3 right-2 flex items-center gap-2"
+                  style="width: 65px; position: absolute; top: 4px; right: 1px"
+                >
+                  <img src="/imgs/sold-out.png" />
+                </div>
+                <div
+                  v-else-if="'Đã kiểm duyệt' === item.status"
+                  class="absolute top-3 mr-0 ms-3 right-2 flex items-center gap-2"
+                  style="width: 60px; position: absolute; top: 7px; right: 3px"
+                >
+                  <img src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png" />
+                </div>
+              </div>
 
-    </div>
+              <div class="p-3 leading-tight text-slate-800">
+                <div
+                  class="font-semibold text-slate-900 mb-1"
+                  style="
+                    font-size: 15px;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                  "
+                >
+                  {{ formatWardCard(item.diaChi) }}, {{ formatProvinceCard(item.khuVuc) }}
+                </div>
+                <div class="font-semibold text-slate-500" style="font-size: 13px">
+                  Ngày bán: {{ formatDate(item.capNhatNgay) }}
+                </div>
 
-    <!-- Lightbox Overlay -->
-    <div class="lightbox-overlay" v-if="lightboxVisible" @click="closeLightbox">
-      <div class="lightbox-container" @click.stop>
-        <!-- Nút đóng -->
-        <button class="lightbox-close" @click="closeLightbox">
-          <i class="fa-solid fa-times"></i>
-        </button>
+                <div class="flex items-center justify-between mt-1">
+                  <div style="color: #dc2626; font-weight: 700; font-size: 16px">
+                    {{ formatMoneyVN(item.giaBan) }}
+                    <div class="inline-flex items-center gap-1 text-[12px] text-slate-500 font-semibold">
+                      <span>H.hồng:</span>
+                      <DotLottieVue
+                        src="https://lottie.host/a94085b1-dc72-4753-88d0-4bdfad75c588/NgBvXtuOwE.lottie"
+                        autoplay
+                        loop
+                        style="width: 20px; height: 26px; display: inline-block; position: relative; top:-5px;"
+                      />
+                      <span class="font-semibold text-blue-700 text-[14px]">
+                        {{ item.phiMoiGioi != null ? item.phiMoiGioi + '%' : '-' }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <div
+                      class="p-2.5 py-0.5 rounded-full text-white shadow-sm"
+                      :class="item.donVi === 'THG' ? 'bg-[#6A0DAD]' : 'bg-[#0057D9]'"
+                      style="font-weight: 550; font-size: 12.5px !important;"
+                    >
+                      {{ item.donVi }}
+                    </div>
+                    <span
+                      class="px-2 py-0.5 rounded-full"
+                      :class="badgeClass(item.loaiMH)"
+                      style="font-weight: 550; font-size: 12.5px !important;"
+                    >
+                      {{ item.loaiMH }}
+                    </span>
+                  </div>
+                </div>
 
-        <!-- Ảnh lớn -->
-        <div class="lightbox-image-container">
-          <img
-              class="lightbox-image"
-              :src="getImageUrl(getCurrentImage(lightboxProject).src)"
-              :alt="lightboxProject.name"
-          />
-        </div>
+                <div class="flex items-center justify-between mt-2 text-[14px]">
+                  <span class="font-semibold text-slate-700 truncate max-w-[55%]">
+                    <template v-if="!item.giaDinhGia">
+                      Chưa định giá
+                    </template>
+                    <template v-else-if="item.giaDinhGia == -1.1">
+                      *********** (Giá định)
+                    </template>
+                    <template v-else>
+                      {{ formatMoneyVN(item.giaDinhGia) }} (Giá định)
+                    </template>
+                  </span>
 
-        <!-- Nút điều hướng -->
-        <button class="lightbox-nav lightbox-prev" @click="prevImage(lightboxProject)" v-if="lightboxProject.images.length > 1">
-          <i class="fa-solid fa-chevron-left"></i>
-        </button>
-        <button class="lightbox-nav lightbox-next" @click="nextImage(lightboxProject)" v-if="lightboxProject.images.length > 1">
-          <i class="fa-solid fa-chevron-right"></i>
-        </button>
+                  <div class="flex items-center gap-3 text-slate-500 text-[12px] shrink-0">
+                    <div class="flex items-center gap-1 font-medium">
+                      <span class="font-medium text-slate-700">
+                        {{ item.soLuotXem ?? 0 }}
+                      </span>đã xem
+                    </div>
+                    <div class="flex items-center gap-1 font-medium">
+                      <span class="font-medium text-slate-700">
+                        {{ item.soLuotThich ?? 0 }}
+                      </span>đã thích
+                    </div>
+                  </div>
+                </div>
 
-        <!-- Thông tin và thumbnails -->
-        <div class="lightbox-info">
-          <div class="lightbox-text">
-            <h3>{{ lightboxProject.name }}</h3>
-            <p>{{ lightboxProject.service }} - {{ getPrice(lightboxProject.price) }}</p>
-          </div>
-          <div class="lightbox-thumbnails" v-if="lightboxProject.images.length > 1">
-            <div
-                v-for="(img, index) in lightboxProject.images"
-                :key="index"
-                class="thumbnail-item"
-                :class="{ active: getCurrentImageIndex(lightboxProject) === index }"
-                @click="goToImage(lightboxProject, index)"
-            >
-              <img :src="getImageUrl(img.src)" :alt="lightboxProject.name" />
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                  <div class="p-2 bg-blue-50 rounded-lg">
+                    <div class="text-[12px] text-slate-500 font-semibold">Người bán</div>
+                    <div class="text-[14px] font-semibold text-slate-800 mt-0.5 truncate">
+                      {{ shortOwnerName(item.tenChuNha) || '—' }}
+                    </div>
+                  </div>
+                  <div class="p-2 bg-slate-50 rounded-lg">
+                    <div class="text-[12px] text-slate-500 font-semibold">Liên hệ</div>
+                    <div class="text-[14px] font-semibold text-blue-700 mt-0.5 flex items-center gap-1">
+                      <i class="fa-solid fa-phone text-blue-500"></i>
+                      {{ item.soDienThoai || '—' }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 mt-2 text-start">
+                  <div>
+                    <div class="text-[12px] text-slate-500 font-semibold">Diện tích</div>
+                    <div class="font-bold">{{ item.dtcn }}m²</div>
+                  </div>
+                  <div>
+                    <div class="text-[12px] text-slate-500 font-semibold">Vị trí</div>
+                    <div class="text-slate-800 text-[13px] truncate font-bold">{{ item.viTri || '—' }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 px-3 pb-3">
+              <button
+                @click="goToDetail(item.id)"
+                class="flex-1 py-2.5 bg-gradient-to-r from-slate-900
+                 to-black text-white rounded-full text-[14px] font-semibold flex items-center justify-center
+                 gap-2 hover:opacity-90 transition-all"
+              >
+                <i class="fa-regular fa-eye text-sm"></i>
+                Xem chi tiết
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- Counter -->
-        <div class="lightbox-counter" v-if="lightboxProject.images.length > 1">
-          {{ getCurrentImageIndex(lightboxProject) + 1 }} / {{ lightboxProject.images.length }}
+        <div v-if="!landAssets.length" class="empty-state">
+          <p>Chưa có dữ liệu phù hợp với bộ lọc hiện tại.</p>
         </div>
+
+        <div class="w-full flex flex-col gap-3 p-3">
+
+          <!-- Hàng trên: Chọn năm + Pagination -->
+          <div class="w-full flex flex-wrap items-center justify-center md:justify-between gap-3">
+
+            <!-- Chọn năm -->
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-calendar-days text-slate-500"></i>
+              <select
+                  v-model="year"
+                  class="form-select w-auto rounded-lg border-slate-300
+               text-sm font-semibold
+               focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+              >
+                <option
+                    v-for="y in [currentYear, currentYear - 1, currentYear - 2, currentYear - 3]"
+                    :key="y"
+                    :value="y"
+                >
+                  Năm {{ y }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex items-center gap-1 justify-center">
+
+              <button
+                  @click="goToPage(0)"
+                  :disabled="page === 0"
+                  class="p-2 rounded-lg text-slate-500
+               hover:text-violet-600
+               disabled:opacity-40 disabled:cursor-not-allowed
+               transition-all"
+              >
+                <i class="fa-solid fa-angles-left"></i>
+              </button>
+
+              <button
+                  @click="goToPage(page - 1)"
+                  :disabled="page === 0"
+                  class="p-2 rounded-lg text-slate-500
+               hover:text-violet-600
+               disabled:opacity-40 disabled:cursor-not-allowed
+               transition-all"
+              >
+                <i class="fa-solid fa-angle-left"></i>
+              </button>
+
+              <!-- Badge trang -->
+              <div
+                  class="px-4 py-2 bg-gradient-to-r
+               from-violet-600 to-purple-600
+               text-white rounded-xl shadow-md"
+              >
+        <span class="text-sm font-semibold">
+          Trang {{ page + 1 }} / {{ totalPages }}
+        </span>
+              </div>
+
+              <button
+                  @click="goToPage(page + 1)"
+                  :disabled="page >= totalPages - 1"
+                  class="p-2 rounded-lg text-slate-500
+               hover:text-violet-600
+               disabled:opacity-40 disabled:cursor-not-allowed
+               transition-all"
+              >
+                <i class="fa-solid fa-angle-right"></i>
+              </button>
+
+              <button
+                  @click="goToPage(totalPages - 1)"
+                  :disabled="page >= totalPages - 1"
+                  class="p-2 rounded-lg text-slate-500
+               hover:text-violet-600
+               disabled:opacity-40 disabled:cursor-not-allowed
+               transition-all"
+              >
+                <i class="fa-solid fa-angles-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Hàng dưới: text hiển thị -->
+          <div class="text-sm text-slate-600 font-medium text-center">
+            Hiển thị
+            <span class="font-semibold text-slate-800">
+      {{ displayedRangeEnd }}
+    </span>
+            /
+            <span class="font-semibold text-slate-800">
+      {{ totalRecords }}
+    </span>
+            bất động sản
+          </div>
+
+        </div>
+
+
       </div>
     </div>
   </section>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import addressData from '/src/assets/js/address.json';
+import api from '/src/api/api.js';
+import { useAuthStore } from '/src/stores/authStore.js';
 
 const props = defineProps({
   title: String
 });
+// 👉 năm hiện tại
+const currentYear = new Date().getFullYear();
+const year = ref(currentYear);
 
-const hoverProject = ref(null)
-const lightboxVisible = ref(false)
-const lightboxProject = ref(null)
+function shortOwnerName(fullName) {
+  if (!fullName || typeof fullName !== 'string') return '—';
 
-// Định nghĩa dữ liệu soldProjects
-const soldProjects = [
-  {
-    name: "Anh Nhân - Quận 9",
-    price: 1.15,
-    service: "Bán nhanh 30 ngày",
-    viewCount: 17,
-    offerCount: 11,
-    images: [
-      { src: "nhan-q9-main.jpg", isMain: true },
-      { src: "nhan-q9-1.jpg", isMain: false },
-      { src: "nhan-q9-2.jpg", isMain: false }
-    ]
-  },
-  {
-    name: "Chị Thủy - Vĩnh Long",
-    price: 6,
-    service: "Bán nhanh 30 ngày",
-    viewCount: 9,
-    offerCount: 5,
-    images: [
-      { src: "thuy-vinhlong-main.jpg", isMain: true },
-      { src: "thuy-vinhlong-1.jpg", isMain: false },
-      { src: "thuy-vinhlong-2.jpg", isMain: false },
-      { src: "thuy-vinhlong-3.jpg", isMain: false },
-      { src: "thuy-vinhlong-4.jpg", isMain: false },
-    ]
-  },
-  {
-    name: "Chị Nguyên - Đồng Tháp",
-    price: 4.5,
-    service: "Bán nhanh 30 ngày",
-    viewCount: 11,
-    offerCount: 6,
-    images: [
-      { src: "nguyen-dongthap-main.jpg", isMain: true },
-      { src: "nguyen-dongthap-1.jpg", isMain: false },
-      { src: "nguyen-dongthap-2.jpg", isMain: false },
-      { src: "nguyen-dongthap-3.jpg", isMain: false },
-      { src: "nguyen-dongthap-4.jpg", isMain: false },
-      { src: "nguyen-dongthap-5.jpg", isMain: false },
-    ]
-  },
-  {
-    name: "Anh Phước - Dĩ An",
-    price: 5.2,
-    service: "Giải pháp 3-6 tháng",
-    viewCount: 15,
-    offerCount: 10,
-    images: [
-      { src: "phuoc-dian-main.jpg", isMain: true },
-      { src: "phuoc-dian-1.jpg", isMain: false },
-      { src: "phuoc-dian-2.jpg", isMain: false },
-      { src: "phuoc-dian-3.jpg", isMain: false },
-      { src: "phuoc-dian-4.jpg", isMain: false },
-      { src: "phuoc-dian-5.jpg", isMain: false },
-    ]
-  },
-  {
-    name: "Chị Hà - Quận 12",
-    price: 7,
-    service: "Giải pháp 3-6 tháng",
-    viewCount: 10,
-    offerCount: 4,
-    images: [
-      { src: "ha-q12-main.jpg", isMain: true },
-      { src: "ha-q12-1.jpg", isMain: false },
-      { src: "ha-q12-2.jpg", isMain: false },
-      { src: "ha-q12-3.jpg", isMain: false },
-      { src: "ha-q12-4.jpg", isMain: false },
-      { src: "ha-q12-5.jpg", isMain: false }
-    ]
-  },
-  {
-    name: "Chú Thanh - Bình Dương",
-    price: 10,
-    service: "Giải pháp 3-6 tháng",
-    viewCount: 12,
-    offerCount: 7,
-    images: [
-      { src: "thanh-binhduong-main.jpg", isMain: true },
-      { src: "thanh-binhduong-1.jpg", isMain: false },
-      { src: "thanh-binhduong-2.jpg", isMain: false }
-    ]
-  }
-];
+  const MAX_LEN = 'Nguyễn Khánh Linh'.length; // mốc chuẩn
+  if (fullName.length <= MAX_LEN) return fullName;
 
-const getPrice = (price) => {
-  return price + " tỷ VNĐ";
+  const parts = fullName.trim().split(/\s+/);
+
+  // Nếu không đủ 3 chữ thì khỏi rút gọn
+  if (parts.length < 3) return fullName;
+
+  const firstInitial = parts[0][0]?.toUpperCase() || '';
+  const secondInitial = parts[1][0]?.toUpperCase() || '';
+
+  const restName = parts.slice(2).join(' ');
+
+  return `${firstInitial}${secondInitial}. ${restName}`;
 }
 
-// Thêm currentImageIndex cho mỗi project
-const projectsWithIndex = ref(soldProjects.map(project => ({
-  ...project,
-  currentImageIndex: 0
-})))
 
 const stats = ref([
   { icon: '<i class="fa-solid fa-house"></i>', value: '1,250+', title: 'Bất động sản đã bán' },
   { icon: '<i class="fa-solid fa-star"></i>', value: '4.9/5', title: 'Đánh giá từ khách hàng' },
   { icon: '<i class="fa-solid fa-users"></i>', value: '2,500+', title: 'Khách hàng hài lòng' },
   { icon: '<i class="fa-solid fa-trophy"></i>', value: '15+', title: 'Giải thưởng uy tín' }
-])
+]);
 
-// Tính toán mức độ quan tâm dựa trên lượt xem và đề nghị
-const calculateInterestLevel = (project) => {
-  const maxViews = Math.max(...soldProjects.map(p => p.viewCount));
-  const maxOffers = Math.max(...soldProjects.map(p => p.offerCount));
+const landAssets = ref([]);
+const totalRecords = ref(0);
 
-  const viewRatio = (project.viewCount / maxViews) * 50;
-  const offerRatio = (project.offerCount / maxOffers) * 50;
+const isFilterMobile = ref(false);
+const showFilterPanel = ref(true);
 
-  return Math.min(Math.round(viewRatio + offerRatio), 100);
+const page = ref(0);
+const pageSize = ref(8);
+
+const totalPages = computed(() => Math.max(Math.ceil(totalRecords.value / pageSize.value) || 1, 1));
+const displayedRangeStart = computed(() => (totalRecords.value === 0 ? 0 : page.value * pageSize.value + 1));
+const displayedRangeEnd = computed(() => Math.min((page.value + 1) * pageSize.value, totalRecords.value));
+
+
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getFullYear()).slice(-2)}`;
+};
+
+const formatWardCard = (addressDetail) => {
+  const raw = addressDetail || '';
+  const parts = raw.split('/!!');
+  return parts[1]?.trim() || '';
+};
+
+const formatProvinceCard = (province) => {
+  if (typeof province !== 'string') return province || '';
+  return province;
+};
+
+const formatProvinceShort = (province) => {
+  if (!province || typeof province !== 'string') return province || '';
+  return province.replace(/^Thành phố\s+/i, 'TP.').replace(/^Tỉnh\s+/i, 'T.');
+};
+
+const getAssetType = (item) => {
+  const dtcnValue = parseFloat(item.dtcn) || 0;
+  const ketCau = (item.ketCau || '').toLowerCase();
+
+  if (item.loaiTaiSan) {
+    const map = {
+      NHA: 'house',
+      DAT: 'land',
+      DATLON: 'land-large'
+    };
+
+    if (map[item.loaiTaiSan]) {
+      return map[item.loaiTaiSan];
+    }
+  }
+
+  const houseKeywords = [
+    'lầu', 'trệt', 'tầng', 'hầm', 'gác',
+    'nhà cấp', 'cấp 1', 'cấp 2', 'cấp 3', 'cấp 4',
+    'biệt thự', 'villa', 'shophouse', 'townhouse', 'nhà',
+    'chung cư', 'căn hộ', 'chcc', 'studio',
+    'condotel', 'officetel', 'apartment', 'can ho',
+    'chung cu', 'tower', 'block'
+  ];
+
+  if (houseKeywords.some((keyword) => ketCau.includes(keyword))) {
+    return 'house';
+  }
+
+  if (dtcnValue > 1000) return 'land-large';
+
+  return 'land';
+};
+
+const getLoai = (item) => {
+  const dtcnValue = parseFloat(item.dtcn) || 0;
+  const structure = (item.structure || '').toLowerCase();
+
+  if (item.loaiTaiSan) {
+    const map = {
+      NHA: 'Nhà',
+      DAT: 'Đất',
+      DATLON: 'Đất lớn'
+    };
+
+    if (map[item.loaiTaiSan]) {
+      return map[item.loaiTaiSan];
+    }
+  }
+
+  const houseKeywords = [
+    'lầu', 'trệt', 'tầng', 'hầm', 'gác',
+    'nhà cấp', 'cấp 1', 'cấp 2', 'cấp 3', 'cấp 4',
+    'biệt thự', 'villa', 'shophouse', 'townhouse', 'nhà',
+    'chung cư', 'căn hộ', 'chcc', 'studio',
+    'condotel', 'officetel', 'apartment', 'can ho',
+    'chung cu', 'tower', 'block'
+  ];
+
+  if (houseKeywords.some((keyword) => structure.includes(keyword))) {
+    return 'Nhà';
+  }
+
+  if (dtcnValue > 10000) return 'Đất lớn';
+
+  return 'Đất';
+};
+
+const getAssetTypeIcon = (item) => {
+  const type = getAssetType(item);
+  switch (type) {
+    case 'house':
+      return 'fa-solid fa-house-chimney';
+    case 'land-large':
+      return 'fa-solid fa-mountain-city';
+    default:
+      return 'fa-solid fa-map-location-dot';
+  }
+};
+
+const badgeClass = (code) => {
+  const map = {
+    BN30N: 'bg-green-500 text-white font-semibold ',
+    HTT: 'bg-yellow-500 text-white font-semibold',
+    HOPTAC: 'bg-orange-500 text-white font-semibold'
+  };
+
+  return map[code] || 'bg-slate-400 text-white font-semibold';
+};
+
+function formatMoneyVN(value) {
+  if (value == null || isNaN(value)) return '0';
+  const num = Number(value);
+
+  if (num < 1_000_000) {
+    return num.toLocaleString('vi-VN');
+  }
+
+  if (num < 1_000_000_000) {
+    const trieu = num / 1_000_000;
+    return `${trieu.toFixed(trieu % 1 === 0 ? 0 : 1)} triệu`;
+  }
+
+  const ty = num / 1_000_000_000;
+  return `${ty.toFixed(ty % 1 === 0 ? 0 : 2)} tỷ`;
 }
 
-// Lấy URL ảnh
-const getImageUrl = (filename) => {
-  // Giả sử ảnh được lưu trong thư mục /imgs/
-  return `/imgs/${filename}`;
+const goToPage = (p) => {
+  if (p < 0) p = 0;
+  if (p >= totalPages.value) p = totalPages.value - 1;
+  page.value = p;
+};
+
+const updatePageSize = () => {
+  if (pageSize.value < 1) pageSize.value = 1;
+  page.value = 0;
+};
+
+function debounce(fn, delay = 300) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), delay);
+  };
 }
 
-// Lấy ảnh hiện tại của project
-const getCurrentImage = (project) => {
-  const projectWithIndex = projectsWithIndex.value.find(p => p.name === project.name);
-  return projectWithIndex.images[projectWithIndex.currentImageIndex];
-}
+watch([page, year], () => {
+  fetchFilteredAssets();
+});
 
-// Lấy index ảnh hiện tại
-const getCurrentImageIndex = (project) => {
-  const projectWithIndex = projectsWithIndex.value.find(p => p.name === project.name);
-  return projectWithIndex.currentImageIndex;
-}
 
-// Chuyển đến ảnh tiếp theo
-const nextImage = (project) => {
-  const projectWithIndex = projectsWithIndex.value.find(p => p.name === project.name);
-  projectWithIndex.currentImageIndex = (projectWithIndex.currentImageIndex + 1) % projectWithIndex.images.length;
-}
+async function fetchFilteredAssets() {
+  try {
+    const res = await api.post(
+        '/user.thg/product/user/da-ban',
+        null,
+        {
+          params: {
+            pageNo: page.value,
+            year: year.value
+          }
+        }
+    );
 
-// Chuyển đến ảnh trước
-const prevImage = (project) => {
-  const projectWithIndex = projectsWithIndex.value.find(p => p.name === project.name);
-  projectWithIndex.currentImageIndex = projectWithIndex.currentImageIndex === 0
-      ? projectWithIndex.images.length - 1
-      : projectWithIndex.currentImageIndex - 1;
-}
+    landAssets.value = Array.isArray(res.data.content)
+        ? res.data.content.map(item => ({
+          ...item,
+          imageUrl: item.imageUrl
+              ? item.imageUrl
+              : 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg'
+        }))
+        : [];
 
-// Chuyển đến ảnh cụ thể
-const goToImage = (project, index) => {
-  const projectWithIndex = projectsWithIndex.value.find(p => p.name === project.name);
-  projectWithIndex.currentImageIndex = index;
-}
+    totalRecords.value = res.data.totalElements || 0;
 
-// Mở lightbox
-const openLightbox = (project) => {
-  lightboxProject.value = project;
-  lightboxVisible.value = true;
-  document.body.style.overflow = 'hidden';
-}
-
-// Đóng lightbox
-const closeLightbox = () => {
-  lightboxVisible.value = false;
-  lightboxProject.value = null;
-  document.body.style.overflow = '';
-}
-
-// Xử lý sự kiện keyboard
-const handleKeydown = (event) => {
-  if (!lightboxVisible.value || !lightboxProject.value) return;
-
-  switch(event.key) {
-    case 'Escape':
-      closeLightbox();
-      break;
-    case 'ArrowLeft':
-      prevImage(lightboxProject.value);
-      break;
-    case 'ArrowRight':
-      nextImage(lightboxProject.value);
-      break;
+    const maxPage = Math.max(
+        Math.ceil(totalRecords.value / pageSize.value) - 1,
+        0
+    );
+    if (page.value > maxPage) {
+      page.value = maxPage;
+    }
+  } catch (err) {
+    console.error('Lỗi tải dữ liệu đã bán:', err);
   }
 }
 
-// Thêm event listener cho keyboard
-onMounted(() => {
-  document.addEventListener('keydown', handleKeydown);
+const debouncedFilter = debounce(fetchFilteredAssets, 300);
+
+
+watch([page, pageSize], () => {
+  debouncedFilter();
 });
 
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeydown);
-});
+const auth = useAuthStore();
+const router = useRouter();
 
-const viewDetails = (project) => {
-  console.log(`Xem chi tiết dự án: ${project.name}`);
-  // Có thể thêm logic điều hướng hoặc hiển thị modal chi tiết ở đây
+const goToDetail = (id) => {
+  router.push(`/san-pham-thien-ha/${id}`);
+};
+
+async function toggleLove(item) {
+  localStorage.setItem('redirectAfterLogin', '/san-pham-thien-ha');
+  if (!auth.accessToken) {
+    router.push({
+      path: '/dang-nhap'
+    });
+    return;
+  }
+
+  item.daThich = !item.daThich;
+  item.soLuotThich = item.daThich ? item.soLuotThich + 1 : item.soLuotThich - 1;
+
+  try {
+    await api.post('/user.thg/product/user/love/toggle', null, {
+      params: {
+        idAsset: item.id
+      }
+    });
+  } catch (e) {
+    item.daThich = !item.daThich;
+    item.soLuotThich = item.daThich ? item.soLuotThich + 1 : item.soLuotThich - 1;
+  }
 }
+
+const updateViewportMode = () => {
+  const w = typeof window !== 'undefined' ? window.innerWidth : 0;
+  if (w < 736) {
+    isFilterMobile.value = true;
+    showFilterPanel.value = false;
+  } else {
+    isFilterMobile.value = false;
+    showFilterPanel.value = true;
+  }
+};
+
+onMounted(() => {
+  updateViewportMode();
+  fetchFilteredAssets();
+  window.addEventListener('resize', updateViewportMode);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateViewportMode);
+});
 </script>
 
 <style scoped>
@@ -295,21 +606,15 @@ const viewDetails = (project) => {
   padding: 0 20px 60px;
 }
 
-.success-sales-section.no-scroll {
-  overflow: hidden;
-  height: 100vh;
-}
-
 .container {
   max-width: 1400px;
   margin: 0 auto;
   position: relative;
 }
 
-/* Phần elip */
 .ellipse-section {
   position: relative;
-  margin-bottom: 100px;
+  margin-bottom: 80px;
   padding-top: 60px;
 }
 
@@ -326,7 +631,7 @@ const viewDetails = (project) => {
 
 .section-header {
   text-align: center;
-  margin-bottom: 180px;
+  margin-bottom: 160px;
   position: relative;
   z-index: 2;
 }
@@ -334,6 +639,10 @@ const viewDetails = (project) => {
 .project-title {
   text-align: center;
   color: #031358;
+  margin-top: 100px;
+  margin-bottom: 50px;
+  font-size: 42px;
+  font-weight: 700;
 }
 
 .section-title {
@@ -351,7 +660,6 @@ const viewDetails = (project) => {
   margin: 0 auto;
 }
 
-/* Stats nằm trên viền elip */
 #stat0, #stat3 {
   transform: translateY(20px);
 }
@@ -404,377 +712,101 @@ const viewDetails = (project) => {
   font-weight: 500;
 }
 
-/* Phần dự án */
-.projects-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
-  margin-bottom: 60px;
-  padding-top: 40px;
-}
-
-.project-card {
-  background: white;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(3, 19, 88, 0.08);
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-  border: 1px solid rgba(3, 19, 88, 0.05);
-}
-
-.project-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(3, 19, 88, 0.15);
-}
-
-.project-image {
+.sold-products-panel {
   position: relative;
-  height: 300px;
-  overflow: hidden;
-  cursor: pointer;
+  z-index: 5;
 }
 
-.project-image .main-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.project-card:hover .project-image .main-image {
-  transform: scale(1.05);
-}
-
-.sold-badge {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  z-index: 3;
-  width: 70px;
-}
-
-/* Navigation buttons */
-.image-nav-buttons {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 15px;
-  z-index: 2;
-}
-
-.nav-btn {
-  background: rgba(255, 255, 255, 0.8);
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: #031358;
-  font-size: 1.2rem;
-}
-
-.nav-btn:hover {
-  background: white;
-  transform: scale(1.1);
-}
-
-.image-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to bottom, transparent 60%, rgba(3, 19, 88, 0.7));
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  z-index: 1;
-}
-
-.image-overlay.active {
-  opacity: 1;
-}
-
-.project-info {
-  padding: 25px;
-}
-
-.project-name {
-  font-size: 1.4rem;
-  color: #031358;
-  margin-bottom: 8px;
-  font-weight: 700;
-}
-
-.project-location {
-  color: #5a6ab1;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.project-details {
-  margin-bottom: 20px;
-}
-
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(3, 19, 88, 0.1);
-}
-
-.detail-label {
-  color: #5a6ab1;
-  font-weight: 500;
-}
-
-.detail-value {
-  color: #031358;
-  font-weight: 600;
-}
-
-.progress-info {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.progress-label {
-  color: #5a6ab1;
-  font-size: 0.9rem;
-  flex: 1;
-}
-
-.progress-bar {
-  flex: 2;
-  height: 8px;
-  background: #e0e5ff;
-  border-radius: 10px;
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #031358, #2d44b0);
-  border-radius: 10px;
-  transition: width 1s ease;
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }
 
-.progress-percent {
-  color: #031358;
-  font-weight: 700;
-  font-size: 0.9rem;
-  min-width: 40px;
-}
-
-/* Nút xem chi tiết */
-.detail-button {
-  width: 100%;
-  background: linear-gradient(135deg, #031358, #1a2f8a);
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 20px;
-  box-shadow: 0 4px 10px rgba(3, 19, 88, 0.2);
-  min-width: 120px;
-}
-
-.detail-button:hover {
-  background: linear-gradient(135deg, #1a2f8a, #031358);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(3, 19, 88, 0.3);
-}
-
-/* Lightbox Overlay */
-.lightbox-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.9);
+.filter-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-  backdrop-filter: blur(5px);
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.lightbox-container {
-  position: relative;
-  max-width: 90vw;
-  max-height: 90vh;
-  background: white;
-  border-radius: 15px;
-  overflow: hidden;
+.filter-item {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .filter-item {
+    width: calc(50% - 12px);
+  }
+}
+
+@media (min-width: 768px) {
+  .filter-item {
+    width: calc(25% - 12px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .filter-row {
+    flex-wrap: nowrap;
+  }
+
+  .filter-item {
+    flex: 1;
+    min-width: 100px;
+  }
+}
+
+.filter-header {
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  gap: 12px;
 }
 
-.lightbox-close {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  border: none;
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
+.filter-title-wrap {
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 10;
-  font-size: 1.3rem;
-  transition: all 0.3s ease;
 }
 
-.lightbox-close:hover {
-  background: rgba(0, 0, 0, 0.9);
-  transform: scale(1.1);
-}
-
-.lightbox-image-container {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f8f9fa;
-  min-height: 60vh;
-  max-height: 70vh;
-}
-
-.lightbox-image {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-/* Lightbox Navigation */
-.lightbox-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.7);
+.filter-title {
+  font-weight: 700;
+  font-size: 20px;
   color: white;
-  border: none;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1.5rem;
-  transition: all 0.3s ease;
-  z-index: 5;
+  text-shadow: 0 0 6px rgba(10, 10, 10, 0.9);
 }
 
-.lightbox-nav:hover {
-  background: rgba(0, 0, 0, 0.9);
-  transform: translateY(-50%) scale(1.1);
-}
-
-.lightbox-prev {
-  left: 20px;
-}
-
-.lightbox-next {
-  right: 20px;
-}
-
-/* Lightbox Info */
-.lightbox-info {
-  padding: 20px;
-  background: white;
-  border-top: 1px solid #eaeaea;
-}
-
-.lightbox-text h3 {
-  color: #031358;
-  margin-bottom: 5px;
-  font-size: 1.3rem;
-}
-
-.lightbox-text p {
-  color: #5a6ab1;
-  margin: 0;
-}
-
-.lightbox-thumbnails {
-  display: flex;
-  gap: 10px;
-  margin-top: 15px;
-  overflow-x: auto;
-  padding: 5px 0;
-}
-
-.thumbnail-item {
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
-  overflow: hidden;
-  cursor: pointer;
-  opacity: 0.6;
-  transition: all 0.3s ease;
-  flex-shrink: 0;
-  border: 2px solid transparent;
-}
-
-.thumbnail-item.active {
-  opacity: 1;
-  border-color: #031358;
-}
-
-.thumbnail-item:hover {
-  opacity: 1;
-}
-
-.thumbnail-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Lightbox Counter */
-.lightbox-counter {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 8px 15px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  z-index: 5;
-}
-
-/* Responsive */
-@media (max-width: 1200px) {
-  .projects-grid {
-    grid-template-columns: repeat(3, 1fr);
+@media (min-width: 768px) {
+  .filter-header {
+    flex-direction: row;
+    align-items: center;
   }
+
+  .filter-title {
+    font-size: 22px;
+  }
+}
+
+.label-glow,
+.icon-glow {
+  text-shadow:
+    0 0 6px rgba(9, 9, 9, 0.9),
+    0 0 12px rgba(10, 10, 10, 0.8);
+}
+
+.empty-state {
+  padding: 20px;
+  text-align: center;
+  background: white;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  color: #475569;
+  margin-bottom: 16px;
 }
 
 @media (max-width: 1024px) {
@@ -789,10 +821,6 @@ const viewDetails = (project) => {
 
   #stat0, #stat1, #stat2, #stat3 {
     transform: translateY(0);
-  }
-
-  .projects-grid {
-    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -823,48 +851,6 @@ const viewDetails = (project) => {
   .stat-card {
     position: static;
   }
-
-  .projects-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .progress-info {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .progress-bar {
-    width: 100%;
-  }
-
-  .lightbox-container {
-    max-width: 95vw;
-    max-height: 95vh;
-  }
-
-  .lightbox-nav {
-    width: 50px;
-    height: 50px;
-    font-size: 1.2rem;
-  }
-
-  .lightbox-prev {
-    left: 10px;
-  }
-
-  .lightbox-next {
-    right: 10px;
-  }
-
-  .lightbox-thumbnails {
-    gap: 8px;
-  }
-
-  .thumbnail-item {
-    width: 50px;
-    height: 50px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -874,37 +860,6 @@ const viewDetails = (project) => {
 
   .section-header {
     margin-bottom: 100px;
-  }
-
-  .image-nav-buttons {
-    padding: 0 10px;
-  }
-
-  .nav-btn {
-    width: 35px;
-    height: 35px;
-    font-size: 1rem;
-  }
-
-  .lightbox-image-container {
-    min-height: 50vh;
-  }
-
-  .lightbox-info {
-    padding: 15px;
-  }
-
-  .lightbox-text h3 {
-    font-size: 1.1rem;
-  }
-
-  .lightbox-thumbnails {
-    gap: 5px;
-  }
-
-  .thumbnail-item {
-    width: 45px;
-    height: 45px;
   }
 }
 </style>

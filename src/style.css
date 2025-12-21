@@ -1,83 +1,635 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* style.css */
+/* Global styles - nhưng được scoped bằng wrapper class */
+.rich-text-editor-wrapper .tiptap:first-child {
+  margin-top: 0;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+/* List styles */
+.rich-text-editor-wrapper .tiptap ul,
+.rich-text-editor-wrapper .tiptap ol {
+  padding: 0 1rem;
+  margin: 1.25rem 1rem 1.25rem 0.4rem;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+.rich-text-editor-wrapper .tiptap ul {
+  list-style: disc;
 }
 
-h1 {
-  font-size: 3.2em;
+.rich-text-editor-wrapper .tiptap ol {
+  list-style: decimal;
+}
+
+.rich-text-editor-wrapper .tiptap ul li p,
+.rich-text-editor-wrapper .tiptap ol li p {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+/* Heading styles */
+.rich-text-editor-wrapper .tiptap h1,
+.rich-text-editor-wrapper .tiptap h2,
+.rich-text-editor-wrapper .tiptap h3,
+.rich-text-editor-wrapper .tiptap h4,
+.rich-text-editor-wrapper .tiptap h5,
+.rich-text-editor-wrapper .tiptap h6 {
   line-height: 1.1;
+  margin-top: 2.5rem;
+  text-wrap: pretty;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.rich-text-editor-wrapper .tiptap h1,
+.rich-text-editor-wrapper .tiptap h2 {
+  margin-top: 3.5rem;
+  margin-bottom: 1.5rem;
 }
 
-.card {
-  padding: 2em;
+.rich-text-editor-wrapper .tiptap h1 {
+  font-size: 1.4rem;
 }
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+.rich-text-editor-wrapper .tiptap h2 {
+  font-size: 1.2rem;
+}
+
+.rich-text-editor-wrapper .tiptap h3 {
+  font-size: 1.1rem;
+}
+
+.rich-text-editor-wrapper .tiptap h4,
+.rich-text-editor-wrapper .tiptap h5,
+.rich-text-editor-wrapper .tiptap h6 {
+  font-size: 1rem;
+}
+
+/* Code and preformatted text styles */
+.rich-text-editor-wrapper .tiptap code {
+  background-color: var(--purple-light);
+  border-radius: 0.4rem;
+  color: var(--black);
+  font-size: 0.85rem;
+  padding: 0.25em 0.3em;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.rich-text-editor-wrapper .tiptap pre {
+  background: var(--black);
+  border-radius: 0.5rem;
+  color: var(--white);
+  font-family: 'JetBrainsMono', monospace;
+  margin: 1.5rem 0;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.rich-text-editor-wrapper .tiptap pre code {
+  background: none;
+  color: inherit;
+  font-size: 0.8rem;
+  padding: 0;
+  white-space: pre-wrap;
+}
+
+.rich-text-editor-wrapper .tiptap blockquote {
+  border-left: 3px solid var(--gray-3);
+  margin: 1.5rem 0;
+  padding-left: 1rem;
+}
+
+.rich-text-editor-wrapper .tiptap hr {
+  border: none;
+  border-top: 1px solid var(--gray-2);
+  margin: 2rem 0;
+}
+
+/* Table-specific styling */
+.rich-text-editor-wrapper .tiptap table {
+  border-collapse: collapse;
+  margin: 0;
+  table-layout: fixed;
+  width: 100%;
+  display: block;
+  max-width: 100%;
+  overflow-x: auto !important;
+}
+
+.rich-text-editor-wrapper .tiptap table tbody,
+.rich-text-editor-wrapper .tiptap table thead {
+  display: table;
+  width: max-content;
+  min-width: 100%;
+}
+
+.rich-text-editor-wrapper .tiptap table td,
+.rich-text-editor-wrapper .tiptap table th {
+  border: 1px solid var(--gray-3);
+  box-sizing: border-box;
+  min-width: 1em;
+  padding: 6px 8px;
+  position: relative;
+  vertical-align: top;
+  word-break: break-word;
+}
+
+.rich-text-editor-wrapper .tiptap table td > *,
+.rich-text-editor-wrapper .tiptap table th > * {
+  margin-bottom: 0;
+}
+
+.rich-text-editor-wrapper .tiptap table th {
+  background-color: var(--gray-1);
+  font-weight: bold;
+  text-align: left;
+}
+
+.rich-text-editor-wrapper .tiptap table .selectedCell:after {
+  background: var(--gray-2);
+  content: '';
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+  opacity: 0.2;
+}
+
+.rich-text-editor-wrapper .tiptap table .column-resize-handle {
+  background-color: var(--purple);
+  bottom: -2px;
+  pointer-events: none;
+  position: absolute;
+  right: -2px;
+  top: 0;
+  width: 4px;
+}
+
+.rich-text-editor-wrapper .tiptap .tableWrapper {
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rich-text-editor-wrapper .tiptap.resize-cursor {
+  cursor: ew-resize;
+  cursor: col-resize;
+}
+
+/* Image styles in editor */
+.rich-text-editor-wrapper .inserted-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+.rich-text-editor-wrapper .tiptap img.ProseMirror-selectednode {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.rich-text-editor-wrapper .tiptap .image-resizer {
+  display: inline-block;
+  position: relative;
+}
+
+.rich-text-editor-wrapper .tiptap .image-resizer .resize-handle {
+  position: absolute;
+  background: var(--primary-color);
+  border: 1px solid white;
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  z-index: 10;
+}
+
+.rich-text-editor-wrapper .tiptap .image-resizer .resize-handle.top-left {
+  top: -5px;
+  left: -5px;
+  cursor: nwse-resize;
+}
+
+.rich-text-editor-wrapper .tiptap .image-resizer .resize-handle.top-right {
+  top: -5px;
+  right: -5px;
+  cursor: nesw-resize;
+}
+
+.rich-text-editor-wrapper .tiptap .image-resizer .resize-handle.bottom-left {
+  bottom: -5px;
+  left: -5px;
+  cursor: nesw-resize;
+}
+
+.rich-text-editor-wrapper .tiptap .image-resizer .resize-handle.bottom-right {
+  bottom: -5px;
+  right: -5px;
+  cursor: nwse-resize;
+}
+
+/* Text alignment styles */
+.rich-text-editor-wrapper .tiptap .text-align-left {
+  text-align: left;
+}
+
+.rich-text-editor-wrapper .tiptap .text-align-center {
   text-align: center;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+.rich-text-editor-wrapper .tiptap .text-align-right {
+  text-align: right;
+}
+
+.rich-text-editor-wrapper .tiptap .text-align-justify {
+  text-align: justify;
+}
+
+/* CSS Variables */
+.rich-text-editor-wrapper {
+  --purple: #8e44ad;
+  --purple-light: #d8b8e8;
+  --black: #000000;
+  --white: #ffffff;
+  --gray-1: #f5f5f5;
+  --gray-2: rgba(153, 153, 153, 0.5);
+  --gray-3: #999999;
+  --primary-color: #3b82f6;
+  --hover-color: #eff6ff;
+  --border-color: #d1d5db;
+  --disabled-color: #9ca3af;
+  --tab-active-color: #2563eb;
+  --success-color: #10b981;
+  --danger-color: #ef4444;
+}
+
+/* Thêm style cho trạng thái kéo thả */
+.rich-text-editor-wrapper .tiptap .ProseMirror-dropcursor {
+  width: 4px;
+  background-color: #3b82f6;
+}
+
+/* Style cho ảnh khi đang được kéo */
+.rich-text-editor-wrapper .tiptap img[draggable="true"] {
+  cursor: grab;
+}
+
+.rich-text-editor-wrapper .tiptap img[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* Vùng drop indicator */
+.rich-text-editor-wrapper .tiptap .drop-indicator {
+  background-color: #3b82f6;
+  height: 2px;
+  margin: 2px 0;
+  opacity: 0.6;
+}
+
+/* COLUMNS STYLES - ĐÃ SỬA */
+.rich-text-editor-wrapper .tiptap .editor-columns-container {
+  display: flex;
+  gap: var(--columns-gap, 16px);
+  margin: 1.5rem 0;
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+.rich-text-editor-wrapper .tiptap .editor-column {
+  flex: 1;
+  min-width: 0;
+  border-radius: 0;
+  padding: 0;
+  position: relative;
+  box-sizing: border-box;
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  transition: none !important;
+}
+
+/* Line giữa các cột - ĐÃ SỬA */
+.rich-text-editor-wrapper .tiptap .editor-columns-container.with-border .editor-column {
+  border: none !important;
+}
+
+.rich-text-editor-wrapper .tiptap .editor-columns-container.with-border .editor-column:not(:last-child)::after {
+  content: '' !important;
+  position: absolute !important;
+  right: calc(var(--columns-gap, 16px) / -2) !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 1px !important;
+  background-color: #e5e7eb !important;
+  z-index: 1 !important;
+  display: block !important;
+}
+
+/* Selection style - ĐÃ SỬA */
+.rich-text-editor-wrapper .tiptap .editor-columns-container.ProseMirror-selectednode {
+  outline: 2px solid var(--primary-color) !important;
+  outline-offset: 2px !important;
+  border-radius: 4px !important;
+}
+
+.rich-text-editor-wrapper .tiptap .editor-column.ProseMirror-selectednode {
+  outline: 2px solid var(--primary-color) !important;
+  outline-offset: 2px !important;
+  border-radius: 4px !important;
+}
+
+/* Đảm bảo các column có min-height khi không có nội dung */
+.rich-text-editor-wrapper .tiptap .editor-column > *:first-child {
+  margin-top: 0;
+}
+
+.rich-text-editor-wrapper .tiptap .editor-column > *:last-child {
+  margin-bottom: 0;
+}
+
+.rich-text-editor-wrapper .tiptap .column-content {
+  min-height: 40px;
+}
+
+/* Đảm bảo ảnh responsive */
+.rich-text-editor-wrapper .tiptap img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Important: CSS để xuất HTML */
+.rich-text-editor-wrapper .tiptap * {
+  box-sizing: border-box;
+}
+
+.rich-text-editor-wrapper .tiptap img {
+  display: block;
+  margin: 8px 0;
+}
+
+/* For print and export */
+@media print {
+  .rich-text-editor-wrapper .tiptap img {
+    page-break-inside: avoid;
+    max-width: 100% !important;
   }
 }
 
-html {
-  overflow-x: hidden;
+/* Global styles for exported HTML */
+.exported-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem 0;
+}
+
+/* Hiệu ứng khi hover ảnh có kích thước tùy chỉnh */
+.rich-text-editor-wrapper .tiptap img[data-size-custom="true"]:hover {
+  outline: 2px dashed #3b82f6;
+  outline-offset: 2px;
+}
+
+.rich-text-editor-wrapper .tiptap img {
+  max-width: 100% !important;
+  height: auto;
+}
+
+/* Dynamic styles cho columns */
+.editor-columns-container[data-gap] {
+  gap: var(--columns-gap);
+}
+
+.editor-columns-container[data-border="true"] .editor-column {
+  border: none !important;
+}
+
+/* ==================== RESPONSIVE STYLES ==================== */
+
+/* Tablet và Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+  /* Base typography */
+  .rich-text-editor-wrapper .tiptap {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  /* Giảm khoảng cách giữa các elements */
+  .rich-text-editor-wrapper .tiptap > * + * {
+    margin-top: 0.75em;
+  }
+
+  /* Headings responsive */
+  .rich-text-editor-wrapper .tiptap h1 {
+    font-size: 1.6rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .rich-text-editor-wrapper .tiptap h2 {
+    font-size: 1.4rem;
+    margin-top: 1.8rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .rich-text-editor-wrapper .tiptap h3 {
+    font-size: 1.2rem;
+    margin-top: 1.5rem;
+  }
+
+  .rich-text-editor-wrapper .tiptap h4,
+  .rich-text-editor-wrapper .tiptap h5,
+  .rich-text-editor-wrapper .tiptap h6 {
+    font-size: 1rem;
+    margin-top: 1.2rem;
+  }
+
+  /* Lists responsive */
+  .rich-text-editor-wrapper .tiptap ul,
+  .rich-text-editor-wrapper .tiptap ol {
+    margin: 1rem 0.5rem 1rem 0.2rem;
+    padding: 0 0.75rem;
+  }
+
+  /* Code blocks responsive */
+  .rich-text-editor-wrapper .tiptap pre {
+    padding: 0.5rem 0.75rem;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    border-radius: 0.25rem;
+  }
+
+  .rich-text-editor-wrapper .tiptap pre code {
+    font-size: 0.75rem;
+  }
+
+  /* Blockquote responsive */
+  .rich-text-editor-wrapper .tiptap blockquote {
+    margin: 1rem 0;
+    padding-left: 0.75rem;
+    font-size: 0.95em;
+  }
+
+  /* HR responsive */
+  .rich-text-editor-wrapper .tiptap hr {
+    margin: 1.5rem 0;
+  }
+
+  /* Tables responsive */
+  .rich-text-editor-wrapper .tiptap .tableWrapper {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .rich-text-editor-wrapper .tiptap table {
+    font-size: 0.9rem;
+  }
+
+  .rich-text-editor-wrapper .tiptap table td,
+  .rich-text-editor-wrapper .tiptap table th {
+    padding: 4px 6px;
+  }
+
+  /* Images responsive */
+  .rich-text-editor-wrapper .tiptap img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  .rich-text-editor-wrapper .tiptap .image-resizer .resize-handle {
+    width: 8px;
+    height: 8px;
+  }
+
+  /* Columns responsive */
+  .rich-text-editor-wrapper .tiptap .editor-columns-container {
+    flex-direction: column !important;
+    gap: 0 !important;
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .rich-text-editor-wrapper .tiptap .editor-column {
+    width: 100% !important;
+    flex: none !important;
+    min-height: auto !important;
+  }
+
+  .rich-text-editor-wrapper .tiptap .editor-columns-container.with-border .editor-column:not(:last-child)::after {
+    display: none !important;
+  }
+
+  .rich-text-editor-wrapper .tiptap .editor-columns-container.with-border .editor-column {
+    border-bottom: 1px solid #e5e7eb !important;
+    padding-bottom: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .rich-text-editor-wrapper .tiptap .editor-columns-container.with-border .editor-column:last-child {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+/* Cải thiện touch interaction */
+@media (max-width: 768px) {
+  /* Tăng kích thước touch target */
+  .rich-text-editor-wrapper .tiptap button,
+  .rich-text-editor-wrapper .tiptap .resize-handle,
+  .rich-text-editor-wrapper .tiptap [draggable="true"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent zoom on input focus */
+  .rich-text-editor-wrapper .tiptap input,
+  .rich-text-editor-wrapper .tiptap textarea {
+    font-size: 16px;
+  }
+}
+
+/* Small mobile (max-width: 400px) */
+@media (max-width: 400px) {
+  .rich-text-editor-wrapper .tiptap {
+    padding: 0 8px;
+  }
+
+  .rich-text-editor-wrapper .tiptap h1 {
+    font-size: 1.4rem;
+  }
+
+  .rich-text-editor-wrapper .tiptap h2 {
+    font-size: 1.2rem;
+  }
+
+  .rich-text-editor-wrapper .tiptap h3 {
+    font-size: 1.1rem;
+  }
+
+  .rich-text-editor-wrapper .tiptap pre {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .rich-text-editor-wrapper .tiptap table {
+    font-size: 0.85rem;
+  }
+
+  .rich-text-editor-wrapper .tiptap table td,
+  .rich-text-editor-wrapper .tiptap table th {
+    padding: 3px 4px;
+  }
+}
+
+/* Thêm cho rất nhỏ (max-width: 320px) */
+@media (max-width: 320px) {
+  .rich-text-editor-wrapper .tiptap {
+    font-size: 15px;
+  }
+
+  .rich-text-editor-wrapper .tiptap h1 {
+    font-size: 1.3rem;
+  }
+
+  .rich-text-editor-wrapper .tiptap h2 {
+    font-size: 1.1rem;
+  }
+
+  .rich-text-editor-wrapper .tiptap ul,
+  .rich-text-editor-wrapper .tiptap ol {
+    padding: 0 0.5rem;
+  }
+}
+
+/* ==================== PRINT STYLES ==================== */
+@media print {
+  .rich-text-editor-wrapper .tiptap h1 {
+    font-size: 1.8rem;
+  }
+
+  .rich-text-editor-wrapper .tiptap h2 {
+    font-size: 1.5rem;
+  }
+
+  .rich-text-editor-wrapper .tiptap h3 {
+    font-size: 1.3rem;
+  }
+
+  .rich-text-editor-wrapper .tiptap pre {
+    background: #f5f5f5 !important;
+    color: #333 !important;
+    border: 1px solid #ddd;
+  }
+
+  .rich-text-editor-wrapper .tiptap table {
+    border: 1px solid #333;
+  }
+
+  .rich-text-editor-wrapper .tiptap table th {
+    background: #f0f0f0 !important;
+  }
 }

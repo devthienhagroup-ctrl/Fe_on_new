@@ -45,15 +45,16 @@ const menuItems = ref([
     icon: "fas fa-shield-alt",
     link: "/bao-mat"
   },
-  // {
-  //   label: "Thanh toán",
-  //   icon: "fa-solid fa-credit-card",
-  //   link: "/thanh-toan"
-  // },
   {
     label: "Phát triển đội nhóm của bạn",
     icon: "fa-solid fa-people-group",
     link: "/nhom-cua-toi",
+    notParentRoute: true
+  },
+  {
+    label: "Hợp tác",
+    icon: "fa-solid fa-sack-dollar",
+    link: "/hop-tac",
     notParentRoute: true
   },
   {

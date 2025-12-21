@@ -1,20 +1,10 @@
 <template>
   <div class="news-management-container">
-    <!-- Toast Notification -->
-    <div class="toast-container" :class="{ 'active': toast.show }">
-      <div class="toast" :class="toast.type">
-        <i :class="toast.icon"></i>
-        <span>{{ toast.message }}</span>
-        <i class="fas fa-times close-toast" @click="hideToast"></i>
-      </div>
-      <div v-if="loading" class="loading-spinner"></div>
-    </div>
-
     <!-- Header -->
     <header class="header">
       <h1><i class="fas fa-newspaper"></i> Quản lý Tin tức</h1>
       <div class="header-actions">
-        <button class="btn btn-primary" @click="showCategoryModal = true">
+        <button class="btn btn-primary" @click="addNewCategory">
           <i class="fas fa-plus"></i> Thêm danh mục
         </button>
       </div>
@@ -31,30 +21,24 @@
           >
             <i class="fas fa-layer-group"></i>
             <span>Tất cả danh mục</span>
-<!--            <span class="category-count">{{ allNews.length }}</span>-->
           </button>
 
           <button
               v-for="category in categories"
               :key="category.id"
               class="category-tab"
-              :class="{ 'active': selectedCategoryId === category.id }"
+              :class="{
+                'active': selectedCategoryId === category.id,
+                'inactive': !category.isActive
+              }"
               @click="selectCategory(category)"
           >
             <i class="fa-solid fa-newspaper"></i>
             <span>{{ category.name }}</span>
-<!--            <span class="category-count">{{ getNewsCount(category.id) }}</span>-->
+            <span v-if="!category.isActive" class="inactive-badge">Ẩn</span>
             <div class="category-actions">
               <button class="btn-icon small" @click.stop="editCategory(category)" title="Sửa">
                 <i class="fas fa-edit"></i>
-              </button>
-              <button
-                  class="btn-icon small btn-danger"
-                  @click.stop="confirmDeleteCategory(category)"
-                  :disabled="getNewsCount(category.id) > 0"
-                  :title="getNewsCount(category.id) > 0 ? 'Không thể xóa danh mục có tin' : 'Xóa'"
-              >
-                <i class="fas fa-trash"></i>
               </button>
             </div>
           </button>
@@ -78,7 +62,7 @@
             :class="{ 'active': activeContentTab === 'edit' }"
             @click="activeContentTab = 'edit'"
             @click.middle="resetNewsForm()" >
-        <i class="fas fa-edit"></i> {{ editingNews.id ? 'Chỉnh sửa tin' : 'Thêm tin mới' }}
+          <i class="fas fa-edit"></i> {{ editingNews.id ? 'Chỉnh sửa tin' : 'Thêm tin mới' }}
         </button>
       </div>
 
@@ -120,7 +104,7 @@
                 <div class="news-meta">
                   <span><i class="far fa-user"></i> {{ news.employeeName }}</span>
                   <span><i class="far fa-eye"></i> {{ news.viewCount }} lượt xem</span>
-                  <span><i class="far fa-calendar"></i> {{ formatDate(news.updateAt) }}</span>
+                  <span><i class="far fa-calendar"></i> {{ formatDate(news.createAt || news.updateAt) }}</span>
                   <span v-if="news.priority" class="priority-badge">
                     <i class="fas fa-flag"></i> Ưu tiên {{ news.priority }}
                   </span>
@@ -165,8 +149,8 @@
             <div class="filter-group">
               <select v-model="statusFilter" @change="filterNews" class="filter-select">
                 <option value="">Tất cả trạng thái</option>
+                <!-- Đã bỏ DRAFT -->
                 <option value="PUBLISHED">Đã xuất bản</option>
-                <option value="DRAFT">Bản nháp</option>
                 <option value="ARCHIVED">Đã lưu trữ</option>
               </select>
 
@@ -241,7 +225,7 @@
                   </div>
                   <div class="meta-item">
                     <i class="far fa-calendar"></i>
-                    <span>{{ formatDate(news.updateAt) }}</span>
+                    <span>{{ formatDate(news.createAt || news.updateAt) }}</span>
                   </div>
                   <div v-if="news.isFeatured && news.priority" class="meta-item priority">
                     <i class="fas fa-flag"></i>
@@ -266,6 +250,17 @@
             <div class="pagination-info">
               Hiển thị {{ startItem }}-{{ endItem }} của {{ filteredNews.length }} tin
             </div>
+            <!-- Thêm phần bulk actions -->
+            <div class="bulk-actions" v-if="selectedCategoryId">
+              <button
+                  class="btn btn-danger btn-sm"
+                  @click="confirmDeleteAllByCategory"
+                  :disabled="loading"
+              >
+                <i class="fas fa-trash"></i> Xóa tất cả tin trong danh mục
+              </button>
+            </div>
+
             <div class="pagination-controls">
               <button
                   class="btn-icon"
@@ -315,7 +310,16 @@
             <h3>{{ editingNews.id ? 'Chỉnh sửa tin tức' : 'Thêm tin tức mới' }}</h3>
             <div class="form-actions">
               <button type="button" class="btn btn-secondary" @click="activeContentTab = 'list'">
-                <i class="fas fa-times"></i> Hủy
+                <i class="fas fa-times"></i> Quay lại
+              </button>
+              <button
+                  v-if="editingNews.id"
+                  type="button"
+                  class="btn btn-danger"
+                  @click="confirmDeleteNews(editingNews)"
+                  :disabled="loading"
+              >
+                <i class="fas fa-trash"></i> Xóa tin
               </button>
               <button type="submit" class="btn btn-success" :disabled="!canSaveNews">
                 <i class="fas fa-save"></i> Lưu tin tức
@@ -324,6 +328,12 @@
           </div>
 
           <div class="form-grid">
+            <!-- Warning message khi danh mục đang ẩn -->
+            <div v-if="showCategoryWarning" class="category-warning">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>Bạn đang chỉnh sửa tin của danh mục tin đang ẩn, nếu muốn xuất bản vui lòng mở danh mục tin hiện tại trước.</span>
+            </div>
+
             <!-- Left Column -->
             <div class="form-column">
               <div class="form-section">
@@ -348,13 +358,13 @@
                       class="form-control"
                       required
                   >
-                    <option value="">Chọn danh mục</option>
+                    <option value="" disabled>Chọn danh mục</option>
                     <option
                         v-for="category in categories"
                         :key="category.id"
                         :value="category.id"
                     >
-                      {{ category.name }}
+                      {{category.name}} {{ category.isActive? "" : "(Đang ẩn)"}}
                     </option>
                   </select>
                 </div>
@@ -371,6 +381,7 @@
                   ></textarea>
                   <div class="char-count">{{ editingNews.summary.length }}/500</div>
                 </div>
+
               </div>
 
               <div class="form-section">
@@ -382,11 +393,15 @@
                         id="newsStatus"
                         v-model="editingNews.status"
                         class="form-control"
+                        :disabled="disableStatusSelect"
                     >
-                      <option value="DRAFT">Bản nháp</option>
+                      <!-- Đã bỏ DRAFT -->
                       <option value="PUBLISHED">Xuất bản</option>
                       <option value="ARCHIVED">Lưu trữ</option>
                     </select>
+                    <small v-if="disableStatusSelect" class="status-disabled-text">
+                      Không thể thay đổi trạng thái khi danh mục đang ẩn
+                    </small>
                   </div>
 
                   <div class="form-group checkbox-group">
@@ -429,12 +444,6 @@
                             :src="thumbnailPreview || editingNews.thumbnail"
                             alt="Thumbnail preview"
                         />
-                        <button
-                            class="btn-icon btn-danger remove-file"
-                            @click.stop="removeThumbnail"
-                        >
-                          <i class="fas fa-times"></i>
-                        </button>
                       </div>
                       <input
                           type="file"
@@ -452,11 +461,14 @@
 
             <!-- Right Column -->
             <div class="form-column">
-              <div class="" style="width: 100%;">
+              <div style="width: 100%;">
                 <h4><i class="fas fa-edit"></i> Nội dung</h4>
                 <div class="editor-wrapper">
                   <!-- AdvancedEditor Component -->
-                  <AdvancedEditModal v-model="editingNews.contentHTML" />
+                  <AdvancedEditModal v-model="editingNews.contentHTML"
+                                     v-model:fileDTOs="fileDTOs"
+                                     v-model:rawFiles="realFiles"
+                  />
                 </div>
 
                 <!-- Preview Section -->
@@ -478,8 +490,8 @@
     </main>
 
     <!-- Category Modal -->
-    <div v-if="showCategoryModal" class="modal-overlay" @click.self="showCategoryModal = false">
-      <div class="modal">
+    <div v-if="showCategoryModal" class="modal-overlay-news" @click.self="showCategoryModal = false">
+      <div class="modal-news">
         <div class="modal-header">
           <h3>{{ editingCategory.id ? 'Sửa' : 'Thêm' }} danh mục</h3>
           <button class="btn-icon" @click="showCategoryModal = false">
@@ -497,15 +509,32 @@
                 class="form-control"
             />
           </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                  type="checkbox"
+                  v-model="editingCategory.isActive"
+                  class="checkbox"
+              />
+              <span class="checkbox-text">Hiển thị danh mục</span>
+            </label>
+          </div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" @click="showCategoryModal = false">
             Hủy
           </button>
           <button
+              class="btn btn-danger"
+              @click="confirmDeleteCategoryModal"
+              :disabled="loading"
+          >
+            <i class="fas fa-trash"></i> Xóa
+          </button>
+          <button
               class="btn btn-primary"
               @click="saveCategory"
-              :disabled="!editingCategory.name"
+              :disabled="!editingCategory.name || loading"
           >
             <i class="fas fa-save"></i> Lưu
           </button>
@@ -514,8 +543,8 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div v-if="showDeleteModal" class="modal-overlay">
-      <div class="modal confirmation-modal">
+    <div v-if="showDeleteModal" class="modal-overlay-news" @click.self="showDeleteModal = false">
+      <div class="modal-news confirmation-modal">
         <div class="modal-header">
           <h3>Xác nhận xóa</h3>
           <button class="btn-icon" @click="showDeleteModal = false">
@@ -534,21 +563,31 @@
           </button>
           <button
               class="btn btn-danger"
-              @click="deleteModalAction === 'category' ? deleteCategory() : deleteNews()"
+              @click="handleDeleteAction"
+              :disabled="loading"
           >
             <i class="fas fa-trash"></i> Xóa
           </button>
         </div>
       </div>
     </div>
+    <div v-if="toast.show" class="toast-notification" :class="toast.type">
+      <i :class="toast.icon"></i>
+      <span>{{ toast.message }}</span>
+      <button class="btn-toast-close" @click="toast.show = false">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import {ref, reactive, computed, onMounted, watch, onUnmounted} from 'vue'
 import AdvancedEditModal from "../../RichTextEditor/AdvancedEditModal.vue";
 import api from "../../../api/api.js";
-import {baseImgaeUrl} from "../../../assets/js/global.js";
+
+const fileDTOs= ref([])
+const realFiles = ref([]);
 
 // Toast notification state
 const toast = reactive({
@@ -574,6 +613,9 @@ const newsData = ref({
     totalPages: 1
   }
 })
+
+// Thêm timeout ref để quản lý
+const toastTimeout = ref(null)
 
 const filteredNews = computed(() => newsData.value.content || [])
 const allNews = computed(() => filteredNews.value) // Giữ tương thích với code cũ
@@ -628,7 +670,8 @@ const showDeleteModal = ref(false)
 // Form states
 const editingCategory = reactive({
   id: null,
-  name: ''
+  name: '',
+  isActive: true
 })
 
 const editingNews = reactive({
@@ -639,8 +682,9 @@ const editingNews = reactive({
   thumbnail: '',
   isFeatured: false,
   priority: null,
-  status: 'DRAFT',
+  status: 'PUBLISHED', // Mặc định là PUBLISHED thay vì DRAFT
   categoryId: null,
+  createAt: '',
   files: []
 })
 
@@ -660,6 +704,22 @@ const selectedCategory = computed(() => {
   return categories.value.find(cat => cat.id === selectedCategoryId.value)
 })
 
+// Tính toán danh mục hiện tại của tin đang chỉnh sửa
+const currentNewsCategory = computed(() => {
+  if (!editingNews.categoryId) return null
+  return categories.value.find(cat => cat.id === editingNews.categoryId)
+})
+
+// Kiểm tra xem có cần hiển thị cảnh báo không
+const showCategoryWarning = computed(() => {
+  return editingNews.id && currentNewsCategory.value && !currentNewsCategory.value.isActive
+})
+
+// Vô hiệu hóa select trạng thái khi danh mục đang ẩn
+const disableStatusSelect = computed(() => {
+  return currentNewsCategory.value && !currentNewsCategory.value.isActive
+})
+
 const featuredNews = computed(() => {
   return filteredNews.value.filter(news => news.isFeatured)
 })
@@ -670,18 +730,24 @@ const canSaveNews = computed(() => {
 
 // Methods
 const showToast = (message, type = 'info') => {
-  const icons = {
-    success: 'fas fa-check-circle',
-    error: 'fas fa-exclamation-circle',
-    warning: 'fas fa-exclamation-triangle',
-    info: 'fas fa-info-circle'
-  }
-
   toast.message = message
   toast.type = type
-  toast.icon = icons[type] || icons.info
-  toast.show = true
 
+  switch (type) {
+    case 'success':
+      toast.icon = 'fas fa-check-circle'
+      break
+    case 'error':
+      toast.icon = 'fas fa-exclamation-circle'
+      break
+    case 'warning':
+      toast.icon = 'fas fa-exclamation-triangle'
+      break
+    default:
+      toast.icon = 'fas fa-info-circle'
+  }
+
+  toast.show = true
   setTimeout(() => {
     toast.show = false
   }, 3000)
@@ -689,17 +755,85 @@ const showToast = (message, type = 'info') => {
 
 const hideToast = () => {
   toast.show = false
+  if (toastTimeout.value) {
+    clearTimeout(toastTimeout.value)
+    toastTimeout.value = null
+  }
 }
+// Đảm bảo dọn dẹp khi component unmount
+onUnmounted(() => {
+  if (toastTimeout.value) {
+    clearTimeout(toastTimeout.value)
+  }
+})
 
 const formatDate = (dateString) => {
   if (!dateString) return ''
-  const date = new Date(dateString)
-  return date.toLocaleDateString('vi-VN')
+
+  try {
+    let date;
+
+    if (dateString instanceof Date) {
+      date = dateString
+    } else if (typeof dateString === 'string') {
+      date = new Date(dateString)
+    } else if (typeof dateString === 'number') {
+      date = new Date(dateString)
+    } else {
+      return ''
+    }
+
+    // Kiểm tra date hợp lệ
+    if (isNaN(date.getTime())) {
+      return ''
+    }
+
+    return date.toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  } catch (error) {
+    console.error('Error formatting date:', error)
+    return ''
+  }
+}
+
+// Sửa hàm formatDateForInput
+const formatDateForInput = (dateString) => {
+  if (!dateString) return ''
+
+  // Nếu dateString là Date object
+  if (dateString instanceof Date) {
+    return dateString.toISOString().slice(0, 16)
+  }
+
+  // Nếu là string
+  if (typeof dateString === 'string') {
+    // Nếu dateString không có timezone, thêm 'Z' để parse thành UTC
+    if (!dateString.includes('Z') && !dateString.includes('+')) {
+      // Đối với LocalDateTime từ Spring Boot (format: "2024-01-15T10:30:00")
+      // Chuyển thành format mà Date() có thể hiểu đúng
+      return dateString.slice(0, 16) // Lấy "YYYY-MM-DDTHH:mm"
+    }
+
+    const date = new Date(dateString)
+    return date.toISOString().slice(0, 16)
+  }
+
+  // Nếu là number (timestamp)
+  if (typeof dateString === 'number') {
+    const date = new Date(dateString)
+    return date.toISOString().slice(0, 16)
+  }
+
+  return ''
 }
 
 const getStatusText = (status) => {
   const statusMap = {
-    'DRAFT': 'Bản nháp',
     'PUBLISHED': 'Đã xuất bản',
     'ARCHIVED': 'Đã lưu trữ'
   }
@@ -707,8 +841,8 @@ const getStatusText = (status) => {
 }
 
 const getNewsCount = (categoryId) => {
-  // Sẽ được cập nhật khi fetch dữ liệu
-  return 0 // Tạm thời
+  if (!categoryId) return 0
+  return filteredNews.value.filter(news => news.categoryId === categoryId).length
 }
 
 const selectAllCategories = () => {
@@ -722,7 +856,34 @@ const selectCategory = (category) => {
 }
 
 const editSelectedNews = (news) => {
+  console.log('Edit news:', news)
+  console.log('createAt value:', news.createAt)
+  console.log('createAt type:', typeof news.createAt)
+
+  // Copy news data
   Object.assign(editingNews, news)
+
+  // Format ngày đăng cho input datetime-local - XỬ LÝ AN TOÀN
+  if (news.createAt) {
+    try {
+      editingNews.createAt = formatDateForInput(news.createAt)
+      console.log('Formatted createAt:', editingNews.createAt)
+    } catch (error) {
+      console.error('Error formatting date:', error)
+      editingNews.createAt = formatDateForInput(new Date())
+    }
+  } else {
+    // Nếu không có ngày, set ngày hiện tại
+    editingNews.createAt = formatDateForInput(new Date())
+  }
+
+  // Đảm bảo files được copy
+  if (news.files) {
+    fileDTOs.value = [...news.files]
+  } else {
+    fileDTOs.value = []
+  }
+
   activeContentTab.value = 'edit'
 }
 
@@ -741,7 +902,7 @@ const filterNews = async () => {
       keyword: searchQuery.value || null,
       categoryId: selectedCategoryId.value || null,
       status: statusFilter.value || null,
-      featured: null, // Có thể thêm toggle cho featured
+      featured: null,
       recentlyCreated: null,
       recentlyUpdated: null,
       sorts: buildSortItems()
@@ -766,7 +927,7 @@ const buildSortItems = () => {
   const sortMap = {
     'createAt': { sortBy: 'CREATED_AT', sortDirection: 'DESC' },
     'updateAt': { sortBy: 'UPDATED_AT', sortDirection: 'DESC' },
-    'priority': { sortBy: 'VIEW_COUNT', sortDirection: 'DESC' }, // Tạm thời
+    'priority': { sortBy: 'PRIORITY', sortDirection: 'DESC' },
     'viewCount': { sortBy: 'VIEW_COUNT', sortDirection: 'DESC' },
     'title': { sortBy: 'TITLE', sortDirection: 'ASC' }
   }
@@ -781,7 +942,7 @@ const buildSortItems = () => {
 }
 
 const sortNews = () => {
-  filterNews() // Sử dụng API sort thay vì sort client-side
+  filterNews()
 }
 
 // Pagination methods
@@ -811,7 +972,13 @@ const goToPage = (page) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-// Category CRUD - giữ nguyên
+// Category CRUD
+const addNewCategory = () => {
+  resetCategoryForm()
+  editingCategory.isActive = true
+  showCategoryModal.value = true
+}
+
 const editCategory = (category) => {
   Object.assign(editingCategory, category)
   showCategoryModal.value = true
@@ -825,69 +992,68 @@ const saveCategory = async () => {
 
   loading.value = true
   try {
-    const response = await fetch('/news/saveCategory', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(editingCategory)
-    })
+    let response
 
-    if (response.ok) {
-      showToast('Lưu danh mục thành công', 'success')
-      showCategoryModal.value = false
-      fetchCategories()
-      resetCategoryForm()
+    if (editingCategory.id) {
+      // Gọi API PUT để cập nhật danh mục
+      response = await api.put(`/news/newsCategory/${editingCategory.id}`, editingCategory)
     } else {
-      showToast('Lỗi khi lưu danh mục', 'error')
+      // Gọi API POST để tạo mới danh mục
+      response = await api.post('/news/newsCategory', editingCategory)
+    }
+
+    if (response.data) {
+      showToast(editingCategory.id ? 'Cập nhật danh mục thành công' : 'Tạo danh mục thành công', 'success')
+      showCategoryModal.value = false
+      await fetchCategories()
+      resetCategoryForm()
     }
   } catch (error) {
-    showToast('Lỗi kết nối', 'error')
+    console.error('Error saving category:', error)
+    showToast(error.response?.data?.message || 'Lỗi khi lưu danh mục', 'error')
   } finally {
     loading.value = false
   }
 }
 
-const confirmDeleteCategory = (category) => {
-  if (getNewsCount(category.id) > 0) {
-    showToast('Không thể xóa danh mục có chứa tin tức', 'warning')
+const confirmDeleteCategoryModal = () => {
+  if (getNewsCount(editingCategory.id) > 0) {
+    showToast('Không thể xóa danh mục đã có tin tức. Vui lòng xóa hết tin trong danh mục trước.', 'error')
     return
   }
 
-  editingCategory.id = category.id
-  editingCategory.name = category.name
   deleteModalAction.value = 'category'
-  deleteMessage.value = `Bạn có chắc chắn muốn xóa danh mục "${category.name}"?`
+  deleteMessage.value = `Bạn có chắc chắn muốn xóa danh mục "${editingCategory.name}"?`
   showDeleteModal.value = true
 }
 
 const deleteCategory = async () => {
   loading.value = true
   try {
-    const response = await fetch('/news/deleteCategory', {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ id: editingCategory.id })
-    })
+    const response = await api.delete(`/news/newsCategory/${editingCategory.id}`)
 
-    if (response.ok) {
+    if (response.status === 204) {
       showToast('Xóa danh mục thành công', 'success')
       showDeleteModal.value = false
-      fetchCategories()
-    } else {
-      const error = await response.json()
-      showToast(error.message || 'Lỗi khi xóa danh mục', 'error')
+      showCategoryModal.value = false
+      await fetchCategories()
+      resetCategoryForm()
     }
   } catch (error) {
-    showToast('Lỗi kết nối', 'error')
+    console.error('Error deleting category:', error)
+
+    // Kiểm tra nếu lỗi là 400 Bad Request (có tin trong danh mục)
+    if (error.response?.status === 400) {
+      showToast('Không thể xóa danh mục đã có tin tức. Vui lòng xóa hết tin trong danh mục trước.', 'error')
+    } else {
+      showToast(error.response?.data?.message || 'Lỗi khi xóa danh mục', 'error')
+    }
   } finally {
     loading.value = false
   }
 }
 
-// News CRUD - cập nhật để sử dụng api service
+// Sửa hàm khi lưu news (trong saveNews)
 const saveNews = async () => {
   if (!canSaveNews.value) {
     showToast('Vui lòng nhập đầy đủ thông tin bắt buộc', 'error')
@@ -899,17 +1065,66 @@ const saveNews = async () => {
     editingNews.priority = null
   }
 
+  // Format ngày đăng trước khi gửi - XỬ LÝ date an toàn
+  const newsToSave = {
+    ...editingNews
+  }
+
+  // Xử lý createAt an toàn
+  if (editingNews.createAt) {
+    try {
+      let dateObj;
+
+      // Kiểm tra loại dữ liệu
+      if (editingNews.createAt instanceof Date) {
+        dateObj = editingNews.createAt
+      } else if (typeof editingNews.createAt === 'string') {
+        dateObj = new Date(editingNews.createAt)
+      } else {
+        dateObj = new Date()
+      }
+
+      // Format thành ISO string (Spring Boot có thể parse)
+      newsToSave.createAt = dateObj.toISOString()
+    } catch (error) {
+      console.error('Error parsing date:', error)
+      newsToSave.createAt = new Date().toISOString()
+    }
+  }
+
+  // Lưu fileDTOs
+  newsToSave.files = fileDTOs.value;
+
   loading.value = true
 
   // Prepare form data
   const formData = new FormData()
 
-  // Add news data
-  formData.append('news', JSON.stringify(editingNews))
+  // Add news data - Dùng Blob để đảm bảo JSON được xử lý đúng
+  const newsBlob = new Blob([JSON.stringify(newsToSave)], {
+    type: 'application/json'
+  })
+  formData.append('news', newsBlob)
 
   // Add thumbnail if exists
   if (thumbnailFile.value) {
     formData.append('thumbnail', thumbnailFile.value)
+  }
+
+  // Gửi files từ rich text editor
+  if (realFiles.value && realFiles.value.length > 0) {
+    realFiles.value.forEach(file => {
+      if (file instanceof File) {
+        formData.append('files', file)
+      }
+    })
+  }
+
+  console.log("SaveNEWs: ", newsToSave);
+
+  // Debug: Log FormData
+  for (let [key, value] of formData.entries()) {
+    console.log(`${key}:`, value, typeof value)
   }
 
   try {
@@ -921,12 +1136,20 @@ const saveNews = async () => {
 
     if (response.data) {
       showToast('Lưu tin tức thành công', 'success')
-      await filterNews() // Load lại dữ liệu sau khi save
+      await filterNews()
       resetNewsForm()
       activeContentTab.value = 'list'
     }
   } catch (error) {
     console.error('Error saving news:', error)
+
+    // Log chi tiết lỗi
+    if (error.response) {
+      console.error('Response status:', error.response.status)
+      console.error('Response data:', error.response.data)
+      console.error('Response headers:', error.response.headers)
+    }
+
     showToast('Lỗi khi lưu tin tức', 'error')
   } finally {
     loading.value = false
@@ -944,14 +1167,12 @@ const confirmDeleteNews = (news) => {
 const deleteNews = async () => {
   loading.value = true
   try {
-    const response = await api.post('/news/deleteNews', {
-      id: editingNews.id
-    })
+    const response = await api.delete(`/news/deleteNews/${editingNews.id}`)
 
     if (response.data) {
       showToast('Xóa tin tức thành công', 'success')
       showDeleteModal.value = false
-      await filterNews() // Load lại dữ liệu
+      await filterNews()
       resetNewsForm()
       activeContentTab.value = 'list'
     }
@@ -975,7 +1196,7 @@ const toggleFeatured = async (news) => {
 
     if (response.data) {
       showToast(`Đã ${updatedNews.isFeatured ? 'đánh dấu' : 'bỏ đánh dấu'} tin nổi bật`, 'success')
-      await filterNews() // Refresh data
+      await filterNews()
     }
   } catch (error) {
     console.error('Error toggling featured:', error)
@@ -983,7 +1204,7 @@ const toggleFeatured = async (news) => {
   }
 }
 
-// File handling - giữ nguyên
+// File handling
 const triggerFileInput = (type) => {
   if (type === 'thumbnail') {
     thumbnailInput.value.click()
@@ -1004,10 +1225,11 @@ const removeThumbnail = () => {
   editingNews.thumbnail = ''
 }
 
-// Form reset - giữ nguyên
+// Form reset
 const resetCategoryForm = () => {
   editingCategory.id = null
   editingCategory.name = ''
+  editingCategory.isActive = true
 }
 
 const resetNewsForm = () => {
@@ -1019,54 +1241,68 @@ const resetNewsForm = () => {
     thumbnail: '',
     isFeatured: false,
     priority: null,
-    status: 'DRAFT',
-    categoryId: selectedCategoryId.value
+    status: 'PUBLISHED', // Mặc định là PUBLISHED
+    categoryId: selectedCategoryId.value,
+    createAt: null // Khởi tạo null
   })
+
+  // Nếu muốn set ngày hiện tại
+  editingNews.createAt = formatDateForInput(new Date())
 
   thumbnailFile.value = null
   thumbnailPreview.value = ''
 }
 
-// API calls - cập nhật để sử dụng api service
+// API calls
 const fetchCategories = async () => {
   loading.value = true
   try {
-    // Gọi API để lấy cả categories và news
+    // Gọi API - API này trả về cả news và categories
     const response = await api.get('/news/getNewsCategories/all/0')
 
     if (response.data) {
+      // Lấy categories từ response
       categories.value = response.data.categories || []
 
-      // Nếu có dữ liệu news trong response (API cũ)
-      if (response.data.news) {
+      // Lấy news từ response và gán vào newsData
+      // Đảm bảo cấu trúc phù hợp với newsData đang sử dụng
+      if (response.data.news && response.data.news.content) {
         newsData.value = response.data.news
+      } else {
+        // Nếu không có news trong response, khởi tạo empty
+        newsData.value = {
+          content: [],
+          page: {
+            size: pageSize.value,
+            number: 0,
+            totalElements: 0,
+            totalPages: 1
+          }
+        }
       }
 
-      if (categories.value.length > 0 && !selectedCategoryId.value) {
-        selectedCategoryId.value = categories.value[0].id
-      }
+      // Không cần gọi filterNews() nữa vì đã có dữ liệu news từ API
+      // Nhưng vẫn set selectedCategoryId để UI hiển thị đúng
+      selectedCategoryId.value = null
 
-      // Sử dụng API filter mới để lấy dữ liệu
-      await filterNews()
+      // Show success message
+      showToast('Tải dữ liệu thành công', 'success')
     }
   } catch (error) {
-    console.error('Error fetching categories:', error)
-    showToast('Lỗi khi tải danh mục', 'error')
-  } finally {
-    loading.value = false
-  }
-}
+    console.error('Error fetching data:', error)
+    showToast('Lỗi khi tải dữ liệu', 'error')
 
-const fetchNews = async () => {
-  if (!selectedCategoryId.value) return
-
-  loading.value = true
-  try {
-    // Sử dụng API filter thay vì API cũ
-    await filterNews()
-  } catch (error) {
-    console.error('Error fetching news:', error)
-    showToast('Lỗi khi tải tin tức', 'error')
+    // Khởi tạo empty data nếu có lỗi
+    categories.value = []
+    newsData.value = {
+      content: [],
+      page: {
+        size: pageSize.value,
+        number: 0,
+        totalElements: 0,
+        totalPages: 1
+      }
+    }
   } finally {
     loading.value = false
   }
@@ -1079,9 +1315,7 @@ onMounted(() => {
 
 // Watchers
 watch(selectedCategoryId, () => {
-  if (selectedCategoryId.value) {
-    fetchNews()
-  }
+  filterNews()
 })
 
 watch(pageSize, () => {
@@ -1101,8 +1335,112 @@ watch(() => editingNews.isFeatured, (newVal) => {
     editingNews.priority = 1
   }
 })
+
+// Thêm phương thức xóa tất cả tin trong danh mục
+const confirmDeleteAllByCategory = () => {
+  if (!selectedCategoryId.value) {
+    showToast('Vui lòng chọn một danh mục', 'warning')
+    return
+  }
+
+  const category = selectedCategory.value
+  deleteModalAction.value = 'categoryAll'
+  deleteMessage.value = `Bạn có chắc chắn muốn xóa TẤT CẢ tin tức trong danh mục "${category.name}"? Hành động này không thể hoàn tả!`
+  showDeleteModal.value = true
+}
+
+// Thêm case xử lý trong deleteModal
+// Tìm phần deleteModal và thêm case mới
+const deleteAllNewsByCategory = async () => {
+  if (!selectedCategoryId.value) return
+
+  loading.value = true
+  try {
+    showToast(`Giả lập Đã xóa tất cả tin tức trong danh mục`, 'warning')
+
+    // const response = await api.delete(`/news/deleteByCategory/${selectedCategoryId.value}`)
+    //
+    // if (response.data) {
+    //   showToast(`Đã xóa tất cả tin tức trong danh mục`, 'warning')
+    //   showDeleteModal.value = false
+    //   await filterNews() // Load lại danh sách
+    // }
+  } catch (error) {
+    console.error('Error deleting all news by category:', error)
+    showToast('Lỗi khi xóa tin tức', 'error')
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleDeleteAction = () => {
+  switch (deleteModalAction.value) {
+    case 'category':
+      deleteCategory()
+      break
+    case 'news':
+      deleteNews()
+      break
+    case 'categoryAll':
+      deleteAllNewsByCategory()
+      break
+  }
+}
 </script>
+
 <style scoped>
+/* Thêm các style mới */
+.category-tab.inactive {
+  opacity: 0.6;
+  background-color: #f3f4f6;
+}
+
+.category-tab.inactive:hover {
+  background-color: #e5e7eb;
+}
+
+.inactive-badge {
+  background: #9ca3af;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Cảnh báo danh mục ẩn */
+.category-warning {
+  background: #fffbeb;
+  border: 1px solid #fbbf24;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #92400e;
+}
+
+.category-warning i {
+  color: #f59e0b;
+  font-size: 18px;
+}
+
+.category-warning span {
+  font-size: 14px;
+  font-weight: 500;
+  flex: 1;
+}
+
+/* Text cho trạng thái bị vô hiệu hóa */
+.status-disabled-text {
+  display: block;
+  margin-top: 4px;
+  color: #ef4444;
+  font-size: 12px;
+  font-style: italic;
+}
+
 .news-management-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -1111,110 +1449,81 @@ watch(() => editingNews.isFeatured, (newVal) => {
 }
 
 /* Toast Notification */
-.toast-container {
+.toast-notification {
   position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 1000;
-  transition: all 0.3s ease;
-  opacity: 0;
-  transform: translateY(100px);
-}
-
-.toast-container.active {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.toast {
-  background: white;
-  padding: 16px 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  bottom: 30px;
+  right: 30px;
+  padding: 15px 20px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   gap: 12px;
-  min-width: 300px;
+  z-index: 1001;
+  animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   max-width: 400px;
-  animation: slideIn 0.3s ease;
 }
 
-.toast.success {
-  border-left: 4px solid #10b981;
+.toast-notification.success {
+  background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
+  color: white;
 }
 
-.toast.error {
-  border-left: 4px solid #ef4444;
+.toast-notification.error {
+  background: linear-gradient(135deg, #dc3545 0%, #e4606d 100%);
+  color: white;
 }
 
-.toast.warning {
-  border-left: 4px solid #f59e0b;
+.toast-notification.warning {
+  background: linear-gradient(135deg, #ffc107 0%, #ffd54f 100%);
+  color: #856404;
 }
 
-.toast.info {
-  border-left: 4px solid #3b82f6;
+.toast-notification.info {
+  background: linear-gradient(135deg, #17a2b8 0%, #4dc0d1 100%);
+  color: white;
 }
 
-.toast i:first-child {
-  font-size: 20px;
+.toast-notification i {
+  font-size: 1.2rem;
+  flex-shrink: 0;
 }
 
-.toast.success i:first-child {
-  color: #10b981;
+.toast-notification span {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
-.toast.error i:first-child {
-  color: #ef4444;
-}
-
-.toast.warning i:first-child {
-  color: #f59e0b;
-}
-
-.toast.info i:first-child {
-  color: #3b82f6;
-}
-
-.close-toast {
-  margin-left: auto;
+.btn-toast-close {
+  background: none;
+  border: none;
+  color: inherit;
   cursor: pointer;
-  opacity: 0.6;
-  transition: opacity 0.2s;
-}
-
-.close-toast:hover {
-  opacity: 1;
-}
-
-.loading-spinner {
-  position: fixed;
-  bottom: 80px;
-  left: 20px;
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #3b82f6;
+  padding: 5px;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: all 0.2s ease;
 }
 
-@keyframes slideIn {
+.btn-toast-close:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes slideInRight {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateX(30px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
   }
 }
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 /* Header */
 .header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1284,7 +1593,6 @@ watch(() => editingNews.isFeatured, (newVal) => {
 .category-nav-wrapper:hover::-webkit-scrollbar-thumb {
   background-color: #cbd5e1;
 }
-
 
 .category-tabs {
   display: flex;
@@ -1659,11 +1967,7 @@ watch(() => editingNews.isFeatured, (newVal) => {
   letter-spacing: 0.5px;
 }
 
-.news-status.draft {
-  background: #f3f4f6;
-  color: #6b7280;
-}
-
+/* Cập nhật status styles - chỉ còn published và archived */
 .news-status.published {
   background: #d1fae5;
   color: #065f46;
@@ -1966,8 +2270,6 @@ watch(() => editingNews.isFeatured, (newVal) => {
   padding: 20px;
   background: white;
   min-height: 200px;
-  max-height: 400px;
-  overflow-y: auto;
 }
 
 .tiptap-preview {
@@ -2100,7 +2402,9 @@ watch(() => editingNews.isFeatured, (newVal) => {
 }
 
 /* Modal */
-.modal-overlay {
+/* Modal Overlay */
+/* Modal centering fix */
+.modal-overlay-news {
   position: fixed;
   top: 0;
   left: 0;
@@ -2112,22 +2416,23 @@ watch(() => editingNews.isFeatured, (newVal) => {
   align-items: center;
   z-index: 1000;
   animation: fadeIn 0.2s ease;
+  padding: 20px;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.modal {
+.modal-news {
   background: white;
   border-radius: 12px;
-  width: 90%;
+  width: 100%;
   max-width: 500px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
   animation: modalSlideIn 0.3s ease;
+  margin: auto; /* Thêm để đảm bảo căn giữa */
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes modalSlideIn {
@@ -2451,5 +2756,35 @@ textarea.form-control {
     width: 100%;
     justify-content: center;
   }
+}
+
+/* Responsive cho datetime input */
+@media (max-width: 768px) {
+  input[type="datetime-local"] {
+    font-size: 14px;
+  }
+}
+
+/* Thêm vào phần CSS */
+.bulk-actions {
+  margin-right: auto;
+  margin-left: 16px;
+}
+
+.bulk-actions .btn-danger {
+  background: #ef4444;
+  color: white;
+  border: 1px solid #dc2626;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.bulk-actions .btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.bulk-actions .btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

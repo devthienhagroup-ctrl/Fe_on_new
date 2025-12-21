@@ -19,13 +19,13 @@
       >
         <i class="fas fa-cog"></i> Thông tin chung
       </button>
-      <button
-          class="tab-button"
-          :class="{ active: activeTab === 'posts' }"
-          @click="activeTab = 'posts'"
-      >
-        <i class="fas fa-newspaper"></i> Quản lý bài viết
-      </button>
+<!--      <button-->
+<!--          class="tab-button"-->
+<!--          :class="{ active: activeTab === 'posts' }"-->
+<!--          @click="activeTab = 'posts'"-->
+<!--      >-->
+<!--        <i class="fas fa-newspaper"></i> Quản lý bài viết-->
+<!--      </button>-->
       <button
           class="tab-button"
           :class="{ active: activeTab === 'styles' }"

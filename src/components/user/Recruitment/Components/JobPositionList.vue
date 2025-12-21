@@ -16,10 +16,11 @@
               @mouseleave="resetHoveredIndex"
           >
             <div class="position-content">
-              <h3>{{ position }}</h3>
+              <h3>{{ position.title }}</h3>
               <div class="button-container">
                 <button
                     class="btn apply-btn"
+                    @click="emit('applyClick')"
                     :style="{
                     background: config.buttonGradient,
                     color: config.buttonTextColor
@@ -27,15 +28,23 @@
                 >
                   {{ config.applyButtonText }}
                 </button>
-                <button
-                    class="btn detail-btn"
-                    :style="{
-                    'border-color': config.primaryColor,
-                    color: config.primaryColor
-                  }"
+                <router-link
+                    :to="position.link || '#'"
+                    custom
+                    v-slot="{ navigate, href, isActive, isExactActive }"
                 >
-                  {{ config.detailButtonText }}
-                </button>
+                  <button
+                      class="btn detail-btn"
+                      :style="{
+                      'border-color': config.primaryColor,
+                      color: config.primaryColor
+                    }"
+                      @click="navigate"
+                      :href="href"
+                  >
+                    {{ config.detailButtonText }}
+                  </button>
+                </router-link>
               </div>
             </div>
           </div>
@@ -54,8 +63,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import {ref, computed, defineEmits} from 'vue'
 import {baseImgaeUrl} from "../../../../assets/js/global.js";
+import { RouterLink } from 'vue-router'
+
+const emit = defineEmits(['applyClick'])
 
 let config = {
   // Text content
@@ -65,15 +77,15 @@ let config = {
   imageUrl: '/imgs/coi-hoi-viec-lam.png',
   imageAlt: 'Cơ hội việc làm',
 
-  // Positions data
+  // Positions data với link
   positions: [
-    'Nhân viên telesale',
-    'Nhân viên văn phòng',
-    'Chuyên viên tư vấn',
-    'Chuyên viên định giá BĐS',
-    'Nhân viên khảo sát thị trường',
-    'Môi giới bất động sản',
-    'Cộng tác viên THG'
+    { title: 'Nhân viên telesale', link: '' },
+    { title: 'Nhân viên văn phòng', link: '' },
+    { title: 'Chuyên viên tư vấn', link: '' },
+    { title: 'Chuyên viên định giá BĐS', link: '' },
+    { title: 'Nhân viên khảo sát thị trường', link: '' },
+    { title: 'Môi giới bất động sản', link: '' },
+    { title: 'Cộng tác viên THG', link: '' }
   ],
 
   // Colors
@@ -261,6 +273,11 @@ const cssVars = computed(() => ({
   animation: fadeInUp 0.3s ease;
 }
 
+.button-container a {
+  text-decoration: none;
+  display: contents;
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -283,6 +300,10 @@ const cssVars = computed(() => ({
   font-size: v-bind('config.buttonFontSize');
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .apply-btn {

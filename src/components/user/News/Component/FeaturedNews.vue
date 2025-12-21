@@ -7,33 +7,72 @@
       <!-- Cột trái - Tin tức -->
       <div class="left-column">
         <!-- Tin nổi bật nhất -->
-        <div class="featured-news" v-if="newsArticles.length > 0">
+        <div class="featured-news" v-if="sortedNews.length > 0" @click="goToNews(sortedNews[0])">
           <div class="featured-image-container">
-            <img :src="newsArticles[0].image" :alt="newsArticles[0].title" class="featured-image">
-            <div class="date-overlay" :style="{ backgroundColor: config.colors.dateOverlayBg, color: config.colors.primary }">{{ newsArticles[0].date }}</div>
+            <img :src="sortedNews[0].thumbnail" :alt="sortedNews[0].title" class="featured-image">
+            <div class="date-overlay"
+                 :style="{ backgroundColor: config.colors.dateOverlayBg, color: config.colors.primary }">
+              {{ formatDate(sortedNews[0].createAt) }}
+            </div>
           </div>
           <div class="featured-info">
-            <h2 class="featured-title" :style="{ color: config.colors.primary }">{{ newsArticles[0].title }}</h2>
-            <p class="featured-subtitle" :style="{ color: config.colors.textSecondary }">{{ newsArticles[0].subtitle }}</p>
-            <div class="category-tag" :style="{ color: config.colors.primary }">{{ newsArticles[0].category }}</div>
+            <h2 class="featured-title" :style="{ color: config.colors.primary }">{{ sortedNews[0].title }}</h2>
+            <p class="featured-subtitle" :style="{ color: config.colors.textSecondary }">{{ sortedNews[0].summary }}</p>
+            <div class="featured-meta">
+              <span class="meta-item">
+                <i class="fa-regular fa-newspaper"></i>
+                {{ sortedNews[0].categoryName }}
+              </span>
+              <span class="meta-item">
+                <i class="fa-solid fa-user-pen"></i>
+                {{ sortedNews[0].employeeName }}
+              </span>
+              <span class="meta-item">
+                <i class="fa-regular fa-eye"></i>
+                {{ sortedNews[0].viewCount }} lượt xem
+              </span>
+            </div>
+            <div class="category-tag" :style="{ color: config.colors.primary }">{{ sortedNews[0].categoryName }}</div>
           </div>
         </div>
 
         <!-- Các tin nổi bật khác -->
-        <div class="other-news" v-if="newsArticles.length > 1">
+        <div class="other-news" v-if="sortedNews.length > 1">
           <div
-              v-for="(article, index) in newsArticles.slice(1)"
-              :key="index"
+              v-for="(article, index) in sortedNews.slice(1)"
+              :key="article.id || index"
               class="news-item"
+              @click="goToNews(article)"
           >
             <div class="news-image-container">
-              <img :src="article.image" :alt="article.title" class="news-image">
-              <div class="date-overlay" :style="{ backgroundColor: config.colors.dateOverlayBg, color: config.colors.primary }">{{ article.date }}</div>
+              <img :src="article.thumbnail" :alt="article.title" class="news-image">
+              <div class="date-overlay"
+                   :style="{ backgroundColor: config.colors.dateOverlayBg, color: config.colors.primary }">
+                {{ formatDate(article.createAt) }}
+              </div>
             </div>
             <div class="news-info">
-              <h3 class="news-title" :style="{ color: config.colors.primary }">{{ article.title }}</h3>
-              <p class="news-subtitle" :style="{ color: config.colors.textSecondary }">{{ article.subtitle }}</p>
-              <div class="category-tag" :style="{ color: config.colors.primary }">{{ article.category }}</div>
+              <div class="info-wrapper">
+                <h3 class="news-title" :style="{ color: config.colors.primary }">{{ article.title }}</h3>
+                <p class="news-subtitle" :style="{ color: config.colors.textSecondary }">{{ article.summary }}</p>
+              </div>
+              <div class="meta-wrapper">
+                <div class="news-meta">
+                <span class="meta-item">
+                  <i class="fa-regular fa-newspaper"></i>
+                  {{ article.categoryName }}
+                </span>
+                  <span class="meta-item">
+                  <i class="fa-solid fa-user-pen"></i>
+                  {{ article.employeeName }}
+                </span>
+                  <span class="meta-item">
+                  <i class="fa-regular fa-eye"></i>
+                  {{ article.viewCount }}
+                </span>
+                </div>
+                <div class="category-tag" :style="{ color: config.colors.primary }">{{ article.categoryName }}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -121,128 +160,60 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import {ref, reactive, computed} from 'vue'
 
-// Object config cho CMS
-let config = {
-  colors: {
-    primary: '#031358',
-    secondary: '#0030FF',
-    textSecondary: '#6B7280',
-    white: '#FFFFFF',
-    dateOverlayBg: 'rgba(255, 255, 255, 0.8)',
-    buttonShadow: 'rgba(3, 19, 88, 0.3)'
-  },
-  typography: {
-    mainTitle: {
-      fontSize: '36px',
-      fontWeight: '700'
-    },
-    featuredTitle: {
-      fontSize: '25px',
-      fontWeight: '700'
-    },
-    featuredSubtitle: {
-      fontSize: '20px'
-    },
-    newsTitle: {
-      fontSize: '18px',
-      fontWeight: '700'
-    },
-    newsSubtitle: {
-      fontSize: '16px'
-    },
-    formTitle: {
-      fontSize: '33px',
-      fontWeight: '700'
-    },
-    formLabel: {
-      fontSize: '16px',
-      focusFontSize: '12px'
-    },
-    button: {
-      fontSize: '18px',
-      fontWeight: '700'
-    },
-    categoryTag: {
-      fontSize: '14px',
-      fontWeight: '500'
-    }
-  },
-  spacing: {
-    containerMaxWidth: '1400px',
-    containerMarginTop: '80px',
-    containerPadding: '20px',
-    contentGap: '30px',
-    featuredImageHeight: '400px',
-    newsImageHeight: '200px',
-    formPadding: '25px',
-    buttonPadding: '15px'
-  },
-  borderRadius: {
-    small: '4px',
-    medium: '8px'
-  },
-  shadows: {
-    card: '0 4px 12px rgba(0, 0, 0, 0.1)',
-    buttonHover: '0 4px 12px rgba(3, 19, 88, 0.3)'
-  },
-  gradients: {
-    button: 'linear-gradient(to right, #031358, #0030FF)'
-  },
-  transitions: {
-    default: '0.3s',
-    formLabel: 'all 0.3s ease'
+
+const emit = defineEmits(['goToNews'])
+
+const goToNews = (news) => {
+  const newsDTO = {
+    id: news.id,
+    slug: news.slug,
+    title: news.title,
+    thumbnail: news.thumbnail,
+    viewAt: new Date().toISOString()
   }
+
+  emit('goToNews', newsDTO)
 }
 
+
+// Object config cho CMS
+let config = {}
+
 const props = defineProps({
-  sectionData: Object
+  sectionData: Object,
+  featureNews: Object
 })
 
-if(props.sectionData) {
+if (props.sectionData) {
   config = props.sectionData;
   console.log("Đã nhận props", config)
 }
 
-// Dữ liệu tin tức
-const newsArticles = ref([
-  {
-    title: "Bất động sản Thiên Hà Group vinh dự đón nhận giải thưởng top 10 thương hiệu xuất sắc châu á 2024",
-    subtitle: "Giải thưởng danh giá này là minh chứng cho nỗ lực không ngừng của Thiên Hà Group trong việc phát triển các dự án bền vững, mang lại giá trị thật cho khách hàng và đóng góp tích cực cho sự phát triển của ngành bất động sản Việt Nam....",
-    category: "Tin tức | Hoạt động",
-    date: "12/11/2024",
-    image: "/imgs/hd6.jpg"
-  },
-  {
-    title: "Thị trường bất động sản phục hồi mạnh mẽ cuối năm 2025",
-    subtitle: "Sau giai đoạn trầm lắng, thị trường đang ghi nhận tín hiệu tích cực với sự quay trở lại của dòng vốn đầu tư và nhu cầu nhà ở tăng cao......",
-    category: "Giải pháp Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/bannhanhbds.png"
-  },
-  {
-    title: "Dòng tiền đầu tư quay lại bất động sản: Cơ hội vàng cho DN Việt",
-    subtitle: "Các chính sách hỗ trợ, cùng tín hiệu tích cực từ thị trường tài chính, đang mở ra giai đoạn tăng trưởng mới cho ngành bất động sản trong nước....",
-    category: "Đăng tin Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/bannhanhbds.png"
-  },
-  {
-    title: "Người trẻ chuộng mua nhà sẵn nội thất thay vì tự xây",
-    subtitle: "Xu hướng 'sống tiện nghi ngay khi nhận nhà' đang được thế hệ trẻ ưa chuộng. Các dự án căn hộ bàn giao hoàn thiện nội thất trở thành....",
-    category: "Định giá Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/bannhanhbds.png"
-  },
-  {
-    title: "Bất động sản xanh – Xu hướng mới dẫn đầu cuối năm 2025",
-    subtitle: "Mô hình đô thị xanh, thân thiện môi trường đang trở thành lựa chọn hàng đầu của người mua nhà....",
-    category: "Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/bannhanhbds.png"
+// Tính toán danh sách tin tức đã sắp xếp
+const sortedNews = computed(() => {
+  if (!props.featureNews || !Array.isArray(props.featureNews)) {
+    return []
   }
-]);
+
+  // Sắp xếp theo priority tăng dần
+  return [...props.featureNews]
+      .filter(news => news.status === 'PUBLISHED' && news.isFeatured)
+      .sort((a, b) => a.priority - b.priority)
+})
+
+// Hàm format ngày tháng
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+
+  const date = new Date(dateString)
+  return date.toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+}
 
 const formData = reactive({
   fullName: '',
@@ -252,51 +223,51 @@ const formData = reactive({
   area: ''
 })
 
-// Computed properties từ config
+// Computed properties từ config (giữ nguyên)
 const cssVars = computed(() => ({
-  '--color-primary': config.colors.primary,
-  '--color-secondary': config.colors.secondary,
-  '--color-text-secondary': config.colors.textSecondary,
-  '--color-white': config.colors.white,
-  '--color-date-overlay-bg': config.colors.dateOverlayBg,
-  '--color-button-shadow': config.colors.buttonShadow,
+  '--color-primary': config.colors?.primary || '#031358',
+  '--color-secondary': config.colors?.secondary || '#ff6b35',
+  '--color-text-secondary': config.colors?.textSecondary || '#666',
+  '--color-white': config.colors?.white || '#fff',
+  '--color-date-overlay-bg': config.colors?.dateOverlayBg || 'rgba(255, 255, 255, 0.9)',
+  '--color-button-shadow': config.colors?.buttonShadow || 'rgba(0, 0, 0, 0.2)',
 
-  '--font-size-main-title': config.typography.mainTitle.fontSize,
-  '--font-weight-main-title': config.typography.mainTitle.fontWeight,
-  '--font-size-featured-title': config.typography.featuredTitle.fontSize,
-  '--font-weight-featured-title': config.typography.featuredTitle.fontWeight,
-  '--font-size-featured-subtitle': config.typography.featuredSubtitle.fontSize,
-  '--font-size-news-title': config.typography.newsTitle.fontSize,
-  '--font-weight-news-title': config.typography.newsTitle.fontWeight,
-  '--font-size-news-subtitle': config.typography.newsSubtitle.fontSize,
-  '--font-size-form-title': config.typography.formTitle.fontSize,
-  '--font-weight-form-title': config.typography.formTitle.fontWeight,
-  '--font-size-form-label': config.typography.formLabel.fontSize,
-  '--font-size-form-label-focus': config.typography.formLabel.focusFontSize,
-  '--font-size-button': config.typography.button.fontSize,
-  '--font-weight-button': config.typography.button.fontWeight,
-  '--font-size-category-tag': config.typography.categoryTag.fontSize,
-  '--font-weight-category-tag': config.typography.categoryTag.fontWeight,
+  '--font-size-main-title': config.typography?.mainTitle?.fontSize || '36px',
+  'font-weight-main-title': config.typography?.mainTitle?.fontWeight || '700',
+  '--font-size-featured-title': config.typography?.featuredTitle?.fontSize || '28px',
+  'font-weight-featured-title': config.typography?.featuredTitle?.fontWeight || '600',
+  '--font-size-featured-subtitle': config.typography?.featuredSubtitle?.fontSize || '16px',
+  '--font-size-news-title': config.typography?.newsTitle?.fontSize || '20px',
+  'font-weight-news-title': config.typography?.newsTitle?.fontWeight || '600',
+  '--font-size-news-subtitle': config.typography?.newsSubtitle?.fontSize || '14px',
+  '--font-size-form-title': config.typography?.formTitle?.fontSize || '24px',
+  'font-weight-form-title': config.typography?.formTitle?.fontWeight || '600',
+  '--font-size-form-label': config.typography?.formLabel?.fontSize || '16px',
+  '--font-size-form-label-focus': config.typography?.formLabel?.focusFontSize || '12px',
+  '--font-size-button': config.typography?.button?.fontSize || '18px',
+  'font-weight-button': config.typography?.button?.fontWeight || '600',
+  '--font-size-category-tag': config.typography?.categoryTag?.fontSize || '12px',
+  'font-weight-category-tag': config.typography?.categoryTag?.fontWeight || '500',
 
-  '--spacing-container-max-width': config.spacing.containerMaxWidth,
-  '--spacing-container-margin-top': config.spacing.containerMarginTop,
-  '--spacing-container-padding': config.spacing.containerPadding,
-  '--spacing-content-gap': config.spacing.contentGap,
-  '--spacing-featured-image-height': config.spacing.featuredImageHeight,
-  '--spacing-news-image-height': config.spacing.newsImageHeight,
-  '--spacing-form-padding': config.spacing.formPadding,
-  '--spacing-button-padding': config.spacing.buttonPadding,
+  '--spacing-container-max-width': config.spacing?.containerMaxWidth || '1200px',
+  '--spacing-container-margin-top': config.spacing?.containerMarginTop || '50px',
+  '--spacing-container-padding': config.spacing?.containerPadding || '20px',
+  '--spacing-content-gap': config.spacing?.contentGap || '30px',
+  '--spacing-featured-image-height': config.spacing?.featuredImageHeight || '400px',
+  '--spacing-news-image-height': config.spacing?.newsImageHeight || '200px',
+  '--spacing-form-padding': config.spacing?.formPadding || '30px',
+  '--spacing-button-padding': config.spacing?.buttonPadding || '15px',
 
-  '--border-radius-small': config.borderRadius.small,
-  '--border-radius-medium': config.borderRadius.medium,
+  '--border-radius-small': config.borderRadius?.small || '8px',
+  '--border-radius-medium': config.borderRadius?.medium || '12px',
 
-  '--shadow-card': config.shadows.card,
-  '--shadow-button-hover': config.shadows.buttonHover,
+  '--shadow-card': config.shadows?.card || '0 4px 20px rgba(0, 0, 0, 0.1)',
+  '--shadow-button-hover': config.shadows?.buttonHover || '0 6px 25px rgba(0, 0, 0, 0.15)',
 
-  '--gradient-button': config.gradients.button,
+  '--gradient-button': config.gradients?.button || 'linear-gradient(135deg, #031358 0%, #ff6b35 100%)',
 
-  '--transition-default': config.transitions.default,
-  '--transition-form-label': config.transitions.formLabel
+  '--transition-default': config.transitions?.default || '0.3s ease',
+  '--transition-form-label': config.transitions?.formLabel || 'all 0.3s ease'
 }))
 
 // Xử lý submit form
@@ -319,7 +290,13 @@ const submitForm = () => {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Ubuntu', sans-serif;
+}
+
+.meta-wrapper {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
 }
 
 .news-container {
@@ -327,22 +304,22 @@ const submitForm = () => {
     v-bind: cssVars;
   }
 
-  max-width: v-bind('config.spacing.containerMaxWidth');
-  margin: v-bind('config.spacing.containerMarginTop') auto 0;
-  padding: v-bind('config.spacing.containerPadding');
+  max-width: v-bind('config.spacing?.containerMaxWidth || "1200px"');
+  margin: v-bind('config.spacing?.containerMarginTop || "50px"') auto 0;
+  padding: v-bind('config.spacing?.containerPadding || "20px"');
 }
 
 .main-title {
   text-align: center;
-  color: v-bind('config.colors.primary');
-  font-size: v-bind('config.typography.mainTitle.fontSize');
-  font-weight: v-bind('config.typography.mainTitle.fontWeight');
+  color: v-bind('config.colors?.primary || "#031358"');
+  font-size: v-bind('config.typography?.mainTitle?.fontSize || "36px"');
+  font-weight: v-bind('config.typography?.mainTitle?.fontWeight || "700"');
   margin-bottom: 40px;
 }
 
 .content-wrapper {
   display: flex;
-  gap: v-bind('config.spacing.contentGap');
+  gap: v-bind('config.spacing?.contentGap || "30px"');
 }
 
 /* Cột trái - Tin tức */
@@ -352,16 +329,32 @@ const submitForm = () => {
 
 .featured-news {
   margin-bottom: 30px;
-  box-shadow: v-bind('config.shadows.card');
-  border-radius: v-bind('config.borderRadius.medium');
+  box-shadow: v-bind('config.shadows?.card || "0 4px 20px rgba(0, 0, 0, 0.1)"');
+  border-radius: v-bind('config.borderRadius?.medium || "12px"');
   overflow: hidden;
-  background-color: v-bind('config.colors.white');
+  background-color: v-bind('config.colors?.white || "#fff"');
+  transition: all v-bind('config.transitions?.default || "0.3s ease"');
+  cursor: pointer;
+  position: relative;
+}
+
+.featured-news:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.featured-news:hover .featured-image {
+  transform: scale(1.05);
+}
+
+.featured-news:hover .featured-title {
+  color: v-bind('config.colors?.secondary || "#ff6b35"');
 }
 
 .featured-image-container {
   position: relative;
   width: 100%;
-  height: v-bind('config.spacing.featuredImageHeight');
+  height: v-bind('config.spacing?.featuredImageHeight || "400px"');
   overflow: hidden;
 }
 
@@ -369,51 +362,91 @@ const submitForm = () => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform v-bind('config.transitions?.default || "0.3s ease"');
 }
 
 .date-overlay {
   position: absolute;
   bottom: 15px;
   right: 15px;
-  background-color: v-bind('config.colors.dateOverlayBg');
-  color: v-bind('config.colors.primary');
+  background-color: v-bind('config.colors?.dateOverlayBg || "rgba(255, 255, 255, 0.9)"');
+  color: v-bind('config.colors?.primary || "#031358"');
   padding: 5px 10px;
-  border-radius: v-bind('config.borderRadius.small');
+  border-radius: v-bind('config.borderRadius?.small || "8px"');
   font-size: 14px;
   font-weight: 500;
+  transition: all v-bind('config.transitions?.default || "0.3s ease"');
+  z-index: 2;
+}
+
+.featured-news:hover .date-overlay {
+  background-color: v-bind('config.colors?.primary || "#031358"');
+  color: v-bind('config.colors?.white || "#fff"');
 }
 
 .featured-info {
-  background-color: v-bind('config.colors.white');
+  background-color: v-bind('config.colors?.white || "#fff"');
   padding: 25px;
   position: relative;
 }
 
 .featured-title {
-  color: v-bind('config.colors.primary');
-  font-size: v-bind('config.typography.featuredTitle.fontSize');
-  font-weight: v-bind('config.typography.featuredTitle.fontWeight');
+  color: v-bind('config.colors?.primary || "#031358"');
+  font-size: v-bind('config.typography?.featuredTitle?.fontSize || "28px"');
+  font-weight: v-bind('config.typography?.featuredTitle?.fontWeight || "600"');
   margin-bottom: 15px;
   line-height: 1.3;
+  transition: color v-bind('config.transitions?.default || "0.3s ease"');
 }
 
 .featured-subtitle {
-  color: v-bind('config.colors.textSecondary');
-  font-size: v-bind('config.typography.featuredSubtitle.fontSize');
+  color: v-bind('config.colors?.textSecondary || "#666"');
+  font-size: v-bind('config.typography?.featuredSubtitle?.fontSize || "16px"');
   line-height: 1.5;
   margin-bottom: 20px;
 }
 
-.category-tag {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
-  color: v-bind('config.colors.primary');
-  font-size: v-bind('config.typography.categoryTag.fontSize');
-  font-weight: v-bind('config.typography.categoryTag.fontWeight');
+/* Metadata cho tin nổi bật */
+.featured-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
 }
 
-/* Các tin nổi bật khác - không có đổ bóng và nền */
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  color: #666;
+  transition: color v-bind('config.transitions?.default || "0.3s ease"');
+}
+
+.featured-news:hover .meta-item {
+  color: v-bind('config.colors?.primary || "#031358"');
+}
+
+.meta-icon {
+  font-size: 14px;
+}
+
+.category-tag {
+  display: block;
+  text-align: right;
+  color: v-bind('config.colors?.primary || "#031358"');
+  font-size: v-bind('config.typography?.categoryTag?.fontSize || "12px"');
+  font-weight: v-bind('config.typography?.categoryTag?.fontWeight || "500"');
+  transition: color v-bind('config.transitions?.default || "0.3s ease"');
+}
+
+.featured-news:hover .category-tag {
+  color: v-bind('config.colors?.secondary || "#ff6b35"');
+}
+
+/* Các tin nổi bật khác */
 .other-news {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -421,52 +454,99 @@ const submitForm = () => {
 }
 
 .news-item {
-  /* Loại bỏ đổ bóng và nền */
   background: transparent;
   border-radius: 0;
   overflow: hidden;
+  cursor: pointer;
+  transition: all v-bind('config.transitions?.default || "0.3s ease"');
+  border-bottom: 2px solid transparent;
+  padding-bottom: 10px;
+}
+
+.news-item:hover {
+  transform: translateY(-3px);
+  border-bottom: 2px solid v-bind('config.colors?.secondary || "#ff6b35"');
+}
+
+.news-item:hover .news-image {
+  transform: scale(1.05);
+}
+
+.news-item:hover .news-title {
+  color: v-bind('config.colors?.secondary || "#ff6b35"');
+}
+
+.news-item:hover .date-overlay {
+  background-color: v-bind('config.colors?.primary || "#031358"');
+  color: v-bind('config.colors?.white || "#fff"');
+}
+
+.news-item:hover .category-tag {
+  color: v-bind('config.colors?.secondary || "#ff6b35"');
 }
 
 .news-image-container {
   position: relative;
   width: 100%;
-  height: v-bind('config.spacing.newsImageHeight');
+  height: v-bind('config.spacing?.newsImageHeight || "200px"');
   overflow: hidden;
+  border-radius: v-bind('config.borderRadius?.small || "8px"');
 }
 
 .news-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform v-bind('config.transitions?.default || "0.3s ease"');
 }
 
 .news-info {
-  /* Loại bỏ nền trắng */
   background: transparent;
   padding: 15px 0;
   position: relative;
   height: auto;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 200px; /* THÊM DÒNG NÀY */
+}
+
+.info-wrapper {
+  flex: 1; /* THÊM DÒNG NÀY - chiếm không gian còn lại */
 }
 
 .news-title {
-  color: v-bind('config.colors.primary');
-  font-size: v-bind('config.typography.newsTitle.fontSize');
-  font-weight: v-bind('config.typography.newsTitle.fontWeight');
+  color: v-bind('config.colors?.primary || "#031358"');
+  font-size: v-bind('config.typography?.newsTitle?.fontSize || "20px"');
+  font-weight: v-bind('config.typography?.newsTitle?.fontWeight || "600"');
   margin-bottom: 10px;
   line-height: 1.3;
+  transition: color v-bind('config.transitions?.default || "0.3s ease"');
 }
 
 .news-subtitle {
-  color: v-bind('config.colors.textSecondary');
-  font-size: v-bind('config.typography.newsSubtitle.fontSize');
+  color: v-bind('config.colors?.textSecondary || "#666"');
+  font-size: v-bind('config.typography?.newsSubtitle?.fontSize || "14px"');
   line-height: 1.4;
-  margin-bottom: 25px;
+  margin-bottom: 15px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Metadata cho tin thường */
+.news-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
+.news-item:hover .news-meta .meta-item {
+  color: v-bind('config.colors?.primary || "#031358"');
 }
 
 /* Cột phải - Form liên hệ */
@@ -482,18 +562,28 @@ const submitForm = () => {
 }
 
 .form-container {
-  background-color: v-bind('config.colors.white');
-  box-shadow: v-bind('config.shadows.card');
-  border-radius: v-bind('config.borderRadius.medium');
-  padding: v-bind('config.spacing.formPadding');
+  background-color: v-bind('config.colors?.white || "#fff"');
+  box-shadow: v-bind('config.shadows?.card || "0 4px 20px rgba(0, 0, 0, 0.1)"');
+  border-radius: v-bind('config.borderRadius?.medium || "12px"');
+  padding: v-bind('config.spacing?.formPadding || "30px"');
+  transition: all v-bind('config.transitions?.default || "0.3s ease"');
+}
+
+.form-container:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
 .form-title {
-  color: v-bind('config.colors.primary');
-  font-size: v-bind('config.typography.formTitle.fontSize');
-  font-weight: v-bind('config.typography.formTitle.fontWeight');
+  color: v-bind('config.colors?.primary || "#031358"');
+  font-size: v-bind('config.typography?.formTitle?.fontSize || "24px"');
+  font-weight: v-bind('config.typography?.formTitle?.fontWeight || "600"');
   margin-bottom: 25px;
   text-align: center;
+  transition: color v-bind('config.transitions?.default || "0.3s ease"');
+}
+
+.form-container:hover .form-title {
+  color: v-bind('config.colors?.secondary || "#ff6b35"');
 }
 
 .contact-form {
@@ -507,40 +597,53 @@ const submitForm = () => {
 
 .form-input {
   width: 100%;
-  padding: v-bind('config.spacing.buttonPadding') 0 10px 0;
+  padding: v-bind('config.spacing?.buttonPadding || "15px"') 0 10px 0;
   border: none;
-  border-bottom: 1px solid v-bind('config.colors.primary');
+  border-bottom: 1px solid v-bind('config.colors?.primary || "#031358"');
   background-color: transparent;
-  font-size: v-bind('config.typography.formLabel.fontSize');
-  color: v-bind('config.colors.primary');
+  font-size: v-bind('config.typography?.formLabel?.fontSize || "16px"');
+  color: v-bind('config.colors?.primary || "#031358"');
   outline: none;
-  transition: border-color v-bind('config.transitions.default');
+  transition: border-color v-bind('config.transitions?.default || "0.3s ease"');
+}
+
+.form-input:hover {
+  border-bottom: 1px solid v-bind('config.colors?.secondary || "#ff6b35"');
 }
 
 .form-input:focus {
-  border-bottom: 1px solid v-bind('config.colors.primary');
+  border-bottom: 2px solid v-bind('config.colors?.secondary || "#ff6b35"');
 }
 
 .form-label {
   position: absolute;
   top: 50%;
   left: 0;
-  font-size: v-bind('config.typography.formLabel.fontSize');
-  color: v-bind('config.colors.primary');
+  font-size: v-bind('config.typography?.formLabel?.fontSize || "16px"');
+  color: v-bind('config.colors?.primary || "#031358"');
   pointer-events: none;
-  transition: v-bind('config.transitions.formLabel');
+  transition: v-bind('config.transitions?.formLabel || "all 0.3s ease"');
   transform: translateY(-50%);
   opacity: 0.5;
+}
+
+.form-group:hover .form-label {
+  opacity: 0.8;
 }
 
 /* Hiệu ứng focus - label thu nhỏ và di chuyển lên trên */
 .form-input:focus + .form-label,
 .form-input:not(:placeholder-shown) + .form-label {
   top: 0;
-  font-size: v-bind('config.typography.formLabel.focusFontSize');
-  color: v-bind('config.colors.primary');
+  font-size: v-bind('config.typography?.formLabel?.focusFontSize || "12px"');
+  color: v-bind('config.colors?.secondary || "#ff6b35"');
   transform: translateY(0);
   opacity: 1;
+}
+
+.form-group:hover .form-input:focus + .form-label,
+.form-group:hover .form-input:not(:placeholder-shown) + .form-label {
+  color: v-bind('config.colors?.secondary || "#ff6b35"');
 }
 
 select.form-input {
@@ -549,31 +652,63 @@ select.form-input {
   background-repeat: no-repeat;
   background-position: right 8px center;
   background-size: 16px;
+  transition: all v-bind('config.transitions?.default || "0.3s ease"');
+}
+
+select.form-input:hover {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff6b35' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
 }
 
 .submit-btn {
   width: 100%;
-  padding: v-bind('config.spacing.buttonPadding');
-  background: v-bind('config.gradients.button');
-  color: v-bind('config.colors.white');
+  padding: v-bind('config.spacing?.buttonPadding || "15px"');
+  background: v-bind('config.gradients?.button || "linear-gradient(135deg, #031358 0%, #ff6b35 100%)"');
+  color: v-bind('config.colors?.white || "#fff"');
   border: none;
-  border-radius: v-bind('config.borderRadius.medium');
-  font-size: v-bind('config.typography.button.fontSize');
-  font-weight: v-bind('config.typography.button.fontWeight');
+  border-radius: v-bind('config.borderRadius?.medium || "12px"');
+  font-size: v-bind('config.typography?.button?.fontSize || "18px"');
+  font-weight: v-bind('config.typography?.button?.fontWeight || "600"');
   cursor: pointer;
-  transition: transform v-bind('config.transitions.default'), box-shadow v-bind('config.transitions.default');
+  transition: transform v-bind('config.transitions?.default || "0.3s ease"'),
+  box-shadow v-bind('config.transitions?.default || "0.3s ease"'),
+  background v-bind('config.transitions?.default || "0.3s ease"');
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
 }
 
 .submit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: v-bind('config.shadows.buttonHover');
+  box-shadow: v-bind('config.shadows?.buttonHover || "0 6px 25px rgba(0, 0, 0, 0.15)"');
+  background: linear-gradient(135deg, #031358 0%, #ff6b35 100%);
+}
+
+.submit-btn:hover::before {
+  left: 100%;
 }
 
 .form-image {
   margin-top: auto;
   width: 100%;
   height: auto;
-  border-radius: v-bind('config.borderRadius.medium');
+  border-radius: v-bind('config.borderRadius?.medium || "12px"');
+  transition: all v-bind('config.transitions?.default || "0.3s ease"');
+  cursor: pointer;
+}
+
+.form-image:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
 }
 
 /* Responsive */
@@ -619,6 +754,14 @@ select.form-input {
   .form-image {
     max-width: 100%;
   }
+
+  .featured-meta {
+    gap: 10px;
+  }
+
+  .meta-item {
+    font-size: 12px;
+  }
 }
 
 @media (max-width: 576px) {
@@ -631,7 +774,7 @@ select.form-input {
   }
 
   .featured-subtitle {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .form-title {
@@ -644,6 +787,16 @@ select.form-input {
 
   .news-image-container {
     height: 150px;
+  }
+
+  .featured-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .news-meta {
+    flex-direction: column;
+    gap: 5px;
   }
 }
 </style>

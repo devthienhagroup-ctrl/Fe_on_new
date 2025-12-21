@@ -4,7 +4,7 @@
       <!-- Bộ lọc nâng cao -->
       <div class="bg-white rounded-xl shadow-lg border border-slate-300 mb-5 p-4"
            style="
-            background-image: url('https://s3.cloudfly.vn/thg-storage/uploads-public/thienhagroup_filter_2.png');
+            background-image: url('https://s3.cloudfly.vn/thg-storage-dev/uploads-public/thienhagroup_filter_2.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -192,23 +192,6 @@
               <option value="no">Chưa mở</option>
             </select>
           </div>
-
-          <!-- Trạng thái -->
-          <div class="filter-item">
-            <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
-              <i class="fa-solid fa-circle-info text-pink-500 text-xs icon-glow"></i>
-              Trạng thái
-            </label>
-            <select v-model="filterStatus"
-                    class="w-full px-2 py-1.5 text-sm border border-slate-400 rounded-lg
-             focus:ring-2 focus:ring-blue-600 focus:border-transparent
-             bg-white shadow-sm transition-all">
-              <option value="">Tất cả</option>
-              <option value="Chưa bán">Chưa bán</option>
-              <option value="Đã bán">Đã bán</option>
-            </select>
-          </div>
-
           <!-- Đã thích -->
           <div class="filter-item">
             <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1 label-glow" style="color: white!important;">
@@ -791,7 +774,7 @@ const filterCreateDate = ref("");
 const filterUpdateDate = ref("");
 const searchQuery = ref("");
 const filterUnlock = ref("");
-const filterStatus = ref("");
+const filterStatus = ref("Chưa bán");
 const filterLove = ref(null);
 const isFilterMobile = ref(false);   // chỉ dùng cho FILTER
 const showFilterPanel = ref(true);   // trạng thái mở/đóng filter

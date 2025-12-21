@@ -114,7 +114,7 @@ import HeroInvm from "../components/cms/components/investment/Hero.vue";
 import InvmList from "../components/cms/components/investment/InvestmentList.vue";
 import InvmModal from "../components/cms/components/investment/InvestmentModal.vue";
 import NewsManagement from "../components/cms/news/NewsManagement.vue";
-import moigioi from "../components/user/MoiGioi/moigioi.vue"
+import NewsDetail from "../components/user/News/NewsDetail.vue";
 
 const routes = [
         {
@@ -122,10 +122,27 @@ const routes = [
             name: "LoginForm",
             component: LoginForm,
         },
+        // {
+        //     path: "/moi-gioi",
+        //     name: "MoiGioiShow",
+        //     component: moigioi,
+        // },
         {
-            path: "/01",
-            name: "LoginForm11111",
-            component: moigioi,
+            path: "/tin-tuc",
+            name: "News",
+            component: MenuUser,
+            children: [
+                {
+                    path: '',
+                    name: 'news',
+                    component: News
+                },
+                {
+                    path: ':id',
+                    name: 'news-detail',
+                    component: NewsDetail
+                }
+            ]
         },
         {
         path: '/-thg/quan-tri-noi-dung',
@@ -734,6 +751,7 @@ const routes = [
             path: "/",
             name: "Landinngpage",
             component: MenuUser,
+            meta: { enableTailwind: true },
             children: [
                 {
                     path: '',
@@ -846,18 +864,6 @@ const routes = [
             }
         ]
     },
-        {
-            path: "/tin-tuc",
-            name: "News",
-            component: MenuUser,
-            children: [
-                {
-                    path: '',
-                    name: 'news',
-                    component: News
-                }
-            ]
-        },
         {
             path: "/tinh-nang-dang-phat-trien",
             name: "fid",

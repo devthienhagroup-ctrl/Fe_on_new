@@ -5,15 +5,53 @@
 
     <div class="carousel-wrapper" :style="carouselWrapperStyle">
       <div class="carousel" ref="carouselRef" @scroll="updateProgress" :style="carouselStyle">
-        <div v-for="(item, index) in newsArticles" :key="index" class="news-item" :style="newsItemStyle">
+        <div
+            v-for="(news, index) in displayNews"
+            :key="news.id || index"
+            class="news-item"
+            :style="newsItemStyle"
+            @click="goToNews(news)"
+        >
           <div class="image-wrapper" :style="imageWrapperStyle">
-            <img :src="item.image" :alt="item.title" class="news-image" :style="newsImageStyle" />
-            <span class="date-label" :style="dateLabelStyle">{{ item.date }}</span>
+            <img
+                :src="news.thumbnail || defaultImage"
+                :alt="news.title"
+                class="news-image"
+                :style="newsImageStyle"
+                @error="handleImageError"
+            />
+            <span class="date-label" :style="dateLabelStyle">
+              {{ formatDate(news.createAt) }}
+            </span>
+            <div v-if="news.isFeatured" class="featured-badge" :style="featuredBadgeStyle">
+              <i class="fa-solid fa-star"></i> Nổi bật
+            </div>
           </div>
 
-          <div class="info" :style="infoStyle">
-            <h3 class="news-title" :style="newsTitleStyle">{{ item.title }}</h3>
-            <span class="category" :style="categoryStyle">{{ item.category }}</span>
+          <div class="news-content" :style="newsContentStyle">
+            <div class="content-wrapper">
+              <h3 class="news-title" :style="newsTitleStyle">{{ news.title }}</h3>
+              <p class="news-summary" :style="newsSummaryStyle">{{ news.summary }}</p>
+            </div>
+
+            <div class="bottom-section">
+              <div class="news-meta" :style="newsMetaStyle">
+                <span class="category" :style="categoryStyle">
+                  {{ news.categoryName || 'Chưa phân loại' }}
+                </span>
+                <div class="meta-stats" :style="metaStatsStyle">
+                  <span class="view-count" :style="viewCountStyle">
+                    <i class="fa-regular fa-eye"></i> {{ news.viewCount || 0 }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="news-footer" :style="newsFooterStyle">
+                <span class="author" :style="authorStyle">
+                  <i class="fa fa-user"/> {{ news.employeeName || 'Ẩn danh' }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -41,6 +79,20 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 
+const emit = defineEmits(['goToNews'])
+
+const goToNews = (news) => {
+  const newsDTO = {
+    id: news.id,
+    slug: news.slug,
+    title: news.title,
+    thumbnail: news.thumbnail,
+    viewAt: new Date().toISOString()
+  }
+
+  emit('goToNews', newsDTO)
+}
+
 // Config object - có thể quản lý qua CMS
 let config = {
   sectionTitle: "TIN TỨC MỚI NHẤT",
@@ -55,7 +107,11 @@ let config = {
     categoryBg: 'rgba(3, 19, 88, 0.1)',
     progressBarBg: 'rgba(255, 255, 255, 0.3)',
     controlBtnBg: 'rgba(255, 255, 255, 0.9)',
-    newsItemBg: 'rgba(255, 255, 255, 0.95)'
+    newsItemBg: 'rgba(255, 255, 255, 0.95)',
+    featuredBadgeBg: '#ff4757',
+    statusDraft: '#ffa502',
+    statusPublished: '#2ed573',
+    statusArchived: '#57606f'
   },
 
   // Typography
@@ -67,7 +123,11 @@ let config = {
     categorySize: '14px',
     categoryWeight: '500',
     dateLabelSize: '12px',
-    dateLabelWeight: '500'
+    dateLabelWeight: '500',
+    summarySize: '14px',
+    summaryWeight: '400',
+    metaSize: '12px',
+    metaWeight: '400'
   },
 
   // Spacing
@@ -82,15 +142,22 @@ let config = {
     categoryPadding: '4px 10px',
     controlsGap: '20px',
     controlsMarginTop: '20px',
-    progressBarMarginTop: '20px'
+    progressBarMarginTop: '20px',
+    summaryMarginTop: '8px',
+    metaMarginTop: '10px',
+    footerMarginTop: '12px'
   },
 
   // Sizes
   sizes: {
     newsItemWidth: '500px',
+    newsItemHeight: '650px',
+    newsItemHeightTablet: '580px',
+    newsItemHeightMobile: '520px',
     newsImageHeight: '300px',
     controlBtnSize: '50px',
-    progressBarHeight: '4px'
+    progressBarHeight: '4px',
+    featuredBadgeHeight: '24px'
   },
 
   // Border Radius
@@ -100,7 +167,8 @@ let config = {
     dateLabel: '6px',
     category: '20px',
     controlBtn: '50%',
-    progressBar: '10px'
+    progressBar: '10px',
+    featuredBadge: '4px'
   },
 
   // Shadows
@@ -159,7 +227,11 @@ let config = {
 }
 
 const props = defineProps({
-  sectionData: Object
+  sectionData: Object,
+  latestNews: {
+    type: Array,
+    default: () => []
+  }
 })
 
 if(props.sectionData) {
@@ -168,6 +240,8 @@ if(props.sectionData) {
 }
 
 const sectionTitle = ref(config.sectionTitle);
+const defaultImage = '/imgs/dangtinbds.png';
+
 // Computed properties for styles
 const sectionStyle = computed(() => ({
   fontFamily: "'Ubuntu', sans-serif",
@@ -220,7 +294,10 @@ const newsItemStyle = computed(() => ({
   boxShadow: config.shadows.newsItem,
   cursor: 'pointer',
   flexShrink: '0',
-  position: 'relative'
+  position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+  height: config.sizes.newsItemHeight
 }))
 
 const imageWrapperStyle = computed(() => ({
@@ -250,7 +327,24 @@ const dateLabelStyle = computed(() => ({
   backdropFilter: `blur(${config.opacity.backdropFilter})`
 }))
 
-const infoStyle = computed(() => ({
+const featuredBadgeStyle = computed(() => ({
+  position: 'absolute',
+  top: '10px',
+  left: '10px',
+  background: config.colors.featuredBadgeBg,
+  color: config.colors.white,
+  padding: '2px 8px',
+  borderRadius: config.borderRadius.featuredBadge,
+  fontSize: '11px',
+  fontWeight: 'bold',
+  zIndex: 2
+}))
+
+const newsContentStyle = computed(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  flexGrow: '1',
   marginTop: config.spacing.infoMarginTop,
   textAlign: 'left',
   padding: '0 5px'
@@ -261,25 +355,68 @@ const newsTitleStyle = computed(() => ({
   fontSize: config.typography.newsTitleSize,
   fontWeight: config.typography.newsTitleWeight,
   lineHeight: '1.3',
-  marginBottom: '20px',
+  marginBottom: '10px',
+  display: '-webkit-box',
+  WebkitLineClamp: '2',
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden'
+}))
+
+const newsSummaryStyle = computed(() => ({
+  color: '#555',
+  fontSize: config.typography.summarySize,
+  fontWeight: config.typography.summaryWeight,
+  lineHeight: '1.5',
+  marginTop: config.spacing.summaryMarginTop,
   display: '-webkit-box',
   WebkitLineClamp: '3',
   WebkitBoxOrient: 'vertical',
   overflow: 'hidden'
 }))
 
+const newsMetaStyle = computed(() => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginTop: 'auto',
+  paddingTop: '10px'
+}))
+
 const categoryStyle = computed(() => ({
   display: 'inline-block',
-  marginTop: '6px',
   fontSize: config.typography.categorySize,
   color: config.colors.primary,
   fontWeight: config.typography.categoryWeight,
   padding: config.spacing.categoryPadding,
   background: config.colors.categoryBg,
-  borderRadius: config.borderRadius.category,
-  position: 'absolute',
-  bottom: '5px',
-  right: '5px'
+  borderRadius: config.borderRadius.category
+}))
+
+const metaStatsStyle = computed(() => ({
+  display: 'flex',
+  gap: '8px',
+  alignItems: 'center'
+}))
+
+const viewCountStyle = computed(() => ({
+  fontSize: config.typography.metaSize,
+  color: '#666'
+}))
+
+const newsFooterStyle = computed(() => ({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  alignItems: 'center',
+  marginTop: '8px',
+  paddingTop: '8px',
+  borderTop: '1px solid #eee',
+  width: '100%'
+}))
+
+const authorStyle = computed(() => ({
+  fontSize: config.typography.metaSize,
+  color: '#666',
+  fontStyle: 'italic'
 }))
 
 const carouselControlsStyle = computed(() => ({
@@ -322,82 +459,105 @@ const progressStyle = computed(() => ({
   width: `${progress.value}%`
 }))
 
-// Original data and logic (unchanged)
+// Computed property for news data
+const displayNews = computed(() => {
+  if (!props.latestNews || props.latestNews.length === 0) {
+    return newsArticles.value; // Fallback to static data if no props
+  }
+
+  return props.latestNews
+      .filter(news => news.status === 'PUBLISHED' || news.status === 'published')
+      .sort((a, b) => {
+        // Sort by featured first, then by priority, then by date
+        if (a.isFeatured && !b.isFeatured) return -1;
+        if (!a.isFeatured && b.isFeatured) return 1;
+        if (a.priority !== b.priority) return (b.priority || 0) - (a.priority || 0);
+        return new Date(b.createAt) - new Date(a.createAt);
+      });
+})
+
+// Helper methods
+const formatDate = (dateString) => {
+  if (!dateString) return 'Không có ngày';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  } catch (e) {
+    return 'Invalid date';
+  }
+}
+
+const getStatusText = (status) => {
+  const statusMap = {
+    'DRAFT': 'Nháp',
+    'PUBLISHED': 'Đã xuất bản',
+    'ARCHIVED': 'Lưu trữ',
+    'published': 'Đã xuất bản',
+    'draft': 'Nháp',
+    'archived': 'Lưu trữ'
+  };
+  return statusMap[status] || status || 'Unknown';
+}
+
+const getStatusColor = (status) => {
+  const statusColorMap = {
+    'DRAFT': config.colors.statusDraft,
+    'PUBLISHED': config.colors.statusPublished,
+    'ARCHIVED': config.colors.statusArchived,
+    'published': config.colors.statusPublished,
+    'draft': config.colors.statusDraft,
+    'archived': config.colors.statusArchived
+  };
+  return statusColorMap[status] || config.colors.statusDraft;
+}
+
+const handleImageError = (event) => {
+  event.target.src = defaultImage;
+}
+
+
+
+// Original static data (fallback)
 const newsArticles = ref([
   {
     title: "Bất động sản Thiên Hà Group vinh dự đón nhận giải thưởng top 10 thương hiệu xuất sắc châu á 2024",
-    category: "Tin tức | Hoạt động",
+    categoryName: "Tin tức | Hoạt động",
     date: "12/11/2024",
-    image: "/imgs/hd6.jpg"
+    thumbnail: "/imgs/hd6.jpg",
+    summary: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum.",
+    viewCount: 1234,
+    employeeName: "Nguyễn Văn A",
+    createAt: "2024-12-11",
+    isFeatured: true
   },
   {
-    title: "Thị trường bất động sản phục hồi mạnh mẽ cuối năm 2025",
-    category: "Giải pháp Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/dangtinbds.png"
+    title: "Dự án mới tại Quận 7 chính thức ra mắt thị trường",
+    categoryName: "Dự án",
+    date: "10/11/2024",
+    thumbnail: "/imgs/hd5.jpg",
+    summary: "Dự án cao cấp tại Quận 7 với nhiều tiện ích hiện đại",
+    viewCount: 856,
+    employeeName: "Trần Thị B",
+    createAt: "2024-11-10",
+    isFeatured: false
   },
   {
-    title: "Dòng tiền đầu tư quay lại bất động sản: Cơ hội vàng cho DN Việt",
-    category: "Đăng tin Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/dangtinbds.png"
+    title: "Thị trường bất động sản 2025: Xu hướng và dự báo",
+    categoryName: "Phân tích",
+    date: "05/11/2024",
+    thumbnail: "/imgs/hd4.jpg",
+    summary: "Phân tích chi tiết về xu hướng thị trường bất động sản trong năm 2025 từ các chuyên gia hàng đầu",
+    viewCount: 2456,
+    employeeName: "Lê Văn C",
+    createAt: "2024-11-05",
+    isFeatured: true
   },
-  {
-    title: "Người trẻ chuộng mua nhà sẵn nội thất thay vì tự xây",
-    category: "Định giá Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/dangtinbds.png"
-  },
-  {
-    title: "Bất động sản xanh – Xu hướng mới dẫn đầu cuối năm 2025",
-    category: "Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/dangtinbds.png"
-  },
-  {
-    title: "Các yếu tố ảnh hưởng đến giá bất động sản năm 2025",
-    category: "Phân tích thị trường",
-    date: "12/09/2024",
-    image: "/imgs/dangtinbds.png"
-  },
-  {
-    title: "Bất động sản Thiên Hà Group vinh dự đón nhận giải thưởng top 10 thương hiệu xuất sắc châu á 2024",
-    category: "Tin tức | Hoạt động",
-    date: "12/11/2024",
-    image: "/imgs/hd6.jpg"
-  },
-  {
-    title: "Thị trường bất động sản phục hồi mạnh mẽ cuối năm 2025",
-    category: "Giải pháp Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/dangtinbds.png"
-  },
-  {
-    title: "Dòng tiền đầu tư quay lại bất động sản: Cơ hội vàng cho DN Việt",
-    category: "Đăng tin Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/dangtinbds.png"
-  },
-  {
-    title: "Người trẻ chuộng mua nhà sẵn nội thất thay vì tự xây",
-    category: "Định giá Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/dangtinbds.png"
-  },
-  {
-    title: "Bất động sản xanh – Xu hướng mới dẫn đầu cuối năm 2025",
-    category: "Bất động sản",
-    date: "12/10/2024",
-    image: "/imgs/dangtinbds.png"
-  },
-  {
-    title: "Các yếu tố ảnh hưởng đến giá bất động sản năm 2025",
-    category: "Phân tích thị trường",
-    date: "12/09/2024",
-    image: "/imgs/dangtinbds.png"
-  }
+  // ... có thể thêm nhiều item khác
 ])
-
 
 const progress = ref(0)
 const carouselRef = ref(null)
@@ -484,6 +644,52 @@ onUnmounted(() => {
   transform: v-bind('config.transitions.controlBtnActiveTransform');
 }
 
+/* CSS bổ sung cho layout mới */
+.news-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-wrapper {
+  flex: 1;
+}
+
+.bottom-section {
+  margin-top: auto;
+  width: 100%;
+}
+
+.news-meta {
+  align-items: center;
+  min-height: 32px;
+}
+
+.news-footer {
+  justify-content: flex-end !important;
+  min-height: 28px;
+}
+
+.news-summary {
+  min-height: 60px;
+  margin-bottom: 10px;
+}
+
+.featured-badge {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.meta-stats {
+  font-size: v-bind('config.typography.metaSize');
+}
+
+.status {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .news-section {
@@ -505,6 +711,7 @@ onUnmounted(() => {
 
   .news-item {
     min-width: v-bind('config.responsive.tablet.newsItemMinWidth');
+    height: v-bind('config.sizes.newsItemHeightTablet');
   }
 
   .news-title {
@@ -515,19 +722,67 @@ onUnmounted(() => {
     width: v-bind('config.responsive.tablet.controlBtnSize');
     height: v-bind('config.responsive.tablet.controlBtnSize');
   }
+
+  /* Responsive adjustments for additional elements */
+  .news-summary {
+    font-size: 13px;
+    min-height: 52px;
+    -webkit-line-clamp: 2;
+  }
+
+  .news-meta {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .news-footer {
+    justify-content: flex-end !important;
+  }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .section-title {
     font-size: v-bind('config.responsive.mobile.sectionTitleSize');
   }
 
   .news-item {
     min-width: v-bind('config.responsive.mobile.newsItemMinWidth');
+    height: v-bind('config.sizes.newsItemHeightMobile');
   }
 
   .news-image {
     height: v-bind('config.responsive.mobile.newsImageHeight');
+  }
+
+  /* Mobile adjustments */
+  .news-title {
+    -webkit-line-clamp: 1;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .news-summary {
+    -webkit-line-clamp: 2;
+    min-height: 40px;
+    font-size: 12px;
+  }
+
+  .news-footer {
+    justify-content: flex-end !important;
+  }
+
+  .category {
+    font-size: 12px;
+    padding: 3px 8px;
+  }
+
+  .view-count {
+    font-size: 11px;
+  }
+
+  .author {
+    font-size: 11px;
   }
 }
 

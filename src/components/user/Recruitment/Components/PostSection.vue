@@ -3,25 +3,37 @@
     <h2 class="section-title fade-up">{{ config.sectionTitle }}</h2>
     <div class="carousel-container">
       <div class="carousel" ref="carousel">
-        <div
-            v-for="(post, index) in config.posts"
+        <router-link
+            v-for="(post, index) in posts"
             :key="index"
-            class="post-card fade-up"
+            :to="'/tin-tuc/' + post.slug"
+            class="post-card"
             @mouseenter="hoverIndex = index"
             @mouseleave="hoverIndex = -1"
             :style="postCardStyle"
         >
           <div class="image-container" :style="imageContainerStyle">
-            <img :src="baseImgaeUrl+post.image" :alt="post.title" class="post-image" />
-            <div class="date-badge" :style="dateBadgeStyle">{{ post.date }}</div>
+            <img :src="post.thumbnail" :alt="post.title" class="post-image" />
+            <div class="date-badge" :style="dateBadgeStyle">{{ formatDate(post.createAt) }}</div>
           </div>
           <div class="post-content" :style="postContentStyle">
+            <div class="post-meta" :style="postMetaStyle">
+              <span class="post-category">{{ post.categoryName }}</span>
+              <span class="post-views">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" :stroke="config.colors.textLight" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" :stroke="config.colors.textLight" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                {{ post.viewCount }}
+              </span>
+            </div>
             <h3 class="post-title" :style="postTitleStyle">{{ post.title }}</h3>
-            <p class="post-excerpt" :style="postExcerptStyle">{{ post.excerpt }}</p>
+            <p class="post-excerpt" :style="postExcerptStyle">{{ post.summary }}</p>
             <button
                 class="read-more-btn"
                 :class="{ 'hovered': hoverIndex === index }"
                 :style="readMoreBtnStyle"
+                @click.prevent="$router.push('/tin-tuc/' + post.slug)"
             >
               {{ config.buttonText }}
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -30,7 +42,7 @@
               </svg>
             </button>
           </div>
-        </div>
+        </router-link>
       </div>
     </div>
 
@@ -60,7 +72,11 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import {baseImgaeUrl} from "../../../../assets/js/global.js";
+import api from "../../../../api/api.js";
+
+const router = useRouter()
 
 // CONFIG OBJECT - Có thể quản lý qua CMS
 let config = {
@@ -86,7 +102,8 @@ let config = {
     postTitleSize: "20px",
     excerptSize: "17px",
     dateSize: "14px",
-    buttonSize: "16px"
+    buttonSize: "16px",
+    metaSize: "12px"
   },
 
   // Spacing
@@ -116,45 +133,8 @@ let config = {
     cardHoverShadow: "0 12px 24px rgba(3, 19, 88, 0.15)"
   },
 
-  // Posts data
-  posts: [
-    {
-      title: "Tuyển Dụng Chuyên Viên Tư Vấn Bất Động Sản Cao Cấp",
-      excerpt: "Tìm kiếm ứng viên có kinh nghiệm trong lĩnh vực BĐS cao cấp, khả năng giao tiếp tốt và am hiểu thị trường.",
-      image: "/imgs/hr1.jpg",
-      date: "15/10/2023"
-    },
-    {
-      title: "Cơ Hội Nghề Nghiệp: Quản Lý Dự Án Bất Động Sản",
-      excerpt: "Vị trí quản lý dự án yêu cầu kinh nghiệm 3+ năm, kỹ năng lãnh đạo và kiến thức chuyên sâu về pháp lý BĐS.",
-      image: "/imgs/hr2.jpg",
-      date: "12/10/2023"
-    },
-    {
-      title: "Tuyển Gấp Nhân Viên Kinh Doanh Bất Động Sản",
-      excerpt: "Công ty mở rộng quy mô, cần tuyển nhân viên kinh doanh có đam mê, năng động và mong muốn thu nhập cao.",
-      image: "/imgs/hr3.png",
-      date: "10/10/2023"
-    },
-    {
-      title: "Chuyên Viên Pháp Lý Bất Động Sản - Mức Lương Hấp Dẫn",
-      excerpt: "Tìm kiếm chuyên viên pháp lý có kinh nghiệm xử lý hồ sơ, hợp đồng và các vấn đề pháp lý liên quan đến BĐS.",
-      image: "/imgs/hr4.jpg",
-      date: "08/10/2023"
-    },
-    {
-      title: "Trưởng Phòng Kinh Doanh Bất Động Sản Thương Mại",
-      excerpt: "Vị trí lãnh đạo đội ngũ kinh doanh BĐS thương mại, yêu cầu kinh nghiệm quản lý và thành tích bán hàng ấn tượng.",
-      image: "/imgs/hr5.jpg",
-      date: "05/10/2023"
-    },
-    {
-      title: "Nhân Viên Marketing Bất Động Sản - Môi Trường Năng Động",
-      excerpt: "Tuyển dụng chuyên viên marketing có kinh nghiệm trong ngành BĐS, sáng tạo và am hiểu digital marketing.",
-      image: "/imgs/hr6.jpg",
-      date: "01/10/2023"
-    }
-  ]
+  // Posts data - Để trống vì sẽ lấy từ API
+  posts: []
 }
 
 const props = defineProps({
@@ -172,8 +152,9 @@ const hoverIndex = ref(-1)
 const scrollProgress = ref(0)
 const currentSlide = ref(1)
 const totalSlides = ref(0)
+const posts = ref([])
 
-// Computed styles
+// Computed styles - GIỮ NGUYÊN
 const postCardStyle = computed(() => ({
   width: config.sizes.cardWidth,
   borderRadius: config.spacing.cardBorderRadius,
@@ -191,6 +172,11 @@ const dateBadgeStyle = computed(() => ({
 
 const postContentStyle = computed(() => ({
   padding: config.spacing.cardPadding
+}))
+
+const postMetaStyle = computed(() => ({
+  fontSize: config.typography.metaSize,
+  color: config.colors.textLight
 }))
 
 const postTitleStyle = computed(() => ({
@@ -229,6 +215,15 @@ const carouselBtnStyle = computed(() => ({
   border: `2px solid ${config.colors.primary}`
 }))
 
+// Format date
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  const day = date.getDate().toString().padStart(2, '0')
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const year = date.getFullYear()
+  return `${day}/${month}/${year}`
+}
+
 // Update progress and current slide
 const updateProgress = () => {
   if (!carousel.value) return
@@ -245,7 +240,7 @@ const updateProgress = () => {
   // Calculate current slide based on scroll position
   const cardWidth = 320 // Width of each card including gap
   const slidePosition = Math.round(scrollLeft / cardWidth) + 1
-  currentSlide.value = Math.min(slidePosition, config.posts.length)
+  currentSlide.value = Math.min(slidePosition, posts.value.length)
 }
 
 // Carousel navigation
@@ -260,11 +255,24 @@ const scrollCarousel = (direction) => {
   }
 }
 
+// Fetch posts from API
+const fetchPosts = async () => {
+  try {
+    const response = await api.get("/thg/public/news/getNewsByCategorySlug/tuyen-dung")
+    posts.value = response.data
+    totalSlides.value = posts.value.length
+  } catch (error) {
+    console.error("Lỗi khi lấy dữ liệu bài viết:", error)
+    posts.value = []
+  }
+}
+
 // Initialize
 onMounted(() => {
+  fetchPosts()
+
   if (carousel.value) {
     carousel.value.addEventListener('scroll', updateProgress)
-    totalSlides.value = config.posts.length
     updateProgress() // Initial progress calculation
   }
 })
@@ -314,6 +322,7 @@ onUnmounted(() => {
 
 /* FIX: Đảm bảo post-card có width cố định */
 .post-card {
+  display: block;
   width: v-bind('config.sizes.cardWidth');
   flex: 0 0 auto; /* Quan trọng: không cho phép co giãn */
   background: v-bind('config.colors.background');
@@ -322,6 +331,7 @@ onUnmounted(() => {
   box-shadow: v-bind('config.shadows.cardShadow');
   transition: all 0.3s ease;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .post-card:hover {
@@ -360,6 +370,28 @@ onUnmounted(() => {
 
 .post-content {
   padding: v-bind('config.spacing.cardPadding');
+}
+
+.post-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: v-bind('config.typography.metaSize');
+  color: v-bind('config.colors.textLight');
+}
+
+.post-category {
+  background: rgba(3, 19, 88, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.post-views {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .post-title {
@@ -502,6 +534,10 @@ onUnmounted(() => {
 
   .post-excerpt {
     font-size: 16px;
+  }
+
+  .post-meta {
+    font-size: 11px;
   }
 
   .progress-container {

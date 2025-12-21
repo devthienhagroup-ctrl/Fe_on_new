@@ -473,7 +473,7 @@ onMounted(() => {
 }
 
 /* Responsive design */
-@media (max-width: 768px) {
+/*@media (max-width: v-bind('config.responsive.mobileBreakpoint')) {*/@media (max-width: 800px) {
   .main-content {
     flex-direction: column;
   }

@@ -20,38 +20,46 @@
 
         <div class="solution-items">
           <div
-              v-for="(item, index) in config.solutionItems"
+              v-for="(item, index) in featureNews"
               :key="index"
               class="solution-item"
           >
-            <div class="image-container">
-              <img
-                  :src="baseImgaeUrl+item.image"
-                  :alt="item.title"
-                  class="solution-image"
-              />
-              <div class="image-overlay" :style="{ background: config.imageOverlayGradient }"></div>
-            </div>
-
-            <div class="solution-content">
-              <h3 class="solution-title">{{ item.title }}</h3>
-
-              <div class="solution-meta">
-                <p class="posted-date">
-                  <i :class="config.calendarIcon" class="meta-icon"></i>
-                  Posted on: {{ item.postedDate }}
-                </p>
-                <p class="author">
-                  <i :class="config.userIcon" class="meta-icon"></i>
-                  By: {{ item.author }}
-                </p>
+            <router-link :to="'/tin-tuc/' + item.slug" class="solution-link">
+              <div class="image-container">
+                <img
+                    :src="item.thumbnail"
+                    :alt="item.title"
+                    class="solution-image"
+                />
+                <div class="image-overlay" :style="{ background: config.imageOverlayGradient }"></div>
               </div>
 
-              <button class="view-more-btn" :style="{ background: config.buttonGradient }">
-                {{ config.readMoreText }}
-                <i :class="config.arrowRightIcon" class="btn-icon"></i>
-              </button>
-            </div>
+              <div class="solution-content">
+                <h3 class="solution-title">{{ item.title }}</h3>
+                <p class="solution-summary">{{ item.summary }}</p>
+
+                <div class="solution-meta">
+                  <p class="posted-date">
+                    <i :class="config.calendarIcon" class="meta-icon"></i>
+                    Đăng ngày: {{ formatDate(item.createAt) }}
+                  </p>
+                  <p class="author">
+                    <i :class="config.userIcon" class="meta-icon"></i>
+                    Tác giả: {{ item.employeeName || 'Admin' }}
+                  </p>
+                  <!-- Bổ sung lượt xem -->
+                  <p class="views-count">
+                    <i class="meta-icon fa-regular fa-eye" ></i>
+                    Lượt xem: {{ formatViews(item.viewCount) }}
+                  </p>
+                </div>
+
+                <button class="view-more-btn" :style="{ background: config.buttonGradient }">
+                  {{ config.readMoreText }}
+                  <i :class="config.arrowRightIcon" class="btn-icon"></i>
+                </button>
+              </div>
+            </router-link>
           </div>
         </div>
       </div>
@@ -76,69 +84,97 @@
         <div class="news-grid">
           <div class="news-column">
             <div
-                v-for="(item, index) in config.newsItems.slice(0, 2)"
+                v-for="(item, index) in latestNews.slice(0, 2)"
                 :key="index"
                 class="news-item"
             >
-              <div class="news-image-container">
-                <img
-                    :src="baseImgaeUrl+item.image"
-                    :alt="item.title"
-                    class="news-image"
-                />
-                <div class="news-overlay" :style="{ background: config.newsOverlayGradient }"></div>
-              </div>
-              <div class="news-content">
-                <div class="news-tag" :style="{ background: config.tagGradient }">
-                  <i :class="config.newIcon" class="tag-icon"></i>
-                  {{ config.newTagText }}
+              <router-link :to="'/tin-tuc/' + item.slug" class="news-link">
+                <div class="news-image-container">
+                  <img
+                      :src="item.thumbnail"
+                      :alt="item.title"
+                      class="news-image"
+                  />
+                  <div class="news-overlay" :style="{ background: config.newsOverlayGradient }"></div>
                 </div>
-                <h3 class="news-title">{{ item.title }}</h3>
-                <div class="news-footer">
-                  <p class="news-date">
-                    <i :class="config.calendarIcon" class="meta-icon"></i>
-                    {{ item.postedDate }}
-                  </p>
-                  <button class="news-read-btn">
-                    {{ config.readMoreText }}
-                    <i :class="config.arrowRightIcon"></i>
-                  </button>
+                <div class="news-content">
+                  <div class="news-tag" :style="{ background: config.tagGradient }">
+                    <i :class="config.newIcon" class="tag-icon"></i>
+                    {{ config.newTagText }}
+                  </div>
+                  <h3 class="news-title">{{ item.title }}</h3>
+                  <p class="news-summary">{{ item.summary }}</p>
+
+                  <!-- Bổ sung thông tin lượt xem và ngày đăng -->
+                  <div class="news-meta-info">
+                    <div class="news-meta-left">
+                      <p class="news-date">
+                        <i :class="config.calendarIcon" class="meta-icon"></i>
+                        {{ formatDate(item.createAt) }}
+                      </p>
+                      <p class="news-views">
+                        <i  class="meta-icon fa-regular fa-eye"></i>
+                        {{ formatViews(item.viewCount) }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="news-footer">
+                    <button class="news-read-btn">
+                      {{ config.readMoreText }}
+                      <i :class="config.arrowRightIcon"></i>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              </router-link>
             </div>
           </div>
 
           <div class="news-column">
             <div
-                v-for="(item, index) in config.newsItems.slice(2, 4)"
+                v-for="(item, index) in latestNews.slice(2, 4)"
                 :key="index + 2"
                 class="news-item"
             >
-              <div class="news-image-container">
-                <img
-                    :src="baseImgaeUrl+ item.image"
-                    :alt="item.title"
-                    class="news-image"
-                />
-                <div class="news-overlay" :style="{ background: config.newsOverlayGradient }"></div>
-              </div>
-              <div class="news-content">
-                <div class="news-tag" :style="{ background: config.tagGradient }">
-                  <i :class="config.hotIcon" class="tag-icon"></i>
-                  {{ config.hotTagText }}
+              <router-link :to="'/tin-tuc/' + item.slug" class="news-link">
+                <div class="news-image-container">
+                  <img
+                      :src="item.thumbnail"
+                      :alt="item.title"
+                      class="news-image"
+                  />
+                  <div class="news-overlay" :style="{ background: config.newsOverlayGradient }"></div>
                 </div>
-                <h3 class="news-title">{{ item.title }}</h3>
-                <div class="news-footer">
-                  <p class="news-date">
-                    <i :class="config.calendarIcon" class="meta-icon"></i>
-                    {{ item.postedDate }}
-                  </p>
-                  <button class="news-read-btn">
-                    {{ config.readMoreText }}
-                    <i :class="config.arrowRightIcon"></i>
-                  </button>
+                <div class="news-content">
+                  <div class="news-tag" :style="{ background: config.tagGradient }">
+                    <i :class="config.hotIcon" class="tag-icon"></i>
+                    {{ config.newTagText }}
+                  </div>
+                  <h3 class="news-title">{{ item.title }}</h3>
+                  <p class="news-summary">{{ item.summary }}</p>
+
+                  <!-- Bổ sung thông tin lượt xem và ngày đăng -->
+                  <div class="news-meta-info">
+                    <div class="news-meta-left">
+                      <p class="news-date">
+                        <i :class="config.calendarIcon" class="meta-icon"></i>
+                        {{ formatDate(item.createAt) }}
+                      </p>
+                      <p class="news-views">
+                        <i class="fa-regular fa-eye"></i>
+                        {{ formatViews(item.viewCount) }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="news-footer">
+                    <button class="news-read-btn">
+                      {{ config.readMoreText }}
+                      <i :class="config.arrowRightIcon"></i>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              </router-link>
             </div>
           </div>
         </div>
@@ -148,12 +184,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import {baseImgaeUrl} from "../../../../assets/js/global.js";
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import api from "../../../../api/api.js";
+
+const router = useRouter()
 
 const props = defineProps({
   content: Object,
 });
+
 // ==================== CONFIGURATION OBJECT ====================
 // Người dùng có thể sửa các giá trị này mà không cần biết code
 let config = {
@@ -184,58 +224,120 @@ let config = {
   arrowRightIcon: "fas fa-arrow-right",
   calendarIcon: "far fa-calendar",
   userIcon: "far fa-user",
+  eyeIcon: "far fa-eye", // Icon cho lượt xem
   newIcon: "fas fa-bolt",
   hotIcon: "fas fa-fire",
-
-  // Dữ liệu giải pháp
-  solutionItems: [
-    {
-      title: "BẤT ĐỘNG SẢN THIÊN HÀ GROUP VINH DỰ ĐÓN NHẬN GIẢI THƯỞNG TOP 10 THƯƠNG HIỆU XUẤT SẮC CHÂU Á 2024",
-      postedDate: "12/10/2024",
-      author: "Nguyễn Thanh Tùng",
-      image: "/imgs/gp1.jpg"
-    },
-    {
-      title: "Giải pháp đầu tư bất động sản hiệu quả?",
-      postedDate: "05/08/2025",
-      author: "Lê Thị Hạnh",
-      image: "/imgs/gp2.png"
-    },
-    {
-      title: "Làm sao để bán nhanh bất động sản trong 30 ngày?",
-      postedDate: "21/03/2025",
-      author: "Phạm Văn Duy",
-      image: "/imgs/gp3.jpg"
-    }
-  ],
-
-  // Dữ liệu tin tức
-  newsItems: [
-    {
-      title: "Thị trường bất động sản phục hồi mạnh mẽ cuối năm 2025",
-      postedDate: "21/10/2025",
-      image: '/imgs/tt1.png'
-    },
-    {
-      title: "Người trẻ chuộng mua nhà sẵn nội thất thay vì tự xây",
-      postedDate: "15/10/2025",
-      image: "/imgs/tt2.jpg"
-    },
-    {
-      title: "Bất động sản xanh – Xu hướng mới dẫn cuối năm 2025",
-      postedDate: "19/10/2025",
-      image: "/imgs/tt3.png"
-    },
-    {
-      title: "Người trẻ chuộng mua nhà sẵn nội thất thay vì tự xây",
-      postedDate: "14/10/2025",
-      image: "/imgs/tt4.png"
-    }
-  ]
 }
+
 if(props.content) config = props.content.contentJson;
 else console.log("News không có props lấy dữ liệu mặc định")
-// console.log(JSON.stringify(config));
+
+// ==================== DATA FROM API ====================
+const featureNews = ref([])
+const latestNews = ref([])
+
+// ==================== API CALL ====================
+const fetchNews = async () => {
+  try {
+    const response = await api.get('/thg/public/news/getNewsHome')
+    if (response.data) {
+      // Đảm bảo dữ liệu có viewCount và summary
+      featureNews.value = (response.data.featureNews || []).map(news => ({
+        ...news,
+        viewCount: news.viewCount || 0,
+        summary: news.summary || ''
+      }))
+      latestNews.value = (response.data.latestNews || []).map(news => ({
+        ...news,
+        viewCount: news.viewCount || 0,
+        summary: news.summary || ''
+      }))
+    }
+  } catch (error) {
+    console.error("Lỗi khi lấy dữ liệu tin tức:", error)
+    // Giữ dữ liệu mặc định nếu API fail
+    featureNews.value = [
+      {
+        title: "BẤT ĐỘNG SẢN THIÊN HÀ GROUP VINH DỰ ĐÓN NHẬN GIẢI THƯỞNG TOP 10 THƯƠNG HIỆU XUẤT SẮC CHÂU Á 2024",
+        summary: "Thành tựu nổi bật của Thiên Hà Group trong năm 2024",
+        createAt: "2024-10-12T00:00:00",
+        employeeName: "Nguyễn Thanh Tùng",
+        thumbnail: "/imgs/gp1.jpg",
+        slug: "default-feature-1",
+        viewCount: 1250
+      },
+      {
+        title: "Giải pháp đầu tư bất động sản hiệu quả?",
+        summary: "Các chiến lược đầu tư bất động sản thông minh",
+        createAt: "2025-08-05T00:00:00",
+        employeeName: "Lê Thị Hạnh",
+        thumbnail: "/imgs/gp2.png",
+        slug: "default-feature-2",
+        viewCount: 980
+      },
+      {
+        title: "Làm sao để bán nhanh bất động sản trong 30 ngày?",
+        summary: "Bí quyết bán nhanh bất động sản với giá tốt",
+        createAt: "2025-03-21T00:00:00",
+        employeeName: "Phạm Văn Duy",
+        thumbnail: "/imgs/gp3.jpg",
+        slug: "default-feature-3",
+        viewCount: 1560
+      }
+    ]
+    latestNews.value = [
+      {
+        title: "Thị trường bất động sản phục hồi mạnh mẽ cuối năm 2025",
+        summary: "Phân tích xu hướng thị trường bất động sản cuối năm",
+        createAt: "2025-10-21T00:00:00",
+        thumbnail: '/imgs/tt1.png',
+        slug: "default-news-1",
+        viewCount: 890
+      },
+      {
+        title: "Người trẻ chuộng mua nhà sẵn nội thất thay vì tự xây",
+        summary: "Xu hướng mua nhà của thế hệ trẻ hiện nay",
+        createAt: "2025-10-15T00:00:00",
+        thumbnail: "/imgs/tt2.jpg",
+        slug: "default-news-2",
+        viewCount: 1120
+      },
+      {
+        title: "Bất động sản xanh – Xu hướng mới dẫn cuối năm 2025",
+        summary: "Xu hướng bất động sản xanh và bền vững",
+        createAt: "2025-10-19T00:00:00",
+        thumbnail: "/imgs/tt3.png",
+        slug: "default-news-3",
+        viewCount: 750
+      },
+      {
+        title: "Người trẻ chuộng mua nhà sẵn nội thất thay vì tự xây",
+        summary: "Phân tích thị hiếu mua nhà của giới trẻ",
+        createAt: "2025-10-14T00:00:00",
+        thumbnail: "/imgs/tt4.png",
+        slug: "default-news-4",
+        viewCount: 940
+      }
+    ]
+  }
+}
+
+// ==================== HELPER FUNCTIONS ====================
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+}
+
+// Hàm định dạng lượt xem (thêm dấu phân cách hàng nghìn)
+const formatViews = (views) => {
+  if (!views && views !== 0) return '0'
+  return views.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
 
 // ==================== PROGRESS BAR LOGIC ====================
 const leftProgressActive = ref(false)
@@ -256,6 +358,11 @@ const stopProgress = (column) => {
     rightProgressActive.value = false
   }
 }
+
+// ==================== LIFECYCLE HOOKS ====================
+onMounted(() => {
+  fetchNews()
+})
 </script>
 
 <style scoped>
@@ -333,6 +440,15 @@ const stopProgress = (column) => {
   transition: width 1s linear;
 }
 
+/* Link styles */
+.solution-link,
+.news-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+}
+
 /* Left Column Styles */
 .solution-items {
   display: flex;
@@ -347,6 +463,7 @@ const stopProgress = (column) => {
   border-radius: 8px;
   cursor: pointer;
   flex: 1;
+  height: 100%;
 }
 
 .image-container {
@@ -386,9 +503,20 @@ const stopProgress = (column) => {
 
 .solution-title {
   font-size: 18px;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.5rem 0;
   transition: transform 0.3s ease;
   line-height: 1.4;
+}
+
+.solution-summary {
+  font-size: 14px;
+  margin: 0 0 1rem 0;
+  opacity: 0.9;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .solution-meta {
@@ -435,33 +563,6 @@ const stopProgress = (column) => {
   transition: transform 0.3s ease;
 }
 
-/* Left Column Hover Effects */
-.solution-item:hover .solution-image {
-  transform: scale(1.05);
-}
-
-.solution-item:hover .solution-content {
-  transform: translateY(-10px);
-}
-
-.solution-item:hover .solution-title {
-  transform: translateY(-10px);
-}
-
-.solution-item:hover .solution-meta,
-.solution-item:hover .view-more-btn {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.solution-item:hover .view-more-btn {
-  transition-delay: 0.1s;
-}
-
-.solution-item:hover .btn-icon {
-  transform: translateX(3px);
-}
-
 /* Right Column Styles */
 .news-grid {
   display: flex;
@@ -488,6 +589,7 @@ const stopProgress = (column) => {
   flex-direction: column;
   flex: 1;
   min-height: 280px;
+  height: 100%;
 }
 
 .news-image-container {
@@ -542,10 +644,22 @@ const stopProgress = (column) => {
 
 .news-title {
   font-size: 16px;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.5rem 0;
   line-height: 1.5;
   color: #333;
   font-weight: 600;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.news-summary {
+  font-size: 14px;
+  margin: 0 0 1rem 0;
+  color: #666;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -553,14 +667,18 @@ const stopProgress = (column) => {
   flex: 1;
 }
 
-.news-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: auto;
+/* News meta info (ngày đăng + lượt xem) */
+.news-meta-info {
+  margin-bottom: 1rem;
 }
 
-.news-date {
+.news-meta-left {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.news-date, .news-views {
   font-size: 0.875rem;
   color: #666;
   margin: 0;
@@ -568,6 +686,13 @@ const stopProgress = (column) => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.news-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: auto;
 }
 
 .news-read-btn {
@@ -587,6 +712,33 @@ const stopProgress = (column) => {
 .news-read-btn i {
   font-size: 12px;
   transition: transform 0.3s ease;
+}
+
+/* Left Column Hover Effects */
+.solution-item:hover .solution-image {
+  transform: scale(1.05);
+}
+
+.solution-item:hover .solution-content {
+  transform: translateY(-10px);
+}
+
+.solution-item:hover .solution-title {
+  transform: translateY(-10px);
+}
+
+.solution-item:hover .solution-meta,
+.solution-item:hover .view-more-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.solution-item:hover .view-more-btn {
+  transition-delay: 0.1s;
+}
+
+.solution-item:hover .btn-icon {
+  transform: translateX(3px);
 }
 
 /* Right Column Hover Effects */
@@ -644,14 +796,14 @@ const stopProgress = (column) => {
     align-self: flex-end;
   }
 
-  .news-footer {
+  .news-meta-left {
     flex-direction: column;
+    gap: 0.5rem;
     align-items: flex-start;
-    gap: 0.75rem;
   }
 
-  .news-read-btn {
-    align-self: flex-end;
+  .news-footer {
+    justify-content: flex-start;
   }
 
   .news-image-container {

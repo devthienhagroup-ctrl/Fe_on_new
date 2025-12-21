@@ -1,6 +1,6 @@
 <template>
   <!-- Nút mở modal -->
-  <button @click="openEditor" class="open-editor-btn">
+  <button @click="openEditor" type="button" class="open-editor-btn">
     <i class="fas fa-edit"></i> Mở trình soạn thảo
   </button>
 
@@ -577,10 +577,18 @@ const props = defineProps({
   modelValue: {
     type: String,
     default: ''
+  },
+  fileDTOs: {
+    type: Array,
+    default: () => []
+  },
+  rawFiles: {
+    type: Array,
+    default: () => []
   }
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'update:fileDTOs', 'update:rawFiles'])
 
 // Modal state
 const isEditorOpen = ref(false)
@@ -599,6 +607,263 @@ const tableHasHeader = ref(true)
 
 // Tạm lưu nội dung khi đang chỉnh sửa
 const tempContent = ref('')
+
+// State cho các file
+const localFileDTOs = ref([])
+const localRawFiles = ref([])
+
+// Map lưu blob URL để tránh trùng lặp
+const blobUrlMap = ref(new Map()) // key: file object reference, value: blob URL
+
+// Watch props để cập nhật local state
+watch(() => props.fileDTOs, (newFiles) => {
+  if (JSON.stringify(newFiles) !== JSON.stringify(localFileDTOs.value)) {
+    localFileDTOs.value = [...newFiles]
+  }
+}, { deep: true, immediate: true })
+
+watch(() => props.rawFiles, (newRawFiles) => {
+  if (JSON.stringify(newRawFiles) !== JSON.stringify(localRawFiles.value)) {
+    localRawFiles.value = [...newRawFiles]
+  }
+}, { deep: true, immediate: true })
+
+// Emit các thay đổi
+watch(localFileDTOs, (newFiles) => {
+  emit('update:fileDTOs', [...newFiles])
+}, { deep: true })
+
+watch(localRawFiles, (newRawFiles) => {
+  emit('update:rawFiles', [...newRawFiles])
+}, { deep: true })
+
+// Hàm tạo blob URL không trùng lặp
+const createUniqueBlobUrl = (file) => {
+  // Kiểm tra nếu đã có blob URL cho file này
+  if (blobUrlMap.value.has(file)) {
+    return blobUrlMap.value.get(file)
+  }
+
+  // Tạo blob URL mới
+  const blobUrl = URL.createObjectURL(file)
+
+  // Lưu vào map để tránh trùng lặp
+  blobUrlMap.value.set(file, blobUrl)
+
+  console.log('📌 Tạo blob URL mới:', {
+    filename: file.name,
+    blobUrl: blobUrl.substring(0, 50) + '...',
+    mapSize: blobUrlMap.value.size
+  })
+
+  return blobUrl
+}
+
+// Hàm giải phóng blob URL khi không cần
+const revokeBlobUrl = (file) => {
+  if (blobUrlMap.value.has(file)) {
+    const blobUrl = blobUrlMap.value.get(file)
+    URL.revokeObjectURL(blobUrl)
+    blobUrlMap.value.delete(file)
+    console.log('🗑️ Đã giải phóng blob URL:', blobUrl.substring(0, 50) + '...')
+  }
+}
+
+// Hàm extract images từ HTML và cập nhật fileDTOs
+const extractAndUpdateImagesFromHTML = (html) => {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(html, 'text/html')
+  const imgElements = doc.querySelectorAll('img')
+
+  const blobUrlsInHTML = []
+
+  imgElements.forEach(img => {
+    const src = img.getAttribute('src')
+
+    if (!src) return
+
+    if (src.startsWith('blob:')) {
+      // Nếu là blob URL (ảnh mới upload)
+      blobUrlsInHTML.push(src)
+
+      // Tìm fileDTO tương ứng
+      const existingFileDTO = localFileDTOs.value.find(fileDTO =>
+          fileDTO.blobUrl === src
+      )
+
+      if (!existingFileDTO) {
+        // Tìm rawFile tương ứng với blob URL này
+        let correspondingFile = null
+
+        // Duyệt qua map để tìm file tương ứng
+        for (const [file, blobUrl] of blobUrlMap.value.entries()) {
+          if (blobUrl === src) {
+            correspondingFile = file
+            break
+          }
+        }
+
+        if (correspondingFile) {
+          // Tạo fileDTO mới
+          const newFileDTO = {
+            filename: correspondingFile.name,
+            blobUrl: src, // Sử dụng blob URL làm key
+            status: 'NEW',
+            rawFile: correspondingFile
+          }
+
+          localFileDTOs.value.push(newFileDTO)
+          console.log('✅ Đã thêm fileDTO NEW từ blob URL:', src.substring(0, 50) + '...')
+        }
+      }
+    } else if (src.includes('https://s3.cloudfly.vn/thg-storage-dev/uploads-public/')) {
+      // Nếu là ảnh cũ từ server
+      const filename = src.split('/').pop()
+      blobUrlsInHTML.push(src)
+
+      const existingFileDTO = localFileDTOs.value.find(fileDTO =>
+          fileDTO.filename === filename && fileDTO.status === 'EXISTING'
+      )
+
+      if (!existingFileDTO) {
+        const newFileDTO = {
+          filename: filename,
+          blobUrl: src,
+          status: 'EXISTING'
+        }
+
+        localFileDTOs.value.push(newFileDTO)
+        console.log('✅ Đã thêm fileDTO EXISTING từ URL server:', filename)
+      }
+    }
+  })
+
+  // Kiểm tra và loại bỏ fileDTOs không còn trong HTML
+  localFileDTOs.value = localFileDTOs.value.filter(fileDTO => {
+    const stillExists = blobUrlsInHTML.includes(fileDTO.blobUrl)
+
+    if (!stillExists) {
+      if (fileDTO.status === 'NEW') {
+        console.log('🗑️ Xóa fileDTO NEW không còn trong HTML:', fileDTO.blobUrl.substring(0, 50) + '...')
+
+        // Giải phóng blob URL
+        if (fileDTO.rawFile) {
+          revokeBlobUrl(fileDTO.rawFile)
+        }
+
+        // Xóa rawFile tương ứng
+        const rawFileIndex = localRawFiles.value.findIndex(f =>
+            f === fileDTO.rawFile
+        )
+
+        if (rawFileIndex !== -1) {
+          localRawFiles.value.splice(rawFileIndex, 1)
+          console.log('🗑️ Đã xóa rawFile tương ứng')
+        }
+
+        return false
+      } else if (fileDTO.status === 'EXISTING') {
+        // Đánh dấu ảnh cũ là cần xóa
+        fileDTO.status = 'REMOVE'
+        console.log('🔄 Đã đánh dấu fileDTO EXISTING thành REMOVE:', fileDTO.filename)
+        return true
+      }
+    }
+
+    return true
+  })
+}
+
+// Hàm xử lý khi ảnh được thêm vào editor
+const handleImageAdded = async (file) => {
+  try {
+    // Tạo blob URL không trùng lặp
+    const blobUrl = createUniqueBlobUrl(file)
+
+    // Chèn ảnh vào editor với blob URL
+    editor.value.chain().focus().setImage({
+      src: blobUrl
+    }).run()
+
+    console.log('➕ Đã thêm ảnh với blob URL:', blobUrl.substring(0, 50) + '...')
+
+    // Tạo fileDTO
+    const fileDTO = {
+      filename: file.name,
+      blobUrl: blobUrl,
+      status: 'NEW',
+      rawFile: file
+    }
+
+    // Thêm vào localFileDTOs nếu chưa có
+    const existingIndex = localFileDTOs.value.findIndex(f => f.blobUrl === blobUrl)
+    if (existingIndex === -1) {
+      localFileDTOs.value.push(fileDTO)
+    } else {
+      localFileDTOs.value[existingIndex] = fileDTO
+    }
+
+    // Thêm vào rawFiles nếu chưa có
+    const rawFileExists = localRawFiles.value.some(f => f === file)
+    if (!rawFileExists) {
+      localRawFiles.value.push(file)
+    }
+
+    console.log('📋 Đã tạo fileDTO:', {
+      filename: file.name,
+      blobUrl: blobUrl.substring(0, 50) + '...',
+      status: 'NEW'
+    })
+
+    console.log('📊 Trạng thái sau khi thêm ảnh:', {
+      fileDTOs: localFileDTOs.value.map(f => ({
+        filename: f.filename,
+        blobUrl: f.blobUrl?.substring(0, 30) + '...',
+        status: f.status
+      })),
+      rawFiles: localRawFiles.value.length,
+      blobUrlMapSize: blobUrlMap.value.size
+    })
+
+  } catch (error) {
+    console.error('❌ Lỗi khi thêm ảnh:', error)
+    alert(`Lỗi khi chèn ảnh "${file.name}"`)
+  }
+}
+
+// Hàm xử lý khi ảnh bị xóa khỏi editor
+const handleImageDeleted = (src) => {
+  console.log('❌ Ảnh bị xóa khỏi editor:', src?.substring(0, 50) + '...')
+
+  if (!src) return
+
+  // Tìm và xử lý fileDTO
+  const fileIndex = localFileDTOs.value.findIndex(f => f.blobUrl === src)
+  if (fileIndex !== -1) {
+    const fileDTO = localFileDTOs.value[fileIndex]
+
+    if (fileDTO.status === 'NEW') {
+      // Xóa hoàn toàn fileDTO mới
+      localFileDTOs.value.splice(fileIndex, 1)
+      console.log('✅ Đã xóa fileDTO NEW:', src.substring(0, 50) + '...')
+
+      // Giải phóng blob URL và xóa rawFile
+      if (fileDTO.rawFile) {
+        revokeBlobUrl(fileDTO.rawFile)
+
+        const rawFileIndex = localRawFiles.value.findIndex(f => f === fileDTO.rawFile)
+        if (rawFileIndex !== -1) {
+          localRawFiles.value.splice(rawFileIndex, 1)
+          console.log('✅ Đã xóa rawFile tương ứng')
+        }
+      }
+    } else if (fileDTO.status === 'EXISTING') {
+      // Đánh dấu ảnh cũ là cần xóa
+      fileDTO.status = 'REMOVE'
+      console.log('🔄 Đã đánh dấu fileDTO EXISTING thành REMOVE:', fileDTO.filename)
+    }
+  }
+}
 
 // Mở popup chia cột
 const openColumnPopup = () => {
@@ -695,6 +960,14 @@ const updateColumnsGap = () => {
 const openEditor = () => {
   isEditorOpen.value = true
   tempContent.value = props.modelValue
+
+  // Log trạng thái ban đầu
+  console.log('🚀 Mở trình soạn thảo với:', {
+    modelValueLength: props.modelValue?.length,
+    fileDTOs: localFileDTOs.value,
+    rawFiles: localRawFiles.value.length
+  })
+
   nextTick(() => {
     initEditor()
   })
@@ -713,7 +986,23 @@ const closeEditor = () => {
 const saveContent = () => {
   if (editor.value) {
     const html = editor.value.getHTML()
+
+    // Trước khi emit, cập nhật fileDTOs từ HTML hiện tại
+    extractAndUpdateImagesFromHTML(html)
+
+    // Emit contentHTML
     emit('update:modelValue', html)
+
+    console.log('💾 Lưu nội dung:', {
+      contentHTML: html.substring(0, 100) + '...',
+      fileDTOs: localFileDTOs.value.map(f => ({
+        filename: f.filename,
+        blobUrl: f.blobUrl?.substring(0, 30) + '...',
+        status: f.status
+      })),
+      rawFiles: localRawFiles.value.map(f => f.name),
+      blobUrlMapSize: blobUrlMap.value.size
+    })
   }
   closeEditor()
 }
@@ -724,6 +1013,12 @@ const initEditor = () => {
     editor.value.destroy()
   }
 
+  // Khởi tạo fileDTOs từ contentHTML nếu chưa có
+  if (props.modelValue) {
+    extractAndUpdateImagesFromHTML(props.modelValue)
+  }
+
+  // Sử dụng Image extension mặc định
   editor.value = new Editor({
     extensions: [
       StarterKit,
@@ -755,7 +1050,6 @@ const initEditor = () => {
         HTMLAttributes: {
           class: 'editor-column',
         },
-        // Sử dụng Vue component cho column
         ...(typeof window !== 'undefined' && {
           addNodeView() {
             return ({node, editor: ed, getPos}) => {
@@ -772,7 +1066,6 @@ const initEditor = () => {
         HTMLAttributes: {
           class: 'editor-columns-container',
         },
-        // Sử dụng Vue component cho columns container
         ...(typeof window !== 'undefined' && {
           addNodeView() {
             return ({node, editor: ed, getPos}) => {
@@ -786,9 +1079,9 @@ const initEditor = () => {
         }),
       }),
     ],
-    content: tempContent.value || `
+    content: tempContent.value || props.modelValue || `
         <h3>
-          Bạn đã thấy các bảng của chúng tôi chưa? Chúng thật tuyệt vời!
+          Bạn đã thấy các bảng của chúng tôi chưa? Chúng thật tuyệt vì chúng ta đã sửa logic blob URL không trùng!
         </h3>
         <ul>
           <li>Bảng với hàng, ô và tiêu đề (tùy chọn)</li>
@@ -829,9 +1122,102 @@ const initEditor = () => {
         class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none',
         style: 'min-height: 300px;'
       },
+      // Thêm handler cho xóa node (xóa ảnh)
+      handleDOMEvents: {
+        keydown: (view, event) => {
+          // Xử lý khi nhấn Delete/Backspace
+          if (event.key === 'Delete' || event.key === 'Backspace') {
+            const { selection } = view.state
+            const { $from } = selection
+
+            // Kiểm tra nếu đang xóa node ảnh
+            const node = $from.nodeBefore || $from.nodeAfter
+            if (node && node.type.name === 'image') {
+              const src = node.attrs.src
+
+              console.log('⌨️ Xóa ảnh bằng phím:', src?.substring(0, 50) + '...')
+
+              // Đợi một chút để DOM cập nhật
+              setTimeout(() => {
+                handleImageDeleted(src)
+              }, 100)
+            }
+          }
+          return false
+        }
+      }
     },
+
+    onTransaction({ transaction }) {
+      // Theo dõi các transaction để phát hiện xóa ảnh
+      if (transaction.steps && transaction.steps.length > 0) {
+        transaction.steps.forEach(step => {
+          if (step.slice && step.slice.content.size === 0) {
+            // Đây có thể là xóa node
+            // Không cần xử lý gì thêm vì đã có logic trong handleDOMEvents
+          }
+        })
+      }
+    }
   })
+
+  // Thêm event listener cho thay đổi nội dung
+  editor.value.on('update', ({ editor: ed }) => {
+    const html = ed.getHTML()
+    // Cập nhật fileDTOs từ HTML hiện tại
+    extractAndUpdateImagesFromHTML(html)
+
+    console.log('🔄 Editor updated - HTML mẫu:', html.substring(0, 200))
+    console.log('📊 Trạng thái fileDTOs:', localFileDTOs.value.map(f => ({
+      blobUrl: f.blobUrl?.substring(0, 30) + '...',
+      status: f.status
+    })))
+  })
+
+  // Thêm mutation observer để theo dõi thay đổi DOM
+  setTimeout(() => {
+    const editorContent = document.querySelector('.editor-content .ProseMirror')
+    if (editorContent) {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList') {
+            // Kiểm tra nếu có node bị xóa
+            mutation.removedNodes.forEach((node) => {
+              if (node.nodeName === 'IMG') {
+                const src = node.src
+                handleImageDeleted(src)
+              }
+            })
+          }
+        })
+      })
+
+      observer.observe(editorContent, {
+        childList: true,
+        subtree: true
+      })
+
+      // Lưu observer để cleanup
+      editor.value.observer = observer
+    }
+  }, 500)
 }
+
+// Cleanup khi component unmount
+onBeforeUnmount(() => {
+  // Giải phóng tất cả blob URL
+  blobUrlMap.value.forEach((blobUrl, file) => {
+    URL.revokeObjectURL(blobUrl)
+  })
+  blobUrlMap.value.clear()
+
+  if (editor.value) {
+    if (editor.value.observer) {
+      editor.value.observer.disconnect()
+    }
+    editor.value.destroy()
+  }
+})
 
 // Drag and Drop Handler
 const DragAndDropHandler = Extension.create({
@@ -848,7 +1234,7 @@ const DragAndDropHandler = Extension.create({
                 const files = Array.from(dataTransfer.files)
                 const imageFiles = files.filter(file => file.type.startsWith('image/'))
                 if (imageFiles.length > 0) {
-                  handleDroppedImages(imageFiles)
+                  imageFiles.forEach(file => handleImageAdded(file))
                   return true
                 }
               }
@@ -934,24 +1320,6 @@ const CustomTableCell = TableCell.extend({
   },
 })
 
-// Các hàm xử lý ảnh
-const handleDroppedImages = async (files) => {
-  for (const file of files) {
-    if (!file.type.startsWith('image/')) continue
-    if (file.size > 5 * 1024 * 1024) {
-      alert(`Ảnh "${file.name}" vượt quá kích thước 5MB!`)
-      continue
-    }
-    try {
-      const imageUrl = URL.createObjectURL(file)
-      editor.value.chain().focus().setImage({ src: imageUrl }).run()
-    } catch (error) {
-      console.error('Lỗi khi chèn ảnh:', error)
-      alert(`Lỗi khi chèn ảnh "${file.name}"`)
-    }
-  }
-}
-
 const triggerFileInput = () => {
   fileInput.value.click()
 }
@@ -968,9 +1336,8 @@ const handleImageUpload = (event) => {
       return
     }
 
-    // Chèn ảnh ngay lập tức
-    const imageUrl = URL.createObjectURL(file)
-    editor.value.chain().focus().setImage({ src: imageUrl }).run()
+    // Xử lý ảnh
+    handleImageAdded(file)
 
     // Reset input
     if (fileInput.value) {
@@ -981,9 +1348,77 @@ const handleImageUpload = (event) => {
 
 // Các hàm khác
 const insertLink = () => {
-  const url = window.prompt('Nhập URL liên kết:')
-  if (url) {
-    editor.value.chain().focus().setLink({ href: url }).run()
+  // Lấy URL từ người dùng
+  const url = window.prompt('Nhập URL hoặc đường dẫn liên kết:\n• Bắt đầu bằng http/https: Link thông thường\n• Bắt đầu bằng /: Router link', '')
+  if (!url) return
+
+  const href = url.trim()
+  let linkType = 'external' // 'external', 'router', 'other'
+
+  if (href.startsWith('http://') || href.startsWith('https://')) {
+    linkType = 'external'
+  } else if (href.startsWith('/')) {
+    linkType = 'router'
+  } else if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) {
+    linkType = 'other'
+  } else {
+    linkType = 'external'
+  }
+
+  // Lấy text đang được chọn
+  let selectedText = ''
+  if (editor.value) {
+    const { from, to } = editor.value.state.selection
+    selectedText = editor.value.state.doc.textBetween(from, to, ' ')
+  }
+
+  // Nếu không có text được chọn, yêu cầu nhập text
+  let linkText = selectedText
+  if (!linkText) {
+    linkText = window.prompt('Nhập text hiển thị cho link:', href)
+    if (!linkText) return
+  }
+
+  if (editor.value) {
+    if (linkType === 'router') {
+      // Router link
+      if (selectedText) {
+        // Áp dụng link lên text đang chọn
+        editor.value.chain()
+            .focus()
+            .setLink({
+              href: href,
+              'data-router-link': true
+            })
+            .run()
+      } else {
+        // Chèn link mới
+        editor.value.chain()
+            .focus()
+            .insertContent(`<a href="${href}" data-router-link="true">${linkText}</a>`)
+            .run()
+      }
+    } else {
+      // External link hoặc other
+      const finalHref = linkType === 'external' && !href.startsWith('http') ?
+          `https://${href}` : href
+
+      if (selectedText) {
+        editor.value.chain()
+            .focus()
+            .setLink({
+              href: finalHref,
+              target: '_blank',
+              rel: 'noopener noreferrer nofollow'
+            })
+            .run()
+      } else {
+        editor.value.chain()
+            .focus()
+            .insertContent(`<a href="${finalHref}" target="_blank" rel="noopener noreferrer nofollow">${linkText}</a>`)
+            .run()
+      }
+    }
   }
 }
 
@@ -1232,32 +1667,12 @@ const ColumnsContainerComponent = {
   },
 }
 
-// Thêm watcher để cập nhật UI khi columns container được chọn
-watch(() => {
-  if (!editor.value) return false
-  return editor.value.isActive('columnsContainer')
-}, (isActive) => {
-  if (isActive && editor.value) {
-    const { $from } = editor.value.state.selection
-    let node = $from.node()
-
-    if (node.type.name !== 'columnsContainer') {
-      let depth = $from.depth
-      while (depth > 0 && node.type.name !== 'columnsContainer') {
-        depth--
-        node = $from.node(depth)
-      }
-    }
-
-    if (node.type.name === 'columnsContainer') {
-      selectedColumns.value = node.attrs.columns?.toString() || '2'
-      selectedGap.value = node.attrs.gap || '16px'
-    }
-  }
-}, { deep: true })
-
 // Trong initEditor, thêm event listener:
 onMounted(() => {
+  console.log("GỌI onMounted");
+
+  initializeFileDTOsFromContent();
+
   // Thêm event listener cho selection change
   if (editor.value) {
     editor.value.on('selectionUpdate', ({ editor: ed }) => {
@@ -1282,14 +1697,132 @@ onMounted(() => {
   }
 })
 
-// Cleanup
-onBeforeUnmount(() => {
-  if (editor.value) {
-    editor.value.destroy()
+// Thêm watcher để tự động khởi tạo fileDTOs khi modelValue thay đổi
+watch(() => props.modelValue, (newValue) => {
+  if (newValue) {
+    console.log('📝 modelValue changed, extracting images')
+    extractAndUpdateImagesFromHTML(newValue)
   }
-})
-</script>
+}, { immediate: true }) // immediate: true để chạy ngay khi mounted
 
+// Hàm khởi tạo fileDTOs từ content HTML
+const initializeFileDTOsFromContent = () => {
+
+  if (props.modelValue) {
+    console.log('🚀 Khởi tạo fileDTOs từ modelValue')
+    extractAndUpdateImagesFromHTML(props.modelValue)
+
+    console.log('📊 Trạng thái fileDTOs sau khi khởi tạo:', {
+      fileDTOs: localFileDTOs.value.map(f => ({
+        filename: f.filename,
+        blobUrl: f.blobUrl?.substring(0, 30) + '...',
+        status: f.status
+      })),
+      rawFiles: localRawFiles.value.length,
+      blobUrlMapSize: blobUrlMap.value.size
+    })
+  }
+}
+
+// Thêm extension này vào phần extensions
+import { Mark, mergeAttributes } from '@tiptap/core'
+
+const LinkWithRouter = Mark.create({
+  name: 'link',
+  priority: 1000, // Độ ưu tiên cao hơn link mặc định
+  keepOnSplit: false,
+  inclusive: true,
+
+  addOptions() {
+    return {
+      openOnClick: true,
+      linkOnPaste: true,
+      autolink: true,
+      protocols: [],
+      HTMLAttributes: {
+        target: '_blank',
+        rel: 'noopener noreferrer nofollow',
+        class: 'link',
+      },
+    }
+  },
+
+  addAttributes() {
+    return {
+      href: {
+        default: null,
+      },
+      target: {
+        default: this.options.HTMLAttributes.target,
+      },
+      rel: {
+        default: this.options.HTMLAttributes.rel,
+      },
+      class: {
+        default: this.options.HTMLAttributes.class,
+      },
+      'data-router-link': {
+        default: false,
+        parseHTML: element => element.hasAttribute('data-router-link'),
+        renderHTML: attributes => {
+          if (attributes['data-router-link']) {
+            return { 'data-router-link': 'true' }
+          }
+          return {}
+        }
+      }
+    }
+  },
+
+  parseHTML() {
+    return [
+      { tag: 'a[href]' },
+    ]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    const isRouterLink = HTMLAttributes['data-router-link']
+
+    // Xử lý router-link
+    if (isRouterLink) {
+      const { 'data-router-link': _, ...attrs } = HTMLAttributes
+      return ['a', mergeAttributes(
+          attrs,
+          {
+            'data-router-link': 'true',
+            target: null, // Router link không mở tab mới
+            rel: null
+          }
+      ), 0]
+    }
+
+    // Link thông thường
+    return ['a', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0]
+  },
+
+  addCommands() {
+    return {
+      setLink: attributes => ({ chain }) => {
+        return chain()
+            .setMark(this.name, attributes)
+            .setMeta('preventAutolink', true)
+            .run()
+      },
+      toggleLink: attributes => ({ chain }) => {
+        return chain()
+            .toggleMark(this.name, attributes, { extendEmptyMarkRange: true })
+            .run()
+      },
+      unsetLink: () => ({ chain }) => {
+        return chain()
+            .unsetMark(this.name, { extendEmptyMarkRange: true })
+            .run()
+      },
+    }
+  },
+})
+
+</script>
 <style scoped>
 :deep(.editor-content .ProseMirror) {
   padding: 20px;

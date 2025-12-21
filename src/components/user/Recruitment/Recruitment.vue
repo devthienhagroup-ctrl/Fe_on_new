@@ -7,7 +7,7 @@
       <Header :sectionData="parseJSON(pageData.sections[0].contentJson)" @apply-click="scrollToFormSection" />
       <HeroSection :sectionData="parseJSON(pageData.sections[1].contentJson)"></HeroSection>
       <BenefitsSection :sectionData="parseJSON(pageData.sections[2].contentJson)"></BenefitsSection>
-      <JobPositionList :sectionData="parseJSON(pageData.sections[3].contentJson)"></JobPositionList>
+      <JobPositionList :sectionData="parseJSON(pageData.sections[3].contentJson)" @apply-click="scrollToFormSection"></JobPositionList>
       <DepartmentSection :sectionData="parseJSON(pageData.sections[4].contentJson)"></DepartmentSection>
       <PostSection :sectionData="parseJSON(pageData.sections[5].contentJson)"></PostSection>
       <FormSection :sectionData="parseJSON(pageData.sections[6].contentJson)" ref="formSection"></FormSection>

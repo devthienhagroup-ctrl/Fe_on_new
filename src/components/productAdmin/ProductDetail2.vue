@@ -6,7 +6,7 @@
     <div class="executive-header">
       <div class="header-top">
         <div class="header-left">
-          <button class="back-button" @click="router.push('/san-pham-thien-ha')">
+          <button class="back-button" @click="router.back()">
             <i class="fa-solid fa-arrow-left"></i>
             <span>Quay lại danh sách</span>
           </button>
@@ -60,7 +60,11 @@
                   Ưu tiên cộng đồng môi giới
                 </div>
                 <div class="spotlight-copy">
-                  <div class="spotlight-line">Anh/chị chốt căn này nhận trọn <span class="spotlight-percent">
+                  <div class="spotlight-line">
+                    <span v-if="asset.status !== 'Đã bán'">Anh/chị </span>
+                    <span v-else>Ngày {{ formatNgayBan(asset.ngayBan) }} <span style="color: #fc2727; font-weight: 800">{{ asset.nguoiBan }}</span> đã </span>
+                    chốt căn này <span v-if="asset.status === 'Đã bán'"> với giá {{  formatMoneyVN(asset.giaBanThanhCong) }} </span> nhận trọn
+                    <span class="spotlight-percent">
                     {{ asset.phiMoiGioi != null ? asset.phiMoiGioi + '%' : 'Chưa cập nhật' }}
                     </span> hoa hồng</div>
                   <div class="spotlight-line">
@@ -74,7 +78,12 @@
                             display: inline-block;
                             vertical-align: bottom;
                           "
-                    />{{ asset.phiMoiGioi != null && asset.giaBan != null ? formatMoneyVN((asset.phiMoiGioi * asset.giaBan)/100) : 'Chưa cập nhật' }}</span> được giải ngân nhanh, không để anh/chị chờ đợi.
+                    />{{
+                      tinhHoaHong(asset) != null
+                          ? formatMoneyVN(tinhHoaHong(asset))
+                          : 'Chưa cập nhật'
+                    }}</span>
+                    được giải ngân nhanh<span v-if="asset.status !== 'Đã bán'">, không để anh/chị chờ đợi.</span>
                   </div>
                 </div>
                 <div class="spotlight-wave"></div>
@@ -369,8 +378,8 @@
         </div>
         <div class="detail-item">
             <span class="detail-label">Số tờ bản đồ & Số thửa đất</span>
-            <span v-if=" asset.daMoKhoa " class="detail-value">**********</span>
-            <span v-else class="detail-value">{{ asset.plotNumber ?? 'Chưa cập nhật'}} && {{asset.parcelNumber ?? 'Chưa cập nhật'}}</span>
+            <span v-if=" !asset.daMoKhoa " class="detail-value">**********</span>
+            <span v-else class="detail-value">{{ asset.plotNumber ?? 'Chưa cập nhật'}} & {{asset.parcelNumber ?? 'Chưa cập nhật'}}</span>
         </div>
         <div class="detail-item">
             <span class="detail-label">Loại đất</span>
@@ -614,6 +623,19 @@ onMounted(() => loadDetail(id));
 import api from "/src/api/api.js"
 import Spam from "./Spam.vue";
 
+const tinhHoaHong = (asset) => {
+  if (asset.phiMoiGioi == null) return null;
+
+  const giaCoSo =
+      asset.status === 'Đã bán'
+          ? asset.giaBanThanhCong
+          : asset.giaBan;
+
+  if (giaCoSo == null) return null;
+
+  return (asset.phiMoiGioi * giaCoSo) / 100;
+};
+
 
 const thumbnailImage = computed(() => {
   return asset.anhMacDinh
@@ -642,6 +664,20 @@ const lockedImage = computed(() => {
   return asset.anhMacDinh
       || 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg';
 });
+
+
+
+function formatNgayBan(dateTime) {
+  if (!dateTime) return '';
+
+  const date = new Date(dateTime);
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+
+  return `${day}/${month}/${year}`;
+}
 
 
 const parsedAddress = computed(() => {
@@ -1402,7 +1438,7 @@ const openPdf = async (pdfFile) => {
   border: 1px solid #e2e8f0;
   width: 100%;
   min-width: 0;
-  height: 700px;
+  height: 690px;
 }
 
 .gallery-wrapper {
@@ -2332,9 +2368,6 @@ const openPdf = async (pdfFile) => {
     object-fit: cover;
     object-position: center 60%; /* 👈 giống thumbnail */
   }
-
-
-
 
   .thumbnails-container {
     overflow-x: auto;

@@ -279,7 +279,9 @@ const getMenuIcon = (slug) => {
     'dinh-gia-bds': 'fas fa-calculator',
     'tuyen-dung': 'fas fa-users',
     'cong-tac-vien': 'fas fa-handshake',
-    'dau-tu': 'fas fa-chart-line'
+    'dau-tu': 'fas fa-chart-line',
+    'hop-tac': 'fa-solid fa-sack-dollar',
+    'quan-ly-tin-tuc': 'fa-regular fa-folder-open'
   }
   return icons[slug] || 'fas fa-file'
 }

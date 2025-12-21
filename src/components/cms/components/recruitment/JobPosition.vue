@@ -149,12 +149,29 @@
               <div class="position-number">
                 {{ index + 1 }}
               </div>
-              <input
-                  type="text"
-                  class="position-input"
-                  v-model="content.positions[index]"
-                  :placeholder="'Vị trí ' + (index + 1)"
-              />
+
+              <div class="position-inputs">
+                <div class="position-input-group">
+                  <label>Tên vị trí</label>
+                  <input
+                      type="text"
+                      class="position-input"
+                      v-model="position.title"
+                      :placeholder="'Vị trí ' + (index + 1)"
+                  />
+                </div>
+
+                <div class="position-input-group">
+                  <label>Link URL</label>
+                  <input
+                      type="text"
+                      class="position-input"
+                      v-model="position.link"
+                      placeholder="https://example.com/vitri"
+                  />
+                </div>
+              </div>
+
               <div class="position-actions">
                 <button class="btn-icon" @click="movePositionUp(index)" :disabled="index === 0" title="Di chuyển lên">
                   <i class="fas fa-arrow-up"></i>
@@ -455,13 +472,34 @@ const content = reactive({
   imageUrl: '/imgs/coi-hoi-viec-lam.png',
   imageAlt: 'Cơ hội việc làm',
   positions: [
-    'Nhân viên telesale',
-    'Nhân viên văn phòng',
-    'Chuyên viên tư vấn',
-    'Chuyên viên định giá BĐS',
-    'Nhân viên khảo sát thị trường',
-    'Môi giới bất động sản',
-    'Cộng tác viên THG'
+    {
+      title: 'Nhân viên telesale',
+      link: ''
+    },
+    {
+      title: 'Nhân viên văn phòng',
+      link: ''
+    },
+    {
+      title: 'Chuyên viên tư vấn',
+      link: ''
+    },
+    {
+      title: 'Chuyên viên định giá BĐS',
+      link: ''
+    },
+    {
+      title: 'Nhân viên khảo sát thị trường',
+      link: ''
+    },
+    {
+      title: 'Môi giới bất động sản',
+      link: ''
+    },
+    {
+      title: 'Cộng tác viên THG',
+      link: ''
+    }
   ],
   primaryColor: '#031358',
   secondaryColor: '#0827AF',
@@ -636,6 +674,19 @@ const handleFileUpload = (file, type, previewRef, contentPath) => {
   return true
 }
 
+// ========== URL VALIDATION ==========
+const validateUrl = (url) => {
+  if (!url) return true; // Cho phép để trống
+
+  try {
+    // Kiểm tra URL hợp lệ
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // ========== GRADIENT FUNCTIONS ==========
 const parseGradientColors = (gradientStr) => {
   if (!gradientStr) return {color1: '#031358', color2: '#0827AF'};
@@ -746,7 +797,10 @@ const updateButtonColorFromShadow = () => updateColorFromShadow('button', '#0313
 
 // ========== POSITION MANAGEMENT ==========
 const addPosition = () => {
-  content.positions.push('Vị trí mới')
+  content.positions.push({
+    title: 'Vị trí mới',
+    link: ''
+  })
   showToast('Đã thêm vị trí mới', 'success')
 }
 
@@ -773,6 +827,22 @@ const movePositionDown = (index) => {
   }
 }
 
+// Hàm xử lý khi load data từ API để chuyển đổi từ array đơn giản sang object có link
+const transformPositionsData = (data) => {
+  // Nếu positions là array của strings, chuyển thành objects
+  if (Array.isArray(data.positions) && data.positions.length > 0) {
+    if (typeof data.positions[0] === 'string') {
+      data.positions = data.positions.map(title => ({
+        title: title,
+        link: ''
+      }))
+    }
+  } else {
+    data.positions = []
+  }
+  return data
+}
+
 // ========== API INTEGRATION ==========
 const loadData = async () => {
   try {
@@ -784,8 +854,11 @@ const loadData = async () => {
           ? JSON.parse(response.data.contentJson)
           : response.data.contentJson
 
+      // Transform positions data if needed
+      const transformedData = transformPositionsData(data)
+
       // Update content with loaded data
-      Object.assign(content, data)
+      Object.assign(content, transformedData)
 
       // Initialize gradient colors
       const buttonColors = parseGradientColors(content.buttonGradient);
@@ -1231,7 +1304,6 @@ onMounted(() => {
     max-width: 100%;
   }
 }
-
 
 .setting-section {
   background-color: #f8f9fa;
@@ -1824,6 +1896,7 @@ onMounted(() => {
     gap: 10px;
   }
 }
+
 /* Thêm một số styles đặc thù cho positions */
 .positions-settings {
   background-color: white;
@@ -1887,8 +1960,27 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-.position-input {
+.position-inputs {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.position-input-group {
+  width: 100%;
+}
+
+.position-input-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.position-input-group .position-input {
+  width: 100%;
   padding: 10px 15px;
   border: 2px solid #e9ecef;
   border-radius: 6px;
@@ -1897,14 +1989,44 @@ onMounted(() => {
   background-color: white;
 }
 
-.position-input:focus {
+.position-input-group .position-input:focus {
   border-color: #4a6cf7;
   outline: none;
   box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
 }
 
+.url-warning {
+  margin-top: 5px;
+  font-size: 0.75rem;
+  color: #dc3545;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.url-warning i {
+  font-size: 0.8rem;
+}
+
 .position-actions {
   display: flex;
   gap: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .position-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .position-inputs {
+    width: 100%;
+  }
+
+  .position-actions {
+    align-self: flex-end;
+  }
 }
 </style>

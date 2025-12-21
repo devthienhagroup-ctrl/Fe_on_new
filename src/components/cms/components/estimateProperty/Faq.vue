@@ -368,6 +368,18 @@
               </div>
             </div>
 
+            <div class="form-group">
+              <label for="mobile-breakpoint">Mobile breakpoint</label>
+              <div class="input-with-unit">
+                <input
+                    type="text"
+                    id="mobile-breakpoint"
+                    v-model="content.faqConfig.style.mobileBreakpoint"
+                    placeholder="768px"
+                />
+                <span class="unit">px</span>
+              </div>
+            </div>
 
             <div class="color-input-group">
               <label>Màu link</label>
