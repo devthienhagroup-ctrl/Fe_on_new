@@ -176,6 +176,26 @@ const router = useRouter();
 
 const showQSPopup = ref(route.meta.showQSPopup || false);
 
+const resetMobileMenuState = () => {
+  if (window.innerWidth > 1024) return;
+
+  if (solutionSubmenu.value) {
+    solutionSubmenu.value.classList.remove('active');
+  }
+  if (recruitmentSubmenu.value) {
+    recruitmentSubmenu.value.classList.remove('active');
+  }
+  if (userSubmenu.value) {
+    userSubmenu.value.classList.remove('active');
+  }
+  if (navLinks.value) {
+    navLinks.value.classList.remove('active');
+  }
+  if (hamburger.value) {
+    hamburger.value.classList.remove('active');
+  }
+};
+
 // Computed properties for active state - Cập nhật để bao gồm cả route giả
 const isSolutionActive = computed(() => {
   return route.path === '/giai-phap' ||
@@ -196,6 +216,7 @@ watch(
     () => route.fullPath,
     () => {
       showQSPopup.value = route.meta.showQSPopup || false;
+      resetMobileMenuState();
     }
 );
 
@@ -240,23 +261,7 @@ const toggleSubmenu = (type) => {
 
 // Hàm đóng tất cả submenus
 const closeAllSubmenus = () => {
-  if (window.innerWidth <= 1024) {
-    if (solutionSubmenu.value) {
-      solutionSubmenu.value.classList.remove('active');
-    }
-    if (recruitmentSubmenu.value) {
-      recruitmentSubmenu.value.classList.remove('active');
-    }
-    if (userSubmenu.value) {
-      userSubmenu.value.classList.remove('active');
-    }
-    if (navLinks.value) {
-      navLinks.value.classList.remove('active');
-    }
-    if (hamburger.value) {
-      hamburger.value.classList.remove('active');
-    }
-  }
+  resetMobileMenuState();
 };
 
 // Hàm ẩn menu khi click router-link
@@ -269,7 +274,10 @@ const hideMenuOnLinkClick = () => {
     link.addEventListener('click', function (e) {
       // Chỉ xử lý trên mobile
       if (window.innerWidth <= 1024) {
-        closeAllSubmenus();
+        const isDropdownToggle = link.classList.contains('nav-link') && link.closest('.dropdown');
+        if (!isDropdownToggle) {
+          closeAllSubmenus();
+        }
       }
     });
   });
@@ -821,6 +829,7 @@ ul {
   max-width: none;
   padding: 16px 24px;
   border-radius: 14px;
+  display: none;
 }
 
 .submenu-link {
