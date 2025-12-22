@@ -115,6 +115,7 @@ import InvmList from "../components/cms/components/investment/InvestmentList.vue
 import InvmModal from "../components/cms/components/investment/InvestmentModal.vue";
 import NewsManagement from "../components/cms/news/NewsManagement.vue";
 import NewsDetail from "../components/user/News/NewsDetail.vue";
+import moigioi from "../components/user/MoiGioi/moigioi.vue"
 
 const routes = [
         {
@@ -122,11 +123,11 @@ const routes = [
             name: "LoginForm",
             component: LoginForm,
         },
-        // {
-        //     path: "/moi-gioi",
-        //     name: "MoiGioiShow",
-        //     component: moigioi,
-        // },
+        {
+            path: "/moi-gioi",
+            name: "MoiGioiShow",
+            component: moigioi,
+        },
         {
             path: "/tin-tuc",
             name: "News",

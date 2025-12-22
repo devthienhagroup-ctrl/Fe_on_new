@@ -1,9 +1,8 @@
 diff --git a/src/components/user/Home/components/MenuUser.vue b/src/components/user/Home/components/MenuUser.vue
-index e049a6136d66c633ff218c004e900bb60e9734f8..fb9f3c9b19dc0bf49f32b13fbf7ebb2c7c62e16f 100644
+index fb9f3c9b19dc0bf49f32b13fbf7ebb2c7c62e16f..0db4bd0f84713f6a85276ce4739d2b60d9a64b9c 100644
 --- a/src/components/user/Home/components/MenuUser.vue
 +++ b/src/components/user/Home/components/MenuUser.vue
-@@ -154,144 +154,152 @@
-   <Footer :showMap="!route.meta.hideFooterMap" />
+@@ -155,50 +155,56 @@
    <PopupQuickSale v-if="showQSPopup" @close="closePopup"></PopupQuickSale>
  </template>
 
@@ -28,229 +27,131 @@ index e049a6136d66c633ff218c004e900bb60e9734f8..fb9f3c9b19dc0bf49f32b13fbf7ebb2c
 
  const showQSPopup = ref(route.meta.showQSPopup || false);
 
-+const resetMobileMenuState = () => {
-+  if (window.innerWidth > 1024) return;
+ const resetMobileMenuState = () => {
++  if (menuRef.value) {
++    menuRef.value.classList.remove('hide-menu');
++  }
++  lastY = 0;
++  upDistance = 0;
 +
-+  if (solutionSubmenu.value) {
-+    solutionSubmenu.value.classList.remove('active');
-+  }
-+  if (recruitmentSubmenu.value) {
-+    recruitmentSubmenu.value.classList.remove('active');
-+  }
-+  if (userSubmenu.value) {
-+    userSubmenu.value.classList.remove('active');
-+  }
-+  if (navLinks.value) {
-+    navLinks.value.classList.remove('active');
-+  }
-+  if (hamburger.value) {
-+    hamburger.value.classList.remove('active');
-+  }
-+};
-+
+   if (window.innerWidth > 1024) return;
+
+   if (solutionSubmenu.value) {
+     solutionSubmenu.value.classList.remove('active');
+   }
+   if (recruitmentSubmenu.value) {
+     recruitmentSubmenu.value.classList.remove('active');
+   }
+   if (userSubmenu.value) {
+     userSubmenu.value.classList.remove('active');
+   }
+   if (navLinks.value) {
+     navLinks.value.classList.remove('active');
+   }
+   if (hamburger.value) {
+     hamburger.value.classList.remove('active');
+   }
+ };
+
  // Computed properties for active state - Cập nhật để bao gồm cả route giả
  const isSolutionActive = computed(() => {
    return route.path === '/giai-phap' ||
        route.path === '/giai-phap-ban-nhanh' ||
        route.path === '/dinh-gia-bds' ||
        route.path.startsWith('/giai-phap');
- });
-
- const isRecruitmentActive = computed(() => {
-   return route.path === '/tuyen-dung-menu' ||
-       route.path === '/tuyen-dung' ||
-       route.path === '/cong-viec-cong-tac-vien' ||
-       route.path.startsWith('/tuyen-dung');
- });
-
- // Watch route changes
- watch(
-     () => route.fullPath,
-     () => {
-       showQSPopup.value = route.meta.showQSPopup || false;
-+      resetMobileMenuState();
-     }
- );
-
- const closePopup = () => {
-   showQSPopup.value = false;
- };
-
- let lastY = 0;
- let upDistance = 0;
- const needUp = 500;
-
- // Biến để quản lý timeout
- let userSubmenuTimeout = null;
- let solutionSubmenuTimeout = null;
- let recruitmentSubmenuTimeout = null;
-
- // Hàm xử lý đăng xuất
- const handleLogout =async () => {
-   const store = useAuthStore();
-   await store.logout();
- };
-
- const toggleSubmenu = (type) => {
-   if (window.innerWidth <= 1024) {
-     // Mobile behavior
-     if (type === 'solution' && solutionSubmenu.value) {
-       solutionSubmenu.value.classList.toggle('active');
-       if (recruitmentSubmenu.value) {
-         recruitmentSubmenu.value.classList.remove('active');
-       }
-     } else if (type === 'recruitment' && recruitmentSubmenu.value) {
-       recruitmentSubmenu.value.classList.toggle('active');
-       if (solutionSubmenu.value) {
-         solutionSubmenu.value.classList.remove('active');
-       }
-     }
-   } else {
-     // Desktop: chỉ active submenu, không thực sự chuyển route
-     // Chúng ta sẽ dùng @click.prevent nên không chuyển hướng
+@@ -441,85 +447,65 @@ const initializeMenu = () => {
+   if (solutionLink && solutionSubmenuEl) {
+     solutionSubmenuTimeout = setupSubmenuHover(solutionLink.parentElement, solutionSubmenuEl);
    }
- };
 
- // Hàm đóng tất cả submenus
- const closeAllSubmenus = () => {
--  if (window.innerWidth <= 1024) {
--    if (solutionSubmenu.value) {
--      solutionSubmenu.value.classList.remove('active');
--    }
--    if (recruitmentSubmenu.value) {
--      recruitmentSubmenu.value.classList.remove('active');
--    }
--    if (userSubmenu.value) {
--      userSubmenu.value.classList.remove('active');
--    }
--    if (navLinks.value) {
--      navLinks.value.classList.remove('active');
--    }
--    if (hamburger.value) {
--      hamburger.value.classList.remove('active');
--    }
--  }
-+  resetMobileMenuState();
- };
+   // Setup submenu hover for Recruitment
+   if (recruitmentLink && recruitmentSubmenuEl) {
+     recruitmentSubmenuTimeout = setupSubmenuHover(recruitmentLink.parentElement, recruitmentSubmenuEl);
+   }
 
- // Hàm ẩn menu khi click router-link
- const hideMenuOnLinkClick = () => {
-   if (!navLinks.value) return;
+   // Mobile menu toggle
+   hamburgerEl.addEventListener('click', function (e) {
+     e.preventDefault();
+     e.stopPropagation();
 
-   const allRouterLinks = navLinks.value.querySelectorAll('.nav-link, .submenu-link, .user-submenu-link');
+     navLinksEl.classList.toggle('active');
+     hamburgerEl.classList.toggle('active');
 
-   allRouterLinks.forEach(link => {
-     link.addEventListener('click', function (e) {
-       // Chỉ xử lý trên mobile
-       if (window.innerWidth <= 1024) {
--        closeAllSubmenus();
-+        const isDropdownToggle = link.classList.contains('nav-link') && link.closest('.dropdown');
-+        if (!isDropdownToggle) {
-+          closeAllSubmenus();
-+        }
-       }
-     });
+     if (!navLinksEl.classList.contains('active')) {
+       userSubmenuEl.classList.remove('active');
+       if (solutionSubmenuEl) solutionSubmenuEl.classList.remove('active');
+       if (recruitmentSubmenuEl) recruitmentSubmenuEl.classList.remove('active');
+     }
    });
- };
 
- const handleScroll = () => {
-   const y = window.scrollY;
-
-   if (y === 0) {
-     menuRef.value?.classList.remove("hide-menu");
-     upDistance = 0;
-     lastY = y;
-     return;
+   // Mobile submenu toggle for Solution (sử dụng hàm toggleSubmenu)
+-  if (solutionLink && solutionSubmenuEl) {
+-    solutionLink.addEventListener('click', function (e) {
+-      if (window.innerWidth <= 1024) {
+-        e.preventDefault();
+-        e.stopPropagation();
+-        toggleSubmenu('solution');
+-      }
++  if (solutionBack && solutionSubmenuEl) {
++    solutionBack.addEventListener('click', function (e) {
++      e.preventDefault();
++      e.stopPropagation();
++      solutionSubmenuEl.classList.remove('active');
+     });
+-
+-    if (solutionBack) {
+-      solutionBack.addEventListener('click', function (e) {
+-        e.preventDefault();
+-        e.stopPropagation();
+-        solutionSubmenuEl.classList.remove('active');
+-      });
+-    }
    }
 
-   if (y > lastY) {
-     upDistance = 0;
-     menuRef.value?.classList.add("hide-menu");
-   } else {
-     upDistance += lastY - y;
-     if (upDistance >= needUp) {
-       menuRef.value?.classList.remove("hide-menu");
-       upDistance = 0;
+   // Mobile submenu toggle for Recruitment (sử dụng hàm toggleSubmenu)
+-  if (recruitmentLink && recruitmentSubmenuEl) {
+-    recruitmentLink.addEventListener('click', function (e) {
+-      if (window.innerWidth <= 1024) {
+-        e.preventDefault();
+-        e.stopPropagation();
+-        toggleSubmenu('recruitment');
+-      }
++  if (recruitmentBack && recruitmentSubmenuEl) {
++    recruitmentBack.addEventListener('click', function (e) {
++      e.preventDefault();
++      e.stopPropagation();
++      recruitmentSubmenuEl.classList.remove('active');
+     });
+-
+-    if (recruitmentBack) {
+-      recruitmentBack.addEventListener('click', function (e) {
+-        e.preventDefault();
+-        e.stopPropagation();
+-        recruitmentSubmenuEl.classList.remove('active');
+-      });
+-    }
+   }
+
+   // Mobile submenu toggle for User
+   userIcon.addEventListener('click', function (e) {
+     if (window.innerWidth <= 1024) {
+       e.preventDefault();
+       e.stopPropagation();
+       userSubmenuEl.classList.toggle('active');
+       // Đóng các submenu khác
+       if (solutionSubmenuEl) solutionSubmenuEl.classList.remove('active');
+       if (recruitmentSubmenuEl) recruitmentSubmenuEl.classList.remove('active');
      }
-   }
-@@ -799,50 +807,51 @@ ul {
+   });
 
- .icon-link {
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   width: 40px;
-   height: 40px;
-   border-radius: 50%;
-   color: #031358;
-   font-size: 18px;
-   margin-left: 3px;
-   transition: all 0.3s ease;
-   text-decoration: none;
- }
+   // Close menu when clicking outside on mobile
+   document.addEventListener('click', function (e) {
+     if (window.innerWidth <= 1024) {
+       const isClickInsideMenu =
+           navLinksEl.contains(e.target) ||
+           hamburgerEl.contains(e.target) ||
+           (solutionSubmenuEl && solutionSubmenuEl.contains(e.target)) ||
+           (recruitmentSubmenuEl && recruitmentSubmenuEl.contains(e.target)) ||
+           userSubmenuEl.contains(e.target);
 
- .icon-link:hover {
-   background-color: #f0f0f0;
- }
-
- .submenu {
-   width: auto;
-   min-width: 200px;
-   max-width: none;
-   padding: 16px 24px;
-   border-radius: 14px;
-+  display: none;
- }
-
- .submenu-link {
-   display: flex;
-   align-items: center;
-   gap: 8px;
-   font-size: 15px;
-   padding: 8px 0;
-   color: #333;
-   text-decoration: none;
-   border-bottom: 0.4px solid rgba(31, 31, 31, 0.13) !important;
- }
-
- .submenu-link:last-child {
-   border-bottom: none;
- }
-
- /* ===== SUBMENU DESKTOP - FIX LỖI XUỐNG DÒNG ===== */
- @media (min-width: 1025px) {
-   .submenu {
-     position: absolute;
-     top: 60px;
-     left: 50%;
-     transform: translateX(-50%);
-     width: auto;
-@@ -1744,26 +1753,26 @@ ul {
- .nav-link {
-   width: auto;
-   min-width: fit-content;
- }
-
- @media (min-width: 1025px) {
-   .nav-item.dropdown .nav-link:hover {
-     background: linear-gradient(135deg, #eef2ff, #ecfeff);
-     border-radius: 14px;
-   }
-
-   .nav-item.dropdown .nav-link.router-link-active:hover,
-   .nav-item.dropdown .nav-link.router-link-exact-active:hover,
-   .nav-item.dropdown.active .nav-link:hover {
-     background: linear-gradient(135deg, #eef2ff, #ecfeff) !important;
-     color: #333 !important;
-   }
-
-   .nav-item.dropdown .nav-link.router-link-active:hover::after,
-   .nav-item.dropdown .nav-link.router-link-exact-active:hover::after,
-   .nav-item.dropdown.active .nav-link:hover::after {
-     opacity: 0;
-     width: 0;
-   }
- }
--</style>
-\ No newline at end of file
-+</style>
+       if (!isClickInsideMenu) {

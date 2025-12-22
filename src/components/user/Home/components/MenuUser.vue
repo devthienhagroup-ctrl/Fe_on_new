@@ -177,6 +177,12 @@ const router = useRouter();
 const showQSPopup = ref(route.meta.showQSPopup || false);
 
 const resetMobileMenuState = () => {
+  if (menuRef.value) {
+    menuRef.value.classList.remove('hide-menu');
+  }
+  lastY = 0;
+  upDistance = 0;
+
   if (window.innerWidth > 1024) return;
 
   if (solutionSubmenu.value) {
@@ -463,41 +469,21 @@ const initializeMenu = () => {
   });
 
   // Mobile submenu toggle for Solution (sử dụng hàm toggleSubmenu)
-  if (solutionLink && solutionSubmenuEl) {
-    solutionLink.addEventListener('click', function (e) {
-      if (window.innerWidth <= 1024) {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleSubmenu('solution');
-      }
+  if (solutionBack && solutionSubmenuEl) {
+    solutionBack.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      solutionSubmenuEl.classList.remove('active');
     });
-
-    if (solutionBack) {
-      solutionBack.addEventListener('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        solutionSubmenuEl.classList.remove('active');
-      });
-    }
   }
 
   // Mobile submenu toggle for Recruitment (sử dụng hàm toggleSubmenu)
-  if (recruitmentLink && recruitmentSubmenuEl) {
-    recruitmentLink.addEventListener('click', function (e) {
-      if (window.innerWidth <= 1024) {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleSubmenu('recruitment');
-      }
+  if (recruitmentBack && recruitmentSubmenuEl) {
+    recruitmentBack.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      recruitmentSubmenuEl.classList.remove('active');
     });
-
-    if (recruitmentBack) {
-      recruitmentBack.addEventListener('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        recruitmentSubmenuEl.classList.remove('active');
-      });
-    }
   }
 
   // Mobile submenu toggle for User

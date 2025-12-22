@@ -1,5 +1,5 @@
-const API_BASE_URL = 'http://localhost:8084/apithienha'
-const PUBLIC_AVATAR_BASE = 'https://s3.cloudfly.vn/thg-storage-dev-dev/uploads-public'
+const API_BASE_URL = 'https://thienhagroup.vn/apithienha'
+const PUBLIC_AVATAR_BASE = 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public'
 
 const normalizeFileId = (fileOrId) => {
   if (!fileOrId) return ''
