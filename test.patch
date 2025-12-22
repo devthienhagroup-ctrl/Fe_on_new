@@ -1,157 +1,1296 @@
-diff --git a/src/components/user/Home/components/MenuUser.vue b/src/components/user/Home/components/MenuUser.vue
-index fb9f3c9b19dc0bf49f32b13fbf7ebb2c7c62e16f..0db4bd0f84713f6a85276ce4739d2b60d9a64b9c 100644
---- a/src/components/user/Home/components/MenuUser.vue
-+++ b/src/components/user/Home/components/MenuUser.vue
-@@ -155,50 +155,56 @@
-   <PopupQuickSale v-if="showQSPopup" @close="closePopup"></PopupQuickSale>
+diff --git a/src/components/user/MoiGioi/moigioi.vue b/src/components/user/MoiGioi/moigioi.vue
+index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db3619d4f6 100644
+--- a/src/components/user/MoiGioi/moigioi.vue
++++ b/src/components/user/MoiGioi/moigioi.vue
+@@ -122,53 +122,50 @@
+                 <div class="stat-number">{{ broker.propertiesSold }}</div>
+                 <div class="stat-label">BĐS đã bán</div>
+               </div>
+               <div class="broker-stat">
+                 <div class="stat-number">{{ broker.successRate }}%</div>
+                 <div class="stat-label">Tỉ lệ thành công</div>
+               </div>
+               <div class="broker-stat">
+                 <div class="stat-number">{{ broker.totalSales }} tỷ</div>
+                 <div class="stat-label">Tổng giá trị</div>
+               </div>
+             </div>
+
+             <div class="broker-testimonial">
+               <p class="testimonial-text">"{{ broker.testimonial }}"</p>
+             </div>
+
+             <div class="broker-tags">
+               <span class="broker-tag" v-for="tag in broker.tags" :key="tag">{{ tag }}</span>
+             </div>
+
+             <div class="broker-actions">
+               <button class="btn-view-profile" @click.stop="showBrokerDetail(broker)">
+                 Xem hồ sơ
+               </button>
+-              <button class="btn-collaborate" @click.stop="showCollaborationForm(broker)">
+-                Hợp tác ngay
+-              </button>
+             </div>
+           </div>
+         </div>
+
+         <!-- List View for Brokers -->
+         <div v-if="brokerViewMode === 'list'" class="brokers-list">
+           <div class="brokers-table">
+             <div class="table-header">
+               <div class="table-cell" style="width: 50px">#</div>
+               <div class="table-cell" style="width: 80px">Ảnh</div>
+               <div class="table-cell" style="flex: 2">Thông tin</div>
+               <div class="table-cell" style="flex: 1.5">Chuyên môn</div>
+               <div class="table-cell" style="flex: 1">Số BĐS đã bán</div>
+               <div class="table-cell" style="flex: 1">Tỉ lệ thành công</div>
+               <div class="table-cell" style="flex: 1">Tổng giá trị</div>
+               <div class="table-cell" style="width: 150px">Hành động</div>
+             </div>
+
+             <div
+                 v-for="(broker, index) in currentBrokers"
+                 :key="broker.id"
+                 class="table-row"
+                 @click="showBrokerDetail(broker)"
+             >
+               <div class="table-cell" style="width: 50px">{{ (brokersPage - 1) * brokersPerPage + index + 1 }}</div>
+@@ -180,53 +177,50 @@
+               <div class="table-cell" style="flex: 2">
+                 <div class="broker-info-list">
+                   <h4 class="broker-name-list">{{ broker.name }}</h4>
+                   <div class="broker-title-list">{{ broker.title }}</div>
+                   <div class="broker-location-list">
+                     <i class="fas fa-map-marker-alt"></i> {{ broker.location }}
+                   </div>
+                   <div class="broker-experience-list">
+                     <i class="fas fa-briefcase"></i> {{ broker.experience }} năm kinh nghiệm
+                   </div>
+                 </div>
+               </div>
+               <div class="table-cell" style="flex: 1.5">
+                 <div class="broker-tags-list">
+                   <span class="broker-tag-list" v-for="tag in broker.tags" :key="tag">{{ tag }}</span>
+                 </div>
+               </div>
+               <div class="table-cell" style="flex: 1">{{ broker.propertiesSold }}</div>
+               <div class="table-cell" style="flex: 1">{{ broker.successRate }}%</div>
+               <div class="table-cell" style="flex: 1">{{ broker.totalSales }} tỷ</div>
+               <div class="table-cell" style="width: 150px">
+                 <div class="broker-actions-list">
+                   <button class="btn-view-profile-list" @click.stop="showBrokerDetail(broker)">
+                     <i class="fas fa-eye"></i>
+                   </button>
+-                  <button class="btn-collaborate-list" @click.stop="showCollaborationForm(broker)">
+-                    <i class="fas fa-handshake"></i>
+-                  </button>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+
+         <div v-if="filteredBrokers.length === 0" class="no-results">
+           <i class="fas fa-user-slash"></i>
+           <p>Không tìm thấy môi giới phù hợp với tiêu chí tìm kiếm</p>
+         </div>
+
+         <!-- Pagination for Brokers -->
+         <div v-if="filteredBrokers.length > 0" class="pagination">
+           <button
+               class="pagination-btn"
+               :disabled="brokersPage === 1"
+               @click="brokersPage--"
+           >
+             <i class="fas fa-chevron-left"></i> Trước
+           </button>
+
+           <div class="pagination-pages">
+             <span v-for="page in brokerPages" :key="page">
+               <button
+                   v-if="page === '...'"
+@@ -336,83 +330,50 @@
+             <span v-for="page in propertyPages" :key="page">
+               <button
+                   v-if="page === '...'"
+                   class="pagination-dots"
+                   disabled
+               >...</button>
+               <button
+                   v-else
+                   :class="['pagination-page', { active: page === propertiesPage }]"
+                   @click="propertiesPage = page"
+               >
+                 {{ page }}
+               </button>
+             </span>
+           </div>
+
+           <button
+               class="pagination-btn"
+               :disabled="propertiesPage === totalPropertyPages"
+               @click="propertiesPage++"
+           >
+             Sau <i class="fas fa-chevron-right"></i>
+           </button>
+         </div>
+       </section>
+-
+-      <!-- CTA Section -->
+-      <section class="cta-section">
+-        <div class="cta-content">
+-          <h2 class="cta-title">Sẵn sàng hợp tác và thành công cùng chúng tôi?</h2>
+-          <p class="cta-description">
+-            Tham gia mạng lưới đối tác môi giới hàng đầu, tiếp cận nguồn hàng chất lượng
+-            và nhận hỗ trợ tối đa để gia tăng doanh thu.
+-          </p>
+-          <div class="cta-buttons">
+-            <button class="btn-cta-primary" @click="showCollaborationForm()">
+-              <i class="fas fa-handshake"></i> Đăng ký hợp tác ngay
+-            </button>
+-            <button class="btn-cta-secondary" @click="scrollToBrokers">
+-              <i class="fas fa-user-tie"></i> Xem môi giới thành công
+-            </button>
+-          </div>
+-          <div class="cta-benefits">
+-            <div class="benefit">
+-              <i class="fas fa-percentage"></i>
+-              <span>Hoa hồng hấp dẫn lên đến 3.5%</span>
+-            </div>
+-            <div class="benefit">
+-              <i class="fas fa-chart-line"></i>
+-              <span>Đào tạo & hỗ trợ chuyên môn liên tục</span>
+-            </div>
+-            <div class="benefit">
+-              <i class="fas fa-medal"></i>
+-              <span>Cơ hội nhận thưởng và giải thưởng giá trị</span>
+-            </div>
+-          </div>
+-        </div>
+-      </section>
+     </main>
+
+     <!-- Broker Detail Modal -->
+     <div v-if="selectedBroker" class="modal-overlay" @click="closeModal">
+       <div class="modal-content" @click.stop>
+         <button class="modal-close" @click="closeModal">
+           <i class="fas fa-times"></i>
+         </button>
+
+         <div class="modal-body">
+           <div class="broker-detail">
+             <div class="broker-detail-header">
+               <div class="broker-detail-avatar">
+                 <img :src="selectedBroker.avatar" :alt="selectedBroker.name" />
+               </div>
+               <div class="broker-detail-info">
+                 <h3 class="broker-detail-name">{{ selectedBroker.name }}</h3>
+                 <div class="broker-detail-title">{{ selectedBroker.title }}</div>
+                 <div class="broker-detail-location">
+                   <i class="fas fa-map-marker-alt"></i> {{ selectedBroker.location }}
+                 </div>
+                 <div class="broker-detail-experience">
+                   <i class="fas fa-briefcase"></i> {{ selectedBroker.experience }} năm kinh nghiệm
+                 </div>
+               </div>
+@@ -446,250 +407,113 @@
+               <h4>Câu chuyện thành công</h4>
+               <blockquote>"{{ selectedBroker.testimonial }}"</blockquote>
+             </div>
+
+             <div class="broker-detail-properties">
+               <h4>BĐS đã bán thành công (5 gần nhất)</h4>
+               <div class="properties-list">
+                 <div
+                     v-for="property in selectedBroker.recentProperties"
+                     :key="property.id"
+                     class="property-item"
+                 >
+                   <div class="property-item-name">{{ property.name }}</div>
+                   <div class="property-item-details">
+                     <span class="property-item-location">{{ property.location }}</span>
+                     <span class="property-item-value">{{ property.price }} tỷ</span>
+                   </div>
+                 </div>
+               </div>
+             </div>
+
+             <div class="broker-detail-actions">
+               <button class="btn-contact" @click="contactBroker(selectedBroker)">
+                 <i class="fas fa-phone-alt"></i> Liên hệ môi giới
+               </button>
+-              <button class="btn-collaborate" @click="showCollaborationForm(selectedBroker)">
+-                <i class="fas fa-handshake"></i> Hợp tác với môi giới này
+-              </button>
+             </div>
+           </div>
+         </div>
+       </div>
+     </div>
+
+-    <!-- Collaboration Form Modal -->
+-    <div v-if="showCollaborationModal" class="modal-overlay" @click="closeModal">
+-      <div class="modal-content collaboration-form" @click.stop>
+-        <button class="modal-close" @click="closeModal">
+-          <i class="fas fa-times"></i>
+-        </button>
+-
+-        <div class="modal-body">
+-          <h2 class="form-title">Đăng Ký Hợp Tác Môi Giới</h2>
+-          <p class="form-subtitle">
+-            Điền thông tin để trở thành đối tác môi giới và nhận nhiều ưu đãi hấp dẫn
+-          </p>
+-
+-          <form @submit.prevent="submitCollaborationForm" class="collaboration-form-content">
+-            <div class="form-row">
+-              <div class="form-group">
+-                <label for="fullName">Họ và tên *</label>
+-                <input
+-                    type="text"
+-                    id="fullName"
+-                    v-model="collaborationForm.fullName"
+-                    placeholder="Nhập họ và tên của bạn"
+-                    required
+-                />
+-              </div>
+-              <div class="form-group">
+-                <label for="phone">Số điện thoại *</label>
+-                <input
+-                    type="tel"
+-                    id="phone"
+-                    v-model="collaborationForm.phone"
+-                    placeholder="Nhập số điện thoại"
+-                    required
+-                />
+-              </div>
+-            </div>
+-
+-            <div class="form-row">
+-              <div class="form-group">
+-                <label for="email">Email *</label>
+-                <input
+-                    type="email"
+-                    id="email"
+-                    v-model="collaborationForm.email"
+-                    placeholder="Nhập email của bạn"
+-                    required
+-                />
+-              </div>
+-              <div class="form-group">
+-                <label for="city">Tỉnh/Thành phố *</label>
+-                <select id="city" v-model="collaborationForm.city" required>
+-                  <option value="">Chọn tỉnh/thành phố</option>
+-                  <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
+-                </select>
+-              </div>
+-            </div>
+-
+-            <div class="form-row">
+-              <div class="form-group">
+-                <label for="experience">Kinh nghiệm môi giới *</label>
+-                <select id="experience" v-model="collaborationForm.experience" required>
+-                  <option value="">Chọn mức kinh nghiệm</option>
+-                  <option value="under1">Dưới 1 năm</option>
+-                  <option value="1-3">1 - 3 năm</option>
+-                  <option value="3-5">3 - 5 năm</option>
+-                  <option value="over5">Trên 5 năm</option>
+-                </select>
+-              </div>
+-              <div class="form-group">
+-                <label for="specialization">Chuyên môn *</label>
+-                <select id="specialization" v-model="collaborationForm.specialization" required>
+-                  <option value="">Chọn lĩnh vực chuyên môn</option>
+-                  <option value="apartment">Căn hộ chung cư</option>
+-                  <option value="house">Nhà phố, biệt thự</option>
+-                  <option value="land">Đất nền</option>
+-                  <option value="commercial">Bất động sản thương mại</option>
+-                  <option value="all">Đa dạng các loại hình</option>
+-                </select>
+-              </div>
+-            </div>
+-
+-            <div class="form-group">
+-              <label for="message">Lý do muốn hợp tác</label>
+-              <textarea
+-                  id="message"
+-                  v-model="collaborationForm.message"
+-                  placeholder="Chia sẻ lý do bạn muốn hợp tác với chúng tôi và mong muốn của bạn..."
+-                  rows="4"
+-              ></textarea>
+-            </div>
+-
+-            <div class="form-group checkbox-group">
+-              <input
+-                  type="checkbox"
+-                  id="agreeTerms"
+-                  v-model="collaborationForm.agreeTerms"
+-                  required
+-              />
+-              <label for="agreeTerms">
+-                Tôi đồng ý với các điều khoản hợp tác và chính sách bảo mật
+-              </label>
+-            </div>
+-
+-            <div class="form-submit">
+-              <button type="submit" class="btn-submit" :disabled="formSubmitting">
+-                <span v-if="formSubmitting">
+-                  <i class="fas fa-spinner fa-spin"></i> Đang gửi...
+-                </span>
+-                <span v-else>
+-                  <i class="fas fa-paper-plane"></i> Gửi đăng ký hợp tác
+-                </span>
+-              </button>
+-              <p class="form-note">
+-                Chúng tôi sẽ liên hệ với bạn trong vòng 24 giờ sau khi nhận được đăng ký
+-              </p>
+-            </div>
+-          </form>
+-        </div>
+-      </div>
+-    </div>
+
+     <!-- Footer -->
+     <footer class="page-footer">
+       <div class="footer-content">
+         <div class="footer-section">
+           <h4>Hỗ trợ đối tác môi giới</h4>
+           <ul class="footer-links">
+             <li><a href="#">Chính sách hợp tác</a></li>
+             <li><a href="#">Quy trình làm việc</a></li>
+             <li><a href="#">Hướng dẫn đăng ký</a></li>
+             <li><a href="#">Chính sách hoa hồng</a></li>
+           </ul>
+         </div>
+
+         <div class="footer-section">
+           <h4>Tài nguyên dành cho môi giới</h4>
+           <ul class="footer-links">
+             <li><a href="#">Tài liệu giới thiệu BĐS</a></li>
+             <li><a href="#">Bộ công cụ marketing</a></li>
+             <li><a href="#">Đào tạo chuyên môn</a></li>
+             <li><a href="#">Hỏi đáp thường gặp</a></li>
+           </ul>
+         </div>
+
+         <div class="footer-section">
+           <h4>Liên hệ hợp tác</h4>
+           <div class="contact-info">
+             <p><i class="fas fa-phone-alt"></i> Hotline: 1900 1234</p>
+             <p><i class="fas fa-envelope"></i> Email: partner@realestate.com</p>
+             <p><i class="fas fa-clock"></i> Giờ làm việc: 8:00 - 18:00 (T2 - T7)</p>
+           </div>
+         </div>
+       </div>
+
+       <div class="footer-bottom">
+         <p>© 2023 RealEstate Partnership. Tất cả các quyền được bảo lưu.</p>
+       </div>
+     </footer>
+   </div>
  </template>
 
  <script setup>
- import {ref, onMounted, onUnmounted, nextTick, computed, watch} from "vue";
- import {useRoute, useRouter} from 'vue-router'
- import Footer from "./Footer.vue";
- import {useAuthStore} from "../../../../stores/authStore.js";
- import PopupQuickSale from "../../QuickSaleSolution/Components/PopupQuickSale.vue";
+ import { ref, computed, onMounted } from 'vue'
 
- const auth = useAuthStore();
- const menuRef = ref(null);
- const navLinks = ref(null);
- const hamburger = ref(null);
- const solutionSubmenu = ref(null);
- const recruitmentSubmenu = ref(null);
- const userSubmenu = ref(null);
- const userMenuContainer = ref(null);
+ // Reactive state using ref()
+ const brokerViewMode = ref('grid')
+ const searchQuery = ref('')
+ const selectedCity = ref('')
+ const selectedPropertyType = ref('')
+ const selectedBroker = ref(null)
+-const showCollaborationModal = ref(false)
+-const formSubmitting = ref(false)
 
- const route = useRoute()
- const router = useRouter();
+ // Pagination
+ const brokersPage = ref(1)
+ const brokersPerPage = ref(10)
+ const propertiesPage = ref(1)
+ const propertiesPerPage = ref(5)
 
- const showQSPopup = ref(route.meta.showQSPopup || false);
+-// Collaboration form data using ref()
+-const collaborationForm = ref({
+-  fullName: '',
+-  phone: '',
+-  email: '',
+-  city: '',
+-  experience: '',
+-  specialization: '',
+-  message: '',
+-  agreeTerms: false
+-})
+-
+ // Sample data for brokers (increased to 20)
+ const brokers = ref([
+   {
+     id: 1,
+     name: 'Nguyễn Văn An',
+     title: 'Chuyên viên môi giới cao cấp',
+     location: 'Hồ Chí Minh',
+     avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+     verified: true,
+     propertiesSold: 42,
+     successRate: 92,
+     totalSales: 320,
+     experience: 8,
+     averageTime: 45,
+     bio: 'Chuyên gia với hơn 8 năm kinh nghiệm trong lĩnh vực BĐS cao cấp. Đã hoàn thành hơn 40 dự án với tỷ lệ thành công ấn tượng.',
+     testimonial: 'Hợp tác với đội ngũ đã giúp tôi tiếp cận nguồn hàng chất lượng và tăng doanh thu lên 40% chỉ sau 6 tháng.',
+     tags: ['Cao cấp', 'Căn hộ', 'Biệt thự', 'Top Seller'],
+     recentProperties: [
+       { id: 1, name: 'Sunshine City', location: 'Quận 7', price: 45 },
+       { id: 2, name: 'Vinhomes Grand Park', location: 'Quận 9', price: 68 },
+       { id: 3, name: 'Masteri Centre Point', location: 'Quận 2', price: 32 },
+       { id: 4, name: 'The Nassim', location: 'Quận 1', price: 120 },
+       { id: 5, name: 'Estella Heights', location: 'Quận 2', price: 40 }
+     ]
+   },
+@@ -1438,121 +1262,84 @@ const propertyPages = computed(() => {
+       pages.push(1, '...', current - 1, current, current + 1, '...', total)
+     }
+   }
 
- const resetMobileMenuState = () => {
-+  if (menuRef.value) {
-+    menuRef.value.classList.remove('hide-menu');
-+  }
-+  lastY = 0;
-+  upDistance = 0;
+   return pages
+ })
+
+ // Methods
+ const formatNumber = (num) => {
+   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+ }
+
+ const formatDate = (dateString) => {
+   const date = new Date(dateString)
+   return date.toLocaleDateString('vi-VN')
+ }
+
+ const showBrokerDetail = (broker) => {
+   selectedBroker.value = broker
+ }
+
+ const showPropertyDetail = (property) => {
+   alert(`Chi tiết BĐS: ${property.name}\nMô tả: ${property.description}\nĐịa điểm: ${property.location}\nLoại: ${property.type}\nGiá bán: ${property.price} tỷ VNĐ\nNgày bán: ${formatDate(property.soldDate)}`)
+ }
+
+-const showCollaborationForm = (broker = null) => {
+-  if (broker) {
+-    collaborationForm.value.message = `Tôi muốn hợp tác với môi giới ${broker.name}. ${collaborationForm.value.message}`
+-  }
+-  showCollaborationModal.value = true
+-}
+-
+ const contactBroker = (broker) => {
+   alert(`Liên hệ với ${broker.name}\nSố điện thoại: 09XX XXX XXX\nEmail: ${broker.name.toLowerCase().replace(/\s/g, '')}@example.com`)
+ }
+
+-const submitCollaborationForm = () => {
+-  formSubmitting.value = true
+-
+-  // Simulate API call
+-  setTimeout(() => {
+-    alert('Đăng ký hợp tác thành công! Chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất.')
+-    formSubmitting.value = false
+-    showCollaborationModal.value = false
+-    resetCollaborationForm()
+-  }, 1500)
+-}
+-
+-const resetCollaborationForm = () => {
+-  collaborationForm.value = {
+-    fullName: '',
+-    phone: '',
+-    email: '',
+-    city: '',
+-    experience: '',
+-    specialization: '',
+-    message: '',
+-    agreeTerms: false
+-  }
+-}
+-
+ const resetFilters = () => {
+   searchQuery.value = ''
+   selectedCity.value = ''
+   selectedPropertyType.value = ''
+   brokersPage.value = 1
+   propertiesPage.value = 1
+ }
+
+ const closeModal = () => {
+   selectedBroker.value = null
+-  showCollaborationModal.value = false
+-}
+-
+-const scrollToBrokers = () => {
+-  setTimeout(() => {
+-    const brokersSection = document.querySelector('.brokers-section')
+-    if (brokersSection) {
+-      brokersSection.scrollIntoView({ behavior: 'smooth' })
+-    }
+-  }, 100)
+ }
+
+ // Lifecycle hook
+ onMounted(() => {
+   console.log('Broker success page mounted')
+ })
+ </script>
+
+ <style scoped>
+ .broker-success-page {
+   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   color: #333;
+   background-color: #f8f9fa;
+ }
+
++.page-content {
++  padding: 0 1rem 2rem;
++  max-width: 100%;
++}
 +
-   if (window.innerWidth > 1024) return;
+ /* Header Styles */
+ .page-header {
+   background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+   color: white;
+   padding: 3rem 1.5rem;
+   text-align: center;
+ }
 
-   if (solutionSubmenu.value) {
-     solutionSubmenu.value.classList.remove('active');
-   }
-   if (recruitmentSubmenu.value) {
-     recruitmentSubmenu.value.classList.remove('active');
-   }
-   if (userSubmenu.value) {
-     userSubmenu.value.classList.remove('active');
-   }
-   if (navLinks.value) {
-     navLinks.value.classList.remove('active');
-   }
-   if (hamburger.value) {
-     hamburger.value.classList.remove('active');
-   }
- };
+ .header-content {
+   max-width: 1200px;
+   margin: 0 auto;
+ }
 
- // Computed properties for active state - Cập nhật để bao gồm cả route giả
- const isSolutionActive = computed(() => {
-   return route.path === '/giai-phap' ||
-       route.path === '/giai-phap-ban-nhanh' ||
-       route.path === '/dinh-gia-bds' ||
-       route.path.startsWith('/giai-phap');
-@@ -441,85 +447,65 @@ const initializeMenu = () => {
-   if (solutionLink && solutionSubmenuEl) {
-     solutionSubmenuTimeout = setupSubmenuHover(solutionLink.parentElement, solutionSubmenuEl);
-   }
+ .page-title {
+   font-size: 2.8rem;
+   font-weight: 700;
+   margin-bottom: 1rem;
+ }
 
-   // Setup submenu hover for Recruitment
-   if (recruitmentLink && recruitmentSubmenuEl) {
-     recruitmentSubmenuTimeout = setupSubmenuHover(recruitmentLink.parentElement, recruitmentSubmenuEl);
-   }
+ .page-subtitle {
+   font-size: 1.2rem;
+   max-width: 800px;
+   margin: 0 auto 2.5rem;
+   opacity: 0.9;
+   line-height: 1.6;
+@@ -1561,53 +1348,53 @@ onMounted(() => {
+ .stats-overview {
+   display: flex;
+   justify-content: center;
+   flex-wrap: wrap;
+   gap: 2.5rem;
+   margin-top: 2.5rem;
+ }
 
-   // Mobile menu toggle
-   hamburgerEl.addEventListener('click', function (e) {
-     e.preventDefault();
-     e.stopPropagation();
+ .stat-item {
+   text-align: center;
+ }
 
-     navLinksEl.classList.toggle('active');
-     hamburgerEl.classList.toggle('active');
+ .stat-value {
+   font-size: 2.5rem;
+   font-weight: 700;
+   margin-bottom: 0.5rem;
+ }
 
-     if (!navLinksEl.classList.contains('active')) {
-       userSubmenuEl.classList.remove('active');
-       if (solutionSubmenuEl) solutionSubmenuEl.classList.remove('active');
-       if (recruitmentSubmenuEl) recruitmentSubmenuEl.classList.remove('active');
-     }
-   });
+ .stat-label {
+   font-size: 1rem;
+   opacity: 0.9;
+ }
 
-   // Mobile submenu toggle for Solution (sử dụng hàm toggleSubmenu)
--  if (solutionLink && solutionSubmenuEl) {
--    solutionLink.addEventListener('click', function (e) {
--      if (window.innerWidth <= 1024) {
--        e.preventDefault();
--        e.stopPropagation();
--        toggleSubmenu('solution');
--      }
-+  if (solutionBack && solutionSubmenuEl) {
-+    solutionBack.addEventListener('click', function (e) {
-+      e.preventDefault();
-+      e.stopPropagation();
-+      solutionSubmenuEl.classList.remove('active');
-     });
+ /* Filter Section */
+ .filter-section {
+-  max-width: 1200px;
+-  margin: 2rem auto;
+-  padding: 0 1.5rem;
++  max-width: 100%;
++  margin: 2rem 0;
++  padding: 0;
+ }
+
+ .filter-controls {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 1rem;
+   align-items: center;
+   margin-bottom: 1.5rem;
+ }
+
+ .search-box {
+   position: relative;
+   flex-grow: 1;
+   max-width: 400px;
+ }
+
+ .search-input {
+   width: 100%;
+   padding: 0.85rem 1rem 0.85rem 3rem;
+   border: 1px solid #ddd;
+   border-radius: 8px;
+   font-size: 1rem;
+   transition: all 0.3s;
+ }
+
+@@ -1680,95 +1467,95 @@ onMounted(() => {
+
+ .view-toggle-btn {
+   padding: 0.75rem 1.5rem;
+   background: none;
+   border: none;
+   font-size: 1rem;
+   cursor: pointer;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   gap: 0.5rem;
+   transition: all 0.3s;
+ }
+
+ .view-toggle-btn.active {
+   background-color: #1a2980;
+   color: white;
+ }
+
+ .view-toggle-btn:not(.active):hover {
+   background-color: #f8f9fa;
+ }
+
+ /* Section Styles */
+ .brokers-section, .properties-section {
+-  max-width: 1200px;
+-  margin: 0 auto 4rem;
+-  padding: 0 1.5rem;
++  max-width: 100%;
++  margin: 0 0 4rem;
++  padding: 0;
+ }
+
+ .section-header {
+   display: flex;
+   justify-content: space-between;
+   align-items: flex-start;
+   margin-bottom: 2rem;
+   flex-wrap: wrap;
+   gap: 1rem;
+ }
+
+ .section-title {
+   font-size: 2rem;
+   font-weight: 700;
+   color: #1a2980;
+   margin-bottom: 0.5rem;
+ }
+
+ .section-subtitle {
+   color: #666;
+   font-size: 1.1rem;
+   max-width: 600px;
+ }
+
+ .section-stats {
+   display: flex;
+   align-items: center;
+ }
+
+ .section-stat {
+   background-color: #f0f7ff;
+   color: #1a2980;
+   padding: 0.5rem 1rem;
+   border-radius: 20px;
+   font-size: 0.9rem;
+   font-weight: 500;
+ }
+
+ /* Brokers Grid */
+ .brokers-grid {
+   display: grid;
+-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
++  grid-template-columns: repeat(4, minmax(0, 1fr));
+   gap: 2rem;
+   margin-bottom: 3rem;
+ }
+
+ .broker-card {
+   background-color: white;
+   border-radius: 12px;
+   overflow: hidden;
+   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+   transition: all 0.3s ease;
+   cursor: pointer;
+ }
+
+ .broker-card:hover {
+   transform: translateY(-5px);
+   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+ }
+
+ .broker-header {
+   display: flex;
+   padding: 1.5rem;
+   background: linear-gradient(90deg, #f8f9fa 0%, white 100%);
+   border-bottom: 1px solid #eee;
+ }
+
+@@ -1862,82 +1649,71 @@ onMounted(() => {
+   margin: 0;
+ }
+
+ .broker-tags {
+   padding: 1rem 1.5rem;
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.5rem;
+ }
+
+ .broker-tag {
+   background-color: #f0f7ff;
+   color: #1a2980;
+   padding: 0.25rem 0.75rem;
+   border-radius: 20px;
+   font-size: 0.8rem;
+   font-weight: 500;
+ }
+
+ .broker-actions {
+   padding: 1rem 1.5rem 1.5rem;
+   display: flex;
+   gap: 0.75rem;
+ }
+
+-.btn-view-profile, .btn-collaborate, .btn-view-details, .btn-cta-primary, .btn-cta-secondary, .btn-contact, .btn-submit {
++.btn-view-profile, .btn-contact {
+   padding: 0.75rem 1.5rem;
+   border-radius: 8px;
+   font-weight: 600;
+   cursor: pointer;
+   transition: all 0.3s;
+   border: none;
+   font-size: 0.95rem;
+ }
+
+ .btn-view-profile {
+   flex: 1;
+   background-color: #f8f9fa;
+   color: #333;
+   border: 1px solid #ddd;
+ }
+
+ .btn-view-profile:hover {
+   background-color: #e9ecef;
+ }
+
+-.btn-collaborate, .btn-cta-primary, .btn-submit {
+-  flex: 1;
+-  background: linear-gradient(90deg, #1a2980 0%, #26d0ce 100%);
+-  color: white;
+-}
 -
--    if (solutionBack) {
--      solutionBack.addEventListener('click', function (e) {
--        e.preventDefault();
--        e.stopPropagation();
--        solutionSubmenuEl.classList.remove('active');
--      });
--    }
-   }
-
-   // Mobile submenu toggle for Recruitment (sử dụng hàm toggleSubmenu)
--  if (recruitmentLink && recruitmentSubmenuEl) {
--    recruitmentLink.addEventListener('click', function (e) {
--      if (window.innerWidth <= 1024) {
--        e.preventDefault();
--        e.stopPropagation();
--        toggleSubmenu('recruitment');
--      }
-+  if (recruitmentBack && recruitmentSubmenuEl) {
-+    recruitmentBack.addEventListener('click', function (e) {
-+      e.preventDefault();
-+      e.stopPropagation();
-+      recruitmentSubmenuEl.classList.remove('active');
-     });
+-.btn-collaborate:hover, .btn-cta-primary:hover, .btn-submit:hover {
+-  transform: translateY(-2px);
+-  box-shadow: 0 5px 15px rgba(26, 41, 128, 0.3);
+-}
 -
--    if (recruitmentBack) {
--      recruitmentBack.addEventListener('click', function (e) {
--        e.preventDefault();
--        e.stopPropagation();
--        recruitmentSubmenuEl.classList.remove('active');
--      });
--    }
+ /* Brokers List View */
+ .brokers-list {
+   margin-bottom: 3rem;
+ }
+
+ .brokers-table {
+   background-color: white;
+   border-radius: 12px;
+   overflow: hidden;
+   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+ }
+
+ .table-header {
+   display: flex;
+   background-color: #f8f9fa;
+   border-bottom: 1px solid #eee;
+   font-weight: 600;
+   color: #444;
+ }
+
+ .table-row {
+   display: flex;
+   border-bottom: 1px solid #eee;
+   transition: all 0.3s;
+   cursor: pointer;
+@@ -1990,82 +1766,71 @@ onMounted(() => {
+   color: #666;
+   display: flex;
+   align-items: center;
+   gap: 0.5rem;
+ }
+
+ .broker-tags-list {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.25rem;
+ }
+
+ .broker-tag-list {
+   background-color: #f0f7ff;
+   color: #1a2980;
+   padding: 0.15rem 0.5rem;
+   border-radius: 12px;
+   font-size: 0.75rem;
+ }
+
+ .broker-actions-list {
+   display: flex;
+   gap: 0.5rem;
+ }
+
+-.btn-view-profile-list, .btn-collaborate-list {
++.btn-view-profile-list {
+   width: 40px;
+   height: 40px;
+   border-radius: 8px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   border: none;
+   cursor: pointer;
+   transition: all 0.3s;
+ }
+
+ .btn-view-profile-list {
+   background-color: #f8f9fa;
+   color: #333;
+   border: 1px solid #ddd;
+ }
+-
+-.btn-collaborate-list {
+-  background-color: #1a2980;
+-  color: white;
+-}
+-
+ .btn-view-profile-list:hover {
+   background-color: #e9ecef;
+ }
+
+-.btn-collaborate-list:hover {
+-  background-color: #26d0ce;
+-  transform: translateY(-2px);
+-}
+-
+ /* Properties Table */
+ .properties-table {
+   background-color: white;
+   border-radius: 12px;
+   overflow: hidden;
+   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+   margin-bottom: 3rem;
+ }
+
+ .property-image-small {
+   width: 80px;
+   height: 60px;
+   border-radius: 6px;
+   overflow: hidden;
+ }
+
+ .property-image-small img {
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+ }
+
+ .property-info-list {
+   display: flex;
+   flex-direction: column;
+@@ -2163,128 +1928,50 @@ onMounted(() => {
+   border: 1px solid #ddd;
+   background-color: white;
+   cursor: pointer;
+   transition: all 0.3s;
+ }
+
+ .pagination-page:hover {
+   background-color: #f8f9fa;
+ }
+
+ .pagination-page.active {
+   background-color: #1a2980;
+   color: white;
+   border-color: #1a2980;
+ }
+
+ .pagination-dots {
+   width: 40px;
+   height: 40px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   color: #666;
+ }
+
+-/* CTA Section */
+-.cta-section {
+-  background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+-  color: white;
+-  padding: 4rem 1.5rem;
+-  margin: 4rem 0;
+-  border-radius: 12px;
+-  max-width: 1200px;
+-  margin-left: auto;
+-  margin-right: auto;
+-}
+-
+-.cta-content {
+-  max-width: 800px;
+-  margin: 0 auto;
+-  text-align: center;
+-}
+-
+-.cta-title {
+-  font-size: 2.2rem;
+-  font-weight: 700;
+-  margin-bottom: 1rem;
+-}
+-
+-.cta-description {
+-  font-size: 1.1rem;
+-  opacity: 0.9;
+-  line-height: 1.6;
+-  margin-bottom: 2.5rem;
+-}
+-
+-.cta-buttons {
+-  display: flex;
+-  flex-wrap: wrap;
+-  justify-content: center;
+-  gap: 1rem;
+-  margin-bottom: 2.5rem;
+-}
+-
+-.btn-cta-primary, .btn-cta-secondary {
+-  padding: 1rem 2rem;
+-  display: flex;
+-  align-items: center;
+-  justify-content: center;
+-  gap: 0.75rem;
+-  font-size: 1.05rem;
+-}
+-
+-.btn-cta-secondary {
+-  background: rgba(255, 255, 255, 0.2);
+-  color: white;
+-  border: 1px solid rgba(255, 255, 255, 0.3);
+-}
+-
+-.btn-cta-secondary:hover {
+-  background: rgba(255, 255, 255, 0.3);
+-}
+-
+-.cta-benefits {
+-  display: flex;
+-  flex-wrap: wrap;
+-  justify-content: center;
+-  gap: 2rem;
+-  margin-top: 2rem;
+-}
+-
+-.benefit {
+-  display: flex;
+-  align-items: center;
+-  gap: 0.75rem;
+-  font-size: 0.95rem;
+-}
+-
+-.benefit i {
+-  color: #26d0ce;
+-  font-size: 1.2rem;
+-}
+-
+ /* Modal Styles */
+ .modal-overlay {
+   position: fixed;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background-color: rgba(0, 0, 0, 0.7);
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   z-index: 1000;
+   padding: 1.5rem;
+   animation: fadeIn 0.3s;
+ }
+
+ @keyframes fadeIn {
+   from { opacity: 0; }
+   to { opacity: 1; }
+ }
+
+ .modal-content {
+   background-color: white;
+   border-radius: 12px;
+   max-width: 800px;
+@@ -2444,137 +2131,50 @@ onMounted(() => {
+
+ .property-item-details {
+   display: flex;
+   justify-content: space-between;
+   font-size: 0.9rem;
+   color: #666;
+ }
+
+ .broker-detail-actions {
+   display: flex;
+   gap: 1rem;
+   margin-top: 2rem;
+ }
+
+ .btn-contact {
+   flex: 1;
+   background-color: #28a745;
+   color: white;
+ }
+
+ .btn-contact:hover {
+   background-color: #218838;
+   transform: translateY(-2px);
+ }
+
+-/* Collaboration Form */
+-.collaboration-form {
+-  max-width: 700px;
+-}
+-
+-.form-title {
+-  font-size: 1.8rem;
+-  font-weight: 700;
+-  color: #1a2980;
+-  text-align: center;
+-  margin-bottom: 0.5rem;
+-}
+-
+-.form-subtitle {
+-  text-align: center;
+-  color: #666;
+-  margin-bottom: 2rem;
+-}
+-
+-.form-row {
+-  display: flex;
+-  flex-wrap: wrap;
+-  gap: 1.5rem;
+-  margin-bottom: 1.5rem;
+-}
+-
+-.form-group {
+-  flex: 1;
+-  min-width: 250px;
+-}
+-
+-.form-group label {
+-  display: block;
+-  margin-bottom: 0.5rem;
+-  font-weight: 600;
+-  color: #444;
+-}
+-
+-.form-group input, .form-group select, .form-group textarea {
+-  width: 100%;
+-  padding: 0.85rem 1rem;
+-  border: 1px solid #ddd;
+-  border-radius: 8px;
+-  font-size: 1rem;
+-  transition: all 0.3s;
+-}
+-
+-.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+-  outline: none;
+-  border-color: #26d0ce;
+-  box-shadow: 0 0 0 3px rgba(38, 208, 206, 0.2);
+-}
+-
+-.checkbox-group {
+-  display: flex;
+-  align-items: flex-start;
+-  gap: 0.75rem;
+-}
+-
+-.checkbox-group input {
+-  width: auto;
+-  margin-top: 0.25rem;
+-}
+-
+-.checkbox-group label {
+-  font-weight: normal;
+-  font-size: 0.95rem;
+-  line-height: 1.5;
+-}
+-
+-.form-submit {
+-  margin-top: 2rem;
+-  text-align: center;
+-}
+-
+-.form-note {
+-  margin-top: 1rem;
+-  font-size: 0.9rem;
+-  color: #666;
+-  text-align: center;
+-}
+-
+-.btn-submit:disabled {
+-  opacity: 0.7;
+-  cursor: not-allowed;
+-}
+-
+ /* Footer */
+ .page-footer {
+   background-color: #1a2980;
+   color: white;
+   padding: 3rem 1.5rem 1.5rem;
+   margin-top: 4rem;
+ }
+
+ .footer-content {
+   max-width: 1200px;
+   margin: 0 auto;
+   display: flex;
+   flex-wrap: wrap;
+   justify-content: space-between;
+   gap: 3rem;
+   margin-bottom: 2rem;
+ }
+
+ .footer-section {
+   flex: 1;
+   min-width: 250px;
+ }
+
+ .footer-section h4 {
+   font-size: 1.2rem;
+@@ -2616,51 +2216,51 @@ onMounted(() => {
+   border-top: 1px solid rgba(255, 255, 255, 0.1);
+   color: rgba(255, 255, 255, 0.7);
+   font-size: 0.9rem;
+ }
+
+ /* No Results */
+ .no-results {
+   text-align: center;
+   padding: 4rem 1.5rem;
+   color: #666;
+ }
+
+ .no-results i {
+   font-size: 3rem;
+   margin-bottom: 1.5rem;
+   color: #ddd;
+ }
+
+ .no-results p {
+   font-size: 1.2rem;
+ }
+
+ /* Responsive Styles */
+ @media (max-width: 992px) {
+   .brokers-grid {
+-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
++    grid-template-columns: repeat(2, minmax(0, 1fr));
    }
 
-   // Mobile submenu toggle for User
-   userIcon.addEventListener('click', function (e) {
-     if (window.innerWidth <= 1024) {
-       e.preventDefault();
-       e.stopPropagation();
-       userSubmenuEl.classList.toggle('active');
-       // Đóng các submenu khác
-       if (solutionSubmenuEl) solutionSubmenuEl.classList.remove('active');
-       if (recruitmentSubmenuEl) recruitmentSubmenuEl.classList.remove('active');
-     }
-   });
+   .broker-detail-stats {
+     grid-template-columns: repeat(2, 1fr);
+   }
 
-   // Close menu when clicking outside on mobile
-   document.addEventListener('click', function (e) {
-     if (window.innerWidth <= 1024) {
-       const isClickInsideMenu =
-           navLinksEl.contains(e.target) ||
-           hamburgerEl.contains(e.target) ||
-           (solutionSubmenuEl && solutionSubmenuEl.contains(e.target)) ||
-           (recruitmentSubmenuEl && recruitmentSubmenuEl.contains(e.target)) ||
-           userSubmenuEl.contains(e.target);
+   .section-header {
+     flex-direction: column;
+     align-items: flex-start;
+   }
 
-       if (!isClickInsideMenu) {
+   .brokers-table, .properties-table {
+     overflow-x: auto;
+   }
+
+   .table-header, .table-row {
+     min-width: 1000px;
+   }
+ }
+
+ @media (max-width: 768px) {
+   .page-title {
+     font-size: 2.2rem;
+   }
+
+@@ -2688,74 +2288,61 @@ onMounted(() => {
+
+   .broker-header {
+     flex-direction: column;
+     text-align: center;
+   }
+
+   .broker-avatar {
+     margin-right: 0;
+     margin-bottom: 1rem;
+   }
+
+   .broker-detail-header {
+     flex-direction: column;
+     text-align: center;
+   }
+
+   .broker-detail-avatar {
+     margin-right: 0;
+     margin-bottom: 1.5rem;
+   }
+
+   .broker-detail-actions, .broker-actions {
+     flex-direction: column;
+   }
+
+-  .cta-buttons {
+-    flex-direction: column;
+-  }
+-
+-  .form-row {
+-    flex-direction: column;
+-    gap: 1rem;
+-  }
+-
+   .pagination {
+     flex-direction: column;
+     gap: 1rem;
+   }
+
+   .pagination-pages {
+     order: 1;
+   }
+
+   .pagination-btn:first-child {
+     order: 2;
+   }
+
+   .pagination-btn:last-child {
+     order: 3;
+   }
+ }
+
+ @media (max-width: 576px) {
+   .brokers-grid {
+     grid-template-columns: 1fr;
+   }
+
+   .broker-detail-stats {
+     grid-template-columns: 1fr;
+   }
+
+-  .cta-title {
+-    font-size: 1.8rem;
+-  }
+-
+   .modal-body {
+     padding: 1.5rem;
+   }
+
+   .table-header, .table-row {
+     min-width: 1200px;
+   }
+ }
+-</style>
+\ No newline at end of file
++</style>
