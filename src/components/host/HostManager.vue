@@ -382,66 +382,66 @@
     </div>
     <div  class="w-100 text-center mb-4">
       <!-- TITLE -->
-      <hr/>
-      <div v-if="selectedType !== 'HOST'" class=" mb-5">
-        <h4 class="fw-bold w-100 text-start">Thống kê môi giới</h4>
-        <h4 class="fw-bold mb-4 " >
-          TOP môi giới chuyên nghiệp tại
-          <span class="text-primary">
-        {{ filters.tinh && filters.tinh.trim() !== ''
-              ? filters.tinh
-              : 'Toàn quốc' }}
-      </span>
-        </h4>
+<!--      <hr/>-->
+<!--      <div v-if="selectedType !== 'HOST'" class=" mb-5">-->
+<!--        <h4 class="fw-bold w-100 text-start">Thống kê môi giới</h4>-->
+<!--        <h4 class="fw-bold mb-4 " >-->
+<!--          TOP môi giới chuyên nghiệp tại-->
+<!--          <span class="text-primary">-->
+<!--        {{ filters.tinh && filters.tinh.trim() !== ''-->
+<!--              ? filters.tinh-->
+<!--              : 'Toàn quốc' }}-->
+<!--      </span>-->
+<!--        </h4>-->
 
-        <!-- CARD LIST -->
-        <div
-            v-if="podiumBrokers.length"
-            class="top-broker-podium"
-        >
-          <div
-              v-for="item in podiumBrokers"
-              :key="item.employeeId"
-              class="broker-card text-center podium-card"
-              :class="[`rank-${item.rank}`]"
-          >
-            <!-- AVATAR -->
+<!--        &lt;!&ndash; CARD LIST &ndash;&gt;-->
+<!--        <div-->
+<!--            v-if="podiumBrokers.length"-->
+<!--            class="top-broker-podium"-->
+<!--        >-->
+<!--          <div-->
+<!--              v-for="item in podiumBrokers"-->
+<!--              :key="item.employeeId"-->
+<!--              class="broker-card text-center podium-card"-->
+<!--              :class="[`rank-${item.rank}`]"-->
+<!--          >-->
+<!--            &lt;!&ndash; AVATAR &ndash;&gt;-->
 
-              <div
-                  v-if="item.rank <= 3"
-                  class="top-text"
-                  :class="getTopClass(item.rank)"
-              >
-                TOP {{ item.rank }}
-              </div>
-              <div class="avatar-wrapper mx-auto">
-                <img
-                    :src="item.avatar
-                ? 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + item.avatar
-                :  'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + 'vat-default.jpg'"
-                    class="avatar-img"
-                />
+<!--              <div-->
+<!--                  v-if="item.rank <= 3"-->
+<!--                  class="top-text"-->
+<!--                  :class="getTopClass(item.rank)"-->
+<!--              >-->
+<!--                TOP {{ item.rank }}-->
+<!--              </div>-->
+<!--              <div class="avatar-wrapper mx-auto">-->
+<!--                <img-->
+<!--                    :src="item.avatar-->
+<!--                ? 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + item.avatar-->
+<!--                :  'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + 'vat-default.jpg'"-->
+<!--                    class="avatar-img"-->
+<!--                />-->
 
-                <!-- BADGE -->
-                <img
-                    src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/huy-hieu.png"
-                    class="badge-icon"
-                    style="width: 45px; height: 45px"
-                />
-              </div>
+<!--                &lt;!&ndash; BADGE &ndash;&gt;-->
+<!--                <img-->
+<!--                    src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/huy-hieu.png"-->
+<!--                    class="badge-icon"-->
+<!--                    style="width: 45px; height: 45px"-->
+<!--                />-->
+<!--              </div>-->
 
-            <!-- NAME -->
-            <h6 class="fw-semibold mt-3 mb-1" style="font-size: 24px">
-              {{ item.fullName }}
-            </h6>
+<!--            &lt;!&ndash; NAME &ndash;&gt;-->
+<!--            <h6 class="fw-semibold mt-3 mb-1" style="font-size: 24px">-->
+<!--              {{ item.fullName }}-->
+<!--            </h6>-->
 
-            <!-- SOLD -->
-            <p class="text-muted small mb-0" style="font-size: 16px">
-              Đã bán {{ item.totalSold }} căn
-            </p>
-          </div>
-        </div>
-      </div>
+<!--            &lt;!&ndash; SOLD &ndash;&gt;-->
+<!--            <p class="text-muted small mb-0" style="font-size: 16px">-->
+<!--              Đã bán {{ item.totalSold }} căn-->
+<!--            </p>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
 
       <div
           v-if="otherBrokers.length"
@@ -530,6 +530,13 @@
           </div>
         </div>
       </section>
+      <!-- Trong template của file chính, sau phần biểu đồ thống kê -->
+      <div v-if="selectedType !== 'HOST'" class="w-100 text-center mb-4">
+        <!-- ... phần top môi giới và biểu đồ ... -->
+
+        <!-- CHÍNH SÁCH THƯỞNG MÔI GIỚI -->
+        <thuong-moi-gioi />
+      </div>
     </div>
 
 
@@ -562,8 +569,10 @@ import api from "/src/api/api.js";
 import provinces from "/src/assets/js/address.json";
 import CreateHostModal from "./CreateHostModal.vue";
 import HostUpdateModal from "./HostUpdateModal.vue";
+import HostDetailModal from "./HostDetailModal.vue";
 import { Bar } from 'vue-chartjs'
 import { useAuthStore } from "/src/stores/authStore.js";
+import thuongMoiGioi from "./thuongMoiGioi.vue"
 const authStore = useAuthStore();
 const info = authStore.userInfo;
 // src/plugins/chart.js

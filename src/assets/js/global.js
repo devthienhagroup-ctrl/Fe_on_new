@@ -65,5 +65,28 @@ export const logout = async (accessToken) => {
 }
 export const baseImgaeUrl="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/";
 
+export function slugify(str = '') {
+    return str
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+}
+
+export function buildSeoUrl(p) {
+    const loaiTaiSan = slugify(p.loaiMH || 'Khong-xac-dinh') // hoặc map từ p.loaiTaiSan
+    const viTri = slugify(p.viTri || 'khong-xac-dinh')
+    const phuong = slugify(p.diaChi?.split('/!!')[1] || '')
+    const tinh = slugify(p.khuVuc || '')
+    const dienTich = Math.floor(p.dtcn || 0)
+
+    return `/san-pham-thien-ha/${loaiTaiSan}-${viTri}-${phuong}-${tinh}-${dienTich}m2-${p.id}`
+}
+
+
+
 
 

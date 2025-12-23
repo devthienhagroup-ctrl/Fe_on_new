@@ -4,7 +4,7 @@
       <!-- Bộ lọc nâng cao -->
       <div class="bg-white rounded-xl shadow-lg border border-slate-300 mb-5 p-4"
            style="
-            background-image: url('https://s3.cloudfly.vn/thg-storage-dev/uploads-public/thienhagroup_filter_2.png');
+            background-image: url('https://s3.cloudfly.vn/thg-storage/uploads-public/thienhagroup_filter_2.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -338,7 +338,7 @@
                     </button>
 
                     <button
-                        @click="$router.push(`/san-pham-thien-ha/${item.id}`)"
+                        @click="$router.push(buildSeoUrl(item))"
                         class="action-view"
                     >
                       <i class="fa-regular fa-eye text-[10px]"></i>
@@ -367,7 +367,7 @@
                       </button>
 
                       <button
-                          @click="$router.push(`/san-pham-thien-ha/${item.id}`)"
+                          @click="$router.push(buildSeoUrl(item))"
                           class="dot-item"
                       >
                         <i class="fa-regular fa-eye"></i>
@@ -473,7 +473,7 @@
          hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
           >
             <!-- Ảnh -->
-            <div @click="goToDetail(item.id)" style="cursor: pointer;">
+            <div @click="goToDetail(item)" style="cursor: pointer;">
             <div class="relative w-full overflow-hidden" style="height: 200px">
               <div class="relative w-full h-full px-3 pt-3  rounded-3 overflow-hidden aspect-[4/3] w-full">
                 <img
@@ -654,7 +654,7 @@
               <!-- Nút Xem chi tiết (primary) -->
               <!-- Nút Xem chi tiết (giữ nguyên màu, chỉ bỏ border) -->
               <button
-                  @click="$router.push(`/san-pham-thien-ha/${item.id}`)"
+                  @click="$router.push(buildSeoUrl(item))"
                   class="flex-1 py-2.5 bg-gradient-to-r from-slate-900 to-black text-white rounded-full
          text-[14px] font-semibold flex items-center justify-center gap-2
          hover:opacity-90 transition-all"
@@ -746,16 +746,17 @@ import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import { useSidebarStore } from "/src/stores/sidebarStore.js";
 import addressData from "/src/assets/js/address.json";
 import NotificationBell from "/src/components/NotificationBell.vue";
-
+import { buildSeoUrl } from "../../assets/js/global.js";
 
 import { useAuthStore } from "/src/stores/authStore.js";
 const authStore = useAuthStore();
 const info = authStore.userInfo;
 
 const sidebar = useSidebarStore();
-const goToDetail = (id) => {
-  router.push(`/san-pham-thien-ha/${id}`);
+const goToDetail = (item) => {
+  router.push(buildSeoUrl(item));
 }
+
 
 
 // Data

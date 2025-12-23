@@ -5,8 +5,8 @@ export const SOCKET_CONFIG = {
    * SockJS endpoint cho Spring Boot backend
    */
   reconnectDelay: 5000,
-  endpoint: "https://thienhagroup.vn/apithienha/ws-thg",
-  webSocketFactory: () => new SockJS("https://thienhagroup.vn/apithienha/ws-thg"),
+  endpoint: "http://localhost:8084/apithienha/ws-thg",
+  webSocketFactory: () => new SockJS("http://localhost:8084/apithienha/ws-thg"),
 
   // --- Mỗi project + mỗi employee đều có topic riêng ---
   projectTopic: (projectId, employeeId) => `/topic/projects/${projectId}/members/${employeeId}`,

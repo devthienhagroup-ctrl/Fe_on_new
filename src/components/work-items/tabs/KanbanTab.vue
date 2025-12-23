@@ -1493,7 +1493,7 @@
   /* ---------------------- COMPONENT COMMENT NODE (ĐỆ QUY) ---------------------- */
   import CommentNode from "./CommentNode.vue";
   import CommentMentionTextarea from "./CommentMentionTextarea.vue";
-  import {showError, showLoading, showSuccess, updateAlertSuccess} from "../../../assets/js/alertService.js";
+  import {showError, showLoading, showSuccess, updateAlertSuccess} from "/src/assets/js/alertService.js";
 
 
   /* ---------------------- LOGIC XỬ LÝ BÌNH LUẬN ---------------------- */

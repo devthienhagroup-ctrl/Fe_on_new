@@ -552,8 +552,8 @@ const routes = [
                 component: ProductUser
             },
             {
-                path: ":id",
-                name: "ProductDetail2",
+                path: ":slug-:id(\\d+)",
+                name: "ProductDetailSEO",
                 component: ProductDetail2,
                 props: true
             }
@@ -767,7 +767,8 @@ const routes = [
             name: "QuickSale",
             component: MenuUser,
             meta: {
-                showQSPopup: true
+                showQSPopup: true,
+                enableTailwind: true
             },
             children: [
                 {

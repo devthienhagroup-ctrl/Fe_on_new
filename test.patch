@@ -1,18 +1,403 @@
 diff --git a/src/components/user/MoiGioi/moigioi.vue b/src/components/user/MoiGioi/moigioi.vue
-index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db3619d4f6 100644
+index 24a6d2f0d5c062bf44d905cc097d5fb41eef1dc8..a485ecf61369a9919a442b83b314ec3bdb552b4b 100644
 --- a/src/components/user/MoiGioi/moigioi.vue
 +++ b/src/components/user/MoiGioi/moigioi.vue
-@@ -122,53 +122,50 @@
-                 <div class="stat-number">{{ broker.propertiesSold }}</div>
-                 <div class="stat-label">BĐS đã bán</div>
+@@ -7,116 +7,80 @@
+         <p class="page-subtitle">
+           Khám phá câu chuyện thành công từ mạng lưới đối tác môi giới và tham gia bảng thi đua hàng quý
+         </p>
+         <div class="stats-overview">
+           <div class="stat-item">
+             <div class="stat-value">{{ formatNumber(totalBrokers) }}+</div>
+             <div class="stat-label">Môi giới đã hợp tác</div>
+           </div>
+           <div class="stat-item">
+             <div class="stat-value">{{ formatNumber(totalSales) }} tỷ</div>
+             <div class="stat-label">Tổng giá trị giao dịch</div>
+           </div>
+           <div class="stat-item">
+             <div class="stat-value">{{ successRate }}%</div>
+             <div class="stat-label">Tỉ lệ thành công</div>
+           </div>
+           <div class="stat-item">
+             <div class="stat-value">{{ currentQuarter }}</div>
+             <div class="stat-label">Quý thi đua hiện tại</div>
+           </div>
+         </div>
+       </div>
+     </header>
+
+     <main class="page-content">
+-      <!-- Filter section -->
+-      <div class="filter-section">
+-        <div class="filter-controls">
+-          <div class="search-box">
+-            <input
+-                type="text"
+-                v-model="searchQuery"
+-                placeholder="Tìm kiếm môi giới, chuyên môn..."
+-                class="search-input"
+-            />
+-            <span class="search-icon">
+-              <i class="fas fa-search"></i>
+-            </span>
+-          </div>
+-
+-          <div class="filter-options">
+-            <select v-model="selectedCity" class="filter-select">
+-              <option value="">Tất cả tỉnh/thành</option>
+-              <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
+-            </select>
+-
+-            <select v-model="selectedQuarter" class="filter-select">
+-              <option value="all">Tất cả các quý</option>
+-              <option v-for="quarter in quarters" :key="quarter.value" :value="quarter.value">{{ quarter.label }}</option>
+-            </select>
+-          </div>
+-        </div>
+-
+-        <!-- View Toggle for Brokers -->
+-        <div class="view-toggle-section">
+-          <h3 class="view-toggle-title">Chế độ xem môi giới:</h3>
+-          <div class="view-toggle">
+-            <button
+-                :class="['view-toggle-btn', { active: brokerViewMode === 'grid' }]"
+-                @click="brokerViewMode = 'grid'"
+-            >
+-              <i class="fas fa-th-large"></i> Lưới
+-            </button>
+-            <button
+-                :class="['view-toggle-btn', { active: brokerViewMode === 'list' }]"
+-                @click="brokerViewMode = 'list'"
+-            >
+-              <i class="fas fa-list"></i> Danh sách
+-            </button>
+-          </div>
+-        </div>
+-      </div>
+-
+       <!-- Top 10 Competition Section -->
+       <section class="competition-section">
+         <div class="section-header">
+           <div>
+             <h2 class="section-title">
+               <i class="fas fa-trophy"></i> BẢNG THI ĐUA TOP 10 MÔI GIỚI XUẤT SẮC
+             </h2>
+             <p class="section-subtitle">
+               Thống kê thành tích thi đua theo quý - Top 3 nhận giải thưởng tiền mặt và huy chương
+             </p>
+           </div>
+           <div class="competition-period">
+             <span class="period-badge">{{ currentQuarterLabel }}</span>
+             <div class="quarter-info">
+               <i class="fas fa-calendar-alt"></i>
+               <span>Thời gian: {{ quarterDates }}</span>
+             </div>
+           </div>
++          <div class="competition-filter">
++            <label class="competition-filter-label" for="competitionCity">Khu vực</label>
++            <select id="competitionCity" v-model="competitionCity" class="filter-select area-filter">
++              <option value="">Tất cả tỉnh/thành</option>
++              <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
++            </select>
++          </div>
++        </div>
++
++        <div class="view-note">
++          <i class="fas fa-mobile-alt"></i>
++          Bảng thi đua tự chuyển sang dạng lưới trên thiết bị di động.
+         </div>
+
+         <!-- Competition Rewards Info -->
+         <div class="rewards-section">
+           <h3 class="rewards-title">
+             <i class="fas fa-gift"></i> GIẢI THƯỞNG TOP 3
+           </h3>
+           <div class="rewards-grid">
+             <div class="reward-card gold">
+               <div class="reward-rank">
+                 <div class="medal-icon gold">
+                   <i class="fas fa-crown"></i>
+                 </div>
+                 <h4>HẠNG 1</h4>
+               </div>
+               <div class="reward-details">
+                 <div class="reward-amount">50 TRIỆU VNĐ</div>
+                 <div class="reward-desc">Cúp vàng + Chứng nhận xuất sắc</div>
+                 <div class="reward-bonus">+ 1 chuyến du lịch Bali 5 sao</div>
+               </div>
+             </div>
+
+             <div class="reward-card silver">
+               <div class="reward-rank">
+                 <div class="medal-icon silver">
+@@ -136,308 +100,346 @@
+                 <div class="medal-icon bronze">
+                   <i class="fas fa-medal"></i>
+                 </div>
+                 <h4>HẠNG 3</h4>
+               </div>
+               <div class="reward-details">
+                 <div class="reward-amount">15 TRIỆU VNĐ</div>
+                 <div class="reward-desc">Cúp đồng + Chứng nhận xuất sắc</div>
+                 <div class="reward-bonus">+ Điện thoại iPhone 15 Pro</div>
+               </div>
+             </div>
+           </div>
+
+           <div class="rewards-note">
+             <i class="fas fa-info-circle"></i>
+             <span>Giải thưởng được trao vào cuối mỗi quý dựa trên tổng doanh số và số lượng BĐS đã bán</span>
+           </div>
+         </div>
+
+         <!-- Top 10 Leaderboard -->
+         <div class="leaderboard-container">
+           <div class="leaderboard-header">
+             <div class="leaderboard-col rank">HẠNG</div>
+             <div class="leaderboard-col broker">MÔI GIỚI</div>
+             <div class="leaderboard-col stats">THỐNG KÊ QUÝ</div>
+-            <div class="leaderboard-col score">ĐIỂM THI ĐUA</div>
++            <div class="leaderboard-col score">SỐ CĂN BÁN</div>
+             <div class="leaderboard-col trend">XU HƯỚNG</div>
+           </div>
+
+           <div class="leaderboard-body">
+             <div
+                 v-for="(broker, index) in top10Brokers"
+                 :key="broker.id"
+                 :class="['leaderboard-row', getRankClass(index)]"
+             >
+-              <div class="leaderboard-col rank">
++              <div class="leaderboard-col rank" data-label="Hạng">
+                 <div class="rank-display">
+                   <div v-if="index === 0" class="rank-number gold">1</div>
+                   <div v-else-if="index === 1" class="rank-number silver">2</div>
+                   <div v-else-if="index === 2" class="rank-number bronze">3</div>
+                   <div v-else class="rank-number">{{ index + 1 }}</div>
+
+                   <div v-if="index < 3" class="rank-medal">
+                     <i v-if="index === 0" class="fas fa-crown gold"></i>
+                     <i v-else class="fas fa-medal" :class="index === 1 ? 'silver' : 'bronze'"></i>
+                   </div>
+                 </div>
+               </div>
+
+-              <div class="leaderboard-col broker">
++              <div class="leaderboard-col broker" data-label="Môi giới">
+                 <div class="broker-info-compact">
+                   <div class="broker-avatar-small">
+                     <img :src="broker.avatar" :alt="broker.name" />
+                     <div v-if="broker.verified" class="verification-badge">
+                       <i class="fas fa-check-circle"></i>
+                     </div>
+                   </div>
+                   <div class="broker-details">
+                     <div class="broker-name">{{ broker.name }}</div>
+                     <div class="broker-title">{{ broker.title }}</div>
+                     <div class="broker-location">
+                       <i class="fas fa-map-marker-alt"></i> {{ broker.location }}
+                     </div>
+                   </div>
+                 </div>
+               </div>
+
+-              <div class="leaderboard-col stats">
++              <div class="leaderboard-col stats" data-label="Thống kê quý">
+                 <div class="quarter-stats">
+                   <div class="stat-item-compact">
+                     <div class="stat-value">{{ broker.quarterStats.propertiesSold }}</div>
+                     <div class="stat-label">BĐS đã bán</div>
+                   </div>
+                   <div class="stat-item-compact">
+                     <div class="stat-value">{{ formatCurrency(broker.quarterStats.totalSales) }}</div>
+                     <div class="stat-label">Doanh số</div>
+                   </div>
+                   <div class="stat-item-compact">
+                     <div class="stat-value">{{ broker.quarterStats.successRate }}%</div>
+                     <div class="stat-label">Tỉ lệ thành công</div>
+                   </div>
+                 </div>
+               </div>
+
+-              <div class="leaderboard-col score">
++              <div class="leaderboard-col score" data-label="Số căn bán">
+                 <div class="score-display">
+-                  <div class="score-value">{{ broker.competitionScore }}</div>
++                  <div class="score-value">{{ broker.quarterStats.propertiesSold }} căn</div>
+                   <div class="score-progress">
+                     <div class="progress-bar">
+                       <div
+                           class="progress-fill"
+-                          :style="{ width: getScorePercentage(broker.competitionScore) + '%' }"
++                          :style="{ width: getScorePercentage(broker.quarterStats.propertiesSold) + '%' }"
+                           :class="getRankClass(index)"
+                       ></div>
+                     </div>
+-                    <div class="score-max">/ 1000</div>
++                    <div class="score-max">/ {{ maxQuarterPropertiesSold }}</div>
+                   </div>
+                 </div>
+               </div>
+
+-              <div class="leaderboard-col trend">
++              <div class="leaderboard-col trend" data-label="Xu hướng">
+                 <div class="trend-display">
+                   <div v-if="broker.trend === 'up'" class="trend-up">
+                     <i class="fas fa-arrow-up"></i> +{{ broker.rankChange }} hạng
+                   </div>
+                   <div v-else-if="broker.trend === 'down'" class="trend-down">
+                     <i class="fas fa-arrow-down"></i> -{{ broker.rankChange }} hạng
+                   </div>
+                   <div v-else class="trend-neutral">
+                     <i class="fas fa-minus"></i> Giữ nguyên
+                   </div>
+                   <div class="trend-period">vs Quý trước</div>
+                 </div>
+               </div>
+             </div>
+           </div>
+
+           <div class="leaderboard-footer">
+             <div class="update-info">
+               <i class="fas fa-sync-alt"></i>
+               <span>Cập nhật lần cuối: {{ lastUpdateTime }}</span>
+             </div>
+             <button class="btn-view-full" @click="scrollToAllBrokers">
+               Xem tất cả môi giới <i class="fas fa-arrow-right"></i>
+             </button>
+           </div>
+         </div>
+       </section>
+
+       <!-- All Brokers section -->
+       <section class="brokers-section" id="all-brokers">
++        <div class="filter-section">
++          <div class="filter-controls">
++            <div class="search-box">
++              <input
++                  type="text"
++                  v-model="searchQuery"
++                  placeholder="Tìm kiếm môi giới, chuyên môn..."
++                  class="search-input"
++              />
++              <span class="search-icon">
++                <i class="fas fa-search"></i>
++              </span>
++            </div>
++
++            <div class="filter-options">
++              <select v-model="selectedCity" class="filter-select">
++                <option value="">Tất cả tỉnh/thành</option>
++                <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
++              </select>
++
++              <select v-model="selectedQuarter" class="filter-select">
++                <option value="all">Tất cả các quý</option>
++                <option v-for="quarter in quarters" :key="quarter.value" :value="quarter.value">{{ quarter.label }}</option>
++              </select>
++            </div>
++          </div>
++
++          <!-- View Toggle for Brokers -->
++          <div class="view-toggle-section">
++            <h3 class="view-toggle-title">Chế độ xem môi giới:</h3>
++            <div class="view-toggle">
++              <button
++                  :class="['view-toggle-btn', { active: brokerViewMode === 'grid' }]"
++                  @click="brokerViewMode = 'grid'"
++              >
++                <i class="fas fa-th-large"></i> Lưới
++              </button>
++              <button
++                  :class="['view-toggle-btn', { active: brokerViewMode === 'list' }]"
++                  @click="brokerViewMode = 'list'"
++              >
++                <i class="fas fa-list"></i> Danh sách
++              </button>
++            </div>
++          </div>
++        </div>
++
+         <div class="section-header">
+           <div>
+             <h2 class="section-title">Tất Cả Môi Giới Đã Hợp Tác</h2>
+             <p class="section-subtitle">
+               Những môi giới đã đồng hành cùng chúng tôi và đạt được thành tích ấn tượng
+             </p>
+           </div>
+           <div class="section-stats">
+             <span class="section-stat">Hiển thị {{ currentBrokers.length }} / {{ filteredBrokers.length }} môi giới</span>
+           </div>
+         </div>
+
+         <!-- Grid View for Brokers -->
+         <div v-if="brokerViewMode === 'grid'" class="brokers-grid">
+           <div
+               v-for="broker in currentBrokers"
+               :key="broker.id"
+               class="broker-card"
+               @click="showBrokerDetail(broker)"
+           >
+             <div class="broker-header">
+               <div class="broker-avatar">
+                 <img :src="broker.avatar" :alt="broker.name" />
+                 <div class="verification-badge" v-if="broker.verified">
+                   <i class="fas fa-check-circle"></i>
+                 </div>
+                 <div v-if="broker.topRank" :class="['rank-badge', broker.topRank]">
+                   <i v-if="broker.topRank === 'gold'" class="fas fa-crown"></i>
+                   <i v-else class="fas fa-medal"></i>
+                   <span>Top {{ broker.topRank === 'gold' ? 1 : broker.topRank === 'silver' ? 2 : 3 }}</span>
+                 </div>
+               </div>
+               <div class="broker-info">
+                 <h3 class="broker-name">{{ broker.name }}</h3>
+                 <div class="broker-title">{{ broker.title }}</div>
+                 <div class="broker-location">
+                   <i class="fas fa-map-marker-alt"></i> {{ broker.location }}
+                 </div>
+                 <div class="broker-experience">
+                   <i class="fas fa-briefcase"></i> {{ broker.experience }} năm kinh nghiệm
+                 </div>
+               </div>
+             </div>
+
+             <div class="broker-stats">
+-              <div class="broker-stat">
+-                <div class="stat-number">{{ broker.propertiesSold }}</div>
+-                <div class="stat-label">BĐS đã bán</div>
++              <div class="broker-stat broker-stat-wide">
++                <div class="stat-number">
++                  {{ broker.propertiesSold }} căn · {{ broker.totalSales }} tỷ
++                </div>
++                <div class="stat-label">BĐS đã bán & Doanh số</div>
                </div>
                <div class="broker-stat">
                  <div class="stat-number">{{ broker.successRate }}%</div>
                  <div class="stat-label">Tỉ lệ thành công</div>
                </div>
-               <div class="broker-stat">
-                 <div class="stat-number">{{ broker.totalSales }} tỷ</div>
-                 <div class="stat-label">Tổng giá trị</div>
+-              <div class="broker-stat">
+-                <div class="stat-number">{{ broker.totalSales }} tỷ</div>
+-                <div class="stat-label">Tổng giá trị</div>
+-              </div>
+             </div>
+
+             <div class="broker-quarter-stats">
+               <div class="quarter-stats-title">Thống kê quý {{ selectedQuarter !== 'all' ? selectedQuarter : currentQuarter }}</div>
+               <div class="quarter-stats-grid">
+                 <div class="quarter-stat">
+                   <div class="quarter-stat-value">{{ broker.quarterStats.propertiesSold }}</div>
+                   <div class="quarter-stat-label">BĐS đã bán</div>
+                 </div>
+                 <div class="quarter-stat">
+                   <div class="quarter-stat-value">{{ formatCurrency(broker.quarterStats.totalSales) }}</div>
+                   <div class="quarter-stat-label">Doanh số</div>
+                 </div>
+-                <div class="quarter-stat">
+-                  <div class="quarter-stat-value">{{ broker.competitionScore }}</div>
+-                  <div class="quarter-stat-label">Điểm thi đua</div>
+-                </div>
                </div>
              </div>
 
@@ -28,9 +413,9 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
                <button class="btn-view-profile" @click.stop="showBrokerDetail(broker)">
                  Xem hồ sơ
                </button>
--              <button class="btn-collaborate" @click.stop="showCollaborationForm(broker)">
--                Hợp tác ngay
--              </button>
+               <button class="btn-collaborate" @click.stop="showCollaborationForm(broker)">
+                 Hợp tác ngay
+               </button>
              </div>
            </div>
          </div>
@@ -43,9 +428,10 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
                <div class="table-cell" style="width: 80px">Ảnh</div>
                <div class="table-cell" style="flex: 2">Thông tin</div>
                <div class="table-cell" style="flex: 1.5">Chuyên môn</div>
-               <div class="table-cell" style="flex: 1">Số BĐS đã bán</div>
-               <div class="table-cell" style="flex: 1">Tỉ lệ thành công</div>
-               <div class="table-cell" style="flex: 1">Tổng giá trị</div>
+-              <div class="table-cell" style="flex: 1">BĐS đã bán</div>
+-              <div class="table-cell" style="flex: 1">Doanh số quý</div>
+-              <div class="table-cell" style="flex: 1">Điểm thi đua</div>
++              <div class="table-cell" style="flex: 1">BĐS & Doanh số</div>
                <div class="table-cell" style="width: 150px">Hành động</div>
              </div>
 
@@ -55,8 +441,20 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
                  class="table-row"
                  @click="showBrokerDetail(broker)"
              >
-               <div class="table-cell" style="width: 50px">{{ (brokersPage - 1) * brokersPerPage + index + 1 }}</div>
-@@ -180,53 +177,50 @@
+               <div class="table-cell" style="width: 50px">
+                 <div :class="['rank-indicator', { 'top-rank': broker.topRank }]" :data-rank="broker.topRank">
+                   {{ (brokersPage - 1) * brokersPerPage + index + 1 }}
+                 </div>
+               </div>
+               <div class="table-cell" style="width: 80px">
+                 <div class="broker-avatar-small">
+                   <img :src="broker.avatar" :alt="broker.name" />
+                   <div v-if="broker.topRank" :class="['rank-badge-small', broker.topRank]">
+                     <i v-if="broker.topRank === 'gold'" class="fas fa-crown"></i>
+                     <i v-else class="fas fa-medal"></i>
+                   </div>
+                 </div>
+               </div>
                <div class="table-cell" style="flex: 2">
                  <div class="broker-info-list">
                    <h4 class="broker-name-list">{{ broker.name }}</h4>
@@ -74,17 +472,24 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
                    <span class="broker-tag-list" v-for="tag in broker.tags" :key="tag">{{ tag }}</span>
                  </div>
                </div>
-               <div class="table-cell" style="flex: 1">{{ broker.propertiesSold }}</div>
-               <div class="table-cell" style="flex: 1">{{ broker.successRate }}%</div>
-               <div class="table-cell" style="flex: 1">{{ broker.totalSales }} tỷ</div>
+-              <div class="table-cell" style="flex: 1">{{ broker.propertiesSold }}</div>
+-              <div class="table-cell" style="flex: 1">{{ formatCurrency(broker.quarterStats.totalSales) }}</div>
+               <div class="table-cell" style="flex: 1">
+-                <div class="score-badge" :class="getScoreClass(broker.competitionScore)">
+-                  {{ broker.competitionScore }}
++                <div class="table-stat-combined">
++                  <div class="stat-number">{{ broker.propertiesSold }} căn</div>
++                  <div class="stat-label">Doanh số: {{ formatCurrency(broker.quarterStats.totalSales) }}</div>
+                 </div>
+               </div>
                <div class="table-cell" style="width: 150px">
                  <div class="broker-actions-list">
                    <button class="btn-view-profile-list" @click.stop="showBrokerDetail(broker)">
                      <i class="fas fa-eye"></i>
                    </button>
--                  <button class="btn-collaborate-list" @click.stop="showCollaborationForm(broker)">
--                    <i class="fas fa-handshake"></i>
--                  </button>
+                   <button class="btn-collaborate-list" @click.stop="showCollaborationForm(broker)">
+                     <i class="fas fa-handshake"></i>
+                   </button>
                  </div>
                </div>
              </div>
@@ -100,79 +505,7 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
          <div v-if="filteredBrokers.length > 0" class="pagination">
            <button
                class="pagination-btn"
-               :disabled="brokersPage === 1"
-               @click="brokersPage--"
-           >
-             <i class="fas fa-chevron-left"></i> Trước
-           </button>
-
-           <div class="pagination-pages">
-             <span v-for="page in brokerPages" :key="page">
-               <button
-                   v-if="page === '...'"
-@@ -336,83 +330,50 @@
-             <span v-for="page in propertyPages" :key="page">
-               <button
-                   v-if="page === '...'"
-                   class="pagination-dots"
-                   disabled
-               >...</button>
-               <button
-                   v-else
-                   :class="['pagination-page', { active: page === propertiesPage }]"
-                   @click="propertiesPage = page"
-               >
-                 {{ page }}
-               </button>
-             </span>
-           </div>
-
-           <button
-               class="pagination-btn"
-               :disabled="propertiesPage === totalPropertyPages"
-               @click="propertiesPage++"
-           >
-             Sau <i class="fas fa-chevron-right"></i>
-           </button>
-         </div>
-       </section>
--
--      <!-- CTA Section -->
--      <section class="cta-section">
--        <div class="cta-content">
--          <h2 class="cta-title">Sẵn sàng hợp tác và thành công cùng chúng tôi?</h2>
--          <p class="cta-description">
--            Tham gia mạng lưới đối tác môi giới hàng đầu, tiếp cận nguồn hàng chất lượng
--            và nhận hỗ trợ tối đa để gia tăng doanh thu.
--          </p>
--          <div class="cta-buttons">
--            <button class="btn-cta-primary" @click="showCollaborationForm()">
--              <i class="fas fa-handshake"></i> Đăng ký hợp tác ngay
--            </button>
--            <button class="btn-cta-secondary" @click="scrollToBrokers">
--              <i class="fas fa-user-tie"></i> Xem môi giới thành công
--            </button>
--          </div>
--          <div class="cta-benefits">
--            <div class="benefit">
--              <i class="fas fa-percentage"></i>
--              <span>Hoa hồng hấp dẫn lên đến 3.5%</span>
--            </div>
--            <div class="benefit">
--              <i class="fas fa-chart-line"></i>
--              <span>Đào tạo & hỗ trợ chuyên môn liên tục</span>
--            </div>
--            <div class="benefit">
--              <i class="fas fa-medal"></i>
--              <span>Cơ hội nhận thưởng và giải thưởng giá trị</span>
--            </div>
--          </div>
--        </div>
--      </section>
-     </main>
-
-     <!-- Broker Detail Modal -->
-     <div v-if="selectedBroker" class="modal-overlay" @click="closeModal">
+@@ -513,53 +515,50 @@
        <div class="modal-content" @click.stop>
          <button class="modal-close" @click="closeModal">
            <i class="fas fa-times"></i>
@@ -183,6 +516,11 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
              <div class="broker-detail-header">
                <div class="broker-detail-avatar">
                  <img :src="selectedBroker.avatar" :alt="selectedBroker.name" />
+                 <div v-if="selectedBroker.topRank" :class="['rank-badge-large', selectedBroker.topRank]">
+                   <i v-if="selectedBroker.topRank === 'gold'" class="fas fa-crown"></i>
+                   <i v-else class="fas fa-medal"></i>
+                   <span>TOP {{ selectedBroker.topRank === 'gold' ? 1 : selectedBroker.topRank === 'silver' ? 2 : 3 }}</span>
+                 </div>
                </div>
                <div class="broker-detail-info">
                  <h3 class="broker-detail-name">{{ selectedBroker.name }}</h3>
@@ -193,25 +531,112 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
                  <div class="broker-detail-experience">
                    <i class="fas fa-briefcase"></i> {{ selectedBroker.experience }} năm kinh nghiệm
                  </div>
+-                <div class="broker-detail-score">
+-                  <i class="fas fa-star"></i> Điểm thi đua: <strong>{{ selectedBroker.competitionScore }}</strong>/1000
+-                </div>
                </div>
-@@ -446,250 +407,113 @@
+             </div>
+
+             <div class="broker-detail-stats">
+               <div class="broker-detail-stat">
+                 <div class="stat-value">{{ selectedBroker.propertiesSold }}</div>
+                 <div class="stat-label">Tổng BĐS đã bán</div>
+               </div>
+               <div class="broker-detail-stat">
+                 <div class="stat-value">{{ selectedBroker.successRate }}%</div>
+                 <div class="stat-label">Tỉ lệ thành công</div>
+               </div>
+               <div class="broker-detail-stat">
+                 <div class="stat-value">{{ selectedBroker.totalSales }} tỷ</div>
+                 <div class="stat-label">Tổng giá trị giao dịch</div>
+               </div>
+               <div class="broker-detail-stat">
+                 <div class="stat-value">{{ selectedBroker.averageTime }} ngày</div>
+                 <div class="stat-label">Thời gian bán trung bình</div>
+               </div>
+             </div>
+
+             <!-- Quarter Stats -->
+             <div class="broker-detail-quarter">
+               <h4>
+@@ -577,67 +576,88 @@
+                   </div>
+                 </div>
+                 <div class="quarter-stat-card">
+                   <div class="quarter-stat-icon">
+                     <i class="fas fa-money-bill-wave"></i>
+                   </div>
+                   <div class="quarter-stat-content">
+                     <div class="quarter-stat-value">{{ formatCurrency(selectedBroker.quarterStats.totalSales) }}</div>
+                     <div class="quarter-stat-label">Doanh số quý</div>
+                   </div>
+                 </div>
+                 <div class="quarter-stat-card">
+                   <div class="quarter-stat-icon">
+                     <i class="fas fa-percentage"></i>
+                   </div>
+                   <div class="quarter-stat-content">
+                     <div class="quarter-stat-value">{{ selectedBroker.quarterStats.successRate }}%</div>
+                     <div class="quarter-stat-label">Tỉ lệ thành công</div>
+                   </div>
+                 </div>
+                 <div class="quarter-stat-card">
+                   <div class="quarter-stat-icon">
+                     <i class="fas fa-trophy"></i>
+                   </div>
+                   <div class="quarter-stat-content">
+-                    <div class="quarter-stat-value">{{ selectedBroker.competitionScore }}</div>
+-                    <div class="quarter-stat-label">Điểm thi đua</div>
++                    <div class="quarter-stat-value">{{ selectedBroker.propertiesSold }}</div>
++                    <div class="quarter-stat-label">Tổng BĐS đã bán</div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+
+             <div class="broker-detail-bio">
+               <h4>Giới thiệu</h4>
+               <p>{{ selectedBroker.bio }}</p>
+             </div>
+
+             <div class="broker-detail-testimonial">
                <h4>Câu chuyện thành công</h4>
                <blockquote>"{{ selectedBroker.testimonial }}"</blockquote>
              </div>
 
-             <div class="broker-detail-properties">
-               <h4>BĐS đã bán thành công (5 gần nhất)</h4>
-               <div class="properties-list">
-                 <div
-                     v-for="property in selectedBroker.recentProperties"
-                     :key="property.id"
-                     class="property-item"
-                 >
-                   <div class="property-item-name">{{ property.name }}</div>
-                   <div class="property-item-details">
-                     <span class="property-item-location">{{ property.location }}</span>
-                     <span class="property-item-value">{{ property.price }} tỷ</span>
++            <div class="sold-projects">
++              <h4>
++                <i class="fas fa-building"></i>
++                Dự án đã bán thành công
++              </h4>
++              <div class="sold-projects-grid">
++                <div v-for="project in selectedBroker.soldProjects" :key="project.name" class="project-card">
++                  <div class="project-title">{{ project.name }}</div>
++                  <div class="project-meta">
++                    <i class="fas fa-map-marker-alt"></i> {{ project.location }}
++                  </div>
++                  <div class="project-meta">
++                    <i class="fas fa-home"></i> {{ project.type }}
++                  </div>
++                  <div class="project-meta">
++                    <i class="fas fa-coins"></i> Giá trị: {{ formatCurrency(project.value) }}
++                  </div>
++                </div>
++              </div>
++            </div>
++
+             <div class="broker-detail-competition-history">
+               <h4>
+                 <i class="fas fa-history"></i>
+                 Lịch sử thi đua
+               </h4>
+               <div class="competition-history">
+                 <div v-for="history in selectedBroker.competitionHistory" :key="history.quarter" class="history-item">
+                   <div class="history-quarter">Quý {{ history.quarter }}</div>
+                   <div class="history-rank" :class="getRankClass(history.rank - 1)">
+                     Hạng {{ history.rank }}
                    </div>
+                   <div class="history-score">{{ history.score }} điểm</div>
                  </div>
                </div>
              </div>
@@ -220,207 +645,84 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
                <button class="btn-contact" @click="contactBroker(selectedBroker)">
                  <i class="fas fa-phone-alt"></i> Liên hệ môi giới
                </button>
--              <button class="btn-collaborate" @click="showCollaborationForm(selectedBroker)">
--                <i class="fas fa-handshake"></i> Hợp tác với môi giới này
--              </button>
+               <button class="btn-collaborate" @click="showCollaborationForm(selectedBroker)">
+                 <i class="fas fa-handshake"></i> Hợp tác với môi giới này
+               </button>
              </div>
            </div>
-         </div>
-       </div>
-     </div>
-
--    <!-- Collaboration Form Modal -->
--    <div v-if="showCollaborationModal" class="modal-overlay" @click="closeModal">
--      <div class="modal-content collaboration-form" @click.stop>
--        <button class="modal-close" @click="closeModal">
--          <i class="fas fa-times"></i>
--        </button>
--
--        <div class="modal-body">
--          <h2 class="form-title">Đăng Ký Hợp Tác Môi Giới</h2>
--          <p class="form-subtitle">
--            Điền thông tin để trở thành đối tác môi giới và nhận nhiều ưu đãi hấp dẫn
--          </p>
--
--          <form @submit.prevent="submitCollaborationForm" class="collaboration-form-content">
--            <div class="form-row">
--              <div class="form-group">
--                <label for="fullName">Họ và tên *</label>
--                <input
--                    type="text"
--                    id="fullName"
--                    v-model="collaborationForm.fullName"
--                    placeholder="Nhập họ và tên của bạn"
--                    required
--                />
--              </div>
--              <div class="form-group">
--                <label for="phone">Số điện thoại *</label>
--                <input
--                    type="tel"
--                    id="phone"
--                    v-model="collaborationForm.phone"
--                    placeholder="Nhập số điện thoại"
--                    required
--                />
--              </div>
--            </div>
--
--            <div class="form-row">
--              <div class="form-group">
--                <label for="email">Email *</label>
--                <input
--                    type="email"
--                    id="email"
--                    v-model="collaborationForm.email"
--                    placeholder="Nhập email của bạn"
--                    required
--                />
--              </div>
--              <div class="form-group">
--                <label for="city">Tỉnh/Thành phố *</label>
--                <select id="city" v-model="collaborationForm.city" required>
--                  <option value="">Chọn tỉnh/thành phố</option>
--                  <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
--                </select>
--              </div>
--            </div>
--
--            <div class="form-row">
--              <div class="form-group">
--                <label for="experience">Kinh nghiệm môi giới *</label>
--                <select id="experience" v-model="collaborationForm.experience" required>
--                  <option value="">Chọn mức kinh nghiệm</option>
--                  <option value="under1">Dưới 1 năm</option>
--                  <option value="1-3">1 - 3 năm</option>
--                  <option value="3-5">3 - 5 năm</option>
--                  <option value="over5">Trên 5 năm</option>
--                </select>
--              </div>
--              <div class="form-group">
--                <label for="specialization">Chuyên môn *</label>
--                <select id="specialization" v-model="collaborationForm.specialization" required>
--                  <option value="">Chọn lĩnh vực chuyên môn</option>
--                  <option value="apartment">Căn hộ chung cư</option>
--                  <option value="house">Nhà phố, biệt thự</option>
--                  <option value="land">Đất nền</option>
--                  <option value="commercial">Bất động sản thương mại</option>
--                  <option value="all">Đa dạng các loại hình</option>
--                </select>
--              </div>
--            </div>
--
--            <div class="form-group">
--              <label for="message">Lý do muốn hợp tác</label>
--              <textarea
--                  id="message"
--                  v-model="collaborationForm.message"
--                  placeholder="Chia sẻ lý do bạn muốn hợp tác với chúng tôi và mong muốn của bạn..."
--                  rows="4"
--              ></textarea>
--            </div>
--
--            <div class="form-group checkbox-group">
--              <input
--                  type="checkbox"
--                  id="agreeTerms"
--                  v-model="collaborationForm.agreeTerms"
--                  required
--              />
--              <label for="agreeTerms">
--                Tôi đồng ý với các điều khoản hợp tác và chính sách bảo mật
--              </label>
--            </div>
--
--            <div class="form-submit">
--              <button type="submit" class="btn-submit" :disabled="formSubmitting">
--                <span v-if="formSubmitting">
--                  <i class="fas fa-spinner fa-spin"></i> Đang gửi...
--                </span>
--                <span v-else>
--                  <i class="fas fa-paper-plane"></i> Gửi đăng ký hợp tác
--                </span>
--              </button>
--              <p class="form-note">
--                Chúng tôi sẽ liên hệ với bạn trong vòng 24 giờ sau khi nhận được đăng ký
--              </p>
--            </div>
--          </form>
--        </div>
--      </div>
--    </div>
-
-     <!-- Footer -->
-     <footer class="page-footer">
-       <div class="footer-content">
-         <div class="footer-section">
-           <h4>Hỗ trợ đối tác môi giới</h4>
-           <ul class="footer-links">
+@@ -785,701 +805,710 @@
              <li><a href="#">Chính sách hợp tác</a></li>
-             <li><a href="#">Quy trình làm việc</a></li>
-             <li><a href="#">Hướng dẫn đăng ký</a></li>
-             <li><a href="#">Chính sách hoa hồng</a></li>
-           </ul>
-         </div>
-
-         <div class="footer-section">
-           <h4>Tài nguyên dành cho môi giới</h4>
-           <ul class="footer-links">
-             <li><a href="#">Tài liệu giới thiệu BĐS</a></li>
-             <li><a href="#">Bộ công cụ marketing</a></li>
-             <li><a href="#">Đào tạo chuyên môn</a></li>
+             <li><a href="#">Hướng dẫn tham gia thi đua</a></li>
+             <li><a href="#">Tài liệu đào tạo</a></li>
              <li><a href="#">Hỏi đáp thường gặp</a></li>
            </ul>
          </div>
 
          <div class="footer-section">
-           <h4>Liên hệ hợp tác</h4>
+           <h4>Liên hệ thi đua</h4>
            <div class="contact-info">
-             <p><i class="fas fa-phone-alt"></i> Hotline: 1900 1234</p>
-             <p><i class="fas fa-envelope"></i> Email: partner@realestate.com</p>
+             <p><i class="fas fa-phone-alt"></i> Hotline thi đua: 1900 5678</p>
+             <p><i class="fas fa-envelope"></i> Email: thidua@realestate.com</p>
              <p><i class="fas fa-clock"></i> Giờ làm việc: 8:00 - 18:00 (T2 - T7)</p>
            </div>
          </div>
        </div>
 
        <div class="footer-bottom">
-         <p>© 2023 RealEstate Partnership. Tất cả các quyền được bảo lưu.</p>
+         <p>© 2023 RealEstate Competition. Tất cả các quyền được bảo lưu.</p>
        </div>
      </footer>
    </div>
  </template>
 
  <script setup>
- import { ref, computed, onMounted } from 'vue'
+-import { ref, computed, onMounted } from 'vue'
++import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
++
++const commonProjects = [
++  { name: 'Sunrise Riverside', location: 'Hồ Chí Minh', type: 'Căn hộ cao cấp', value: 85 },
++  { name: 'River Park', location: 'Hà Nội', type: 'Nhà phố', value: 72 },
++  { name: 'Seaside Villas', location: 'Đà Nẵng', type: 'Biệt thự nghỉ dưỡng', value: 110 },
++  { name: 'Central Office', location: 'Hà Nội', type: 'Văn phòng', value: 95 }
++]
 
  // Reactive state using ref()
  const brokerViewMode = ref('grid')
  const searchQuery = ref('')
  const selectedCity = ref('')
- const selectedPropertyType = ref('')
+ const selectedQuarter = ref('Q4-2023')
  const selectedBroker = ref(null)
--const showCollaborationModal = ref(false)
--const formSubmitting = ref(false)
+ const showCollaborationModal = ref(false)
+ const formSubmitting = ref(false)
++const competitionCity = ref('')
++const isMobile = ref(false)
 
  // Pagination
  const brokersPage = ref(1)
  const brokersPerPage = ref(10)
- const propertiesPage = ref(1)
- const propertiesPerPage = ref(5)
 
--// Collaboration form data using ref()
--const collaborationForm = ref({
--  fullName: '',
--  phone: '',
--  email: '',
--  city: '',
--  experience: '',
--  specialization: '',
--  message: '',
--  agreeTerms: false
--})
--
- // Sample data for brokers (increased to 20)
+ // Competition quarters
+ const quarters = ref([
+   { label: 'Quý 4 - 2023', value: 'Q4-2023' },
+   { label: 'Quý 3 - 2023', value: 'Q3-2023' },
+   { label: 'Quý 2 - 2023', value: 'Q2-2023' },
+   { label: 'Quý 1 - 2023', value: 'Q1-2023' },
+   { label: 'Quý 4 - 2022', value: 'Q4-2022' }
+ ])
+
+ // Collaboration form data using ref()
+ const collaborationForm = ref({
+   fullName: '',
+   phone: '',
+   email: '',
+   city: '',
+   experience: '',
+   specialization: '',
+   message: '',
+   agreeTerms: false
+ })
+
+ // Sample data for brokers with competition data
  const brokers = ref([
    {
      id: 1,
@@ -434,28 +736,758 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
      totalSales: 320,
      experience: 8,
      averageTime: 45,
+     topRank: 'gold',
+-    competitionScore: 945,
+     quarterStats: {
+       propertiesSold: 12,
+       totalSales: 85,
+       successRate: 95
+     },
+     trend: 'up',
+     rankChange: 2,
      bio: 'Chuyên gia với hơn 8 năm kinh nghiệm trong lĩnh vực BĐS cao cấp. Đã hoàn thành hơn 40 dự án với tỷ lệ thành công ấn tượng.',
-     testimonial: 'Hợp tác với đội ngũ đã giúp tôi tiếp cận nguồn hàng chất lượng và tăng doanh thu lên 40% chỉ sau 6 tháng.',
+     testimonial: 'Tham gia thi đua đã thúc đẩy tôi làm việc hiệu quả hơn và đạt doanh số kỷ lục.',
      tags: ['Cao cấp', 'Căn hộ', 'Biệt thự', 'Top Seller'],
-     recentProperties: [
-       { id: 1, name: 'Sunshine City', location: 'Quận 7', price: 45 },
-       { id: 2, name: 'Vinhomes Grand Park', location: 'Quận 9', price: 68 },
-       { id: 3, name: 'Masteri Centre Point', location: 'Quận 2', price: 32 },
-       { id: 4, name: 'The Nassim', location: 'Quận 1', price: 120 },
-       { id: 5, name: 'Estella Heights', location: 'Quận 2', price: 40 }
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 3, score: 820 },
+       { quarter: 'Q2-2023', rank: 5, score: 780 },
+       { quarter: 'Q1-2023', rank: 7, score: 720 },
+       { quarter: 'Q4-2022', rank: 10, score: 680 }
      ]
    },
-@@ -1438,121 +1262,84 @@ const propertyPages = computed(() => {
-       pages.push(1, '...', current - 1, current, current + 1, '...', total)
-     }
+   {
+     id: 2,
+     name: 'Trần Thị Bích',
+     title: 'Trưởng nhóm môi giới',
+     location: 'Hà Nội',
+     avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+     verified: true,
+     propertiesSold: 38,
+     successRate: 88,
+     totalSales: 280,
+     experience: 6,
+     averageTime: 52,
+     topRank: 'silver',
+-    competitionScore: 892,
+     quarterStats: {
+       propertiesSold: 10,
+       totalSales: 72,
+       successRate: 90
+     },
+     trend: 'up',
+     rankChange: 1,
+     bio: 'Chuyên gia BĐS khu vực Hà Nội với 6 năm kinh nghiệm, đặc biệt thành công với các dự án căn hộ trung và cao cấp.',
+     testimonial: 'Thi đua đã giúp đội nhóm của tôi có động lực phấn đấu và đạt thành tích tốt hơn.',
+     tags: ['Căn hộ', 'Đất nền', 'Team Leader'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 4, score: 810 },
+       { quarter: 'Q2-2023', rank: 6, score: 760 },
+       { quarter: 'Q1-2023', rank: 8, score: 710 },
+       { quarter: 'Q4-2022', rank: 12, score: 650 }
+     ]
+   },
+   {
+     id: 3,
+     name: 'Lê Minh Đức',
+     title: 'Chuyên viên môi giới BĐS',
+     location: 'Đà Nẵng',
+     avatar: 'https://randomuser.me/api/portraits/men/67.jpg',
+     verified: true,
+     propertiesSold: 25,
+     successRate: 85,
+     totalSales: 180,
+     experience: 4,
+     averageTime: 60,
+     topRank: 'bronze',
+-    competitionScore: 865,
+     quarterStats: {
+       propertiesSold: 8,
+       totalSales: 58,
+       successRate: 88
+     },
+     trend: 'neutral',
+     rankChange: 0,
+     bio: 'Chuyên gia BĐS khu vực miền Trung, có mạng lưới khách hàng rộng và am hiểu thị trường địa phương.',
+     testimonial: 'Giải thưởng thi đua là động lực lớn giúp tôi phấn đấu không ngừng.',
+     tags: ['BĐS nghỉ dưỡng', 'Biệt thự', 'Đất nền'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 2, score: 850 },
+       { quarter: 'Q2-2023', rank: 3, score: 800 },
+       { quarter: 'Q1-2023', rank: 4, score: 750 },
+       { quarter: 'Q4-2022', rank: 5, score: 700 }
+     ]
+   },
+   {
+     id: 4,
+     name: 'Phạm Thu Hà',
+     title: 'Chuyên viên tư vấn cao cấp',
+     location: 'Hồ Chí Minh',
+     avatar: 'https://randomuser.me/api/portraits/women/68.jpg',
+     verified: true,
+     propertiesSold: 31,
+     successRate: 90,
+     totalSales: 245,
+     experience: 5,
+     averageTime: 48,
+     topRank: null,
+-    competitionScore: 812,
+     quarterStats: {
+       propertiesSold: 9,
+       totalSales: 65,
+       successRate: 92
+     },
+     trend: 'up',
+     rankChange: 3,
+     bio: 'Chuyên gia tư vấn BĐS cao cấp, đặc biệt thành công với phân khúc khách hàng VIP và người nước ngoài.',
+     testimonial: 'Tham gia thi đua giúp tôi có thêm nhiều cơ hội hợp tác và phát triển sự nghiệp.',
+     tags: ['Cao cấp', 'Khách VIP', 'Người nước ngoài'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 7, score: 780 },
+       { quarter: 'Q2-2023', rank: 10, score: 720 },
+       { quarter: 'Q1-2023', rank: 12, score: 680 },
+       { quarter: 'Q4-2022', rank: 15, score: 620 }
+     ]
+   },
+   {
+     id: 5,
+     name: 'Hoàng Văn Cường',
+     title: 'Chuyên viên môi giới',
+     location: 'Hà Nội',
+     avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
+     verified: true,
+     propertiesSold: 18,
+     successRate: 82,
+     totalSales: 125,
+     experience: 3,
+     averageTime: 65,
+     topRank: null,
+-    competitionScore: 745,
+     quarterStats: {
+       propertiesSold: 6,
+       totalSales: 42,
+       successRate: 85
+     },
+     trend: 'down',
+     rankChange: 2,
+     bio: 'Chuyên gia trẻ với 3 năm kinh nghiệm, năng động và nhiệt huyết, chuyên về phân khúc căn hộ trung cấp.',
+     testimonial: 'Mặc dù hạng giảm nhưng tôi vẫn cố gắng hết mình trong cuộc thi đua này.',
+     tags: ['Căn hộ', 'Trung cấp', 'Năng động'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 4, score: 810 },
+       { quarter: 'Q2-2023', rank: 5, score: 790 },
+       { quarter: 'Q1-2023', rank: 6, score: 740 },
+       { quarter: 'Q4-2022', rank: 8, score: 690 }
+     ]
+   },
+   {
+     id: 6,
+     name: 'Đỗ Thị Lan',
+     title: 'Trưởng phòng môi giới',
+     location: 'Hồ Chí Minh',
+     avatar: 'https://randomuser.me/api/portraits/women/26.jpg',
+     verified: true,
+     propertiesSold: 56,
+     successRate: 94,
+     totalSales: 420,
+     experience: 10,
+     averageTime: 40,
+     topRank: null,
+-    competitionScore: 798,
+     quarterStats: {
+       propertiesSold: 11,
+       totalSales: 78,
+       successRate: 93
+     },
+     trend: 'up',
+     rankChange: 1,
+     bio: 'Với 10 năm kinh nghiệm, là chuyên gia hàng đầu trong lĩnh vực BĐS thương mại và văn phòng.',
+     testimonial: 'Thi đua tạo ra môi trường cạnh tranh lành mạnh giúp mọi người cùng tiến bộ.',
+     tags: ['Thương mại', 'Văn phòng', 'Chuyên gia'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 6, score: 790 },
+       { quarter: 'Q2-2023', rank: 7, score: 770 },
+       { quarter: 'Q1-2023', rank: 9, score: 730 },
+       { quarter: 'Q4-2022', rank: 11, score: 670 }
+     ]
+   },
+   {
+     id: 7,
+     name: 'Vũ Minh Tuấn',
+     title: 'Chuyên viên cao cấp',
+     location: 'Đà Nẵng',
+     avatar: 'https://randomuser.me/api/portraits/men/45.jpg',
+     verified: true,
+     propertiesSold: 22,
+     successRate: 87,
+     totalSales: 160,
+     experience: 4,
+     averageTime: 55,
+     topRank: null,
+-    competitionScore: 732,
+     quarterStats: {
+       propertiesSold: 7,
+       totalSales: 48,
+       successRate: 86
+     },
+     trend: 'neutral',
+     rankChange: 0,
+     bio: 'Chuyên gia về BĐS nghỉ dưỡng ven biển Đà Nẵng, có mối quan hệ rộng với các chủ đầu tư lớn.',
+     testimonial: 'Thi đua là cơ hội để chứng tỏ năng lực và học hỏi từ các đồng nghiệp xuất sắc.',
+     tags: ['Nghỉ dưỡng', 'Ven biển', 'Đầu tư'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 8, score: 770 },
+       { quarter: 'Q2-2023', rank: 8, score: 760 },
+       { quarter: 'Q1-2023', rank: 10, score: 710 },
+       { quarter: 'Q4-2022', rank: 13, score: 660 }
+     ]
+   },
+   {
+     id: 8,
+     name: 'Ngô Văn Hải',
+     title: 'Chuyên viên môi giới',
+     location: 'Hải Phòng',
+     avatar: 'https://randomuser.me/api/portraits/men/33.jpg',
+     verified: true,
+     propertiesSold: 15,
+     successRate: 80,
+     totalSales: 95,
+     experience: 2,
+     averageTime: 70,
+     topRank: null,
+-    competitionScore: 685,
+     quarterStats: {
+       propertiesSold: 5,
+       totalSales: 32,
+       successRate: 82
+     },
+     trend: 'up',
+     rankChange: 4,
+     bio: 'Chuyên gia trẻ đầy tiềm năng tại Hải Phòng, chuyên về phân khúc nhà phố và đất nền đô thị.',
+     testimonial: 'Lần đầu tham gia thi đua và đã có sự tiến bộ vượt bậc nhờ sự hỗ trợ từ công ty.',
+     tags: ['Nhà phố', 'Đất nền', 'Trẻ tuổi'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 12, score: 700 },
+       { quarter: 'Q2-2023', rank: 16, score: 650 },
+       { quarter: 'Q1-2023', rank: 18, score: 600 },
+       { quarter: 'Q4-2022', rank: 20, score: 550 }
+     ]
+   },
+   {
+     id: 9,
+     name: 'Lê Thị Mai',
+     title: 'Chuyên viên tư vấn',
+     location: 'Cần Thơ',
+     avatar: 'https://randomuser.me/api/portraits/women/50.jpg',
+     verified: true,
+     propertiesSold: 12,
+     successRate: 78,
+     totalSales: 65,
+     experience: 2,
+     averageTime: 75,
+     topRank: null,
+-    competitionScore: 642,
+     quarterStats: {
+       propertiesSold: 4,
+       totalSales: 28,
+       successRate: 80
+     },
+     trend: 'down',
+     rankChange: 1,
+     bio: 'Chuyên gia về BĐS khu vực Đồng bằng sông Cửu Long, am hiểu thị trường địa phương.',
+     testimonial: 'Thi đua giúp tôi có thêm động lực để cải thiện kỹ năng và nâng cao hiệu suất làm việc.',
+     tags: ['Đồng bằng', 'Đất nền', 'Địa phương'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 9, score: 750 },
+       { quarter: 'Q2-2023', rank: 9, score: 740 },
+       { quarter: 'Q1-2023', rank: 11, score: 690 },
+       { quarter: 'Q4-2022', rank: 14, score: 640 }
+     ]
+   },
+   {
+     id: 10,
+     name: 'Trịnh Thị Hương',
+     title: 'Chuyên viên cao cấp',
+     location: 'Nha Trang',
+     avatar: 'https://randomuser.me/api/portraits/women/30.jpg',
+     verified: true,
+     propertiesSold: 28,
+     successRate: 89,
+     totalSales: 195,
+     experience: 5,
+     averageTime: 50,
+     topRank: null,
+-    competitionScore: 765,
+     quarterStats: {
+       propertiesSold: 8,
+       totalSales: 55,
+       successRate: 88
+     },
+     trend: 'up',
+     rankChange: 2,
+     bio: 'Chuyên gia về BĐS nghỉ dưỡng tại Nha Trang, có kinh nghiệm làm việc với khách hàng quốc tế.',
+     testimonial: 'Thi đua không chỉ là cạnh tranh mà còn là cơ hội để giao lưu và học hỏi kinh nghiệm.',
+     tags: ['Nghỉ dưỡng', 'Du lịch', 'Quốc tế'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 10, score: 740 },
+       { quarter: 'Q2-2023', rank: 11, score: 710 },
+       { quarter: 'Q1-2023', rank: 13, score: 670 },
+       { quarter: 'Q4-2022', rank: 16, score: 620 }
+     ]
+   },
+   {
+     id: 11,
+     name: 'Bùi Văn Thành',
+     title: 'Trưởng nhóm kinh doanh',
+     location: 'Hồ Chí Minh',
+     avatar: 'https://randomuser.me/api/portraits/men/55.jpg',
+     verified: true,
+     propertiesSold: 47,
+     successRate: 91,
+     totalSales: 350,
+     experience: 7,
+     averageTime: 42,
+     topRank: null,
+-    competitionScore: 815,
+     quarterStats: {
+       propertiesSold: 10,
+       totalSales: 72,
+       successRate: 91
+     },
+     trend: 'neutral',
+     rankChange: 0,
+     bio: 'Chuyên gia với 7 năm kinh nghiệm, đặc biệt thành công trong lĩnh vực căn hộ cao cấp và biệt thự.',
+     testimonial: 'Thi đua tạo động lực để tôi và đội nhóm không ngừng phấn đấu vươn lên.',
+     tags: ['Cao cấp', 'Biệt thự', 'Kinh doanh'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 5, score: 800 },
+       { quarter: 'Q2-2023', rank: 4, score: 810 },
+       { quarter: 'Q1-2023', rank: 3, score: 820 },
+       { quarter: 'Q4-2022', rank: 4, score: 780 }
+     ]
+   },
+   {
+     id: 12,
+     name: 'Nguyễn Thị Hồng',
+     title: 'Chuyên viên môi giới',
+     location: 'Hà Nội',
+     avatar: 'https://randomuser.me/api/portraits/women/65.jpg',
+     verified: true,
+     propertiesSold: 21,
+     successRate: 84,
+     totalSales: 145,
+     experience: 3,
+     averageTime: 60,
+     topRank: null,
+-    competitionScore: 698,
+     quarterStats: {
+       propertiesSold: 6,
+       totalSales: 40,
+       successRate: 84
+     },
+     trend: 'down',
+     rankChange: 3,
+     bio: 'Chuyên gia trẻ với sự nhiệt huyết và đam mê, chuyên về phân khúc căn hộ trung cấp tại Hà Nội.',
+     testimonial: 'Dù thứ hạng có giảm nhưng tôi vẫn cảm thấy hài lòng với những gì đã đạt được.',
+     tags: ['Trung cấp', 'Nhiệt huyết', 'Hà Nội'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 7, score: 780 },
+       { quarter: 'Q2-2023', rank: 5, score: 790 },
+       { quarter: 'Q1-2023', rank: 5, score: 760 },
+       { quarter: 'Q4-2022', rank: 7, score: 710 }
+     ]
+   },
+   {
+     id: 13,
+     name: 'Phan Văn Dũng',
+     title: 'Chuyên viên cao cấp',
+     location: 'Đà Nẵng',
+     avatar: 'https://randomuser.me/api/portraits/men/70.jpg',
+     verified: true,
+     propertiesSold: 33,
+     successRate: 88,
+     totalSales: 240,
+     experience: 6,
+     averageTime: 48,
+     topRank: null,
+-    competitionScore: 755,
+     quarterStats: {
+       propertiesSold: 8,
+       totalSales: 52,
+       successRate: 87
+     },
+     trend: 'up',
+     rankChange: 1,
+     bio: 'Chuyên gia với 6 năm kinh nghiệm về BĐS nghỉ dưỡng và căn hộ cao cấp tại Đà Nẵng.',
+     testimonial: 'Tham gia thi đua là cách tốt nhất để thể hiện năng lực và đóng góp cho công ty.',
+     tags: ['Nghỉ dưỡng', 'Cao cấp', 'Đà Nẵng'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 11, score: 720 },
+       { quarter: 'Q2-2023', rank: 12, score: 700 },
+       { quarter: 'Q1-2023', rank: 14, score: 660 },
+       { quarter: 'Q4-2022', rank: 17, score: 610 }
+     ]
+   },
+   {
+     id: 14,
+     name: 'Đinh Thị Thu',
+     title: 'Chuyên viên tư vấn',
+     location: 'Hải Phòng',
+     avatar: 'https://randomuser.me/api/portraits/women/42.jpg',
+     verified: true,
+     propertiesSold: 19,
+     successRate: 83,
+     totalSales: 115,
+     experience: 3,
+     averageTime: 62,
+     topRank: null,
+-    competitionScore: 672,
+     quarterStats: {
+       propertiesSold: 5,
+       totalSales: 35,
+       successRate: 83
+     },
+     trend: 'up',
+     rankChange: 2,
+     bio: 'Chuyên gia về nhà phố và đất nền tại Hải Phòng, có mạng lưới khách hàng địa phương rộng.',
+     testimonial: 'Thi đua giúp tôi có thêm nhiều mối quan hệ và cơ hội hợp tác mới.',
+     tags: ['Nhà phố', 'Đất nền', 'Hải Phòng'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 14, score: 680 },
+       { quarter: 'Q2-2023', rank: 16, score: 640 },
+       { quarter: 'Q1-2023', rank: 17, score: 600 },
+       { quarter: 'Q4-2022', rank: 19, score: 560 }
+     ]
+   },
+   {
+     id: 15,
+     name: 'Lý Văn Hùng',
+     title: 'Chuyên viên môi giới',
+     location: 'Cần Thơ',
+     avatar: 'https://randomuser.me/api/portraits/men/28.jpg',
+     verified: true,
+     propertiesSold: 14,
+     successRate: 79,
+     totalSales: 80,
+     experience: 2,
+     averageTime: 68,
+     topRank: null,
+-    competitionScore: 628,
+     quarterStats: {
+       propertiesSold: 4,
+       totalSales: 25,
+       successRate: 79
+     },
+     trend: 'neutral',
+     rankChange: 0,
+     bio: 'Chuyên gia trẻ về BĐS khu vực Cần Thơ, chuyên về phân khúc căn hộ và nhà phố.',
+     testimonial: 'Thi đua là động lực để tôi không ngừng học hỏi và cải thiện kỹ năng.',
+     tags: ['Căn hộ', 'Nhà phố', 'Cần Thơ'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 15, score: 670 },
+       { quarter: 'Q2-2023', rank: 14, score: 680 },
+       { quarter: 'Q1-2023', rank: 16, score: 630 },
+       { quarter: 'Q4-2022', rank: 18, score: 580 }
+     ]
+   },
+   {
+     id: 16,
+     name: 'Võ Thị Kim',
+     title: 'Chuyên viên cao cấp',
+     location: 'Nha Trang',
+     avatar: 'https://randomuser.me/api/portraits/women/35.jpg',
+     verified: true,
+     propertiesSold: 26,
+     successRate: 86,
+     totalSales: 185,
+     experience: 5,
+     averageTime: 52,
+     topRank: null,
+-    competitionScore: 738,
+     quarterStats: {
+       propertiesSold: 7,
+       totalSales: 48,
+       successRate: 86
+     },
+     trend: 'down',
+     rankChange: 2,
+     bio: 'Chuyên gia về BĐS nghỉ dưỡng ven biển Nha Trang, có kinh nghiệm làm việc với khách hàng cao cấp.',
+     testimonial: 'Thi đua là cơ hội để tôi chứng minh năng lực và đóng góp cho sự phát triển chung.',
+     tags: ['Nghỉ dưỡng', 'Ven biển', 'Cao cấp'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 9, score: 750 },
+       { quarter: 'Q2-2023', rank: 7, score: 770 },
+       { quarter: 'Q1-2023', rank: 8, score: 730 },
+       { quarter: 'Q4-2022', rank: 9, score: 690 }
+     ]
+   },
+   {
+     id: 17,
+     name: 'Trần Văn Hải',
+     title: 'Trưởng phòng kinh doanh',
+     location: 'Hồ Chí Minh',
+     avatar: 'https://randomuser.me/api/portraits/men/40.jpg',
+     verified: true,
+     propertiesSold: 62,
+     successRate: 93,
+     totalSales: 480,
+     experience: 12,
+     averageTime: 38,
+     topRank: null,
+-    competitionScore: 825,
+     quarterStats: {
+       propertiesSold: 13,
+       totalSales: 92,
+       successRate: 94
+     },
+     trend: 'up',
+     rankChange: 1,
+     bio: 'Chuyên gia hàng đầu với 12 năm kinh nghiệm trong lĩnh vực BĐS cao cấp và thương mại.',
+     testimonial: 'Thi đua tạo ra không khí làm việc sôi nổi và hiệu quả trong toàn đội ngũ.',
+     tags: ['Cao cấp', 'Thương mại', 'Hàng đầu'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 4, score: 810 },
+       { quarter: 'Q2-2023', rank: 3, score: 820 },
+       { quarter: 'Q1-2023', rank: 2, score: 830 },
+       { quarter: 'Q4-2022', rank: 3, score: 790 }
+     ]
+   },
+   {
+     id: 18,
+     name: 'Nguyễn Thị Lan Anh',
+     title: 'Chuyên viên môi giới',
+     location: 'Hà Nội',
+     avatar: 'https://randomuser.me/api/portraits/women/55.jpg',
+     verified: true,
+     propertiesSold: 24,
+     successRate: 85,
+     totalSales: 165,
+     experience: 4,
+     averageTime: 58,
+     topRank: null,
+-    competitionScore: 710,
+     quarterStats: {
+       propertiesSold: 7,
+       totalSales: 45,
+       successRate: 85
+     },
+     trend: 'up',
+     rankChange: 3,
+     bio: 'Chuyên gia về căn hộ cao cấp tại Hà Nội, có kinh nghiệm làm việc với khách hàng doanh nhân.',
+     testimonial: 'Thi đua giúp tôi có thêm động lực để đạt được những mục tiêu cao hơn.',
+     tags: ['Cao cấp', 'Doanh nhân', 'Hà Nội'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 13, score: 690 },
+       { quarter: 'Q2-2023', rank: 16, score: 650 },
+       { quarter: 'Q1-2023', rank: 19, score: 590 },
+       { quarter: 'Q4-2022', rank: 21, score: 540 }
+     ]
+   },
+   {
+     id: 19,
+     name: 'Hoàng Văn Nam',
+     title: 'Chuyên viên cao cấp',
+     location: 'Đà Nẵng',
+     avatar: 'https://randomuser.me/api/portraits/men/60.jpg',
+     verified: true,
+     propertiesSold: 29,
+     successRate: 87,
+     totalSales: 210,
+     experience: 5,
+     averageTime: 50,
+     topRank: null,
+-    competitionScore: 748,
+     quarterStats: {
+       propertiesSold: 8,
+       totalSales: 55,
+       successRate: 87
+     },
+     trend: 'neutral',
+     rankChange: 0,
+     bio: 'Chuyên gia về BĐS nghỉ dưỡng và căn hộ cao cấp tại Đà Nẵng, có mối quan hệ rộng với các đối tác.',
+     testimonial: 'Thi đua là sân chơi lành mạnh để các môi giới cùng nhau phát triển.',
+     tags: ['Nghỉ dưỡng', 'Cao cấp', 'Đối tác'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 10, score: 740 },
+       { quarter: 'Q2-2023', rank: 10, score: 730 },
+       { quarter: 'Q1-2023', rank: 12, score: 680 },
+       { quarter: 'Q4-2022', rank: 15, score: 630 }
+     ]
+   },
+   {
+     id: 20,
+     name: 'Phạm Thị Thanh',
+     title: 'Chuyên viên tư vấn',
+     location: 'Hải Phòng',
+     avatar: 'https://randomuser.me/api/portraits/women/48.jpg',
+     verified: true,
+     propertiesSold: 17,
+     successRate: 81,
+     totalSales: 105,
+     experience: 3,
+     averageTime: 64,
+     topRank: null,
+-    competitionScore: 658,
+     quarterStats: {
+       propertiesSold: 5,
+       totalSales: 38,
+       successRate: 82
+     },
+     trend: 'up',
+     rankChange: 2,
+     bio: 'Chuyên gia về nhà phố và đất nền tại Hải Phòng, có kinh nghiệm làm việc với khách hàng địa phương.',
+     testimonial: 'Thi đua giúp tôi có thêm nhiều bài học quý giá và kinh nghiệm thực tế.',
+     tags: ['Nhà phố', 'Đất nền', 'Địa phương'],
++    soldProjects: commonProjects,
+     competitionHistory: [
+       { quarter: 'Q3-2023', rank: 16, score: 660 },
+       { quarter: 'Q2-2023', rank: 18, score: 620 },
+       { quarter: 'Q1-2023', rank: 20, score: 570 },
+       { quarter: 'Q4-2022', rank: 22, score: 520 }
+     ]
    }
+ ])
 
-   return pages
+ const cities = ref(['Hồ Chí Minh', 'Hà Nội', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ', 'Nha Trang', 'Đà Lạt'])
+
+ // Computed properties
+ const totalBrokers = computed(() => {
+   return brokers.value.length
  })
 
- // Methods
+ const totalSales = computed(() => {
+   return brokers.value.reduce((sum, broker) => sum + broker.totalSales, 0)
+ })
+
+ const successRate = computed(() => {
+   const avg = brokers.value.reduce((sum, broker) => sum + broker.successRate, 0) / brokers.value.length
+   return Math.round(avg)
+ })
+
+@@ -1507,72 +1536,87 @@ const lastUpdateTime = computed(() => {
+   const now = new Date()
+   return `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`
+ })
+
+ const filteredBrokers = computed(() => {
+   let filtered = [...brokers.value]
+
+   // Filter by search query
+   if (searchQuery.value) {
+     const query = searchQuery.value.toLowerCase()
+     filtered = filtered.filter(broker =>
+         broker.name.toLowerCase().includes(query) ||
+         broker.title.toLowerCase().includes(query) ||
+         broker.location.toLowerCase().includes(query) ||
+         broker.tags.some(tag => tag.toLowerCase().includes(query))
+     )
+   }
+
+   // Filter by city
+   if (selectedCity.value) {
+     filtered = filtered.filter(broker =>
+         broker.location === selectedCity.value
+     )
+   }
+
+-  // Sort by competition score
+-  filtered.sort((a, b) => b.competitionScore - a.competitionScore)
++  // Sort by số căn bán trong quý và doanh số
++  filtered.sort((a, b) => {
++    if (b.quarterStats.propertiesSold === a.quarterStats.propertiesSold) {
++      return b.quarterStats.totalSales - a.quarterStats.totalSales
++    }
++    return b.quarterStats.propertiesSold - a.quarterStats.propertiesSold
++  })
+
+   return filtered
+ })
+
+ const top10Brokers = computed(() => {
+   let filtered = [...brokers.value]
+
+-  // Filter by city if selected
+-  if (selectedCity.value) {
++  // Filter by city for competition board
++  if (competitionCity.value) {
+     filtered = filtered.filter(broker =>
+-        broker.location === selectedCity.value
++        broker.location === competitionCity.value
+     )
+   }
+
+-  // Sort by competition score and take top 10
++  // Sort by số căn bán và doanh số
+   return filtered
+-      .sort((a, b) => b.competitionScore - a.competitionScore)
++      .sort((a, b) => {
++        if (b.quarterStats.propertiesSold === a.quarterStats.propertiesSold) {
++          return b.quarterStats.totalSales - a.quarterStats.totalSales
++        }
++        return b.quarterStats.propertiesSold - a.quarterStats.propertiesSold
++      })
+       .slice(0, 10)
+ })
+
++const maxQuarterPropertiesSold = computed(() => {
++  if (!top10Brokers.value.length) return 0
++  return top10Brokers.value[0].quarterStats.propertiesSold
++})
++
+ // Pagination computed properties
+ const totalBrokerPages = computed(() => {
+   return Math.ceil(filteredBrokers.value.length / brokersPerPage.value)
+ })
+
+ const currentBrokers = computed(() => {
+   const start = (brokersPage.value - 1) * brokersPerPage.value
+   const end = start + brokersPerPage.value
+   return filteredBrokers.value.slice(start, end)
+ })
+
+ const brokerPages = computed(() => {
+   const pages = []
+   const total = totalBrokerPages.value
+   const current = brokersPage.value
+
+   if (total <= 5) {
+     for (let i = 1; i <= total; i++) {
+       pages.push(i)
+     }
+   } else {
+     if (current <= 3) {
+       pages.push(1, 2, 3, 4, '...', total)
+     } else if (current >= total - 2) {
+       pages.push(1, '...', total - 3, total - 2, total - 1, total)
+@@ -1588,58 +1632,52 @@ const brokerPages = computed(() => {
  const formatNumber = (num) => {
    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+ }
+
+ const formatCurrency = (amount) => {
+   if (amount >= 1000) {
+     return `${(amount / 1000).toFixed(1)} tỷ`
+   } else {
+     return `${amount} triệu`
+   }
  }
 
  const formatDate = (dateString) => {
@@ -463,75 +1495,95 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
    return date.toLocaleDateString('vi-VN')
  }
 
+ const getRankClass = (index) => {
+   if (index === 0) return 'gold'
+   if (index === 1) return 'silver'
+   if (index === 2) return 'bronze'
+   return ''
+ }
+
+ const getScorePercentage = (score) => {
+-  return (score / 1000) * 100
+-}
+-
+-const getScoreClass = (score) => {
+-  if (score >= 900) return 'score-excellent'
+-  if (score >= 800) return 'score-good'
+-  if (score >= 700) return 'score-average'
+-  return 'score-fair'
++  if (!maxQuarterPropertiesSold.value) return 0
++  return (score / maxQuarterPropertiesSold.value) * 100
+ }
+
  const showBrokerDetail = (broker) => {
    selectedBroker.value = broker
  }
 
- const showPropertyDetail = (property) => {
-   alert(`Chi tiết BĐS: ${property.name}\nMô tả: ${property.description}\nĐịa điểm: ${property.location}\nLoại: ${property.type}\nGiá bán: ${property.price} tỷ VNĐ\nNgày bán: ${formatDate(property.soldDate)}`)
+ const showCollaborationForm = (broker = null) => {
+   if (broker) {
+     collaborationForm.value.message = `Tôi muốn hợp tác với môi giới ${broker.name} và tham gia thi đua. ${collaborationForm.value.message}`
+   }
+   showCollaborationModal.value = true
  }
 
--const showCollaborationForm = (broker = null) => {
--  if (broker) {
--    collaborationForm.value.message = `Tôi muốn hợp tác với môi giới ${broker.name}. ${collaborationForm.value.message}`
--  }
--  showCollaborationModal.value = true
--}
--
  const contactBroker = (broker) => {
    alert(`Liên hệ với ${broker.name}\nSố điện thoại: 09XX XXX XXX\nEmail: ${broker.name.toLowerCase().replace(/\s/g, '')}@example.com`)
  }
 
--const submitCollaborationForm = () => {
--  formSubmitting.value = true
--
--  // Simulate API call
--  setTimeout(() => {
--    alert('Đăng ký hợp tác thành công! Chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất.')
--    formSubmitting.value = false
--    showCollaborationModal.value = false
--    resetCollaborationForm()
--  }, 1500)
--}
--
--const resetCollaborationForm = () => {
--  collaborationForm.value = {
--    fullName: '',
--    phone: '',
--    email: '',
--    city: '',
--    experience: '',
--    specialization: '',
--    message: '',
--    agreeTerms: false
--  }
--}
--
- const resetFilters = () => {
-   searchQuery.value = ''
-   selectedCity.value = ''
-   selectedPropertyType.value = ''
-   brokersPage.value = 1
-   propertiesPage.value = 1
+ const submitCollaborationForm = () => {
+   formSubmitting.value = true
+
+   // Simulate API call
+   setTimeout(() => {
+     alert('Đăng ký hợp tác thành công! Chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất để hướng dẫn tham gia thi đua.')
+     formSubmitting.value = false
+     showCollaborationModal.value = false
+@@ -1661,53 +1699,70 @@ const resetCollaborationForm = () => {
  }
 
  const closeModal = () => {
    selectedBroker.value = null
--  showCollaborationModal.value = false
--}
--
--const scrollToBrokers = () => {
--  setTimeout(() => {
--    const brokersSection = document.querySelector('.brokers-section')
--    if (brokersSection) {
--      brokersSection.scrollIntoView({ behavior: 'smooth' })
--    }
--  }, 100)
+   showCollaborationModal.value = false
  }
 
+ const scrollToCompetition = () => {
+   setTimeout(() => {
+     const competitionSection = document.querySelector('.competition-section')
+     if (competitionSection) {
+       competitionSection.scrollIntoView({ behavior: 'smooth' })
+     }
+   }, 100)
+ }
+
+ const scrollToAllBrokers = () => {
+   setTimeout(() => {
+     const brokersSection = document.querySelector('.brokers-section')
+     if (brokersSection) {
+       brokersSection.scrollIntoView({ behavior: 'smooth' })
+     }
+   }, 100)
+ }
+
++const handleResize = () => {
++  isMobile.value = window.innerWidth < 768
++  if (isMobile.value) {
++    brokerViewMode.value = 'grid'
++  }
++}
++
++watch([selectedCity, searchQuery, selectedQuarter], () => {
++  brokersPage.value = 1
++})
++
  // Lifecycle hook
  onMounted(() => {
-   console.log('Broker success page mounted')
+   console.log('Broker success page with competition mounted')
++  handleResize()
++  window.addEventListener('resize', handleResize)
++})
++
++onBeforeUnmount(() => {
++  window.removeEventListener('resize', handleResize)
  })
  </script>
 
@@ -540,70 +1592,53 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
    color: #333;
    background-color: #f8f9fa;
+   padding: 0;
  }
 
-+.page-content {
-+  padding: 0 1rem 2rem;
-+  max-width: 100%;
-+}
-+
  /* Header Styles */
  .page-header {
    background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
    color: white;
-   padding: 3rem 1.5rem;
+   padding: 3rem 2rem;
    text-align: center;
  }
 
  .header-content {
-   max-width: 1200px;
+   max-width: 1400px;
    margin: 0 auto;
  }
 
  .page-title {
-   font-size: 2.8rem;
-   font-weight: 700;
-   margin-bottom: 1rem;
- }
-
- .page-subtitle {
-   font-size: 1.2rem;
-   max-width: 800px;
-   margin: 0 auto 2.5rem;
-   opacity: 0.9;
-   line-height: 1.6;
-@@ -1561,53 +1348,53 @@ onMounted(() => {
- .stats-overview {
-   display: flex;
-   justify-content: center;
-   flex-wrap: wrap;
-   gap: 2.5rem;
-   margin-top: 2.5rem;
- }
-
- .stat-item {
-   text-align: center;
+@@ -1738,50 +1793,54 @@ onMounted(() => {
  }
 
  .stat-value {
-   font-size: 2.5rem;
-   font-weight: 700;
+   font-size: 2.8rem;
+   font-weight: 800;
    margin-bottom: 0.5rem;
+   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
  }
 
  .stat-label {
-   font-size: 1rem;
-   opacity: 0.9;
+   font-size: 1.1rem;
+   opacity: 0.95;
+   font-weight: 500;
+ }
+
+ /* Main Content */
+ .page-content {
+   max-width: 1400px;
+   margin: 0 auto;
+   padding: 0 1rem;
  }
 
  /* Filter Section */
  .filter-section {
--  max-width: 1200px;
--  margin: 2rem auto;
--  padding: 0 1.5rem;
-+  max-width: 100%;
-+  margin: 2rem 0;
-+  padding: 0;
+   margin: 2rem 0;
++  background: white;
++  padding: 1.25rem;
++  border-radius: 12px;
++  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06);
  }
 
  .filter-controls {
@@ -623,66 +1658,94 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
  .search-input {
    width: 100%;
    padding: 0.85rem 1rem 0.85rem 3rem;
-   border: 1px solid #ddd;
-   border-radius: 8px;
+   border: 2px solid #e0e0e0;
+   border-radius: 10px;
    font-size: 1rem;
+   transition: all 0.3s;
+   background-color: white;
+ }
+@@ -1802,50 +1861,74 @@ onMounted(() => {
+
+ .filter-options {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 1rem;
+   align-items: center;
+ }
+
+ .filter-select {
+   padding: 0.85rem 1rem;
+   border: 2px solid #e0e0e0;
+   border-radius: 10px;
+   font-size: 1rem;
+   background-color: white;
+   min-width: 200px;
+   cursor: pointer;
    transition: all 0.3s;
  }
 
-@@ -1680,95 +1467,95 @@ onMounted(() => {
+ .filter-select:focus {
+   outline: none;
+   border-color: #26d0ce;
+   box-shadow: 0 0 0 3px rgba(38, 208, 206, 0.2);
+ }
+
++.competition-filter {
++  display: flex;
++  align-items: center;
++  gap: 0.75rem;
++}
++
++.competition-filter-label {
++  font-weight: 600;
++  color: white;
++}
++
++.area-filter {
++  min-width: 220px;
++}
++
++.view-note {
++  display: inline-flex;
++  align-items: center;
++  gap: 0.5rem;
++  margin-bottom: 1rem;
++  color: #fff;
++  font-weight: 500;
++}
++
+ /* View Toggle */
+ .view-toggle-section {
+   display: flex;
+   align-items: center;
+   gap: 1rem;
+   margin-bottom: 1.5rem;
+ }
+
+ .view-toggle-title {
+   font-size: 1.1rem;
+   font-weight: 600;
+   color: #444;
+   margin: 0;
+ }
+
+ .view-toggle {
+   display: flex;
+   border-radius: 10px;
+   overflow: hidden;
+   border: 2px solid #e0e0e0;
+   background-color: white;
+ }
 
  .view-toggle-btn {
    padding: 0.75rem 1.5rem;
-   background: none;
-   border: none;
-   font-size: 1rem;
-   cursor: pointer;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   gap: 0.5rem;
-   transition: all 0.3s;
- }
-
- .view-toggle-btn.active {
-   background-color: #1a2980;
-   color: white;
- }
-
- .view-toggle-btn:not(.active):hover {
-   background-color: #f8f9fa;
- }
-
- /* Section Styles */
- .brokers-section, .properties-section {
--  max-width: 1200px;
--  margin: 0 auto 4rem;
--  padding: 0 1.5rem;
-+  max-width: 100%;
-+  margin: 0 0 4rem;
-+  padding: 0;
- }
-
- .section-header {
-   display: flex;
-   justify-content: space-between;
-   align-items: flex-start;
-   margin-bottom: 2rem;
-   flex-wrap: wrap;
-   gap: 1rem;
- }
-
- .section-title {
-   font-size: 2rem;
-   font-weight: 700;
-   color: #1a2980;
-   margin-bottom: 0.5rem;
+@@ -2399,51 +2482,51 @@ onMounted(() => {
  }
 
  .section-subtitle {
    color: #666;
    font-size: 1.1rem;
-   max-width: 600px;
+   max-width: 800px;
  }
 
  .section-stats {
@@ -693,33 +1756,34 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
  .section-stat {
    background-color: #f0f7ff;
    color: #1a2980;
-   padding: 0.5rem 1rem;
-   border-radius: 20px;
-   font-size: 0.9rem;
-   font-weight: 500;
+   padding: 0.75rem 1.5rem;
+   border-radius: 25px;
+   font-size: 0.95rem;
+   font-weight: 600;
  }
 
  /* Brokers Grid */
  .brokers-grid {
    display: grid;
--  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-+  grid-template-columns: repeat(4, minmax(0, 1fr));
+-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
++  grid-template-columns: repeat(4, 1fr);
    gap: 2rem;
    margin-bottom: 3rem;
  }
 
  .broker-card {
    background-color: white;
-   border-radius: 12px;
+   border-radius: 15px;
    overflow: hidden;
-   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
    transition: all 0.3s ease;
    cursor: pointer;
+   border: 1px solid #eee;
  }
 
  .broker-card:hover {
-   transform: translateY(-5px);
-   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+   transform: translateY(-8px);
+   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
  }
 
  .broker-header {
@@ -727,120 +1791,113 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
    padding: 1.5rem;
    background: linear-gradient(90deg, #f8f9fa 0%, white 100%);
    border-bottom: 1px solid #eee;
- }
-
-@@ -1862,82 +1649,71 @@ onMounted(() => {
-   margin: 0;
- }
-
- .broker-tags {
-   padding: 1rem 1.5rem;
-   display: flex;
-   flex-wrap: wrap;
-   gap: 0.5rem;
- }
-
- .broker-tag {
-   background-color: #f0f7ff;
+   position: relative;
+@@ -2505,56 +2588,62 @@ onMounted(() => {
+   margin-bottom: 0.25rem;
    color: #1a2980;
-   padding: 0.25rem 0.75rem;
-   border-radius: 20px;
-   font-size: 0.8rem;
-   font-weight: 500;
  }
 
- .broker-actions {
-   padding: 1rem 1.5rem 1.5rem;
-   display: flex;
-   gap: 0.75rem;
- }
-
--.btn-view-profile, .btn-collaborate, .btn-view-details, .btn-cta-primary, .btn-cta-secondary, .btn-contact, .btn-submit {
-+.btn-view-profile, .btn-contact {
-   padding: 0.75rem 1.5rem;
-   border-radius: 8px;
+ .broker-title {
+   color: #26d0ce;
    font-weight: 600;
-   cursor: pointer;
-   transition: all 0.3s;
-   border: none;
-   font-size: 0.95rem;
+   margin-bottom: 0.5rem;
+   font-size: 1rem;
  }
 
- .btn-view-profile {
-   flex: 1;
-   background-color: #f8f9fa;
-   color: #333;
-   border: 1px solid #ddd;
- }
-
- .btn-view-profile:hover {
-   background-color: #e9ecef;
- }
-
--.btn-collaborate, .btn-cta-primary, .btn-submit {
--  flex: 1;
--  background: linear-gradient(90deg, #1a2980 0%, #26d0ce 100%);
--  color: white;
--}
--
--.btn-collaborate:hover, .btn-cta-primary:hover, .btn-submit:hover {
--  transform: translateY(-2px);
--  box-shadow: 0 5px 15px rgba(26, 41, 128, 0.3);
--}
--
- /* Brokers List View */
- .brokers-list {
-   margin-bottom: 3rem;
- }
-
- .brokers-table {
-   background-color: white;
-   border-radius: 12px;
-   overflow: hidden;
-   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
- }
-
- .table-header {
-   display: flex;
-   background-color: #f8f9fa;
-   border-bottom: 1px solid #eee;
-   font-weight: 600;
-   color: #444;
- }
-
- .table-row {
-   display: flex;
-   border-bottom: 1px solid #eee;
-   transition: all 0.3s;
-   cursor: pointer;
-@@ -1990,82 +1766,71 @@ onMounted(() => {
+ .broker-location, .broker-experience {
    color: #666;
+   font-size: 0.9rem;
    display: flex;
    align-items: center;
    gap: 0.5rem;
+   margin-bottom: 0.25rem;
  }
 
- .broker-tags-list {
+ .broker-stats {
    display: flex;
-   flex-wrap: wrap;
-   gap: 0.25rem;
+   justify-content: space-around;
+   padding: 1.5rem;
+   border-bottom: 1px solid #eee;
++  gap: 1rem;
++  flex-wrap: wrap;
  }
 
- .broker-tag-list {
-   background-color: #f0f7ff;
+ .broker-stat {
+   text-align: center;
+ }
+
++.broker-stat-wide {
++  flex: 1 1 220px;
++}
++
+ .stat-number {
+   font-size: 1.6rem;
+   font-weight: 800;
    color: #1a2980;
-   padding: 0.15rem 0.5rem;
-   border-radius: 12px;
-   font-size: 0.75rem;
+   margin-bottom: 0.25rem;
  }
 
+ .stat-label {
+   font-size: 0.9rem;
+   color: #666;
+   font-weight: 500;
+ }
+
+ .broker-quarter-stats {
+   padding: 1.5rem;
+   background-color: #f8f9fa;
+   border-bottom: 1px solid #eee;
+ }
+
+ .quarter-stats-title {
+   font-size: 1rem;
+   font-weight: 700;
+   color: #1a2980;
+   margin-bottom: 1rem;
+   text-align: center;
+@@ -2820,50 +2909,61 @@ onMounted(() => {
+
+ .score-excellent {
+   background-color: rgba(40, 167, 69, 0.1);
+   color: #28a745;
+   border: 1px solid rgba(40, 167, 69, 0.3);
+ }
+
+ .score-good {
+   background-color: rgba(0, 123, 255, 0.1);
+   color: #007bff;
+   border: 1px solid rgba(0, 123, 255, 0.3);
+ }
+
+ .score-average {
+   background-color: rgba(255, 193, 7, 0.1);
+   color: #ffc107;
+   border: 1px solid rgba(255, 193, 7, 0.3);
+ }
+
+ .score-fair {
+   background-color: rgba(108, 117, 125, 0.1);
+   color: #6c757d;
+   border: 1px solid rgba(108, 117, 125, 0.3);
+ }
+
++.table-stat-combined .stat-number {
++  font-weight: 700;
++  color: #1a2980;
++  margin-bottom: 0.25rem;
++}
++
++.table-stat-combined .stat-label {
++  color: #666;
++  font-size: 0.9rem;
++}
++
  .broker-actions-list {
    display: flex;
    gap: 0.5rem;
  }
 
--.btn-view-profile-list, .btn-collaborate-list {
-+.btn-view-profile-list {
+ .btn-view-profile-list, .btn-collaborate-list {
    width: 40px;
    height: 40px;
    border-radius: 8px;
@@ -857,184 +1914,121 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
    color: #333;
    border: 1px solid #ddd;
  }
--
--.btn-collaborate-list {
--  background-color: #1a2980;
--  color: white;
--}
--
- .btn-view-profile-list:hover {
-   background-color: #e9ecef;
+
+ .btn-collaborate-list {
+   background-color: #1a2980;
+@@ -3286,51 +3386,51 @@ onMounted(() => {
+   color: #1a2980;
  }
 
--.btn-collaborate-list:hover {
--  background-color: #26d0ce;
--  transform: translateY(-2px);
--}
--
- /* Properties Table */
- .properties-table {
-   background-color: white;
-   border-radius: 12px;
-   overflow: hidden;
-   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-   margin-bottom: 3rem;
- }
-
- .property-image-small {
-   width: 80px;
-   height: 60px;
-   border-radius: 6px;
-   overflow: hidden;
- }
-
- .property-image-small img {
-   width: 100%;
-   height: 100%;
-   object-fit: cover;
- }
-
- .property-info-list {
+ .quarter-stat-content {
    display: flex;
    flex-direction: column;
-@@ -2163,128 +1928,50 @@ onMounted(() => {
-   border: 1px solid #ddd;
-   background-color: white;
-   cursor: pointer;
-   transition: all 0.3s;
+   gap: 0.25rem;
  }
 
- .pagination-page:hover {
-   background-color: #f8f9fa;
+ .quarter-stat-value {
+   font-size: 1.5rem;
+   font-weight: 800;
+   color: #1a2980;
  }
 
- .pagination-page.active {
-   background-color: #1a2980;
-   color: white;
-   border-color: #1a2980;
- }
-
- .pagination-dots {
-   width: 40px;
-   height: 40px;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   color: #666;
- }
-
--/* CTA Section */
--.cta-section {
--  background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
--  color: white;
--  padding: 4rem 1.5rem;
--  margin: 4rem 0;
--  border-radius: 12px;
--  max-width: 1200px;
--  margin-left: auto;
--  margin-right: auto;
--}
--
--.cta-content {
--  max-width: 800px;
--  margin: 0 auto;
--  text-align: center;
--}
--
--.cta-title {
--  font-size: 2.2rem;
--  font-weight: 700;
--  margin-bottom: 1rem;
--}
--
--.cta-description {
--  font-size: 1.1rem;
--  opacity: 0.9;
--  line-height: 1.6;
--  margin-bottom: 2.5rem;
--}
--
--.cta-buttons {
--  display: flex;
--  flex-wrap: wrap;
--  justify-content: center;
--  gap: 1rem;
--  margin-bottom: 2.5rem;
--}
--
--.btn-cta-primary, .btn-cta-secondary {
--  padding: 1rem 2rem;
--  display: flex;
--  align-items: center;
--  justify-content: center;
--  gap: 0.75rem;
--  font-size: 1.05rem;
--}
--
--.btn-cta-secondary {
--  background: rgba(255, 255, 255, 0.2);
--  color: white;
--  border: 1px solid rgba(255, 255, 255, 0.3);
--}
--
--.btn-cta-secondary:hover {
--  background: rgba(255, 255, 255, 0.3);
--}
--
--.cta-benefits {
--  display: flex;
--  flex-wrap: wrap;
--  justify-content: center;
--  gap: 2rem;
--  margin-top: 2rem;
--}
--
--.benefit {
--  display: flex;
--  align-items: center;
--  gap: 0.75rem;
--  font-size: 0.95rem;
--}
--
--.benefit i {
--  color: #26d0ce;
--  font-size: 1.2rem;
--}
--
- /* Modal Styles */
- .modal-overlay {
-   position: fixed;
-   top: 0;
-   left: 0;
-   right: 0;
-   bottom: 0;
-   background-color: rgba(0, 0, 0, 0.7);
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   z-index: 1000;
-   padding: 1.5rem;
-   animation: fadeIn 0.3s;
- }
-
- @keyframes fadeIn {
-   from { opacity: 0; }
-   to { opacity: 1; }
- }
-
- .modal-content {
-   background-color: white;
-   border-radius: 12px;
-   max-width: 800px;
-@@ -2444,137 +2131,50 @@ onMounted(() => {
-
- .property-item-details {
-   display: flex;
-   justify-content: space-between;
+ .quarter-stat-label {
    font-size: 0.9rem;
    color: #666;
+   font-weight: 500;
  }
 
+ .broker-detail-bio, .broker-detail-testimonial, .broker-detail-competition-history {
+   margin-bottom: 2rem;
+ }
+
+-.broker-detail-bio h4, .broker-detail-testimonial h4, .broker-detail-competition-history h4 {
++.broker-detail-bio h4, .broker-detail-testimonial h4, .broker-detail-competition-history h4, .sold-projects h4 {
+   font-size: 1.3rem;
+   color: #1a2980;
+   margin-bottom: 1rem;
+   font-weight: 700;
+ }
+
+ .broker-detail-bio p {
+   line-height: 1.6;
+   color: #555;
+   font-size: 1rem;
+ }
+
+ .broker-detail-testimonial blockquote {
+   border-left: 4px solid #26d0ce;
+   padding-left: 1.5rem;
+   font-style: italic;
+   color: #555;
+   line-height: 1.6;
+   margin: 0;
+   font-size: 1.05rem;
+ }
+
+ .competition-history {
+   display: flex;
+   flex-direction: column;
+@@ -3368,50 +3468,83 @@ onMounted(() => {
+
+ .history-rank.silver {
+   background-color: rgba(192, 192, 192, 0.2);
+   color: #505050;
+   border: 1px solid #C0C0C0;
+ }
+
+ .history-rank.bronze {
+   background-color: rgba(205, 127, 50, 0.2);
+   color: #5D2906;
+   border: 1px solid #CD7F32;
+ }
+
+ .history-rank:not(.gold):not(.silver):not(.bronze) {
+   background-color: rgba(38, 208, 206, 0.2);
+   color: #1a7775;
+   border: 1px solid #26d0ce;
+ }
+
+ .history-score {
+   font-weight: 600;
+   color: #666;
+   font-size: 0.95rem;
+ }
+
++.sold-projects {
++  margin-bottom: 2rem;
++}
++
++.sold-projects-grid {
++  display: grid;
++  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
++  gap: 1rem;
++}
++
++.project-card {
++  background: #f8f9fa;
++  border-radius: 10px;
++  padding: 1rem;
++  border-left: 4px solid #1a2980;
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
++}
++
++.project-title {
++  font-weight: 700;
++  color: #1a2980;
++  margin-bottom: 0.5rem;
++}
++
++.project-meta {
++  color: #555;
++  display: flex;
++  align-items: center;
++  gap: 0.5rem;
++  font-size: 0.95rem;
++  margin-bottom: 0.25rem;
++}
++
  .broker-detail-actions {
    display: flex;
    gap: 1rem;
@@ -1045,165 +2039,83 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
    flex: 1;
    background-color: #28a745;
    color: white;
+   font-weight: 600;
+   padding: 1rem;
+   border-radius: 8px;
+   border: none;
+   cursor: pointer;
+   transition: all 0.3s;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   gap: 0.75rem;
  }
 
  .btn-contact:hover {
    background-color: #218838;
    transform: translateY(-2px);
- }
-
--/* Collaboration Form */
--.collaboration-form {
--  max-width: 700px;
--}
--
--.form-title {
--  font-size: 1.8rem;
--  font-weight: 700;
--  color: #1a2980;
--  text-align: center;
--  margin-bottom: 0.5rem;
--}
--
--.form-subtitle {
--  text-align: center;
--  color: #666;
--  margin-bottom: 2rem;
--}
--
--.form-row {
--  display: flex;
--  flex-wrap: wrap;
--  gap: 1.5rem;
--  margin-bottom: 1.5rem;
--}
--
--.form-group {
--  flex: 1;
--  min-width: 250px;
--}
--
--.form-group label {
--  display: block;
--  margin-bottom: 0.5rem;
--  font-weight: 600;
--  color: #444;
--}
--
--.form-group input, .form-group select, .form-group textarea {
--  width: 100%;
--  padding: 0.85rem 1rem;
--  border: 1px solid #ddd;
--  border-radius: 8px;
--  font-size: 1rem;
--  transition: all 0.3s;
--}
--
--.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
--  outline: none;
--  border-color: #26d0ce;
--  box-shadow: 0 0 0 3px rgba(38, 208, 206, 0.2);
--}
--
--.checkbox-group {
--  display: flex;
--  align-items: flex-start;
--  gap: 0.75rem;
--}
--
--.checkbox-group input {
--  width: auto;
--  margin-top: 0.25rem;
--}
--
--.checkbox-group label {
--  font-weight: normal;
--  font-size: 0.95rem;
--  line-height: 1.5;
--}
--
--.form-submit {
--  margin-top: 2rem;
--  text-align: center;
--}
--
--.form-note {
--  margin-top: 1rem;
--  font-size: 0.9rem;
--  color: #666;
--  text-align: center;
--}
--
--.btn-submit:disabled {
--  opacity: 0.7;
--  cursor: not-allowed;
--}
--
- /* Footer */
- .page-footer {
-   background-color: #1a2980;
-   color: white;
-   padding: 3rem 1.5rem 1.5rem;
-   margin-top: 4rem;
- }
-
- .footer-content {
-   max-width: 1200px;
-   margin: 0 auto;
+@@ -3563,80 +3696,84 @@ onMounted(() => {
    display: flex;
-   flex-wrap: wrap;
-   justify-content: space-between;
-   gap: 3rem;
-   margin-bottom: 2rem;
+   align-items: center;
+   gap: 0.75rem;
+   margin-bottom: 1rem;
+   color: rgba(255, 255, 255, 0.9);
+   font-size: 0.95rem;
  }
 
- .footer-section {
-   flex: 1;
-   min-width: 250px;
- }
-
- .footer-section h4 {
-   font-size: 1.2rem;
-@@ -2616,51 +2216,51 @@ onMounted(() => {
+ .footer-bottom {
+   text-align: center;
+   padding-top: 1.5rem;
    border-top: 1px solid rgba(255, 255, 255, 0.1);
    color: rgba(255, 255, 255, 0.7);
    font-size: 0.9rem;
- }
-
- /* No Results */
- .no-results {
-   text-align: center;
-   padding: 4rem 1.5rem;
-   color: #666;
- }
-
- .no-results i {
-   font-size: 3rem;
-   margin-bottom: 1.5rem;
-   color: #ddd;
- }
-
- .no-results p {
-   font-size: 1.2rem;
+   max-width: 1400px;
+   margin: 0 auto;
  }
 
  /* Responsive Styles */
- @media (max-width: 992px) {
+ @media (max-width: 1200px) {
+   .page-content {
+     padding: 0 1rem;
+   }
+
    .brokers-grid {
--    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-+    grid-template-columns: repeat(2, minmax(0, 1fr));
+-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
++    grid-template-columns: repeat(3, 1fr);
    }
 
-   .broker-detail-stats {
-     grid-template-columns: repeat(2, 1fr);
+   .rewards-grid {
+     grid-template-columns: 1fr;
+   }
+ }
+
+ @media (max-width: 992px) {
+   .page-title {
+     font-size: 2.2rem;
    }
 
-   .section-header {
+   .stats-overview {
+     gap: 2rem;
+   }
+
+   .stat-value {
+     font-size: 2.2rem;
+   }
+
+   .leaderboard-header, .leaderboard-row {
+     grid-template-columns: 60px 1.5fr 2fr 1fr 0.8fr;
+   }
+
+   .quarter-stats {
      flex-direction: column;
-     align-items: flex-start;
+     gap: 0.75rem;
    }
 
-   .brokers-table, .properties-table {
++  .brokers-grid {
++    grid-template-columns: repeat(2, 1fr);
++  }
++
+   .brokers-table, .leaderboard-body {
      overflow-x: auto;
    }
 
@@ -1213,20 +2125,35 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
  }
 
  @media (max-width: 768px) {
-   .page-title {
-     font-size: 2.2rem;
+   .page-header {
+     padding: 2rem 1rem;
    }
 
-@@ -2688,74 +2288,61 @@ onMounted(() => {
+   .page-title {
+     font-size: 1.8rem;
+   }
 
+   .page-subtitle {
+     font-size: 1rem;
+   }
+
+   .stats-overview {
+     gap: 1.5rem;
+   }
+@@ -3672,99 +3809,135 @@ onMounted(() => {
    .broker-header {
      flex-direction: column;
      text-align: center;
+     padding: 1.5rem 1rem;
    }
 
    .broker-avatar {
      margin-right: 0;
      margin-bottom: 1rem;
+   }
+
+   .broker-actions, .broker-detail-actions, .cta-buttons {
+     flex-direction: column;
    }
 
    .broker-detail-header {
@@ -1239,19 +2166,76 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
      margin-bottom: 1.5rem;
    }
 
-   .broker-detail-actions, .broker-actions {
-     flex-direction: column;
+-  .broker-detail-stats {
++  .brokers-grid {
+     grid-template-columns: repeat(2, 1fr);
    }
 
--  .cta-buttons {
--    flex-direction: column;
--  }
--
--  .form-row {
--    flex-direction: column;
--    gap: 1rem;
--  }
--
+-  .leaderboard-header, .leaderboard-row {
+-    grid-template-columns: 50px 1fr 1fr 1fr;
++  .broker-detail-stats {
++    grid-template-columns: repeat(2, 1fr);
+   }
+
+-  .leaderboard-col.stats {
++  .leaderboard-header {
+     display: none;
+   }
+
++  .leaderboard-body {
++    overflow: visible;
++  }
++
++  .leaderboard-row {
++    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
++    gap: 1rem;
++    background: #f8f9fa;
++    margin: 1rem;
++    border-radius: 12px;
++    padding: 1rem;
++  }
++
++  .leaderboard-col {
++    background: white;
++    border-radius: 10px;
++    padding: 0.75rem;
++    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
++  }
++
++  .leaderboard-col::before {
++    content: attr(data-label);
++    display: block;
++    font-weight: 700;
++    color: #1a2980;
++    margin-bottom: 0.35rem;
++    font-size: 0.95rem;
++  }
++
++  .leaderboard-col.rank, .leaderboard-col.trend {
++    display: flex;
++    align-items: center;
++    justify-content: center;
++  }
++
++  .score-progress {
++    flex-direction: column;
++    align-items: flex-start;
++  }
++
++  .progress-bar {
++    width: 100%;
++  }
++
+   .form-row {
+     flex-direction: column;
+     gap: 1rem;
+   }
+
+   .footer-content {
+     flex-direction: column;
+     gap: 2rem;
+   }
+
    .pagination {
      flex-direction: column;
      gap: 1rem;
@@ -1275,20 +2259,32 @@ index eb1887af5c010d594e1150d7a655c3bf9874eb40..f3cf424be7565c149b2afdcbac8da6db
      grid-template-columns: 1fr;
    }
 
-   .broker-detail-stats {
-     grid-template-columns: 1fr;
+   .cta-title {
+     font-size: 1.6rem;
    }
 
--  .cta-title {
--    font-size: 1.8rem;
--  }
--
    .modal-body {
      padding: 1.5rem;
    }
 
+   .broker-detail-stats {
+     grid-template-columns: 1fr;
+   }
+
+   .quarter-stats-grid {
+     grid-template-columns: 1fr;
+   }
+
+-  .leaderboard-header, .leaderboard-row {
+-    grid-template-columns: 40px 1fr 1fr;
+-  }
+-
+-  .leaderboard-col.score {
+-    display: none;
+-  }
+-
    .table-header, .table-row {
-     min-width: 1200px;
+     min-width: 800px;
    }
  }
 -</style>
