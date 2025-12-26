@@ -20,6 +20,9 @@ export const SOCKET_CONFIG = {
   teamChatTopic: (teamId) => `/topic/my-team/${teamId}/chat`,
   checkoutTopic: (employeeId) => `/topic/checkout/${employeeId}`,
   teamEventTopic: (teamId) => `/topic/my-team/${teamId}/events`,
+  invitationTopic: (employeeId) => `/topic/invitations/${employeeId}`,
+
+
 
 
   // --- Hàng đợi riêng user (convertAndSendToUser) ---

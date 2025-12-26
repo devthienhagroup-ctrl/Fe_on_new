@@ -154,7 +154,7 @@ onMounted(() => {
   border-right: 5px dashed v-bind('sectionData.styles.borderColor');
   border-bottom: 5px dashed v-bind('sectionData.styles.borderColor');
   width: 80%;
-  height: 106.5%;
+  height: 111.5%;
   right: 68px;
   top: 0;
 }
@@ -205,7 +205,7 @@ onMounted(() => {
 /* Responsive Design */
 @media (max-width: 1400px) {
   .st-title {
-    width: 100%;
+    width: 100% !important;
   }
 }
 

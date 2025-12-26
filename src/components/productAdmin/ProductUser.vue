@@ -237,7 +237,7 @@
                 <th class="text-left">TT</th>
                 <th class="text-left">Loại MH</th>
                 <th class="text-left">Đơn Vị</th>
-                <th class="text-left">&nbsp; Thao Tác</th>
+                <th class="text-left ps-3">&nbsp; Thao Tác</th>
               </tr>
               </thead>
               <tbody>
@@ -282,7 +282,7 @@
                 <td class="text-slate-900 text-gray-800">{{ item.viTri }}</td>
                 <td class="font-medium text-slate-800">{{ item.dtcn + 'm²' }}</td>
                 <td class="text-slate-900 text-gray-800">
-                    {{ catChuoi(item.ketCau || '-', 10) }}
+                    {{ catChuoi(item.ketCau || '-', 25) }}
                 </td>
                 <td class="text-slate-900 text-gray-800">{{  formatDate(item.capNhatNgay) }}</td>
                 <td class="font-bold text-blue-700">
@@ -337,6 +337,16 @@
                       ></i>
                     </button>
 
+                    <!-- HỢP TÁC -->
+                    <button
+                        @click="openCollabModal(item)"
+                        class="action-collab"
+                    >
+                      <i class="fa-solid fa-handshake text-[10px]"></i>
+                      <span>Hợp tác</span>
+                    </button>
+
+                    <!-- XEM -->
                     <button
                         @click="$router.push(buildSeoUrl(item))"
                         class="action-view"
@@ -366,6 +376,17 @@
                         <span>Yêu thích</span>
                       </button>
 
+                      <!-- HỢP TÁC -->
+                      <button
+                          v-if="canRequestCollaboration(item)"
+                          @click="openCollabModal(item)"
+                          class="dot-item"
+                      >
+                        <i class="fa-solid fa-handshake"></i>
+                        <span>Hợp tác</span>
+                      </button>
+
+                      <!-- XEM -->
                       <button
                           @click="$router.push(buildSeoUrl(item))"
                           class="dot-item"
@@ -376,6 +397,7 @@
                     </div>
                   </div>
                 </td>
+
               </tr>
               </tbody>
             </table>
@@ -651,32 +673,39 @@
             </div>
             </div>
             <div class="flex items-center gap-2 px-3 pb-3">
-              <!-- Nút Xem chi tiết (primary) -->
-              <!-- Nút Xem chi tiết (giữ nguyên màu, chỉ bỏ border) -->
+              <!-- Xem chi tiết -->
               <button
                   @click="$router.push(buildSeoUrl(item))"
                   class="flex-1 py-2.5 bg-gradient-to-r from-slate-900 to-black text-white rounded-full
-         text-[14px] font-semibold flex items-center justify-center gap-2
-         hover:opacity-90 transition-all"
+           text-[14px] font-semibold flex items-center justify-center gap-2
+           hover:opacity-90 transition-all"
               >
                 <i class="fa-regular fa-eye text-sm"></i>
                 Xem chi tiết
               </button>
 
-              <!-- Nút Yêu thích (không border + nền xám nhạt) -->
+              <!-- Hợp tác -->
+              <button
+                  @click="openCollabModal(item)"
+                  class="px-4 py-2.5 rounded-full
+           bg-gradient-to-r from-blue-600 to-indigo-600
+           text-white font-semibold text-[14px]
+           hover:opacity-90 transition-all shadow-sm"
+              >
+                <i class="fa-solid fa-handshake text-sm"></i>
+                Hợp tác
+              </button>
+
+              <!-- Yêu thích -->
               <button
                   @click="toggleLove(item)"
                   class="w-10 h-10 rounded-full bg-slate-100 text-slate-800 shadow-sm
-         hover:bg-slate-200 flex items-center justify-center transition"
+           hover:bg-slate-200 flex items-center justify-center transition"
               >
-                <i
-                    :class="item.daThich
-      ? 'fa-solid fa-heart text-black text-base'
-      : 'fa-regular fa-heart text-base'"
-                ></i>
+                <i :class="item.daThich ? 'fa-solid fa-heart text-black' : 'fa-regular fa-heart'"></i>
               </button>
-
             </div>
+
           </div>
 
         </div>
@@ -738,9 +767,84 @@
       </template>
     </div>
   </div>
+  <!-- MODAL HỢP TÁC -->
+  <div v-if="showCollabModal" class="collab-overlay">
+    <div class="collab-modal">
+      <!-- Header -->
+      <div class="collab-header">
+        <div class="collab-icon">🤝</div>
+        <div class="collab-title-wrap">
+          <h3 class="collab-title">Gửi lời đề nghị hợp tác</h3>
+          <p class="collab-subtitle">
+            Sản phẩm:
+            <span>
+            {{ formatWardCard(selectedAsset?.diaChi) }},
+            {{ formatProvinceCard(selectedAsset?.khuVuc) }}
+          </span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="collab-body">
+        <p class="text-primary fs-6 fw-bold">Chúng tôi sẽ công khai cho bạn tất cả thông tin và cam kết trã phí môi giới đầy đủ như đã công bố!</p>
+        <label class="collab-label">Lý do bạn muốn hợp tác</label>
+
+        <textarea
+            v-model="collabReason"
+            rows="3"
+            placeholder="Ví dụ: Tôi có khách đang tìm mua khu vực này, đã từng chốt nhiều giao dịch tương tự..."
+            class="collab-textarea"
+        ></textarea>
+
+        <!-- Gợi ý -->
+        <div class="collab-hints">
+          <button
+              v-for="hint in collabHints"
+              :key="hint"
+              @click="collabReason = hint"
+              class="collab-hint-btn"
+          >
+            {{ hint }}
+          </button>
+        </div>
+
+        <!-- Cam kết -->
+        <label class="collab-policy">
+          <input type="checkbox" v-model="agreePolicy" />
+          Tôi cam kết tuân thủ giá và quy định của sản phẩm
+        </label>
+      </div>
+
+      <!-- Footer -->
+      <div class="collab-footer">
+        <button class="btn-cancel" @click="closeCollabModal">
+          Hủy
+        </button>
+        <button
+            class="btn-submit"
+            :disabled="!collabReason || !agreePolicy"
+            @click="submitCollaboration"
+        >
+          Gửi đề nghị
+        </button>
+      </div>
+    </div>
+  </div>
+
+
 </template>
 
 <script setup>
+const agreePolicy = ref(false);
+
+const collabHints = [
+  "Tôi có khách đang tìm mua khu vực này",
+  "Am hiểu giá thị trường và khu vực",
+  "Đã từng bán nhiều sản phẩm tương tự",
+  "Có nguồn khách sẵn, có thể chốt nhanh"
+];
+
 import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import { useSidebarStore } from "/src/stores/sidebarStore.js";
@@ -1213,8 +1317,9 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 async function toggleLove(item) {
   // ❌ Chưa đăng nhập → đá ra trang đăng nhập
-  localStorage.setItem("redirectAfterLogin", "/san-pham-thien-ha");
+
   if (!auth.accessToken) {
+    localStorage.setItem("redirectAfterLogin", "/san-pham-thien-ha");
     router.push({
       path: "/dang-nhap"
     });
@@ -1246,6 +1351,51 @@ async function toggleLove(item) {
   }
 }
 
+async function submitCollaboration() {
+  // ❌ chưa đăng nhập
+  if (!auth.accessToken) {
+    localStorage.setItem("redirectAfterLogin", "/san-pham-thien-ha");
+    router.push({
+      path: "/dang-nhap"
+    });
+    return;
+  }
+
+  if (!selectedAsset.value?.id) {
+    showCenterError("Không xác định được sản phẩm");
+    return;
+  }
+
+  try {
+    const payload = {
+      sanPhamId: selectedAsset.value.id,
+      noiDungHopTac: collabReason.value
+    };
+
+    const res = await api.post(
+        "/admin/api/de-nghi-hop-tac/gui-loi-moi",
+        payload
+    );
+
+    // ✅ API luôn trả 200 → check success
+    if (!res.data.success) {
+      showCenterWarning(res.data.message || "Không thể gửi đề nghị hợp tác");
+      return;
+    }
+
+    // ✅ Thành công
+    showCenterSuccess(res.data.message || "Gửi đề nghị hợp tác thành công");
+
+    // 👉 cập nhật UI để không gửi lại
+    selectedAsset.value.daGuiYeuCau = true;
+
+    closeCollabModal();
+
+  } catch (e) {
+    console.error(e);
+    showCenterError("Có lỗi xảy ra khi gửi đề nghị hợp tác");
+  }
+}
 
 
 onMounted(() => {
@@ -1258,6 +1408,30 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateViewportMode);
 });
  // 'table' hoặc 'card'
+const showCollabModal = ref(false);
+const selectedAsset = ref(null);
+const collabReason = ref("");
+
+
+const canRequestCollaboration = (item) => {
+  if (!auth.accessToken) return false;
+  if (item.status === 'Đã bán') return false;
+  if (item.isOwner) return false;        // backend trả về
+  if (item.daGuiYeuCau) return false;    // backend trả về
+  return true;
+};
+
+const openCollabModal = (item) => {
+  selectedAsset.value = item;
+  collabReason.value = "";
+  showCollabModal.value = true;
+};
+
+const closeCollabModal = () => {
+  showCollabModal.value = false;
+};
+
+
 </script>
 
 <style scoped>
@@ -1468,9 +1642,10 @@ th{
 }
 .action-heart {
   background: rgba(133,132,132,0.13);
-  padding: 0 10px;
+  padding: 0 15px;
   margin-right: 5px;
   border-radius: 8px;
+  border: solid 1px #b9b9b9;
 }
 
 .action-view {
@@ -1547,7 +1722,217 @@ th{
     display: none;
   }
 }
+/* ===== OVERLAY ===== */
 
+
+/* ===== OVERLAY ===== */
+.collab-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+}
+
+/* ===== OVERLAY ===== */
+.collab-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55); /* giảm mờ */
+  backdrop-filter: blur(4px);
+  padding: 16px; /* chống sát lề mobile */
+}
+
+/* ===== MODAL ===== */
+.collab-modal {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.28);
+}
+
+/* ===== HEADER ===== */
+.collab-header {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.collab-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e5edff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.collab-title {
+  font-size: 1.05rem;        /* >= 1rem */
+  font-weight: 700;          /* giảm đậm */
+  color: #111827;
+}
+
+.collab-subtitle {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+/* ===== BODY ===== */
+.collab-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.collab-label {
+  font-size: 1rem;           /* >= 1rem */
+  font-weight: 600;
+  color: #111827;
+}
+
+.collab-textarea {
+  width: 100%;
+  min-height: 96px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.2px solid #d1d5db;
+  font-size: 1rem;           /* >= 1rem */
+  font-weight: 400;
+  color: #111827;
+  resize: none;
+}
+
+.collab-textarea::placeholder {
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.collab-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* ===== HINT BUTTONS ===== */
+.collab-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.collab-hint-btn {
+  padding: 5px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #111827;
+  border: none;
+  cursor: pointer;
+}
+
+.collab-hint-btn:hover {
+  background: #d1d5db;
+}
+
+/* ===== POLICY ===== */
+.collab-policy {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+/* ===== FOOTER ===== */
+.collab-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.btn-cancel {
+  padding: 7px 14px;
+  border-radius: 8px;
+  background: #e5e7eb;
+  color: #111827;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-submit {
+  padding: 7px 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2563eb, #4338ca);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 480px) {
+  .collab-modal {
+    max-width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .collab-title {
+    font-size: 1rem;
+  }
+
+  .collab-textarea {
+    min-height: 88px;
+  }
+
+  .collab-footer {
+    gap: 8px;
+  }
+}
+/* Nút hợp tác (table) */
+.action-collab {
+  padding: 2px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 8px;
+  background: #f8d7ac;      /* nền cam nhạt */
+  color: #f57430;           /* chữ cam đậm */
+  border: 1px solid #f8b66c;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+  margin-right: 10px;
+}
+
+.action-collab:hover {
+  background: #fed7aa;
+  border-color: #fdba74;
+}
 
 
 </style>

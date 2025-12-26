@@ -116,6 +116,8 @@ import InvmModal from "../components/cms/components/investment/InvestmentModal.v
 import NewsManagement from "../components/cms/news/NewsManagement.vue";
 import NewsDetail from "../components/user/News/NewsDetail.vue";
 import moigioi from "../components/user/MoiGioi/moigioi.vue"
+import Test from "../components/productAdmin/test.vue";
+import Test1 from "../components/productAdmin/test1.vue";
 
 const routes = [
         {
@@ -126,7 +128,14 @@ const routes = [
         {
             path: "/moi-gioi",
             name: "MoiGioiShow",
-            component: moigioi,
+            component: MenuUser,
+            children: [
+                {
+                    path: '',
+                    name: 'MoiGioiShow1',
+                    component: moigioi
+                }
+            ]
         },
         {
             path: "/tin-tuc",
@@ -536,7 +545,24 @@ const routes = [
     },
 
 
-
+    {
+        path: "/01",
+        component: Test,
+        meta: {
+            requiresAuth: false,
+            hideFooterMap: true,
+            enableTailwind: true
+        }
+    },
+    {
+        path: "/02",
+        component: Test1,
+        meta: {
+            requiresAuth: false,
+            hideFooterMap: true,
+            enableTailwind: true
+        }
+    },
     {
         path: "/san-pham-thien-ha",
         component: MenuUser,

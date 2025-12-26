@@ -237,240 +237,233 @@ const centerImageStyle = computed(() => ({
   text-align: justify;
 }
 
-/* Responsive Design - Các giá trị động sẽ được ghi đè ở breakpoint */
 @media (max-width: 1400px) {
   .main-content-wrapper {
-    margin-top: 50px;
+    margin-top: 50px !important;
   }
 
   .st-title {
-    width: 100%;
+    width: 100% !important;
   }
 
   .text-content-wrapper {
-    width: 90%;
-    right: -20%;
+    width: 90% !important;
+    right: -20% !important;
   }
 
   .center-img {
-    width: 280px;
-    right: -120px;
+    width: 280px !important;
+    right: -120px !important;
   }
 
   .center-img::before {
-    width: 320px;
-    height: 320px;
+    width: 320px !important;
+    height: 320px !important;
   }
 
   .section10::before {
-    height: 24%;
-    width: 39%;
+    height: 24% !important;
+    width: 39% !important;
   }
+
   .st-title::before {
-    display: none;
+    display: none !important;
   }
 }
 
 @media (max-width: 1200px) {
   .section {
-    padding: 40px 30px;
+    padding: 40px 30px !important;
   }
 
   .text-content-wrapper {
-    width: 95%;
-    right: -15%;
-    padding: 18px;
+    width: 95% !important;
+    right: -15% !important;
+    padding: 18px !important;
   }
 
   .center-img {
-    width: 250px;
-    right: -100px;
-    top: -50px;
+    width: 250px !important;
+    right: -100px !important;
+    top: -50px !important;
   }
 
   .center-img::before {
-    width: 290px;
-    height: 290px;
+    width: 290px !important;
+    height: 290px !important;
   }
 }
 
 @media (max-width: 992px) {
   .main-content-wrapper {
-    flex-direction: column;
-    gap: 30px;
-    margin-top: 30px;
+    flex-direction: column !important;
+    gap: 30px !important;
+    margin-top: 30px !important;
   }
 
   .left-content-section,
   .right-content-section {
-    flex: none;
-    width: 100%;
+    flex: none !important;
+    width: 100% !important;
   }
 
   .st-title {
-    width: 100%;
+    width: 100% !important;
   }
 
   .st-title::before {
-    display: none;
+    display: none !important;
   }
 
   .section10::before {
-    display: none;
+    display: none !important;
   }
 
   .text-content-wrapper {
-    position: relative;
-    width: 100%;
-    right: 0;
-    bottom: 0;
-    margin-top: 20px;
-    padding: 25px;
+    position: relative !important;
+    width: 100% !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    margin-top: 20px !important;
+    padding: 25px !important;
   }
 
   .center-img {
-    position: relative;
-    width: 300px;
-    top: 0;
-    right: 0;
-    margin: 30px auto;
+    position: relative !important;
+    width: 300px !important;
+    top: 0 !important;
+    right: 0 !important;
+    margin: 30px auto !important;
   }
 
   .center-img::before {
-    width: 340px;
-    height: 340px;
+    width: 340px !important;
+    height: 340px !important;
   }
 
   .left-img img {
-    margin-left: 0;
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
-    display: block;
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 500px !important;
+    margin: 0 auto !important;
+    display: block !important;
   }
 
   .right-img {
-    margin-top: 20px;
+    margin-top: 20px !important;
   }
 
   .section10 .title-component {
-    transform: translateY(0);
+    transform: translateY(0) !important;
   }
 }
 
 @media (max-width: 768px) {
   .section {
-    padding: 30px 20px;
-    margin-top: 30px;
-    margin-bottom: 30px;
+    padding: 30px 20px !important;
+    margin-top: 30px !important;
+    margin-bottom: 30px !important;
   }
 
   .text-content-wrapper {
-    padding: 20px;
-    margin-top: 15px;
+    padding: 20px !important;
+    margin-top: 15px !important;
   }
 
   .center-img {
-    width: 250px;
-    margin: 20px auto;
+    width: 250px !important;
+    margin: 20px auto !important;
   }
 
   .center-img::before {
-    width: 280px;
-    height: 280px;
+    width: 280px !important;
+    height: 280px !important;
   }
 
   .section10 .text-content p {
-    font-size: 16px;
-    line-height: 1.5;
+    font-size: 16px !important;
+    line-height: 1.5 !important;
   }
 
   .left-img img,
   .right-img img {
-    border-radius: 15px;
+    border-radius: 15px !important;
   }
 }
 
 @media (max-width: 576px) {
   .section {
-    padding: 20px 15px;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    padding: 20px 15px !important;
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
   }
 
   .text-content-wrapper {
-    padding: 15px;
-    border-radius: 15px;
-    margin-top: 15px;
+    padding: 15px !important;
+    border-radius: 15px !important;
+    margin-top: 15px !important;
   }
 
   .center-img {
-    width: 200px;
-    margin: 15px auto;
+    width: 200px !important;
+    margin: 15px auto !important;
   }
 
   .center-img::before {
-    width: 230px;
-    height: 230px;
+    width: 230px !important;
+    height: 230px !important;
   }
 
   .section10 .text-content p {
-    font-size: 15px;
-    line-height: 1.4;
-    text-align: left;
+    font-size: 15px !important;
+    line-height: 1.4 !important;
+    text-align: left !important;
   }
 
   .main-content-wrapper {
-    gap: 20px;
+    gap: 20px !important;
   }
 
   .right-img {
-    margin-top: 10px;
+    margin-top: 10px !important;
   }
 }
 
 @media (max-width: 400px) {
   .section {
-    padding: 15px 10px;
+    padding: 15px 10px !important;
   }
 
   .text-content-wrapper {
-    padding: 12px;
+    padding: 12px !important;
   }
 
   .center-img {
-    width: 180px;
+    width: 180px !important;
   }
 
   .center-img::before {
-    width: 210px;
-    height: 210px;
+    width: 210px !important;
+    height: 210px !important;
   }
 
   .section10 .text-content p {
-    font-size: 14px;
+    font-size: 14px !important;
   }
 }
 
-/* Đảm bảo hình ảnh không vượt quá container */
-img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Fix cho các thiết bị rất nhỏ */
 @media (max-width: 360px) {
   .center-img {
-    width: 160px;
+    width: 160px !important;
   }
 
   .center-img::before {
-    width: 190px;
-    height: 190px;
+    width: 190px !important;
+    height: 190px !important;
   }
 
   .text-content-wrapper {
-    padding: 10px;
+    padding: 10px !important;
   }
 }
 </style>

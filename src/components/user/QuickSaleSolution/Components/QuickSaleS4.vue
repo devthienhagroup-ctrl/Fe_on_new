@@ -234,7 +234,7 @@ if (props.sectionData) {
 /* Responsive Design */
 @media (max-width: 1400px) {
   .st-title {
-    width: v-bind('sectionData.styles.titleWrapper.mobileWidth');
+    width: 100% !important;
   }
 }
 

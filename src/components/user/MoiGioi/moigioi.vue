@@ -1085,6 +1085,7 @@ onBeforeUnmount(() => {
   color: #333;
   background-color: #f8f9fa;
   padding: 0;
+  margin-top: 65px;
 }
 
 /* Header Styles */
