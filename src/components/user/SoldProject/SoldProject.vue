@@ -462,9 +462,9 @@ const isFilterMobile = ref(false);
 const showFilterPanel = ref(true);
 
 const page = ref(0);
-const pageSize = ref(8);
+const pageSize = ref(4);
 
-const totalPages = computed(() => Math.max(Math.ceil(totalRecords.value / pageSize.value) || 1, 1));
+const totalPages = ref(0);
 const displayedRangeStart = computed(() => (totalRecords.value === 0 ? 0 : page.value * pageSize.value + 1));
 const displayedRangeEnd = computed(() => Math.min((page.value + 1) * pageSize.value, totalRecords.value));
 
@@ -646,7 +646,8 @@ async function fetchFilteredAssets() {
         }))
         : [];
 
-    totalRecords.value = res.data.totalElements || 0;
+    totalRecords.value = res.data.page.totalElements || 0;
+    totalPages.value = res.data.page.totalPages || 0;
 
     const maxPage = Math.max(
         Math.ceil(totalRecords.value / pageSize.value) - 1,

@@ -4,7 +4,7 @@
       <!-- Bộ lọc nâng cao -->
       <div class="bg-white rounded-xl shadow-lg border border-slate-300 mb-5 p-4"
            style="
-            background-image: url('https://s3.cloudfly.vn/thg-storage-dev/uploads-public/thienhagroup_filter_2.png');
+            background-image: url('https://s3.cloudfly.vn/thg-storage/uploads-public/thienhagroup_filter_2.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -338,7 +338,7 @@
                     </button>
 
                     <button
-                        @click="$router.push(`/san-pham-thien-ha/${item.id}`)"
+                        @click="$router.push(buildSeoUrl(item))"
                         class="action-view"
                     >
                       <i class="fa-regular fa-eye text-[10px]"></i>
@@ -367,7 +367,7 @@
                       </button>
 
                       <button
-                          @click="$router.push(`/san-pham-thien-ha/${item.id}`)"
+                          @click="$router.push(buildSeoUrl(item))"
                           class="dot-item"
                       >
                         <i class="fa-regular fa-eye"></i>
@@ -479,11 +479,25 @@
           <!-- BN30N - Bán nhanh 30 ngày -->
           <div v-if="shouldShowCategory('BN30N') && bn30nItems.length > 0" class="mb-8">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                <div class="w-3 h-8 bg-green-500 rounded-full"></div>
-                Bán Nhanh 30 Ngày
-                <span class="text-sm font-normal text-slate-500">({{ bn30nTotal }} sản phẩm)</span>
+              <h2
+                  class="text-xl font-bold text-slate-800 flex items-center gap-2 px-3 py-2 rounded-lg"
+                  style="
+  background: linear-gradient(
+    90deg,
+    rgba(34,197,94,0.45) 0%,
+    rgba(34,197,94,0.32) 50%,
+    rgba(34,197,94,0.16) 80%,
+    rgba(34,197,94,0) 100%
+  );
+  border-left: 10px solid #22c55e;
+"
+>
+                  Bán Nhanh 30 Ngày
+                <span class="text-sm font-normal text-slate-700">
+    ({{ bn30nTotal }} sản phẩm)
+  </span>
               </h2>
+
               <div class="flex items-center gap-2">
                 <button @click="scrollSlider('bn30n', -1)"
                         class="w-10 h-10 rounded-full bg-white border border-slate-300 flex items-center justify-center hover:bg-slate-50 transition-all">
@@ -507,7 +521,7 @@
                   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden
                       hover:shadow-lg transition-all duration-200 hover:-translate-y-1 h-full">
                     <!-- Ảnh -->
-                    <div @click="goToDetail(item.id)" style="cursor: pointer;">
+                    <div @click="goToDetail(item)" style="cursor: pointer;">
                       <div class="relative w-full overflow-hidden" style="height: 200px">
                         <div class="relative w-full h-full px-3 pt-3 rounded-3 overflow-hidden aspect-[4/3] w-full">
                           <img
@@ -674,7 +688,7 @@
                     <div class="flex items-center gap-2 px-3 pb-3">
                       <!-- Nút Xem chi tiết -->
                       <button
-                          @click="$router.push(`/san-pham-thien-ha/${item.id}`)"
+                          @click="$router.push(buildSeoUrl(item))"
                           class="flex-1 py-2.5 bg-gradient-to-r from-slate-900 to-black text-white rounded-full
                            text-[14px] font-semibold flex items-center justify-center gap-2
                            hover:opacity-90 transition-all"
@@ -736,11 +750,25 @@
           <!-- HOPTAC - Hàng hợp tác -->
           <div v-if="shouldShowCategory('HOPTAC') && hoptacItems.length > 0" class="mb-8">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                <div class="w-3 h-8 bg-orange-500 rounded-full"></div>
+              <h2
+                  class="text-xl font-bold text-slate-800 flex items-center gap-2 px-3 py-2 rounded-lg"
+                  style="
+    background: linear-gradient(
+      90deg,
+      rgba(249,115,22,0.45) 0%,
+      rgba(249,115,22,0.32) 50%,
+      rgba(249,115,22,0.16) 80%,
+      rgba(249,115,22,0) 100%
+    );
+    border-left: 7px solid #fb923c;
+  "
+              >
                 Hàng Hợp Tác
-                <span class="text-sm font-normal text-slate-500">({{ hoptacTotal }} sản phẩm)</span>
+                <span class="text-sm font-normal text-slate-700">
+    ({{ hoptacTotal }} sản phẩm)
+  </span>
               </h2>
+
               <div class="flex items-center gap-2">
                 <button @click="scrollSlider('hoptac', -1)"
                         class="w-10 h-10 rounded-full bg-white border border-slate-300 flex items-center justify-center hover:bg-slate-50 transition-all">
@@ -765,7 +793,7 @@
                       hover:shadow-lg transition-all duration-200 hover:-translate-y-1 h-full">
                     <!-- Nội dung card tương tự như BN30N -->
                     <!-- ... (giữ nguyên cấu trúc card) -->
-                    <div @click="goToDetail(item.id)" style="cursor: pointer;">
+                    <div @click="goToDetail(item)" style="cursor: pointer;">
                       <div class="relative w-full overflow-hidden" style="height: 200px">
                         <div class="relative w-full h-full px-3 pt-3 rounded-3 overflow-hidden aspect-[4/3] w-full">
                           <img
@@ -905,7 +933,7 @@
 
                     <div class="flex items-center gap-2 px-3 pb-3">
                       <button
-                          @click="$router.push(`/san-pham-thien-ha/${item.id}`)"
+                          @click="$router.push(buildSeoUrl(item))"
                           class="flex-1 py-2.5 bg-gradient-to-r from-slate-900 to-black text-white rounded-full
                            text-[14px] font-semibold flex items-center justify-center gap-2
                            hover:opacity-90 transition-all"
@@ -965,11 +993,25 @@
           <!-- HTT - Hàng thị trường -->
           <div v-if="shouldShowCategory('HTT') && httItems.length > 0" class="mb-8">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                <div class="w-3 h-8 bg-yellow-500 rounded-full"></div>
+              <h2
+                  class="text-xl font-bold text-slate-800 flex items-center gap-2 px-3 py-2 rounded-lg"
+                  style="
+    background: linear-gradient(
+      90deg,
+      rgba(234,179,8,0.45) 0%,
+      rgba(234,179,8,0.32) 50%,
+      rgba(234,179,8,0.16) 80%,
+      rgba(234,179,8,0) 100%
+    );
+    border-left: 7px solid #facc15;
+  "
+              >
                 Hàng Thị Trường
-                <span class="text-sm font-normal text-slate-500">({{ httTotal }} sản phẩm)</span>
+                <span class="text-sm font-normal text-slate-700">
+    ({{ httTotal }} sản phẩm)
+  </span>
               </h2>
+
               <div class="flex items-center gap-2">
                 <button @click="scrollSlider('htt', -1)"
                         class="w-10 h-10 rounded-full bg-white border border-slate-300 flex items-center justify-center hover:bg-slate-50 transition-all">
@@ -994,7 +1036,7 @@
                       hover:shadow-lg transition-all duration-200 hover:-translate-y-1 h-full">
                     <!-- Nội dung card tương tự như BN30N -->
                     <!-- ... (giữ nguyên cấu trúc card) -->
-                    <div @click="goToDetail(item.id)" style="cursor: pointer;">
+                    <div @click="goToDetail(item)" style="cursor: pointer;">
                       <div class="relative w-full overflow-hidden" style="height: 200px">
                         <div class="relative w-full h-full px-3 pt-3 rounded-3 overflow-hidden aspect-[4/3] w-full">
                           <img
@@ -1134,7 +1176,7 @@
 
                     <div class="flex items-center gap-2 px-3 pb-3">
                       <button
-                          @click="$router.push(`/san-pham-thien-ha/${item.id}`)"
+                          @click="$router.push(buildSeoUrl(item))"
                           class="flex-1 py-2.5 bg-gradient-to-r from-slate-900 to-black text-white rounded-full
                            text-[14px] font-semibold flex items-center justify-center gap-2
                            hover:opacity-90 transition-all"
@@ -1194,8 +1236,8 @@ const authStore = useAuthStore();
 const info = authStore.userInfo;
 
 const sidebar = useSidebarStore();
-const goToDetail = (id) => {
-  router.push(`/san-pham-thien-ha/${id}`);
+const goToDetail = (item) => {
+  router.push(buildSeoUrl(item));
 }
 
 // Data
@@ -1211,7 +1253,7 @@ const httItems = ref([]);
 const bn30nPage = ref(0);
 const hoptacPage = ref(0);
 const httPage = ref(0);
-const pageSizeSlider = ref(4); // Số lượng items mỗi lần load - ĐÃ THAY ĐỔI THÀNH 4
+const pageSizeSlider = ref(5); // Số lượng items mỗi lần load - ĐÃ THAY ĐỔI THÀNH 4
 const loading = ref(false);
 const bn30nLoading = ref(false);
 const hoptacLoading = ref(false);
@@ -1891,10 +1933,11 @@ const handleScroll = (category) => {
 
 const auth = useAuthStore();
 import { useRouter } from "vue-router";
+import {buildSeoUrl} from "../../assets/js/global.js";
 const router = useRouter();
 async function toggleLove(item) {
   // ❌ Chưa đăng nhập → đá ra trang đăng nhập
-  localStorage.setItem("redirectAfterLogin", "/san-pham-thien-ha");
+  localStorage.setItem("redirectAfterLogin", buildSeoUrl(item));
   if (!auth.accessToken) {
     router.push({
       path: "/dang-nhap"
@@ -1910,7 +1953,7 @@ async function toggleLove(item) {
 
   try {
     await api.post(
-        "/user.thg/product/user/love/toggle",
+        "/thg.user/my-land/love/toggle",
         null,
         {
           params: {
@@ -2259,13 +2302,13 @@ th{
 /* Responsive cho slider */
 @media (max-width: 768px) {
   .slider-item {
-    width: 320px; /* Nhỏ hơn trên mobile */
+    width: 350px; /* Nhỏ hơn trên mobile */
   }
 }
 
 @media (max-width: 480px) {
   .slider-item {
-    width: 280px; /* Nhỏ hơn trên mobile nhỏ */
+    width: 350px; /* Nhỏ hơn trên mobile nhỏ */
   }
 }
 </style>

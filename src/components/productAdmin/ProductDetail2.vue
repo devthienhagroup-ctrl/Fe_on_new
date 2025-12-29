@@ -12,7 +12,7 @@
           </button>
 
           <div class="property-title-section">
-            <h1 class="property-address">{{ formatAddress( asset.address ) ?? 'Chưa cập nhật' }}</h1>
+            <h1 class="property-address">{{   buildSeoTitle( asset ) ?? 'Chưa cập nhật' }}</h1>
 
             <div class="property-meta">
                 <span class="meta-item">
@@ -46,7 +46,17 @@
                   <span>Ấn phẩm dành cho môi giới</span>
                 </div>
                 <div class="press-time">
-                  <i class="fa-regular fa-clock"></i>
+                  <DotLottieVue
+                      src="https://lottie.host/61153ea4-8b80-495a-a839-ab5f1ce029e6/dJBFFfgOe4.lottie"
+                      autoplay
+                      loop
+                      style="
+                            width: 40px;
+                            height: 40px;
+                            display: inline-block;
+                            vertical-align: bottom;
+                          "
+                  />
                   <span>Tin nhanh | Cập nhật mới nhất</span>
                 </div>
               </div>
@@ -694,6 +704,45 @@ const parsedAddress = computed(() => {
 function formatAddress(address) {
   if (!address) return "";
   return address.replace(/\/!!/g, ", ");
+}
+
+function formatAddressFromItem(item) {
+  if (!item || !item.address) return ''
+  return item.address.replace(/\/!!/g, ', ')
+}
+
+function mapLoaiMH(code) {
+  switch (code) {
+    case 'BN30N':
+      return 'Bán nhanh 30 ngày'
+    case 'HOPTAC':
+      return 'Hợp tác phân phối'
+    case 'HTT':
+      return 'Hàng thị trường'
+    default:
+      return 'Bất động sản'
+  }
+}
+function buildSeoTitle(item) {
+  if (!item) return ''
+
+  const loaiMH = mapLoaiMH(item.phanLoaiHang)
+  const loaiTaiSan = item.loaiTaiSan === 'NHA'
+      ? 'Nhà đất'
+      : 'Bất động sản'
+
+  // Cắt địa chỉ để lấy phường + tỉnh
+  const parts = item.address?.split('/!!') || []
+  const phuong = parts[1] || ''
+  const tinh = parts[2] || item.khuVucMa || ''
+
+  const dienTich = item.totalArea
+      ? `${Math.floor(item.totalArea)}m²`
+      : ''
+
+  return `${loaiMH} ${loaiTaiSan} ${dienTich} tại ${phuong} ${tinh} | Thiên Hà Group`
+      .replace(/\s+/g, ' ')
+      .trim()
 }
 
 

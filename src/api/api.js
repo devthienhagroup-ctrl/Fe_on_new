@@ -17,7 +17,6 @@ const api = axios.create({
 const PUBLIC_API_PREFIX = [
     "/thg/public/",
     "/thg/api/auth/",
-    "/user.thg/product/user/",
     "/uploads/",
     "/uploadpss/",
     "/ws-thg/",
