@@ -463,7 +463,7 @@
               </div>
             </div>
             <div class="flex gap-4">
-              <div v-for="i in 4" :key="i" class="slider-item">
+              <div v-for="i in 3" :key="i" class="flex-none w-[350px]">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 animate-pulse">
                   <div class="bg-slate-300 h-48 rounded-xl mb-4"></div>
                   <div class="space-y-3">
@@ -482,7 +482,7 @@
               <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                 <div class="w-3 h-8 bg-green-500 rounded-full"></div>
                 Bán Nhanh 30 Ngày
-                <span class="text-sm font-normal text-slate-500">({{ bn30nTotal }} sản phẩm)</span>
+                <span class="text-sm font-normal text-slate-500">({{ bn30nItems.length }} sản phẩm)</span>
               </h2>
               <div class="flex items-center gap-2">
                 <button @click="scrollSlider('bn30n', -1)"
@@ -498,11 +498,11 @@
 
             <!-- Slider container -->
             <div class="relative">
-              <div ref="bn30nSlider" class="flex overflow-x-auto scrollbar-hide gap-4 pb-4 slider-container"
+              <div ref="bn30nSlider" class="flex overflow-x-auto scrollbar-hide gap-4 pb-4"
                    @scroll="handleScroll('bn30n')"
                    style="scroll-behavior: smooth;">
                 <div v-for="item in bn30nItems" :key="item.id"
-                     class="slider-item">
+                     class="flex-none" style="width: 400px;">
                   <!-- Card item (giữ nguyên cấu trúc) -->
                   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden
                       hover:shadow-lg transition-all duration-200 hover:-translate-y-1 h-full">
@@ -700,7 +700,7 @@
                 </div>
 
                 <!-- Load more indicator -->
-                <div v-if="bn30nLoading && bn30nItems.length > 0" class="slider-item flex items-center justify-center">
+                <div v-if="bn30nLoading && bn30nItems.length > 0" class="flex-none flex items-center justify-center" style="width: 300px;">
                   <div class="text-center">
                     <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500 mx-auto"></div>
                     <p class="mt-2 text-sm text-slate-600">Đang tải thêm...</p>
@@ -720,7 +720,7 @@
               </div>
             </div>
             <div class="flex gap-4">
-              <div v-for="i in 4" :key="i" class="slider-item">
+              <div v-for="i in 3" :key="i" class="flex-none w-[350px]">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 animate-pulse">
                   <div class="bg-slate-300 h-48 rounded-xl mb-4"></div>
                   <div class="space-y-3">
@@ -739,7 +739,7 @@
               <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                 <div class="w-3 h-8 bg-orange-500 rounded-full"></div>
                 Hàng Hợp Tác
-                <span class="text-sm font-normal text-slate-500">({{ hoptacTotal }} sản phẩm)</span>
+                <span class="text-sm font-normal text-slate-500">({{ hoptacItems.length }} sản phẩm)</span>
               </h2>
               <div class="flex items-center gap-2">
                 <button @click="scrollSlider('hoptac', -1)"
@@ -755,11 +755,11 @@
 
             <!-- Slider container -->
             <div class="relative">
-              <div ref="hoptacSlider" class="flex overflow-x-auto scrollbar-hide gap-4 pb-4 slider-container"
+              <div ref="hoptacSlider" class="flex overflow-x-auto scrollbar-hide gap-4 pb-4"
                    @scroll="handleScroll('hoptac')"
                    style="scroll-behavior: smooth;">
                 <div v-for="item in hoptacItems" :key="item.id"
-                     class="slider-item">
+                     class="flex-none" style="width: 350px;">
                   <!-- Card item (tương tự như trên, chỉ đổi màu badge) -->
                   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden
                       hover:shadow-lg transition-all duration-200 hover:-translate-y-1 h-full">
@@ -929,7 +929,7 @@
                 </div>
 
                 <!-- Load more indicator -->
-                <div v-if="hoptacLoading && hoptacItems.length > 0" class="slider-item flex items-center justify-center">
+                <div v-if="hoptacLoading && hoptacItems.length > 0" class="flex-none flex items-center justify-center" style="width: 300px;">
                   <div class="text-center">
                     <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500 mx-auto"></div>
                     <p class="mt-2 text-sm text-slate-600">Đang tải thêm...</p>
@@ -949,7 +949,7 @@
               </div>
             </div>
             <div class="flex gap-4">
-              <div v-for="i in 4" :key="i" class="slider-item">
+              <div v-for="i in 3" :key="i" class="flex-none w-[350px]">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 animate-pulse">
                   <div class="bg-slate-300 h-48 rounded-xl mb-4"></div>
                   <div class="space-y-3">
@@ -968,7 +968,7 @@
               <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                 <div class="w-3 h-8 bg-yellow-500 rounded-full"></div>
                 Hàng Thị Trường
-                <span class="text-sm font-normal text-slate-500">({{ httTotal }} sản phẩm)</span>
+                <span class="text-sm font-normal text-slate-500">({{ httItems.length }} sản phẩm)</span>
               </h2>
               <div class="flex items-center gap-2">
                 <button @click="scrollSlider('htt', -1)"
@@ -984,11 +984,11 @@
 
             <!-- Slider container -->
             <div class="relative">
-              <div ref="httSlider" class="flex overflow-x-auto scrollbar-hide gap-4 pb-4 slider-container"
+              <div ref="httSlider" class="flex overflow-x-auto scrollbar-hide gap-4 pb-4"
                    @scroll="handleScroll('htt')"
                    style="scroll-behavior: smooth;">
                 <div v-for="item in httItems" :key="item.id"
-                     class="slider-item">
+                     class="flex-none" style="width: 350px;">
                   <!-- Card item (tương tự như trên, chỉ đổi màu badge) -->
                   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden
                       hover:shadow-lg transition-all duration-200 hover:-translate-y-1 h-full">
@@ -1158,7 +1158,7 @@
                 </div>
 
                 <!-- Load more indicator -->
-                <div v-if="httLoading && httItems.length > 0" class="slider-item flex items-center justify-center">
+                <div v-if="httLoading && httItems.length > 0" class="flex-none flex items-center justify-center" style="width: 300px;">
                   <div class="text-center">
                     <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-yellow-500 mx-auto"></div>
                     <p class="mt-2 text-sm text-slate-600">Đang tải thêm...</p>
@@ -1211,7 +1211,7 @@ const httItems = ref([]);
 const bn30nPage = ref(0);
 const hoptacPage = ref(0);
 const httPage = ref(0);
-const pageSizeSlider = ref(4); // Số lượng items mỗi lần load - ĐÃ THAY ĐỔI THÀNH 4
+const pageSizeSlider = ref(5); // Số lượng items mỗi lần load
 const loading = ref(false);
 const bn30nLoading = ref(false);
 const hoptacLoading = ref(false);
@@ -1702,6 +1702,7 @@ async function fetchSliderData() {
   loading.value = true;
 
   try {
+    // Chuẩn bị payload chung
     const basePayload = {
       trangSo: 0,
       soDong: pageSizeSlider.value,
@@ -1716,178 +1717,129 @@ async function fetchSliderData() {
     };
 
     if (!filterLoaiMH.value) {
+      // Nếu không lọc theo loạiMH, load riêng từng loại với pageSizeSlider items mỗi loại
       const [bn30nRes, hoptacRes, httRes] = await Promise.all([
         api.post("/user.thg/product/user/bang-du-lieu", {
           ...basePayload,
-          loaiMH: "BN30N",
+          loaiMH: 'BN30N',
+          soDong: pageSizeSlider.value
         }),
         api.post("/user.thg/product/user/bang-du-lieu", {
           ...basePayload,
-          loaiMH: "HOPTAC",
+          loaiMH: 'HOPTAC',
+          soDong: pageSizeSlider.value
         }),
         api.post("/user.thg/product/user/bang-du-lieu", {
           ...basePayload,
-          loaiMH: "HTT",
-        }),
+          loaiMH: 'HTT',
+          soDong: pageSizeSlider.value
+        })
       ]);
 
       bn30nItems.value = processItems(bn30nRes.data.content || []);
       hoptacItems.value = processItems(hoptacRes.data.content || []);
       httItems.value = processItems(httRes.data.content || []);
 
-      // ✅ LẤY ĐÚNG TỔNG
-      bn30nTotal.value = bn30nRes.data.page?.totalElements || 0;
-      hoptacTotal.value = hoptacRes.data.page?.totalElements || 0;
-      httTotal.value = httRes.data.page?.totalElements || 0;
     } else {
-      const res = await api.post("/user.thg/product/user/bang-du-lieu", {
+      // Nếu có lọc theo loạiMH, chỉ load 1 loại
+      const payload = {
         ...basePayload,
         loaiMH: filterLoaiMH.value,
-      });
+        soDong: pageSizeSlider.value
+      };
 
-      const items = processItems(res.data.content || []);
-      const total = res.data.page?.totalElements || 0;
+      const res = await api.post("/user.thg/product/user/bang-du-lieu", payload);
+      const allItems = processItems(res.data.content || []);
 
-      bn30nItems.value = filterLoaiMH.value === "BN30N" ? items : [];
-      hoptacItems.value = filterLoaiMH.value === "HOPTAC" ? items : [];
-      httItems.value = filterLoaiMH.value === "HTT" ? items : [];
-
-      bn30nTotal.value = filterLoaiMH.value === "BN30N" ? total : 0;
-      hoptacTotal.value = filterLoaiMH.value === "HOPTAC" ? total : 0;
-      httTotal.value = filterLoaiMH.value === "HTT" ? total : 0;
+      // Split items by category
+      bn30nItems.value = allItems.filter(item => item.loaiMH === 'BN30N');
+      hoptacItems.value = allItems.filter(item => item.loaiMH === 'HOPTAC');
+      httItems.value = allItems.filter(item => item.loaiMH === 'HTT');
     }
 
+    // Reset page counters
     bn30nPage.value = 0;
     hoptacPage.value = 0;
     httPage.value = 0;
-  } catch (e) {
-    console.error(e);
+
+  } catch (err) {
+    console.error("Lỗi tải dữ liệu slider:", err);
   } finally {
     loading.value = false;
   }
 }
 
-const bn30nTotal = ref(0);
-const hoptacTotal = ref(0);
-const httTotal = ref(0);
-
 // Load more for specific category
 async function loadMoreCategory(category) {
-  const config = {
-    BN30N: {
-      page: bn30nPage,
-      items: bn30nItems,
-      total: bn30nTotal,
-      loading: bn30nLoading,
-    },
-    HOPTAC: {
-      page: hoptacPage,
-      items: hoptacItems,
-      total: hoptacTotal,
-      loading: hoptacLoading,
-    },
-    HTT: {
-      page: httPage,
-      items: httItems,
-      total: httTotal,
-      loading: httLoading,
-    },
-  };
+  const loadingRef = category === 'BN30N' ? bn30nLoading :
+      category === 'HOPTAC' ? hoptacLoading : httLoading;
+  const pageRef = category === 'BN30N' ? bn30nPage :
+      category === 'HOPTAC' ? hoptacPage : httPage;
+  const itemsRef = category === 'BN30N' ? bn30nItems :
+      category === 'HOPTAC' ? hoptacItems : httItems;
 
-  const c = config[category];
-  if (!c) return;
-
-  // ❌ ĐÃ LOAD HẾT → KHÔNG GỌI API NỮA
-  if (c.items.value.length >= c.total.value) return;
-
-  c.loading.value = true;
-  c.page.value++;
+  loadingRef.value = true;
+  pageRef.value++;
 
   try {
-    const res = await api.post("/user.thg/product/user/bang-du-lieu", {
-      trangSo: c.page.value,
+    const payload = {
+      trangSo: pageRef.value,
       soDong: pageSizeSlider.value,
-      loaiMH: category,
       tuKhoa: searchQuery.value || null,
       mucGia: filterGiaRange.value || null,
       phuongXa: filterWard.value || null,
       khuVuc: filterProvince.value || null,
       viTri: filterViTri.value || null,
+      loaiMH: category,
       moKhoa: filterUnlock.value === "" ? null : filterUnlock.value === "yes",
       trangThai: filterStatus.value || null,
       daThich: filterLove.value || null,
-    });
+    };
 
-    c.items.value.push(...processItems(res.data.content || []));
-  } catch (e) {
-    c.page.value--;
-    console.error(e);
+    const res = await api.post(
+        "/user.thg/product/user/bang-du-lieu",
+        payload
+    );
+
+    const newItems = processItems(res.data.content || []);
+
+    itemsRef.value = [...itemsRef.value, ...newItems];
+  } catch (err) {
+    console.error(`Lỗi tải thêm ${category}:`, err);
+    pageRef.value--;
   } finally {
-    c.loading.value = false;
+    loadingRef.value = false;
   }
 }
 
-
 // Slider scrolling
-// Slider scrolling - SIMPLE VERSION
-// Slider scrolling - DEBUG VERSION
 const scrollSlider = (category, direction) => {
-  const sliderRef =
-      category === 'bn30n' ? bn30nSlider :
-          category === 'hoptac' ? hoptacSlider : httSlider;
+  const sliderRef = category === 'bn30n' ? bn30nSlider :
+      category === 'hoptac' ? hoptacSlider : httSlider;
 
-  if (!sliderRef.value) {
-    console.log(`Slider ${category} not found`);
-    return;
+  if (sliderRef.value) {
+    const scrollAmount = 320; // Card width + gap
+    sliderRef.value.scrollLeft += direction * scrollAmount;
   }
-
-  const firstItem = sliderRef.value.querySelector('.slider-item');
-  if (!firstItem) {
-    console.log(`No .slider-item found in ${category}`);
-    return;
-  }
-
-  // DEBUG: Log thông tin
-  console.log(`Slider ${category}:`, {
-    itemWidth: firstItem.offsetWidth,
-    gap: parseInt(getComputedStyle(sliderRef.value).gap),
-    scrollLeftBefore: sliderRef.value.scrollLeft
-  });
-
-  const style = getComputedStyle(sliderRef.value);
-  const gap = parseInt(style.gap) || 16;
-  const itemWidth = firstItem.offsetWidth;
-  const scrollAmount = itemWidth + gap;
-
-  sliderRef.value.scrollLeft += direction * scrollAmount;
-
-  console.log(`Scrolled ${direction > 0 ? 'right' : 'left'} by ${scrollAmount}px`);
 };
 
-// Handle scroll to load more - SIMPLE VERSION
+// Handle scroll to load more
 const handleScroll = (category) => {
-  const sliderRef =
-      category === 'bn30n' ? bn30nSlider :
-          category === 'hoptac' ? hoptacSlider : httSlider;
+  const sliderRef = category === 'bn30n' ? bn30nSlider :
+      category === 'hoptac' ? hoptacSlider : httSlider;
+  const loadingRef = category === 'bn30n' ? bn30nLoading :
+      category === 'hoptac' ? hoptacLoading : httLoading;
+  const categoryCode = category === 'bn30n' ? 'BN30N' :
+      category === 'hoptac' ? 'HOPTAC' : 'HTT';
 
-  const loadingRef =
-      category === 'bn30n' ? bn30nLoading :
-          category === 'hoptac' ? hoptacLoading : httLoading;
-
-  const categoryCode =
-      category === 'bn30n' ? 'BN30N' :
-          category === 'hoptac' ? 'HOPTAC' : 'HTT';
-
-  if (!sliderRef.value || loadingRef.value) return;
-
-  const { scrollLeft, scrollWidth, clientWidth } = sliderRef.value;
-
-  // Khi còn 200px đến cuối thì load more
-  if (scrollWidth - scrollLeft - clientWidth < 200) {
-    loadMoreCategory(categoryCode);
+  if (sliderRef.value && !loadingRef.value) {
+    const { scrollLeft, scrollWidth, clientWidth } = sliderRef.value;
+    if (scrollWidth - scrollLeft - clientWidth < 100) {
+      // Near the end, load more
+      loadMoreCategory(categoryCode);
+    }
   }
 };
-
 
 const auth = useAuthStore();
 import { useRouter } from "vue-router";
@@ -1976,10 +1928,10 @@ onBeforeUnmount(() => {
   scroll-behavior: smooth;
 }
 
-/* Slider item - CỐ ĐỊNH WIDTH */
+/* Slider item */
 .slider-item {
   flex: 0 0 auto;
-  width: 350px; /* ĐÃ TĂNG WIDTH LÊN */
+  width: 300px;
 }
 
 /* Các style hiện tại giữ nguyên... */
@@ -2253,19 +2205,6 @@ th{
 @media (min-width: 1300px) {
   .action-dot {
     display: none;
-  }
-}
-
-/* Responsive cho slider */
-@media (max-width: 768px) {
-  .slider-item {
-    width: 320px; /* Nhỏ hơn trên mobile */
-  }
-}
-
-@media (max-width: 480px) {
-  .slider-item {
-    width: 280px; /* Nhỏ hơn trên mobile nhỏ */
   }
 }
 </style>

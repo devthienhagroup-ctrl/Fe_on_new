@@ -59,8 +59,8 @@
         </router-link>
       </li>
       <li class="nav-item project-item">
-        <router-link to="/tinh-nang-dang-phat-trien" class="nav-link">
-          <i class="fas fa-project-diagram column-icon"></i> Dự án
+        <router-link to="/du-an-da-ban" class="nav-link">
+          <i class="fas fa-project-diagram column-icon"></i> Dự án đã bán
         </router-link>
       </li>
 
@@ -97,11 +97,11 @@
                     <i class="fa-solid fa-clipboard-user"></i> Ứng tuyển CTV
                   </router-link>
                 </li>
-                <li>
-                  <router-link to="/moi-gioi" class="submenu-link" @click="closeAllSubmenus">
-                    <i class="fa-solid fa-handshake"></i> Cộng đồng môi giới
-                  </router-link>
-                </li>
+<!--                <li>-->
+<!--                  <router-link to="/moi-gioi" class="submenu-link" @click="closeAllSubmenus">-->
+<!--                    <i class="fa-solid fa-handshake"></i> Cộng đồng môi giới-->
+<!--                  </router-link>-->
+<!--                </li>-->
               </ul>
             </div>
           </div>

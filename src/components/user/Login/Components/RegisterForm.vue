@@ -374,7 +374,11 @@ const handleSendOtp = async () => {
   if (!validate()) return;
 
   try {
-    await showLoading(api.post("/thg/api/auth/send-otp", { email: registerForm.email }));
+    const res = await showLoading(api.post("/thg/api/auth/send-otp", { email: registerForm.email, phone: registerForm.phone  }));
+    if (!res.data.success) {
+      updateAlertError(res.data.message)
+      return
+    }
     updateAlertSuccess("OTP đã được gửi đến email!");
 
     showOtpStep.value = true;

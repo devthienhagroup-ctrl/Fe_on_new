@@ -474,7 +474,7 @@ const initialAssignedJobs = [
   },
   {
     id: 2,
-    title: 'Tư vấn bất động sản nghỉ dưỡng',
+    title: 'Tư vấn bất động sản',
     salary: 12000000,
     salaryVisible: false,
     location: 'Phú Quốc, Kiên Giang',
@@ -841,7 +841,7 @@ onMounted(() => {
 }
 
 .carousel-slide {
-  flex: 0 0 calc(33.333% - 20px);
+  flex: 0 0 320px;
   min-width: 0;
 }
 
@@ -1959,4 +1959,40 @@ thead {
     padding: 6px 10px;
   }
 }
+@media (max-width: 1024px) {
+  .carousel-slide {
+    flex: 0 0 280px;
+  }
+}
+
+/* ===== MOBILE FULL WIDTH FOR ASSIGNED JOBS ===== */
+@media (max-width: 768px) {
+  .carousel-container {
+    padding: 0;              /* bỏ padding 2 bên */
+  }
+
+  .carousel-track {
+    gap: 16px;
+    padding: 0 12px;         /* nhẹ 2 bên cho đẹp */
+  }
+
+  .carousel-slide {
+    flex: 0 0 100%;          /* 👈 FULL NGANG */
+  }
+}
+
+/* ===== HIDE CAROUSEL BUTTONS ON MOBILE ===== */
+@media (max-width: 768px) {
+  .carousel-btn {
+    display: none !important;
+  }
+}
+
+
+@media (max-width: 480px) {
+  .carousel-slide {
+    flex: 0 0 90%;
+  }
+}
+
 </style>

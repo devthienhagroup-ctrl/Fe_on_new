@@ -129,7 +129,7 @@
                 </span>
               </td>
               <td class="text-start">
-                <div v-if="getType(item.type.typeId)" class="d-inline-flex align-items-center gap-2">
+                <div v-if="item.type != null && getType(item.type.typeId)" class="d-inline-flex align-items-center gap-2">
                   <i
                       v-if="item.type"
                       :class="item.type.icon"
@@ -1690,7 +1690,7 @@
   async function updateWorkItemStatus(id, newStatus) {
     if (!props.canUpdateWorkItem) return;
     try {
-      const res = await api.post(`/admin.thg/project/work/view_detail/${id}/`, null, {
+      const res = await api.post(`/admin.thg/project/work/view_detail/${id}`, null, {
         params: { status: newStatus },
         withCredentials: true,
       });

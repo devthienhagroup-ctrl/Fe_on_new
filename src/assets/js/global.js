@@ -4,7 +4,7 @@ import api from '../../api/api'
 // Đăng nhập -> trả về accessToken
 export const login = async ({ email, password, rememberMe }) => {
     const res = await api.post('/thg/api/auth/login', { email, password, rememberMe })
-
+    localStorage.setItem('remember', String(rememberMe))
     const accessToken = res.data?.accessToken
     const userInfo = res.data?.userInfo
     const listPermission = res.data?.listPermission
@@ -17,32 +17,44 @@ export const login = async ({ email, password, rememberMe }) => {
 
 // Refresh -> trả về accessToken mới
 export const refresh = async () => {
-    const res = await api.post('/thg/api/auth/refresh', {}, { withCredentials: true })
-    const token = res.data?.accessToken
-    console.log("Refetch thành công ✅✅✅✅✅")
-    if (!token) throw new Error('No accessToken returned')
-    return token
-}
+    const remember = localStorage.getItem('remember') === 'true'
 
-export const refreshRenew = async () => {
     const res = await api.post(
-        '/thg/api/auth/refresh-renew',
+        `/thg/api/auth/refresh?remember=${remember}`,
         {},
         { withCredentials: true }
     )
 
-    console.log("Refetch thành công ✅")
+    const token = res.data?.accessToken
+    console.log('Refetch thành công ✅✅✅✅✅')
+
+    if (!token) throw new Error('No accessToken returned')
+    return token
+}
+
+
+// Refresh + Renew quyền -> trả về accessToken + listAuthority
+export const refreshRenew = async () => {
+    const remember = localStorage.getItem('remember') === 'true'
+
+    const res = await api.post(
+        `/thg/api/auth/refresh-renew?remember=${remember}`,
+        {},
+        { withCredentials: true }
+    )
+
+    console.log('Refetch Renew thành công ✅')
 
     const accessToken = res.data?.accessToken
     const listAuthorityRaw = res.data?.listAuthority
 
     if (!accessToken) {
-        throw new Error("No accessToken returned")
+        throw new Error('No accessToken returned')
     }
 
-    // ⭐ CHUYỂN 'listAuthority' về dạng mảng string để FE dùng được
+    // ⭐ Chuẩn hóa authority cho FE
     const listAuthority = Array.isArray(listAuthorityRaw)
-        ? listAuthorityRaw.map(a => (typeof a === "string" ? a : a.authority))
+        ? listAuthorityRaw.map(a => (typeof a === 'string' ? a : a.authority))
         : []
 
     return {
@@ -54,6 +66,7 @@ export const refreshRenew = async () => {
 
 // Logout (gửi kèm bearer hiện tại và cookie refresh)
 export const logout = async (accessToken) => {
+
     await api.post(
         '/thg/api/auth/logout',
         {},
@@ -62,6 +75,8 @@ export const logout = async (accessToken) => {
             headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
         }
     )
+
+    localStorage.removeItem('remember');
 }
 export const baseImgaeUrl="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/";
 

@@ -184,39 +184,10 @@
               </div>
             </div>
             <div class="row g-4">
-              <div class="col-md-4">
-                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                  <i class="fas fa-map-marker-alt text-danger"></i>
-                  <span>Tỉnh/Thành phố  <span class="text-danger">*</span></span>
-                </label>
-                <select class="form-select form-select-md" v-model="formAddress.province">
-                  <option value="">-- Chọn Tỉnh/TP --</option>
-                  <option v-for="province in provinceOptions" :key="province.code" :value="province.name">{{ province.name }}</option>
-                </select>
-                <small v-if="errors.address" class="text-danger">{{ errors.address }}</small>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                  <i class="fas fa-map-pin text-success"></i>
-                  <span>Xã/Phường <span class="text-danger">*</span></span>
-                </label>
-                <select class="form-select form-select-md" v-model="formAddress.ward" :disabled="!formAddress.province">
-                  <option value="">-- Chọn khu vực --</option>
-                  <option v-for="ward in wardOptions" :key="ward.name" :value="ward.name">{{ ward.name }}</option>
-                </select>
-                <small v-if="errors.address" class="text-danger">{{ errors.address }}</small>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                  <i class="fas fa-road text-secondary"></i>
-                  <span>Số nhà, đường  <span class="text-danger">*</span></span>
-                </label>
-                <input type="text" class="form-control " v-model.trim="formAddress.street" placeholder="Số nhà, tên đường">
-                <small v-if="errors.address" class="text-danger">{{ errors.address }}</small>
-              </div>
-
+              <Address5 v-model="form.address"></Address5>
+              <small v-if="errors.address" class="text-danger">
+                {{ errors.address }}
+              </small>
               <div class="col-md-4">
                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
                   <i class="fas fa-map-pin text-primary"></i>
@@ -963,6 +934,7 @@ import FileOrLand from '../land/FileOrLand.vue'
 import addressData from '/src/assets/js/address.json'
 import {showLoading, updateAlertSuccess} from "../../assets/js/alertService.js";
 import router from "../../router/index.js";
+import Address5 from "./Address5.vue";
 
 const handleNguoiBanLookup = async () => {
   if (!form.nguoiBanSearch) {
@@ -1016,6 +988,7 @@ function formatMoneyVN(value) {
 const defaultRoom = () => ({ loaiPhong: '', soLuong: null, dienTich: null, moTa: '' })
 
 const form = reactive({
+  address: '',
   oldAddress: '',
   plotNumber: '',
   parcelNumber: '',
@@ -1065,7 +1038,7 @@ const form = reactive({
 
 })
 
-const formAddress = reactive({ street: '', ward: '', province: '' })
+
 const uploadedFiles = ref([])
 
 const errors = reactive({})
@@ -1102,20 +1075,7 @@ watch(
     }
 )
 
-watch(
-    () => formAddress.province,
-    (newProvince) => {
-      const province = provinceOptions.value.find((p) => normalizeText(p.name) === normalizeText(newProvince))
-      if (!province) {
-        formAddress.ward = ''
-        return
-      }
-      const wardStillValid = province.wards.find((ward) => normalizeText(ward.name) === normalizeText(formAddress.ward))
-      if (!wardStillValid) {
-        formAddress.ward = ''
-      }
-    }
-)
+
 
 watch(() => form.phanLoaiHang, () => {
   ownerLookupMessage.value = ''
@@ -1174,10 +1134,17 @@ const validateForm = () => {
   track(requireNumberField(form.giaNoiBo, 'giaNoiBo', 'Nhập giá nội bộ'))
   track(requireNumberField(form.desire, 'desire', 'Nhập kỳ vọng'))
 
-  if (!formAddress.street || !formAddress.ward || !formAddress.province) {
+  if (!form.address) {
     errors.address = 'Vui lòng nhập đầy đủ địa chỉ'
     isValid = false
+  } else {
+    const parts = form.address.split('/!!')
+    if (parts.length < 3 || parts.some(p => !p || !p.trim())) {
+      errors.address = 'Vui lòng nhập đầy đủ địa chỉ'
+      isValid = false
+    }
   }
+
 
   track(requireTextField(form.landPosition, 'landPosition', 'Nhập vị trí đất'))
   track(requireTextField(form.plotNumber, 'plotNumber', 'Nhập số thửa'))
@@ -1325,6 +1292,7 @@ watch(() => form.status, (newStatus) => {
 
 const resetForm = () => {
   Object.assign(form, {
+    address:'',
     oldAddress: '',
     plotNumber: '',
     parcelNumber: '',
@@ -1370,7 +1338,7 @@ const resetForm = () => {
     nguoiBanSearch: '',
     giaBanThanhCong: null,
   })
-  Object.assign(formAddress, { street: '', ward: '', province: '' })
+  form.address = ''
   ownerSearch.value = ''
   ownerLookupMessage.value = ''
   uploadedFiles.value = []
@@ -1378,13 +1346,13 @@ const resetForm = () => {
 }
 
 const buildFormData = () => {
-  const addressPayload = [formAddress.street, formAddress.ward, formAddress.province].join('/!!')
   const dto = {
     ...form,
-    address: addressPayload,
-    khuVucMa: formAddress.province || form.khuVucMa,
+    address: form.address,
+    khuVucMa: form.address.split('/!!')[2], // province
     rooms: isHouse.value ? form.rooms : [],
   }
+
   const fd = new FormData()
   fd.append('dto',  new Blob( [JSON.stringify(dto)], { type: "application/json" }));
   uploadedFiles.value.forEach((file) => {
@@ -1418,7 +1386,7 @@ const submitForm = async () => {
     }));
     updateAlertSuccess('Tạo tài sản thành công!');
     resetForm();
-    router.push("/test01");
+    router.push("/-thg/quan-ly-san-pham");
   } catch (e) {
     alert('Không thể tạo tài sản, vui lòng thử lại')
   } finally {

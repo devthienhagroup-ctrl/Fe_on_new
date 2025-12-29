@@ -116,8 +116,10 @@ import InvmModal from "../components/cms/components/investment/InvestmentModal.v
 import NewsManagement from "../components/cms/news/NewsManagement.vue";
 import NewsDetail from "../components/user/News/NewsDetail.vue";
 import moigioi from "../components/user/MoiGioi/moigioi.vue"
+import SoldProject from "../components/user/SoldProject/SoldProject.vue";
 import Test from "../components/productAdmin/test.vue";
 import Test1 from "../components/productAdmin/test1.vue";
+import Test3 from "../components/myProduct/test3.vue";
 
 const routes = [
         {
@@ -129,6 +131,7 @@ const routes = [
             path: "/moi-gioi",
             name: "MoiGioiShow",
             component: MenuUser,
+            meta: { requiresAuth: false },
             children: [
                 {
                     path: '',
@@ -141,6 +144,7 @@ const routes = [
             path: "/tin-tuc",
             name: "News",
             component: MenuUser,
+            meta: { requiresAuth: false },
             children: [
                 {
                     path: '',
@@ -545,30 +549,39 @@ const routes = [
     },
 
 
-    {
-        path: "/01",
-        component: Test,
-        meta: {
-            requiresAuth: false,
-            hideFooterMap: true,
-            enableTailwind: true
-        }
-    },
-    {
-        path: "/02",
-        component: Test1,
-        meta: {
-            requiresAuth: false,
-            hideFooterMap: true,
-            enableTailwind: true
-        }
-    },
+    // {
+    //     path: "/01",
+    //     component: Test,
+    //     meta: {
+    //         requiresAuth: false,
+    //         hideFooterMap: false,
+    //         enableTailwind: true
+    //     }
+    // },
+    // {
+    //     path: "/02",
+    //     component: Test1,
+    //     meta: {
+    //         requiresAuth: false,
+    //         hideFooterMap: false,
+    //         enableTailwind: true
+    //     }
+    // },
+    // {
+    //     path: "/03",
+    //     component: Test3,
+    //     meta: {
+    //         requiresAuth: false,
+    //         hideFooterMap: false,
+    //         enableTailwind: true
+    //     }
+    // },
     {
         path: "/san-pham-thien-ha",
         component: MenuUser,
         meta: {
             requiresAuth: false,
-            hideFooterMap: true,
+            hideFooterMap: false,
             enableTailwind: true
         },
         children: [
@@ -582,7 +595,24 @@ const routes = [
                 name: "ProductDetailSEO",
                 component: ProductDetail2,
                 props: true
-            }
+            },
+
+        ]
+    },
+    {
+        path: "/du-an-da-ban",
+        component: MenuUser,
+        meta: {
+            requiresAuth: false,
+            hideFooterMap: false,
+            enableTailwind: true
+        },
+        children: [
+            {
+                path: "",
+                name: "DuAnDaBan",
+                component: SoldProject
+            },
         ]
     },
     {
@@ -684,7 +714,7 @@ const routes = [
         {
             path: '/bao-cao-dinh-gia',
             component: MenuUser, // MenuUser là layout chính
-            meta: {requiresAuth: true,  loginFrom: "user", hideFooterMap: true},
+            meta: {requiresAuth: true,  loginFrom: "user", hideFooterMap: false},
             children: [
                 {
                     path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
@@ -693,6 +723,7 @@ const routes = [
                 }
             ]
         },
+    
         {
             path: '/-thg/goi-he-thong',
             component: Menu, // MenuUser là layout chính
@@ -720,7 +751,7 @@ const routes = [
         {
             path: '/nhom-cua-toi',
             component: MenuUser, // MenuUser là layout chính
-            meta: {requiresAuth: true,  loginFrom: "user", hideFooterMap: true},
+            meta: {requiresAuth: true,  loginFrom: "user", hideFooterMap: false},
             children: [
                 {
                     path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
@@ -778,7 +809,7 @@ const routes = [
             path: "/",
             name: "Landinngpage",
             component: MenuUser,
-            meta: { enableTailwind: true },
+            meta: { enableTailwind: true, requiresAuth: false },
             children: [
                 {
                     path: '',
@@ -794,7 +825,8 @@ const routes = [
             component: MenuUser,
             meta: {
                 showQSPopup: true,
-                enableTailwind: true
+                enableTailwind: true,
+                requiresAuth: false
             },
             children: [
                 {
@@ -807,6 +839,7 @@ const routes = [
         {
             path: "/dinh-gia-bds",
             name: "EstimateProperty",
+            meta:{ enableTailwind: true, requiresAuth: false },
             component: MenuUser,
             children: [
                 {
@@ -820,7 +853,7 @@ const routes = [
             path: "/dang-nhap",
             name: "LoginUser",
             component: MenuUser,
-            meta: { loginFrom: "user"},
+            meta: { loginFrom: "user", requiresAuth: false},
             children: [
                 {
                     path: '',
@@ -833,6 +866,7 @@ const routes = [
             path: "/tuyen-dung",
             name: "Recruitment",
             component: MenuUser,
+            meta: { requiresAuth: false },
             children: [
                 {
                     path: '',
@@ -845,6 +879,7 @@ const routes = [
         path: "/goi-dich-vu",
         name: "ServicePackage",
         component: MenuUser,
+        meta: { requiresAuth: false },
         children: [
             {
                 path: '',
@@ -857,6 +892,7 @@ const routes = [
             path: "/lien-he",
             name: "Contact",
             component: MenuUser,
+            meta: { requiresAuth: false },
             children: [
                 {
                     path: '',
@@ -870,25 +906,27 @@ const routes = [
         path: "/thanh-toan",
         name: "Checkout",
         component: MenuUser,
+        meta: { requiresAuth: false },
         children: [
             {
                 path: '',
-                name: 'checkout',
+                name: 'checkout2',
                 component: PaymentPage,
-                meta: {hideFooterMap: true}
+                meta: {hideFooterMap: false}
             }
         ]
     },
     {
         path: "/thanh-toan-san-pham",
-        name: "Checkout",
+        name: "Checkout1",
         component: MenuUser,
+        meta: { requiresAuth: false },
         children: [
             {
                 path: '',
-                name: 'checkout',
+                name: 'checkout11111',
                 component: PaymentPage2,
-                meta: {hideFooterMap: true}
+                meta: {hideFooterMap: false}
             }
         ]
     },
@@ -902,6 +940,7 @@ const routes = [
         path: "/cong-viec-cong-tac-vien",
         name: "CollaboratorJobs",
         component: MenuUser,
+        meta: { requiresAuth: false },
         children: [
             {
                 path: '',
@@ -925,7 +964,7 @@ const routes = [
     {
         path: "/ho-so",
         name: "Profile",
-        meta: {requiresAuth: true,  loginFrom: "user", hideFooterMap: true},
+        meta: {requiresAuth: true,  loginFrom: "user", hideFooterMap: false},
         component: MenuUser,
         children: [
             {
@@ -1115,6 +1154,7 @@ const routes = [
         path: "/hop-tac",
         name: "Investments",
         component: MenuUser,
+        meta: { requiresAuth: false },
         children: [
             {
                 path: "",
@@ -1132,12 +1172,13 @@ const routes = [
         path: "/ga4-demo",
         name: "GA4Demo",
         component: MenuUser,
+        meta: { requiresAuth: false },
         children: [
             {
                 path: '',
                 name: 'ga4-demo',
                 component: Ga4EventExample,
-                meta: { hideFooterMap: true }
+                meta: { hideFooterMap: false }
             }
         ]
     },

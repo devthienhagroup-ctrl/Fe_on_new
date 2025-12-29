@@ -4,7 +4,7 @@
 
       <!-- Tiêu đề chính -->
       <div
-          class="relative bg-gradient-to-r from-indigo-700 via-blue-700 to-cyan-700 rounded-2xl shadow-2xl p-5 mb-5 overflow-hidden">
+          class="relative bg-gradient-to-r from-indigo-700 via-blue-700 to-cyan-700 rounded-2xl shadow-2xl p-5 mb-5">
         <div class="absolute inset-0 opacity-10 bg-pattern"></div>
         <div class="relative flex items-center justify-between">
           <div>
@@ -17,17 +17,18 @@
             <p class="text-blue-100 text-sm flex items-center gap-2">
               <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
               Bảng điều khiển danh mục bất động sản • Dữ liệu trực tiếp
+              <div class="bg-white rounded-4"><NotificationBell/></div>
             </p>
           </div>
           <div class="flex flex-col items-end gap-1">
 
             <!-- Hàng 1 -->
-            <div class="flex items-center gap-4 mb-2 backdrop-blur-sm bg-white/70 rounded-xl px-3 py-2 shadow-md">
+            <div class=" flex items-center gap-4 mb-2 backdrop-blur-sm bg-white/70 rounded-xl px-3 py-2 shadow-md">
 
               <!-- Chuông thông báo -->
-              <div>
-                <NotificationBell/>
-              </div>
+
+
+
 
               <!-- Thông tin người dùng -->
               <div class="flex flex-col text-right leading-tight">

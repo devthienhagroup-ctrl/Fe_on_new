@@ -1876,7 +1876,7 @@ onBeforeUnmount(() => {
   --gray-3: #999999;
   --primary-color: #3b82f6;
   --hover-color: #eff6ff;
-  --border-color: #d1d5db;
+  --border-color: #2e74dc;
   --disabled-color: #9ca3af;
   --tab-active-color: #2563eb;
   --success-color: #10b981;

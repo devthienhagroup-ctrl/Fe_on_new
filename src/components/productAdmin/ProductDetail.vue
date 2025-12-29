@@ -102,342 +102,374 @@
         </div>
       </div>
 
-      <!-- MAIN CONTENT GRID -->
-      <div class="content-grid">
+      <!-- TABS -->
+<!--      <div class="asset-tabs">-->
+<!--        <button-->
+<!--            class="tab-btn"-->
+<!--            :class="{ active: activeTab === 'DETAIL' }"-->
+<!--            @click="activeTab = 'DETAIL'"-->
+<!--        >-->
+<!--          <i class="fa-solid fa-circle-info"></i>-->
+<!--          Thông tin chi tiết-->
+<!--        </button>-->
 
-        <!-- LEFT COLUMN - GALLERY -->
-        <div class="gallery-section" style="width: 930px; max-width: 930px">
-          <div class="gallery-wrapper">
-            <div class="main-image-container">
-              <img :src="asset.slide[activeImage]" alt="Property image" class="main-image" />
-              <div class="image-counter">{{ activeImage + 1 }} / {{ asset.slide.length }}</div>
-            </div>
+<!--        <button-->
+<!--            class="tab-btn"-->
+<!--            :class="{ active: activeTab === 'FILE' }"-->
+<!--            @click="activeTab = 'FILE'"-->
+<!--        >-->
+<!--          <i class="fa-solid fa-handshake"></i>-->
+<!--          Môi giới đã hợp tác-->
+<!--        </button>-->
+<!--      </div>-->
 
-            <div class="thumbnails-container">
-              <div class="thumbnails-scroll">
-                <img
-                    v-for="(img, i) in asset.slide"
-                    :key="i"
-                    :src="img"
-                    @click="activeImage = i"
-                    :class="['thumbnail', { 'thumbnail-active': activeImage === i }]"
-                    alt="Thumbnail"
-                />
+
+      <!-- TAB 1 -->
+      <div v-if="activeTab === 'DETAIL'">
+        <!-- MAIN CONTENT GRID -->
+        <div class="content-grid">
+
+          <!-- LEFT COLUMN - GALLERY -->
+          <div class="gallery-section" style="width: 930px; max-width: 930px">
+            <div class="gallery-wrapper">
+              <div class="main-image-container">
+                <img :src="asset.slide[activeImage]" alt="Property image" class="main-image" />
+                <div class="image-counter">{{ activeImage + 1 }} / {{ asset.slide.length }}</div>
               </div>
-            </div>
-            <div class="file-section">
-              <FileOrLand entity-type="land" :entity-id="asset.id" :file-list="asset.files || [] "
-                          :canEdit="false"/>
+
+              <div class="thumbnails-container">
+                <div class="thumbnails-scroll">
+                  <img
+                      v-for="(img, i) in asset.slide"
+                      :key="i"
+                      :src="img"
+                      @click="activeImage = i"
+                      :class="['thumbnail', { 'thumbnail-active': activeImage === i }]"
+                      alt="Thumbnail"
+                  />
+                </div>
+              </div>
+              <div class="file-section">
+                <FileOrLand entity-type="land" :entity-id="asset.id" :file-list="asset.files || [] "
+                            :canEdit="false"/>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- RIGHT COLUMN - GENERAL INFO -->
-        <div class="info-section">
-          <div class="info-card">
-            <div class="card-header">
-              <i class="fa-solid fa-circle-info header-icon"></i>
-              <h3 class="card-title">Thông tin chung</h3>
-            </div>
+          <!-- RIGHT COLUMN - GENERAL INFO -->
+          <div class="info-section">
+            <div class="info-card">
+              <div class="card-header">
+                <i class="fa-solid fa-circle-info header-icon"></i>
+                <h3 class="card-title">Thông tin chung</h3>
+              </div>
 
-            <div class="info-grid">
-              <div class="info-row">
-                <span class="info-label">Loại tài sản</span>
-                <span class="info-value" :class="badgeLoai(asset.loaiTaiSan)">
+              <div class="info-grid">
+                <div class="info-row">
+                  <span class="info-label">Loại tài sản</span>
+                  <span class="info-value" :class="badgeLoai(asset.loaiTaiSan)">
                   {{ formatLoai( asset.loaiTaiSan ) }}
                 </span>
-              </div>
+                </div>
 
-              <div class="info-row">
-                <span class="info-label">Trạng thái</span>
-                <span class="info-value" :class="badgeStatus(asset.status)">
+                <div class="info-row">
+                  <span class="info-label">Trạng thái</span>
+                  <span class="info-value" :class="badgeStatus(asset.status)">
                   {{ formatStatus(asset.status) }}
                 </span>
-              </div>
+                </div>
 
-              <div class="info-row highlight-row">
-                <span class="info-label">Giá bán</span>
-                <span class="info-value price-selling text-primary">{{ formatMoneyVN(asset.giaBan) }}</span>
-              </div>
+                <div class="info-row highlight-row">
+                  <span class="info-label">Giá bán</span>
+                  <span class="info-value price-selling text-primary">{{ formatMoneyVN(asset.giaBan) }}</span>
+                </div>
 
-              <div class="info-row highlight-row">
-                <span class="info-label">Giá nội bộ</span>
-                <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.giaNoiBo) }}</span>
-              </div>
+                <div class="info-row highlight-row">
+                  <span class="info-label">Giá nội bộ</span>
+                  <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.giaNoiBo) }}</span>
+                </div>
 
-              <div class="info-row highlight-row">
-                <span class="info-label">Giá mong muốn</span>
-                <span class="info-value price-internal text-primary">{{  formatMoneyVN( asset.desire ) }}</span>
-              </div>
+                <div class="info-row highlight-row">
+                  <span class="info-label">Giá mong muốn</span>
+                  <span class="info-value price-internal text-primary">{{  formatMoneyVN( asset.desire ) }}</span>
+                </div>
 
-              <div class="info-row">
-                <span class="info-label">Liên hệ</span>
-                <span class="info-value"> <i class="fa-solid fa-phone text-danger"></i> {{ asset.lienHe ?? ' Chưa cập nhật' }}</span>
-              </div>
+                <div class="info-row">
+                  <span class="info-label">Liên hệ</span>
+                  <span class="info-value"> <i class="fa-solid fa-phone text-danger"></i> {{ asset.lienHe ?? ' Chưa cập nhật' }}</span>
+                </div>
 
-              <div class="info-row">
-                <span class="info-label">Chủ sở hữu</span>
-                <span v-if="asset.ownerName != null" class="info-value">
+                <div class="info-row">
+                  <span class="info-label">Chủ sở hữu</span>
+                  <span v-if="asset.ownerName != null" class="info-value">
                   {{ asset.ownerName ?? 'Chưa cập nhật' }}
                 </span>
-                <span v-else class="text-gray-600 info-value">Chưa cập nhật</span>
-              </div>
+                  <span v-else class="text-gray-600 info-value">Chưa cập nhật</span>
+                </div>
 
-              <div class="info-row">
-                <span class="info-label">SĐT chủ sở hữu</span>
-                <span class="info-value"> {{ asset.ownerPhone ?? 'Chưa cập nhật' }}</span>
-              </div>
+                <div class="info-row">
+                  <span class="info-label">SĐT chủ sở hữu</span>
+                  <span class="info-value"> {{ asset.ownerPhone ?? 'Chưa cập nhật' }}</span>
+                </div>
 
-              <div class="info-row">
-                <span class="info-label">Đơn vị sở hữu</span>
-                <span class="info-value owner-unit">
+                <div class="info-row">
+                  <span class="info-label">Đơn vị sở hữu</span>
+                  <span class="info-value owner-unit">
                   <img v-if="asset.donViSoHuu === 'THG'" src="/imgs/logokn.png" alt="THG" class="unit-logo">
                   <span  v-else-if="asset.donViSoHuu === 'DT'">
                      <i class="fa-solid fa-handshake unit-icon"></i> Đối tác
                   </span>
 
               </span>
+                </div>
+
+                <div class="info-row">
+                  <span class="info-label">Phí môi giới</span>
+                  <span class="info-value text-primary">{{ asset.phiMoiGioi != null ? asset.phiMoiGioi + '%' : 'Chưa cập nhật' }}</span>
+                </div>
               </div>
 
-              <div class="info-row">
-                <span class="info-label">Phí môi giới</span>
-                <span class="info-value text-primary">{{ asset.phiMoiGioi != null ? asset.phiMoiGioi + '%' : 'Chưa cập nhật' }}</span>
-              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEGAL INFO SECTION -->
+        <div class="detail-section section-legal">
+          <div class="section-header">
+            <div class="section-title-group">
+              <i class="fa-solid fa-scale-balanced section-icon"></i>
+              <h3 class="section-title">Thông tin pháp lý & quản trị</h3>
+            </div>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Đường</span>
+              <span class="detail-value">{{ formatAddressDetail( asset.address ) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Phường/Xã</span>
+              <span class="detail-value">{{  formatWard( asset.address )  }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Khu vực</span>
+              <span class="detail-value">{{ asset.khuVucMa ?? 'Chưa cập nhật' }}</span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Địa chỉ cũ</span>
+              <span class="detail-value">{{ asset.oldAddress ?? 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Số tờ bản đồ & Số thửa đất</span>
+              <span class="detail-value">{{ asset.plotNumber ?? 'Chưa cập nhật' }} && {{ asset.parcelNumber ?? 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Loại đất</span>
+              <span class="detail-value">{{ asset.loaiDat }}</span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Diện tích tổng</span>
+              <span class="detail-value highlight">{{  formatArea( asset.totalArea) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Quan hệ sở hữu</span>
+              <span class="detail-value">{{ asset.ownershipRelation ?? 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Quyền sử dụng đất</span>
+              <span class="detail-value">{{ asset.landUseRight ?? 'Chưa cập nhật' }}</span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Vị trí</span>
+              <span class="detail-value">{{ asset.landPosition ?? 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Trạng thái</span>
+              <span v-if="asset.status == null" class="detail-value">Chưa cập nhật</span>
+              <span v-else-if="asset === 'Đã bán'" class="detail-value">Đã bán</span>
+              <span v-else class="detail-value">Đang rao bán</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Chiều ngang & chiều dài</span>
+              <span class="detail-value text-primary">
+              Ngang {{ asset.chieuNgang != null ? formatArea2(asset.chieuNgang) + 'm' : 'Chưa cập nhật' }} ,
+              Dài {{ asset.chieuDai != null ? formatArea2(asset.chieuDai) + 'm' : 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Loại đất</span>
+              <span class="detail-value">{{ asset.loaiDat ?? 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Hình dạng/ kết cấu</span>
+              <span class="detail-value">{{ asset.structure ?? 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Hiện trạng đất</span>
+              <span class="detail-value">{{ asset.hienTrangDat ?? 'Chưa cập nhật' }}</span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Lộ giới & Độ rộng đường</span>
+              <span class="detail-value">{{ asset.loGioi != null ? asset.loGioi + 'm' : 'Chưa cập nhật' }} &
+              {{ asset.doRongDuong != null ? asset.doRongDuong + 'm' : 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Quy hoạch</span>
+              <span class="detail-value">{{ asset.quyHoach ?? 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Mặt tiền</span>
+              <span class="detail-value">{{ asset.matTienNha != null ? asset.matTienNha + ' m' : 'Chưa cập nhật' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- HOUSE SECTION -->
+        <div class="detail-section section-house" v-if=" getAssetType(asset) === 'NHA'">
+          <div class="section-header">
+            <div class="section-title-group">
+              <i class="fa-solid fa-house-chimney section-icon"></i>
+              <h3 class="section-title">Kích thước & Kết cấu (Nhà)</h3>
+            </div>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Diện tích sàn</span>
+              <span class="detail-value highlight">{{ formatArea( asset.floorArea ) }} </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Loại nhà</span>
+              <span class="detail-value highlight">{{ asset.loaiNha ?? 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Số tầng & Số lầu</span>
+              <span class="detail-value">{{ asset.soTang != null ? asset.soTang + ' tầng' : 'Chưa cập nhật' }} &
+              {{ asset.soLau != null ? asset.soLau + ' lầu' : 'Chưa cập nhật' }} </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Hiện trạng nhà</span>
+              <span class="detail-value">{{ asset.hienTrangNha ?? 'Chưa cập nhật' }}</span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Phòng ngủ</span>
+              <span class="detail-value">{{ asset.soPhongNgu != null ? asset.soPhongNgu + ' phòng' : 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Phòng tắm</span>
+              <span class="detail-value"> {{ asset.soPhongTam != null ? asset.soPhongTam + ' phòng' : 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Tổng số phòng</span>
+              <span class="detail-value">{{ asset.tongSoPhong != null ? asset.tongSoPhong + ' phòng' : 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Năm xây dựng</span>
+              <span class="detail-value">{{ asset.namXayDung ?? 'Chưa cập nhật' }}</span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Nội thất</span>
+              <span class="detail-value">{{ asset.noiThat ?? 'Chưa cập nhật' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROOMS DETAIL -->
+        <div class="detail-section section-rooms" v-if="getAssetType(asset) === 'NHA'">
+          <div class="section-header">
+            <div class="section-title-group">
+              <i class="fa-solid fa-door-closed section-icon"></i>
+              <h3 class="section-title">Chi tiết phòng</h3>
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <!-- Nếu có room thì mới hiện table -->
+            <table class="executive-table" v-if="asset.rooms && asset.rooms.length > 0">
+              <thead>
+              <tr>
+                <th>Loại phòng</th>
+                <th>Số lượng</th>
+                <th>Diện tích (từng phòng)</th>
+                <th>Mô tả</th>
+              </tr>
+              </thead>
+
+              <tbody>
+              <tr v-for="(r, index) in asset.rooms" :key="index">
+                <td class="room-type">{{ r.loaiPhong ?? 'Chưa cập nhật' }}</td>
+                <td class="text-start">{{ r.soLuong ?? 'Chưa cập nhật' }}</td>
+                <td class="room-area">{{ r.dienTich != null ? r.dienTich + ' m²' : 'Chưa cập nhật' }}</td>
+                <td class="room-desc">{{ r.moTa || '—' }}</td>
+              </tr>
+              </tbody>
+            </table>
+
+            <!-- Nếu không có dữ liệu -->
+            <div v-else class="text-center text-muted py-3">
+              Chưa có thông tin
             </div>
 
           </div>
         </div>
-      </div>
 
-      <!-- LEGAL INFO SECTION -->
-      <div class="detail-section section-legal">
-        <div class="section-header">
-          <div class="section-title-group">
-            <i class="fa-solid fa-scale-balanced section-icon"></i>
-            <h3 class="section-title">Thông tin pháp lý & quản trị</h3>
-          </div>
-        </div>
-
-        <div class="detail-grid">
-          <div class="detail-item">
-            <span class="detail-label">Đường</span>
-            <span class="detail-value">{{ formatAddressDetail( asset.address ) }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Phường/Xã</span>
-            <span class="detail-value">{{  formatWard( asset.address )  }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Khu vực</span>
-            <span class="detail-value">{{ asset.khuVucMa ?? 'Chưa cập nhật' }}</span>
+        <!-- VALUATION SECTION -->
+        <div class="detail-section section-valuation">
+          <div class="section-header">
+            <div class="section-title-group">
+              <i class="fa-solid fa-chart-line section-icon"></i>
+              <h3 class="section-title">Định giá</h3>
+            </div>
           </div>
 
-          <div class="detail-item">
-            <span class="detail-label">Địa chỉ cũ</span>
-            <span class="detail-value">{{ asset.oldAddress ?? 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Số tờ bản đồ & Số thửa đất</span>
-            <span class="detail-value">{{ asset.plotNumber ?? 'Chưa cập nhật' }} && {{ asset.parcelNumber ?? 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Loại đất</span>
-            <span class="detail-value">{{ asset.loaiDat }}</span>
+          <div v-if="!asset.valuations || asset.valuations.length === 0" class="empty-state">
+            <i class="fa-solid fa-chart-simple empty-icon"></i>
+            <p class="empty-text">Chưa có dữ liệu định giá cho tài sản này</p>
           </div>
 
-          <div class="detail-item">
-            <span class="detail-label">Diện tích tổng</span>
-            <span class="detail-value highlight">{{  formatArea( asset.totalArea) }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Quan hệ sở hữu</span>
-            <span class="detail-value">{{ asset.ownershipRelation ?? 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Quyền sử dụng đất</span>
-            <span class="detail-value">{{ asset.landUseRight ?? 'Chưa cập nhật' }}</span>
-          </div>
-
-          <div class="detail-item">
-            <span class="detail-label">Vị trí</span>
-            <span class="detail-value">{{ asset.landPosition ?? 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Trạng thái</span>
-            <span v-if="asset.status == null" class="detail-value">Chưa cập nhật</span>
-            <span v-else-if="asset === 'Đã bán'" class="detail-value">Đã bán</span>
-            <span v-else class="detail-value">Đang rao bán</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Chiều ngang & chiều dài</span>
-            <span class="detail-value text-primary">
-              Ngang {{ asset.chieuNgang != null ? formatArea2(asset.chieuNgang) + 'm' : 'Chưa cập nhật' }} ,
-              Dài {{ asset.chieuDai != null ? formatArea2(asset.chieuDai) + 'm' : 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Loại đất</span>
-            <span class="detail-value">{{ asset.loaiDat ?? 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Hình dạng/ kết cấu</span>
-            <span class="detail-value">{{ asset.structure ?? 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Hiện trạng đất</span>
-            <span class="detail-value">{{ asset.hienTrangDat ?? 'Chưa cập nhật' }}</span>
-          </div>
-
-          <div class="detail-item">
-            <span class="detail-label">Lộ giới & Độ rộng đường</span>
-            <span class="detail-value">{{ asset.loGioi != null ? asset.loGioi + 'm' : 'Chưa cập nhật' }} &
-              {{ asset.doRongDuong != null ? asset.doRongDuong + 'm' : 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Quy hoạch</span>
-            <span class="detail-value">{{ asset.quyHoach ?? 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Mặt tiền</span>
-            <span class="detail-value">{{ asset.matTienNha != null ? asset.matTienNha + ' m' : 'Chưa cập nhật' }}</span>
+          <div v-else class="table-wrapper">
+            <table class="executive-table">
+              <thead>
+              <tr>
+                <th>Lần định giá</th>
+                <th>Ngày hiệu lực</th>
+                <th>Tổng giá</th>
+                <th>Giá cao nhất</th>
+                <th>Tương quan</th>
+                <th>File PDF</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="v in asset.valuations" :key="v.valuationId">
+                <td class="valuation-round">Lần {{ v.valuationRound }}</td>
+                <td>{{ v.effectiveDate }}</td>
+                <td><span class="price-valuation">{{ formatMoneyVN( v.totalPrice ) }}</span></td>
+                <td><span class="price-valuation">{{  formatMoneyVN( v.totalMaxPrice) }}</span></td>
+                <td v-html="renderPriceCompare(asset.desire, v.totalPrice)"> </td>
+                <td>
+                  <button class="pdf-btn" @click="openPdf(v.pdfFile)">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>{{ v.pdfFile.fileName }}</span>
+                  </button>
+                </td>
+              </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
-
-      <!-- HOUSE SECTION -->
-      <div class="detail-section section-house" v-if=" getAssetType(asset) === 'NHA'">
-        <div class="section-header">
-          <div class="section-title-group">
-            <i class="fa-solid fa-house-chimney section-icon"></i>
-            <h3 class="section-title">Kích thước & Kết cấu (Nhà)</h3>
-          </div>
-        </div>
-
-        <div class="detail-grid">
-          <div class="detail-item">
-            <span class="detail-label">Diện tích sàn</span>
-            <span class="detail-value highlight">{{ formatArea( asset.floorArea ) }} </span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Loại nhà</span>
-            <span class="detail-value highlight">{{ asset.loaiNha ?? 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Số tầng & Số lầu</span>
-            <span class="detail-value">{{ asset.soTang != null ? asset.soTang + ' tầng' : 'Chưa cập nhật' }} &
-              {{ asset.soLau != null ? asset.soLau + ' lầu' : 'Chưa cập nhật' }} </span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Hiện trạng nhà</span>
-            <span class="detail-value">{{ asset.hienTrangNha ?? 'Chưa cập nhật' }}</span>
-          </div>
-
-          <div class="detail-item">
-            <span class="detail-label">Phòng ngủ</span>
-            <span class="detail-value">{{ asset.soPhongNgu != null ? asset.soPhongNgu + ' phòng' : 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Phòng tắm</span>
-            <span class="detail-value"> {{ asset.soPhongTam != null ? asset.soPhongTam + ' phòng' : 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Tổng số phòng</span>
-            <span class="detail-value">{{ asset.tongSoPhong != null ? asset.tongSoPhong + ' phòng' : 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Năm xây dựng</span>
-            <span class="detail-value">{{ asset.namXayDung ?? 'Chưa cập nhật' }}</span>
-          </div>
-
-          <div class="detail-item">
-            <span class="detail-label">Nội thất</span>
-            <span class="detail-value">{{ asset.noiThat ?? 'Chưa cập nhật' }}</span>
-          </div>
-        </div>
+      <!-- TAB 2 -->
+      <div v-if="activeTab === 'FILE'">
+        <HopTacMoiGioi />
       </div>
 
-      <!-- ROOMS DETAIL -->
-      <div class="detail-section section-rooms" v-if="getAssetType(asset) === 'NHA'">
-        <div class="section-header">
-          <div class="section-title-group">
-            <i class="fa-solid fa-door-closed section-icon"></i>
-            <h3 class="section-title">Chi tiết phòng</h3>
-          </div>
-        </div>
 
-        <div class="table-wrapper">
-          <!-- Nếu có room thì mới hiện table -->
-          <table class="executive-table" v-if="asset.rooms && asset.rooms.length > 0">
-            <thead>
-            <tr>
-              <th>Loại phòng</th>
-              <th>Số lượng</th>
-              <th>Diện tích (từng phòng)</th>
-              <th>Mô tả</th>
-            </tr>
-            </thead>
 
-            <tbody>
-            <tr v-for="(r, index) in asset.rooms" :key="index">
-              <td class="room-type">{{ r.loaiPhong ?? 'Chưa cập nhật' }}</td>
-              <td class="text-start">{{ r.soLuong ?? 'Chưa cập nhật' }}</td>
-              <td class="room-area">{{ r.dienTich != null ? r.dienTich + ' m²' : 'Chưa cập nhật' }}</td>
-              <td class="room-desc">{{ r.moTa || '—' }}</td>
-            </tr>
-            </tbody>
-          </table>
-
-          <!-- Nếu không có dữ liệu -->
-          <div v-else class="text-center text-muted py-3">
-            Chưa có thông tin
-          </div>
-
-        </div>
-      </div>
-
-      <!-- VALUATION SECTION -->
-      <div class="detail-section section-valuation">
-        <div class="section-header">
-          <div class="section-title-group">
-            <i class="fa-solid fa-chart-line section-icon"></i>
-            <h3 class="section-title">Định giá</h3>
-          </div>
-        </div>
-
-        <div v-if="!asset.valuations || asset.valuations.length === 0" class="empty-state">
-          <i class="fa-solid fa-chart-simple empty-icon"></i>
-          <p class="empty-text">Chưa có dữ liệu định giá cho tài sản này</p>
-        </div>
-
-        <div v-else class="table-wrapper">
-          <table class="executive-table">
-            <thead>
-            <tr>
-              <th>Lần định giá</th>
-              <th>Ngày hiệu lực</th>
-              <th>Tổng giá</th>
-              <th>Giá cao nhất</th>
-              <th>Tương quan</th>
-              <th>File PDF</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="v in asset.valuations" :key="v.valuationId">
-              <td class="valuation-round">Lần {{ v.valuationRound }}</td>
-              <td>{{ v.effectiveDate }}</td>
-              <td><span class="price-valuation">{{ formatMoneyVN( v.totalPrice ) }}</span></td>
-              <td><span class="price-valuation">{{  formatMoneyVN( v.totalMaxPrice) }}</span></td>
-              <td v-html="renderPriceCompare(asset.desire, v.totalPrice)"> </td>
-              <td>
-                <button class="pdf-btn" @click="openPdf(v.pdfFile)">
-                  <i class="fa-solid fa-file-pdf"></i>
-                  <span>{{ v.pdfFile.fileName }}</span>
-                </button>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
   </template>
 
@@ -445,7 +477,9 @@
   import { ref, onMounted, computed } from "vue";
   import { useRoute, useRouter } from "vue-router";
   import FileOrLand from "../land/FileOrLand.vue";
+  import HopTacMoiGioi from "./HopTacMoiGioi.vue";
 
+  const activeTab = ref("DETAIL") // DETAIL | FILE
   const route = useRoute();
   const router = useRouter();
   const id = route.params.id;
@@ -1531,6 +1565,32 @@
 .default-color {
   background-color: #94a3b8 !important; /* slate-400 */
   border-color: #64748b !important;     /* slate-500 */
+}
+.asset-tabs {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 10px 16px;
+  font-weight: 600;
+  color: #64748b;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.tab-btn i {
+  margin-right: 6px;
+}
+
+.tab-btn.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
 }
 
 </style>

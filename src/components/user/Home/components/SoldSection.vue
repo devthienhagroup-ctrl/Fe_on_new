@@ -29,7 +29,7 @@
             :key="item.id"
             class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
           >
-            <div @click="goToDetail(item.id)" style="cursor: pointer;">
+            <div @click="$router.push(buildSeoUrl(item))" style="cursor: pointer;">
               <div class="relative w-full overflow-hidden" style="height: 200px">
                 <div class="relative w-full h-full px-3 pt-3 rounded-3 overflow-hidden aspect-[4/3] w-full">
                   <img
@@ -172,7 +172,7 @@
 
             <div class="flex items-center gap-2 px-3 pb-3">
               <button
-                @click="goToDetail(item.id)"
+                  @click="$router.push(buildSeoUrl(item))"
                 class="flex-1 py-2.5 bg-gradient-to-r from-slate-900
                  to-black text-white rounded-full text-[14px] font-semibold flex items-center justify-center
                  gap-2 hover:opacity-90 transition-all"
@@ -300,6 +300,7 @@ import { useRouter } from 'vue-router';
 import addressData from '/src/assets/js/address.json';
 import api from '/src/api/api.js';
 import { useAuthStore } from '/src/stores/authStore.js';
+import {buildSeoUrl} from "../../../../assets/js/global.js";
 
 const props = defineProps({
   title: String
