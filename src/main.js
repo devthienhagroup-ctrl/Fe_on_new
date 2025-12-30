@@ -36,10 +36,7 @@ watch(
 )
 app.use(router)
 app.mount('#app')
-// document.addEventListener("contextmenu", function (e) {
-//     e.preventDefault();
-// });
-// if (import.meta.env.PROD) {
-//     console.log = () => {};
-// }
-
+document.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    console.log("[Security] Right click disabled.");
+});

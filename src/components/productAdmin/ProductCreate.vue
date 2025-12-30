@@ -930,7 +930,7 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import api from '/src/api/api.js'
-import FileOrLand from '../land/FileOrLand.vue'
+import FileOrLand from './FileNew.vue'
 import addressData from '/src/assets/js/address.json'
 import {showLoading, updateAlertSuccess} from "../../assets/js/alertService.js";
 import router from "../../router/index.js";

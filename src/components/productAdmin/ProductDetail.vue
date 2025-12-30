@@ -102,26 +102,26 @@
         </div>
       </div>
 
-      <!-- TABS -->
-<!--      <div class="asset-tabs">-->
-<!--        <button-->
-<!--            class="tab-btn"-->
-<!--            :class="{ active: activeTab === 'DETAIL' }"-->
-<!--            @click="activeTab = 'DETAIL'"-->
-<!--        >-->
-<!--          <i class="fa-solid fa-circle-info"></i>-->
-<!--          Thông tin chi tiết-->
-<!--        </button>-->
+<!--       TABS-->
+      <div class="asset-tabs">
+        <button
+            class="tab-btn"
+            :class="{ active: activeTab === 'DETAIL' }"
+            @click="activeTab = 'DETAIL'"
+        >
+          <i class="fa-solid fa-circle-info"></i>
+          Thông tin chi tiết
+        </button>
 
-<!--        <button-->
-<!--            class="tab-btn"-->
-<!--            :class="{ active: activeTab === 'FILE' }"-->
-<!--            @click="activeTab = 'FILE'"-->
-<!--        >-->
-<!--          <i class="fa-solid fa-handshake"></i>-->
-<!--          Môi giới đã hợp tác-->
-<!--        </button>-->
-<!--      </div>-->
+        <button
+            class="tab-btn"
+            :class="{ active: activeTab === 'FILE' }"
+            @click="activeTab = 'FILE'"
+        >
+          <i class="fa-solid fa-handshake"></i>
+          Môi giới đã hợp tác
+        </button>
+      </div>
 
 
       <!-- TAB 1 -->

@@ -549,33 +549,33 @@ const routes = [
     },
 
 
-    // {
-    //     path: "/01",
-    //     component: Test,
-    //     meta: {
-    //         requiresAuth: false,
-    //         hideFooterMap: false,
-    //         enableTailwind: true
-    //     }
-    // },
-    // {
-    //     path: "/02",
-    //     component: Test1,
-    //     meta: {
-    //         requiresAuth: false,
-    //         hideFooterMap: false,
-    //         enableTailwind: true
-    //     }
-    // },
-    // {
-    //     path: "/03",
-    //     component: Test3,
-    //     meta: {
-    //         requiresAuth: false,
-    //         hideFooterMap: false,
-    //         enableTailwind: true
-    //     }
-    // },
+    {
+        path: "/01",
+        component: Test,
+        meta: {
+            requiresAuth: false,
+            hideFooterMap: false,
+            enableTailwind: true
+        }
+    },
+    {
+        path: "/02",
+        component: Test1,
+        meta: {
+            requiresAuth: false,
+            hideFooterMap: false,
+            enableTailwind: true
+        }
+    },
+    {
+        path: "/03",
+        component: Test3,
+        meta: {
+            requiresAuth: false,
+            hideFooterMap: false,
+            enableTailwind: true
+        }
+    },
     {
         path: "/san-pham-thien-ha",
         component: MenuUser,

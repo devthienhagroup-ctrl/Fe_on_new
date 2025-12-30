@@ -462,7 +462,7 @@ const isFilterMobile = ref(false);
 const showFilterPanel = ref(true);
 
 const page = ref(0);
-const pageSize = ref(4);
+const pageSize = ref(8);
 
 const totalPages = ref(0);
 const displayedRangeStart = computed(() => (totalRecords.value === 0 ? 0 : page.value * pageSize.value + 1));

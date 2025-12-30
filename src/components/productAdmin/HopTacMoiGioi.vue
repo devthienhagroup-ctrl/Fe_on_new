@@ -8,6 +8,15 @@
       </div>
 
       <div class="header-right">
+        <div class="header-actions">
+          <button
+              class="cancel-btn"
+              :disabled="selectedBrokerIds.length === 0"
+              @click="openCancelModal"
+          >
+            <i class="fa-solid fa-ban"></i>
+            Hủy hợp tác
+          </button>
         <div class="search-box">
           <i class="fa-solid fa-search search-icon"></i>
           <input
@@ -22,6 +31,7 @@
           </button>
         </div>
       </div>
+      </div>
     </div>
 
     <!-- Broker List -->
@@ -30,6 +40,13 @@
         <table class="broker-table">
           <thead>
           <tr>
+            <th class="checkbox-col ps-4">
+              <input
+                  type="checkbox"
+                  :checked="isAllSelected"
+                  @change="toggleSelectAll"
+              />
+            </th>
             <th class="avatar-col ps-4"> # </th>
             <th class="name-col">Tên môi giới</th>
             <th class="contact-col">Liên hệ</th>
@@ -40,7 +57,15 @@
           </thead>
           <tbody>
           <tr v-for="broker in brokers" :key="broker.id" class="broker-row">
-            <td class="avatar-col">
+              <td class="checkbox-col ps-4">
+                <input
+                    type="checkbox"
+                    :value="broker.idHT"
+                    v-model="selectedBrokerIds"
+                />
+              </td>
+
+              <td class="avatar-col">
               <div class="broker-avatar">
                 <img
                     :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'
@@ -107,14 +132,25 @@
         <div class="empty-icon-wrapper">
           <i class="fa-solid fa-users-line empty-icon"></i>
         </div>
-        <h3>Không tìm thấy môi giới</h3>
-        <p v-if="searchQuery">Không có môi giới nào phù hợp với tìm kiếm "{{ searchQuery }}"</p>
-        <p v-else>Chưa có môi giới nào hợp tác</p>
+
+        <h3 class="empty-title">
+          Không tìm thấy môi giới
+        </h3>
+
+        <p v-if="searchQuery" class="empty-desc">
+          Không có môi giới nào phù hợp với từ khóa
+          <span class="highlight">“{{ searchQuery }}”</span>
+        </p>
+
+        <p v-else class="empty-desc">
+          Chưa có môi giới nào hợp tác
+        </p>
       </div>
+
     </div>
 
     <!-- Pagination -->
-    <div v-if="brokers.length > 0" class="pagination-container">
+    <div v-if="brokers.length > 0" class="pagination-container mt-3">
       <div class="pagination-info">
         Hiển thị {{ startIndex }}–{{ endIndex }} trong tổng {{ totalElements }} môi giới
       </div>
@@ -159,6 +195,32 @@
       </div>
     </div>
   </div>
+  <div v-if="showCancelModal" class="modal-overlay">
+    <div class="modal-box">
+      <h2>Hủy hợp tác môi giới</h2>
+
+      <p class="modal-sub">
+        Bạn đang hủy hợp tác với
+        <strong>{{ selectedBrokerIds.length }}</strong> môi giới
+      </p>
+
+      <textarea
+          v-model="cancelReason"
+          placeholder="Nhập lý do / thư xin lỗi..."
+          rows="4"
+      />
+
+      <div class="modal-actions">
+        <button class="btn-secondary" @click="closeCancelModal">
+          Đóng
+        </button>
+        <button class="btn-danger" @click="submitCancel">
+          Xác nhận hủy
+        </button>
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <script setup>
@@ -324,6 +386,56 @@ watch(pageSize, () => {
   currentPage.value = 1
   loadBrokers()
 })
+
+
+const selectedBrokerIds = ref([])
+const showCancelModal = ref(false)
+const cancelReason = ref('')
+
+const isAllSelected = computed(() =>
+    brokers.value.length > 0 &&
+    selectedBrokerIds.value.length === brokers.value.length
+)
+
+const toggleSelectAll = (e) => {
+  selectedBrokerIds.value = e.target.checked
+      ? brokers.value.map(b => b.idHT)   // ✅ đổi ở đây
+      : []
+}
+
+const openCancelModal = () => {
+  showCancelModal.value = true
+}
+
+const closeCancelModal = () => {
+  showCancelModal.value = false
+  cancelReason.value = ''
+  selectedBrokerIds.value = []        // ✅ reset luôn cho sạch state
+}
+
+const submitCancel = async () => {
+  try {
+    await api.post(
+        '/admin.thg/product/admin/huy-hop-tac',
+        {
+          idHTs: selectedBrokerIds.value,
+          reason: cancelReason.value
+        }
+    )
+
+    console.log('✅ Đã gọi API hủy hợp tác')
+
+    // Reload danh sách
+    await loadBrokers()
+
+    closeCancelModal()
+  } catch (e) {
+    console.error('❌ Hủy hợp tác thất bại', e)
+  }
+}
+
+
+
 </script>
 
 <style scoped>
@@ -670,6 +782,152 @@ watch(pageSize, () => {
   gap: 8px;
   flex-wrap: nowrap;   /* 🔥 quan trọng */
   white-space: nowrap; /* 🔥 giữ 1 hàng */
+}
+.empty-state {
+  padding: 64px 24px;
+  text-align: center;
+  background: linear-gradient(180deg, #ffffff, #f9fafb);
+  border-radius: 16px;
+  border: 1px dashed #e5e7eb;
+  margin: 24px 0;
+}
+
+.empty-icon-wrapper {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #eef2ff, #f0fdf4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-icon {
+  font-size: 28px;
+  color: #6366f1; /* indigo-500 */
+}
+
+.empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.empty-desc {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.empty-desc .highlight {
+  color: #4f46e5;
+  font-weight: 500;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cancel-btn {
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  background: #fee2e2;
+  color: #b91c1c;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 200px;
+}
+
+.cancel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.59);
+
+  /* ✨ hiệu ứng mờ nền */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+
+  /* ✨ animation */
+  animation: modalOverlayFade .25s ease;
+}
+
+@keyframes modalOverlayFade {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(6px);
+  }
+}
+
+
+.modal-box {
+  width: 420px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.modal-box h2 {
+  margin-bottom: 8px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #0a2463;
+}
+
+.modal-sub {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+.modal-box textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  padding: 12px;
+  font-size: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.btn-secondary {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.btn-danger {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #dc2626;
+  color: #fff;
+  font-weight: 600;
 }
 
 </style>

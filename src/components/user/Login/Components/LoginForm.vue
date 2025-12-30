@@ -128,11 +128,10 @@ const handleLogin = async () => {
         router.push(redirectPath);
       } else {
         const flag = localStorage.getItem("loginFrom");
-        if( flag === 'user'){
-          router.push("/");
-        }else{
-          router.push("/-thg/quan-ly")
-        }
+
+        router.push("/");
+
+
          // hoặc / cho user
       }
     }, 1200)
