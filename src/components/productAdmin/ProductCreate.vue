@@ -335,6 +335,7 @@
                 <select class="form-select form-select-md" v-model="form.status">
                   <option value="">-- Chọn tình trạng --</option>
                   <option value="Chưa định giá">Mới</option>
+                  <option value="Bán giải pháp">Bán giải pháp</option>
                   <option value="Bán nhanh 30 ngày">Bán nhanh 30 ngày</option>
                   <option value="Đã bán">Đã bán</option>
                 </select>
@@ -894,6 +895,32 @@
 
           </section>
 
+          <!-- Mô tả ngắn -->
+          <section class="mb-4">
+            <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+              <div class="section-icon bg-info-light">
+                <i class="fas fa-pen-nib text-info"></i>
+              </div>
+              <div>
+                <h2 class="h5 fw-bold mb-1">Mô tả ngắn</h2>
+                <p class="text-muted small mb-0">Tóm tắt nhanh nổi bật của tài sản</p>
+              </div>
+            </div>
+
+            <div class="short-description-card">
+              <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                <i class="fas fa-align-left text-primary"></i>
+                <span>Nội dung mô tả</span>
+              </label>
+              <textarea
+                  class="form-control short-description-input"
+                  rows="4"
+                  v-model.trim="form.moTaNgan"
+                  placeholder="Ví dụ: Nhà góc 2 mặt tiền, gần trung tâm, phù hợp kinh doanh..."></textarea>
+              <small v-if="errors.moTaNgan" class="text-danger">{{ errors.moTaNgan }}</small>
+            </div>
+          </section>
+
           <!-- Upload hồ sơ -->
           <section class="mb-4">
             <div class="d-flex align-items-center mb-4 border-bottom pb-3">
@@ -915,6 +942,7 @@
                 @update:files="handleFileUpdate"
             />
             <div v-if="errors.files" class="text-danger small mt-2">{{ errors.files }}</div>
+            <div v-if="errors.mainImage" class="text-danger small mt-2">{{ errors.mainImage }}</div>
           </section>
         </form>
         <div class="d-flex gap-2">
@@ -1027,6 +1055,7 @@ const form = reactive({
   ownerId: null,
   ownerFullName: '',
   ownerPhone: '',
+  moTaNgan: '',
   rooms: [defaultRoom()],
   hienThongTinChuKhiMoKhoa: true,
   hienLienHeKhiMoKhoa: true,
@@ -1238,6 +1267,17 @@ const validateForm = () => {
     isValid = false
   }
 
+  const hasMainImage = uploadedFiles.value.some((file) => file && file.isOnTop && isImageFile(file.fileName))
+  if (!hasMainImage) {
+    errors.mainImage = 'Vui lòng chọn 1 ảnh chính'
+    isValid = false
+  }
+
+  if (!form.moTaNgan || form.moTaNgan.trim().length < 100) {
+    errors.moTaNgan = 'Mô tả ngắn tối thiểu 100 ký tự'
+    isValid = false
+  }
+
   return isValid
 }
 
@@ -1333,6 +1373,7 @@ const resetForm = () => {
     ownerFullName: '',
     ownerPhone: '',
     rooms: [defaultRoom()],
+    moTaNgan: '',
     nguoiBanId: null,
     nguoiBanTen: '',
     nguoiBanSearch: '',
@@ -1355,6 +1396,10 @@ const buildFormData = () => {
 
   const fd = new FormData()
   fd.append('dto',  new Blob( [JSON.stringify(dto)], { type: "application/json" }));
+  const mainFile = uploadedFiles.value.find((file) => file?.isOnTop && file.file instanceof File)
+  if (mainFile) {
+    fd.append('newFileOntop', mainFile.file)
+  }
   uploadedFiles.value.forEach((file) => {
     if (file.file instanceof File) {
       const key = file.isIG ? 'newLandBookFiles' : 'newFiles'
@@ -1498,6 +1543,21 @@ const submitForm = async () => {
 /* Color coding for different field types */
 .text-primary { color: #4361ee !important; }
 .text-success { color: #28a745 !important; }
+
+.short-description-card {
+  background: #f7f9ff;
+  border: 1px solid rgba(67, 97, 238, 0.15);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.08);
+}
+
+.short-description-input {
+  border-radius: 10px;
+  border-color: rgba(67, 97, 238, 0.2);
+  resize: vertical;
+  min-height: 120px;
+}
 .text-warning { color: #ffc107 !important; }
 .text-info { color: #17a2b8 !important; }
 .text-danger { color: #dc3545 !important; }

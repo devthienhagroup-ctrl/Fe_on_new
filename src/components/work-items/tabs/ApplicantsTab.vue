@@ -1,0 +1,385 @@
+<template>
+  <div class="applicants-tab px-3">
+    <div class="tab-toolbar d-flex flex-wrap align-items-start align-items-md-center justify-content-between mb-3 gap-3">
+      <div>
+        <h6 class="mb-1 fw-semibold">Ứng tuyển theo công việc</h6>
+        <p class="text-muted small mb-0">
+          Theo dõi danh sách ứng viên đang ứng tuyển các công việc trong dự án.
+        </p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <div class="position-relative search-field">
+          <i class="fa-solid fa-magnifying-glass position-absolute text-muted"></i>
+          <input
+            v-model="searchKeyword"
+            type="text"
+            class="form-control form-control-sm ps-5"
+            placeholder="Tìm theo tên công việc hoặc ứng viên"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <span class="badge bg-primary-subtle text-primary">
+        {{ filteredApplicants.length }} ứng viên phù hợp
+      </span>
+      <span class="badge bg-light text-secondary">
+        {{ applicants.length }} tổng ứng viên
+      </span>
+    </div>
+
+    <div class="table-responsive bg-white shadow-sm rounded-4 position-relative">
+      <table class="table table-hover align-middle mb-0 applicants-table">
+        <thead class="table-light text-secondary">
+          <tr>
+            <th scope="col">Ứng viên</th>
+            <th scope="col">Công việc</th>
+            <th scope="col">Ngày ứng tuyển</th>
+            <th scope="col">Trạng thái</th>
+            <th scope="col" class="text-end">Ghi chú</th>
+            <th scope="col" class="text-end">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="applicant in filteredApplicants" :key="applicant.id">
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="applicant-avatar">{{ applicant.initials }}</div>
+                <div>
+                  <div class="fw-semibold">{{ applicant.candidateName }}</div>
+                  <div class="text-muted extra-small">
+                    {{ applicant.email }} · {{ applicant.phone }}
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="fw-semibold">{{ applicant.jobTitle }}</div>
+              <div class="text-muted extra-small">{{ applicant.department }}</div>
+            </td>
+            <td>
+              <div class="fw-semibold">{{ applicant.appliedDate }}</div>
+              <div class="text-muted extra-small">{{ applicant.expectedSalary }}</div>
+            </td>
+            <td>
+              <span :class="['status-pill', statusClass(applicant.status)]">
+                {{ applicant.status }}
+              </span>
+            </td>
+            <td class="text-end text-muted small">
+              {{ applicant.note }}
+            </td>
+            <td class="text-end">
+              <div class="d-flex justify-content-end gap-2">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-success"
+                  @click="openAcceptModal(applicant)"
+                >
+                  <i class="fa-solid fa-check me-1"></i>
+                  Chấp nhận
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  @click="openRejectModal(applicant)"
+                >
+                  <i class="fa-solid fa-xmark me-1"></i>
+                  Từ chối
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr v-if="!filteredApplicants.length">
+            <td colspan="6" class="text-center text-muted py-4">
+              Không tìm thấy ứng viên phù hợp.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      v-if="showAcceptModal"
+      class="modal fade show d-block"
+      tabindex="-1"
+      role="dialog"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header">
+            <h6 class="modal-title fw-semibold">Thư chào mừng</h6>
+            <button type="button" class="btn-close" @click="closeModals"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted small mb-2">
+              Gửi thư chào mừng cho ứng viên <strong>{{ selectedApplicant?.candidateName }}</strong>.
+            </p>
+            <textarea
+              v-model="welcomeMessage"
+              class="form-control"
+              rows="4"
+              placeholder="Nhập nội dung thư chào mừng..."
+            ></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" @click="closeModals">Hủy</button>
+            <button type="button" class="btn btn-primary" @click="submitAccept">
+              Gửi thư
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      v-if="showRejectModal"
+      class="modal fade show d-block"
+      tabindex="-1"
+      role="dialog"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header">
+            <h6 class="modal-title fw-semibold">Thư từ chối</h6>
+            <button type="button" class="btn-close" @click="closeModals"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted small mb-2">
+              Lý do từ chối (có thể bỏ qua) cho
+              <strong>{{ selectedApplicant?.candidateName }}</strong>.
+            </p>
+            <textarea
+              v-model="rejectReason"
+              class="form-control"
+              rows="4"
+              placeholder="Nhập lý do từ chối (không bắt buộc)..."
+            ></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" @click="closeModals">Hủy</button>
+            <button type="button" class="btn btn-danger" @click="submitReject">
+              Xác nhận từ chối
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showAcceptModal || showRejectModal" class="modal-backdrop fade show"></div>
+  </div>
+</template>
+
+<script setup>
+import { computed, ref } from "vue";
+
+const applicants = ref([
+  {
+    id: 1,
+    candidateName: "Nguyễn Minh Khoa",
+    initials: "NK",
+    email: "khoa.nguyen@demo.com",
+    phone: "0901 234 567",
+    jobTitle: "Frontend Engineer",
+    department: "Team Web",
+    appliedDate: "12/03/2024",
+    expectedSalary: "20 - 25 triệu",
+    status: "Đang đánh giá",
+    note: "Hẹn phỏng vấn vòng 1"
+  },
+  {
+    id: 2,
+    candidateName: "Trần Thảo Vy",
+    initials: "TV",
+    email: "vy.tran@demo.com",
+    phone: "0932 778 911",
+    jobTitle: "UI/UX Designer",
+    department: "Team Product",
+    appliedDate: "10/03/2024",
+    expectedSalary: "18 - 22 triệu",
+    status: "Đã nhận hồ sơ",
+    note: "Đang review portfolio"
+  },
+  {
+    id: 3,
+    candidateName: "Phạm Quốc Huy",
+    initials: "QH",
+    email: "huy.pham@demo.com",
+    phone: "0977 445 221",
+    jobTitle: "Backend Engineer",
+    department: "Team Platform",
+    appliedDate: "09/03/2024",
+    expectedSalary: "25 - 30 triệu",
+    status: "Phỏng vấn",
+    note: "Vòng kỹ thuật 15/03"
+  },
+  {
+    id: 4,
+    candidateName: "Lê Hải Anh",
+    initials: "HA",
+    email: "anh.le@demo.com",
+    phone: "0919 554 333",
+    jobTitle: "Project Coordinator",
+    department: "PMO",
+    appliedDate: "07/03/2024",
+    expectedSalary: "15 - 18 triệu",
+    status: "Đạt yêu cầu",
+    note: "Chờ offer"
+  },
+  {
+    id: 5,
+    candidateName: "Vũ Đức Anh",
+    initials: "DA",
+    email: "anh.vu@demo.com",
+    phone: "0988 120 876",
+    jobTitle: "QA Engineer",
+    department: "Team QA",
+    appliedDate: "06/03/2024",
+    expectedSalary: "14 - 17 triệu",
+    status: "Không phù hợp",
+    note: "Thiếu kinh nghiệm automation"
+  }
+]);
+
+const searchKeyword = ref("");
+const showAcceptModal = ref(false);
+const showRejectModal = ref(false);
+const selectedApplicant = ref(null);
+const welcomeMessage = ref("");
+const rejectReason = ref("");
+
+const filteredApplicants = computed(() => {
+  const keyword = searchKeyword.value.trim().toLowerCase();
+
+  return applicants.value.filter((applicant) => {
+    if (!keyword) return true;
+    const matchesJob = applicant.jobTitle.toLowerCase().includes(keyword);
+    const matchesCandidate = applicant.candidateName.toLowerCase().includes(keyword);
+    return matchesJob || matchesCandidate;
+  });
+});
+
+const openAcceptModal = (applicant) => {
+  selectedApplicant.value = applicant;
+  welcomeMessage.value = "";
+  showAcceptModal.value = true;
+  showRejectModal.value = false;
+};
+
+const openRejectModal = (applicant) => {
+  selectedApplicant.value = applicant;
+  rejectReason.value = "";
+  showRejectModal.value = true;
+  showAcceptModal.value = false;
+};
+
+const closeModals = () => {
+  showAcceptModal.value = false;
+  showRejectModal.value = false;
+  selectedApplicant.value = null;
+};
+
+const submitAccept = () => {
+  if (!selectedApplicant.value) return;
+  selectedApplicant.value.status = "Đạt yêu cầu";
+  selectedApplicant.value.note = "Đã gửi thư chào mừng";
+  closeModals();
+};
+
+const submitReject = () => {
+  if (!selectedApplicant.value) return;
+  selectedApplicant.value.status = "Không phù hợp";
+  selectedApplicant.value.note = rejectReason.value.trim() || "Đã gửi thư từ chối";
+  closeModals();
+};
+
+const statusClass = (status) => {
+  switch (status) {
+    case "Đang đánh giá":
+      return "status-review";
+    case "Đã nhận hồ sơ":
+      return "status-received";
+    case "Phỏng vấn":
+      return "status-interview";
+    case "Đạt yêu cầu":
+      return "status-pass";
+    case "Không phù hợp":
+      return "status-reject";
+    default:
+      return "status-review";
+  }
+};
+</script>
+
+<style scoped>
+.applicants-tab {
+  width: 100%;
+  padding-bottom: 8px;
+}
+
+.search-field {
+  min-width: 320px;
+}
+
+.search-field i {
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.applicants-table th,
+.applicants-table td {
+  padding: 14px 16px;
+}
+
+.applicant-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #eef1ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #4c5be5;
+}
+
+.extra-small {
+  font-size: 12px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-review {
+  background: rgba(76, 91, 229, 0.12);
+  color: #4c5be5;
+}
+
+.status-received {
+  background: rgba(14, 165, 233, 0.12);
+  color: #0284c7;
+}
+
+.status-interview {
+  background: rgba(245, 158, 11, 0.16);
+  color: #b45309;
+}
+
+.status-pass {
+  background: rgba(34, 197, 94, 0.16);
+  color: #15803d;
+}
+
+.status-reject {
+  background: rgba(239, 68, 68, 0.16);
+  color: #b91c1c;
+}
+</style>

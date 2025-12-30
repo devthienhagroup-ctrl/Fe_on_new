@@ -340,6 +340,7 @@ import AllWorkItemsTab from "./tabs/AllWorkItemsTab.vue";
 import KanbanTab from "./tabs/KanbanTab.vue";
 import SummaryTab from "./tabs/SummaryTab.vue";
 import TimelineTab from "./tabs/TimelineTab.vue";
+import ApplicantsTab from "./tabs/ApplicantsTab.vue";
 import {showLoading, updateAlertSuccess} from "../../assets/js/alertService.js";
 import { useAuthStore } from "../../stores/authStore.js";
 import { useSidebarStore } from "../../stores/sidebarStore.js";
@@ -400,6 +401,7 @@ const rawTabs = [
   { key: "kanban", label: "Kanban", icon: "fa-solid fa-chess-board" },
   { key: "report", label: "Báo cáo", icon: "fa-solid fa-globe" },
   { key: "info", label: "Thông tin", icon: "fa-solid fa-circle-info" },
+  { key: "applicants", label: "Ứng tuyển", icon: "fa-solid fa-user-check" },
 ];
 
 const tabs = computed(() =>
@@ -422,6 +424,7 @@ const componentMap = {
   kanban: KanbanTab,
   report: SummaryTab,
   info: TimelineTab,
+  applicants: ApplicantsTab,
 };
 
 const activeComponent = computed(() => componentMap[activeTab.value] || AllWorkItemsTab);

@@ -322,11 +322,17 @@ const managers = ref([
 ]);
 
 const departmentForm = ref({
+  oldDepartmentName: null,   // ✅ thêm
+  departmentName: "",
+  description: "",
+  address: "",
+  profileImage: "",
   manager: {
     managerId: null
   },
   listEmployees: []
 });
+
 const flag = ref(true);
 const departments = ref([]);
 
@@ -367,6 +373,7 @@ async function getEdit(name) {
     departmentForm.value = {
       ...departmentForm.value,
       ...data,
+      oldDepartmentName: data.departmentName, // ✅ LƯU TÊN CŨ
       manager: data.manager ?? { managerId: null },
     };
     addressKey.value++;

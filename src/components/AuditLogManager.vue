@@ -87,7 +87,7 @@
                 <i class="fa-solid fa-filter me-1"></i> Lọc
               </button>
               <button
-                  v-if="authStore.listAuthority.includes('AUDITLOG_DELETE')"
+                  v-if="authStore.listAuthority.includes('AUDIT_DELETE')"
                   class="btn btn-sm btn-outline-danger"
                   :disabled="!selectedIds.length"
                   @click="confirmDelete"

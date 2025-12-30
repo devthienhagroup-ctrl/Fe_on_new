@@ -197,18 +197,6 @@
                       group-hover:scale-110 transition-transform">
                   <i class="fa-solid fa-handshake text-white text-lg"></i>
                 </div>
-
-                <div :class="[
-                'flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded-full',
-                stats.rateDonVi >= 0 ? 'text-emerald-600 bg-emerald-100' : 'text-rose-100 text-rose-600'
-              ]">
-                  <i :class="[
-                  'fa-solid text-xs',
-                  stats.rateDonVi >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'
-                ]"></i>
-
-                  {{ stats.rateDonVi.toFixed(1) }}% so với cùng kỳ
-                </div>
               </div>
 
               <h3 class="text-slate-900 text-sm font-medium mb-1">Đơn Vị Phân Phối</h3>

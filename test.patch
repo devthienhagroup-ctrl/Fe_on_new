@@ -1,2724 +1,391 @@
-diff --git a/src/components/AppointmentManager.vue b/src/components/AppointmentManager.vue
-index c15df9073c0e88020829ab0e9c22d7db2604e555..3c8de54f264b01104fd96e2cdef53b4d26686321 100644
---- a/src/components/AppointmentManager.vue
-+++ b/src/components/AppointmentManager.vue
-@@ -1,37 +1,45 @@
- <template>
-   <div class="appointment-manager">
-
-     <!-- HEADER -->
-     <div class="d-flex justify-content-between align-items-center px-3 pb-2"
-          style="border-bottom: solid 0.5px rgba(0,0,0,0.3)">
-       <h5 class="fw-bold mb-0 d-flex align-items-center gap-2">
-         <i class="fa-solid fa-calendar-check text-orange fs-4"></i>
-         Quản lý lịch hẹn
-       </h5>
-
-       <div class="d-flex align-items-center justify-content-end gap-2">
-+        <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+        >
-+          <i class="fa-solid fa-bars"></i>
-+          <span class="d-none d-md-inline">Menu</span>
-+        </button>
-         <NotificationBell />
-         <div class="d-flex flex-column align-items-end text-end">
-           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-         </div>
-
-         <img v-if="info.avatarUrl"
-              :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-              class="rounded-circle border"
-              style="width: 36px; height: 36px; object-fit: cover;" />
-
-         <div v-else class="avatar-circle">
-           {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-         </div>
-       </div>
-     </div>
-     <!-- CONTENT -->
-     <div class="p-3">
-
-       <!-- PAGINATION + SEARCH -->
-       <div class="pagination-top d-flex align-items-center justify-content-between mb-3">
-
-         <div class="d-flex gap-2">
-           <button class="btn btn-sm btn-outline-orange" :disabled="page === 0" @click="goFirstPage">« Đầu</button>
-           <button class="btn btn-sm btn-outline-orange" :disabled="page === 0" @click="prevPage">‹ Trước</button>
-
-@@ -211,79 +219,81 @@
-       </div>
-
-       <!-- MODALS -->
-       <AssignEmployeeModal
-           v-if="showAssignModal"
-           :appointment="selectedAppointment"
-           @close="showAssignModal = false"
-           @assigned="loadData" />
-
-       <UpdateAppointmentModal
-           v-if="showUpdateModal"
-           :appointment="selectedAppointment"
-           @close="showUpdateModal = false"
-           @updated="loadData" />
-
-
-     </div>
-   </div>
- </template>
-
- <script setup>
- import { ref, onMounted, watch } from "vue";
- import api from "/src/api/api.js";
- import NotificationBell from "/src/components/NotificationBell.vue";
- import { useAuthStore } from "/src/stores/authStore.js";
-+import { useSidebarStore } from "/src/stores/sidebarStore.js";
- import AssignEmployeeModal from "./AssignEmployeeModal.vue";
- import UpdateAppointmentModal from "./UpdateAppointmentModal.vue";
- import { showWarning } from "/src/assets/js/alertService.js";
-
-
-
- /* NEW STATE */
- const filterCame = ref(null);
- const filterBN30N = ref(null);
- const mineStatus = ref("upcoming");
-
- function mapPurpose(code) {
-   if (!code) return "—";
-   switch (code.trim().toUpperCase()) {
-     case "BN30N": return "Bán nhanh 30N";
-     case "NKQ": return "Nhận KQ ĐG";
-     default: return code;
-   }
- }
- function shortBranch(address) {
-   if (!address) return "";
-
-   const parts = address.split(",");
-   const lastTwo = parts.slice(-2).map(p => p.trim());
-   return lastTwo.join(", ");
- }
-
- const auth = useAuthStore();
- const info = auth.userInfo;
-+const sidebar = useSidebarStore();
-
- const tab = ref("upcoming");
-
- const keyword = ref("");
- const items = ref([]);
- const page = ref(0);
- const size = 10;
- const totalPages = ref(50);
- const expandedRowId = ref(null);
-
- function toggleResult(item) {
-   expandedRowId.value = expandedRowId.value === item.id ? null : item.id;
- }
-
-
-
- const showAssignModal = ref(false);
- const showUpdateModal = ref(false);
- const showViewModal = ref(false);
- const selectedAppointment = ref(null);
-
- function fixAddress(address) {
-   return address ? address.replace(/\//g, ", ") : "";
- }
-
-@@ -550,26 +560,49 @@ onMounted(() => {
- }
- .purpose-badge {
-   display: inline-flex;
-   align-items: center;
-   padding: 3px 10px;
-   border-radius: 20px;       /* Bo tròn 2 đầu */
-   font-size: 12px;
-   font-weight: 600;
-   width: fit-content;
- }
-
- /* BN30N - màu cam nổi bật */
- .purpose-bn30n {
-   background: rgba(255, 159, 67, 0.15);
-   color: #ff7e29;
-   border: 1px solid #ff9f43;
- }
-
- /* NKQ - màu xanh dương */
- .purpose-nkq {
-   background: rgba(52, 152, 219, 0.15);
-   color: #2980b9;
-   border: 1px solid #3498db;
- }
-
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
+diff --git a/src/components/work-items/tabs/ApplicantsTab.vue b/src/components/work-items/tabs/ApplicantsTab.vue
+new file mode 100644
+index 0000000000000000000000000000000000000000..83e71b52769f1adc21ef62ed6fc5864cdf3315b1
+--- /dev/null
++++ b/src/components/work-items/tabs/ApplicantsTab.vue
+@@ -0,0 +1,385 @@
++<template>
++  <div class="applicants-tab px-3">
++    <div class="tab-toolbar d-flex flex-wrap align-items-start align-items-md-center justify-content-between mb-3 gap-3">
++      <div>
++        <h6 class="mb-1 fw-semibold">Ứng tuyển theo công việc</h6>
++        <p class="text-muted small mb-0">
++          Theo dõi danh sách ứng viên đang ứng tuyển các công việc trong dự án.
++        </p>
++      </div>
++      <div class="d-flex flex-wrap gap-2">
++        <div class="position-relative search-field">
++          <i class="fa-solid fa-magnifying-glass position-absolute text-muted"></i>
++          <input
++            v-model="searchKeyword"
++            type="text"
++            class="form-control form-control-sm ps-5"
++            placeholder="Tìm theo tên công việc hoặc ứng viên"
++          />
++        </div>
++      </div>
++    </div>
 +
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
++    <div class="d-flex flex-wrap gap-2 mb-3">
++      <span class="badge bg-primary-subtle text-primary">
++        {{ filteredApplicants.length }} ứng viên phù hợp
++      </span>
++      <span class="badge bg-light text-secondary">
++        {{ applicants.length }} tổng ứng viên
++      </span>
++    </div>
 +
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
- </style>
-diff --git a/src/components/AuditLogManager.vue b/src/components/AuditLogManager.vue
-index 4e4736d9f1617e77b81de0be5e9c5056dccf5850..b555304b35caf2d0a3339f5ab7893806e56fe8e9 100644
---- a/src/components/AuditLogManager.vue
-+++ b/src/components/AuditLogManager.vue
-@@ -1,37 +1,45 @@
- <template>
-   <div class="d-flex flex-column h-100">
-     <!-- Header -->
-     <div
-         class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2 border-bottom"
-         style="border-color: rgba(0, 0, 0, 0.3)"
-     >
-       <h5 class="fw-bold text-dark mb-0 d-flex align-items-center">
-         <i class="fa-solid fa-clock-rotate-left text-primary me-2"></i> Nhật ký hoạt động
-       </h5>
-
-       <div class="d-flex align-items-center justify-content-end gap-2">
-+        <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+        >
-+          <i class="fa-solid fa-bars"></i>
-+          <span class="d-none d-md-inline">Menu</span>
-+        </button>
-         <NotificationBell />
-         <div class="d-flex flex-column align-items-end text-end">
-           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-         </div>
-
-         <img
-             v-if="info.avatarUrl"
-             :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-             alt="avatar"
-             class="rounded-circle border"
-             style="width: 36px; height: 36px; object-fit: cover;"
-         />
-         <div v-else class="avatar-circle">
-           {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-         </div>
-       </div>
-     </div>
-
-     <!-- Bộ lọc -->
-     <div class="main-layout px-3">
-       <div class="card border-0 shadow-sm rounded-4 mb-3">
-         <div class="card-body py-3 px-4">
-           <div class="row g-3 align-items-center">
-             <div class="col-md-3 col-6">
-               <label class="form-label small mb-1 fw-medium">Hoạt động</label>
-@@ -207,54 +215,56 @@
-             <div class="custom-modal-header bg-primary text-white d-flex justify-content-between align-items-center">
-               <h6 class="mb-0 fw-semibold">
-                 <i class="fa-solid fa-code-compare me-2"></i> So sánh thay đổi
-               </h6>
-               <button class="btn-close btn-close-white" @click="closeDiff"></button>
-             </div>
-             <div class="custom-modal-body">
-               <pre class="bg-light p-3 rounded-3 small text-dark" style="max-height: 400px; overflow:auto;">
- Old: {{ prettyJSON(selectedLog?.oldValue) }}
-
- New: {{ prettyJSON(selectedLog?.newValue) }}
-               </pre>
-             </div>
-           </div>
-         </div>
-       </transition>
-     </div>
-   </div>
- </template>
-
- <script setup>
- import { ref, computed, onMounted } from "vue";
- import Swal from "sweetalert2";
- import api from "../api/api.js";
- import { useAuthStore } from "../stores/authStore.js";
-+import { useSidebarStore } from "../stores/sidebarStore.js";
- import NotificationBell from "./NotificationBell.vue";
-
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-+const sidebar = useSidebarStore();
-
- const isLoading = ref(false);
- const logs = ref([]);
- const activities = ref([]);
- const targets = ref([]);
- const selectedIds = ref([]);
- const selectedLog = ref(null);
- const showModal = ref(false);
-
- const filters = ref({
-   activity: "",
-   targetType: "",
-   startDate: "",
-   endDate: "",
- });
-
- const pagination = ref({
-   pageNo: 0,
-   size: 10,
- });
-
- const totalPages = ref(0);
- const totalElements = ref(0);
-
- const selectAll = computed({
-@@ -504,26 +514,50 @@ onMounted(async () => {
-   opacity: 1;
- }
-
- /* Body modal */
- .custom-modal-body {
-   padding: 1rem 1.5rem 1.5rem;
-   max-height: 500px;
-   overflow-y: auto;
- }
-
- /* Animation */
- @keyframes fadeIn {
-   from { opacity: 0; }
-   to { opacity: 1; }
- }
- @keyframes zoomIn {
-   from {
-     transform: scale(0.9);
-     opacity: 0.8;
-   }
-   to {
-     transform: scale(1);
-     opacity: 1;
-   }
- }
++    <div class="table-responsive bg-white shadow-sm rounded-4 position-relative">
++      <table class="table table-hover align-middle mb-0 applicants-table">
++        <thead class="table-light text-secondary">
++          <tr>
++            <th scope="col">Ứng viên</th>
++            <th scope="col">Công việc</th>
++            <th scope="col">Ngày ứng tuyển</th>
++            <th scope="col">Trạng thái</th>
++            <th scope="col" class="text-end">Ghi chú</th>
++            <th scope="col" class="text-end">Thao tác</th>
++          </tr>
++        </thead>
++        <tbody>
++          <tr v-for="applicant in filteredApplicants" :key="applicant.id">
++            <td>
++              <div class="d-flex align-items-center gap-2">
++                <div class="applicant-avatar">{{ applicant.initials }}</div>
++                <div>
++                  <div class="fw-semibold">{{ applicant.candidateName }}</div>
++                  <div class="text-muted extra-small">
++                    {{ applicant.email }} · {{ applicant.phone }}
++                  </div>
++                </div>
++              </div>
++            </td>
++            <td>
++              <div class="fw-semibold">{{ applicant.jobTitle }}</div>
++              <div class="text-muted extra-small">{{ applicant.department }}</div>
++            </td>
++            <td>
++              <div class="fw-semibold">{{ applicant.appliedDate }}</div>
++              <div class="text-muted extra-small">{{ applicant.expectedSalary }}</div>
++            </td>
++            <td>
++              <span :class="['status-pill', statusClass(applicant.status)]">
++                {{ applicant.status }}
++              </span>
++            </td>
++            <td class="text-end text-muted small">
++              {{ applicant.note }}
++            </td>
++            <td class="text-end">
++              <div class="d-flex justify-content-end gap-2">
++                <button
++                  type="button"
++                  class="btn btn-sm btn-outline-success"
++                  @click="openAcceptModal(applicant)"
++                >
++                  <i class="fa-solid fa-check me-1"></i>
++                  Chấp nhận
++                </button>
++                <button
++                  type="button"
++                  class="btn btn-sm btn-outline-danger"
++                  @click="openRejectModal(applicant)"
++                >
++                  <i class="fa-solid fa-xmark me-1"></i>
++                  Từ chối
++                </button>
++              </div>
++            </td>
++          </tr>
++          <tr v-if="!filteredApplicants.length">
++            <td colspan="6" class="text-center text-muted py-4">
++              Không tìm thấy ứng viên phù hợp.
++            </td>
++          </tr>
++        </tbody>
++      </table>
++    </div>
 +
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
++    <div
++      v-if="showAcceptModal"
++      class="modal fade show d-block"
++      tabindex="-1"
++      role="dialog"
++    >
++      <div class="modal-dialog modal-dialog-centered">
++        <div class="modal-content border-0 shadow">
++          <div class="modal-header">
++            <h6 class="modal-title fw-semibold">Thư chào mừng</h6>
++            <button type="button" class="btn-close" @click="closeModals"></button>
++          </div>
++          <div class="modal-body">
++            <p class="text-muted small mb-2">
++              Gửi thư chào mừng cho ứng viên <strong>{{ selectedApplicant?.candidateName }}</strong>.
++            </p>
++            <textarea
++              v-model="welcomeMessage"
++              class="form-control"
++              rows="4"
++              placeholder="Nhập nội dung thư chào mừng..."
++            ></textarea>
++          </div>
++          <div class="modal-footer">
++            <button type="button" class="btn btn-light" @click="closeModals">Hủy</button>
++            <button type="button" class="btn btn-primary" @click="submitAccept">
++              Gửi thư
++            </button>
++          </div>
++        </div>
++      </div>
++    </div>
 +
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
++    <div
++      v-if="showRejectModal"
++      class="modal fade show d-block"
++      tabindex="-1"
++      role="dialog"
++    >
++      <div class="modal-dialog modal-dialog-centered">
++        <div class="modal-content border-0 shadow">
++          <div class="modal-header">
++            <h6 class="modal-title fw-semibold">Thư từ chối</h6>
++            <button type="button" class="btn-close" @click="closeModals"></button>
++          </div>
++          <div class="modal-body">
++            <p class="text-muted small mb-2">
++              Lý do từ chối (có thể bỏ qua) cho
++              <strong>{{ selectedApplicant?.candidateName }}</strong>.
++            </p>
++            <textarea
++              v-model="rejectReason"
++              class="form-control"
++              rows="4"
++              placeholder="Nhập lý do từ chối (không bắt buộc)..."
++            ></textarea>
++          </div>
++          <div class="modal-footer">
++            <button type="button" class="btn btn-light" @click="closeModals">Hủy</button>
++            <button type="button" class="btn btn-danger" @click="submitReject">
++              Xác nhận từ chối
++            </button>
++          </div>
++        </div>
++      </div>
++    </div>
 +
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
- </style>
-diff --git a/src/components/CreateProject.vue b/src/components/CreateProject.vue
-index 73e05b47d971136b37714f7e99a510c4ab928970..9740004d88eccb493a8b9dc738cfee63820b37bc 100644
---- a/src/components/CreateProject.vue
-+++ b/src/components/CreateProject.vue
-@@ -1,43 +1,51 @@
- <template>
-   <div class="container-build pb-4 bg-light min-vh-90 danh-sach-du-an">
-     <div
-         class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2"
-         style="border-bottom: solid 0.5px rgba(0,0,0,0.3)"
-     >
-       <h5 class="fw-bold mb-0 d-flex align-items-center">
-         <button
-             @click="goBack"
-             class="btn border border-primary rounded-circle d-flex align-items-center justify-content-center me-2"
-             style="width: 40px; height: 40px;"
-         >
-           <i class="fa-solid fa-chevron-left text-primary fs-5"></i>
-         </button>
-         Tạo mới dự án
-       </h5>
-
-       <div class="d-flex align-items-center justify-content-end gap-2">
-+        <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+        >
-+          <i class="fa-solid fa-bars"></i>
-+          <span class="d-none d-md-inline">Menu</span>
-+        </button>
-         <NotificationBell />
-         <div class="d-flex flex-column align-items-end text-end">
-           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-         </div>
-
-         <img
-             v-if="info.avatarUrl"
-             :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-             alt="avatar"
-             class="rounded-circle border"
-             style="width: 36px; height: 36px; object-fit: cover;"
-         />
-         <div v-else class="avatar-circle">
-           {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-         </div>
-       </div>
-     </div>
-
-     <div class="tabs-wrapper d-flex align-items-center justify-content-between border-bottom pb-2 px-3">
-       <div class="tabs-du-an flex-grow-1 overflow-hidden">
-         <div class="d-flex gap-4 small text-muted fw-medium px-2 inner-tabs">
-           <span
-               v-for="tab in tabs"
-               :key="tab.key"
-               :class="['tab-item', { active: activeTab.key === tab.key }]"
-@@ -748,56 +756,58 @@
-                             {{ isMemberInProject(employee.id) ? 'Đã trong dự án' : 'Thêm' }}
-                           </button>
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-                   <div v-else class="text-muted small text-center py-4">
-                     Không có phòng ban nào phù hợp với điều kiện hiển thị.
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div> <!-- /drawer-panel -->
-         </div> <!-- /drawer-overlay -->
-       </div> <!-- /members tab -->
-     </div>
-   </div>
- </template>
-
- <script setup>
- import { computed, ref, watch, onMounted, onBeforeUnmount } from "vue";
- import { useRouter } from "vue-router";
- import { showError, showSuccess, showWarning } from "../assets/js/alertService.js";
- import api from "../api/api.js";
- import { useAuthStore } from "../stores/authStore.js";
-+import { useSidebarStore } from "../stores/sidebarStore.js";
- import DescriptionEditor from "./common/DescriptionEditor.vue";
- import { showLoading, updateAlertSuccess, updateAlertError } from "../assets/js/alertService.js";
- import NotificationBell from "./NotificationBell.vue";
-
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-+const sidebar = useSidebarStore();
-
- const AVATAR_BASE_URL = " https://s3.cloudfly.vn/thg-storage-dev/uploads-public/";
-
- const router = useRouter();
-
- const tabs = [
-   { key: "info", label: "Thông tin dự án" },
-   { key: "members", label: "Tham gia dự án" }
- ];
-
- const activeTab = ref(tabs[0]);
- const hasLoadedMembersData = ref(false);
- watch(activeTab, async (tab) => {
-   if (tab.key === "members" && !hasLoadedMembersData.value) {
-     const loaded = await getDataTab2();
-     hasLoadedMembersData.value = loaded;
-   }
- });
-
- const dropdownOpen = ref(false);
- const projectTypes = ref([]);
-
- const toggleDropdown = () => {
-   dropdownOpen.value = !dropdownOpen.value;
- };
-@@ -1891,29 +1901,49 @@ watch(
- .drawer-employee {
-   background: #fff;
-   border-radius: 12px;
-   padding: 12px 16px;
-   border: 1px solid #eef1ff;
-   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
- }
-
- .drawer-employee:hover {
-   transform: translateY(-2px);
-   box-shadow: 0 8px 18px rgba(76, 91, 229, 0.12);
-   border-color: #ccd2ff;
- }
-
- .search-result-card {
-   background: #fff;
-   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
- }
-
- .search-result-card:hover {
-   transform: translateY(-2px);
-   box-shadow: 0 8px 18px rgba(76, 91, 229, 0.12);
-   border-color: #ccd2ff !important;
- }
-
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
-
--
--</style>
-\ No newline at end of file
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
-+</style>
-diff --git a/src/components/CustomerManager.vue b/src/components/CustomerManager.vue
-index 79da2f4d86acc3c5044258f68b9faa37d41db958..74b9c8c599b749c09b36a248ca8f6c8c282939d4 100644
---- a/src/components/CustomerManager.vue
-+++ b/src/components/CustomerManager.vue
-@@ -1,37 +1,45 @@
- <template>
-   <div class="d-flex flex-column h-100">
-     <!-- Header -->
-     <div
-         class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2 border-bottom"
-         style="border-color: rgba(0, 0, 0, 0.3)"
-     >
-       <h5 class="fw-bold mb-0 d-flex align-items-center text-dark">
-         <i class="fa-solid fa-user-tie me-2 text-primary"></i> Quản lý khách hàng
-       </h5>
-
-       <div class="d-flex align-items-center justify-content-end gap-2">
-+        <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+        >
-+          <i class="fa-solid fa-bars"></i>
-+          <span class="d-none d-md-inline">Menu</span>
-+        </button>
-         <NotificationBell />
-         <div class="d-flex flex-column align-items-end text-end">
-           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-         </div>
-
-         <img
-             v-if="info.avatarUrl"
-             :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-             alt="avatar"
-             class="rounded-circle border"
-             style="width: 36px; height: 36px; object-fit: cover;"
-         />
-         <div v-else class="avatar-circle">
-           {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-         </div>
-       </div>
-     </div>
-
-     <!-- Main layout -->
-     <div class="main-layout px-3">
-       <!-- Form Section -->
-       <div class="form-section card border rounded-4 shadow-sm">
-         <div class="card-header fw-semibold border-bottom rounded-top-3 form-header">
-           {{ isEditing ? 'Cập nhật khách hàng' : 'Thêm khách hàng mới' }}
-         </div>
-@@ -237,53 +245,55 @@
-                 @click="nextPage"
-             >
-               <i class="fa-solid fa-angle-right"></i>
-             </button>
-             <button
-                 class="btn btn-sm btn-outline-primary"
-                 :disabled="pageNo >= totalPages - 1"
-                 @click="toLastPage"
-             >
-               <i class="fa-solid fa-angles-right"></i>
-             </button>
-           </div>
-         </div>
-       </div>
-     </div>
-   </div>
- </template>
-
- <script setup>
- import { ref, onMounted, nextTick, computed } from 'vue'
- import Swal from 'sweetalert2'
- import { showSuccess } from '../assets/js/alertService.js'
- import api from '../api/api.js'
- import addressData from '../assets/js/address.json'
- import {useAuthStore} from "../stores/authStore.js";
-+import { useSidebarStore } from "../stores/sidebarStore.js";
- import NotificationBell from "./NotificationBell.vue";
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-+const sidebar = useSidebarStore();
-
- const provinces = ref(addressData)
- const wards = ref([])
- const isEditing = ref(false)
- const isLoading = ref(false)
-
- const form = ref({
-   customerName: '',
-   customerPhone: '',
-   street: '',
-   provinceCode: '',
-   wardCode: ''
- })
-
- // ========== CRUD ==========
- const saveCustomer = async () => {
-   if (!form.value.customerName || !form.value.customerPhone) {
-     Swal.fire('Thiếu thông tin', 'Vui lòng nhập đầy đủ tên và số điện thoại!', 'warning')
-     return
-   }
-   const fullAddress = [form.value.provinceCode, form.value.wardCode, form.value.street].filter(Boolean).join('|')
-   const payload = { ...form.value, address: fullAddress }
-
-   if (isEditing.value) {
-     await api.put(`/admin.thg/customer/update/${form.value.customerPhone}`, payload, { withCredentials: true })
-@@ -471,26 +481,50 @@ onMounted(fetchCustomersPaged)
-
- .icon-btn {
-   border-radius: 6px;
-   padding: 6px 10px;
- }
- .btn-edit {
-   background: #ecfdf5;
-   color: #059669;
- }
- .btn-delete {
-   background: #fef2f2;
-   color: #dc2626;
- }
-
- .avatar-circle {
-   width: 32px;
-   height: 32px;
-   border-radius: 50%;
-   background: #3b82f6;
-   color: white;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   font-weight: 600;
- }
++    <div v-if="showAcceptModal || showRejectModal" class="modal-backdrop fade show"></div>
++  </div>
++</template>
 +
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
++<script setup>
++import { computed, ref } from "vue";
 +
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
++const applicants = ref([
++  {
++    id: 1,
++    candidateName: "Nguyễn Minh Khoa",
++    initials: "NK",
++    email: "khoa.nguyen@demo.com",
++    phone: "0901 234 567",
++    jobTitle: "Frontend Engineer",
++    department: "Team Web",
++    appliedDate: "12/03/2024",
++    expectedSalary: "20 - 25 triệu",
++    status: "Đang đánh giá",
++    note: "Hẹn phỏng vấn vòng 1"
++  },
++  {
++    id: 2,
++    candidateName: "Trần Thảo Vy",
++    initials: "TV",
++    email: "vy.tran@demo.com",
++    phone: "0932 778 911",
++    jobTitle: "UI/UX Designer",
++    department: "Team Product",
++    appliedDate: "10/03/2024",
++    expectedSalary: "18 - 22 triệu",
++    status: "Đã nhận hồ sơ",
++    note: "Đang review portfolio"
++  },
++  {
++    id: 3,
++    candidateName: "Phạm Quốc Huy",
++    initials: "QH",
++    email: "huy.pham@demo.com",
++    phone: "0977 445 221",
++    jobTitle: "Backend Engineer",
++    department: "Team Platform",
++    appliedDate: "09/03/2024",
++    expectedSalary: "25 - 30 triệu",
++    status: "Phỏng vấn",
++    note: "Vòng kỹ thuật 15/03"
++  },
++  {
++    id: 4,
++    candidateName: "Lê Hải Anh",
++    initials: "HA",
++    email: "anh.le@demo.com",
++    phone: "0919 554 333",
++    jobTitle: "Project Coordinator",
++    department: "PMO",
++    appliedDate: "07/03/2024",
++    expectedSalary: "15 - 18 triệu",
++    status: "Đạt yêu cầu",
++    note: "Chờ offer"
++  },
++  {
++    id: 5,
++    candidateName: "Vũ Đức Anh",
++    initials: "DA",
++    email: "anh.vu@demo.com",
++    phone: "0988 120 876",
++    jobTitle: "QA Engineer",
++    department: "Team QA",
++    appliedDate: "06/03/2024",
++    expectedSalary: "14 - 17 triệu",
++    status: "Không phù hợp",
++    note: "Thiếu kinh nghiệm automation"
++  }
++]);
 +
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
- </style>
-diff --git a/src/components/DepartmentManager.vue b/src/components/DepartmentManager.vue
-index 8811f1641aae2db57ee8afce3ab803ebc1c56d15..56cc08cd56d1ae97ee71dd79c1dffe3730e3cee7 100644
---- a/src/components/DepartmentManager.vue
-+++ b/src/components/DepartmentManager.vue
-@@ -1,33 +1,41 @@
- <template>
-   <!-- Header -->
-   <div class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2 " style="border-bottom: solid 0.5px rgba(0,0,0,0.3)">
-     <h5 class="fw-bold mb-0 d-flex align-items-center">
-       Quản lý phòng ban
-     </h5>
-
-     <div class="d-flex align-items-center justify-content-end gap-2">
-+      <button
-+          class="header-menu-toggle"
-+          title="Ẩn/hiện menu"
-+          @click="sidebar.toggle()"
-+      >
-+        <i class="fa-solid fa-bars"></i>
-+        <span class="d-none d-md-inline">Menu</span>
-+      </button>
-       <NotificationBell />
-       <div class="d-flex flex-column align-items-end text-end">
-         <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-       </div>
-
-       <img
-           v-if="info.avatarUrl"
-           :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-           alt="avatar"
-           class="rounded-circle border"
-           style="width: 36px; height: 36px; object-fit: cover;"
-       />
-       <div v-else class="avatar-circle">
-         {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-       </div>
-     </div>
-   </div>
-
-   <!-- Nội dung chính -->
-   <div class="main-layout px-3" style="height: 90%">
-     <!-- Form trái -->
-     <div class="form-section card border rounded-4 shadow-sm small-text">
-       <div class="card-header fw-semibold small-text  border-bottom rounded-top-3"
-         style="background-color: #88b686">
-         Thêm / sửa phòng ban
-@@ -221,54 +229,56 @@
-             <td class="text-center">
-               <button
-                   v-if="authStore.listAuthority.includes('DEPARTMENT_UPDATE') || authStore.listAuthority.includes('DEPARTMENT_UPDATE')"
-                   class="btn btn-soft-primary btn-sm me-1"
-                   @click="getEdit(dept.departmentName)"
-               >
-                 <i class="fa-solid fa-pen"></i>
-               </button>
-               <button v-if="authStore.listAuthority.includes('DEPARTMENT_DELETE')" class="btn btn-soft-danger btn-sm" @click="deleteDepartment(dept.departmentName)">
-                 <i class="fa-solid fa-trash"></i>
-               </button>
-             </td>
-           </tr>
-           </tbody>
-         </table>
-       </div>
-     </div>
-   </div>
- </template>
-
- <script setup>
- import {onMounted, ref} from "vue";
- import api from "../api/api.js";
- import {showError, showSuccess, showWarning} from "../assets/js/alertService.js";
- import { useAuthStore } from "../stores/authStore.js";
-+import { useSidebarStore } from "../stores/sidebarStore.js";
- import DescriptionEditor from "./common/DescriptionEditor.vue";
- import AddressSelector from "./land/my-valuation/components/AddressSelector.vue";
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-+const sidebar = useSidebarStore();
- const addressKey = ref(0);
-
-
- function validateDepartment() {
-   const form = departmentForm.value;
-
-   // ===== VALIDATE TÊN PHÒNG BAN =====
-   if (!form.departmentName || form.departmentName.trim() === "") {
-     showWarning("Dữ liệu chưa hợp lệ!", "Tên phòng ban không được bỏ trống.");
-     return false;
-   }
-
-   if (form.departmentName.length < 10) {
-     showWarning("Dữ liệu chưa hợp lệ!", "Tên phòng ban phải có ít nhất 10 ký tự.");
-     return false;
-   }
-
-   if (form.departmentName.length > 55) {
-     showWarning("Dữ liệu chưa hợp lệ!", "Tên phòng ban quá dài .");
-     return false;
-   }
-
-   // ===== VALIDATE MÔ TẢ =====
-   if (!form.description || form.description.trim() === "") {
-     showWarning("Dữ liệu chưa hợp lệ!", "Mô tả không được để trống.");
-@@ -696,27 +706,49 @@ function goToEmployee() {
-   color: #426ba8;/* phóng to nhẹ overlay */
- }
-
- .overlay-camera i {
-   font-size: 24px;
- }
-
- /* hover hiện overlay */
- .text-center:hover .overlay-camera {
-   opacity: 1;
- }
-
- .avatar-circle {
-   width: 35px;
-   height: 35px;
-   border-radius: 50%;
-   background-color: #d6d9ff;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   font-weight: bold;
-   color: #333;
- }
- /* Modal nền */
-
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
++const searchKeyword = ref("");
++const showAcceptModal = ref(false);
++const showRejectModal = ref(false);
++const selectedApplicant = ref(null);
++const welcomeMessage = ref("");
++const rejectReason = ref("");
 +
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
- </style>
-diff --git a/src/components/EmployeeManager.vue b/src/components/EmployeeManager.vue
-index 03101c04848234f3b17fedc78139c089545b26ea..55fcd71479fbfccc48f3f8f0781e4fa2a40d4436 100644
---- a/src/components/EmployeeManager.vue
-+++ b/src/components/EmployeeManager.vue
-@@ -1,42 +1,50 @@
- <template>
-
-     <!-- Header -->
-     <div class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2 " style="border-bottom: solid 0.5px rgba(0,0,0,0.3)">
-       <h5 class="fw-bold mb-0 d-flex align-items-center">
-         <button
-             v-if="authStore.listAuthority.includes('EMPLOYEE_CREATE')"
-             @click="openModal3"
-             class="btn border border-primary rounded-circle d-flex align-items-center justify-content-center  me-2"
-             style="width: 40px; height: 40px;"
-         >
-           <i class="fa-solid fa-plus text-primary fs-5"></i>
-         </button>
-         Quản lý nhân sự
-       </h5>
-
-       <div class="d-flex align-items-center justify-content-end gap-2">
-+        <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+        >
-+          <i class="fa-solid fa-bars"></i>
-+          <span class="d-none d-md-inline">Menu</span>
-+        </button>
-         <NotificationBell />
-         <div class="d-flex flex-column align-items-end text-end">
-           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-         </div>
-
-         <img
-             v-if="info.avatarUrl"
-             :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-             alt="avatar"
-             class="rounded-circle border"
-             style="width: 36px; height: 36px; object-fit: cover;"
-         />
-         <div v-else class="avatar-circle">
-           {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-         </div>
-       </div>
-     </div>
-
-     <!-- Filter bar -->
-     <div
-         class="filter-bar bg-light border rounded-4 px-3 py-2 d-flex align-items-center mb-3 mx-3"
-     >
-       <!-- Thông tin hiển thị -->
-       <span class="small text-muted me-3">
-       Hiển thị
-@@ -701,84 +709,86 @@
-             </select>
-           </div>
-         </div>
-       </form>
-     </div>
-
-     <!-- Footer -->
-     <div class="modal-footer d-flex justify-content-end gap-2">
-       <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal">Hủy</button>
-       <button type="button" class="btn btn-primary" @click="createEmployee">Lưu</button>
-     </div>
-   </div>
- </div>
- </div>
- </template>
- <script setup>
- import NotificationBell from "./NotificationBell.vue";
-
- const statusSelectClass = computed(() => {
-   return detailUpdate.value.status
-       ? "text-success"
-       : "text-danger";
- });
- import { ref, computed, watch, onMounted } from "vue";
- import { useAuthStore } from "../stores/authStore.js";
-+import { useSidebarStore } from "../stores/sidebarStore.js";
- import api from "../api/api.js";
- import {nextTick} from "vue";
- import { showSuccess, showError, showWarning } from "../assets/js/alertService.js";
-
-
-
- // ========= Pagination & Filter =========
- const total = ref(0);
- const page = ref(1);
- const size = ref(10);
- const pageSize = ref(10);
- const search = ref("");
- const selectedDept = ref("");
- const selectedGroup = ref("");
- const departmentsData = ref([]);
- const departments = ref([]);
- const groups = ref([]);
- const isAutoAdjustingSize = ref(false);
- const totalPages = ref(0);
- const pageString = computed(
-     () =>
-         `${String(page.value).padStart(2, "0")} / ${String(totalPages.value).padStart(
-             2,
-             "0"
-         )}`
- );
-
- const goToFirstPage = () => (page.value = 1);
- const goToLastPage = () => (page.value = totalPages.value);
- const prevPage = () => page.value > 1 && page.value--;
- const nextPage = () => page.value < totalPages.value && page.value++;
-
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-+const sidebar = useSidebarStore();
-
- // ========= Danh sách nhân sự =========
- const nhanSuList = ref([]);
-
- // ========= Gọi API lấy danh sách phòng ban + nhóm =========
- async function getDepartments() {
-   try {
-     const token = authStore.accessToken;
-
-     const response = await api.get("/admin/api/getInit", {
-       headers: { Authorization: `Bearer ${token}` },
-       withCredentials: true,
-     });
-
-     departmentsData.value = response.data;
-     departments.value = response.data.map((d) => d.name);
-     groups.value = response.data.flatMap((d) => d.listTeams.map((t) => t.name));
-   } catch (error) {
-     console.error("Lỗi khi lấy department:", error);
-   }
- }
- // ========= Gọi API lấy danh sách nhân sự =========
- const suppressSizeWatch = ref(false); // khóa an toàn
-
- // ========= Gọi API lấy danh sách nhân sự =========
-@@ -1503,26 +1513,50 @@ label[for="avatarInput"]:hover #overlayIcon {
- }
- .table th, .table td {
-   font-size: 0.9rem;
- }
- .modal-content {
-   border-radius: 16px;
-   overflow: hidden; /* giúp bo góc rõ khi có border hoặc shadow */
-   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
- }
-
- /* Bo góc nhẹ cho input, select, textarea */
- .form-control,
- .form-select {
-   border-radius: 10px !important;
- }
-
- /* Bo góc cho button outline */
- .btn-outline-secondary {
-   border-radius: 8px;
- }
-
- /* Bo góc cho button chính */
- .btn-primary {
-   border-radius: 8px;
- }
--</style>
-\ No newline at end of file
++const filteredApplicants = computed(() => {
++  const keyword = searchKeyword.value.trim().toLowerCase();
 +
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-+
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
-+
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
-+</style>
-diff --git a/src/components/Project.vue b/src/components/Project.vue
-index 27f133dd7577370adfdcb5be0fd45a12fea226db..946d2905d86ce2821624763ab3f19f55ce2e8d90 100644
---- a/src/components/Project.vue
-+++ b/src/components/Project.vue
-@@ -1,42 +1,50 @@
- <template>
-   <div class=" container-build pb-4 bg-light min-vh-90 danh-sach-du-an">
-     <!-- Header -->
-     <div class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2 " style="border-bottom: solid 0.5px rgba(0,0,0,0.3)">
-       <h5 class="fw-bold mb-0 d-flex align-items-center">
-         <button
-             v-if="canCreateProject"
-             @click="goToCreateProject"
-             class="btn border border-primary rounded-circle d-flex align-items-center justify-content-center  me-2"
-             style="width: 40px; height: 40px;"
-         >
-           <i class="fa-solid fa-plus text-primary fs-5"></i>
-         </button>
-         Quản lý dự án
-       </h5>
-
-       <div class="d-flex align-items-center justify-content-end gap-2">
-+        <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+        >
-+          <i class="fa-solid fa-bars"></i>
-+          <span class="d-none d-md-inline">Menu</span>
-+        </button>
-         <NotificationBell />
-         <div class="d-flex flex-column align-items-end text-end">
-           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-         </div>
-
-         <img
-             v-if="info.avatarUrl"
-             :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-             alt="avatar"
-             class="rounded-circle border"
-             style="width: 36px; height: 36px; object-fit: cover;"
-         />
-         <div v-else class="avatar-circle">
-           {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-         </div>
-       </div>
-     </div>
-     <!-- Tabs -->
-     <!-- Tabs -->
-     <div class="tabs-wrapper d-flex align-items-center justify-content-between border-bottom pb-2  px-3">
-       <!-- Thanh cuộn tab -->
-       <div ref="tabContainer" class="tabs-du-an flex-grow-1 overflow-hidden">
-         <div class="d-flex gap-4 small text-muted fw-medium px-2 inner-tabs">
-       <span
-           v-for="tab in tabs"
-@@ -323,54 +331,56 @@
-             </div>
-           </td>
-
-           <td class="text-center">
-             <i
-                 :class="pro.priority
-                 ? 'fa-solid fa-flag text-warning'    // khi priority = true
-                 : 'fa-regular fa-flag text-muted'   // khi priority = false
-               "
-             ></i>
-           </td>
-         </tr>
-         </tbody>
-       </table>
-     </div>
-   </div>
-   </div>
-
- </template>
-
- <script setup>
- import {ref, computed, onMounted} from "vue";
- import { useRouter } from "vue-router";
- import api from "../api/api.js";
- import { useAuthStore } from "../stores/authStore.js";
-+import { useSidebarStore } from "../stores/sidebarStore.js";
-
-
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-+const sidebar = useSidebarStore();
- const canCreateProject = computed(
-     () => Array.isArray(authStore.listAuthority) && authStore.listAuthority.includes('PROJECT_CREATE')
- );
-
- const router = useRouter();
-
- const goToCreateProject = () => {
-   router.push({ name: "CreateProject" });
- };
-
- // Giá trị sắp xếp
- const sortOrder = ref("asc");
-
- // Tab đang chọn
- const activeTab = ref(null);
-
- // Danh sách tab
- const tabs = ref([]);
-
- // Dữ liệu dự án
- const projects = ref([]);
-
- // --- Các hàm xử lý ---
- const getVisibleAvatars = (list) => list.slice(0, 3);
- const getHiddenAvatars =  (list) => {
-@@ -926,28 +936,49 @@ input[type="checkbox"] {
-   position: relative;
-   z-index: 0;
- }
-
- :deep(.custom-table tbody tr.project-row:hover) {
-   z-index: 20;
- }
-
- :deep(.custom-table tbody tr.project-row:hover td) {
-   background-color: #818cf8 !important;
-   color: #fff !important;
-   transition: all 0.25s ease;
- }
- :deep(.custom-table thead.bg-light) {
-   background: #818cf8 !important;
-   color: #ffffff !important;
-   font-weight: 600;
-   border-bottom: 2px solid #5a4eb8;
- }
- :deep(.table-responsive) {
-   overflow: visible;
-   position: relative;
-   z-index: 0;
- }
-
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
-
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
- </style>
-diff --git a/src/components/RolePermissionManager.vue b/src/components/RolePermissionManager.vue
-index 2eaa6f89e2e5237dc17ac16a5847e60b086a3655..0cf6d30c557ad77a07fc7815905a3b666753ab4e 100644
---- a/src/components/RolePermissionManager.vue
-+++ b/src/components/RolePermissionManager.vue
-@@ -1,37 +1,45 @@
- <template>
-   <div class="d-flex flex-column h-100">
-     <!-- Header -->
-     <div
-         class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2 border-bottom"
-         style="border-color: rgba(0, 0, 0, 0.3)"
-     >
-       <h5 class="fw-bold mb-0 d-flex align-items-center text-dark">
-         <i class="fa-solid fa-shield-halved me-2 text-primary"></i> Quản lý phân quyền
-       </h5>
-
-       <div class="d-flex align-items-center justify-content-end gap-2">
-+        <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+        >
-+          <i class="fa-solid fa-bars"></i>
-+          <span class="d-none d-md-inline">Menu</span>
-+        </button>
-         <NotificationBell />
-         <div class="d-flex flex-column align-items-end text-end">
-           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-         </div>
-
-         <img
-             v-if="info.avatarUrl"
-             :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-             alt="avatar"
-             class="rounded-circle border"
-             style="width: 36px; height: 36px; object-fit: cover;"
-         />
-         <div v-else class="avatar-circle">
-           {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-         </div>
-       </div>
-     </div>
-
-     <!-- Main -->
-     <div class="px-3">
-       <div class="card border rounded-4 shadow-sm flex-grow-1 overflow-hidden position-relative">
-         <div
-             class="card-header fw-semibold border-bottom rounded-top-4"
-             style="background-color: #60a5fa; color: #fff"
-         >
-@@ -289,53 +297,55 @@
-             Chưa có dữ liệu quyền hoặc chưa chọn vai trò
-           </div>
-
-           <!-- Save -->
-           <div class="d-flex justify-content-end mt-4">
-             <button
-                 class="btn btn-success btn-sm px-4 shadow-sm"
-                 @click="updatePermissions"
-                 :disabled="!permissions.length || !selectedRole"
-             >
-               <i class="fa-solid fa-save me-1"></i> Lưu thay đổi
-             </button>
-           </div>
-         </div>
-       </div>
-     </div>
-   </div>
- </template>
-
- <script setup>
- import { ref, onMounted, computed } from 'vue'
- import api from '../api/api.js'
- import Swal from 'sweetalert2'
- import { showSuccess } from '../assets/js/alertService.js'
- import {useAuthStore} from "../stores/authStore.js";
-+import { useSidebarStore } from "../stores/sidebarStore.js";
- import NotificationBell from "./NotificationBell.vue";
- const authStore = useAuthStore()
- const info = authStore.userInfo
-+const sidebar = useSidebarStore()
-
- const roles = ref([])
- const selectedRole = ref('')
- const permissions = ref([])
- const activePermission = ref(null)
-
- const selectedRoleObj = computed(() =>
-     roles.value.find((r) => r.roleName === selectedRole.value)
- )
-
- // 🧩 Lấy danh sách Role
- const fetchRoles = async () => {
-   try {
-     const { data } = await api.get('/admin.thg/role-permission/roles')
-     roles.value = data.filter((r) => r.roleName)
-
-     if (roles.value.length) {
-       selectedRole.value = roles.value[0].roleName
-       await fetchPermissions()
-     }
-   } catch {
-     Swal.fire('Lỗi', 'Không thể tải danh sách Role', 'error')
-   }
- }
-
-@@ -524,26 +534,50 @@ const deleteRoleConfirm = async () => {
-     Swal.fire('Lỗi', 'Không thể xóa vai trò.', 'error')
-   }
- }
- </script>
-
- <style scoped>
- .hoverable {
-   transition: all 0.2s ease;
- }
- .hoverable:hover {
-   background-color: #f1f5f9;
- }
-
- .avatar-circle {
-   width: 32px;
-   height: 32px;
-   border-radius: 50%;
-   background: #3b82f6;
-   color: white;
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   font-weight: 600;
-   font-size: 15px;
- }
-+
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-+
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
-+
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
- </style>
-diff --git a/src/components/ServiceManager.vue b/src/components/ServiceManager.vue
-index 9dd71f53b98c170f5a9c52e3a30d14e2ba6ab0df..e0d6c8ddab3c8954a36b2a984ab0e9d8a4e6c05f 100644
---- a/src/components/ServiceManager.vue
-+++ b/src/components/ServiceManager.vue
-@@ -1,37 +1,45 @@
- <template>
-   <div class="d-flex flex-column h-100">
-     <!-- Header -->
-     <div
-         class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2 border-bottom"
-         style="border-color: rgba(0, 0, 0, 0.3)"
-     >
-       <h5 class="fw-bold mb-0 d-flex align-items-center text-dark">
-         <i class="fa-solid fa-briefcase me-2 text-primary"></i> Quản lý dịch vụ
-       </h5>
-
-       <div class="d-flex align-items-center justify-content-end gap-2">
-+        <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+        >
-+          <i class="fa-solid fa-bars"></i>
-+          <span class="d-none d-md-inline">Menu</span>
-+        </button>
-         <NotificationBell />
-         <div class="d-flex flex-column align-items-end text-end">
-           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-         </div>
-
-         <img
-             v-if="info.avatarUrl"
-             :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-             alt="avatar"
-             class="rounded-circle border"
-             style="width: 36px; height: 36px; object-fit: cover;"
-         />
-         <div v-else class="avatar-circle">
-           {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-         </div>
-       </div>
-     </div>
-
-     <!-- Main layout -->
-     <div class="main-layout px-3">
-       <!-- Form Section -->
-       <div class="form-section card border rounded-4 shadow-sm">
-         <div class="card-header fw-semibold border-bottom rounded-top-4 form-header" style="background-color: #9bd5af">
-           {{ isEditing ? 'Cập nhật dịch vụ' : 'Thêm dịch vụ mới' }}
-         </div>
-@@ -137,55 +145,57 @@
-                   </button>
-                   <button
-                       v-if="authStore.listAuthority.includes('SERVICE_DELETE')"
-                       class="btn icon-btn btn-delete"
-                       @click="handleDelete(service)"
-                   >
-                     <i class="fa-solid fa-trash"></i>
-                   </button>
-                 </div>
-               </td>
-             </tr>
-             </tbody>
-           </table>
-         </div>
-       </div>
-     </div>
-   </div>
- </template>
-
- <script setup>
- import { ref, onMounted } from 'vue'
- import api from '../api/api.js'
- import Swal from 'sweetalert2'
- import { showSuccess, confirmWithInput } from '../assets/js/alertService.js'
- import { useAuthStore } from "../stores/authStore.js"
-+import { useSidebarStore } from "../stores/sidebarStore.js"
- import DescriptionEditor from "./common/DescriptionEditor.vue"
- import NotificationBell from "./NotificationBell.vue";
-
- const authStore = useAuthStore()
- const info = authStore.userInfo
-+const sidebar = useSidebarStore()
-
- const services = ref([])
- const form = ref({ serviceID: null, serviceName: '', description: '' })
- const isEditing = ref(false)
- const isLoading = ref(false)
-
- // 🧩 Load danh sách
- const fetchServices = async () => {
-   isLoading.value = true
-   try {
-     const res = await api.get('/admin.thg/service/all', { withCredentials: true })
-     services.value = res.data || []
-   } catch (err) {
-
-   } finally {
-     isLoading.value = false
-   }
- }
-
- // 🧩 Reset form
- const resetForm = () => {
-   form.value = { serviceID: null, serviceName: '', description: '' }
-   isEditing.value = false
- }
-
-@@ -327,26 +337,50 @@ onMounted(fetchServices)
- .btn-edit:hover {
-   background-color: #d1fae5;
- }
- .btn-delete {
-   background-color: #fef2f2;
-   border-color: #fecaca;
-   color: #dc2626;
- }
- .btn-delete:hover {
-   background-color: #fee2e2;
- }
-
- /* ====== AVATAR ====== */
- .avatar-circle {
-   width: 32px;
-   height: 32px;
-   border-radius: 50%;
-   background: #3b82f6;
-   color: white;
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   font-weight: 600;
-   font-size: 15px;
- }
-+
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-+
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
-+
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
- </style>
-diff --git a/src/components/ServiceSystemManager.vue b/src/components/ServiceSystemManager.vue
-index 6156ec5218b8aa71f8fb47d4f1228511404118c9..675ba39d43f162d9e625afbb35c9e93de7faef66 100644
---- a/src/components/ServiceSystemManager.vue
-+++ b/src/components/ServiceSystemManager.vue
-@@ -1,45 +1,53 @@
- <template>
-   <div class="pb-4 bg-light min-vh-95">
-     <!-- HEADER -->
-     <div
-         class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2 header-bar"
-     >
-       <h5 class="fw-bold mb-0 d-flex align-items-center">
-         <button
-             v-if="canCreatePackage"
-             @click="openCreateDrawer"
-             class="btn border border-primary rounded-circle d-flex align-items-center justify-content-center me-2 create-btn"
-             style="width: 38px; height: 38px;"
-         >
-           <i class="fa-solid fa-plus text-primary fs-5"></i>
-         </button>
-         <i class="fa-solid fa-box-open text-primary me-2"></i>
-         Quản lý gói dịch vụ
-       </h5>
-
-       <div class="d-flex align-items-center justify-content-end gap-2">
-+        <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+        >
-+          <i class="fa-solid fa-bars"></i>
-+          <span class="d-none d-md-inline">Menu</span>
-+        </button>
-         <NotificationBell />
-         <div class="d-flex flex-column align-items-end text-end">
-           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-         </div>
-         <img
-             v-if="info.avatarUrl"
-             :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-             alt="avatar"
-             class="rounded-circle border profile-avatar"
-         />
-         <div v-else class="avatar-circle">
-           {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-         </div>
-       </div>
-     </div>
-
-     <!-- TABS -->
-     <ul class="nav nav-tabs mb-3 bg-white px-3 pt-2">
-       <li class="nav-item">
-         <button
-             class="nav-link d-flex align-items-center"
-             :class="{ active: activeTab === 'packages' }"
-             @click="activeTab = 'packages'"
-         >
-           <i class="fa-solid fa-box me-2 text-primary"></i>
-@@ -707,79 +715,81 @@
-
-           <div class="modal-footer-custom">
-             <button class="btn btn-secondary rounded-pill" @click="closeServiceEdit">
-               <i class="fa-solid fa-ban me-1"></i>Hủy
-             </button>
-             <button class="btn btn-primary rounded-pill" @click="saveServiceEdit">
-               <i class="fa-solid fa-floppy-disk me-1"></i>{{ editingService.serviceId ? 'Lưu' : 'Tạo' }}
-             </button>
-           </div>
-         </div>
-       </div>
-     </div>
-   </div>
- </template>
-
- <script setup>
- import { ref, computed, onMounted, nextTick } from "vue";
- import { Chart, registerables } from "chart.js";
- Chart.defaults.font.size = 13.5;
- Chart.defaults.font.family = "'Segoe UI', 'Helvetica Neue', Arial";
- Chart.defaults.font.weight = "500";
-
- import NotificationBell from "./NotificationBell.vue";
- import api from "../api/api.js";
- import { useAuthStore } from "../stores/authStore.js";
-+import { useSidebarStore } from "../stores/sidebarStore.js";
- import {
-   showWarning,
-   confirmWithInput,
-   showLoading,
-   updateAlertSuccess,
-   updateAlertError,
- } from "../assets/js/alertService.js";
- import DescriptionEditor from "./common/DescriptionEditor.vue";
-
- Chart.register(...registerables);
-
- const packages = ref([]);
- const search = ref("");
- const canCreatePackage = ref(true);
- const editingRow = ref(null);
- const hasData = ref(false);
- const viewMode = ref("grid");
- const sortBy = ref("name");
-
- const showCreateDrawer = ref(false);
-
- const showServiceDrawer = ref(false);
- const services = ref([]);
- const serviceSearch = ref("");
- const servicesLoading = ref(false);
- const selectedServiceIds = ref([]);
-
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-+const sidebar = useSidebarStore();
-
- const activeTab = ref("packages");
- const statsMode = ref("summary");
- const selectedPackageId = ref("");
- const selectedYear = ref(new Date().getFullYear());
- let chartInstance = null;
-
- const formErrors = ref({});
- const createFormErrors = ref({});
- const editingServiceErrors = ref({});
-
- const form = ref({
-   packageId: null,
-   packageName: "",
-   basePrice: 0,
-   durationDays: 30,
-   isActive: true,
-   description: "",
-   details: [],
- });
-
- const createForm = ref({
-   packageName: "",
-   basePrice: 0,
-   durationDays: 30,
-@@ -1695,26 +1705,50 @@ function closeServiceEdit() {
-   width: 100% !important;
-   height: 400px !important;
- }
-
- @media (max-width: 992px) {
-   .search-group {
-     min-width: 200px;
-   }
- }
-
- @media (max-width: 576px) {
-   .gift-package-card,
-   .gift-service-card {
-     padding: 0.85rem;
-   }
-
-   .gift-package-icon {
-     width: 42px;
-     height: 42px;
-   }
-
-   .gift-package-icon i {
-     font-size: 1.2rem;
-   }
- }
-+
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-+
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
-+
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
- </style>
-diff --git a/src/components/TeamManager.vue b/src/components/TeamManager.vue
-index 3815f4220589bd55b4b6ae4d8896185977c59449..e55d7a550bb9554517596524d0ff1db2c6c25714 100644
---- a/src/components/TeamManager.vue
-+++ b/src/components/TeamManager.vue
-@@ -1,35 +1,43 @@
- <template>
-   <div>
-     <!-- Header -->
-     <div
-         class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2"
-         style="border-bottom: solid 0.5px rgba(0, 0, 0, 0.3)"
-     >
-       <h5 class="fw-bold mb-0 d-flex align-items-center">Quản lý đội nhóm</h5>
-
-       <div class="d-flex align-items-center justify-content-end gap-2">
-+        <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+        >
-+          <i class="fa-solid fa-bars"></i>
-+          <span class="d-none d-md-inline">Menu</span>
-+        </button>
-         <NotificationBell />
-         <div class="d-flex flex-column align-items-end text-end">
-           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-         </div>
-
-         <img
-             v-if="info.avatarUrl"
-             :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-             alt="avatar"
-             class="rounded-circle border"
-             style="width: 36px; height: 36px; object-fit: cover;"
-         />
-         <div v-else class="avatar-circle">
-           {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-         </div>
-       </div>
-     </div>
-
-     <div class="main-layout px-3">
-       <!-- Form section -->
-       <div class="form-section card border rounded-4 shadow-sm small-text">
-         <div class="card-header fw-semibold small-text border-bottom rounded-top-3" style="background-color: #f6e6d5">
-           Thêm / sửa nhóm
-         </div>
-
-@@ -368,55 +376,57 @@
-
-                   <span class="member-count-sm">{{ team.members?.length || 0 }} thành viên</span>
-                 </div>
-               </td>
-
-               <td>
-                 <div class="action-cell">
-                   <button class="btn btn-soft-primary btn-sm" type="button"  @click="selectTeam(JSON.parse(JSON.stringify(team)))"><i class="fa-solid fa-pen"></i></button>
-                   <button v-if="authStore.listAuthority.includes('TEAM_DELETE')" class="btn btn-soft-danger btn-sm" type="button" @click="deleteTeam(team)"><i class="fa-solid fa-trash"></i></button>
-                 </div>
-               </td>
-             </tr>
-             </tbody>
-           </table>
-         </div>
-       </div>
-     </div>
-   </div>
- </template>
-
- <script setup>
- import { computed, onMounted, ref, watch } from "vue";
- import api from "../api/api.js";
- import { showSuccess, showWarning, confirmWithInput, showError } from "../assets/js/alertService.js";
- import { useAuthStore } from "../stores/authStore.js";
-+import { useSidebarStore } from "../stores/sidebarStore.js";
- import DescriptionEditor from "./common/DescriptionEditor.vue";
- import NotificationBell from "./NotificationBell.vue";
-
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-+const sidebar = useSidebarStore();
-
- /* --- Bộ lọc & trạng thái --- */
- const statusFilter = ref(true);
- const searchText = ref("");
- const selectedDept = ref("");
- const pageSize = ref(5);
- const currentPage = ref(1);
- const currentPageDisplay = computed(() => currentPage.value);
-
- /* --- Dữ liệu chính --- */
- const teams = ref([]);
- const departments = ref([]);
- const totalElements = ref(0);
- const totalPages = ref(1);
-
- /* --- Team đang chọn --- */
- const selectedTeam = ref({
-   teamId: null,
-   teamName: "",
-   teamDesc: "",
-   department: { departmentName: "" },
-   status: true,
-   leader: { idE: "", fullName: "" },
-   members: [],
-   avatar: "",
-@@ -1444,26 +1454,50 @@ async function deleteTeam(team) {
-
- .member-detail-item {
-   display: flex;
-   align-items: center;
-   justify-content: space-between;
-   padding: 10px;
-   border: 1px solid #e5e7eb;
-   border-radius: 10px;
-   gap: 12px;
- }
-
- .member-detail-info {
-   display: flex;
-   align-items: center;
-   gap: 12px;
- }
-
- .member-detail-avatar {
-   width: 45px;
-   height: 45px;
-   border-radius: 50%;
-   object-fit: cover;
-   border: 2px solid #fff;
-   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
- }
--</style>
-\ No newline at end of file
-+
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-+
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
-+
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
-+</style>
-diff --git a/src/components/TypeManager.vue b/src/components/TypeManager.vue
-index 9b3ff719b0eb551678383dc9efac1552930b2ef8..038789cb61c9f64d916f95c930e457e6b02c085d 100644
---- a/src/components/TypeManager.vue
-+++ b/src/components/TypeManager.vue
-@@ -1,35 +1,43 @@
- <template>
-   <div class="d-flex flex-column h-100">
-     <!-- Header -->
-     <div
-         class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2 border-bottom"
-         style="border-color: rgba(0, 0, 0, 0.3)"
-     >
-       <h5 class="fw-bold mb-0 d-flex align-items-center">Quản lý loại hạng mục</h5>
-
-       <div class="d-flex align-items-center justify-content-end gap-2">
-+        <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+        >
-+          <i class="fa-solid fa-bars"></i>
-+          <span class="d-none d-md-inline">Menu</span>
-+        </button>
-         <NotificationBell />
-         <div class="d-flex flex-column align-items-end text-end">
-           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-         </div>
-
-         <img
-             v-if="info.avatarUrl"
-             :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-             alt="avatar"
-             class="rounded-circle border"
-             style="width: 36px; height: 36px; object-fit: cover;"
-         />
-         <div v-else class="avatar-circle">
-           {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-         </div>
-       </div>
-     </div>
-
-     <!-- Nội dung -->
-     <div class="main-layout px-3">
-       <!-- Form -->
-       <div class="form-section card border rounded-4 shadow-sm">
-         <div class="card-header fw-semibold border-bottom rounded-top-3 form-header">
-           Thêm / sửa loại hạng mục
-         </div>
-@@ -228,53 +236,55 @@
-             <div class="icon-grid">
-               <button
-                   v-for="icon in entry.icons"
-                   :key="icon"
-                   type="button"
-                   class="icon-option"
-                   :class="{ active: icon === typeForm.icon }"
-                   @click="selectIcon(icon)"
-               >
-                 <i :class="icon" :style="{ color: typeForm.color || '#1274e5' }"></i>
-               </button>
-             </div>
-           </div>
-         </div>
-       </div>
-     </div>
-   </div>
- </template>
-
- <script setup>
- import { computed, onMounted, ref } from 'vue'
- import api from '../api/api.js'
- import FA6 from '../assets/js/FA6icons.json'
- import {showError, showSuccess, showWarning} from "../assets/js/alertService.js"; // dùng file tạo bằng script trong cheat sheet
- import { useAuthStore } from "../stores/authStore.js"
-+import { useSidebarStore } from "../stores/sidebarStore.js"
-
- const authStore = useAuthStore()
- const info = authStore.userInfo
-+const sidebar = useSidebarStore()
-
- const isLoading = ref(false)
- const detailLoading = ref(false)
- const types = ref([])
- const usingFallback = ref(false)
- const selectedTypeId = ref(null)
- const showIconModal = ref(false)
- const filterFlag = ref('all')
- const typeForm = ref(createDefaultForm())
-
- const iconEntries = computed(() =>
-     Object.entries(FA6 || {}).map(([key, icons]) => ({ key, icons }))
- )
-
- const filteredTypes = computed(() => {
-   if (filterFlag.value === 'work') return types.value.filter(t => t.workTypeFlag)
-   if (filterFlag.value === 'asset') return types.value.filter(t => !t.workTypeFlag)
-   return types.value
- })
-
- const isEditing = computed(() => typeForm.value.id !== null)
- const resolvedFormIcon = computed(() => resolveIconClass(typeForm.value.icon))
-
-
- function validateTypeForm() {
-@@ -688,27 +698,49 @@ onMounted(fetchTypes)
-   border: none;
-   border-radius: 8px;
-   /* Bo tròn bên trong khớp bên ngoài */
- }
-
- /* Nếu bạn dùng Firefox */
- .color-picker::-moz-color-swatch {
-   border: none;
-   border-radius: 8px;
-
- }
-
- /* Đảm bảo căn giữa cùng span */
- .d-flex.align-items-center.gap-2 {
-   align-items: center;
-   gap: 8px;
- }
-
- .color-label {
-   display: inline-block;
-   min-width: 80px;
-   font-size: 14px;
-   color: #374151;
- }
-
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
-+
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
- </style>
-diff --git a/src/components/UpdateProject.vue b/src/components/UpdateProject.vue
-index 7a884ed4b2b0ecf6cb5fe424dedfac43ca164d28..388181871452a0debcdd4fcfcfdd3d95c66ccd33 100644
---- a/src/components/UpdateProject.vue
-+++ b/src/components/UpdateProject.vue
-@@ -1,43 +1,51 @@
- <template>
-   <div class="container-build pb-4 bg-light min-vh-92 danh-sach-du-an">
-     <div
-         class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2"
-         style="border-bottom: solid 0.5px rgba(0,0,0,0.3)"
-     >
-       <h5 class="fw-bold mb-0 d-flex align-items-center">
-         <button
-             @click="goBack"
-             class="btn border border-primary rounded-circle d-flex align-items-center justify-content-center me-2"
-             style="width: 40px; height: 40px;"
-         >
-           <i class="fa-solid fa-chevron-left text-primary fs-5"></i>
-         </button>
-         Cập nhật dự án
-       </h5>
-
-       <div class="d-flex align-items-center justify-content-end gap-2">
-+        <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+        >
-+          <i class="fa-solid fa-bars"></i>
-+          <span class="d-none d-md-inline">Menu</span>
-+        </button>
-         <NotificationBell />
-         <div class="d-flex flex-column align-items-end text-end">
-           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-         </div>
-
-         <img
-             v-if="info.avatarUrl"
-             :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-             alt="avatar"
-             class="rounded-circle border"
-             style="width: 36px; height: 36px; object-fit: cover;"
-         />
-         <div v-else class="avatar-circle">
-           {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-         </div>
-       </div>
-     </div>
-
-     <div class="tabs-wrapper d-flex align-items-center justify-content-between border-bottom pb-2 px-3">
-       <div class="tabs-du-an flex-grow-1 overflow-hidden">
-         <div class="d-flex gap-4 small text-muted fw-medium px-2 inner-tabs">
-           <span
-               v-for="tab in tabs"
-               :key="tab.key"
-               :class="['tab-item', { active: activeTab.key === tab.key }]"
-@@ -753,55 +761,57 @@
-                             {{ isMemberInProject(employee.id) ? 'Đã trong dự án' : 'Thêm' }}
-                           </button>
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-                   <div v-else class="text-muted small text-center py-4">
-                     Không có phòng ban nào phù hợp với điều kiện hiển thị.
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div> <!-- /drawer-panel -->
-         </div> <!-- /drawer-overlay -->
-       </div> <!-- /members tab -->
-     </div>
-   </div>
- </template>
-
- <script setup>
- import { computed, ref, watch, onMounted, onBeforeUnmount } from "vue";
- import { useRoute, useRouter } from "vue-router";
- import { showError, showSuccess, showWarning, showLoading, updateAlertSuccess, updateAlertError } from "../assets/js/alertService.js";
- import api from "../api/api.js";
- import { useAuthStore } from "../stores/authStore.js";
-+import { useSidebarStore } from "../stores/sidebarStore.js";
- import DescriptionEditor from "./common/DescriptionEditor.vue";
- import NotificationBell from "./NotificationBell.vue";
-
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-+const sidebar = useSidebarStore();
-
- const AVATAR_BASE_URL = " https://s3.cloudfly.vn/thg-storage-dev/uploads-public/";
-
- const router = useRouter();
- const route = useRoute();
-
- const tabs = [
-   { key: "info", label: "Thông tin dự án" },
-   { key: "members", label: "Tham gia dự án" }
- ];
-
- const activeTab = ref(tabs[0]);
- const hasLoadedMembersData = ref(false);
- watch(activeTab, async (tab) => {
-   if (tab.key === "members" && !hasLoadedMembersData.value) {
-     const loaded = await getDataTab2();
-     hasLoadedMembersData.value = loaded;
-   }
- });
-
- const dropdownOpen = ref(false);
- const projectTypes = ref([]);
-
- const toggleDropdown = () => {
-   dropdownOpen.value = !dropdownOpen.value;
-@@ -1737,26 +1747,50 @@ watch(
-
- .drawer-employee {
-   background: #fff;
-   border-radius: 12px;
-   padding: 12px 16px;
-   border: 1px solid #eef1ff;
-   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
- }
-
- .drawer-employee:hover {
-   transform: translateY(-2px);
-   box-shadow: 0 8px 18px rgba(76, 91, 229, 0.12);
-   border-color: #ccd2ff;
- }
-
- .search-result-card {
-   background: #fff;
-   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
- }
-
- .search-result-card:hover {
-   transform: translateY(-2px);
-   box-shadow: 0 8px 18px rgba(76, 91, 229, 0.12);
-   border-color: #ccd2ff !important;
- }
--</style>
-\ No newline at end of file
-+
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-+
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
-+
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
-+</style>
-diff --git a/src/components/host/HostManager.vue b/src/components/host/HostManager.vue
-index f7db7d588b8e6e0170ba33b665f4457de2fd4a27..356fc96ceb485678f687ca1f537b75fcd5db7ed6 100644
---- a/src/components/host/HostManager.vue
-+++ b/src/components/host/HostManager.vue
-@@ -1,33 +1,41 @@
- <template>
-   <div class="d-flex justify-content-between align-items-center px-3 pb-2 " style="border-bottom: solid 0.5px rgba(0,0,0,0.3)">
-     <h5 class="fw-bold mb-0 d-flex align-items-center" style="font-size: 20px">
-       <i class="fas fa-users me-2 text-primary"></i>
-       Quản lý người dùng
-     </h5>
-
-     <div class="d-flex align-items-center justify-content-end gap-2">
-+      <button
-+          class="header-menu-toggle"
-+          title="Ẩn/hiện menu"
-+          @click="sidebar.toggle()"
-+      >
-+        <i class="fa-solid fa-bars"></i>
-+        <span class="d-none d-md-inline">Menu</span>
-+      </button>
-       <NotificationBell />
-       <div class="d-flex flex-column align-items-end text-end">
-         <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-       </div>
-
-       <img
-           v-if="info.avatarUrl"
-           :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-           alt="avatar"
-           class="rounded-circle border"
-           style="width: 36px; height: 36px; object-fit: cover;"
-       />
-       <div v-else class="avatar-circle">
-         {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-       </div>
-     </div>
-   </div>
-   <div class="container-fluid py-4 host-list-container">
-     <!-- HEADER -->
-     <div class="d-flex justify-content-between align-items-center mb-1">
-       <div>
-         <div class="d-flex align-items-center gap-2 mb-2">
-           <h4 class="mb-0 fw-bold text-dark">
-             Danh sách {{ selectedType === 'HOST' ? 'chủ nhà' : 'môi giới' }}
-           </h4>
-@@ -550,53 +558,55 @@
-     <HostUpdateModal
-         v-if="showUpdate"
-         :host="selectedHost"
-         :type="selectedType"
-         @close="showUpdate = false"
-         @reload="fetchData"
-     />
-     <CreateHostModal
-         v-if="showCreateHostModal"
-         :type="selectedType"
-         @close="showCreateHostModal = false"
-         @created="fetchData"
-     />
-   </div>
- </template>
-
- <script setup>
- import { ref, computed, watch, onMounted } from "vue";
- import api from "/src/api/api.js";
- import provinces from "/src/assets/js/address.json";
- import CreateHostModal from "./CreateHostModal.vue";
- import HostUpdateModal from "./HostUpdateModal.vue";
- import HostDetailModal from "./HostDetailModal.vue";
- import { Bar } from 'vue-chartjs'
- import { useAuthStore } from "/src/stores/authStore.js";
-+import { useSidebarStore } from "/src/stores/sidebarStore.js";
- import thuongMoiGioi from "./thuongMoiGioi.vue"
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-+const sidebar = useSidebarStore();
- // src/plugins/chart.js
- import {
-   Chart as ChartJS,
-   CategoryScale,
-   LinearScale,
-   BarElement,
-   LineElement,
-   PointElement,
-   Tooltip,
-   Legend
- } from 'chart.js'
-
- ChartJS.register(
-     CategoryScale,
-     LinearScale,
-     BarElement,
-     LineElement,
-     PointElement,
-     Tooltip,
-     Legend
- )
-
-
-
-
-@@ -1710,28 +1720,49 @@ th {
-   );
-   text-shadow: 0 0 8px rgba(180, 83, 9, 0.3);
-   animation-duration: 4s;
- }
-
-
- @keyframes shimmer {
-   0% {
-     background-position: -200% center;
-   }
-   100% {
-     background-position: 200% center;
-   }
- }
- .top-text {
-   font-weight: 800;
-   position: relative;
-   display: inline-block;
-   background-size: 200% auto;
-   background-clip: text;
-   -webkit-background-clip: text;
-   color: transparent;
-   animation: shimmer 3s linear infinite;
- }
-
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
-
--</style>
-\ No newline at end of file
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
-+</style>
-diff --git a/src/components/land/AdminValuationManager.vue b/src/components/land/AdminValuationManager.vue
-index b71aa54fe6179eba9bb3857d058ac8aa96f303a4..d59d9b1b291356ec69ac2f268b7a7399ed85eceb 100644
---- a/src/components/land/AdminValuationManager.vue
-+++ b/src/components/land/AdminValuationManager.vue
-@@ -1,33 +1,41 @@
- <template>
-   <div>
-     <div class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2 " style="border-bottom: solid 0.5px rgba(0,0,0,0.3)">
-       <h5 class="fw-bold mb-0 d-flex align-items-center">
-         Quản lý định giá
-       </h5>
-
-       <div class="d-flex align-items-center justify-content-end gap-2">
-+        <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+        >
-+          <i class="fa-solid fa-bars"></i>
-+          <span class="d-none d-md-inline">Menu</span>
-+        </button>
-         <NotificationBell/>
-         <div class="d-flex flex-column align-items-end text-end">
-           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-         </div>
-
-         <img
-             v-if="info.avatarUrl"
-             :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-             alt="avatar"
-             class="rounded-circle border"
-             style="width: 36px; height: 36px; object-fit: cover;"
-         />
-         <div v-else class="avatar-circle">
-           {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-         </div>
-       </div>
-     </div>
-
-     <!-- Tabs -->
-     <ul class="nav nav-tabs valuation-tabs px-4">
-       <li class="nav-item" v-for="tab in tabs" :key="tab.key">
-         <button
-             class="nav-link"
-             :class="{ active: activeTab === tab.key }"
-             type="button"
-@@ -1010,52 +1018,54 @@
-             </div>
-           </div>
-           <div class="modal-footer">
-             <button class="btn btn-primary" @click="saveAssetModal">Lưu</button>
-           </div>
-         </div>
-       </div>
-     </div>
-   </div>
- </template>
-
- <script setup>
- import NotificationBell from "../NotificationBell.vue";
- import { ref, reactive, computed, watch, onMounted } from "vue";
- import { PDFDocument, rgb } from "pdf-lib";
- import * as fontkit from "fontkit";
- import fontRegular from "../../assets/font-times-new-roman/SVN-Times New Roman.ttf";
- import fontBold from "../../assets/font-times-new-roman/SVN-Times New Roman Bold.ttf";
- import logoImg from "/imgs/logo.png";
- import FileOrLand from "./FileOrLand.vue";
- import { loadPrivateFileDataUrl } from "../../api/fileApi.js";
- import { showLoading, updateAlertError, updateAlertSuccess, showSuccess, showWarning } from "../../assets/js/alertService.js";
- import AddressSelector3 from "./my-valuation/components/AddressSelector3.vue";
- import  api  from "../../api/api.js"
- import { useAuthStore } from "../../stores/authStore.js";
-+import { useSidebarStore } from "../../stores/sidebarStore.js";
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-+const sidebar = useSidebarStore();
-
- /* ---------------------- Tabs ---------------------- */
- const tabs = [
-   { key: "assets", label: "Tài sản" },
-   { key: "detail", label: "Chi tiết" },
-   { key: "requests", label: "Yêu cầu định giá" },
-   { key: "valuation", label: "Định giá" },
- ];
- const activeTab = ref("assets");
- function switchTab(tab) {
-   activeTab.value = tab;
-
-   // Rời khỏi tab định giá hoặc tab chi tiết → clear asset
-   if (tab !== "valuation" && tab !== "detail") {
-     selectedAsset.value = null;
-   }
- }
-
- const editAssetMode = ref(false);
- const editAsset = ref({});
-
- function toggleEditAsset() {
-   if (!editAssetMode.value) {
-     editAsset.value = { ...currentAsset.value }; // copy dữ liệu hiện tại
-     editAssetMode.value = true;
-@@ -2962,27 +2972,49 @@ h6.fw-bold {
-   border: 1px solid rgba(46, 204, 113, 0.35);
-   border-radius: 20px;
-   padding: 5px 5px;
-   font-size: 13px;
- }
-
- /* TÍM subtle */
- .badge-purple-subtle {
-   background: rgba(155, 89, 182, 0.15);
-   color: #8e44ad;
-   border: 1px solid rgba(155, 89, 182, 0.35);
-   border-radius: 20px;
-   padding: 5px 5px;
-   font-size: 13px;
- }
-
- .badge-info-subtle {
-   background: rgba(13, 110, 253, 0.15);
-   color: #0d6efd;
-   border: 1px solid rgba(13, 110, 253, 0.35);
-   border-radius: 20px;
-   padding: 5px 5px;
-   font-size: 13px;
- }
-
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-+
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
-
--</style>
-\ No newline at end of file
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
-+</style>
-diff --git a/src/components/work-items/WorkItemManager.vue b/src/components/work-items/WorkItemManager.vue
-index 660da6c40143b30006c6983d40926e30d0456152..e2ba27c620824e25e4ec71c02395ec23483867ad 100644
---- a/src/components/work-items/WorkItemManager.vue
-+++ b/src/components/work-items/WorkItemManager.vue
-@@ -38,50 +38,58 @@
-             />
-             <span class="tooltip1">
-               {{ m.fullName }}<template v-if="m.email"> — {{ m.email }}</template>
-             </span>
-           </div>
-
-           <!-- +N còn lại -->
-           <div
-               v-if="allAvatars && allAvatars.length > 6"
-               class="avatar-wrapper"
-               :style="{ left: ((allAvatars.slice(0,6)).length * -10) + 'px', zIndex: 100 }"
-           >
-             <div class="avatar-small bg-light text-dark fw-semibold d-flex align-items-center justify-content-center rounded-circle">
-               +{{ allAvatars.length - 6 }}
-             </div>
-             <span class="tooltip">
-               <template v-for="(m, i) in allAvatars.slice(6)" :key="i">
-                 {{ m.fullName }}<template v-if="m.email"> — {{ m.email }}</template><br />
-               </template>
-             </span>
-           </div>
-         </div>
-       </div>
-
-       <div class="d-flex align-items-center justify-content-end gap-2">
-+        <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+        >
-+          <i class="fa-solid fa-bars"></i>
-+          <span class="d-none d-md-inline">Menu</span>
-+        </button>
-         <NotificationBell />
-         <div class="d-flex flex-column align-items-end text-end">
-           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-         </div>
-
-         <img
-             v-if="info.avatarUrl"
-             :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-             alt="avatar"
-             class="rounded-circle border"
-             style="width: 36px; height: 36px; object-fit: cover;"
-         />
-         <div v-else class="avatar-circle">
-           {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-         </div>
-       </div>
-     </div>
-
-     <!-- Tabs -->
-     <div
-         class="d-flex align-items-center border-bottom pb-2 px-3"
-         style="border-bottom: solid 0.5px rgba(0,0,0,0.3)"
-     >
-       <button
-           v-for="tab in tabs"
-@@ -312,65 +320,67 @@
-               </div>
-             </form>
-           </div>
-           <div class="modal-footer bg-white border-0 px-4 py-3 d-flex justify-content-end gap-2">
-             <button type="button" class="btn btn-secondary" @click="closeModalCreate">Cancel</button>
-             <button type="button" class="btn btn-primary px-4" @click="create">Create</button>
-           </div>
-         </div>
-       </div>
-     </div>
-   </transition>
-   <div v-if="showCreateModal" class="modal-backdrop fade show"></div>
- </template>
- <script setup>
- import { ref, computed, onMounted, watch, onBeforeUnmount } from "vue";
- import { useRoute } from "vue-router";
-
- import api from "../../api/api.js";
-
- import AllWorkItemsTab from "./tabs/AllWorkItemsTab.vue";
- import KanbanTab from "./tabs/KanbanTab.vue";
- import SummaryTab from "./tabs/SummaryTab.vue";
- import TimelineTab from "./tabs/TimelineTab.vue";
- import {showLoading, updateAlertSuccess} from "../../assets/js/alertService.js";
- import { useAuthStore } from "../../stores/authStore.js";
-+import { useSidebarStore } from "../../stores/sidebarStore.js";
- import DescriptionEditor from "../common/DescriptionEditor.vue";
- import { socketService } from "../../services/socketService.js";
- import { SOCKET_CONFIG } from "../../config/socketConfig.js";
- import {
-   enrichSocketEvent,
-   isWorkItemEvent,
-   isCommentEvent,
-   isMemberEvent,
-   isProjectMetaEvent,
- } from "../../utils/socketEventUtils.js";
- import NotificationBell from "../NotificationBell.vue";
-
- const route = useRoute();
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-+const sidebar = useSidebarStore();
-
- const canViewTimelineTab = computed(() =>
-     authStore.hasProjectPermission("PROJECT_VIEW_TIMELINE") ||
-     authStore.hasPermission("PROJECT_VIEW_TIMELINE")
- )
-
- const canViewSummaryTab = computed(() =>
-     authStore.hasProjectPermission("PROJECT_VIEW_SUMARY") ||
-     authStore.hasPermission("PROJECT_VIEW_SUMARY")
- )
-
- const canCreateWorkItem = computed(() =>
-     authStore.hasProjectPermission("WORKITEM_CREATE") ||
-     authStore.hasPermission("WORKITEM_CREATE")
- )
-
- const canUpdateWorkItem = computed(() =>
-     authStore.hasProjectPermission("WORKITEM_UPDATE") ||
-     authStore.hasPermission("WORKITEM_UPDATE")
- )
-
- // ⚠️ bạn viết sai key: WORKITEM_EDIT_IMPLEMENTER
- const canEditImplementer = computed(() =>
-     authStore.hasProjectPermission("WORKITEM_EDIT_IMPLEMENTER") ||
-     authStore.hasPermission("WORKITEM_EDIT_IMPLEMENTER")
-@@ -906,26 +916,49 @@ async function getInfoProject() {
- .fade-in-up-leave-active {
-   animation: fadeInUp 0.2s ease reverse;
- }
-
- @keyframes fadeInUp {
-   from {
-     opacity: 0;
-     transform: translate3d(0, 20px, 0);
-   }
-   to {
-     opacity: 1;
-     transform: translate3d(0, 0, 0);
-   }
- }
-
- .attachment-list .file-name {
-   max-width: 240px;
- }
-
- @media (max-width: 576px) {
-   .attachment-list .file-name {
-     max-width: 160px;
-   }
- }
-
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-+
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
-+
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
- </style>
-diff --git a/src/main.js b/src/main.js
-index 040e8fe4a48ecb4d2482f03168579dd87da9bd0f..2010c8000db5827a7ab1666d2157b96e8823259a 100644
---- a/src/main.js
-+++ b/src/main.js
-@@ -14,32 +14,29 @@ import { attachUserId, init, setupRouterTracking } from './ga4'
- import 'bootstrap/dist/css/bootstrap.min.css'
- import 'bootstrap'
- import 'bootstrap-icons/font/bootstrap-icons.css'
-
- // App init
- const pinia = createPinia()
- pinia.use(piniaPluginPersistedstate)
-
- const app = createApp(App)
- app.use(pinia)
- const authStore = useAuthStore()
-
- init()
- attachUserId()
- setupRouterTracking(router)
-
- watch(
-     () => authStore.userInfo?.id,
-     () => {
-         attachUserId()
-     },
-     { immediate: true }
- )
- app.use(router)
- app.mount('#app')
--// document.addEventListener("contextmenu", function (e) {
--//     e.preventDefault();
--// });
--// if (import.meta.env.PROD) {
--//     console.log = () => {};
--// }
--
-+document.addEventListener("contextmenu", (event) => {
-+    event.preventDefault();
-+    console.log("[Security] Right click disabled.");
++  return applicants.value.filter((applicant) => {
++    if (!keyword) return true;
++    const matchesJob = applicant.jobTitle.toLowerCase().includes(keyword);
++    const matchesCandidate = applicant.candidateName.toLowerCase().includes(keyword);
++    return matchesJob || matchesCandidate;
++  });
 +});
-diff --git a/src/style.css b/src/style.css
-index 6d4567bba842e0524817d0ce46dd3f54ad7ceb1e..fd08a1c588dc2537abb65d26e770ced155d85691 100644
---- a/src/style.css
-+++ b/src/style.css
-@@ -610,26 +610,26 @@
-   .rich-text-editor-wrapper .tiptap h1 {
-     font-size: 1.8rem;
-   }
-
-   .rich-text-editor-wrapper .tiptap h2 {
-     font-size: 1.5rem;
-   }
-
-   .rich-text-editor-wrapper .tiptap h3 {
-     font-size: 1.3rem;
-   }
-
-   .rich-text-editor-wrapper .tiptap pre {
-     background: #f5f5f5 !important;
-     color: #333 !important;
-     border: 1px solid #ddd;
-   }
-
-   .rich-text-editor-wrapper .tiptap table {
-     border: 1px solid #333;
-   }
-
-   .rich-text-editor-wrapper .tiptap table th {
-     background: #f0f0f0 !important;
-   }
--}
-\ No newline at end of file
++
++const openAcceptModal = (applicant) => {
++  selectedApplicant.value = applicant;
++  welcomeMessage.value = "";
++  showAcceptModal.value = true;
++  showRejectModal.value = false;
++};
++
++const openRejectModal = (applicant) => {
++  selectedApplicant.value = applicant;
++  rejectReason.value = "";
++  showRejectModal.value = true;
++  showAcceptModal.value = false;
++};
++
++const closeModals = () => {
++  showAcceptModal.value = false;
++  showRejectModal.value = false;
++  selectedApplicant.value = null;
++};
++
++const submitAccept = () => {
++  if (!selectedApplicant.value) return;
++  selectedApplicant.value.status = "Đạt yêu cầu";
++  selectedApplicant.value.note = "Đã gửi thư chào mừng";
++  closeModals();
++};
++
++const submitReject = () => {
++  if (!selectedApplicant.value) return;
++  selectedApplicant.value.status = "Không phù hợp";
++  selectedApplicant.value.note = rejectReason.value.trim() || "Đã gửi thư từ chối";
++  closeModals();
++};
++
++const statusClass = (status) => {
++  switch (status) {
++    case "Đang đánh giá":
++      return "status-review";
++    case "Đã nhận hồ sơ":
++      return "status-received";
++    case "Phỏng vấn":
++      return "status-interview";
++    case "Đạt yêu cầu":
++      return "status-pass";
++    case "Không phù hợp":
++      return "status-reject";
++    default:
++      return "status-review";
++  }
++};
++</script>
++
++<style scoped>
++.applicants-tab {
++  width: 100%;
++  padding-bottom: 8px;
 +}
++
++.search-field {
++  min-width: 320px;
++}
++
++.search-field i {
++  left: 14px;
++  top: 50%;
++  transform: translateY(-50%);
++}
++
++.applicants-table th,
++.applicants-table td {
++  padding: 14px 16px;
++}
++
++.applicant-avatar {
++  width: 38px;
++  height: 38px;
++  border-radius: 50%;
++  background: #eef1ff;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  font-weight: 600;
++  color: #4c5be5;
++}
++
++.extra-small {
++  font-size: 12px;
++}
++
++.status-pill {
++  display: inline-flex;
++  align-items: center;
++  padding: 4px 10px;
++  border-radius: 999px;
++  font-size: 12px;
++  font-weight: 600;
++}
++
++.status-review {
++  background: rgba(76, 91, 229, 0.12);
++  color: #4c5be5;
++}
++
++.status-received {
++  background: rgba(14, 165, 233, 0.12);
++  color: #0284c7;
++}
++
++.status-interview {
++  background: rgba(245, 158, 11, 0.16);
++  color: #b45309;
++}
++
++.status-pass {
++  background: rgba(34, 197, 94, 0.16);
++  color: #15803d;
++}
++
++.status-reject {
++  background: rgba(239, 68, 68, 0.16);
++  color: #b91c1c;
++}
++</style>

@@ -52,87 +52,108 @@
   </div>
 
   <!-- ================= FILE MODAL ================= -->
-  <div v-if="showFileModal" class="modal-backdrop" @click.self="closeFileModal">
-    <div class="modal-content bg-white rounded-4 p-4" style="width:480px">
-      <h6 class="fw-bold mb-3">Danh sách file</h6>
+  <teleport to="body">
+    <div v-if="showFileModal" class="file-modal-backdrop" @click.self="closeFileModal">
+      <div class="file-modal-content bg-white rounded-4 p-4" style="width:480px">
+        <h6 class="fw-bold mb-3">Danh sách file</h6>
 
-      <table class="table table-sm">
-        <tbody>
-        <tr v-for="(f,i) in files" :key="i">
-          <td class="small text-truncate">{{ f.fileName }}</td>
-          <td class="text-end">
-            <button class="btn btn-light btn-sm border me-1"
-                    @click="downloadFile(f.id,f.fileName)">
-              <i class="fa-solid fa-download text-primary"></i>
-            </button>
-            <button v-if="canEdit"
-                    class="btn btn-light btn-sm border"
-                    @click="removeFile(i)">
-              <i class="fa-solid fa-trash text-danger"></i>
-            </button>
-          </td>
-        </tr>
-        <tr v-if="!files.length">
-          <td class="text-center text-muted">Không có file</td>
-        </tr>
-        </tbody>
-      </table>
+        <table class="table table-sm">
+          <tbody>
+          <tr v-for="(f,i) in files" :key="i">
+            <td class="small text-truncate">{{ f.fileName }}</td>
+            <td class="text-end">
+              <button class="btn btn-light btn-sm border me-1"
+                      @click="downloadFile(f.id,f.fileName)">
+                <i class="fa-solid fa-download text-primary"></i>
+              </button>
+              <button v-if="canEdit"
+                      class="btn btn-light btn-sm border"
+                      @click="removeFile(i)">
+                <i class="fa-solid fa-trash text-danger"></i>
+              </button>
+            </td>
+          </tr>
+          <tr v-if="!files.length">
+            <td class="text-center text-muted">Không có file</td>
+          </tr>
+          </tbody>
+        </table>
 
-      <div class="text-end">
-        <button class="btn btn-secondary btn-sm" @click="closeFileModal">Đóng</button>
+        <div class="text-end">
+          <button class="btn btn-secondary btn-sm" @click="closeFileModal">Đóng</button>
+        </div>
       </div>
     </div>
-  </div>
+  </teleport>
 
   <!-- ================= LIGHTBOX MODAL ================= -->
-  <div v-if="previewIndex !== null" class="lightbox-modal">
-    <div class="lightbox-inner">
+  <teleport to="body">
+    <div v-if="previewIndex !== null" class="lightbox-modal">
+      <div class="lightbox-inner">
 
-      <!-- HEADER -->
-      <div class="lightbox-header">
-        <span class="badge"
-              :class="currentImageType==='landBook'?'bg-warning':'bg-primary'">
-          {{ currentImageType==='landBook' ? 'Ảnh sổ' : 'Ảnh thường' }}
-        </span>
+        <!-- HEADER -->
+        <div class="lightbox-header">
+          <span class="badge"
+                :class="currentImageType==='landBook'?'bg-warning':'bg-primary'">
+            {{ currentImageType==='landBook' ? 'Ảnh sổ' : 'Ảnh thường' }}
+          </span>
 
         <div class="d-flex gap-2">
+          <button class="btn btn-dark btn-sm lightbox-pin-btn"
+                  :class="{active:isMainImage(previewIndex)}"
+                  @click="setMainImage(previewIndex)">
+            <i class="fa-solid fa-thumbtack"></i>
+          </button>
+
           <button class="btn btn-dark btn-sm"
                   @click="downloadFile(currentImage?.id,currentImage?.fileName)">
             <i class="fa-solid fa-download text-success"></i>
           </button>
 
-          <button v-if="canEdit"
-                  class="btn btn-dark btn-sm"
-                  @click="removeImage(previewIndex)">
-            <i class="fa-solid fa-trash text-danger"></i>
-          </button>
+            <button v-if="canEdit"
+                    class="btn btn-dark btn-sm"
+                    @click="removeImage(previewIndex)">
+              <i class="fa-solid fa-trash text-danger"></i>
+            </button>
 
-          <button class="btn btn-dark btn-sm"
-                  @click="closeLightbox">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
+            <button class="btn btn-dark btn-sm"
+                    @click="closeLightbox">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
         </div>
-      </div>
 
-      <!-- IMAGE -->
+        <!-- IMAGE -->
       <div class="lightbox-body">
+        <button class="lightbox-nav prev" @click="goPrev">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
         <img :src="previewUrls[previewIndex]"
              class="lightbox-main-img" />
+        <button class="lightbox-nav next" @click="goNext">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
       </div>
 
-      <!-- THUMBNAILS -->
-      <div class="lightbox-thumbs">
+        <!-- THUMBNAILS -->
+        <div class="lightbox-thumbs">
         <div v-for="(u,i) in previewUrls"
              :key="i"
              class="thumb"
              :class="{active:i===previewIndex}"
              @click="previewIndex=i">
           <img :src="u"/>
+          <span class="thumb-pin"
+                :class="{active:isMainImage(i)}"
+                @click.stop="setMainImage(i)">
+            <i class="fa-solid fa-thumbtack"></i>
+          </span>
         </div>
       </div>
 
+      </div>
     </div>
-  </div>
+  </teleport>
 </template>
 
 <script setup>
@@ -236,6 +257,22 @@ function removeImage(i){
   emitAll();
 }
 
+function isMainImage(i){
+  const list = currentImageType.value==="landBook"?landBookImages.value:normalImages.value;
+  return Boolean(list[i]?.isOnTop);
+}
+
+function setMainImage(i){
+  [normalImages.value, landBookImages.value].forEach((list) => {
+    list.forEach((img) => {
+      if (img) img.isOnTop = false;
+    });
+  });
+  const list = currentImageType.value==="landBook"?landBookImages.value:normalImages.value;
+  if (list[i]) list[i].isOnTop = true;
+  emitAll();
+}
+
 function removeFile(i){
   files.value.splice(i,1);
   emitAll();
@@ -247,6 +284,16 @@ function emitAll(){
 
 function openFileModal(){ showFileModal.value=true }
 function closeFileModal(){ showFileModal.value=false }
+
+function goPrev(){
+  if (previewIndex.value === null || !previewUrls.value.length) return;
+  previewIndex.value = (previewIndex.value - 1 + previewUrls.value.length) % previewUrls.value.length;
+}
+
+function goNext(){
+  if (previewIndex.value === null || !previewUrls.value.length) return;
+  previewIndex.value = (previewIndex.value + 1) % previewUrls.value.length;
+}
 
 async function downloadFile(id,name){
   try{
@@ -274,16 +321,37 @@ function triggerBrowserDownload(url,name){
 .file-counter{cursor:pointer;display:flex;gap:6px;align-items:center}
 .file-counter:hover{opacity:.85}
 
+</style>
+
+<style>
 /* ================= LIGHTBOX MODAL ================= */
 .lightbox-modal{
   position:fixed;
   inset:0;
-  z-index:99999;
+  z-index:999999;
   background:rgba(0,0,0,.65);
   backdrop-filter:blur(6px);
   display:flex;
   justify-content:center;
   align-items:center;
+}
+
+.file-modal-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:999999;
+  background:rgba(0,0,0,.4);
+  backdrop-filter:blur(3px);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.file-modal-content{
+  max-width:92vw;
+  max-height:90vh;
+  overflow:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);
 }
 
 .lightbox-inner{
@@ -311,6 +379,7 @@ function triggerBrowserDownload(url,name){
   justify-content:center;
   align-items:center;
   overflow:hidden;
+  position:relative;
 }
 
 .lightbox-main-img{
@@ -332,6 +401,7 @@ function triggerBrowserDownload(url,name){
 }
 
 .thumb{
+  position:relative;
   width:72px;
   height:54px;
   border-radius:8px;
@@ -344,4 +414,59 @@ function triggerBrowserDownload(url,name){
 .thumb:hover{opacity:.85}
 .thumb.active{opacity:1;border-color:#0d6efd}
 .thumb img{width:100%;height:100%;object-fit:cover}
+
+.lightbox-pin-btn.active{
+  background:#0d6efd;
+  border-color:#0d6efd;
+}
+
+.lightbox-nav{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.25);
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  transition:.2s;
+}
+
+.lightbox-nav:hover{
+  background:rgba(13,110,253,.85);
+}
+
+.lightbox-nav.prev{left:14px;}
+.lightbox-nav.next{right:14px;}
+
+.thumb-pin{
+  position:absolute;
+  top:4px;
+  right:4px;
+  width:22px;
+  height:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  font-size:12px;
+  opacity:.7;
+  transition:.2s;
+}
+
+.thumb-pin.active{
+  background:#0d6efd;
+  opacity:1;
+}
+
+.thumb-pin:hover{
+  opacity:1;
+}
 </style>
