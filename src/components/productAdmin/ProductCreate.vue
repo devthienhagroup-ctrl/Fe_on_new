@@ -144,26 +144,30 @@
                   <input type="number" min="0" step="1000000" class="form-control" v-model.number="form.giaNoiBo" placeholder="Giá nội bộ">
                   <span class="input-group-text bg-light">VNĐ</span>
                 </div>
+                <div class="d-flex align-items-center justify-content-between mt-1">
                 <small v-if="errors.giaNoiBo" class="text-danger">{{ errors.giaNoiBo }}</small>
-                <small v-else-if="form.giaNoiBo" class="text-info fw-medium mt-1 d-block">
+                <small v-if="form.giaNoiBo" class="text-info fw-medium">
                   <i class="fas fa-chart-line me-1"></i>{{ formatMoneyVN(form.giaNoiBo) }}
                 </small>
+                </div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
                   <i class="fas fa-bullseye text-danger"></i>
-                  <span>Kỳ vọng <span class="text-danger">*</span></span>
+                  <span>Mong muốn <span class="text-danger">*</span></span>
                 </label>
                 <div class="input-group input-group-md">
                   <span class="input-group-text"><i class="fas fa-chart-line"></i></span>
-                  <input  type="number" min="0" step="1000000" class="form-control" v-model.number="form.desire" placeholder="Giá kỳ vọng của chủ sở hữu">
+                  <input  type="number" min="0" step="1000000" class="form-control" v-model.number="form.desire" placeholder="Gía mong muốn của chủ sở hữu">
                   <span class="input-group-text bg-light">VNĐ</span>
                 </div>
+                <div class="d-flex align-items-center justify-content-between mt-1">
                 <small v-if="errors.desire" class="text-danger">{{ errors.desire }}</small>
-                <small v-else-if="form.desire" class="text-info fw-medium mt-1 d-block">
+                <small v-if="form.desire" class="text-info fw-medium">
                   <i class="fas fa-chart-line me-1"></i>{{ formatMoneyVN(form.desire) }}
                 </small>
+                </div>
               </div>
 
               <div class="col-md-2">
@@ -810,6 +814,64 @@
             </section>
           </div>
 
+          <div v-show="activeTab === 'manager'" class="tab-panel">
+            <section class="mb-5">
+              <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                <div class="section-icon bg-warning-light">
+                  <i class="fas fa-user-shield text-warning"></i>
+                </div>
+                <div>
+                  <h2 class="h5 fw-bold mb-1">Thông tin người quản lý</h2>
+                  <p class="text-muted small mb-0">Tìm kiếm người quản lý trong hệ thống</p>
+                </div>
+              </div>
+
+              <div class="owner-mode-card">
+                <div class="row g-3 align-items-end">
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                      <i class="fas fa-search text-primary"></i>
+                      <span>Tìm người quản lý <span class="text-danger">*</span></span>
+                    </label>
+                    <div class="input-group input-group-md">
+                      <span class="input-group-text bg-light"><i class="fas fa-search text-muted"></i></span>
+                      <input
+                        type="text"
+                        class="form-control"
+                        v-model.trim="managerSearch"
+                        placeholder="Nhập số điện thoại hoặc email"
+                      >
+                    </div>
+                    <small v-if="errors.managerSearch" class="text-danger">{{ errors.managerSearch }}</small>
+                  </div>
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-primary w-100" @click="handleManagerLookup">
+                      <i class="fas fa-search me-1"></i>Tìm
+                    </button>
+                  </div>
+                </div>
+                <div v-if="managerLookupMessage" class="mt-3">
+                  <div :class="['alert', managerLookupMessage.includes('thành công') ? 'alert-success' : 'alert-danger', 'py-2 small']">
+                    <i :class="managerLookupMessage.includes('thành công') ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
+                    {{ managerLookupMessage }}
+                  </div>
+                </div>
+                <div v-if="hasManager" class="owner-info-card mt-3">
+                  <div class="owner-info-header">
+                    <i class="fas fa-user-check"></i>
+                    <span>Người quản lý trong hệ thống</span>
+                  </div>
+                  <div class="owner-info-body">
+                    <div class="owner-name">{{ managerInfo.fullName }}</div>
+                    <div class="owner-meta">
+                      <i class="fas fa-phone text-primary me-2"></i>{{ managerInfo.phone }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
           <div v-show="activeTab === 'owner'" class="tab-panel">
             <!-- Thông tin chủ tài sản -->
             <section class="mb-5">
@@ -975,7 +1037,7 @@
                   />
                   <small v-if="errors.ownerFullName" class="text-danger">{{ errors.ownerFullName }}</small>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-3">
                   <label class="form-label fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
                   <input
                     v-model="nonSystemNewOwner.phone"
@@ -985,7 +1047,7 @@
                   />
                   <small v-if="errors.ownerPhone" class="text-danger">{{ errors.ownerPhone }}</small>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-3">
                   <label class="form-label fw-semibold">Giới tính</label>
                   <select v-model="nonSystemNewOwner.gender" class="form-select">
                     <option :value="null">Không xác định</option>
@@ -1131,9 +1193,10 @@ import { computed, reactive, ref, watch } from 'vue'
 import api from '/src/api/api.js'
 import FileOrLand from './FileNew.vue'
 import addressData from '/src/assets/js/address.json'
-import {showLoading, updateAlertSuccess} from "../../assets/js/alertService.js";
+import {showLoading, updateAlertError, updateAlertSuccess} from "../../assets/js/alertService.js";
 import router from "../../router/index.js";
 import Address5 from "./Address5.vue";
+import {useAuthStore} from "../../stores/authStore.js";
 
 const handleNguoiBanLookup = async () => {
   if (!form.nguoiBanSearch) {
@@ -1231,6 +1294,7 @@ const form = reactive({
   ownerGender: null,
   ownerNewAddress: '',
   ownerOldAddress: '',
+  nguoiQuanLyID: null,
   moTaNgan: '',
   rooms: [defaultRoom()],
   hienThongTinChuKhiMoKhoa: true,
@@ -1250,6 +1314,12 @@ const errors = reactive({})
 const ownerSearch = ref('')
 const ownerLookupMessage = ref('')
 const ownerMode = ref('system')
+const managerSearch = ref('')
+const managerLookupMessage = ref('')
+const managerInfo = reactive({
+  fullName: '',
+  phone: '',
+})
 const nonSystemOwnerOption = ref('existing')
 const nonSystemOwnerSearch = ref('')
 const nonSystemLookupMessage = ref('')
@@ -1270,6 +1340,7 @@ const wardOptions = computed(() => selectedProvince.value?.wards || [])
 const isHouse = computed(() => form.loaiTaiSan === 'NHA')
 const isSystemOwnerMode = computed(() => ownerMode.value === 'system')
 const hasSystemOwner = computed(() => isSystemOwnerMode.value && form.ownerFullName && form.ownerPhone)
+const hasManager = computed(() => form.nguoiQuanLyID && managerInfo.fullName && managerInfo.phone)
 
 const tabs = computed(() => {
   const baseTabs = [
@@ -1279,7 +1350,11 @@ const tabs = computed(() => {
   ]
 
   if (isHouse.value) {
-    baseTabs.push({ id: 'house', label: 'Thông tin nhà & phòng', icon: 'fas fa-home' })
+    baseTabs.push({id: 'house', label: 'Thông tin nhà & phòng', icon: 'fas fa-home'})
+  }
+
+  if ( useAuthStore().hasPermission('PRODUCT_EDIT_MANAGER') ){
+    baseTabs.push({ id: 'manager', label: 'Người quản lý', icon: 'fas fa-user-shield' })
   }
 
   baseTabs.push({ id: 'owner', label: 'Chủ tài sản & hồ sơ', icon: 'fas fa-user-tie' })
@@ -1400,7 +1475,7 @@ const requireTextField = (value, key, message) => {
 
 const requireNumberField = (value, key, message, allowZero = false) => {
   const numberValue = Number(value)
-  if (value === null || value === undefined || value === '' || Number.isNaN(numberValue) || (!allowZero && numberValue <= 0)) {
+  if (value === null || value === undefined || value === '' || Number.isNaN(numberValue) || (!allowZero && numberValue < 0)) {
     errors[key] = message
     return false
   }
@@ -1468,6 +1543,10 @@ const validateOwnerSection = () => {
   return valid
 }
 
+const validateManagerSection = () => {
+  return  true
+}
+
 const validateTab = (tabId) => {
   let isValid = true
   const track = (valid) => {
@@ -1481,7 +1560,7 @@ const validateTab = (tabId) => {
     track(requireTextField(form.donViSoHuu, 'donViSoHuu', 'Chọn đơn vị sở hữu'))
     track(requireNumberField(form.giaBan, 'giaBan', 'Vui lòng nhập giá bán hợp lệ'))
     track(requireNumberField(form.giaNoiBo, 'giaNoiBo', 'Nhập giá nội bộ'))
-    track(requireNumberField(form.desire, 'desire', 'Nhập kỳ vọng'))
+    track(requireNumberField(form.desire, 'desire', 'Nhập giá mong muốn'))
     track(requireNumberField(form.phiMoiGioi, 'phiMoiGioi', 'Nhập phí môi giới', true))
   }
 
@@ -1588,6 +1667,11 @@ const validateTab = (tabId) => {
     }
   }
 
+  if (tabId === 'manager') {
+    clearErrors(['managerSearch'])
+    track(validateManagerSection())
+  }
+
   return isValid
 }
 
@@ -1647,6 +1731,7 @@ const tabFieldMap = {
     'rooms',
     'soLau',
   ],
+  manager: ['managerSearch'],
   owner: [
     'ownerSearch',
     'nonSystemOwnerSearch',
@@ -1679,7 +1764,7 @@ const validateForm = () => {
   track(requireTextField(form.donViSoHuu, 'donViSoHuu', 'Chọn đơn vị sở hữu'))
   track(requireNumberField(form.giaBan, 'giaBan', 'Vui lòng nhập giá bán hợp lệ'))
   track(requireNumberField(form.giaNoiBo, 'giaNoiBo', 'Nhập giá nội bộ'))
-  track(requireNumberField(form.desire, 'desire', 'Nhập kỳ vọng'))
+  track(requireNumberField(form.desire, 'desire', 'Nhập giá mong muốn'))
 
   if (!form.address) {
     errors.address = 'Vui lòng nhập đầy đủ địa chỉ'
@@ -1710,6 +1795,10 @@ const validateForm = () => {
   track(requireNumberField(form.phiMoiGioi, 'phiMoiGioi', 'Nhập phí môi giới', true))
 
   if (!validateOwnerSection()) {
+    isValid = false
+  }
+
+  if (!validateManagerSection()) {
     isValid = false
   }
 
@@ -1822,6 +1911,36 @@ const handleOwnerLookup = async () => {
   }
 }
 
+const handleManagerLookup = async () => {
+  managerLookupMessage.value = ''
+  if (!managerSearch.value) {
+    errors.managerSearch = 'Nhập phone hoặc email để tìm kiếm'
+    return
+  }
+  errors.managerSearch = ''
+  try {
+    const { data } = await api.get('/admin.thg/product/admin/tim-chu-tai-san', {
+      params: {
+        search: managerSearch.value,
+        phanLoaiHang: form.phanLoaiHang,
+      },
+    })
+    if (data) {
+      form.nguoiQuanLyID = data.id
+      managerInfo.fullName = data.fullName
+      managerInfo.phone = data.phone
+      managerLookupMessage.value = 'Tìm thấy người quản lý thành công'
+    } else {
+      form.nguoiQuanLyID = null
+      managerInfo.fullName = ''
+      managerInfo.phone = ''
+      managerLookupMessage.value = 'Không tìm thấy người quản lý với thông tin đã nhập'
+    }
+  } catch (e) {
+    managerLookupMessage.value = 'Lỗi khi tìm kiếm người quản lý'
+  }
+}
+
 const handleNonSystemOwnerLookup = async () => {
   nonSystemLookupMessage.value = ''
   nonSystemExistingOwner.value = null
@@ -1916,6 +2035,7 @@ const resetForm = () => {
     ownerGender: null,
     ownerNewAddress: '',
     ownerOldAddress: '',
+    nguoiQuanLyID: null,
     rooms: [defaultRoom()],
     hienThongTinChuKhiMoKhoa: true,
     hienLienHeKhiMoKhoa: true,
@@ -1930,6 +2050,10 @@ const resetForm = () => {
   ownerSearch.value = ''
   ownerLookupMessage.value = ''
   ownerMode.value = 'system'
+  managerSearch.value = ''
+  managerLookupMessage.value = ''
+  managerInfo.fullName = ''
+  managerInfo.phone = ''
   nonSystemOwnerOption.value = 'existing'
   nonSystemOwnerSearch.value = ''
   nonSystemLookupMessage.value = ''
@@ -2001,14 +2125,25 @@ const submitForm = async () => {
   isSubmitting.value = true
   try {
     const payload = buildFormData()
-    await showLoading(api.post('/admin.thg/product/admin/tao-moi', payload, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }));
-    updateAlertSuccess('Tạo tài sản thành công!');
-    resetForm();
-    router.push("/-thg/quan-ly-san-pham");
+
+    const res = await showLoading(
+        api.post('/admin.thg/product/admin/tao-moi', payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+    )
+    if (!res.data?.success) {
+      updateAlertError(
+          'Tạo tài sản thất bại!', res.data?.message
+      )
+      return
+    }
+
+    updateAlertSuccess('Tạo sản phẩm thành công!')
+    resetForm()
+    router.push('/-thg/quan-ly-san-pham')
+
   } catch (e) {
-    alert('Không thể tạo tài sản, vui lòng thử lại')
+    updateAlertError('Không thể tạo sản phẩm, vui lòng thử lại sau!')
   } finally {
     isSubmitting.value = false
   }
@@ -2150,6 +2285,10 @@ const submitForm = async () => {
   color: white;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+}
+
+.from-control{
+  border-radius: 10px !important;
 }
 
 .form-control:readonly {
