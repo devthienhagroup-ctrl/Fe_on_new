@@ -821,7 +821,7 @@
                   <i class="fas fa-user-shield text-warning"></i>
                 </div>
                 <div>
-                  <h2 class="h5 fw-bold mb-1">Thông tin người quản lý</h2>
+                  <h2 class="h5 fw-bold mb-1">Thông tin người quản lý( để trống -> mặc định là bạn )</h2>
                   <p class="text-muted small mb-0">Tìm kiếm người quản lý trong hệ thống</p>
                 </div>
               </div>
