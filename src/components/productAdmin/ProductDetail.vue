@@ -13,9 +13,9 @@
             <div class="property-title-section">
               <h1 class="property-address">{{ formatAddress( asset.address ) }}</h1>
 
-              <div class="property-meta">
+            <div class="property-meta">
                 <span class="meta-item">
-                  <span class="meta-label">Loại mặt hàng:</span>
+                  <span class="meta-label"><i class="fa-solid fa-tags"></i> Loại mặt hàng:</span>
                   <span :class="['property-badge', badgeClass(asset.phanLoaiHang)]">
                     {{ asset.phanLoaiHang ?? 'Chưa cập nhật' }}
                   </span>
@@ -24,71 +24,46 @@
                 <div class="meta-divider"></div>
 
                 <span class="meta-item">
-                  <span class="meta-label">Giá bán:</span>
+                  <span class="meta-label"><i class="fa-solid fa-coins"></i> Giá bán:</span>
                   <span class="price-selling">{{  formatMoneyVN(asset.giaBan) }}</span>
                 </span>
 
                 <div class="meta-divider"></div>
 
                 <span class="meta-item">
-                  <span class="meta-label">Giá nội bộ:</span>
+                  <span class="meta-label"><i class="fa-solid fa-user-shield"></i> Giá nội bộ:</span>
                   <span class="price-internal">{{ formatMoneyVN(asset.giaNoiBo) }}</span>
                 </span>
 
                 <div class="meta-divider"></div>
 
                 <span class="meta-item">
-                  <span class="meta-label">Số lượt xem:</span>
+                  <span class="meta-label"><i class="fa-solid fa-eye"></i> Số lượt xem:</span>
                   <span class="price-internal">{{ formatMoneyVN(asset.luotXem) }}</span>
                 </span>
                 <div class="meta-divider"></div>
 
                 <span class="meta-item">
-                  <span class="meta-label">Số lượt thích:</span>
+                  <span class="meta-label"><i class="fa-solid fa-heart"></i> Số lượt thích:</span>
                   <span class="price-internal">{{ formatMoneyVN(asset.luotThich) }}</span>
                 </span>
                 <div class="meta-divider"></div>
 
                 <span class="meta-item">
-                  <span class="meta-label">Số lượt mở khóa:</span>
+                  <span class="meta-label"><i class="fa-solid fa-lock-open"></i> Số lượt mở khóa:</span>
                   <span class="price-internal">{{ formatMoneyVN(asset.luotMoKhoa) }}</span>
                 </span>
 
               </div>
             </div>
-            <div v-if="asset.status === 'Đã bán'" class="d-flex align-items-center gap-3 p-3 rounded-3 bg-light border mt-2">
-              <!-- ICON -->
-              <div
-                  class="d-flex align-items-center justify-content-center
-           rounded-3
-           text-white shadow"
-                  style="width: 48px; height: 48px;"
-              >
-                <i class="fa-solid fa-user-check fs-5" style="color: black"></i>
+            <div class="description-card mt-2">
+              <div class="description-header">
+                <i class="fa-solid fa-pen-nib text-primary"></i>
+                <span>Mô tả ngắn</span>
               </div>
-
-              <!-- INFO -->
-              <div class="flex-grow-1">
-                <div class="fw-semibold text-dark">
-                  {{ asset.nguoiBanTen || 'Chưa cập nhật người bán' }}
-                </div>
-                <div class="text-muted small">
-                  Người bán thành công
-                </div>
-              </div>
-
-              <!-- PRICE -->
-              <div class="text-end">
-                <div class="fw-bold text-success fs-5">
-                  {{ asset.giaBanThanhCong
-                    ? formatMoneyVN(asset.giaBanThanhCong)
-                    : 'Chưa cập nhật'
-                  }}
-                </div>
-                <div class="text-muted small">
-                  Giá bán thành công
-                </div>
-              </div>
+              <p class="description-content">
+                {{ asset.moTaNgan ? asset.moTaNgan : 'Chưa cập nhật' }}
+              </p>
             </div>
 
           </div>
@@ -132,12 +107,12 @@
           <!-- LEFT COLUMN - GALLERY -->
           <div class="gallery-section" style="width: 930px; max-width: 930px">
             <div class="gallery-wrapper">
-              <div class="main-image-container">
+              <div class="main-image-container" v-if="asset.slide && asset.slide.length">
                 <img :src="asset.slide[activeImage]" alt="Property image" class="main-image" />
                 <div class="image-counter">{{ activeImage + 1 }} / {{ asset.slide.length }}</div>
               </div>
 
-              <div class="thumbnails-container">
+              <div v-if="asset.slide && asset.slide.length" class="thumbnails-container">
                 <div class="thumbnails-scroll">
                   <img
                       v-for="(img, i) in asset.slide"
@@ -150,8 +125,14 @@
                 </div>
               </div>
               <div class="file-section">
-                <FileOrLand entity-type="land" :entity-id="asset.id" :file-list="asset.files || [] "
-                            :canEdit="false"/>
+                <FileOrLand
+                  entity-type="land"
+                  :entity-id="asset.id"
+                  :file-list="asset.files || []"
+                  :canEdit="false"
+                  :onUpload="false"
+                  :allowDownloadAll="true"
+                />
               </div>
             </div>
           </div>
@@ -166,41 +147,41 @@
 
               <div class="info-grid">
                 <div class="info-row">
-                  <span class="info-label">Loại tài sản</span>
+                  <span class="info-label"><i class="fa-solid fa-layer-group"></i> Loại tài sản</span>
                   <span class="info-value" :class="badgeLoai(asset.loaiTaiSan)">
                   {{ formatLoai( asset.loaiTaiSan ) }}
                 </span>
                 </div>
 
                 <div class="info-row">
-                  <span class="info-label">Trạng thái</span>
+                  <span class="info-label"><i class="fa-solid fa-circle-check"></i> Trạng thái</span>
                   <span class="info-value" :class="badgeStatus(asset.status)">
                   {{ formatStatus(asset.status) }}
                 </span>
                 </div>
 
                 <div class="info-row highlight-row">
-                  <span class="info-label">Giá bán</span>
+                  <span class="info-label"><i class="fa-solid fa-money-bill-wave"></i> Giá bán</span>
                   <span class="info-value price-selling text-primary">{{ formatMoneyVN(asset.giaBan) }}</span>
                 </div>
 
                 <div class="info-row highlight-row">
-                  <span class="info-label">Giá nội bộ</span>
+                  <span class="info-label"><i class="fa-solid fa-shield"></i> Giá nội bộ</span>
                   <span class="info-value price-internal text-primary">{{  formatMoneyVN(asset.giaNoiBo) }}</span>
                 </div>
 
                 <div class="info-row highlight-row">
-                  <span class="info-label">Giá mong muốn</span>
+                  <span class="info-label"><i class="fa-solid fa-hand-holding-dollar"></i> Giá mong muốn</span>
                   <span class="info-value price-internal text-primary">{{  formatMoneyVN( asset.desire ) }}</span>
                 </div>
 
                 <div class="info-row">
-                  <span class="info-label">Liên hệ</span>
+                  <span class="info-label"><i class="fa-solid fa-phone"></i> Liên hệ</span>
                   <span class="info-value"> <i class="fa-solid fa-phone text-danger"></i> {{ asset.lienHe ?? ' Chưa cập nhật' }}</span>
                 </div>
 
                 <div class="info-row">
-                  <span class="info-label">Chủ sở hữu</span>
+                  <span class="info-label"><i class="fa-solid fa-user-tie text-info"></i> Chủ sở hữu</span>
                   <span v-if="asset.ownerName != null" class="info-value">
                   {{ asset.ownerName ?? 'Chưa cập nhật' }}
                 </span>
@@ -208,12 +189,12 @@
                 </div>
 
                 <div class="info-row">
-                  <span class="info-label">SĐT chủ sở hữu</span>
+                  <span class="info-label"><i class="fa-solid fa-phone text-success"></i> SĐT chủ sở hữu</span>
                   <span class="info-value"> {{ asset.ownerPhone ?? 'Chưa cập nhật' }}</span>
                 </div>
 
                 <div class="info-row">
-                  <span class="info-label">Đơn vị sở hữu</span>
+                  <span class="info-label"><i class="fa-solid fa-building text-primary"></i> Đơn vị sở hữu</span>
                   <span class="info-value owner-unit">
                   <img v-if="asset.donViSoHuu === 'THG'" src="/imgs/logokn.png" alt="THG" class="unit-logo">
                   <span  v-else-if="asset.donViSoHuu === 'DT'">
@@ -224,11 +205,134 @@
                 </div>
 
                 <div class="info-row">
-                  <span class="info-label">Phí môi giới</span>
+                  <span class="info-label"><i class="fa-solid fa-percent text-warning"></i> Phí môi giới</span>
                   <span class="info-value text-primary">{{ asset.phiMoiGioi != null ? asset.phiMoiGioi + '%' : 'Chưa cập nhật' }}</span>
                 </div>
               </div>
 
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section section-system">
+          <div class="section-header">
+            <div class="section-title-group">
+              <i class="fa-solid fa-gears section-icon"></i>
+              <h3 class="section-title">Thông tin hệ thống</h3>
+            </div>
+          </div>
+
+          <div class="detail-grid system-grid">
+            <div class="detail-group">
+              <div class="group-title">
+                <i class="fa-solid fa-user-check text-info"></i>
+                <span>Người bán</span>
+              </div>
+              <div class="group-row">
+                <span class="row-label">
+                  <i class="fa-solid fa-user text-primary"></i>
+                  Tên người bán
+                </span>
+                <span class="row-value">{{ formatValue(asset.nguoiBanTen) }}</span>
+              </div>
+              <div class="group-row">
+                <span class="row-label">
+                  <i class="fa-solid fa-phone text-success"></i>
+                  Số điện thoại
+                </span>
+                <span class="row-value">{{ formatPhone(asset.sdtNguoiBan) }}</span>
+              </div>
+              <div class="group-row">
+                <span class="row-label">
+                  <i class="fa-solid fa-money-check-dollar text-danger"></i>
+                  Giá bán thành công
+                </span>
+                <span class="row-value">{{ asset.giaBanThanhCong != null ? formatMoneyVN(asset.giaBanThanhCong) : 'Chưa cập nhật' }}</span>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <div class="group-title">
+                <i class="fa-solid fa-user-gear text-warning"></i>
+                <span>Người quản lý</span>
+              </div>
+              <div class="group-row">
+                <span class="row-label">
+                  <i class="fa-solid fa-user text-primary"></i>
+                  Tên người quản lý
+                </span>
+                <span class="row-value">{{ formatValue(asset.nguoiQuanLy) }}</span>
+              </div>
+              <div class="group-row">
+                <span class="row-label">
+                  <i class="fa-solid fa-envelope-open-text text-info"></i>
+                  Email
+                </span>
+                <span class="row-value">{{ formatValue(asset.nguoiQuanLyEmail) }}</span>
+              </div>
+              <div class="group-row">
+                <span class="row-label">
+                  <i class="fa-solid fa-phone-volume text-success"></i>
+                  Số điện thoại
+                </span>
+                <span class="row-value">{{ formatPhone(asset.managerPhone) }}</span>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <div class="group-title">
+                <i class="fa-solid fa-user-tie text-primary"></i>
+                <span>Chủ tài sản</span>
+              </div>
+              <div class="group-row">
+                <span class="row-label">
+                  <i class="fa-solid fa-circle-user text-info"></i>
+                  Chế độ chủ tài sản
+                </span>
+                <span class="row-value">{{ formatOwnerMode(asset.ownerMode) }}</span>
+              </div>
+              <div class="group-row">
+                <span class="row-label">
+                  <i class="fa-solid fa-user text-success"></i>
+                  Tên chủ tài sản
+                </span>
+                <span class="row-value">{{ formatValue(asset.ownerName) }}</span>
+              </div>
+              <div class="group-row">
+                <span class="row-label">
+                  <i class="fa-solid fa-phone text-warning"></i>
+                  Số điện thoại
+                </span>
+                <span class="row-value">{{ formatPhone(asset.ownerPhone) }}</span>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <div class="group-title">
+                <i class="fa-solid fa-calendar-days text-success"></i>
+                <span>Thời gian</span>
+              </div>
+              <div class="group-row">
+                <span class="row-label">
+                  <i class="fa-solid fa-calendar-plus text-primary"></i>
+                  Ngày tạo
+                </span>
+                <span class="row-value">{{ formatDateTime(asset.createAt) }}</span>
+              </div>
+              <div class="group-row">
+                <span class="row-label">
+                  <i class="fa-solid fa-clock-rotate-left text-warning"></i>
+                  Ngày cập nhật
+                </span>
+                <span class="row-value">{{ formatDateTime(asset.updateAt) }}</span>
+              </div>
+              <div class="group-row">
+                <span class="row-label">
+                  <i class="fa-solid fa-calendar-check text-info"></i>
+                  Ngày bán
+                </span>
+                <span class="row-value">{{ formatDateTime(asset.ngayBan) }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -244,84 +348,84 @@
 
           <div class="detail-grid">
             <div class="detail-item">
-              <span class="detail-label">Đường</span>
+              <span class="detail-label"><i class="fa-solid fa-road"></i> Đường</span>
               <span class="detail-value">{{ formatAddressDetail( asset.address ) }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Phường/Xã</span>
+              <span class="detail-label"><i class="fa-solid fa-location-dot"></i> Phường/Xã</span>
               <span class="detail-value">{{  formatWard( asset.address )  }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Khu vực</span>
+              <span class="detail-label"><i class="fa-solid fa-map"></i> Khu vực</span>
               <span class="detail-value">{{ asset.khuVucMa ?? 'Chưa cập nhật' }}</span>
             </div>
 
             <div class="detail-item">
-              <span class="detail-label">Địa chỉ cũ</span>
-              <span class="detail-value">{{ asset.oldAddress ?? 'Chưa cập nhật' }}</span>
+              <span class="detail-label"><i class="fa-solid fa-map-location-dot"></i> Địa chỉ cũ</span>
+              <span class="detail-value">{{ asset.oldAddress === '' ? 'Chưa cập nhật': asset.oldAddress }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Số tờ bản đồ & Số thửa đất</span>
-              <span class="detail-value">{{ asset.plotNumber ?? 'Chưa cập nhật' }} && {{ asset.parcelNumber ?? 'Chưa cập nhật' }}</span>
+              <span class="detail-label"><i class="fa-solid fa-map-location"></i> Số tờ bản đồ & Số thửa đất</span>
+              <span class="detail-value">{{ asset.plotNumber ?? 'Chưa cập nhật' }} / {{ asset.parcelNumber ?? 'Chưa cập nhật' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Loại đất</span>
-              <span class="detail-value">{{ asset.loaiDat }}</span>
+              <span class="detail-label"><i class="fa-solid fa-tree-city"></i> Loại đất</span>
+              <span class="detail-value">{{ asset.loaiDat ?? 'Chưa cập nhật' }}</span>
             </div>
 
             <div class="detail-item">
-              <span class="detail-label">Diện tích tổng</span>
+              <span class="detail-label"><i class="fa-solid fa-ruler-combined"></i> Diện tích tổng</span>
               <span class="detail-value highlight">{{  formatArea( asset.totalArea) }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Quan hệ sở hữu</span>
+              <span class="detail-label"><i class="fa-solid fa-people-group"></i> Quan hệ sở hữu</span>
               <span class="detail-value">{{ asset.ownershipRelation ?? 'Chưa cập nhật' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Quyền sử dụng đất</span>
+              <span class="detail-label"><i class="fa-solid fa-file-signature"></i> Quyền sử dụng đất</span>
               <span class="detail-value">{{ asset.landUseRight ?? 'Chưa cập nhật' }}</span>
             </div>
 
             <div class="detail-item">
-              <span class="detail-label">Vị trí</span>
+              <span class="detail-label"><i class="fa-solid fa-location-crosshairs"></i> Vị trí</span>
               <span class="detail-value">{{ asset.landPosition ?? 'Chưa cập nhật' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Trạng thái</span>
+              <span class="detail-label"><i class="fa-solid fa-flag"></i> Trạng thái</span>
               <span v-if="asset.status == null" class="detail-value">Chưa cập nhật</span>
-              <span v-else-if="asset === 'Đã bán'" class="detail-value">Đã bán</span>
+              <span v-else-if="asset.status === 'Đã bán'" class="detail-value">Đã bán</span>
               <span v-else class="detail-value">Đang rao bán</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Chiều ngang & chiều dài</span>
+              <span class="detail-label"><i class="fa-solid fa-ruler"></i> Chiều ngang & chiều dài</span>
               <span class="detail-value text-primary">
               Ngang {{ asset.chieuNgang != null ? formatArea2(asset.chieuNgang) + 'm' : 'Chưa cập nhật' }} ,
               Dài {{ asset.chieuDai != null ? formatArea2(asset.chieuDai) + 'm' : 'Chưa cập nhật' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Loại đất</span>
+              <span class="detail-label"><i class="fa-solid fa-seedling"></i> Loại đất</span>
               <span class="detail-value">{{ asset.loaiDat ?? 'Chưa cập nhật' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Hình dạng/ kết cấu</span>
+              <span class="detail-label"><i class="fa-solid fa-shapes"></i> Hình dạng/ kết cấu</span>
               <span class="detail-value">{{ asset.structure ?? 'Chưa cập nhật' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Hiện trạng đất</span>
+              <span class="detail-label"><i class="fa-solid fa-mountain-sun"></i> Hiện trạng đất</span>
               <span class="detail-value">{{ asset.hienTrangDat ?? 'Chưa cập nhật' }}</span>
             </div>
 
             <div class="detail-item">
-              <span class="detail-label">Lộ giới & Độ rộng đường</span>
+              <span class="detail-label"><i class="fa-solid fa-road-circle-check"></i> Lộ giới & Độ rộng đường</span>
               <span class="detail-value">{{ asset.loGioi != null ? asset.loGioi + 'm' : 'Chưa cập nhật' }} &
               {{ asset.doRongDuong != null ? asset.doRongDuong + 'm' : 'Chưa cập nhật' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Quy hoạch</span>
+              <span class="detail-label"><i class="fa-solid fa-drafting-compass"></i> Quy hoạch</span>
               <span class="detail-value">{{ asset.quyHoach ?? 'Chưa cập nhật' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Mặt tiền</span>
+              <span class="detail-label"><i class="fa-solid fa-building-columns"></i> Mặt tiền</span>
               <span class="detail-value">{{ asset.matTienNha != null ? asset.matTienNha + ' m' : 'Chưa cập nhật' }}</span>
             </div>
           </div>
@@ -338,42 +442,42 @@
 
           <div class="detail-grid">
             <div class="detail-item">
-              <span class="detail-label">Diện tích sàn</span>
+              <span class="detail-label"><i class="fa-solid fa-ruler-vertical"></i> Diện tích sàn</span>
               <span class="detail-value highlight">{{ formatArea( asset.floorArea ) }} </span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Loại nhà</span>
+              <span class="detail-label"><i class="fa-solid fa-house"></i> Loại nhà</span>
               <span class="detail-value highlight">{{ asset.loaiNha ?? 'Chưa cập nhật' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Số tầng & Số lầu</span>
+              <span class="detail-label"><i class="fa-solid fa-layer-group"></i> Số tầng & Số lầu</span>
               <span class="detail-value">{{ asset.soTang != null ? asset.soTang + ' tầng' : 'Chưa cập nhật' }} &
               {{ asset.soLau != null ? asset.soLau + ' lầu' : 'Chưa cập nhật' }} </span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Hiện trạng nhà</span>
+              <span class="detail-label"><i class="fa-solid fa-house-circle-check"></i> Hiện trạng nhà</span>
               <span class="detail-value">{{ asset.hienTrangNha ?? 'Chưa cập nhật' }}</span>
             </div>
 
             <div class="detail-item">
-              <span class="detail-label">Phòng ngủ</span>
+              <span class="detail-label"><i class="fa-solid fa-bed"></i> Phòng ngủ</span>
               <span class="detail-value">{{ asset.soPhongNgu != null ? asset.soPhongNgu + ' phòng' : 'Chưa cập nhật' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Phòng tắm</span>
+              <span class="detail-label"><i class="fa-solid fa-bath"></i> Phòng tắm</span>
               <span class="detail-value"> {{ asset.soPhongTam != null ? asset.soPhongTam + ' phòng' : 'Chưa cập nhật' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Tổng số phòng</span>
+              <span class="detail-label"><i class="fa-solid fa-door-open"></i> Tổng số phòng</span>
               <span class="detail-value">{{ asset.tongSoPhong != null ? asset.tongSoPhong + ' phòng' : 'Chưa cập nhật' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Năm xây dựng</span>
+              <span class="detail-label"><i class="fa-solid fa-calendar-days"></i> Năm xây dựng</span>
               <span class="detail-value">{{ asset.namXayDung ?? 'Chưa cập nhật' }}</span>
             </div>
 
             <div class="detail-item">
-              <span class="detail-label">Nội thất</span>
+              <span class="detail-label"><i class="fa-solid fa-couch"></i> Nội thất</span>
               <span class="detail-value">{{ asset.noiThat ?? 'Chưa cập nhật' }}</span>
             </div>
           </div>
@@ -476,18 +580,17 @@
   <script setup>
   import { ref, onMounted, computed } from "vue";
   import { useRoute, useRouter } from "vue-router";
-  import FileOrLand from "../land/FileOrLand.vue";
+  import FileOrLand from "./FileNew.vue";
   import HopTacMoiGioi from "./HopTacMoiGioi.vue";
 
   const activeTab = ref("DETAIL") // DETAIL | FILE
   const route = useRoute();
   const router = useRouter();
   const id = route.params.id;
-  const activeImage = ref(0);
-
   const asset = ref(null);
   const rooms = ref([]);
   const pdfUrl = ref(null);
+  const activeImage = ref(0);
 
   onMounted(() => loadDetail(id));
 
@@ -511,8 +614,6 @@
       case "DAT": return "#8b5cf6";
     }
   };
-
-
 
   const parsedAddress = computed(() => {
     if (!asset.value?.address) return { street: "", ward: "", area: "" };
@@ -788,6 +889,45 @@
         return loai;
     }
   };
+
+  const formatOwnerMode = (mode) => {
+    if (!mode) return "Chưa cập nhật";
+    const map = {
+      system: "Chủ tài sản có dùng hệ thống",
+      nonSystem: "Chủ tài sản không dùng hệ thống"
+    };
+    return map[mode] || mode;
+  };
+
+  const formatValue = (value) => {
+    if (value === null || value === undefined || value === "") return "Chưa cập nhật";
+    return value;
+  };
+
+  const formatDateTime = (value) => {
+    if (!value) return "Chưa cập nhật";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleString("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  };
+
+  const formatPhone = (value) => {
+    if (!value) return "Chưa cập nhật";
+    const digits = String(value).replace(/\D/g, "");
+    if (digits.length === 10) {
+      return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7)}`;
+    }
+    if (digits.length === 11) {
+      return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7)}`;
+    }
+    return value;
+  };
   </script>
 
 <style scoped>
@@ -872,6 +1012,13 @@
   color: #64748b;
   font-size: 14px;
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meta-label i {
+  color: #6366f1;
 }
 
 .meta-divider {
@@ -1125,6 +1272,13 @@
   color: #64748b;
   font-size: 14px;
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.info-label i {
+  color: #0ea5e9;
 }
 
 .info-value {
@@ -1162,6 +1316,29 @@
   border-top: 2px solid #f1f5f9;
 }
 
+.description-card {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+
+.description-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: #9a3412;
+  margin-bottom: 8px;
+}
+
+.description-content {
+  margin: 0;
+  color: #7c2d12;
+  white-space: pre-line;
+  font-weight: 500;
+}
+
 /* ========= DETAIL SECTIONS ========= */
 .detail-section {
   background: white;
@@ -1191,6 +1368,10 @@
 
 .section-valuation {
   border-left-color: #ef4444;
+}
+
+.section-system {
+  border-left-color: #6366f1;
 }
 
 .section-header {
@@ -1230,6 +1411,10 @@
   color: #ef4444;
 }
 
+.section-system .section-icon {
+  color: #6366f1;
+}
+
 .section-title {
   font-size: 22px;
   font-weight: 700;
@@ -1244,10 +1429,61 @@
   gap: 20px 32px;
 }
 
+.system-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.detail-group {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.group-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.row-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.row-value {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+}
+
 .detail-item {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
 }
 
 .detail-label {
@@ -1256,6 +1492,29 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-legal .detail-label i {
+  color: #0ea5e9;
+}
+
+.section-house .detail-label i {
+  color: #10b981;
+}
+
+.section-rooms .detail-label i {
+  color: #8b5cf6;
+}
+
+.section-valuation .detail-label i {
+  color: #ef4444;
+}
+
+.section-system .detail-label i {
+  color: #6366f1;
 }
 
 .detail-value {

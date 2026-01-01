@@ -4,7 +4,7 @@
       <!-- Bộ lọc nâng cao -->
       <div class="bg-white rounded-xl shadow-lg border border-slate-300 mb-4 p-4"
            style="
-            background-image: url('https://s3.cloudfly.vn/thg-storage-dev/uploads-public/thienhagroup_filter_2.png');
+            background-image: url('https://s3.cloudfly.vn/thg-storage/uploads-public/thienhagroup_filter_2.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -12,7 +12,7 @@
         <div class="filter-header mb-3">
           <div class="filter-title-wrap">
             <h1 class="filter-title">
-              Sản Phẩm Thiên Hà Group Dành Riêng Cho Bạn
+              Kho hàng của bạn
             </h1>
           </div>
 

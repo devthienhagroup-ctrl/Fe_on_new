@@ -64,6 +64,8 @@
               <p class="press-lede">
                 {{ formatAddress(asset.address) ?? 'Chưa cập nhật' }} đang mở chào bán với mức giá cạnh tranh, pháp lý minh bạch và quỹ hoa hồng hấp dẫn. Mọi thông tin được biên tập theo định dạng tạp chí để anh/chị môi giới dễ tư vấn và chốt khách.
               </p>
+              <p class="press-lede" v-html="asset.moTaNgan">
+              </p>
               <div class="commission-spotlight">
                 <div class="spotlight-badge">
                   <i class="fa-solid fa-sparkles"></i>

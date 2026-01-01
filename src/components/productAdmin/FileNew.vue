@@ -99,7 +99,8 @@
           </span>
 
         <div class="d-flex gap-2">
-          <button class="btn btn-dark btn-sm lightbox-pin-btn"
+          <button v-if="canEdit"
+                  class="btn btn-dark btn-sm lightbox-pin-btn"
                   :class="{active:isMainImage(previewIndex)}"
                   @click="setMainImage(previewIndex)">
             <i class="fa-solid fa-thumbtack"></i>
@@ -143,7 +144,8 @@
              :class="{active:i===previewIndex}"
              @click="previewIndex=i">
           <img :src="u"/>
-          <span class="thumb-pin"
+          <span v-if="canEdit"
+                class="thumb-pin"
                 :class="{active:isMainImage(i)}"
                 @click.stop="setMainImage(i)">
             <i class="fa-solid fa-thumbtack"></i>
