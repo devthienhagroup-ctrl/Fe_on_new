@@ -12,6 +12,19 @@
 
             <div class="property-title-section">
               <h1 class="property-address">{{ formatAddress( asset.address ) }}</h1>
+              <div v-if="asset?.dk === true && asset?.thuDK" class="register-letter">
+                <div class="register-letter__content">
+                  <i class="fa-solid fa-envelope-open-text text-primary"></i>
+                  <div>
+                    <p class="register-letter__label">Thư đăng ký</p>
+                    <p class="register-letter__text">{{ asset.thuDK }}</p>
+                  </div>
+                </div>
+                <button class="register-letter__btn" type="button" @click="approveRegister">
+                  <i class="fa-solid fa-check"></i>
+                  Duyệt
+                </button>
+              </div>
 
             <div class="property-meta">
                 <span class="meta-item">
@@ -582,6 +595,7 @@
   import { useRoute, useRouter } from "vue-router";
   import FileOrLand from "./FileNew.vue";
   import HopTacMoiGioi from "./HopTacMoiGioi.vue";
+  import { showCenterSuccess, showCenterError, showCenterWarning } from "/src/assets/js/alertService.js";
 
   const activeTab = ref("DETAIL") // DETAIL | FILE
   const route = useRoute();
@@ -607,6 +621,28 @@
       console.warn("API chưa có dữ liệu — fallback mock");
     }
   }
+
+  const approveRegister = async () => {
+    if (!asset.value?.id) {
+      showCenterWarning("Thiếu thông tin", "Không tìm thấy ID tài sản.");
+      return;
+    }
+
+    try {
+      await api.post(`/admin.thg/product/admin/toggle-show/${asset.value.id}`);
+      showCenterSuccess(
+        "Đã duyệt hiển thị",
+        `Tài sản ID ${asset.value.id} đã được cập nhật trạng thái hiển thị.`
+      );
+      await loadDetail(asset.value.id);
+    } catch (e) {
+      console.error(e);
+      showCenterError(
+        "Lỗi cập nhật!",
+        "Không thể thay đổi trạng thái hiển thị tài sản. Vui lòng thử lại."
+      );
+    }
+  };
 
   const typeColor = (type) => {
     switch (type) {
@@ -993,6 +1029,57 @@
   color: #0f172a;
   margin: 0 0 16px 0;
   line-height: 1.3;
+}
+
+.register-letter {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 16px;
+}
+
+.register-letter__content {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  color: #0f172a;
+}
+
+.register-letter__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 4px;
+}
+
+.register-letter__text {
+  margin: 0;
+  font-size: 14px;
+  color: #0f172a;
+  white-space: pre-wrap;
+}
+
+.register-letter__btn {
+  border: none;
+  background: #10b981;
+  color: #ffffff;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(16, 185, 129, 0.25);
+}
+
+.register-letter__btn:hover {
+  background: #059669;
 }
 
 .property-meta {

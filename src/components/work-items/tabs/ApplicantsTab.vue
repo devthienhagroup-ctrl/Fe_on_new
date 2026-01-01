@@ -20,14 +20,6 @@
       </div>
     </div>
 
-    <div class="d-flex flex-wrap gap-2 mb-3">
-      <span class="badge bg-primary-subtle text-primary">
-        {{ filteredApplicants.length }} ứng viên phù hợp
-      </span>
-      <span class="badge bg-light text-secondary">
-        {{ applicants.length }} tổng ứng viên
-      </span>
-    </div>
 
     <div class="table-responsive bg-white shadow-sm rounded-4 position-relative">
       <table class="table table-hover align-middle mb-0 applicants-table">
@@ -37,7 +29,7 @@
             <th scope="col">Công việc</th>
             <th scope="col">Ngày ứng tuyển</th>
             <th scope="col">Trạng thái</th>
-            <th scope="col" class="text-end">Ghi chú</th>
+            <th scope="col">Tệp đính kèm</th>
             <th scope="col" class="text-end">Thao tác</th>
           </tr>
         </thead>
@@ -45,7 +37,14 @@
           <tr v-for="applicant in filteredApplicants" :key="applicant.id">
             <td>
               <div class="d-flex align-items-center gap-2">
-                <div class="applicant-avatar">{{ applicant.initials }}</div>
+                <div class="applicant-avatar">
+                  <img
+                    v-if="applicant.avatarUrl"
+                    :src="applicant.avatarUrl"
+                    :alt="applicant.candidateName"
+                  />
+                  <span v-else>{{ applicant.initials }}</span>
+                </div>
                 <div>
                   <div class="fw-semibold">{{ applicant.candidateName }}</div>
                   <div class="text-muted extra-small">
@@ -56,19 +55,26 @@
             </td>
             <td>
               <div class="fw-semibold">{{ applicant.jobTitle }}</div>
-              <div class="text-muted extra-small">{{ applicant.department }}</div>
             </td>
             <td>
               <div class="fw-semibold">{{ applicant.appliedDate }}</div>
-              <div class="text-muted extra-small">{{ applicant.expectedSalary }}</div>
             </td>
             <td>
               <span :class="['status-pill', statusClass(applicant.status)]">
                 {{ applicant.status }}
               </span>
             </td>
-            <td class="text-end text-muted small">
-              {{ applicant.note }}
+            <td>
+              <button
+                v-if="applicant.file"
+                type="button"
+                class="btn btn-link p-0 text-primary fw-semibold"
+                @click="openFile(applicant.file)"
+              >
+                <i class="fa-solid fa-paperclip me-1"></i>
+                {{ applicant.file.fileName || "Tệp đính kèm" }}
+              </button>
+              <span v-else class="text-muted small">Không có tệp</span>
             </td>
             <td class="text-end">
               <div class="d-flex justify-content-end gap-2">
@@ -172,75 +178,19 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
+import api from "../../../api/api.js";
+import { fetchPrivateDownloadUrl } from "../../../api/fileApi.js";
+import { showError } from "../../../assets/js/alertService.js";
 
-const applicants = ref([
-  {
-    id: 1,
-    candidateName: "Nguyễn Minh Khoa",
-    initials: "NK",
-    email: "khoa.nguyen@demo.com",
-    phone: "0901 234 567",
-    jobTitle: "Frontend Engineer",
-    department: "Team Web",
-    appliedDate: "12/03/2024",
-    expectedSalary: "20 - 25 triệu",
-    status: "Đang đánh giá",
-    note: "Hẹn phỏng vấn vòng 1"
-  },
-  {
-    id: 2,
-    candidateName: "Trần Thảo Vy",
-    initials: "TV",
-    email: "vy.tran@demo.com",
-    phone: "0932 778 911",
-    jobTitle: "UI/UX Designer",
-    department: "Team Product",
-    appliedDate: "10/03/2024",
-    expectedSalary: "18 - 22 triệu",
-    status: "Đã nhận hồ sơ",
-    note: "Đang review portfolio"
-  },
-  {
-    id: 3,
-    candidateName: "Phạm Quốc Huy",
-    initials: "QH",
-    email: "huy.pham@demo.com",
-    phone: "0977 445 221",
-    jobTitle: "Backend Engineer",
-    department: "Team Platform",
-    appliedDate: "09/03/2024",
-    expectedSalary: "25 - 30 triệu",
-    status: "Phỏng vấn",
-    note: "Vòng kỹ thuật 15/03"
-  },
-  {
-    id: 4,
-    candidateName: "Lê Hải Anh",
-    initials: "HA",
-    email: "anh.le@demo.com",
-    phone: "0919 554 333",
-    jobTitle: "Project Coordinator",
-    department: "PMO",
-    appliedDate: "07/03/2024",
-    expectedSalary: "15 - 18 triệu",
-    status: "Đạt yêu cầu",
-    note: "Chờ offer"
-  },
-  {
-    id: 5,
-    candidateName: "Vũ Đức Anh",
-    initials: "DA",
-    email: "anh.vu@demo.com",
-    phone: "0988 120 876",
-    jobTitle: "QA Engineer",
-    department: "Team QA",
-    appliedDate: "06/03/2024",
-    expectedSalary: "14 - 17 triệu",
-    status: "Không phù hợp",
-    note: "Thiếu kinh nghiệm automation"
+const props = defineProps({
+  projectId: {
+    type: Number,
+    required: true
   }
-]);
+});
+
+const applicants = ref([]);
 
 const searchKeyword = ref("");
 const showAcceptModal = ref(false);
@@ -248,6 +198,94 @@ const showRejectModal = ref(false);
 const selectedApplicant = ref(null);
 const welcomeMessage = ref("");
 const rejectReason = ref("");
+let searchTimeout = null;
+
+const ASSET_BASE_URL = "https://s3.cloudfly.vn/thg-storage-dev/uploads-public/";
+
+const formatDate = (value) => {
+  if (!value) return "Chưa cập nhật";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Chưa cập nhật";
+  return new Intl.DateTimeFormat("vi-VN").format(date);
+};
+
+const getInitials = (name) => {
+  if (!name) return "--";
+  const parts = name.trim().split(/\s+/);
+  const initials = parts.slice(-2).map((part) => part[0]).join("");
+  return initials.toUpperCase() || "--";
+};
+
+const buildAvatarUrl = (path) => {
+  if (!path) return "";
+  if (path.startsWith("http")) return path;
+  return `${ASSET_BASE_URL}${path}`;
+};
+
+const mapApplicant = (item) => {
+  const file = item?.files?.[0] ?? null;
+  return {
+    id: item?.ungTuyenId ?? `${item?.nguoiUngTuyenId ?? ""}-${item?.workItemId ?? ""}`,
+    candidateName: item?.hoTen ?? "Chưa cập nhật",
+    initials: getInitials(item?.hoTen),
+    email: item?.email ?? "Chưa cập nhật",
+    phone: item?.soDienThoai ?? "Chưa cập nhật",
+    avatarUrl: buildAvatarUrl(item?.avatar),
+    jobTitle: item?.tenViTri ?? "Chưa cập nhật",
+    appliedDate: formatDate(item?.ngayUngTuyen),
+    status: item?.trangThai ?? "Đang đánh giá",
+    file: file
+      ? {
+          id: file.id,
+          fileName: file.fileName,
+          url: file.url,
+          isPrivate: file.isPrivate
+        }
+      : null
+  };
+};
+
+const fetchApplicants = async () => {
+  if (!props.projectId) return;
+  try {
+    const response = await api.get("/admin.thg/project/work/ung-tuyen", {
+      params: {
+        projectId: props.projectId,
+        search: searchKeyword.value.trim() || undefined
+      }
+    });
+    const data = Array.isArray(response?.data) ? response.data : [];
+    applicants.value = data.map(mapApplicant);
+  } catch (error) {
+    console.error("Không thể tải danh sách ứng tuyển:", error);
+    showError("Không thể tải danh sách ứng tuyển.");
+  }
+};
+
+const openFile = async (file) => {
+  if (!file) return;
+  try {
+    if (file.isPrivate) {
+      const downloadUrl = await fetchPrivateDownloadUrl(file.id);
+      if (!downloadUrl) {
+        showError("Không thể tải tệp đính kèm.");
+        return;
+      }
+      window.open(downloadUrl, "_blank");
+      return;
+    }
+
+    if (file.url) {
+      window.open(file.url, "_blank");
+      return;
+    }
+
+    showError("Không tìm thấy đường dẫn tệp.");
+  } catch (error) {
+    console.error("Không thể mở tệp đính kèm:", error);
+    showError("Không thể tải tệp đính kèm.");
+  }
+};
 
 const filteredApplicants = computed(() => {
   const keyword = searchKeyword.value.trim().toLowerCase();
@@ -283,14 +321,12 @@ const closeModals = () => {
 const submitAccept = () => {
   if (!selectedApplicant.value) return;
   selectedApplicant.value.status = "Đạt yêu cầu";
-  selectedApplicant.value.note = "Đã gửi thư chào mừng";
   closeModals();
 };
 
 const submitReject = () => {
   if (!selectedApplicant.value) return;
   selectedApplicant.value.status = "Không phù hợp";
-  selectedApplicant.value.note = rejectReason.value.trim() || "Đã gửi thư từ chối";
   closeModals();
 };
 
@@ -310,6 +346,21 @@ const statusClass = (status) => {
       return "status-review";
   }
 };
+
+watch(
+  () => props.projectId,
+  () => {
+    fetchApplicants();
+  },
+  { immediate: true }
+);
+
+watch(searchKeyword, () => {
+  if (searchTimeout) clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    fetchApplicants();
+  }, 350);
+});
 </script>
 
 <style scoped>
@@ -343,6 +394,13 @@ const statusClass = (status) => {
   justify-content: center;
   font-weight: 600;
   color: #4c5be5;
+  overflow: hidden;
+}
+
+.applicant-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .extra-small {

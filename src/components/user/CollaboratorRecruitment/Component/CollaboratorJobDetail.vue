@@ -9,7 +9,7 @@
         <div class="left-column">
           <!-- Ảnh lớn -->
           <div class="main-image">
-            <img :src="jobData.image" :alt="jobData.title" />
+            <img :src="resolveImage(jobData.image)" :alt="jobData.title" />
           </div>
 
           <!-- Thông tin công việc -->
@@ -27,7 +27,7 @@
           </div>
 
           <!-- Mô tả công việc -->
-          <div class="job-description" v-html="jobData.jobDescription"></div>
+          <div class="job-description" v-html="jobDescription"></div>
         </div>
 
         <!-- Cột phải -->
@@ -35,7 +35,7 @@
           <!-- Ô trên - Đăng ký -->
           <div class="register-card">
             <h3 class="register-title">Bắt đầu hành trình cùng Thiên Hà Group</h3>
-            <button class="register-btn">Đăng ký ngay</button>
+            <button class="register-btn" @click="openApplyModal">Ứng tuyển ngay</button>
             <div class="register-image">
               <img src="/imgs/Click here-pana.svg" alt="Click here" />
             </div>
@@ -63,96 +63,147 @@
       </div>
 
       <!-- Nút quay lại -->
-      <router-link to="/collaborator-jobs" class="back-btn">
+      <router-link to="/cong-viec-cong-tac-vien" class="back-btn">
         Quay lại
       </router-link>
+    </div>
+
+    <div v-if="showApplyModal" class="job-modal">
+      <div class="modal-overlay" @click="closeApplyModal"></div>
+      <div class="modal-card modal-apply">
+        <button class="modal-close" @click="closeApplyModal">
+          <i class="fa-solid fa-times"></i>
+        </button>
+        <div class="modal-body">
+          <h3 class="modal-title">Ứng tuyển công việc</h3>
+          <p class="modal-subtitle">{{ jobData.title }}</p>
+
+          <div class="file-upload">
+            <label class="file-label" for="cv-upload-detail">
+              <i class="fa-solid fa-upload"></i>
+              <span>Upload CV (tối đa 1 file)</span>
+            </label>
+            <input
+                id="cv-upload-detail"
+                type="file"
+                accept=".pdf,.doc,.docx"
+                @change="handleFileChange"
+            >
+            <p v-if="selectedFile" class="file-name">Đã chọn: {{ selectedFile.name }}</p>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-register" :disabled="!selectedFile || isSubmitting" @click="submitApplication">
+              <i class="fa-solid fa-paper-plane"></i> Gửi ứng tuyển
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import Swal from "sweetalert2";
+import api from "../../../../api/api.js";
+import addressData from '/src/assets/js/address.json';
 import QuickLink from './QuickLink.vue'
 
-const getRandomImage = (width, heghit, seed) => {
-  return `https://picsum.photos/${width}/${heghit}?random=${seed}`
+const route = useRoute()
+const logoTHG = '/imgs/logoTHG.png'
+const ASSET_BASE_URL = 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'
+
+const jobData = ref({})
+const showApplyModal = ref(false)
+const selectedFile = ref(null)
+const isSubmitting = ref(false)
+
+const resolveImage = (image) => {
+  if (!image) return logoTHG
+  if (image.startsWith('http') || image.startsWith('/')) return image
+  return `${ASSET_BASE_URL}${image}`
 }
 
-// Dữ liệu công việc
-const jobData = ref({
-  id: 4,
-  title: 'Cộng tác viên dự án Vinhomes',
-  salary: 20000000,
-  salaryVisible: false,
-  location: 'Quận 2, TP.HCM',
-  date: '30/10/2023',
-  image: getRandomImage(927,580, 4),
-  creator: 'Tập đoàn Vingroup',
-  creatorAvatar: getRandomImage(60, 60, 6),
-  income: '20-50 triệu',
-  applicants: 25,
-  jobDescription: `
-    <h3>Mô tả công việc</h3>
-    <ul>
-      <li>Giới thiệu và tư vấn các sản phẩm của Vinhomes</li>
-      <li>Kết nối khách hàng với chủ đầu tư</li>
-      <li>Tổ chức tour tham quan dự án</li>
-      <li>Hỗ trợ khách hàng hoàn thiện hồ sơ</li>
-    </ul>
+const formatDate = (value) => {
+  if (!value) return 'Chưa cập nhật'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return 'Chưa cập nhật'
+  return new Intl.DateTimeFormat('vi-VN').format(date)
+}
 
-    <h3>Quyền lợi</h3>
-    <ul>
-      <li>Hoa hồng lên đến 3% giá trị giao dịch</li>
-      <li>Được training bài bản từ chuyên gia</li>
-      <li>Làm việc tại văn phòng hiện đại</li>
-      <li>Cơ hội trở thành nhân viên chính thức</li>
-    </ul>
+const formatSalary = (salary) => {
+  if (!salary) return 'Chưa cập nhật'
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND'
+  }).format(salary)
+}
 
-    <h3>Yêu cầu</h3>
-    <ul>
-      <li>Có kinh nghiệm CTV BĐS là lợi thế</li>
-      <li>Kỹ năng giao tiếp tự tin</li>
-      <li>Có khả năng làm việc độc lập</li>
-      <li>Cam kết làm việc lâu dài</li>
-    </ul>
-  `
+const parseAddressFromJson = (addressValue) => {
+  if (!addressValue) return ''
+  if (typeof addressValue === 'string') {
+    if (addressValue.includes('|')) {
+      const [provinceCode, wardCode, streetDetail] = addressValue.split('|').map((item) => item.trim())
+      const province = addressData.find((item) => `${item.code}` === provinceCode)
+      const ward = province?.wards?.find((item) => `${item.code}` === wardCode)
+      return [streetDetail, ward?.name, province?.name].filter(Boolean).join(', ')
+    }
+
+    try {
+      const parsed = JSON.parse(addressValue)
+      return parseAddressFromJson(parsed)
+    } catch (error) {
+      return addressValue
+    }
+  }
+
+  if (typeof addressValue === 'object') {
+    const province =
+        addressData.find((item) => item.code === addressValue.provinceCode || item.name === addressValue.province) ||
+        null
+    const ward =
+        province?.wards?.find((item) => item.code === addressValue.wardCode || item.name === addressValue.ward) || null
+    return [addressValue.street, ward?.name, province?.name].filter(Boolean).join(', ')
+  }
+
+  return ''
+}
+
+const jobAddress = computed(() => {
+  const addressValue = jobData.value?.address || jobData.value?.location || ''
+  const parsed = parseAddressFromJson(addressValue)
+  return parsed || addressValue || 'Chưa cập nhật'
 })
 
-// Danh sách thông tin công việc
+const jobDescription = computed(() => {
+  return jobData.value?.description || jobData.value?.jobDescription || ''
+})
+
 const jobInfoItems = computed(() => [
   {
-    title: 'Người tạo',
-    value: jobData.value.creator,
-    icon: jobData.value.creatorAvatar
-  },
-  {
-    title: 'Địa điểm',
-    value: jobData.value.location,
+    title: 'Địa chỉ',
+    value: jobAddress.value,
     iconClass: 'fas fa-map-marker-alt'
   },
   {
-    title: 'Thu nhập',
-    value: jobData.value.income,
+    title: 'Mức lương',
+    value: formatSalary(jobData.value?.salary),
     iconClass: 'fas fa-money-bill-wave'
   },
   {
-    title: 'Hạn nộp',
-    value: jobData.value.date,
+    title: 'Hạn ứng tuyển',
+    value: formatDate(jobData.value?.endDate || jobData.value?.deadline),
     iconClass: 'fas fa-calendar-alt'
   },
   {
     title: 'Ứng viên',
-    value: `${jobData.value.applicants} người`,
+    value: jobData.value?.applicants ? `${jobData.value.applicants} người` : 'Chưa cập nhật',
     iconClass: 'fas fa-users'
-  },
-  {
-    title: 'Trạng thái',
-    value: 'Đang tuyển',
-    iconClass: 'fas fa-briefcase'
   }
 ])
 
-// Liên kết nhanh
 const quickLinks = ref([
   {
     title: 'Về Thiên Hà Group',
@@ -209,10 +260,66 @@ const quickLinks = ref([
   }
 ])
 
-// Hàm copy text
-const copyToClipboard = (text) => {
-  navigator.clipboard.writeText(text)
+const fetchJobDetail = async () => {
+  if (!route.params.id) return
+  try {
+    const res = await api.get(`/admin.thg/project/work/view_detail/${route.params.id}`, {
+      withCredentials: true,
+    })
+    jobData.value = res.data || {}
+  } catch (error) {
+    console.error('Error fetching work item detail:', error)
+    Swal.fire('Lỗi', 'Không thể tải chi tiết công việc. Vui lòng thử lại sau.', 'error')
+  }
 }
+
+const openApplyModal = () => {
+  showApplyModal.value = true
+  selectedFile.value = null
+}
+
+const closeApplyModal = () => {
+  showApplyModal.value = false
+  selectedFile.value = null
+  isSubmitting.value = false
+}
+
+const handleFileChange = (event) => {
+  const file = event.target.files?.[0]
+  selectedFile.value = file || null
+}
+
+const submitApplication = async () => {
+  if (!route.params.id || !selectedFile.value || isSubmitting.value) return
+  isSubmitting.value = true
+  try {
+    const formData = new FormData()
+    formData.append('cv', selectedFile.value)
+
+    await api.post(`/thg/public/work-items/${route.params.id}/apply`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+
+    Swal.fire('Thành công', 'Ứng tuyển thành công!', 'success')
+    closeApplyModal()
+  } catch (error) {
+    console.error('Error submitting application:', error)
+    Swal.fire('Lỗi', 'Không thể gửi ứng tuyển. Vui lòng thử lại sau.', 'error')
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+watch(
+  () => route.params.id,
+  () => {
+    fetchJobDetail()
+  }
+)
+
+onMounted(() => {
+  fetchJobDetail()
+})
 </script>
 
 <style scoped>
@@ -449,6 +556,76 @@ const copyToClipboard = (text) => {
 
 .back-btn:hover {
   background: #002244;
+}
+
+.job-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.job-modal .modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.job-modal .modal-card {
+  position: relative;
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  width: min(700px, 92vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 2;
+}
+
+.job-modal .modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #333;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.modal-apply .file-upload {
+  margin-top: 20px;
+  border: 1px dashed #cfd4da;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.modal-apply .file-label {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #031358;
+  font-weight: 600;
+}
+
+.modal-apply input[type="file"] {
+  display: none;
+}
+
+.modal-apply .file-name {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #6c757d;
 }
 
 /* Responsive */

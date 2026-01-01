@@ -258,7 +258,7 @@
 
           <div
               class="grid gap-2"
-              style="grid-template-columns: repeat(7, minmax(0, 1fr));"
+              style="grid-template-columns: repeat(8, minmax(0, 1fr));"
           >
 
             <!-- Mức giá -->
@@ -379,8 +379,28 @@
              bg-white shadow-sm"
               >
                 <option value="">Tất cả</option>
-                <option value="false">Đang rao bán</option>
-                <option value="true">Đã bán</option>
+                <option value="Chưa định giá">Mới</option>
+                <option value="Bán giải pháp">Bán giải pháp</option>
+                <option value="Bán nhanh 30 ngày">Bán nhanh 30 ngày</option>
+                <option value="Đã bán">Đã bán</option>
+              </select>
+            </div>
+
+            <div class="min-w-0">
+              <label class="block text-[11px] font-bold text-slate-800 mb-0.5 flex items-center gap-1 truncate mb-1 mb-1">
+                <i class="fa-solid fa-circle-check text-primary text-[10px]"></i>
+                <span class="truncate">Đăng ký kểm duyệt</span>
+              </label>
+              <select
+                  v-model="filterKiemDuyet"
+                  class="w-full min-w-0 px-1.5 py-1 text-[12px]
+             border border-slate-400 rounded-md
+             focus:ring-1 focus:ring-blue-600 focus:border-transparent
+             bg-white shadow-sm"
+              >
+                <option value="">Tất cả</option>
+                <option :value="true">Có đăng ký</option>
+                <option :value="false">Chưa đăng ký</option>
               </select>
             </div>
 
@@ -738,6 +758,7 @@
   const filterUpdateDate = ref("");
   const searchQuery = ref("");
   const filterDaBan = ref("");
+  const filterKiemDuyet = ref("");
 
   // Pagination
   const page = ref(0);
@@ -1081,6 +1102,7 @@
       stats.value.rateDonVi = data.tyLeTangDonVi;
       stats.value.loaiMHStats = data.loaiHangStats;
       stats.value.khuVucStats = data.khuVucStats;
+
     } catch (e) {
       console.error("Lỗi khi tải thống kê:", e);
     }
@@ -1133,6 +1155,7 @@
         filterDaBan,
         filterShow,
         searchQuery,
+        filterKiemDuyet,
         page,
         pageSize,
       ],
@@ -1152,10 +1175,8 @@
       viTri: filterViTri.value || null,
       loaiMH: filterLoaiMH.value || null,
       hienThi: filterShow.value === "" ? null : filterShow.value === "yes",
-      daBan:
-          filterDaBan.value === ""
-              ? null
-              : filterDaBan.value === "true",
+      kiemDuyet:  filterKiemDuyet.value === "" ? null: filterKiemDuyet.value,
+      trangThai: filterDaBan.value || null
     };
 
     try {

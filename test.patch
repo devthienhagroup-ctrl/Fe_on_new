@@ -1,288 +1,1331 @@
-diff --git a/src/components/myProduct/test3.vue b/src/components/myProduct/test3.vue
-index d9ae6ea787e499a9df96c3464a9f570ff5410969..b8cb1d4a352a40915e7b54a44b708912ac01c32c 100644
---- a/src/components/myProduct/test3.vue
-+++ b/src/components/myProduct/test3.vue
-@@ -1,45 +1,52 @@
+diff --git a/src/components/user/CollaboratorRecruitment/CollaboratorRecruitment.vue b/src/components/user/CollaboratorRecruitment/CollaboratorRecruitment.vue
+index a9fa4f10013e68abf3aa61090aa0f73b65b420ef..26f0e5230b6db1b1e3c1eff9f7dfbf47b61ec87e 100644
+--- a/src/components/user/CollaboratorRecruitment/CollaboratorRecruitment.vue
++++ b/src/components/user/CollaboratorRecruitment/CollaboratorRecruitment.vue
+@@ -1,116 +1,49 @@
  <template>
-   <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 px-3 py-3" >
-     <div class="max-w-[1600px] mx-auto">
-       <!-- Bộ lọc nâng cao -->
-       <div class="bg-white rounded-xl shadow-lg border border-slate-300 mb-4 p-4"
-            style="
-             background-image: url('https://s3.cloudfly.vn/thg-storage-dev/uploads-public/thienhagroup_filter_2.png');
-             background-size: cover;
-             background-position: center;
-             background-repeat: no-repeat;
-           ">
-         <div class="filter-header mb-3">
-           <div class="filter-title-wrap">
-             <h1 class="filter-title">
-               Sản Phẩm Thiên Hà Group Dành Riêng Cho Bạn
-             </h1>
+   <div class="collaborator-recruitment">
+     <!-- Header Banner -->
+     <div class="banner-header">
+       <div class="banner-content">
+         <div class="left-column">
+           <h1 class="main-title">Cơ hội cộng tác cùng Thiên Hà Group</h1>
+           <h2 class="sub-title">Định hướng nghề môi giới chuyên nghiệp</h2>
+           <p class="description">
+             Tham gia vào hệ thống của Thiên Hà Group với vai trò cộng tác viên bất động sản để tiếp cận kho dự án lớn,
+             quy trình làm việc bài bản và đội ngũ hỗ trợ tận tâm. Đây là bước khởi đầu lý tưởng cho những ai muốn nghiêm
+             túc phát triển sự nghiệp môi giới nhưng cần một vị trí linh hoạt, không ràng buộc thời gian.
+           </p>
+         </div>
+         <div class="right-column">
+           <div class="glass-effect">
+             <img :src="logoTHG" alt="Thiên Hà Group Logo" class="logo">
+           </div>
+         </div>
+       </div>
+     </div>
+
+     <!-- Main Container -->
+     <div class="main-container">
+-      <!-- Assigned Jobs Section - Carousel -->
+-      <section class="jobs-section">
+-        <h2 class="section-title">Công việc đã nhận</h2>
+-
+-        <!-- Carousel Container -->
+-        <div class="carousel-container">
+-          <!-- Navigation Buttons -->
+-          <button class="carousel-btn carousel-btn-prev" @click="prevSlide">
+-            <i class="fa-solid fa-chevron-left"></i>
+-          </button>
+-
+-          <!-- Carousel Track -->
+-          <div class="carousel-track" ref="carouselTrack">
+-            <div
+-                v-for="job in displayedAssignedJobs"
+-                :key="job.id"
+-                class="carousel-slide"
+-            >
+-              <div class="job-item">
+-                <div class="job-content">
+-                  <div class="job-image">
+-                    <img :src="job.image" :alt="job.title">
+-                  </div>
+-                  <div class="job-details">
+-                    <h3 class="job-title">{{ job.title }}</h3>
+-                    <div class="job-info-row">
+-                      <div class="job-detail salary">
+-                        <span class="icon money"><i class="fa-solid fa-money-bill-wave"></i></span>
+-                        <span class="salary-text">
+-                          <span>{{ formatSalary(job.salary) }}</span>
+-                        </span>
+-                      </div>
+-                    </div>
+-                    <div class="job-info-row">
+-                      <div class="job-detail">
+-                        <span class="icon location"><i class="fa-solid fa-location-dot"></i></span>
+-                        <span>{{ job.location }}</span>
+-                      </div>
+-                    </div>
+-                    <div class="job-info-row">
+-                      <div class="job-detail">
+-                        <span class="icon calendar"><i class="fa-solid fa-calendar"></i></span>
+-                        <span>{{ job.date }}</span>
+-                      </div>
+-                    </div>
+-                  </div>
+-                </div>
+-                <button class="btn-detail info-btn"
+-                        @click="router.push('/cong-viec-cong-tac-vien/nhiem-vu-ca-nhan/' + job.id)">
+-                  <i class="fa-solid fa-circle-info"></i> Xem chi tiết
+-                </button>
+-              </div>
+-            </div>
+-          </div>
+-
+-          <!-- Navigation Buttons -->
+-          <button class="carousel-btn carousel-btn-next" @click="nextSlide">
+-            <i class="fa-solid fa-chevron-right"></i>
+-          </button>
+-        </div>
+-
+-        <!-- Loading Indicator -->
+-        <div v-if="isLoading" class="loading-indicator">
+-          <i class="fa-solid fa-spinner fa-spin"></i> Đang tải thêm công việc...
+-        </div>
+-      </section>
+-
+       <!-- Available Jobs Section -->
+       <section class="jobs-section">
+         <div class="section-header">
+           <h2 class="section-title">Các công việc đang tuyển</h2>
+
+           <div class="view-toggle-container">
+             <button
+                 class="view-toggle-btn"
+                 :class="{ active: !tableView }"
+                 @click="tableView = false"
+                 title="Xem dạng lưới"
+             >
+               <i class="fa-solid fa-grip"></i>
+             </button>
+             <button
+                 class="view-toggle-btn"
+                 :class="{ active: tableView }"
+                 @click="tableView = true"
+                 title="Xem dạng bảng"
+             >
+               <i class="fa-solid fa-table"></i>
+             </button>
            </div>
 
-           <!-- Nút chuyển đổi giữa bảng và thẻ -->
-           <div class="filter-actions">
-+            <button
-+                @click="$router.push('/-thg/quan-ly-san-pham/tao-moi')"
-+                class="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-lg hover:from-amber-600 hover:to-yellow-600 transition-all shadow-md hover:shadow-lg text-sm"
-+            >
-+              <i class="fa-solid fa-plus text-xs"></i>
-+              <span class="font-medium">Thêm sản phẩm</span>
-+            </button>
-             <button
-                 @click="viewMode = 'card'"
-                 :class="[
-         'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
-         viewMode === 'card'
-           ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-           : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-       ]"
-             >
-               <i class="fa-solid fa-grip text-sm"></i>
-               <span class="text-sm font-medium">Thẻ</span>
-             </button>
-
-             <button
-                 @click="viewMode = 'table'"
-                 :disabled="isMobile"
-                 :class="[
-         'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
-         viewMode === 'table'
-           ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-           : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50',
-         isMobile ? 'opacity-60 cursor-not-allowed' : ''
-       ]"
-             >
-               <i class="fa-solid fa-table text-sm"></i>
-@@ -336,91 +343,91 @@
-                   <td class="text-center relative">
-                     <!-- ACTION FULL (>=1300px) -->
-                     <div class="action-full inline-flex items-center">
-                       <button
-                           @click="toggleLove(item)"
-                           class="action-heart"
-                       >
-                         <i
-                             :class="item.daThich
-             ? 'fa-solid fa-heart text-black text-base'
-             : 'fa-regular fa-heart text-base'"
-                         ></i>
-                       </button>
-
-                       <!-- HỢP TÁC -->
-                       <!--                    <button-->
-                       <!--                        @click="openCollabModal(item)"-->
-                       <!--                        class="action-collab"-->
-                       <!--                    >-->
-                       <!--                      <i class="fa-solid fa-handshake text-[10px]"></i>-->
-                       <!--                      <span>Hợp tác</span>-->
-                       <!--                    </button>-->
-
-                       <!-- XEM -->
-                       <button
--                          @click="$router.push(buildSeoUrl(item))"
-+                          @click="goToDetail(item)"
-                           class="action-view"
-                       >
-                         <i class="fa-regular fa-eye text-[10px]"></i>
-                         <span>Xem</span>
-                       </button>
-                     </div>
-
-                     <!-- ACTION DOT ( <1300px ) -->
-                     <div class="action-dot relative inline-block">
-                       <button class="dot-btn">
-                         <i class="fa-solid fa-ellipsis-vertical"></i>
-                       </button>
-
-                       <!-- DROPDOWN -->
-                       <div class="dot-menu">
-                         <button
-                             @click="toggleLove(item)"
-                             class="dot-item"
-                         >
-                           <i
-                               :class="item.daThich
-               ? 'fa-solid fa-heart text-red-500'
-               : 'fa-regular fa-heart'"
-                           ></i>
-                           <span>Yêu thích</span>
-                         </button>
-
-                         <!-- HỢP TÁC -->
-                         <!--                      <button-->
-                         <!--                          v-if="canRequestCollaboration(item)"-->
-                         <!--                          @click="openCollabModal(item)"-->
-                         <!--                          class="dot-item"-->
-                         <!--                      >-->
-                         <!--                        <i class="fa-solid fa-handshake"></i>-->
-                         <!--                        <span>Hợp tác</span>-->
-                         <!--                      </button>-->
-
-                         <!-- XEM -->
-                         <button
--                            @click="$router.push(buildSeoUrl(item))"
-+                            @click="goToDetail(item)"
-                             class="dot-item"
-                         >
-                           <i class="fa-regular fa-eye"></i>
-                           <span>Xem chi tiết</span>
-                         </button>
-                       </div>
-                     </div>
-                   </td>
-
-                 </tr>
-                 </tbody>
-               </table>
+         </div>
+@@ -123,96 +56,98 @@
+               <input
+                   type="text"
+                   placeholder="Tìm kiếm công việc..."
+                   v-model="searchQuery"
+                   class="search-input"
+               >
+               <button
+                   class="search-clear"
+                   v-if="searchQuery"
+                   @click="clearSearch"
+               >
+                 <i class="fa-solid fa-times"></i>
+               </button>
              </div>
+           </div>
 
-             <!-- Phân trang -->
-             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-3 bg-gradient-to-r from-slate-100 to-slate-200 border-t border-slate-300">
-               <div class="flex items-center gap-1">
-                 <button
-                     @click="goToPage(0)"
-                     :disabled="page === 0"
-                     class="p-1.5 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+           <!-- Bộ lọc khu vực -->
+           <div class="filter-item" :class="{ active: locationFilter !== '' }">
+             <div class="filter-icon" @click="resetLocationFilter">
+               <i class="fa-solid fa-location-dot"></i>
+             </div>
+             <select
+                 id="location-filter"
+                 v-model="locationFilter"
+                 class="filter-select"
++                @change="handleFilterChange"
+             >
+               <option value="">Tất cả khu vực</option>
+-              <option value="hcm">TP.HCM</option>
+-              <option value="hn">Hà Nội</option>
+-              <option value="dn">Đà Nẵng</option>
+-              <option value="other">Khu vực khác</option>
++              <option value="TP.HCM">TP.HCM</option>
++              <option value="Hà Nội">Hà Nội</option>
++              <option value="Đà Nẵng">Đà Nẵng</option>
+             </select>
+           </div>
+
+           <!-- Bộ lọc Quận/Huyện -->
+           <div class="filter-item" :class="{ active: districtFilter !== '' }">
+             <div class="filter-icon" @click="resetDistrictFilter">
+               <i class="fa-solid fa-map"></i>
+             </div>
+             <select
+                 id="district-filter"
+                 v-model="districtFilter"
+                 class="filter-select"
++                @change="handleFilterChange"
+             >
+               <option value="">Tất cả Quận/Huyện</option>
+-              <option value="q1">Quận 1</option>
+-              <option value="q2">Quận 2</option>
+-              <option value="q3">Quận 3</option>
+-              <option value="q7">Quận 7</option>
+-              <option value="q9">Quận 9</option>
+-              <option value="bt">Bình Thạnh</option>
+-              <option value="td">Thủ Đức</option>
++              <option value="Quận 1">Quận 1</option>
++              <option value="Quận 2">Quận 2</option>
++              <option value="Quận 3">Quận 3</option>
++              <option value="Quận 7">Quận 7</option>
++              <option value="Quận 9">Quận 9</option>
++              <option value="Bình Thạnh">Bình Thạnh</option>
++              <option value="Thủ Đức">Thủ Đức</option>
+             </select>
+           </div>
+
+           <!-- Bộ lọc Xã/Phường -->
+           <div class="filter-item" :class="{ active: wardFilter !== '' }">
+             <div class="filter-icon" @click="resetWardFilter">
+               <i class="fa-solid fa-map-pin"></i>
+             </div>
+             <select
+                 id="ward-filter"
+                 v-model="wardFilter"
+                 class="filter-select"
++                @change="handleFilterChange"
+             >
+               <option value="">Tất cả Xã/Phường</option>
+-              <option value="p1">Phường 1</option>
+-              <option value="p2">Phường 2</option>
+-              <option value="p3">Phường 3</option>
+-              <option value="pt">Phú Thạnh</option>
+-              <option value="tn">Tân Phong</option>
++              <option value="Phường 1">Phường 1</option>
++              <option value="Phường 2">Phường 2</option>
++              <option value="Phường 3">Phường 3</option>
++              <option value="Phú Thạnh">Phú Thạnh</option>
++              <option value="Tân Phong">Tân Phong</option>
+             </select>
+           </div>
+
+           <!-- Bộ lọc mức lương -->
+           <div class="filter-item" :class="{ active: salaryRange.min > 0 || salaryRange.max < 50000000 }">
+             <div class="filter-icon" @click="openSalaryModal">
+               <i class="fa-solid fa-money-bill-wave"></i>
+             </div>
+             <div class="salary-display" @click="openSalaryModal">
+               {{ formatSalaryDisplay() }}
+             </div>
+           </div>
+         </div>
+
+
+         <!-- Modal mức lương -->
+         <div class="salary-modal" v-if="showSalaryModal">
+           <div class="modal-overlay" @click="closeSalaryModal"></div>
+           <div class="modal-content">
+             <div class="modal-header">
+               <h3>Chọn mức lương</h3>
+               <button class="close-btn" @click="closeSalaryModal">
+                 <i class="fa-solid fa-times"></i>
+               </button>
+             </div>
+@@ -239,681 +174,549 @@
+                     class="slider max-slider"
                  >
-                   <i class="fa-solid fa-angles-left text-sm"></i>
-                 </button>
-                 <button
-@@ -664,51 +671,51 @@
-                         {{ item.soDienThoai || '—' }}
-                       </div>
-                     </div>
+               </div>
+               <div class="selected-range">
+                 Mức lương: {{ formatSalary(salaryRange.min) }} - {{ formatSalary(salaryRange.max) }}
+               </div>
+             </div>
+             <div class="modal-actions">
+               <button class="btn-apply" @click="applySalaryFilter">Áp dụng</button>
+               <button class="btn-reset" @click="resetSalaryFilter">Đặt lại</button>
+             </div>
+           </div>
+         </div>
+
+         <!-- Dạng lưới -->
+         <div v-if="!tableView" class="jobs-grid">
+           <div
+               v-for="job in paginatedJobs"
+               :key="job.id"
+               class="job-item"
+               @mouseenter="hoveredJob = job.id"
+               @mouseleave="hoveredJob = null"
+           >
+             <div class="job-content">
+               <div class="job-image">
+-                <img :src="job.image" :alt="job.title">
++                <img :src="resolveImage(job.image)" :alt="job.title">
+               </div>
+               <div class="job-details">
+                 <h3 class="job-title">{{ job.title }}</h3>
+                 <div class="job-info-row">
+                   <div class="job-detail salary">
+                     <span class="icon money"><i class="fa-solid fa-money-bill-wave"></i> </span>
+                     <span class="salary-text">
+                       <span v-if="isLoggedIn || job.salaryVisible">{{ formatSalary(job.salary) }}</span>
+                       <span v-else>{{ hideSalary(job.salary) }}</span>
+                       <span v-if="!isLoggedIn" class="toggle-salary" @click.stop="toggleSalaryVisibility(job.id)"
+                             v-html=" !job.salaryVisible ? `<i class='fa-solid fa-eye'></i>️` : `<i class='fa-solid fa-eye-slash'></i>`">
+
+                       </span>
+                     </span>
                    </div>
-
-                   <!-- Chi tiết: DT, Vị trí, MG -->
-                   <div class="grid grid-cols-2 gap-2 mt-2 text-start">
-                     <div>
-                       <div class="text-[12px] text-slate-500 font-semibold">Diện tích</div>
-                       <div class="font-bold">{{ item.dtcn }}m²</div>
-                     </div>
-                     <div>
-                       <div class="text-[12px] text-slate-500 font-semibold">Vị trí</div>
-                       <div class="text-slate-800 text-[13px] truncate font-bold">{{ item.viTri || '—' }}</div>
-                     </div>
+                 </div>
+                 <div class="job-info-row">
+                   <div class="job-detail">
+                     <span class="icon location"><i class="fa-solid fa-location-dot"></i></span>
+-                    <span>{{ job.location }}</span>
++                    <span>{{ getJobAddress(job) }}</span>
                    </div>
-
-
-                   <!-- Nút xem chi tiết + nút yêu thích -->
-
+                 </div>
+                 <div class="job-info-row">
+                   <div class="job-detail">
+                     <span class="icon calendar"><i class="fa-solid fa-calendar"></i></span>
+-                    <span>{{ job.date }}</span>
++                    <span>{{ formatDate(job.endDate || job.deadline) }}</span>
+                   </div>
                  </div>
                </div>
-               <div class="flex items-center gap-2 px-3 pb-3">
-                 <!-- Xem chi tiết -->
-                 <button
--                    @click="$router.push(buildSeoUrl(item))"
-+                    @click="goToDetail(item)"
-                     class="flex-1 py-2.5 bg-gradient-to-r from-slate-900 to-black text-white rounded-full
-              text-[14px] font-semibold flex items-center justify-center gap-2
-              hover:opacity-90 transition-all"
-                 >
-                   <i class="fa-regular fa-eye text-sm"></i>
-                   Xem chi tiết
-                 </button>
+             </div>
+             <div class="job-actions">
+               <button
+                   class="btn-register"
+                   :class="{ 'half-width': hoveredJob === job.id }"
++                  @click="openApplyModal(job)"
+               >
+                 <i class="fa-solid fa-paper-plane"></i> Đăng ký ngay
+               </button>
+               <button
+-                  @click="router.push('/collaborator-jobs/'+ job.id)"
++                  @click="openDetailModal(job.id)"
+                   class="btn-detail-2 outline"
+                   v-if="hoveredJob === job.id"
+               >
+                 Xem chi tiết
+               </button>
+             </div>
+           </div>
+         </div>
 
-                 <!-- Hợp tác -->
-                 <!--              <button-->
-                 <!--                  @click="openCollabModal(item)"-->
-                 <!--                  class="px-4 py-2.5 rounded-full-->
-                 <!--           bg-gradient-to-r from-blue-600 to-indigo-600-->
-                 <!--           text-white font-semibold text-[14px]-->
-                 <!--           hover:opacity-90 transition-all shadow-sm"-->
-                 <!--              >-->
-                 <!--                <i class="fa-solid fa-handshake text-sm"></i>-->
-                 <!--                Hợp tác-->
-                 <!--              </button>-->
+         <!-- Dạng bảng -->
+         <div v-else class="jobs-table-container">
+           <table class="jobs-table">
+             <thead>
+             <tr>
+               <th class="table-header">Công việc</th>
+               <th class="table-header">Mức lương</th>
+               <th class="table-header">Địa điểm</th>
+-              <th class="table-header">Ngày đăng</th>
++              <th class="table-header">Hạn ứng tuyển</th>
+               <th class="table-header">Thao tác</th>
+             </tr>
+             </thead>
+             <tbody>
+             <tr
+                 v-for="job in paginatedJobs"
+                 :key="job.id"
+                 class="table-row"
+             >
+               <td class="table-cell job-title-cell">
+                 <div class="job-title-wrapper">
+                   <div class="job-image-table">
+-                    <img :src="job.image" :alt="job.title">
++                    <img :src="resolveImage(job.image)" :alt="job.title">
+                   </div>
+                   <div class="job-info-table">
+                     <h3 class="job-title-table">{{ job.title }}</h3>
+-                    <p class="job-creator">{{ job.creator }}</p>
++                    <p class="job-creator">{{ getJobAddress(job) }}</p>
+                   </div>
+                 </div>
+               </td>
+               <td class="table-cell salary-cell">
+                 <div class="salary-wrapper">
+                   <span v-if="isLoggedIn || job.salaryVisible">{{ formatSalary(job.salary) }}</span>
+                   <span v-else>{{ hideSalary(job.salary) }}</span>
+                   <span class="toggle-salary" @click="toggleSalaryVisibility(job.id)"
+                         v-html=" !job.salaryVisible ? `<i class='fa-solid fa-eye'></i>️` : `<i class='fa-solid fa-eye-slash'></i>`">
+                   </span>
+                 </div>
+               </td>
+               <td class="table-cell location-cell">
+                 <div class="location-wrapper">
+                   <i class="fa-solid fa-location-dot location-icon"></i>
+-                  <span>{{ job.location }}</span>
++                  <span>{{ getJobAddress(job) }}</span>
+                 </div>
+               </td>
+               <td class="table-cell date-cell">
+                 <div class="date-wrapper">
+                   <i class="fa-solid fa-calendar date-icon"></i>
+-                  <span>{{ job.date }}</span>
++                  <span>{{ formatDate(job.endDate || job.deadline) }}</span>
+                 </div>
+               </td>
+               <td class="table-cell action-cell">
+                 <div class="action-wrapper">
+                   <button
+                       class="btn-register-table"
+-                      @click="router.push('/collaborator-jobs/'+ job.id)"
++                      @click="openApplyModal(job)"
+                   >
+                     <i class="fa-solid fa-paper-plane"></i> Đăng ký
+                   </button>
+                   <button
+                       class="btn-detail-table"
+-                      @click="router.push('/collaborator-jobs/'+ job.id)"
++                      @click="openDetailModal(job.id)"
+                   >
+                     <i class="fa-solid fa-circle-info"></i> Chi tiết
+                   </button>
+                 </div>
+               </td>
+             </tr>
+             </tbody>
+           </table>
+         </div>
 
-                 <!-- Yêu thích -->
-                 <button
-                     @click="toggleLove(item)"
-                     class="w-10 h-10 rounded-full bg-slate-100 text-slate-800 shadow-sm
-              hover:bg-slate-200 flex items-center justify-center transition"
-@@ -856,50 +863,55 @@ const changeTab = (tab) => {
+         <!-- Pagination -->
+         <div class="pagination">
+-          <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
++          <button class="page-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">
++            <i class="fa-solid fa-chevron-left"></i>
++          </button>
 
-   // Gọi lại hàm load dữ liệu hiện tại
-   fetchFilteredAssets();
- }
+           <button
+               v-for="page in totalPages"
+               :key="page"
+               class="page-btn"
+               :class="{ active: currentPage === page }"
+-              @click="currentPage = page"
++              @click="goToPage(page)"
+           >
+             {{ page }}
+           </button>
 
- const collabHints = [
-   "Tôi có khách đang tìm mua khu vực này",
-   "Am hiểu giá thị trường và khu vực",
-   "Đã từng bán nhiều sản phẩm tương tự",
-   "Có nguồn khách sẵn, có thể chốt nhanh"
- ];
-
- import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
- import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
- import { useSidebarStore } from "/src/stores/sidebarStore.js";
- import addressData from "/src/assets/js/address.json";
- import NotificationBell from "/src/components/NotificationBell.vue";
- import { buildSeoUrl } from "../../assets/js/global.js";
-
- import { useAuthStore } from "/src/stores/authStore.js";
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-
- const sidebar = useSidebarStore();
- const goToDetail = (item) => {
-+  if (activeTab.value === 'MY_ASSET') {
-+    router.push(`/-thg/quan-ly-san-pham/${item.id}`);
-+    return;
-+  }
+-          <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
++          <button class="page-btn" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">
++            <i class="fa-solid fa-chevron-right"></i>
++          </button>
+         </div>
+       </section>
+     </div>
 +
-   router.push(buildSeoUrl(item));
++    <div v-if="showDetailModal" class="job-modal">
++      <div class="modal-overlay" @click="closeDetailModal"></div>
++      <div class="modal-card">
++        <button class="modal-close" @click="closeDetailModal">
++          <i class="fa-solid fa-times"></i>
++        </button>
++        <div class="modal-body">
++          <div class="modal-header">
++            <div class="modal-image">
++              <img :src="resolveImage(selectedJob?.image)" :alt="selectedJob?.title">
++            </div>
++            <div class="modal-title">
++              <h3>{{ selectedJob?.title }}</h3>
++              <p class="modal-subtitle">{{ getJobAddress(selectedJob) }}</p>
++            </div>
++          </div>
++
++          <div class="modal-info-grid">
++            <div class="modal-info-item">
++              <span class="info-label">Địa chỉ</span>
++              <span class="info-value">{{ getJobAddress(selectedJob) }}</span>
++            </div>
++            <div class="modal-info-item">
++              <span class="info-label">Mức lương</span>
++              <span class="info-value">
++                {{ selectedJob?.salary ? formatSalary(selectedJob.salary) : 'Chưa cập nhật' }}
++              </span>
++            </div>
++            <div class="modal-info-item">
++              <span class="info-label">Hạn ứng tuyển</span>
++              <span class="info-value">{{ formatDate(selectedJob?.endDate || selectedJob?.deadline) }}</span>
++            </div>
++          </div>
++
++          <div class="modal-description" v-if="selectedJob?.description || selectedJob?.jobDescription">
++            <h4>Mô tả công việc</h4>
++            <div v-html="selectedJob?.description || selectedJob?.jobDescription"></div>
++          </div>
++
++          <div class="modal-actions">
++            <button class="btn-register" @click="openApplyModal(selectedJob)">
++              <i class="fa-solid fa-paper-plane"></i> Ứng tuyển ngay
++            </button>
++          </div>
++        </div>
++      </div>
++    </div>
++
++    <div v-if="showApplyModal" class="job-modal">
++      <div class="modal-overlay" @click="closeApplyModal"></div>
++      <div class="modal-card modal-apply">
++        <button class="modal-close" @click="closeApplyModal">
++          <i class="fa-solid fa-times"></i>
++        </button>
++        <div class="modal-body">
++          <h3 class="modal-title">Ứng tuyển công việc</h3>
++          <p class="modal-subtitle">{{ applyJob?.title }}</p>
++
++          <div class="file-upload">
++            <label class="file-label" for="cv-upload">
++              <i class="fa-solid fa-upload"></i>
++              <span>Upload CV (tối đa 1 file)</span>
++            </label>
++            <input
++                id="cv-upload"
++                type="file"
++                accept=".pdf,.doc,.docx"
++                @change="handleFileChange"
++            >
++            <p v-if="selectedFile" class="file-name">Đã chọn: {{ selectedFile.name }}</p>
++          </div>
++
++          <div class="modal-actions">
++            <button class="btn-register" :disabled="!selectedFile || isSubmitting" @click="submitApplication">
++              <i class="fa-solid fa-paper-plane"></i> Gửi ứng tuyển
++            </button>
++          </div>
++        </div>
++      </div>
++    </div>
+   </div>
+ </template>
+
+ <script setup>
+-import {ref, computed, onMounted} from 'vue'
++import {ref, computed, onMounted, watch} from 'vue'
+ import {useRouter} from "vue-router";
++import Swal from "sweetalert2";
++import api from "../../../api/api.js";
+
+ const router = useRouter()
+
+ // Mock data for images (replace with actual imports in your project)
+-const ctvBanner = '/imgs/ctv.png'
+ const logoTHG = '/imgs/logoTHG.png'
+-
+-// Random image URLs for demonstration
+-const getRandomImage = (seed) => {
+-  return `https://picsum.photos/300/200?random=${seed}`
+-}
++const ASSET_BASE_URL = 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'
+
+ // Thêm vào script setup
+ const searchQuery = ref('')
+ const tableView = ref(false) // false = lưới, true = bảng
+
+ const clearSearch = () => {
+   searchQuery.value = ''
++  handleFilterChange()
  }
 
+-// Carousel variables
+-const currentSlide = ref(0)
+-const slidesPerView = ref(3)
++const availableJobs = ref([])
+ const isLoading = ref(false)
+-const carouselTrack = ref(null)
+-const allAssignedJobs = ref([])
+-const displayedAssignedJobs = ref([])
+-
+-// Mock job data
+-const initialAssignedJobs = [
+-  {
+-    id: 1,
+-    title: 'Môi giới căn hộ cao cấp',
+-    salary: 15000000,
+-    salaryVisible: false,
+-    location: 'Quận 1, TP.HCM',
+-    date: '15/10/2023',
+-    image: getRandomImage(1),
+-    creator: 'Công ty BĐS Diamond Land',
+-    income: '15-25 triệu',
+-    applicants: 8,
+-    jobDescription: `
+-      <h3>Mô tả công việc</h3>
+-      <ul>
+-        <li>Tìm kiếm và tư vấn khách hàng về các dự án căn hộ cao cấp tại Quận 1</li>
+-        <li>Giới thiệu sản phẩm phù hợp với nhu cầu khách hàng</li>
+-        <li>Hỗ trợ khách hàng trong suốt quá trình giao dịch</li>
+-        <li>Theo dõi và chăm sóc khách hàng tiềm năng</li>
+-      </ul>
+-
+-      <h3>Quyền lợi</h3>
+-      <ul>
+-        <li>Lương cứng 15 triệu + hoa hồng không giới hạn</li>
+-        <li>Được đào tạo chuyên sâu về sản phẩm</li>
+-        <li>Môi trường làm việc chuyên nghiệp</li>
+-        <li>Cơ hội thăng tiến rõ ràng</li>
+-      </ul>
+-
+-      <h3>Yêu cầu</h3>
+-      <ul>
+-        <li>Có kinh nghiệm môi giới BĐS từ 1 năm</li>
+-        <li>Kỹ năng giao tiếp tốt</li>
+-        <li>Chăm chỉ, trung thực</li>
+-        <li>Biết sử dụng các công cụ marketing online</li>
+-      </ul>
+-    `
+-  },
+-  {
+-    id: 2,
+-    title: 'Tư vấn bất động sản',
+-    salary: 12000000,
+-    salaryVisible: false,
+-    location: 'Phú Quốc, Kiên Giang',
+-    date: '20/10/2023',
+-    image: getRandomImage(2),
+-    creator: 'Tập đoàn Sunshine Group',
+-    income: '12-30 triệu',
+-    applicants: 12,
+-    jobDescription: `
+-      <h3>Mô tả công việc</h3>
+-      <ul>
+-        <li>Tư vấn các sản phẩm BĐS nghỉ dưỡng tại Phú Quốc</li>
+-        <li>Kết nối với khách hàng có nhu cầu đầu tư</li>
+-        <li>Tổ chức các sự kiện giới thiệu sản phẩm</li>
+-        <li>Chăm sóc khách hàng sau bán hàng</li>
+-      </ul>
+-
+-      <h3>Quyền lợi</h3>
+-      <ul>
+-        <li>Lương cứng 12 triệu + hoa hồng hấp dẫn</li>
+-        <li>Được cung cấp database khách hàng tiềm năng</li>
+-        <li>Hỗ trợ chi phí đi lại, tiếp khách</li>
+-        <li>Nghỉ phép có lương theo quy định</li>
+-      </ul>
+-
+-      <h3>Yêu cầu</h3>
+-      <ul>
+-        <li>Ưu tiên ứng viên có kinh nghiệm BĐS nghỉ dưỡng</li>
+-        <li>Khả năng thuyết phục tốt</li>
+-        <li>Có mối quan hệ rộng trong ngành</li>
+-        <li>Sẵn sàng công tác tại Phú Quốc</li>
+-      </ul>
+-    `
+-  },
+-  {
+-    id: 3,
+-    title: 'Chuyên viên tư vấn đất nền',
+-    salary: 18000000,
+-    salaryVisible: false,
+-    location: 'Quận 9, TP.HCM',
+-    date: '25/10/2023',
+-    image: getRandomImage(3),
+-    creator: 'Công ty Đất Xanh Miền Nam',
+-    income: '18-35 triệu',
+-    applicants: 15,
+-    jobDescription: `
+-      <h3>Mô tả công việc</h3>
+-      <ul>
+-        <li>Tư vấn và môi giới các dự án đất nền tại khu vực Quận 9</li>
+-        <li>Phân tích thị trường và định giá BĐS</li>
+-        <li>Hỗ trợ khách hàng trong các thủ tục pháp lý</li>
+-        <li>Xây dựng mạng lưới khách hàng tiềm năng</li>
+-      </ul>
+-
+-      <h3>Quyền lợi</h3>
+-      <ul>
+-        <li>Lương cứng 18 triệu + hoa hồng cao</li>
+-        <li>Được đào tạo về pháp lý BĐS</li>
+-        <li>Thưởng theo hiệu suất hàng tháng</li>
+-        <li>Bảo hiểm đầy đủ theo luật lao động</li>
+-      </ul>
+-
+-      <h3>Yêu cầu</h3>
+-      <ul>
+-        <li>Tốt nghiệp ĐH chuyên ngành liên quan</li>
+-        <li>Có ít nhất 2 năm kinh nghiệm đất nền</li>
+-        <li>Hiểu biết về pháp lý BĐS</li>
+-        <li>Có kỹ năng đàm phán tốt</li>
+-      </ul>
+-    `
+-  }
+-]
+-
+-const availableJobs = ref([
+-  {
+-    id: 4,
+-    title: 'Cộng tác viên dự án Vinhomes',
+-    salary: 20000000,
+-    salaryVisible: false,
+-    location: 'Quận 2, TP.HCM',
+-    date: '30/10/2023',
+-    image: getRandomImage(4),
+-    creator: 'Tập đoàn Vingroup',
+-    income: '20-50 triệu',
+-    applicants: 25,
+-    jobDescription: `
+-      <h3>Mô tả công việc</h3>
+-      <ul>
+-        <li>Giới thiệu và tư vấn các sản phẩm của Vinhomes</li>
+-        <li>Kết nối khách hàng với chủ đầu tư</li>
+-        <li>Tổ chức tour tham quan dự án</li>
+-        <li>Hỗ trợ khách hàng hoàn thiện hồ sơ</li>
+-      </ul>
+-
+-      <h3>Quyền lợi</h3>
+-      <ul>
+-        <li>Hoa hồng lên đến 3% giá trị giao dịch</li>
+-        <li>Được training bài bản từ chuyên gia</li>
+-        <li>Làm việc tại văn phòng hiện đại</li>
+-        <li>Cơ hội trở thành nhân viên chính thức</li>
+-      </ul>
+-
+-      <h3>Yêu cầu</h3>
+-      <ul>
+-        <li>Có kinh nghiệm CTV BĐS là lợi thế</li>
+-        <li>Kỹ năng giao tiếp tự tin</li>
+-        <li>Có khả năng làm việc độc lập</li>
+-        <li>Cam kết làm việc lâu dài</li>
+-      </ul>
+-    `
+-  },
+-  // ... (giữ nguyên các job khác từ CollaboratorRecruitment.vue)
+-])
+-
+-const additionalAssignedJobs = [
+-  {
+-    id: 13,
+-    title: 'Cộng tác viên dự án mới 1',
+-    salary: 20000000,
+-    salaryVisible: false,
+-    location: 'Quận 2, TP.HCM',
+-    date: '01/12/2023',
+-    image: getRandomImage(13),
+-    creator: 'Tập đoàn Vingroup',
+-    income: '20-50 triệu',
+-    applicants: 5
+-  },
+-  {
+-    id: 14,
+-    title: 'Cộng tác viên dự án mới 2',
+-    salary: 18000000,
+-    salaryVisible: false,
+-    location: 'Quận 7, TP.HCM',
+-    date: '02/12/2023',
+-    image: getRandomImage(14),
+-    creator: 'Công ty BĐS Phú Gia',
+-    income: '18-45 triệu',
+-    applicants: 3
+-  }
+-]
++const totalPages = ref(1)
 
+ // Reactive variables
+ const isLoggedIn = ref(false) // Change to true to test logged in state
+ const hoveredJob = ref(null)
+ const currentPage = ref(1)
+ const itemsPerPage = ref(6)
 
- // Data
- const landAssets = ref([]);
- const totalRecords = ref(0);
+ // Computed properties
+-const totalPages = computed(() => Math.ceil(availableJobs.value.length / itemsPerPage.value))
+ const paginatedJobs = computed(() => {
+-  const startIndex = (currentPage.value - 1) * itemsPerPage.value
+-  return availableJobs.value.slice(startIndex, startIndex + itemsPerPage.value)
++  return availableJobs.value
+ })
 
- // Filters
- const filterGiaRange = ref("");
- const filterProvince = ref("");
- const filterWard = ref("");
- const filterStreet = ref("");
- const filterLoaiMH = ref("");
- const filterDTCN = ref("");
- const filterViTri = ref("");
- const filterCreateDate = ref("");
- const filterUpdateDate = ref("");
- const searchQuery = ref("");
- const filterUnlock = ref("");
- const filterStatus = ref(null);
- const filterLove = ref(null);
- const isFilterMobile = ref(false);   // chỉ dùng cho FILTER
- const showFilterPanel = ref(true);   // trạng thái mở/đóng filter
-@@ -2015,26 +2027,26 @@ th{
-
- /* HOVER */
- .fake-tab:hover {
-   background: #e2e8f0;
+-// Carousel methods
+-const loadMoreJobs = async () => {
+-  if (isLoading.value) return
+-
+-  isLoading.value = true
+-
+-  try {
+-    await new Promise(resolve => setTimeout(resolve, 1000))
+-
+-    const startIndex = allAssignedJobs.value.length
+-    const newJobs = additionalAssignedJobs.slice(startIndex, startIndex + slidesPerView.value)
+-
+-    if (newJobs.length > 0) {
+-      allAssignedJobs.value = [...allAssignedJobs.value, ...newJobs]
+-      updateDisplayedJobs()
+-    }
+-
+-  } catch (error) {
+-    console.error('Error loading more jobs:', error)
+-  } finally {
+-    isLoading.value = false
+-  }
+-}
+-
+-const updateDisplayedJobs = () => {
+-  const startIndex = currentSlide.value * slidesPerView.value
+-  displayedAssignedJobs.value = allAssignedJobs.value.slice(startIndex, startIndex + slidesPerView.value)
+-}
+-
+-const nextSlide = async () => {
+-  const maxSlide = Math.ceil(allAssignedJobs.value.length / slidesPerView.value) - 1
+-
+-  if (currentSlide.value >= maxSlide) {
+-    await loadMoreJobs()
+-  }
+-
+-  if (currentSlide.value < Math.ceil(allAssignedJobs.value.length / slidesPerView.value) - 1) {
+-    currentSlide.value++
+-    updateDisplayedJobs()
+-  }
+-}
+-
+-const prevSlide = () => {
+-  if (currentSlide.value > 0) {
+-    currentSlide.value--
+-    updateDisplayedJobs()
+-  }
+-}
+-
+-// Initialize carousel
+-const initializeCarousel = () => {
+-  allAssignedJobs.value = [...initialAssignedJobs]
+-  updateDisplayedJobs()
+-
+-  // Xử lý kéo ngang trên mobile
+-  if (carouselTrack.value) {
+-    let startX = 0
+-    let currentX = 0
+-    let isDragging = false
+-
+-    const handleTouchStart = (e) => {
+-      startX = e.touches[0].clientX
+-      isDragging = true
+-    }
+-
+-    const handleTouchMove = (e) => {
+-      if (!isDragging) return
+-      currentX = e.touches[0].clientX
+-    }
+-
+-    const handleTouchEnd = async () => {
+-      if (!isDragging) return
+-
+-      const diff = startX - currentX
+-      const threshold = 50
+-
+-      if (diff > threshold) {
+-        await nextSlide()
+-      } else if (diff < -threshold) {
+-        prevSlide()
+-      }
+-
+-      isDragging = false
+-    }
+-
+-    carouselTrack.value.addEventListener('touchstart', handleTouchStart)
+-    carouselTrack.value.addEventListener('touchmove', handleTouchMove)
+-    carouselTrack.value.addEventListener('touchend', handleTouchEnd)
+-  }
+-}
+-
+ // Methods
+ const formatSalary = (salary) => {
+   return new Intl.NumberFormat('vi-VN', {
+     style: 'currency',
+     currency: 'VND'
+   }).format(salary)
  }
 
- /* ACTIVE */
- .fake-tab.active {
-   background: linear-gradient(135deg, #2563eb, #4f46e5);
-   color: #ffffff;
-   box-shadow: 0 6px 14px rgba(37, 99, 235, 0.4);
++const formatDate = (value) => {
++  if (!value) return 'Chưa cập nhật'
++  const date = new Date(value)
++  if (Number.isNaN(date.getTime())) return 'Chưa cập nhật'
++  return new Intl.DateTimeFormat('vi-VN').format(date)
++}
++
+ const hideSalary = (salary) => {
++  if (!salary) return '0 ₫'
+   const salaryStr = salary.toString()
+   return salaryStr.charAt(0) + 'x.xxx.xxx ₫'
  }
 
- /* ICON ACTIVE */
- .fake-tab.active i {
-   color: #ffffff !important;
-   opacity: 1;
++const resolveImage = (image) => {
++  if (!image) return logoTHG
++  if (image.startsWith('http') || image.startsWith('/')) return image
++  return `${ASSET_BASE_URL}${image}`
++}
++
++const getJobAddress = (job) => {
++  if (!job) return 'Chưa cập nhật'
++  if (job.address) return job.address
++  if (job.location) return job.location
++  if (job.ward || job.province) {
++    return [job.ward, job.province].filter(Boolean).join(', ')
++  }
++  return 'Chưa cập nhật'
++}
++
+ const toggleSalaryVisibility = (jobId) => {
+   // Kiểm tra nếu chưa đăng nhập
+   if (!isLoggedIn.value) {
+     showLoginAlert();
+     return;
+   }
+
+-  const allJobs = [...initialAssignedJobs, ...availableJobs.value]
+-  const job = allJobs.find(j => j.id === jobId)
++  const job = availableJobs.value.find(j => j.id === jobId)
+   if (job) {
+     job.salaryVisible = !job.salaryVisible
+   }
  }
 
- /* ===== ICON COLOR PER TAB ===== */
- .fake-tab:nth-child(1) i { color: #eb5a25; } /* BĐS */
- .fake-tab:nth-child(2) i { color: #16a34a; } /* Mở khóa */
- .fake-tab:nth-child(3) i { color: #0d9488; } /* Hợp tác */
- .fake-tab:nth-child(4) i { color: #e11d48; } /* Yêu thích */
+ // Thêm hàm hiển thị thông báo đăng nhập
+ const showLoginAlert = () => {
+   Swal.fire({
+     title: 'Yêu cầu đăng nhập',
+     text: 'Bạn cần đăng nhập để xem mức lương chi tiết',
+     icon: 'warning',
+     showCancelButton: true,
+     confirmButtonText: 'Đăng nhập',
+     cancelButtonText: 'Để sau',
+     confirmButtonColor: '#0030FF',
+     cancelButtonColor: '#6c757d'
+   }).then((result) => {
+     if (result.isConfirmed) {
+       // Chuyển hướng đến trang đăng nhập
+       router.push('/dang-nhap');
+     }
+   });
+ }
+
+ // Filter variables
+ const locationFilter = ref('')
+ const districtFilter = ref('')
+ const wardFilter = ref('')
+ const showSalaryModal = ref(false)
+ const salaryRange = ref({
+   min: 0,
+   max: 50000000
+ })
+
+ const resetLocationFilter = () => {
+   locationFilter.value = ''
++  handleFilterChange()
+ }
+
+ const resetDistrictFilter = () => {
+   districtFilter.value = ''
++  handleFilterChange()
+ }
+
+ const resetWardFilter = () => {
+   wardFilter.value = ''
++  handleFilterChange()
+ }
+
+ const openSalaryModal = () => {
+   showSalaryModal.value = true
+ }
+
+ const closeSalaryModal = () => {
+   showSalaryModal.value = false
+ }
+
+ const applySalaryFilter = () => {
+   closeSalaryModal()
+-  // Logic áp dụng bộ lọc lương ở đây
++  handleFilterChange()
+ }
+
+ const resetSalaryFilter = () => {
+   salaryRange.value = { min: 0, max: 50000000 }
++  handleFilterChange()
+ }
+
+ const formatSalaryDisplay = () => {
+   if (salaryRange.value.min === 0 && salaryRange.value.max === 50000000) {
+     return 'Tất cả mức lương'
+   }
+   return `${formatSalary(salaryRange.value.min)} - ${formatSalary(salaryRange.value.max)}`
+ }
+
+-// Initialize
+-onMounted(() => {
+-  initializeCarousel()
+-})
+-</script>
++const showDetailModal = ref(false)
++const selectedJob = ref(null)
++const showApplyModal = ref(false)
++const applyJob = ref(null)
++const selectedFile = ref(null)
++const isSubmitting = ref(false)
+
+-<style scoped>
+-/* Carousel Styles */
+-.carousel-container {
+-  position: relative;
+-  margin-bottom: 50px;
+-  padding: 0 50px;
+-}
++const fetchWorkItems = async () => {
++  isLoading.value = true
++  try {
++    const params = {
++      page: currentPage.value - 1,
++      size: itemsPerPage.value,
++      title: searchQuery.value || null,
++      province: locationFilter.value || null,
++      ward: wardFilter.value || districtFilter.value || null,
++      minSalary: salaryRange.value.min > 0 ? salaryRange.value.min : null,
++      maxSalary: salaryRange.value.max < 50000000 ? salaryRange.value.max : null
++    }
+
+-.carousel-track {
+-  display: flex;
+-  gap: 30px;
+-  transition: transform 0.3s ease;
+-  overflow-x: auto;
+-  scroll-behavior: smooth;
+-  scrollbar-width: none; /* Firefox */
+-  -ms-overflow-style: none; /* IE and Edge */
++    const res = await api.get('/thg/public/work-items', { params })
++    const { content, totalPages: total } = res.data || {}
++    availableJobs.value = Array.isArray(content)
++        ? content.map((job) => ({ ...job, salaryVisible: false }))
++        : []
++    totalPages.value = total || 1
++  } catch (error) {
++    console.error('Error fetching work items:', error)
++    availableJobs.value = []
++    totalPages.value = 1
++  } finally {
++    isLoading.value = false
++  }
+ }
+
+-.carousel-track::-webkit-scrollbar {
+-  display: none; /* Chrome, Safari and Opera */
++const openDetailModal = async (id) => {
++  try {
++    const res = await api.get(`/admin.thg/project/work/view_detail/${id}`, {
++      withCredentials: true,
++    })
++    selectedJob.value = res.data
++    showDetailModal.value = true
++  } catch (error) {
++    console.error('Error fetching work item detail:', error)
++    Swal.fire('Lỗi', 'Không thể tải chi tiết công việc. Vui lòng thử lại sau.', 'error')
++  }
+ }
+
+-.carousel-slide {
+-  flex: 0 0 320px;
+-  min-width: 0;
++const closeDetailModal = () => {
++  showDetailModal.value = false
++  selectedJob.value = null
+ }
+
+-.carousel-btn {
+-  position: absolute;
+-  top: 50%;
+-  transform: translateY(-50%);
+-  width: 50px;
+-  height: 50px;
+-  background: linear-gradient(135deg, #031358, #0030FF);
+-  color: white;
+-  border: none;
+-  border-radius: 50%;
+-  display: flex;
+-  align-items: center;
+-  justify-content: center;
+-  cursor: pointer;
+-  transition: all 0.3s ease;
+-  z-index: 10;
+-  box-shadow: 0 4px 15px rgba(3, 19, 88, 0.3);
++const openApplyModal = (job) => {
++  applyJob.value = job
++  selectedFile.value = null
++  showApplyModal.value = true
++  showDetailModal.value = false
+ }
+
+-.carousel-btn:hover {
+-  background: linear-gradient(135deg, #0030FF, #031358);
+-  transform: translateY(-50%) scale(1.1);
++const closeApplyModal = () => {
++  showApplyModal.value = false
++  applyJob.value = null
++  selectedFile.value = null
++  isSubmitting.value = false
+ }
+
+-.carousel-btn-prev {
+-  left: 0;
++const handleFileChange = (event) => {
++  const file = event.target.files?.[0]
++  selectedFile.value = file || null
+ }
+
+-.carousel-btn-next {
+-  right: 0;
+-}
++const submitApplication = async () => {
++  if (!applyJob.value?.id || !selectedFile.value || isSubmitting.value) return
++  isSubmitting.value = true
++  try {
++    const formData = new FormData()
++    formData.append('cv', selectedFile.value)
+
+-.carousel-btn i {
+-  font-size: 18px;
++    await api.post(`/thg/public/work-items/${applyJob.value.id}/apply`, formData, {
++      headers: { 'Content-Type': 'multipart/form-data' }
++    })
++
++    Swal.fire('Thành công', 'Ứng tuyển thành công!', 'success')
++    closeApplyModal()
++  } catch (error) {
++    console.error('Error submitting application:', error)
++    Swal.fire('Lỗi', 'Không thể gửi ứng tuyển. Vui lòng thử lại sau.', 'error')
++  } finally {
++    isSubmitting.value = false
++  }
+ }
+
+-.loading-indicator {
+-  text-align: center;
+-  padding: 20px;
+-  color: #666;
+-  font-size: 16px;
++const handleFilterChange = () => {
++  currentPage.value = 1
++  fetchWorkItems()
+ }
+
+-.loading-indicator i {
+-  margin-right: 10px;
++const goToPage = (page) => {
++  currentPage.value = page
++  fetchWorkItems()
+ }
+
++let searchTimeout
++watch(searchQuery, () => {
++  if (searchTimeout) clearTimeout(searchTimeout)
++  searchTimeout = setTimeout(() => {
++    handleFilterChange()
++  }, 400)
++})
++
++onMounted(() => {
++  fetchWorkItems()
++})
++</script>
++
++<style scoped>
+ @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
+
+ .collaborator-recruitment {
+   margin-top: 60px;
+   padding: 0;
+   box-sizing: border-box;
+   font-family: 'Ubuntu', sans-serif;
+ }
+
+ .main-container {
+   max-width: 1400px;
+   margin: 0 auto;
+ }
+
+ /* Banner Header */
+ .banner-header {
+   background-image: url('/imgs/ctv.png');
+   background-size: cover;
+   background-position: center;
+   color: white;
+   padding: 80px 20px;
+ }
+
+ .banner-content {
+   display: flex;
+@@ -1937,62 +1740,152 @@ thead {
+   }
+
+   .btn-apply, .btn-reset {
+     width: 100%;
+   }
+
+   .job-actions {
+     flex-direction: column;
+   }
+
+   .btn-register.half-width,
+   .btn-detail {
+     width: 100%;
+   }
+
+   .action-wrapper {
+     flex-direction: column;
+   }
+
+   .btn-register-table, .btn-detail-table {
+     width: 100%;
+     font-size: 11px;
+     padding: 6px 10px;
+   }
+ }
+-@media (max-width: 1024px) {
+-  .carousel-slide {
+-    flex: 0 0 280px;
+-  }
++
++.job-modal {
++  position: fixed;
++  inset: 0;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  z-index: 1000;
+ }
+
+-/* ===== MOBILE FULL WIDTH FOR ASSIGNED JOBS ===== */
+-@media (max-width: 768px) {
+-  .carousel-container {
+-    padding: 0;              /* bỏ padding 2 bên */
+-  }
++.job-modal .modal-overlay {
++  position: absolute;
++  inset: 0;
++  background: rgba(0, 0, 0, 0.45);
++}
+
+-  .carousel-track {
+-    gap: 16px;
+-    padding: 0 12px;         /* nhẹ 2 bên cho đẹp */
+-  }
++.job-modal .modal-card {
++  position: relative;
++  background: #fff;
++  border-radius: 16px;
++  padding: 24px;
++  width: min(900px, 92vw);
++  max-height: 90vh;
++  overflow-y: auto;
++  z-index: 2;
++}
+
+-  .carousel-slide {
+-    flex: 0 0 100%;          /* 👈 FULL NGANG */
+-  }
++.job-modal .modal-close {
++  position: absolute;
++  top: 16px;
++  right: 16px;
++  background: transparent;
++  border: none;
++  font-size: 18px;
++  cursor: pointer;
++  color: #333;
+ }
+
+-/* ===== HIDE CAROUSEL BUTTONS ON MOBILE ===== */
+-@media (max-width: 768px) {
+-  .carousel-btn {
+-    display: none !important;
+-  }
++.job-modal .modal-header {
++  display: flex;
++  gap: 16px;
++  align-items: center;
++  margin-bottom: 20px;
+ }
+
++.job-modal .modal-image img {
++  width: 120px;
++  height: 90px;
++  border-radius: 10px;
++  object-fit: cover;
++}
+
+-@media (max-width: 480px) {
+-  .carousel-slide {
+-    flex: 0 0 90%;
+-  }
++.job-modal .modal-title h3 {
++  margin: 0 0 6px;
++  font-size: 22px;
++  color: #031358;
++}
++
++.job-modal .modal-subtitle {
++  margin: 0;
++  color: #6c757d;
++}
++
++.modal-info-grid {
++  display: grid;
++  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
++  gap: 16px;
++  margin-bottom: 20px;
++}
++
++.modal-info-item {
++  background: #f8f9fa;
++  border-radius: 12px;
++  padding: 12px 16px;
++}
++
++.modal-info-item .info-label {
++  display: block;
++  font-size: 12px;
++  color: #6c757d;
++  margin-bottom: 6px;
++}
++
++.modal-info-item .info-value {
++  font-weight: 600;
++  color: #031358;
++}
++
++.modal-description h4 {
++  margin-bottom: 12px;
++  color: #031358;
++}
++
++.modal-actions {
++  display: flex;
++  justify-content: flex-end;
++  margin-top: 20px;
++}
++
++.modal-apply .file-upload {
++  margin-top: 20px;
++  border: 1px dashed #cfd4da;
++  border-radius: 12px;
++  padding: 16px;
++  text-align: center;
++}
++
++.modal-apply .file-label {
++  cursor: pointer;
++  display: inline-flex;
++  align-items: center;
++  gap: 8px;
++  color: #031358;
++  font-weight: 600;
++}
++
++.modal-apply input[type="file"] {
++  display: none;
++}
++
++.modal-apply .file-name {
++  margin-top: 10px;
++  font-size: 13px;
++  color: #6c757d;
+ }
 
 -</style>
 \ No newline at end of file

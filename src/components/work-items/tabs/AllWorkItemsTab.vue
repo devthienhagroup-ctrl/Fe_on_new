@@ -709,6 +709,69 @@
                   <span v-else class="editable" style="font-size: 15px !important">{{ formatDateTime(task.deadline) }}</span>
                 </div>
 
+                <div class="field-line" :class="{ 'field-line--editable': canUpdate }" @click="startEditing('mucLuong')">
+                  <strong>Mức lương:</strong>
+                  <input
+                      v-if="editField.mucLuong"
+                      type="number"
+                      style="width: 261px"
+                      class="form-control form-control-sm text-fix"
+                      v-model="task.mucLuong"
+                      ref="mucLuongInputRef"
+                      @blur="finishEditing('mucLuong')"
+                      @keyup.enter.prevent="finishEditing('mucLuong')"
+                  />
+                  <span v-else class="editable" style="font-size: 15px !important">{{ formatCurrency(task.mucLuong) }}</span>
+                </div>
+
+                <div class="field-line" :class="{ 'field-line--editable': canUpdate }" @click="startEditing('hanUngTuyen')">
+                  <strong>Hạn ứng tuyển:</strong>
+                  <input
+                      v-if="editField.hanUngTuyen"
+                      type="datetime-local"
+                      style="width: 261px"
+                      class="form-control form-control-sm text-fix"
+                      v-model="task.hanUngTuyen"
+                      ref="hanUngTuyenInputRef"
+                      @blur="finishEditing('hanUngTuyen')"
+                      @keyup.enter.prevent="finishEditing('hanUngTuyen')"
+                  />
+                  <span v-else class="editable" style="font-size: 15px !important">{{ formatDateTime(task.hanUngTuyen) }}</span>
+                </div>
+
+                <div class="field-line" :class="{ 'field-line--editable': canUpdate }" @click="startEditing('choPhepUngTuyen')">
+                  <strong>Cho phép ứng tuyển:</strong>
+                  <select
+                      v-if="editField.choPhepUngTuyen"
+                      class="form-select form-select-sm text-fix"
+                      style="width: 261px"
+                      v-model="task.choPhepUngTuyen"
+                      ref="choPhepUngTuyenInputRef"
+                      @change="finishEditing('choPhepUngTuyen')"
+                      @blur="finishEditing('choPhepUngTuyen')"
+                  >
+                    <option :value="true">Có</option>
+                    <option :value="false">Không</option>
+                  </select>
+                  <span v-else class="editable" style="font-size: 15px !important">{{ formatBoolean(task.choPhepUngTuyen) }}</span>
+                </div>
+
+                <div class="field-line flex-column align-items-start" :class="{ 'field-line--editable': canUpdate }" @click="startEditing('address')">
+                  <strong>Địa chỉ:</strong>
+                  <div class="w-100">
+                    <template v-if="canUpdate">
+                      <div v-if="editField.address">
+                        <Address5 v-model="task.address" />
+                        <div class="d-flex justify-content-end gap-2 mt-2">
+                          <button class="btn btn-primary btn-sm" type="button" @click.stop="finishEditing('address')">OK</button>
+                        </div>
+                      </div>
+                      <span v-else class="editable" style="font-size: 15px !important">{{ formatAddress(task.address) }}</span>
+                    </template>
+                    <span v-else style="font-size: 15px !important">{{ formatAddress(task.address) }}</span>
+                  </div>
+                </div>
+
                 <hr class="my-3" />
 
                 <strong>Tiến độ:</strong>
@@ -831,6 +894,7 @@
   import "vue3-select/dist/vue3-select.css";
   import DescriptionEditor from "../../common/DescriptionEditor.vue";
   import FileGallery from '../../FileGallery.vue'
+  import Address5 from "./Address6.vue";
   import { eventMatchesProject, isWorkItemEvent, isCommentEvent } from '../../../utils/socketEventUtils.js'
 
 
@@ -1131,6 +1195,10 @@
     actualEffort: false,
     expStartDate: false,
     deadline: false,
+    mucLuong: false,
+    hanUngTuyen: false,
+    choPhepUngTuyen: false,
+    address: false,
   });
 
   const titleInputRef = ref(null);
@@ -1139,6 +1207,9 @@
   const actualEffortInputRef = ref(null);
   const expStartDateInputRef = ref(null);
   const deadlineInputRef = ref(null);
+  const mucLuongInputRef = ref(null);
+  const hanUngTuyenInputRef = ref(null);
+  const choPhepUngTuyenInputRef = ref(null);
 
   const fieldRefs = {
     title: titleInputRef,
@@ -1146,7 +1217,10 @@
     effort: effortInputRef,
     actualEffort: actualEffortInputRef,
     expStartDate: expStartDateInputRef,
-    deadline: deadlineInputRef
+    deadline: deadlineInputRef,
+    mucLuong: mucLuongInputRef,
+    hanUngTuyen: hanUngTuyenInputRef,
+    choPhepUngTuyen: choPhepUngTuyenInputRef
   };
 
   const task = ref({
@@ -1177,6 +1251,10 @@
     actualEffort: null,
     deadline: null,
     expStartDate: null,
+    mucLuong: null,
+    hanUngTuyen: null,
+    choPhepUngTuyen: false,
+    address: "",
     actualStartDate: null,
     actualEndDate: null,
     progress: null,
@@ -1409,6 +1487,23 @@
     const hours = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes()).padStart(2, "0");
     return `${day}/${month}/${year} ${hours}:${minutes}`;
+  }
+
+  function formatCurrency(value) {
+    if (value === null || value === undefined || value === "") return "—";
+    const numericValue = Number(value);
+    if (Number.isNaN(numericValue)) return value;
+    return `${new Intl.NumberFormat("vi-VN").format(numericValue)} ₫`;
+  }
+
+  function formatBoolean(value) {
+    if (value === null || value === undefined) return "—";
+    return value ? "Có" : "Không";
+  }
+
+  function formatAddress(value) {
+    if (!value) return "—";
+    return value.replace(/\s*\/!!\s*/g, ", ");
   }
 
   const progressClass = computed(() => {

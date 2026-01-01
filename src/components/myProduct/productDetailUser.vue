@@ -5,10 +5,31 @@
     <div class="executive-header">
       <div class="header-top">
         <div class="header-left">
-          <button class="back-button" @click="router.push('/03')">
-            <i class="fa-solid fa-arrow-left"></i>
-            <span>Quay lại danh sách</span>
-          </button>
+          <div class="header-bar">
+            <button class="back-button" @click="router.push('/03')">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Quay lại danh sách</span>
+            </button>
+
+            <div class="header-actions">
+              <button
+                  class="action-btn btn-edit"
+                  @click="$router.push(`/-thg/quan-ly-san-pham/cap-nhat/${asset.id}`)"
+              >
+                <i class="fa-solid fa-pen"></i>
+                <span>Cập nhật thông tin</span>
+              </button>
+
+              <button
+                  v-if="asset?.show === false"
+                  class="action-btn btn-register"
+                  @click="handleRegisterApproval"
+              >
+                <i class="fa-solid fa-file-signature"></i>
+                <span>Đăng ký kiểm duyệt và đăng sản phẩm</span>
+              </button>
+            </div>
+          </div>
 
           <div class="property-title-section">
             <h1 class="property-address">{{ formatAddress( asset.address ) }}</h1>
@@ -68,12 +89,7 @@
 
         </div>
 
-        <div class="header-actions">
-          <button class="action-btn btn-edit" @click="$router.push(`/-thg/quan-ly-san-pham/cap-nhat/${asset.id}`)">
-            <i class="fa-solid fa-pen"></i>
-            <span>Cập nhật thông tin</span>
-          </button>
-        </div>
+
       </div>
     </div>
 
@@ -574,6 +590,30 @@
 
 
 
+    <div v-if="showRegisterModal" class="register-modal-overlay" @click.self="closeRegisterModal">
+      <div class="register-modal-panel" role="dialog" aria-modal="true" aria-labelledby="register-modal-title">
+        <div class="register-modal-header">
+          <h3 id="register-modal-title" class="register-modal-title">Nhập thư đăng ký</h3>
+          <button class="register-modal-close" type="button" @click="closeRegisterModal">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="register-modal-body">
+          <label class="register-modal-label" for="register-letter">Nội dung thư đăng ký</label>
+          <textarea
+            id="register-letter"
+            v-model="registerLetter"
+            class="register-modal-input"
+            placeholder="Nhập nội dung thư đăng ký..."
+            rows="6"
+          ></textarea>
+        </div>
+        <div class="register-modal-actions">
+          <button class="register-modal-btn cancel" type="button" @click="closeRegisterModal">Hủy</button>
+          <button class="register-modal-btn confirm" type="button" @click="submitRegisterLetter">Gửi đăng ký</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -582,6 +622,7 @@ import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import FileOrLand from "/src/components/productAdmin/FileNew.vue";
 import HopTacMoiGioi from "/src/components/productAdmin/HopTacMoiGioi.vue";
+import {showCenterError, showCenterWarning} from "/src/assets/js/alertService.js";
 
 const activeTab = ref("DETAIL") // DETAIL | FILE
 const route = useRoute();
@@ -591,6 +632,8 @@ const asset = ref(null);
 const rooms = ref([]);
 const pdfUrl = ref(null);
 const activeImage = ref(0);
+const showRegisterModal = ref(false);
+const registerLetter = ref("");
 
 onMounted(() => loadDetail(id));
 
@@ -778,6 +821,156 @@ const getAssetType = (item) => {
 
   // Còn lại → đất
   return "DAT";
+};
+
+const normalizeText = (value) => (value ?? "").toString().trim().toLowerCase();
+
+const requireTextField = (value) => Boolean(normalizeText(value));
+
+const requireNumberField = (value, allowZero = false) => {
+  const numberValue = Number(value);
+  if (value === null || value === undefined || value === "" || Number.isNaN(numberValue)) {
+    return false;
+  }
+  if (!allowZero && numberValue < 0) {
+    return false;
+  }
+  return true;
+};
+
+const validateAsset = () => {
+  if (!asset.value) return false;
+  const current = asset.value;
+  let isValid = true;
+
+  const track = (valid) => {
+    if (!valid) isValid = false;
+  };
+
+  track(requireTextField(current.loaiTaiSan));
+  track(requireTextField(current.phanLoaiHang));
+  track(requireTextField(current.donViSoHuu));
+  track(requireNumberField(current.giaBan));
+  track(requireNumberField(current.giaNoiBo));
+  track(requireNumberField(current.desire));
+
+  if (!current.address) {
+    isValid = false;
+  } else {
+    const parts = current.address.split("/!!");
+    if (parts.length < 3 || parts.some((p) => !p || !p.trim())) {
+      isValid = false;
+    }
+  }
+
+  track(requireTextField(current.landPosition));
+  track(requireTextField(current.plotNumber));
+  track(requireTextField(current.parcelNumber));
+  track(requireNumberField(current.totalArea));
+  track(requireTextField(current.ownershipRelation));
+  track(requireTextField(current.landUseRight));
+  track(requireTextField(current.status));
+  track(requireNumberField(current.matTienNha));
+  track(requireNumberField(current.chieuNgang));
+  track(requireNumberField(current.chieuDai));
+  track(requireTextField(current.hienTrangDat));
+  track(requireNumberField(current.doRongDuong));
+  track(requireNumberField(current.loGioi));
+  track(requireTextField(current.structure));
+  track(requireNumberField(current.phiMoiGioi, true));
+  track(requireTextField(current.lienHe));
+
+  if (current.status === "Đã bán") {
+    const hasSeller = Boolean(current.nguoiBanId) || Boolean(normalizeText(current.nguoiBanTen));
+    if (!hasSeller) {
+      isValid = false;
+    }
+    if (!current.giaBanThanhCong || current.giaBanThanhCong <= 0) {
+      isValid = false;
+    }
+  }
+
+  if (getAssetType(current) === "NHA") {
+    track(requireNumberField(current.floorArea));
+    track(requireTextField(current.loaiNha));
+    track(requireNumberField(current.tongSoPhong));
+    track(requireNumberField(current.soPhongNgu));
+    track(requireNumberField(current.soPhongTam));
+    track(requireNumberField(current.soTang));
+    track(requireTextField(current.noiThat));
+    track(requireTextField(current.hienTrangNha));
+    track(requireTextField(current.namXayDung));
+
+    if (current.soLau == null) {
+      isValid = false;
+    }
+
+    const roomsData = Array.isArray(current.rooms) ? current.rooms : [];
+    const hasRooms = roomsData.length > 0;
+    const invalidRoom = roomsData.some((room) => {
+      const hasLoaiPhong = normalizeText(room?.loaiPhong);
+      const hasSoLuong = typeof room?.soLuong === "number" && room.soLuong > 0;
+      const hasDienTich = typeof room?.dienTich === "number" && room.dienTich > 0;
+      const hasMoTa = normalizeText(room?.moTa);
+      return !(hasLoaiPhong && hasSoLuong && hasDienTich && hasMoTa);
+    });
+
+    if (!hasRooms || invalidRoom) {
+      isValid = false;
+    }
+  }
+
+  return isValid;
+};
+
+const handleRegisterApproval = () => {
+  if (!validateAsset()) {
+    showCenterWarning("Vui lòng cập nhật đầy đủ thông tin và đăng ký lại.");
+    return;
+  }
+  openRegisterModal();
+};
+
+const closeRegisterModal = () => {
+  showRegisterModal.value = false;
+  registerLetter.value = "";
+};
+
+const submitRegisterLetter = async () => {
+  if (!registerLetter.value.trim()) {
+    showCenterWarning("Vui lòng nhập thư đăng ký.");
+    return;
+  }
+
+  try {
+    await api.post(
+        "/user.thg/product/user/register-letter",
+        null,
+        {
+          params: {
+            landId: id, // hoặc item.id
+            thuDK: registerLetter.value.trim(),
+          },
+        }
+    );
+
+    showCenterSuccess("Gửi thư đăng ký thành công");
+    closeRegisterModal();
+  } catch (e) {
+    console.error(e);
+
+    const msg =
+        e?.response?.data ||
+        "Gửi thư đăng ký thất bại, vui lòng thử lại";
+
+    showCenterError(msg);
+  }
+};
+
+
+const openRegisterModal = () => {
+  registerLetter.value = "";
+  showRegisterModal.value = true;
 };
 
 const renderPriceCompare = (desirePrice, totalPrice) => {
@@ -1106,6 +1299,107 @@ const formatPhone = (value) => {
 .btn-edit:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px -1px rgba(59, 130, 246, 0.4);
+}
+
+.btn-register {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+}
+
+.btn-register:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px -1px rgba(16, 185, 129, 0.4);
+}
+
+.register-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 16px;
+}
+
+.register-modal-panel {
+  width: min(560px, 92vw);
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+  padding: 20px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.register-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.register-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.register-modal-close {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.register-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.register-modal-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.register-modal-input {
+  min-height: 140px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 12px;
+  font-size: 14px;
+  resize: vertical;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.register-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.register-modal-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.register-modal-btn.cancel {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.register-modal-btn.confirm {
+  background: #10b981;
+  color: #ffffff;
+  box-shadow: 0 8px 16px rgba(16, 185, 129, 0.25);
 }
 
 .btn-news {
@@ -1849,6 +2143,16 @@ const formatPhone = (value) => {
 .tab-btn.active {
   color: #2563eb;
   border-bottom-color: #2563eb;
+}
+.header-bar {
+  display: flex;
+  align-items: center;
+}
+
+.header-actions {
+  margin-left: auto; /* 👈 đẩy 2 nút này sang phải */
+  display: flex;
+  gap: 12px;
 }
 
 </style>
