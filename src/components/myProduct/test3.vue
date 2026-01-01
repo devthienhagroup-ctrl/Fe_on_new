@@ -19,6 +19,13 @@
           <!-- Nút chuyển đổi giữa bảng và thẻ -->
           <div class="filter-actions">
             <button
+                @click="$router.push('/-thg/quan-ly-san-pham/tao-moi')"
+                class="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-lg hover:from-amber-600 hover:to-yellow-600 transition-all shadow-md hover:shadow-lg text-sm"
+            >
+              <i class="fa-solid fa-plus text-xs"></i>
+              <span class="font-medium">Thêm sản phẩm</span>
+            </button>
+            <button
                 @click="viewMode = 'card'"
                 :class="[
         'px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2',
@@ -358,7 +365,7 @@
 
                       <!-- XEM -->
                       <button
-                          @click="$router.push(buildSeoUrl(item))"
+                          @click="goToDetail(item)"
                           class="action-view"
                       >
                         <i class="fa-regular fa-eye text-[10px]"></i>
@@ -398,7 +405,7 @@
 
                         <!-- XEM -->
                         <button
-                            @click="$router.push(buildSeoUrl(item))"
+                            @click="goToDetail(item)"
                             class="dot-item"
                         >
                           <i class="fa-regular fa-eye"></i>
@@ -686,7 +693,7 @@
               <div class="flex items-center gap-2 px-3 pb-3">
                 <!-- Xem chi tiết -->
                 <button
-                    @click="$router.push(buildSeoUrl(item))"
+                    @click="goToDetail(item)"
                     class="flex-1 py-2.5 bg-gradient-to-r from-slate-900 to-black text-white rounded-full
              text-[14px] font-semibold flex items-center justify-center gap-2
              hover:opacity-90 transition-all"
@@ -849,7 +856,7 @@
 
 <script setup>
 const agreePolicy = ref(false);
-const activeTab = ref('UNLOCKED')
+const activeTab = ref('MY_ASSET')
 const changeTab = (tab) => {
   activeTab.value = tab
   console.log('TAB:', tab)
@@ -878,6 +885,11 @@ const info = authStore.userInfo;
 
 const sidebar = useSidebarStore();
 const goToDetail = (item) => {
+  if (activeTab.value === 'MY_ASSET') {
+    router.push(`/user/quan-ly-san-pham/${item.id}`);
+    return;
+  }
+
   router.push(buildSeoUrl(item));
 }
 

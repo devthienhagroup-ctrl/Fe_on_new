@@ -120,6 +120,7 @@ import SoldProject from "../components/user/SoldProject/SoldProject.vue";
 import Test from "../components/productAdmin/test.vue";
 import Test1 from "../components/productAdmin/test1.vue";
 import Test3 from "../components/myProduct/test3.vue";
+import productDetailUser from "../components/myProduct/productDetailUser.vue"
 
 const routes = [
         {
@@ -127,7 +128,12 @@ const routes = [
             name: "LoginForm",
             component: LoginForm,
         },
-        {
+    {
+        path: "/user/quan-ly-san-pham/:id",
+        name: "QLSAN-DETAIL",
+        component: productDetailUser,
+    },
+    {
             path: "/moi-gioi",
             name: "MoiGioiShow",
             component: MenuUser,
