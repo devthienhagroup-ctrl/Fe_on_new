@@ -369,7 +369,7 @@
             <div class="min-w-0">
               <label class="block text-[11px] font-bold text-slate-800 mb-0.5 flex items-center gap-1 truncate mb-1 mb-1">
                 <i class="fa-solid fa-circle-check text-emerald-600 text-[10px]"></i>
-                <span class="truncate">Tình Trạng</span>
+                <span class="truncate">Trạng thái</span>
               </label>
               <select
                   v-model="filterDaBan"

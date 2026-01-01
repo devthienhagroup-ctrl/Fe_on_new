@@ -246,7 +246,7 @@
                   <small v-if="errors.landPosition" class="text-danger">{{ errors.landPosition }}</small>
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-16">
                   <label class="form-label fw-semibold d-flex align-items-center gap-2">
                     <i class="fas fa-map-signs text-success"></i>
                     <span>Địa chỉ cũ</span>
@@ -1060,17 +1060,8 @@
                         <option :value="false">Nữ</option>
                       </select>
                     </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                        <i class="fas fa-map-marker-alt text-danger"></i>
-                        <span>Địa chỉ mới <span class="text-danger">*</span></span>
-                      </label>
-                      <input
-                        type="text"
-                        class="form-control"
-                        v-model.trim="nonSystemNewOwner.newAddress"
-                        placeholder="Địa chỉ hiện tại"
-                      />
+                    <div class="col-12">
+                      <Address5 v-model="nonSystemNewOwner.newAddress"></Address5>
                       <small v-if="errors.ownerNewAddress" class="text-danger">{{ errors.ownerNewAddress }}</small>
                     </div>
                     <div class="col-md-6">

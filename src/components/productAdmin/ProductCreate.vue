@@ -1058,7 +1058,6 @@
                   </select>
                 </div>
                 <div class="col-12">
-                  <label class="form-label fw-semibold">Địa chỉ mới <span class="text-danger">*</span></label>
                   <Address5 v-model="nonSystemNewOwner.newAddress"></Address5>
                   <small v-if="errors.ownerNewAddress" class="text-danger">{{ errors.ownerNewAddress }}</small>
                 </div>
