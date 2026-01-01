@@ -313,6 +313,24 @@ function triggerBrowserDownload(url,name){
   const a=document.createElement("a");
   a.href=url; a.download=name; a.click();
 }
+
+import {watch } from "vue";
+
+watch(
+    () => props.fileList,
+    (list = []) => {
+      normalImages.value = list.filter(
+          f => isImage(f.fileName) && !f.isIG
+      )
+      landBookImages.value = list.filter(
+          f => isImage(f.fileName) && f.isIG
+      )
+      files.value = list.filter(
+          f => !isImage(f.fileName)
+      )
+    },
+    { immediate: true }
+)
 </script>
 
 <style scoped>

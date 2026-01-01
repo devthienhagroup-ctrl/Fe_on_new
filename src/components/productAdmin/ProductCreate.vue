@@ -888,6 +888,18 @@
             <div class="owner-mode-switch mb-4">
               <div class="form-check">
                 <input
+                    id="owner-nonsystem"
+                    v-model="ownerMode"
+                    class="form-check-input"
+                    type="radio"
+                    value="nonSystem"
+                />
+                <label class="form-check-label fw-semibold" for="owner-nonsystem">
+                  Chủ tài sản không sử dụng hệ thống
+                </label>
+              </div>
+              <div class="form-check">
+                <input
                   id="owner-system"
                   v-model="ownerMode"
                   class="form-check-input"
@@ -898,18 +910,7 @@
                   Chủ tài sản có sử dụng hệ thống
                 </label>
               </div>
-              <div class="form-check">
-                <input
-                  id="owner-nonsystem"
-                  v-model="ownerMode"
-                  class="form-check-input"
-                  type="radio"
-                  value="nonSystem"
-                />
-                <label class="form-check-label fw-semibold" for="owner-nonsystem">
-                  Chủ tài sản không sử dụng hệ thống
-                </label>
-              </div>
+
             </div>
 
             <div v-if="isSystemOwnerMode" class="owner-mode-card">
@@ -960,6 +961,16 @@
               <div class="d-flex gap-3 flex-wrap mb-3">
                 <div class="form-check">
                   <input
+                      id="owner-new"
+                      v-model="nonSystemOwnerOption"
+                      class="form-check-input"
+                      type="radio"
+                      value="new"
+                  />
+                  <label class="form-check-label" for="owner-new">Nhập chủ mới</label>
+                </div>
+                <div class="form-check">
+                  <input
                     id="owner-existing"
                     v-model="nonSystemOwnerOption"
                     class="form-check-input"
@@ -968,16 +979,7 @@
                   />
                   <label class="form-check-label" for="owner-existing">Chọn chủ đã có</label>
                 </div>
-                <div class="form-check">
-                  <input
-                    id="owner-new"
-                    v-model="nonSystemOwnerOption"
-                    class="form-check-input"
-                    type="radio"
-                    value="new"
-                  />
-                  <label class="form-check-label" for="owner-new">Nhập chủ mới</label>
-                </div>
+
               </div>
 
               <div v-if="nonSystemOwnerOption === 'existing'" class="row g-3 align-items-end">
@@ -1313,14 +1315,14 @@ const uploadedFiles = ref([])
 const errors = reactive({})
 const ownerSearch = ref('')
 const ownerLookupMessage = ref('')
-const ownerMode = ref('system')
+const ownerMode = ref('nonSystem')
 const managerSearch = ref('')
 const managerLookupMessage = ref('')
 const managerInfo = reactive({
   fullName: '',
   phone: '',
 })
-const nonSystemOwnerOption = ref('existing')
+const nonSystemOwnerOption = ref('new')
 const nonSystemOwnerSearch = ref('')
 const nonSystemLookupMessage = ref('')
 const nonSystemExistingOwner = ref(null)

@@ -264,47 +264,96 @@
                   <i class="fas fa-balance-scale text-warning"></i>
                 </div>
                 <div>
-                  <h2 class="h5 fw-bold mb-1">Pháp lý & diện tích</h2>
-                  <p class="text-muted small mb-0">Thông tin pháp lý và diện tích tài sản</p>
+                  <h2 class="h5 fw-bold mb-1">Thông tin pháp lý &amp; diện tích</h2>
+                  <p class="text-muted small mb-0">Các thông tin mô tả đặc điểm và pháp lý của tài sản</p>
                 </div>
               </div>
+
               <div class="row g-4">
-                <div class="col-md-2">
-                  <label class="form-label fw-semibold">Số thửa <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" v-model.trim="form.plotNumber" placeholder="Nhập số thửa">
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-hashtag text-primary"></i>
+                    <span>Số thửa <span class="text-danger">*</span></span>
+                  </label>
+                  <input type="text" class="form-control" v-model.trim="form.plotNumber" placeholder="Số thửa">
                   <small v-if="errors.plotNumber" class="text-danger">{{ errors.plotNumber }}</small>
                 </div>
-                <div class="col-md-2">
-                  <label class="form-label fw-semibold">Số tờ <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" v-model.trim="form.parcelNumber" placeholder="Nhập số tờ">
+
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-file-alt text-info"></i>
+                    <span>Số tờ <span class="text-danger">*</span></span>
+                  </label>
+                  <input type="text" class="form-control" v-model.trim="form.parcelNumber" placeholder="Số tờ">
                   <small v-if="errors.parcelNumber" class="text-danger">{{ errors.parcelNumber }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Tổng diện tích <span class="text-danger">*</span></label>
-                  <div class="input-group">
-                    <input type="number" min="0" class="form-control" v-model.number="form.totalArea" placeholder="Tổng diện tích">
-                    <span class="input-group-text">m²</span>
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-expand-alt text-success"></i>
+                    <span>Tổng diện tích (m²) <span class="text-danger">*</span></span>
+                  </label>
+                  <div class="input-group input-group-md">
+                    <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.totalArea" placeholder="Tổng diện tích tài sản">
+                    <span class="input-group-text"><i class="fas fa-ruler-combined"></i></span>
                   </div>
                   <small v-if="errors.totalArea" class="text-danger">{{ errors.totalArea }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Quan hệ sở hữu <span class="text-danger">*</span></label>
-                  <input v-model.trim="form.ownershipRelation" list="ownershipRelations" class="form-control" placeholder="Quan hệ sở hữu">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-handshake text-warning"></i>
+                    <span>Quan hệ sở hữu <span class="text-danger">*</span></span>
+                  </label>
+
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model.trim="form.ownershipRelation"
+                    list="ownershipRelations"
+                    placeholder="Quan hệ với chủ sở hữu"
+                  >
+
                   <datalist id="ownershipRelations">
                     <option value="Chính chủ"></option>
-                    <option value="Thừa kế"></option>
+                    <option value="Người thân"></option>
+                    <option value="Uỷ quyền"></option>
                     <option value="Đồng sở hữu"></option>
+                    <option value="Môi giới đại diện"></option>
                   </datalist>
                   <small v-if="errors.ownershipRelation" class="text-danger">{{ errors.ownershipRelation }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Quyền sử dụng đất <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" v-model.trim="form.landUseRight" placeholder="Quyền sử dụng đất">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-gavel text-danger"></i>
+                    <span>Quyền sử dụng  <span class="text-danger">*</span></span>
+                  </label>
+
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model.trim="form.landUseRight"
+                    list="landUseRights"
+                    placeholder="Quyền sử dụng đất"
+                  >
+
+                  <datalist id="landUseRights">
+                    <option value="Sổ đỏ"></option>
+                    <option value="Sổ hồng"></option>
+                    <option value="Đất thổ cư"></option>
+                    <option value="Đất nông nghiệp"></option>
+                    <option value="Giấy tờ viết tay"></option>
+                  </datalist>
                   <small v-if="errors.landUseRight" class="text-danger">{{ errors.landUseRight }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Tình trạng <span class="text-danger">*</span></label>
-                  <select class="form-select" v-model="form.status">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-clipboard-check text-info"></i>
+                    <span>Trạng thái <span class="text-danger">*</span></span>
+                  </label>
+                  <select class="form-select form-select-md" v-model="form.status">
                     <option value="">-- Chọn tình trạng --</option>
                     <option value="Chưa định giá">Mới</option>
                     <option value="Bán giải pháp">Bán giải pháp</option>
@@ -313,78 +362,188 @@
                   </select>
                   <small v-if="errors.status" class="text-danger">{{ errors.status }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Mặt tiền <span class="text-danger">*</span></label>
-                  <div class="input-group">
-                    <input type="number" min="0" class="form-control" v-model.number="form.matTienNha" placeholder="Mặt tiền">
-                    <span class="input-group-text">m</span>
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-vector-square text-success"></i>
+                    <span>Mặt tiền (m) <span class="text-danger">*</span></span>
+                  </label>
+                  <div class="input-group input-group-md">
+                    <input type="number" min="0" class="form-control" step="0.01" v-model.number="form.matTienNha"
+                           placeholder="Mặt tiền tổng tài sản">
+                    <span class="input-group-text"><i class="fas fa-home"></i></span>
                   </div>
                   <small v-if="errors.matTienNha" class="text-danger">{{ errors.matTienNha }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Chiều ngang <span class="text-danger">*</span></label>
-                  <div class="input-group">
-                    <input type="number" min="0" class="form-control" v-model.number="form.chieuNgang" placeholder="Chiều ngang">
-                    <span class="input-group-text">m</span>
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-arrows-alt-h text-primary"></i>
+                    <span>Chiều ngang (m) <span class="text-danger">*</span></span>
+                  </label>
+                  <div class="input-group input-group-md">
+                    <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.chieuNgang"
+                           placeholder="Tổng chiều ngang tài sản">
+                    <span class="input-group-text"><i class="fas fa-ruler-horizontal"></i></span>
                   </div>
                   <small v-if="errors.chieuNgang" class="text-danger">{{ errors.chieuNgang }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Chiều dài <span class="text-danger">*</span></label>
-                  <div class="input-group">
-                    <input type="number" min="0" class="form-control" v-model.number="form.chieuDai" placeholder="Chiều dài">
-                    <span class="input-group-text">m</span>
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-arrows-alt-v text-success"></i>
+                    <span>Chiều dài (m) <span class="text-danger">*</span></span>
+                  </label>
+                  <div class="input-group input-group-md">
+                    <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.chieuDai"
+                           placeholder="Tổng chiều dài sản phẩm">
+                    <span class="input-group-text"><i class="fas fa-ruler-vertical"></i></span>
                   </div>
                   <small v-if="errors.chieuDai" class="text-danger">{{ errors.chieuDai }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Hiện trạng đất <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" v-model.trim="form.hienTrangDat" placeholder="Hiện trạng đất">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-search text-info"></i>
+                    <span>Hiện trạng đất <span class="text-danger">*</span></span>
+                  </label>
+
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model.trim="form.hienTrangDat"
+                    list="hienTrangDatList"
+                    placeholder="Hiện trạng"
+                  >
+
+                  <datalist id="hienTrangDatList">
+                    <option value="Đất trống"></option>
+                    <option value="Có nhà"></option>
+                    <option value="Đã lên thổ cư"></option>
+                    <option value="Đang cho thuê"></option>
+                    <option value="Đang tranh chấp"></option>
+                  </datalist>
                   <small v-if="errors.hienTrangDat" class="text-danger">{{ errors.hienTrangDat }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Độ rộng đường <span class="text-danger">*</span></label>
-                  <div class="input-group">
-                    <input type="number" min="0" class="form-control" v-model.number="form.doRongDuong" placeholder="Độ rộng đường">
-                    <span class="input-group-text">m</span>
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-arrows-alt-h text-success"></i>
+                    <span>Độ rộng đường (m) <span class="text-danger">*</span></span>
+                  </label>
+                  <div class="input-group input-group-md">
+                    <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.doRongDuong"
+                           placeholder="Độ rồng đường vào tài sản">
+                    <span class="input-group-text"><i class="fas fa-road"></i></span>
                   </div>
                   <small v-if="errors.doRongDuong" class="text-danger">{{ errors.doRongDuong }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Lộ giới <span class="text-danger">*</span></label>
-                  <div class="input-group">
-                    <input type="number" min="0" class="form-control" v-model.number="form.loGioi" placeholder="Lộ giới">
-                    <span class="input-group-text">m</span>
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-ruler-horizontal text-primary"></i>
+                    <span>Lộ giới (m) <span class="text-danger">*</span></span>
+                  </label>
+                  <div class="input-group input-group-md">
+                    <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.loGioi"
+                           placeholder="Lộ giới">
+                    <span class="input-group-text"><i class="fas fa-ruler"></i></span>
                   </div>
                   <small v-if="errors.loGioi" class="text-danger">{{ errors.loGioi }}</small>
                 </div>
-                <div class="col-md-4">
-                  <label class="form-label fw-semibold">Mô tả hình dạng/kết cấu <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" v-model.trim="form.structure" placeholder="Mô tả hình dạng/kết cấu">
+
+                <div class="col-12">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-archway text-danger"></i>
+                    <span>Hình dạng / Kết cấu <span class="text-danger">*</span></span>
+                  </label>
+                  <textarea class="form-control" v-model.trim="form.structure" rows="2" placeholder="Mô tả kết cấu công trình"></textarea>
                   <small v-if="errors.structure" class="text-danger">{{ errors.structure }}</small>
                 </div>
               </div>
+            </section>
 
-              <div v-if="isSold" class="row g-4 mt-2">
-                <div class="col-md-4">
-                  <label class="form-label fw-semibold">Người bán <span class="text-danger">*</span></label>
-                  <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="fas fa-search text-muted"></i></span>
-                    <input type="text" class="form-control" v-model.trim="form.nguoiBanSearch" placeholder="Email hoặc số điện thoại">
-                    <button type="button" class="btn btn-outline-primary" @click="handleNguoiBanLookup">
-                      <i class="fas fa-search"></i>
-                    </button>
-                  </div>
-                  <small v-if="errors.nguoiBanSearch" class="text-danger">{{ errors.nguoiBanSearch }}</small>
-                  <div v-if="form.nguoiBanTen" class="small text-muted mt-1">Đã chọn: {{ form.nguoiBanTen }}</div>
+            <section v-if="isSold" class="mb-5">
+              <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                <div class="section-icon bg-success-light">
+                  <i class="fas fa-user-check text-success"></i>
                 </div>
+                <div>
+                  <h2 class="h5 fw-bold mb-1">Người bán thành công</h2>
+                  <p class="text-muted small mb-0">Thông tin người chốt giao dịch</p>
+                </div>
+              </div>
+
+              <div class="row g-4">
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Giá bán thành công <span class="text-danger">*</span></label>
+                  <label class="form-label fw-semibold">
+                    Email / Số điện thoại <span class="text-danger">*</span>
+                  </label>
                   <div class="input-group">
-                    <input type="number" min="0" class="form-control" v-model.number="form.giaBanThanhCong" placeholder="Giá bán thành công">
+                    <span class="input-group-text">
+                      <i class="fas fa-search"></i>
+                    </span>
+                    <input
+                      v-model.trim="form.nguoiBanSearch"
+                      @blur="handleNguoiBanLookup"
+                      type="text"
+                      class="form-control"
+                      placeholder="Nhập email hoặc SĐT"
+                    />
+                  </div>
+                  <small v-if="errors.nguoiBanSearch" class="text-danger">
+                    {{ errors.nguoiBanSearch }}
+                  </small>
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">
+                    Người bán
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control bg-light"
+                    readonly
+                    v-model="form.nguoiBanTen"
+                    placeholder="Tự động load"
+                  />
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">
+                    Giá bán thành công <span class="text-danger">*</span>
+                  </label>
+                  <div class="input-group">
+                    <input
+                      type="number"
+                      min="0"
+                      step="1000000"
+                      v-model.number="form.giaBanThanhCong"
+                      class="form-control"
+                      placeholder="Giá chốt"
+                    />
                     <span class="input-group-text">VNĐ</span>
                   </div>
-                  <small v-if="errors.giaBanThanhCong" class="text-danger">{{ errors.giaBanThanhCong }}</small>
+                  <small v-if="errors.giaBanThanhCong" class="text-danger">
+                    {{ errors.giaBanThanhCong }}
+                  </small>
+                  <small v-else-if="form.giaBanThanhCong" class="text-info fw-medium mt-1 d-block">
+                    <i class="fas fa-chart-line me-1"></i>{{ formatMoneyVN(form.giaBanThanhCong) }}
+                  </small>
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">
+                    Ngày bán <span class="text-danger">*</span>
+                  </label>
+                  <input
+                    v-model="form.ngayBan"
+                    type="date"
+                    class="form-control"
+                  />
+                  <small v-if="errors.ngayBan" class="text-danger">
+                    {{ errors.ngayBan }}
+                  </small>
                 </div>
               </div>
             </section>
@@ -393,146 +552,255 @@
           <div v-show="activeTab === 'house'" class="tab-panel">
             <section class="mb-5">
               <div class="d-flex align-items-center mb-4 border-bottom pb-3">
-                <div class="section-icon bg-danger-light">
-                  <i class="fas fa-home text-danger"></i>
+                <div class="section-icon bg-warning-light">
+                  <i class="fas fa-home text-warning"></i>
                 </div>
                 <div>
-                  <h2 class="h5 fw-bold mb-1">Thông tin nhà &amp; phòng</h2>
-                  <p class="text-muted small mb-0">Các thông tin mô tả đặc điểm và pháp lý của tài sản</p>
+                  <h2 class="h5 fw-bold mb-1">Thông tin nhà</h2>
+                  <p class="text-muted small mb-0">Chi tiết về công trình nhà ở</p>
                 </div>
               </div>
               <div class="row g-4">
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Diện tích sàn <span class="text-danger">*</span></label>
-                  <div class="input-group">
-                    <input type="number" min="0" class="form-control" v-model.number="form.floorArea" placeholder="Diện tích sàn">
-                    <span class="input-group-text">m²</span>
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-layer-group text-info"></i>
+                    <span>Diện tích sàn (m²) <span class="text-danger">*</span></span>
+                  </label>
+                  <div class="input-group input-group-md">
+                    <input type="number" min="0" step="0.01" class="form-control" v-model.number="form.floorArea">
+                    <span class="input-group-text"><i class="fas fa-th-large"></i></span>
                   </div>
                   <small v-if="errors.floorArea" class="text-danger">{{ errors.floorArea }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Loại nhà <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" v-model.trim="form.loaiNha" placeholder="Loại nhà">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-house-user text-success"></i>
+                    <span>Loại nhà <span class="text-danger">*</span></span>
+                  </label>
+
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model.trim="form.loaiNha"
+                    placeholder="Loại nhà"
+                    list="loaiNhaList"
+                  >
+                  <datalist id="loaiNhaList">
+                    <option value="Nhà cấp 4"></option>
+                    <option value="Chung cư"></option>
+                    <option value="Nhà 4 tầng"></option>
+                    <option value="Nhà phố"></option>
+                    <option value="Nhà biệt thự"></option>
+                  </datalist>
                   <small v-if="errors.loaiNha" class="text-danger">{{ errors.loaiNha }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Tổng số phòng <span class="text-danger">*</span></label>
-                  <input type="number" min="0" class="form-control" v-model.number="form.tongSoPhong" placeholder="Tổng số phòng">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-door-closed text-warning"></i>
+                    <span>Tổng số phòng <span class="text-danger">*</span></span>
+                  </label>
+                  <input type="number" min="0" class="form-control" v-model.number="form.tongSoPhong">
                   <small v-if="errors.tongSoPhong" class="text-danger">{{ errors.tongSoPhong }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Số phòng ngủ <span class="text-danger">*</span></label>
-                  <input type="number" min="0" class="form-control" v-model.number="form.soPhongNgu" placeholder="Số phòng ngủ">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-bed text-primary"></i>
+                    <span>Số phòng ngủ <span class="text-danger">*</span></span>
+                  </label>
+                  <input type="number" min="0" class="form-control" v-model.number="form.soPhongNgu">
                   <small v-if="errors.soPhongNgu" class="text-danger">{{ errors.soPhongNgu }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Số phòng tắm <span class="text-danger">*</span></label>
-                  <input type="number" min="0" class="form-control" v-model.number="form.soPhongTam" placeholder="Số phòng tắm">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-bath text-info"></i>
+                    <span>Số phòng tắm <span class="text-danger">*</span></span>
+                  </label>
+                  <input type="number" min="0" class="form-control" v-model.number="form.soPhongTam">
                   <small v-if="errors.soPhongTam" class="text-danger">{{ errors.soPhongTam }}</small>
                 </div>
-                <div class="col-md-4">
-                  <label class="form-label fw-semibold">Số tầng <span class="text-danger">*</span></label>
-                  <input type="number" min="0" class="form-control" v-model.number="form.soTang" placeholder="Số tầng">
-                  <small v-if="errors.soTang" class="text-danger">{{ errors.soTang }}</small>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label fw-semibold">Số lầu <span class="text-danger">*</span></label>
-                  <input type="number" min="0" class="form-control" v-model.number="form.soLau" placeholder="Số lầu">
+
+                <div class="col-md-2">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-layer-group text-primary"></i>
+                    <span>Số lầu <span class="text-danger">*</span></span>
+                  </label>
+                  <input type="number" min="0" class="form-control" v-model.number="form.soLau">
                   <small v-if="errors.soLau" class="text-danger">{{ errors.soLau }}</small>
                 </div>
+
+                <div class="col-md-2">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-building text-info"></i>
+                    <span>Số tầng <span class="text-danger">*</span></span>
+                  </label>
+                  <input type="number" min="0" class="form-control" v-model.number="form.soTang">
+                  <small v-if="errors.soTang" class="text-danger">{{ errors.soTang }}</small>
+                </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Nội thất <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" v-model.trim="form.noiThat" placeholder="Nội thất">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-couch text-warning"></i>
+                    <span>Nội thất <span class="text-danger">*</span></span>
+                  </label>
+
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model.trim="form.noiThat"
+                    list="noiThatList"
+                    placeholder="Nội thất"
+                  >
+
+                  <datalist id="noiThatList">
+                    <option value="Full nội thất"></option>
+                    <option value="Cơ bản"></option>
+                    <option value="Nội thất trống"></option>
+                    <option value="Có tủ bếp"></option>
+                    <option value="Có máy lạnh"></option>
+                  </datalist>
                   <small v-if="errors.noiThat" class="text-danger">{{ errors.noiThat }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Hiện trạng nhà <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" v-model.trim="form.hienTrangNha" placeholder="Hiện trạng nhà">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-search text-primary"></i>
+                    <span>Hiện trạng nhà <span class="text-danger">*</span></span>
+                  </label>
+
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model.trim="form.hienTrangNha"
+                    list="hienTrangNhaList"
+                    placeholder="Hiện trạng"
+                  >
+
+                  <datalist id="hienTrangNhaList">
+                    <option value="Nhà mới"></option>
+                    <option value="Nhà đang ở"></option>
+                    <option value="Nhà đang cho thuê"></option>
+                    <option value="Nhà xuống cấp"></option>
+                    <option value="Nhà bỏ trống"></option>
+                  </datalist>
                   <small v-if="errors.hienTrangNha" class="text-danger">{{ errors.hienTrangNha }}</small>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Năm xây dựng <span class="text-danger">*</span></label>
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-calendar-alt text-info"></i>
+                    <span>Năm xây dựng <span class="text-danger">*</span></span>
+                  </label>
                   <input type="text" class="form-control" v-model.trim="form.namXayDung" placeholder="Năm xây dựng">
                   <small v-if="errors.namXayDung" class="text-danger">{{ errors.namXayDung }}</small>
                 </div>
               </div>
+            </section>
 
-              <div class="mt-4">
-                <div class="table-responsive">
-                  <table class="table table-borderless align-middle">
-                    <thead class="table-light">
-                    <tr>
-                      <th class="text-center" style="width: 30%">Loại phòng</th>
-                      <th class="text-center" style="width: 15%">Số lượng</th>
-                      <th class="text-center" style="width: 20%">Diện tích</th>
-                      <th style="width: 30%">Mô tả</th>
-                      <th class="text-center" style="width: 5%"></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr v-for="(room, index) in form.rooms" :key="room.id || index" class="room-row">
-                      <td>
-                        <input
-                            type="text"
-                            list="roomTypeList"
-                            class="form-control form-control-sm"
-                            v-model.trim="room.loaiPhong"
-                            placeholder="Phòng ngủ, phòng khách..."
-                        />
-
-                        <datalist id="roomTypeList">
-                          <option value="Phòng ngủ" />
-                          <option value="Nhà vệ sinh" />
-                          <option value="Phòng khách" />
-                          <option value="Phòng bếp" />
-                          <option value="Phòng ăn" />
-                          <option value="Phòng làm việc" />
-                          <option value="Phòng đọc sách" />
-                          <option value="Phòng thờ" />
-                          <option value="Kho" />
-                          <option value="Sân thượng" />
-                        </datalist>
-                      </td>
-                      <td class="text-center">
-                        <input
-                            type="number"
-                            min="0"
-                            class="form-control form-control-sm w-full"
-                            v-model.number="room.soLuong"
-                            placeholder="Số lượng phòng tương đồng"
-                        />
-                      </td>
-                      <td class="text-center">
-                        <div class="input-group input-group-sm">
-                          <input type="number" min="0" step="0.01" class="form-control form-control-sm w-full" v-model.number="room.dienTich"
-                                 placeholder="Diện tích mỗi phòng">
-                          <span class="input-group-text"><i class="fas fa-ruler-combined"></i></span>
-                        </div>
-                      </td>
-                      <td>
-                        <input type="text" class="form-control form-control-sm" v-model.trim="room.moTa" placeholder="Ghi chú về phòng">
-                      </td>
-                      <td class="text-center pe-4">
-                        <button type="button" class="btn btn-sm btn-outline-danger" @click="removeRoom(index)" :disabled="form.rooms.length === 1">
-                          <i class="fas fa-trash"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr v-if="form.rooms.length === 0">
-                      <td colspan="5" class="text-center py-4 text-muted">
-                        <i class="fas fa-door-closed me-2"></i>Chưa có phòng nào được thêm
-                      </td>
-                    </tr>
-                    </tbody>
-                  </table>
-                  <div v-if="errors.rooms" class="text-danger small mt-2">{{ errors.rooms }}</div>
+            <section class="mb-5">
+              <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+                <div class="d-flex align-items-center">
+                  <div class="section-icon bg-info-light">
+                    <i class="fas fa-door-open text-info"></i>
+                  </div>
+                  <div>
+                    <h2 class="h5 fw-bold mb-1">Danh sách phòng</h2>
+                    <p class="text-muted small mb-0">Quản lý các phòng trong nhà</p>
+                  </div>
                 </div>
-              </div>
-              <div class="mt-4 d-flex align-items-center justify-content-between">
-                <div class="text-sm text-muted">Thêm mới hoặc chỉnh sửa chi tiết phòng để mô tả đầy đủ tài sản.</div>
-                <button type="button" class="btn btn-primary" @click="addRoom">
-                  <i class="fas fa-plus me-2"></i>Thêm phòng
+                <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-2" @click="addRoom">
+                  <i class="fas fa-plus"></i><span>Thêm phòng</span>
                 </button>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                  <thead class="table-light">
+                  <tr>
+                    <th class="ps-4" style="width: 25%;">
+                      <i class="fas fa-door-closed me-2 text-primary"></i>
+                      Loại phòng  <span class="text-danger">*</span>
+                    </th>
+
+                    <th class="ps-2" style="width: 20%;">
+                      <i class="fas fa-hashtag me-2 text-info"></i>
+                      Số lượng  <span class="text-danger">*</span>
+                    </th>
+
+                    <th class="ps-2" style="width: 20%;">
+                      <i class="fas fa-expand-alt me-2 text-success"></i>
+                      Diện tích (m²)  <span class="text-danger">*</span>
+                    </th>
+
+                    <th style="width: 35%;">
+                      <i class="fas fa-comment-alt me-2 text-warning"></i>
+                      Mô tả  <span class="text-danger">*</span>
+                    </th>
+
+                    <th class="text-center pe-4" style="width: 60px;">
+                      <i class="fas fa-cog text-muted"></i>
+                    </th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr v-for="(room, index) in form.rooms" :key="room.id || index" class="room-row">
+                    <td class="ps-4">
+                      <input
+                        type="text"
+                        list="roomTypeList"
+                        class="form-control form-control-sm"
+                        v-model.trim="room.loaiPhong"
+                        placeholder="Phòng ngủ, phòng khách..."
+                      />
+
+                      <datalist id="roomTypeList">
+                        <option value="Phòng ngủ" />
+                        <option value="Nhà vệ sinh" />
+                        <option value="Phòng khách" />
+                        <option value="Phòng bếp" />
+                        <option value="Phòng ăn" />
+                        <option value="Phòng làm việc" />
+                        <option value="Phòng đọc sách" />
+                        <option value="Phòng thờ" />
+                        <option value="Kho" />
+                        <option value="Sân thượng" />
+                      </datalist>
+                    </td>
+                    <td class="text-center">
+                      <input
+                        type="number"
+                        min="0"
+                        class="form-control form-control-sm w-full"
+                        v-model.number="room.soLuong"
+                        placeholder="Số lượng phòng tương đồng"
+                      />
+                    </td>
+                    <td class="text-center">
+                      <div class="input-group input-group-sm">
+                        <input type="number" min="0" step="0.01" class="form-control form-control-sm w-full" v-model.number="room.dienTich"
+                               placeholder="Diện tích mỗi phòng">
+                        <span class="input-group-text"><i class="fas fa-ruler-combined"></i></span>
+                      </div>
+                    </td>
+                    <td>
+                      <input type="text" class="form-control form-control-sm" v-model.trim="room.moTa" placeholder="Ghi chú về phòng">
+                    </td>
+                    <td class="text-center pe-4">
+                      <button type="button" class="btn btn-sm btn-outline-danger" @click="removeRoom(index)" :disabled="form.rooms.length === 1">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr v-if="form.rooms.length === 0">
+                    <td colspan="5" class="text-center py-4 text-muted">
+                      <i class="fas fa-door-closed me-2"></i>Chưa có phòng nào được thêm
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+                <div v-if="errors.rooms" class="text-danger small mt-2">{{ errors.rooms }}</div>
               </div>
             </section>
           </div>
@@ -610,6 +878,18 @@
               <div class="owner-mode-switch mb-4">
                 <div class="form-check">
                   <input
+                      id="owner-nonsystem"
+                      v-model="ownerMode"
+                      class="form-check-input"
+                      type="radio"
+                      value="nonSystem"
+                  />
+                  <label class="form-check-label fw-semibold" for="owner-nonsystem">
+                    Chủ tài sản không sử dụng hệ thống
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input
                     id="owner-system"
                     v-model="ownerMode"
                     class="form-check-input"
@@ -620,18 +900,7 @@
                     Chủ tài sản có sử dụng hệ thống
                   </label>
                 </div>
-                <div class="form-check">
-                  <input
-                    id="owner-nonsystem"
-                    v-model="ownerMode"
-                    class="form-check-input"
-                    type="radio"
-                    value="nonSystem"
-                  />
-                  <label class="form-check-label fw-semibold" for="owner-nonsystem">
-                    Chủ tài sản không sử dụng hệ thống
-                  </label>
-                </div>
+
               </div>
 
               <div v-if="isSystemOwnerMode" class="owner-mode-card">
@@ -1003,6 +1272,7 @@ const form = reactive({
   nguoiBanTen: '',
   nguoiBanSearch: '',
   giaBanThanhCong: null,
+  ngayBan: '',
   files: [],
   newFiles: [],
   newLandBookFiles: [],
@@ -1013,14 +1283,14 @@ const form = reactive({
 const errors = reactive({})
 const ownerSearch = ref('')
 const ownerLookupMessage = ref('')
-const ownerMode = ref('system')
+const ownerMode = ref('nonSystem')
 const managerSearch = ref('')
 const managerLookupMessage = ref('')
 const managerInfo = reactive({
   fullName: '',
   phone: '',
 })
-const nonSystemOwnerOption = ref('existing')
+const nonSystemOwnerOption = ref('new')
 const nonSystemOwnerSearch = ref('')
 const nonSystemLookupMessage = ref('')
 const nonSystemExistingOwner = ref(null)
@@ -1148,6 +1418,7 @@ watch(() => form.status, (newStatus) => {
     form.nguoiBanTen = ''
     form.nguoiBanSearch = ''
     form.giaBanThanhCong = null
+    form.ngayBan = ''
   }
 })
 
@@ -1224,6 +1495,16 @@ const formatMoneyVN = (value) => {
 
   const ty = num / 1_000_000_000
   return `${ty.toFixed(ty % 1 === 0 ? 0 : 2)} tỷ`
+}
+
+const formatDateForInput = (value) => {
+  if (!value) return ''
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value
+  }
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return ''
+  return parsed.toISOString().slice(0, 10)
 }
 
 const clearErrors = (fields) => {
@@ -1333,6 +1614,7 @@ const validateTab = (tabId) => {
       'structure',
       'nguoiBanSearch',
       'giaBanThanhCong',
+      'ngayBan',
     ])
     track(requireTextField(form.plotNumber, 'plotNumber', 'Nhập số thửa'))
     track(requireTextField(form.parcelNumber, 'parcelNumber', 'Nhập số tờ'))
@@ -1355,6 +1637,10 @@ const validateTab = (tabId) => {
       }
       if (!form.giaBanThanhCong || form.giaBanThanhCong <= 0) {
         errors.giaBanThanhCong = 'Nhập giá bán thành công'
+        isValid = false
+      }
+      if (!form.ngayBan) {
+        errors.ngayBan = 'Nhập ngày bán'
         isValid = false
       }
     }
@@ -1454,6 +1740,7 @@ const tabFieldMap = {
     'structure',
     'nguoiBanSearch',
     'giaBanThanhCong',
+    'ngayBan',
   ],
   house: [
     'floorArea',
@@ -1548,6 +1835,11 @@ const validateForm = () => {
       errors.giaBanThanhCong = 'Nhập giá bán thành công'
       isValid = false
     }
+
+    if (!form.ngayBan) {
+      errors.ngayBan = 'Nhập ngày bán'
+      isValid = false
+    }
   }
 
   if (isHouse.value) {
@@ -1610,11 +1902,15 @@ const isValidVietnamPhone = (phone) => {
   return /^(0|\+84)[3|5|7|8|9]\d{8}$/.test(cleaned)
 }
 
-const handleOwnerLookup = async () => {
-  ownerLookupMessage.value = ''
+const handleOwnerLookup = async ({ silent = false } = {}) => {
+  if (!silent) {
+    ownerLookupMessage.value = ''
+  }
   if (!isSystemOwnerMode.value) return
   if (!ownerSearch.value) {
-    errors.ownerSearch = 'Nhập phone hoặc email để tìm kiếm'
+    if (!silent) {
+      errors.ownerSearch = 'Nhập phone hoặc email để tìm kiếm'
+    }
     return
   }
   errors.ownerSearch = ''
@@ -1636,7 +1932,7 @@ const handleOwnerLookup = async () => {
       form.ownerOldAddress = data.oldAddress || ''
 
       // 🔴 CHỐT: chỉ show message khi KHÔNG hydrate
-      if (!isHydrating.value) {
+      if (!silent && !isHydrating.value) {
         ownerLookupMessage.value = 'Tìm thấy chủ tài sản thành công'
       }
     } else {
@@ -1654,10 +1950,14 @@ const handleOwnerLookup = async () => {
   }
 }
 
-const handleManagerLookup = async () => {
-  managerLookupMessage.value = ''
+const handleManagerLookup = async ({ silent = false } = {}) => {
+  if (!silent) {
+    managerLookupMessage.value = ''
+  }
   if (!managerSearch.value) {
-    errors.managerSearch = 'Nhập phone hoặc email để tìm kiếm'
+    if (!silent) {
+      errors.managerSearch = 'Nhập phone hoặc email để tìm kiếm'
+    }
     return
   }
   errors.managerSearch = ''
@@ -1675,7 +1975,7 @@ const handleManagerLookup = async () => {
       managerInfo.fullName = data.fullName
       managerInfo.phone = data.phone
 
-      if (!isHydrating.value) {
+      if (!silent && !isHydrating.value) {
         managerLookupMessage.value = 'Tìm thấy người quản lý thành công'
       }
     } else {
@@ -1693,16 +1993,22 @@ const handleManagerLookup = async () => {
   }
 }
 
-const handleNonSystemOwnerLookup = async () => {
-  nonSystemLookupMessage.value = ''
+const handleNonSystemOwnerLookup = async ({ silent = false } = {}) => {
+  if (!silent) {
+    nonSystemLookupMessage.value = ''
+  }
   nonSystemExistingOwner.value = null
   const phone = nonSystemOwnerSearch.value.trim()
   if (!phone) {
-    errors.nonSystemOwnerSearch = 'Nhập số điện thoại để tìm kiếm'
+    if (!silent) {
+      errors.nonSystemOwnerSearch = 'Nhập số điện thoại để tìm kiếm'
+    }
     return
   }
   if (!/^[0-9]{9,11}$/.test(phone.replace(/\s+/g, ''))) {
-    errors.nonSystemOwnerSearch = 'Số điện thoại không hợp lệ'
+    if (!silent) {
+      errors.nonSystemOwnerSearch = 'Số điện thoại không hợp lệ'
+    }
     return
   }
   errors.nonSystemOwnerSearch = ''
@@ -1718,7 +2024,9 @@ const handleNonSystemOwnerLookup = async () => {
       form.ownerGender = data.gender ?? null
       form.ownerNewAddress = data.newAddress || ''
       form.ownerOldAddress = data.oldAddress || ''
-      nonSystemLookupMessage.value = 'Tìm thấy chủ tài sản thành công'
+      if (!silent) {
+        nonSystemLookupMessage.value = 'Tìm thấy chủ tài sản thành công'
+      }
     } else {
       form.ownerId = null
       form.ownerFullName = ''
@@ -1730,9 +2038,11 @@ const handleNonSystemOwnerLookup = async () => {
   }
 }
 
-const handleNguoiBanLookup = async () => {
+const handleNguoiBanLookup = async ({ silent = false } = {}) => {
   if (!form.nguoiBanSearch) {
-    errors.nguoiBanSearch = 'Nhập email hoặc số điện thoại'
+    if (!silent) {
+      errors.nguoiBanSearch = 'Nhập email hoặc số điện thoại'
+    }
     return
   }
 
@@ -1761,6 +2071,12 @@ const handleNguoiBanLookup = async () => {
 
 const hydrateForm = (data) => {
   isHydrating.value = true
+  const sellerSearch =
+    data.nguoiBanEmail ||
+    data.emailNguoiBan ||
+    data.nguoiBanSearch ||
+    data.sellerEmail ||
+    ''
   Object.assign(form, {
     ...data,
     ownerFullName: data.ownerFullName || data.ownerName || '',
@@ -1772,6 +2088,8 @@ const hydrateForm = (data) => {
     ownerOldAddress: data.ownerOldAddress || '',
     moTaNgan: data.moTaNgan || '',
     rooms: data.rooms && data.rooms.length ? data.rooms : [defaultRoom()],
+    nguoiBanSearch: sellerSearch || data.nguoiBanSearch || '',
+    ngayBan: formatDateForInput(data.ngayBan),
     files: data.files || [],
     newFiles: [],
     newLandBookFiles: [],
@@ -1805,10 +2123,10 @@ const prefillOwnerAndManager = async () => {
   if (ownerPhone) {
     if (form.ownerMode === 'system') {
       ownerSearch.value = ownerPhone
-      await handleOwnerLookup()
+      await handleOwnerLookup({ silent: true })
     } else if (form.ownerMode === 'nonSystem' && form.ownerOption === 'existing') {
       nonSystemOwnerSearch.value = ownerPhone
-      await handleNonSystemOwnerLookup()
+      await handleNonSystemOwnerLookup({ silent: true })
     }
   }
 
@@ -1822,8 +2140,15 @@ const prefillOwnerAndManager = async () => {
 
   if (managerPhone) {
     managerSearch.value = managerPhone
-    await handleManagerLookup()
+    await handleManagerLookup({ silent: true })
   }
+}
+
+const prefillSeller = async () => {
+  if (form.status !== 'Đã bán') return
+  const sellerSearch = (form.nguoiBanSearch || '').trim()
+  if (!sellerSearch) return
+  await handleNguoiBanLookup({ silent: true })
 }
 
 const loadAssetDetail = async () => {
@@ -1832,21 +2157,33 @@ const loadAssetDetail = async () => {
     asset.value = res.data
     hydrateForm(asset.value)
     await prefillOwnerAndManager()
+    await prefillSeller()
   } catch (error) {
     updateAlertError('Không thể tải dữ liệu tài sản!')
   }
 }
 
-const resetForm = () => {
-  if (confirm('Bạn có chắc muốn đặt lại tất cả thay đổi?')) {
-    if (asset.value) {
-      hydrateForm(asset.value)
-      prefillOwnerAndManager()
-    }
-    activeTab.value = 'basic'
-    Object.keys(errors).forEach((k) => (errors[k] = ''))
-  }
+import { confirmYesNo } from "../../assets/js/alertService.js";
+
+const resetForm = async () => {
+  await confirmYesNo(
+      'Xác nhận đặt lại',
+      'Bạn có chắc muốn <b>đặt lại tất cả thay đổi</b>?',
+      () => {
+        if (asset.value) {
+          hydrateForm(asset.value)
+          prefillOwnerAndManager()
+        }
+
+        activeTab.value = 'basic'
+
+        Object.keys(errors).forEach(k => {
+          errors[k] = ''
+        })
+      }
+  )
 }
+
 
 const buildFormData = () => {
   const dto = {
