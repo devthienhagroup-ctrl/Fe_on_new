@@ -77,6 +77,18 @@ const menuItems = ref([
     label: "Hỗ trợ",
     icon: "fa-solid fa-headset",
     link: "/ho-tro"
+  },
+  {
+    label: "Lời đề nghị của bạn",
+    icon: "fa-solid fa-handshake",
+    link: "/loi-de-nghi",
+    notParentRoute: true
+  },
+  {
+    label: "Sản phẩm của bạn",
+    icon: "fa-solid fa-boxes-stacked",
+    link: "/san-pham-cua-ban",
+    notParentRoute: true
   }
 
 ])

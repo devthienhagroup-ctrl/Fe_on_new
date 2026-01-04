@@ -12,7 +12,7 @@
           </button>
 
           <div class="property-title-section">
-            <h1 class="property-address">{{ formatAddress( asset.address ) ?? 'Chưa cập nhật' }}</h1>
+            <h1 class="property-address">{{   buildSeoTitle( asset ) ?? 'Chưa cập nhật' }}</h1>
 
             <div class="property-meta">
                 <span class="meta-item">
@@ -46,13 +46,25 @@
                   <span>Ấn phẩm dành cho môi giới</span>
                 </div>
                 <div class="press-time">
-                  <i class="fa-regular fa-clock"></i>
+                  <DotLottieVue
+                      src="https://lottie.host/61153ea4-8b80-495a-a839-ab5f1ce029e6/dJBFFfgOe4.lottie"
+                      autoplay
+                      loop
+                      style="
+                            width: 40px;
+                            height: 40px;
+                            display: inline-block;
+                            vertical-align: bottom;
+                          "
+                  />
                   <span>Tin nhanh | Cập nhật mới nhất</span>
                 </div>
               </div>
 
               <p class="press-lede">
                 {{ formatAddress(asset.address) ?? 'Chưa cập nhật' }} đang mở chào bán với mức giá cạnh tranh, pháp lý minh bạch và quỹ hoa hồng hấp dẫn. Mọi thông tin được biên tập theo định dạng tạp chí để anh/chị môi giới dễ tư vấn và chốt khách.
+              </p>
+              <p class="press-lede" v-html="asset.moTaNgan">
               </p>
               <div class="commission-spotlight">
                 <div class="spotlight-badge">
@@ -696,6 +708,45 @@ function formatAddress(address) {
   return address.replace(/\/!!/g, ", ");
 }
 
+function formatAddressFromItem(item) {
+  if (!item || !item.address) return ''
+  return item.address.replace(/\/!!/g, ', ')
+}
+
+function mapLoaiMH(code) {
+  switch (code) {
+    case 'BN30N':
+      return 'Bán nhanh 30 ngày'
+    case 'HOPTAC':
+      return 'Hợp tác phân phối'
+    case 'HTT':
+      return 'Hàng thị trường'
+    default:
+      return 'Bất động sản'
+  }
+}
+function buildSeoTitle(item) {
+  if (!item) return ''
+
+  const loaiMH = mapLoaiMH(item.phanLoaiHang)
+  const loaiTaiSan = item.loaiTaiSan === 'NHA'
+      ? 'Nhà đất'
+      : 'Bất động sản'
+
+  // Cắt địa chỉ để lấy phường + tỉnh
+  const parts = item.address?.split('/!!') || []
+  const phuong = parts[1] || ''
+  const tinh = parts[2] || item.khuVucMa || ''
+
+  const dienTich = item.totalArea
+      ? `${Math.floor(item.totalArea)}m²`
+      : ''
+
+  return `${loaiMH} ${loaiTaiSan} ${dienTich} tại ${phuong} ${tinh} | Thiên Hà Group`
+      .replace(/\s+/g, ' ')
+      .trim()
+}
+
 
 function formatMoneyVN(value) {
   if (value == null || isNaN(value)) return "0";
@@ -779,6 +830,7 @@ const formatWard = (addressDetail) => {
   return ward;
 };
 import { useAuthStore } from "/src/stores/authStore.js";
+import {handleServiceUsageResponse, showCenterSuccess} from "../../assets/js/alertService.js";
 const authStore = useAuthStore();
 const auth = useAuthStore();
 
@@ -801,14 +853,21 @@ async function handleUnlock(asset) {
     // Gọi API kiểm tra có được unlock không
     const res = await api.get(`/thg.user/my-land/checkout/check/${asset.id}`);
 
-    if (res?.data?.unlocked === true) {
-      // ✅ Nếu đã được mở khóa → reload trang
-      location.reload();
-    } else {
-      // ❌ Chưa đủ điều kiện → lưu vào localStorage và chuyển qua thanh toán
-      localStorage.setItem("landAssetId", asset.id);
-      router.push("/thanh-toan-san-pham");
-    }
+    const ok = handleServiceUsageResponse(res.data, {
+      router, // 👈 TRUYỀN ROUTER VÀO
+      onContinue: () => {
+        localStorage.setItem("landAssetId", asset.id);
+        router.push("/thanh-toan-san-pham");
+      }
+    })
+
+
+    if(!ok)
+      return;
+
+    showCenterSuccess("Mở khóa sản phẩm thành công!")
+    location.reload();
+
   } catch (e) {
     console.error("❌ Lỗi khi gọi API kiểm tra mở khóa", e);
   }

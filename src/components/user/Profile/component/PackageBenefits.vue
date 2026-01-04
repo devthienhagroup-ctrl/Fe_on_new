@@ -1,37 +1,33 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 // Dữ liệu gói dịch vụ
 const servicePackage = ref({
-  name: 'Gói VIP',
-  startDate: '2024-01-01',
-  endDate: '2024-12-31',
-  remainingDays: 45
 })
 
 // Dữ liệu dịch vụ còn lại
 const remainingServices = ref([
-  { id: 1, name: 'Tư vấn pháp lý', used: 2, total: 5 },
-  { id: 2, name: 'Định giá bất động sản', used: 1, total: 3 },
-  { id: 3, name: 'Chụp ảnh chuyên nghiệp', used: 0, total: 2 },
-  { id: 4, name: 'Quảng cáo đa kênh', used: 1, total: 4 },
-  { id: 5, name: 'Hỗ trợ đăng tin', used: 3, total: 6 }
 ])
 
-// Dữ liệu lịch sử sử dụng
-const serviceHistory = ref([
-  { id: 1, serviceName: 'Tư vấn pháp lý', date: '2024-05-15', details: 'Tư vấn hợp đồng mua bán' },
-  { id: 2, serviceName: 'Định giá bất động sản', date: '2024-05-10', details: 'Định giá căn hộ chung cư' },
-  { id: 3, serviceName: 'Quảng cáo đa kênh', date: '2024-05-08', details: 'Đăng tin trên 5 nền tảng' },
-  { id: 4, serviceName: 'Hỗ trợ đăng tin', date: '2024-05-05', details: 'Viết mô tả và đăng tin' },
-  { id: 5, serviceName: 'Tư vấn pháp lý', date: '2024-04-20', details: 'Tư vấn thủ tục sang tên' },
-  { id: 6, serviceName: 'Chụp ảnh chuyên nghiệp', date: '2024-04-15', details: 'Chụp ảnh căn hộ 2 phòng ngủ' },
-  { id: 7, serviceName: 'Hỗ trợ đăng tin', date: '2024-04-10', details: 'Chỉnh sửa và tối ưu tin đăng' },
-  { id: 8, serviceName: 'Định giá bất động sản', date: '2024-04-05', details: 'Định giá nhà phố mặt tiền' },
-  { id: 9, serviceName: 'Quảng cáo đa kênh', date: '2024-03-28', details: 'Quảng cáo trên 3 nền tảng' },
-  { id: 10, serviceName: 'Hỗ trợ đăng tin', date: '2024-03-20', details: 'Đăng tin cho nhà cho thuê' }
-])
+import api  from "../../../../api/api.js";
+const loadServiceOverview = async () => {
+  try {
+    const res = await api.get('/profile/overview');
+        // hoặc: getServiceOverview()
 
+
+    const data = res.data
+
+    servicePackage.value = data.servicePackage
+    remainingServices.value = data.remainingServices
+
+  } catch (e) {
+    console.error(e)
+  }
+}
+onMounted(() => {
+  loadServiceOverview()
+})
 // Phân trang
 const currentPage = ref(1)
 const itemsPerPage = 5
@@ -95,7 +91,7 @@ const getUsageColor = (used, total) => {
 
           </div>
           <div class="package-details">
-            <h2 class="package-name">{{ servicePackage.name }}</h2>
+            <h2 class="package-name"> Gói {{ servicePackage.name }}</h2>
             <div class="package-period">
               <span class="period-label">Thời gian còn lại:</span>
               <span class="remaining-days">{{ servicePackage.remainingDays }} ngày</span>
@@ -135,10 +131,11 @@ const getUsageColor = (used, total) => {
                 <i class="fas fa-home"></i>
                 {{ service.name }}
               </td>
-              <td class="text-center">{{ service.used }}/{{ service.total }}</td>
-              <td class="text-center">{{ service.total - service.used }}</td>
+              <td class="text-start ps-4">{{ service.used }}/{{ service.total == null ? 'Không giới hạn': service.total }}</td>
+              <td class="text-start ps-4">{{ service.total === null ? 'Không giới hạn' : service.total - service.used }}</td>
               <td>
-                <div class="progress-container">
+                <div v-if="service.total == null"> Không giới hạn </div>
+                <div v-else class="progress-container">
                   <div
                       class="progress-bar"
                       :style="{
@@ -158,84 +155,13 @@ const getUsageColor = (used, total) => {
       </div>
 
       <!-- Đường phân cách -->
-      <div class="divider"></div>
-
-      <!-- Lịch sử sử dụng dịch vụ -->
-      <div class="history-section">
-        <h3 class="section-title">
-          <i class="fas fa-history"></i>
-          Lịch sử sử dụng dịch vụ
-        </h3>
-
-        <div class="table-container">
-          <table class="history-table">
-            <thead>
-            <tr>
-              <th>STT</th>
-              <th>Tên dịch vụ</th>
-              <th>Ngày tháng sử dụng</th>
-              <th>Chi tiết</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="(history, index) in paginatedHistory" :key="history.id">
-              <td class="text-center">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
-              <td class="service-name">
-                <i class="fas fa-building"></i>
-                {{ history.serviceName }}
-              </td>
-              <td class="text-center">{{ formatDate(history.date) }}</td>
-              <td class="text-center">
-                <button class="detail-btn">
-                  <i class="fas fa-eye"></i>
-                  Xem chi tiết
-                </button>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Phân trang -->
-        <div class="pagination">
-          <button
-              class="pagination-btn"
-              :disabled="currentPage === 1"
-              @click="goToPage(currentPage - 1)"
-          >
-            <i class="fas fa-chevron-left"></i>
-            Trước
-          </button>
-
-          <div class="page-numbers">
-            <button
-                v-for="page in totalPages"
-                :key="page"
-                class="page-btn"
-                :class="{ active: page === currentPage }"
-                @click="goToPage(page)"
-            >
-              {{ page }}
-            </button>
-          </div>
-
-          <button
-              class="pagination-btn"
-              :disabled="currentPage === totalPages"
-              @click="goToPage(currentPage + 1)"
-          >
-            Sau
-            <i class="fas fa-chevron-right"></i>
-          </button>
-        </div>
-      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .benefits-container {
-  font-family: 'Ubuntu', sans-serif;
+
 }
 
 .security-header {

@@ -169,7 +169,7 @@ const supportSections = [
 .support-container {
   width: 95%;
   height: 100%;
-  font-family: 'Ubuntu', sans-serif;
+
   padding: 20px;
   box-sizing: border-box;
   margin: 0 auto;

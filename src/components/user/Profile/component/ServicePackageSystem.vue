@@ -33,13 +33,15 @@
 
               <div class="price-section">
                 <div class="price">{{ formatPrice(packageItem.price) }}</div>
-                <div class="duration">/ {{ packageItem.unit }}</div>
+                <div class="duration">/ {{ packageItem.unit }} <span class="fs-6" v-if="packageItem.tuDongGiaHan != null">
+                  ( {{ packageItem.tuDongGiaHan ? 'Gia hạn tự động':'Đã hủy' }})
+                </span> </div>
               </div>
 
               <div class="divider"></div>
 
               <div class="description-section">
-                <p class="description">{{ packageItem.description }}</p>
+                <p v-html="packageItem.description" class="description"></p>
               </div>
 
               <div class="button-section">
@@ -49,6 +51,7 @@
                     packageItem.isActive ? 'current-package' : 'upgrade'
                   ]"
                     :disabled="packageItem.isActive"
+                    @click="registerOrUpgradePackage(packageItem)"
                 >
                   {{ packageItem.buttonText }}
                 </button>
@@ -66,18 +69,29 @@
                   <div
                       v-for="(detail, index) in packageItem.details"
                       :key="index"
-                      class="detail-item"
+                      class="detail-item d-flex align-items-start gap-2 text-blue-dark"
                   >
-                    <i :class="detail.icon"></i>
-                    <span>{{ detail.text }}</span>
+                    <!-- ICON -->
+                    <i class="fa-solid fa-plus mt-1"></i>
+
+                    <!-- TEXT -->
+                    <span class="fw-semibold">
+        {{ detail.text }}
+      </span>
+
+                    <!-- SỐ LƯỢT (CĂN PHẢI + IN ĐẬM + CÓ MÀU) -->
+                    <span class="ms-auto fw-bold text-primary">
+                      {{ detail.soLuot === null ? 'Không giới hạn':  detail.soLuot + ' lượt'}}
+                    </span>
                   </div>
                 </div>
               </div>
+
             </transition>
           </div>
         </div>
       </div>
-      <AdditionalServices></AdditionalServices>
+      <AdditionalServices @cancel-package="fetchServicePackages" ></AdditionalServices>
       <!-- Call to Action Section -->
       <div class="cta-section">
         <h2 class="cta-title">Sẵn sàng nâng tầm hoạt động kinh doanh của bạn?</h2>
@@ -94,164 +108,142 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
 import AdditionalServices from "./AdditionalServices.vue";
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import api from '/src/api/api.js'   // dùng axios instance của bạn
 
 const route = useRoute()
 
-// Check if hideHeader is true in route meta
+// ===== HIDE HEADER =====
 const hideHeader = computed(() => {
   return route.meta?.hideHeader === true
 })
 
-const servicePackages = ref([
-  {
-    id: 1,
-    name: "Gói dùng thử",
-    price: 0,
-    unit: "tháng",
-    icon: "fa-regular fa-star",
-    description: "Trải nghiệm miễn phí các tính năng cơ bản — đăng tin, xem danh sách và làm quen với nền tảng. Gói này phù hợp cho những người mới bắt đầu muốn khám phá các tính năng cơ bản của nền tảng.",
-    buttonText: "Gói hiện tại của bạn",
-    isActive: true,
-    showDetails: false,
-    details: [
-      { icon: "fa-solid fa-bullhorn", text: "Đăng tối đa 3 tin bất động sản miễn phí" },
-      { icon: "fa-regular fa-eye", text: "Hiển thị tin ở mức cơ bản" },
-      { icon: "fa-solid fa-user", text: "Xem thông tin của 5 khách hàng đầu tiên" },
-      { icon: "fa-solid fa-magnifying-glass", text: "Truy cập bộ lọc tìm kiếm cơ bản" },
-      { icon: "fa-solid fa-mobile", text: "Ứng dụng di động miễn phí" },
-      { icon: "fa-solid fa-envelope", text: "Hỗ trợ email trong 24h" }
-    ]
-  },
-  {
-    id: 2,
-    name: "Gói nâng cao",
-    price: 199000,
-    unit: "tháng",
-    icon: "fa-solid fa-rocket",
-    description: "Mở rộng quyền truy cập với nhiều lượt đăng tin hơn, ưu tiên hiển thị và thêm công cụ quản lý tin đăng hiệu quả. Phù hợp cho các cá nhân kinh doanh nhỏ.",
-    buttonText: "Nâng cấp ngay!",
-    isActive: false,
-    showDetails: false,
-    details: [
-      { icon: "fa-solid fa-clipboard-list", text: "Đăng tối đa 20 tin/tháng" },
-      { icon: "fa-solid fa-star", text: "Ưu tiên hiển thị trong kết quả tìm kiếm" },
-      { icon: "fa-solid fa-chart-line", text: "Thống kê lượt xem tin đăng" },
-      { icon: "fa-solid fa-pen-to-square", text: "Chỉnh sửa và làm mới tin dễ dàng" },
-      { icon: "fa-solid fa-headset", text: "Hỗ trợ kỹ thuật nhanh chóng" },
-      { icon: "fa-solid fa-image", text: "Tải lên hình ảnh chất lượng cao" },
-      { icon: "fa-solid fa-share", text: "Chia sẻ tin đăng lên mạng xã hội" }
-    ]
-  },
-  {
-    id: 3,
-    name: "Gói Pro",
-    price: 299000,
-    unit: "tháng",
-    icon: "fa-solid fa-briefcase",
-    description: "Dành cho môi giới chuyên nghiệp, hỗ trợ đăng tin không giới hạn, phân tích lượt xem và tiếp cận khách hàng tiềm năng nhanh hơn. Bao gồm tất cả tính năng của gói nâng cao và nhiều hơn nữa.",
-    buttonText: "Nâng cấp ngay!",
-    isActive: false,
-    showDetails: false,
-    details: [
-      { icon: "fa-solid fa-infinity", text: "Đăng tin không giới hạn" },
-      { icon: "fa-solid fa-rectangle-ad", text: "Đặt banner nổi bật trên trang chủ" },
-      { icon: "fa-solid fa-chart-column", text: "Thống kê chi tiết lượt xem & tương tác" },
-      { icon: "fa-solid fa-arrows-rotate", text: "Tự động làm mới tin mỗi ngày" },
-      { icon: "fa-brands fa-facebook", text: "Quảng cáo trên mạng xã hội" },
-      { icon: "fa-solid fa-headset", text: "Hỗ trợ kỹ thuật 24/7" },
-      { icon: "fa-solid fa-download", text: "Xuất báo cáo định kỳ" },
-      { icon: "fa-solid fa-users", text: "Quản lý nhiều tài khoản con" }
-    ]
-  },
-  {
-    id: 4,
-    name: "Gói Premium",
-    price: 449000,
-    unit: "tháng",
-    icon: "fa-solid fa-gem",
-    description: "Trải nghiệm toàn bộ tính năng cao cấp — hiển thị nổi bật, báo cáo hiệu suất chi tiết, hỗ trợ thương hiệu cá nhân và chăm sóc khách hàng riêng. Giải pháp toàn diện cho doanh nghiệp lớn.",
-    buttonText: "Nâng cấp ngay!",
-    isActive: false,
-    showDetails: false,
-    details: [
-      { icon: "fa-solid fa-layer-group", text: "Bao gồm mọi tính năng của Gói Pro" },
-      { icon: "fa-solid fa-trophy", text: "Hiển thị top đầu trong kết quả tìm kiếm" },
-      { icon: "fa-solid fa-chart-pie", text: "Báo cáo phân tích chuyên sâu hiệu quả tin đăng" },
-      { icon: "fa-solid fa-user-tie", text: "Xây dựng thương hiệu cá nhân/doanh nghiệp" },
-      { icon: "fa-solid fa-handshake", text: "Chăm sóc khách hàng riêng 1-1" },
-      { icon: "fa-solid fa-headset", text: "Hỗ trợ kỹ thuật 24/7" },
-      { icon: "fa-solid fa-comments-dollar", text: "Tư vấn chiến lược marketing bất động sản" },
-      { icon: "fa-solid fa-gem", text: "Badge Premium trên hồ sơ" },
-      { icon: "fa-solid fa-video", text: "Hỗ trợ video call tư vấn" }
-    ]
-  },
-  {
-    id: 5,
-    name: "Gói Pro",
-    price: 299000,
-    unit: "tháng",
-    icon: "fa-solid fa-briefcase",
-    description: "Dành cho môi giới chuyên nghiệp, hỗ trợ đăng tin không giới hạn, phân tích lượt xem và tiếp cận khách hàng tiềm năng nhanh hơn. Bao gồm tất cả tính năng của gói nâng cao và nhiều hơn nữa.",
-    buttonText: "Nâng cấp ngay!",
-    isActive: false,
-    showDetails: false,
-    details: [
-      { icon: "fa-solid fa-infinity", text: "Đăng tin không giới hạn" },
-      { icon: "fa-solid fa-rectangle-ad", text: "Đặt banner nổi bật trên trang chủ" },
-      { icon: "fa-solid fa-chart-column", text: "Thống kê chi tiết lượt xem & tương tác" },
-      { icon: "fa-solid fa-arrows-rotate", text: "Tự động làm mới tin mỗi ngày" },
-      { icon: "fa-brands fa-facebook", text: "Quảng cáo trên mạng xã hội" },
-      { icon: "fa-solid fa-headset", text: "Hỗ trợ kỹ thuật 24/7" },
-      { icon: "fa-solid fa-download", text: "Xuất báo cáo định kỳ" },
-      { icon: "fa-solid fa-users", text: "Quản lý nhiều tài khoản con" }
-    ]
-  },
-  {
-    id: 6,
-    name: "Gói Premium",
-    price: 449000,
-    unit: "tháng",
-    icon: "fa-solid fa-gem",
-    description: "Trải nghiệm toàn bộ tính năng cao cấp — hiển thị nổi bật, báo cáo hiệu suất chi tiết, hỗ trợ thương hiệu cá nhân và chăm sóc khách hàng riêng. Giải pháp toàn diện cho doanh nghiệp lớn.",
-    buttonText: "Nâng cấp ngay!",
-    isActive: false,
-    showDetails: false,
-    details: [
-      { icon: "fa-solid fa-layer-group", text: "Bao gồm mọi tính năng của Gói Pro" },
-      { icon: "fa-solid fa-trophy", text: "Hiển thị top đầu trong kết quả tìm kiếm" },
-      { icon: "fa-solid fa-chart-pie", text: "Báo cáo phân tích chuyên sâu hiệu quả tin đăng" },
-      { icon: "fa-solid fa-user-tie", text: "Xây dựng thương hiệu cá nhân/doanh nghiệp" },
-      { icon: "fa-solid fa-handshake", text: "Chăm sóc khách hàng riêng 1-1" },
-      { icon: "fa-solid fa-headset", text: "Hỗ trợ kỹ thuật 24/7" },
-      { icon: "fa-solid fa-comments-dollar", text: "Tư vấn chiến lược marketing bất động sản" },
-      { icon: "fa-solid fa-gem", text: "Badge Premium trên hồ sơ" },
-      { icon: "fa-solid fa-video", text: "Hỗ trợ video call tư vấn" }
-    ]
-  }
-])
+// ===== DATA =====
+const servicePackages = ref([])
+const loading = ref(false)
+const error = ref(null)
 
+// ===== FETCH API =====
+const fetchServicePackages = async () => {
+  loading.value = true
+  error.value = null
+
+  try {
+    const res = await api.get('/api/service-packages')
+    servicePackages.value = res.data
+  } catch (e) {
+    console.error(e)
+    error.value = 'Không thể tải danh sách gói dịch vụ'
+  } finally {
+    loading.value = false
+  }
+}
+
+// ===== TOGGLE DETAILS =====
 const toggleDetails = (packageId) => {
-  // Mở/đóng card được click
   const packageItem = servicePackages.value.find(p => p.id === packageId)
   if (packageItem) {
     packageItem.showDetails = !packageItem.showDetails
   }
 }
 
+// ===== FORMAT PRICE =====
 const formatPrice = (price) => {
   if (price === 0) return 'Miễn phí'
   return price.toLocaleString('vi-VN')
 }
+
+// ===== INIT =====
+onMounted(() => {
+  fetchServicePackages()
+})
+
+import {
+  confirmYesNo,
+  showLoading,
+  updateAlertSuccess,
+  updateAlertError
+} from '/src/assets/js/alertService.js'
+
+const registerOrUpgradePackage = async (packageItem) => {
+  confirmYesNo(
+      'Xác nhận gói dịch vụ',
+      `
+<div style="text-align:left; font-size:18px; line-height:1.6;">
+  <div style="margin-bottom:6px;">
+    <span style="color:#374151;">Gói:</span>
+    <b style="color:#2563eb;">${packageItem.name}</b>
+  </div>
+
+  <div style="margin-bottom:10px;">
+    <span style="color:#374151;">Giá:</span>
+    <b style="color:#2563eb;">
+      ${formatPrice(packageItem.price)} / ${packageItem.unit}
+    </b>
+  </div>
+
+  <div style="
+    padding:10px 12px;
+    border-radius:8px;
+    background:rgba(37,99,235,0.10);
+    color:#1e3a8a;
+    font-weight:600;
+  ">
+    Bạn có chắc chắn muốn <b>đăng ký / nâng cấp</b> gói này không?
+  </div>
+</div>
+`
+      ,
+      async () => {
+        try {
+          // 🌀 Hiện loading + chờ API xong
+           const  res = await showLoading(
+              api.post(
+                  `/profile/register-or-upgrade/${packageItem.id}`
+              )
+          )
+          const data = res.data
+          console.log(data.success)
+          // ❌ Không đủ tiền / nghiệp vụ fail
+          if (!data.success){
+            updateAlertError('Thất bại', 'Số dư không đủ để đăng ký gói dịch vụ! Vui lòng nạp thêm tiền vào tài khoản và đăng ký lại.')
+            return;
+          }else{
+            updateAlertSuccess(
+                'Thành công 🎉',
+                'Gói dịch vụ đã được kích hoạt'
+            )
+          }
+
+          // ✅ Thành công
+
+
+          // reload lại danh sách gói
+          await fetchServicePackages()
+
+        } catch (e) {
+          console.error(e)
+
+          // ❌ Lỗi
+          updateAlertError(
+              'Thất bại',
+              e?.response?.data || 'Không thể đăng ký gói dịch vụ'
+          )
+        }
+      }
+  )
+}
+
 </script>
+
 
 <style scoped>
 .service-packages-container {
   max-width: 1400px;
   margin: 0 auto;
-  font-family: 'Ubuntu', sans-serif;
+
   position: relative;
 }
 
@@ -756,4 +748,8 @@ const formatPrice = (price) => {
     height: 450px;
   }
 }
+.text-blue-dark {
+  color: #0f172a; /* xanh đen - slate-900 */
+}
+
 </style>

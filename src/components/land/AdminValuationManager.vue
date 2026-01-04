@@ -6,6 +6,14 @@
       </h5>
 
       <div class="d-flex align-items-center justify-content-end gap-2">
+        <button
+            class="header-menu-toggle"
+            title="Ẩn/hiện menu"
+            @click="sidebar.toggle()"
+        >
+          <i class="fa-solid fa-bars"></i>
+          <span class="d-none d-md-inline">Menu</span>
+        </button>
         <NotificationBell/>
         <div class="d-flex flex-column align-items-end text-end">
           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
@@ -1032,8 +1040,10 @@ import { showLoading, updateAlertError, updateAlertSuccess, showSuccess, showWar
 import AddressSelector3 from "./my-valuation/components/AddressSelector3.vue";
 import  api  from "../../api/api.js"
 import { useAuthStore } from "../../stores/authStore.js";
+import { useSidebarStore } from "../../stores/sidebarStore.js";
 const authStore = useAuthStore();
 const info = authStore.userInfo;
+const sidebar = useSidebarStore();
 
 /* ---------------------- Tabs ---------------------- */
 const tabs = [
@@ -2984,5 +2994,27 @@ h6.fw-bold {
   font-size: 13px;
 }
 
+.header-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #cbd5f5;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
 
+.header-menu-toggle:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.header-menu-toggle:active {
+  transform: scale(0.98);
+}
 </style>

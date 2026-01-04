@@ -60,6 +60,14 @@
       </div>
 
       <div class="d-flex align-items-center justify-content-end gap-2">
+        <button
+            class="header-menu-toggle"
+            title="Ẩn/hiện menu"
+            @click="sidebar.toggle()"
+        >
+          <i class="fa-solid fa-bars"></i>
+          <span class="d-none d-md-inline">Menu</span>
+        </button>
         <NotificationBell />
         <div class="d-flex flex-column align-items-end text-end">
           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
@@ -112,7 +120,7 @@
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
           <div class="modal-header bg-white border-0 px-4 py-3">
-            <h5 class="modal-title fw-semibold">Create new to-do item</h5>
+            <h5 class="modal-title fw-semibold">Tạo mới công việc</h5>
             <button type="button" class="btn-close" aria-label="Close" @click="closeModalCreate"></button>
           </div>
           <div class="modal-body bg-light-subtle px-4 py-4">
@@ -308,6 +316,35 @@
                         placeholder="Enter effort points"
                     />
                   </div>
+                  <div class="mb-3 mt-3">
+                    <label class="form-label fw-semibold small">Mức lương</label>
+                    <input
+                        v-model.number="formData.mucLuong"
+                        type="number"
+                        min="0"
+                        class="form-control rounded-3 py-2"
+                        placeholder="Nhập mức lương"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold small">Hạn ứng tuyển</label>
+                    <input
+                        v-model="formData.hanUngTuyen"
+                        type="datetime-local"
+                        class="form-control rounded-3 py-2"
+                    />
+                  </div>
+                  <div class="mb-0">
+                    <label class="form-label fw-semibold small">Cho phép ứng tuyển</label>
+                    <select v-model="formData.choPhepUngTuyen" class="form-select rounded-3 py-2">
+                      <option :value="true">Có</option>
+                      <option :value="false">Không</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-semibold small">Địa chỉ</label>
+                  <Address5 v-model="formData.address" />
                 </div>
               </div>
             </form>
@@ -332,9 +369,12 @@ import AllWorkItemsTab from "./tabs/AllWorkItemsTab.vue";
 import KanbanTab from "./tabs/KanbanTab.vue";
 import SummaryTab from "./tabs/SummaryTab.vue";
 import TimelineTab from "./tabs/TimelineTab.vue";
+import ApplicantsTab from "./tabs/ApplicantsTab.vue";
 import {showLoading, updateAlertSuccess} from "../../assets/js/alertService.js";
 import { useAuthStore } from "../../stores/authStore.js";
+import { useSidebarStore } from "../../stores/sidebarStore.js";
 import DescriptionEditor from "../common/DescriptionEditor.vue";
+import Address5 from "../productAdmin/Address5.vue";
 import { socketService } from "../../services/socketService.js";
 import { SOCKET_CONFIG } from "../../config/socketConfig.js";
 import {
@@ -349,6 +389,7 @@ import NotificationBell from "../NotificationBell.vue";
 const route = useRoute();
 const authStore = useAuthStore();
 const info = authStore.userInfo;
+const sidebar = useSidebarStore();
 
 const canViewTimelineTab = computed(() =>
     authStore.hasProjectPermission("PROJECT_VIEW_TIMELINE") ||
@@ -390,6 +431,7 @@ const rawTabs = [
   { key: "kanban", label: "Kanban", icon: "fa-solid fa-chess-board" },
   { key: "report", label: "Báo cáo", icon: "fa-solid fa-globe" },
   { key: "info", label: "Thông tin", icon: "fa-solid fa-circle-info" },
+  { key: "applicants", label: "Ứng tuyển", icon: "fa-solid fa-user-check" },
 ];
 
 const tabs = computed(() =>
@@ -412,6 +454,7 @@ const componentMap = {
   kanban: KanbanTab,
   report: SummaryTab,
   info: TimelineTab,
+  applicants: ApplicantsTab,
 };
 
 const activeComponent = computed(() => componentMap[activeTab.value] || AllWorkItemsTab);
@@ -457,6 +500,10 @@ const initialFormState = () => ({
   deadline: "",
   type: null,
   effort: null,
+  mucLuong: null,
+  hanUngTuyen: "",
+  choPhepUngTuyen: false,
+  address: "",
   files: [],
 });
 
@@ -701,12 +748,22 @@ async function create(){
   const payload = new FormData();
   payload.append("title", formData.value.title);
   payload.append("description", formData.value.description || "");
-  payload.append("assigneeId", formData.value.assignee?.id ?? null);
-  payload.append("typeAssignee", formData.value.assignee?.type ?? "");
+  if ( formData.value.assigneeId != null) {
+    payload.append("assigneeId",  formData.value.assigneeId);
+  }
+
+  if ( formData.value.typeAssignee != null) {
+    payload.append("typeAssignee",  formData.value.typeAssignee);
+  }
+
   payload.append("startDate", formData.value.startDate ? formData.value.startDate : "");
   payload.append("deadline", formData.value.deadline ? formData.value.deadline : "");
   payload.append("typeId", formData.value.type?.id ?? "");
   payload.append("effort", formData.value.effort ?? "");
+  payload.append("mucLuong", formData.value.mucLuong ?? "");
+  payload.append("hanUngTuyen", formData.value.hanUngTuyen || "");
+  payload.append("choPhepUngTuyen", formData.value.choPhepUngTuyen ?? false);
+  payload.append("address", formData.value.address || "");
   payload.append("projectId", route.params.projectId ?? 0)
 
   formData.value.files.forEach((file) => {
@@ -928,4 +985,27 @@ async function getInfoProject() {
   }
 }
 
+.header-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #cbd5f5;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.header-menu-toggle:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.header-menu-toggle:active {
+  transform: scale(0.98);
+}
 </style>

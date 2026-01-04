@@ -4,7 +4,7 @@ import {useAuthStore} from "../stores/authStore.js";
 import Menu from "../components/Menu.vue";
 import EmployeeManager from "../components/EmployeeManager.vue";
 import DepartmentManager from "../components/DepartmentManager.vue";
-import Project from "../components/Project.vue";// import store Pinia
+import Project from "../components/Project.vue";
 import CreateProject from "../components/CreateProject.vue";
 import WorkItemManager from "../components/work-items/WorkItemManager.vue";
 import TeamManager from "../components/TeamManager.vue";
@@ -121,1116 +121,1226 @@ import SoldProject from "../components/user/SoldProject/SoldProject.vue";
 import InvestmentPayment from "../components/user/Investment/InvestmentPayment.vue";
 import Invested from "../components/user/Investment/Invested/Invested.vue";
 import InvestorManagement from "../components/user/Investment/Invested/InvestorManagement.vue";
+import moigioi from "../components/user/MoiGioi/moigioi.vue";
+import Test from "../components/productAdmin/test.vue";
+import Test1 from "../components/productAdmin/test1.vue";
+import Test3 from "../components/myProduct/test3.vue";
+import productDetailUser from "../components/myProduct/productDetailUser.vue"
+import PaymentQR from "../components/user/Profile/component/PaymentQR.vue";
+import productCreateUser from "../components/productUser/productCreateUser.vue"
+import productUpdate from "../components/productUser/ProductUpdate.vue"
+import RutTienAdmin from "../components/rutTienAdmin.vue";
 
 const routes = [
-        {
-            path: "/-thg/dang-nhap",
-            name: "LoginForm",
-            component: LoginForm,
-        },
-        // {
-        //     path: "/moi-gioi",
-        //     name: "MoiGioiShow",
-        //     component: moigioi,
-        // },
-        {
-            path: "/tin-tuc",
-            name: "News",
-            component: MenuUser,
-            children: [
-                {
-                    path: '',
-                    name: 'news',
-                    component: News
-                },
-                {
-                    path: ':id',
-                    name: 'news-detail',
-                    component: NewsDetail
-                }
-            ]
-        },
-        {
-            path: '/-thg/quan-tri-noi-dung',
-            name: 'cms',
-            component: Menu,
-            meta: {requiresAuth: true, loginFrom: "admin"},
-            children: [
-                {
-                    path: 'trang-chu',
-                    name: 'CMS',
-                    component: cms,
-                    children: [
-                        {
-                            path: 'banner',
-                            name: 'banner',
-                            component: Banner
-                        },
-                        {
-                            path: "thong-ke",
-                            name: "stats",
-                            component: Stats
-                        },
-                        {
-                            path: 'noi-bat',
-                            name: "hero",
-                            component: Hero
-                        },
-                        {
-                            path: 'dich-vu',
-                            name: 'service',
-                            component: Service
-                        },
-                        {
-                            path: 'tong-quan',
-                            name: 'overView',
-                            component: OverView
-                        },
-                        {
-                            path: 'con-so-an-tuong',
-                            name: 'impressiveNumber',
-                            component: ImpressiveNumber
-                        },
-                        {
-                            path: 'du-an-da-ban',
-                            name: 'soldProjects',
-                            component: SoldProjects
-                        },
-                        {
-                            path: 'danh-gia-khach-hang',
-                            name: 'reviews',
-                            component: Reviews
-                        },
-                        {
-                            path: 'danh-gia-he-thong',
-                            name: 'systemEvaluation',
-                            component: SystemEvaluation
-                        },
-                        {
-                            path: 'truyen-thong',
-                            name: 'mediaAboutUs',
-                            component: MediaAboutUs
-                        },
-                        {
-                            path: 'tin-tuc',
-                            name: 'newsEditor',
-                            component: NewsEditor
-                        },
-                        {
-                            path: 'lien-he',
-                            name: 'contactEditor',
-                            component: ContactEditor
-                        },
-                        {
-                            path: 'anh-nen-danh-gia',
-                            name: 'reviewBackgroundImage',
-                            component: ReviewsBackgroundImage
-                        }
-                    ]
-                },
-                {
-                    path: 'ban-nhanh',
-                    name: 'QuickSaleEditor',
-                    component: cms,
-                    children: [
-                        {
-                            path: 'header',
-                            name: 'Header',
-                            component: QSHeader
-                        },
-                        {
-                            path: 'dinh-gia-so-bo',
-                            name: 'qs1',
-                            component: QS1DinhGiaSoBo
-                        },
-                        {
-                            path: 'dong-y-gia-so-bo',
-                            name: 'qs2',
-                            component: QS2DongYGiaSoBo
-                        },
-                        {
-                            path: 'khao-sat',
-                            name: 'qs3',
-                            component: QS3KhaoSat
-                        },
-                        {
-                            path: 'danh-gia-giao-dich',
-                            name: 'qs4',
-                            component: QS4DanhGia
-                        },
-                        {
-                            path: "thoa-thuan",
-                            name: 'qs5',
-                            component: QS5ThoaThuan
-                        },
-                        {
-                            path: "y-tuong",
-                            name: 'qs6',
-                            component: QS6YTuong
-                        },
-                        {
-                            path: "trien-khai",
-                            name: 'qs7',
-                            component: QS7TrienKhai
-                        },
-                        {
-                            path: "tu-van-ho-tro",
-                            name: 'qs8',
-                            component: QS8TuVanHoTro
-                        },
-                        {
-                            path: "ho-tro-dam-phan",
-                            name: 'qs9',
-                            component: QS9HoTroDamPhan
-                        },
-                        {
-                            path: "ho-tro-phap-ly",
-                            name: 'qs10',
-                            component: QS10HoTroPhapLy
-                        },
-                        {
-                            path: "loi-ich",
-                            name: 'benefits',
-                            component: Benefits
-                        },
-                        {
-                            path: 'popup',
-                            name: 'popup',
-                            component: QSPopup
-                        },
-                        {
-                            path: 'anh-nen-3',
-                            name: 'anhNen3',
-                            component: QSImageBackground3
-                        }
-
-                    ]
-                },
-                {
-                    path: 'dinh-gia-bds',
-                    name: 'EP',
-                    component: cms,
-                    children: [
-                        {
-                            path: 'header',
-                            name: 'EPHeader',
-                            component: Header
-                        },
-                        {
-                            path: 'quy-trinh-dinh-gia',
-                            name: 'EPProccess',
-                            component: Proccess
-                        },
-                        {
-                            path: 'cac-buoc-trong-quy-trinh',
-                            name: 'ProccessStep',
-                            component: ProccessStep
-                        },
-                        {
-                            path: 'gia-tri-bds-dua-tren',
-                            name: 'EPFactor',
-                            component: Factor
-                        },
-                        {
-                            path: 'ly-do',
-                            name: 'EPReason',
-                            component: Reason
-                        },
-                        {
-                            path: 'bang-phi',
-                            name: 'EPFee',
-                            component: Fee
-                        },
-                        {
-                            path: 'tinh-phi-nhanh',
-                            name: 'EPQuickFee',
-                            component: QuickFee
-                        },
-                        {
-                            path: 'cau-hoi-thuong-gap',
-                            name: 'EPFaq',
-                            component: Faq
-                        }
-
-                    ]
-                },
-                {
-                    path: 'tuyen-dung',
-                    name: 'recruitmentEditor',
-                    component: cms,
-                    children: [
-                        {
-                            path: 'nut-ung-tuyen',
-                            name: 'applyBtn',
-                            component: ApplyBtn
-                        },
-                        {
-                            path: 'loi-ich',
-                            name: 'benefitsRC',
-                            component: BenefitsRC
-                        },
-                        {
-                            path: 'vi-tri-dang-tuyen',
-                            name: 'departmentRC',
-                            component: Department
-                        },
-                        {
-                            path: 'form-ung-tuyen',
-                            name: 'formRC',
-                            component: Form
-                        },
-                        {
-                            path: 'header',
-                            name: 'headerRC',
-                            component: HeaderRC
-                        },
-                        {
-                            path: 'co-hoi-viec-lam',
-                            name: 'jobPositionRC',
-                            component: JobPosition
-                        },
-                        {
-                            path: 'bai-viet-tuyen-dung',
-                            name: 'postRC',
-                            component: Post
-                        },
-                        {
-                            path: 'noi-bat',
-                            name: 'heroRC',
-                            component: HeroRC
-                        }
-                    ]
-                },
-                {
-                    path: 'tin-tuc',
-                    name: 'NewsEditor',
-                    component: cms,
-                    children: [
-                        {
-                            path: 'tin-noi-bat',
-                            name: 'featuredNewsE',
-                            component: FeaturedNewsE
-                        },
-                        {
-                            path: 'tin-moi-nhat',
-                            name: 'latestNewsE',
-                            component: LatestNewsE
-                        },
-                        {
-                            path: 'danh-muc-tin-tuc',
-                            name: 'CategoryNewsE',
-                            component: CategoryNewsE
-                        },
-                        {
-                            path: 'dang-ky-nhan-tin',
-                            name: 'EmailSubcribe',
-                            component: EmailSubscribeE
-                        }
-                    ]
-                },
-                {
-                    path: 'lien-he',
-                    name: 'contactEditor',
-                    component: cms,
-                    children: [
-                        {
-                            path: '',
-                            name: 'contactE',
-                            component: ContactE
-                        }
-                    ]
-                },
-                {
-                    path: 'hop-tac',
-                    name: 'investmentEditor',
-                    component: cms,
-                    children: [
-                        {
-                            path: 'noi-bat',
-                            name: 'heroInvestment',
-                            component: HeroInvm
-                        },
-                        {
-                            path: 'danh-sach',
-                            name: 'invmList',
-                            component: InvmList
-                        },
-                        {
-                            path: 'hop-thoai',
-                            name: 'invmModal',
-                            component: InvmModal
-                        },
-                        {
-                            path: 'chi-tiet-noi-bat',
-                            name: 'detailHero',
-                            component: DetailHero
-                        },
-                        {
-                            path: 'chi-tiet-goi-dang-ky',
-                            name: 'detailPackage',
-                            component: DetailPackage
-                        },
-                        {
-                            path: 'chi-tiet-danh-sach-nguoi-hop-tac',
-                            name: 'detailInvestor',
-                            component: DetailInvestor
-                        }
-                    ]
-                },
-                {
-                    path: 'quan-ly-tin-tuc',
-                    name: 'newsManagement',
-                    component: cms,
-                    children: [
-                        {
-                            path: '',
-                            name: 'newsM',
-                            component: NewsManagement
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            path: "/-thg/quan-ly-nguoi-dung",
-            component: Menu,
-            meta: {
-                requiresAuth: true,
-                enableTailwind: true,
-                loginFrom: "admin",
+    {
+        path: "/-thg/dang-nhap",
+        name: "LoginForm",
+        component: LoginForm,
+    },
+    {
+        path: "/user/quan-ly-san-pham",
+        component: MenuUser,
+        children: [
+            {
+                path: ":id",
+                name: "QLSAN-DETAIL",
+                component: productDetailUser,
             },
-            children: [
-                {
-                    path: "",
-                    name: "HostManager",
-                    component: HostManager
-                }]
-        },
-        {
-            path: "/-thg/quan-ly-san-pham",
-            component: Menu,
-            meta: {
-                requiresAuth: true,
-                enableTailwind: true,
-                loginFrom: "admin",
+            {
+                path: "cap-nhat/:id",
+                name: "QLSAN-DETAIL-UPDATE",
+                component: productUpdate,
             },
-            children: [
-                {
-                    path: "",
-                    name: "ProductList",
-                    component: ProductList
-                },
-                {
-                    path: "tao-moi",
-                    name: "ProductCreate",
-                    component: ProductCreate
-                },
-                {
-                    path: "cap-nhat/:id",
-                    name: "ProductUpdate",
-                    component: ProductUpdate,
-                    props: true
-                },
-                {
-                    path: ":id",
-                    name: "ProductDetail",
-                    component: ProductDetail,
-                    props: true
-                }
-            ]
-        },
-
-
-        {
-            path: "/san-pham-thien-ha",
-            component: MenuUser,
-            meta: {
-                requiresAuth: false,
-                hideFooterMap: false,
-                enableTailwind: true
+            {
+                path: "tao-moi",
+                name: "QLSAN-CREATE",
+                component: productCreateUser,
+            }
+        ]
+    },
+    {
+        path: "/moi-gioi",
+        name: "MoiGioiShow",
+        component: MenuUser,
+        meta: { requiresAuth: false },
+        children: [
+            {
+                path: '',
+                name: 'MoiGioiShow1',
+                component: moigioi
+            }
+        ]
+    },
+    {
+        path: "/tin-tuc",
+        name: "News",
+        component: MenuUser,
+        meta: { requiresAuth: false },
+        children: [
+            {
+                path: '',
+                name: 'news',
+                component: News
             },
-            children: [
-                {
-                    path: "",
-                    name: "ProductUser",
-                    component: ProductUser
-                },
-                {
-                    path: ":slug-:id(\\d+)",
-                    name: "ProductDetailSEO",
-                    component: ProductDetail2,
-                    props: true
-                },
-
-            ]
-        },
-        {
-            path: "/-thg/loai-hinh",
-            component: Menu, // MenuUser là layout chính
-            meta: {requiresAuth: true, loginFrom: "admin"},
-            children: [
-                {
-                    path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
-                    name: 'TypeManager',
-                    component: TypeManager
-                }
-            ]// 🔒 route này yêu cầu đăng nhập
-        },
-        {
-            path: "/-thg/nhom",
-            component: Menu, // MenuUser là layout chính
-            meta: {requiresAuth: true, loginFrom: "admin"},
-            children: [
-                {
-                    path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
-                    name: 'TeamManager',
-                    component: TeamManager
-                }
-            ] // 🔒 route này yêu cầu đăng nhập
-        },
-        {
-            path: '/-thg/nhan-vien',
-            component: Menu, // MenuUser là layout chính
-            meta: {requiresAuth: true, loginFrom: "admin"},
-            children: [
-                {
-                    path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
-                    name: 'EmployeeManager',
-                    component: EmployeeManager
-                }
-            ]
-        },
-        {
-            path: '/-thg/phong-ban',
-            component: Menu, // MenuUser là layout chính
-            meta: {requiresAuth: true, loginFrom: "admin"},
-            children: [
-                {
-                    path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
-                    name: 'DepartmentManager',
-                    component: DepartmentManager
-                }
-            ]
-        },
-        {
-            path: '/-thg/dich-vu',
-            component: Menu, // MenuUser là layout chính
-            meta: {requiresAuth: true, loginFrom: "admin"},
-            children: [
-                {
-                    path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
-                    name: 'ServiceManager',
-                    component: ServiceManager
-                }
-            ]
-        },
-        {
-            path: '/-thg/phan-quyen',
-            component: Menu, // MenuUser là layout chính
-            meta: {requiresAuth: true, loginFrom: "admin"},
-            children: [
-                {
-                    path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
-                    name: 'RolePermissionManager',
-                    component: RolePermissionManager
-                }
-            ]
-        },
-        {
-            path: '/-thg/khach-hang',
-            component: Menu, // MenuUser là layout chính
-            meta: {requiresAuth: true, loginFrom: "admin"},
-            children: [
-                {
-                    path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
-                    name: 'CustomerManager',
-                    component: CustomerManager
-                }
-            ]
-        },
-        {
-            path: '/-thg/dinh-gia',
-            component: Menu, // MenuUser là layout chính
-            meta: {requiresAuth: true, loginFrom: "admin"},
-            children: [
-                {
-                    path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
-                    name: 'AdminValuationManager',
-                    component: AdminValuationManager
-                }
-            ]
-        },
-        {
-            path: '/bao-cao-dinh-gia',
-            component: MenuUser, // MenuUser là layout chính
-            meta: {requiresAuth: true, loginFrom: "user", hideFooterMap: true},
-            children: [
-                {
-                    path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
-                    name: 'MyValuationManager',
-                    component: MyValuationManager
-                }
-            ]
-        },
-        {
-            path: '/-thg/goi-he-thong',
-            component: Menu, // MenuUser là layout chính
-            meta: {requiresAuth: true, loginFrom: "admin"},
-            children: [
-                {
-                    path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
-                    name: 'servicesystem',
-                    component: ServiceSystemManager
-                }
-            ]
-        },
-        {
-            path: '/-thg/lich-hen',
-            component: Menu, // MenuUser là layout chính
-            meta: {requiresAuth: true, loginFrom: "admin"},
-            children: [
-                {
-                    path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
-                    name: 'AppointmentManager',
-                    component: AppointmentManager
-                }
-            ]
-        },
-        {
-            path: '/nhom-cua-toi',
-            component: MenuUser, // MenuUser là layout chính
-            meta: {requiresAuth: true, loginFrom: "user", hideFooterMap: true},
-            children: [
-                {
-                    path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
-                    name: 'myTeamUser',
-                    component: MyTeamMain
-                }
-            ]
-        },
-        {
-            path: '/-thg/lich-su-he-thong',
-            component: Menu, // MenuUser là layout chính
-            meta: {requiresAuth: true, loginFrom: "admin"},
-            children: [
-                {
-                    path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
-                    name: 'auditlog',
-                    component: AuditLogManager
-                }
-            ]
-        },
-        {
-            path: '/-thg/quan-ly',
-            name: 'homeAdmin',
-            component: HomeAdmin,
-            meta: {requiresAuth: true}
-        },
-        {
-            path: '/-thg/du-an',
-            component: Menu, // MenuUser là layout chính
-            meta: {requiresAuth: true, loginFrom: "admin"},
-            children: [
-                {
-                    path: '', // path rỗng nghĩa là /employee sẽ hiển thị EmployeeManager
-                    name: 'Project',
-                    component: Project
-                },
-                {
-                    path: 'tao-moi',
-                    name: 'CreateProject',
-                    component: CreateProject
-                },
-                {
-                    path: 'hang-muc/:projectId?',
-                    name: 'WorkItemManager',
-                    component: WorkItemManager
-                },
-                {
-                    path: 'cap-nhat/:projectId?',
-                    name: 'UpdateProject',
-                    component: UpdateProject
-                }
-            ]
-        },
-        {
-            path: "/",
-            name: "Landinngpage",
-            component: MenuUser,
-            meta: {enableTailwind: true},
-            children: [
-                {
-                    path: '',
-                    name: 'landingpage',
-                    component: LandingPage
-                }
-            ]
-        },
-
-        {
-            path: "/giai-phap-ban-nhanh",
-            name: "QuickSale",
-            component: MenuUser,
-            meta: {
-                showQSPopup: true,
-                enableTailwind: true
+            {
+                path: ':id',
+                name: 'news-detail',
+                component: NewsDetail
+            }
+        ]
+    },
+    {
+        path: '/-thg/quan-tri-noi-dung',
+        name: 'cms',
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: 'trang-chu',
+                name: 'CMS',
+                component: cms,
+                children: [
+                    {
+                        path: 'banner',
+                        name: 'banner',
+                        component: Banner
+                    },
+                    {
+                        path: "thong-ke",
+                        name: "stats",
+                        component: Stats
+                    },
+                    {
+                        path: 'noi-bat',
+                        name: "hero",
+                        component: Hero
+                    },
+                    {
+                        path: 'dich-vu',
+                        name: 'service',
+                        component: Service
+                    },
+                    {
+                        path: 'tong-quan',
+                        name: 'overView',
+                        component: OverView
+                    },
+                    {
+                        path: 'con-so-an-tuong',
+                        name: 'impressiveNumber',
+                        component: ImpressiveNumber
+                    },
+                    {
+                        path: 'du-an-da-ban',
+                        name: 'soldProjects',
+                        component: SoldProjects
+                    },
+                    {
+                        path: 'danh-gia-khach-hang',
+                        name: 'reviews',
+                        component: Reviews
+                    },
+                    {
+                        path: 'danh-gia-he-thong',
+                        name: 'systemEvaluation',
+                        component: SystemEvaluation
+                    },
+                    {
+                        path: 'truyen-thong',
+                        name: 'mediaAboutUs',
+                        component: MediaAboutUs
+                    },
+                    {
+                        path: 'tin-tuc',
+                        name: 'newsEditor',
+                        component: NewsEditor
+                    },
+                    {
+                        path: 'lien-he',
+                        name: 'contactEditor',
+                        component: ContactEditor
+                    },
+                    {
+                        path: 'anh-nen-danh-gia',
+                        name: 'reviewBackgroundImage',
+                        component: ReviewsBackgroundImage
+                    }
+                ]
             },
-            children: [
-                {
-                    path: '',
-                    name: 'quick-sale',
-                    component: QuickSaleSolution
-                }
-            ]
-        },
-        {
-            path: "/dinh-gia-bds",
-            name: "EstimateProperty",
-            component: MenuUser,
-            meta: {
-                enableTailwind: true
-            },
-            children: [
-                {
-                    path: '',
-                    name: 'estimate-property',
-                    component: EstimateProperty
-                }
-            ]
-        },
-        {
-            path: "/du-an-da-ban",
-            name: "SoldProject",
-            component: MenuUser,
-            meta: {enableTailwind: true},
-            children: [
-                {
-                    path: '',
-                    name: 'sold-project',
-                    component: SoldProject
-                }
-            ]
-        },
-        {
-            path: "/dang-nhap",
-            name: "LoginUser",
-            component: MenuUser,
-            meta: {loginFrom: "user"},
-            children: [
-                {
-                    path: '',
-                    name: 'login-user',
-                    component: LoginUser
-                }
-            ]
-        },
-        {
-            path: "/tuyen-dung",
-            name: "Recruitment",
-            component: MenuUser,
-            children: [
-                {
-                    path: '',
-                    name: 'recruitment',
-                    component: Recruitment
-                }
-            ]
-        },
-        {
-            path: "/goi-dich-vu",
-            name: "ServicePackage",
-            component: MenuUser,
-            children: [
-                {
-                    path: '',
-                    name: 'service-package-system',
-                    component: ServicePackageSystem
-                }
-            ]
-        },
-        {
-            path: "/lien-he",
-            name: "Contact",
-            component: MenuUser,
-            children: [
-                {
-                    path: '',
-                    name: 'contact',
-                    component: Contact,
-                    meta: {hideFooterMap: true}
-                }
-            ]
-        },
-        {
-            path: "/thanh-toan",
-            name: "Checkout",
-            component: MenuUser,
-            children: [
-                {
-                    path: '',
-                    name: 'checkout',
-                    component: PaymentPage,
-                    meta: {hideFooterMap: true}
-                }
-            ]
-        },
-        {
-            path: "/thanh-toan-san-pham",
-            name: "Checkout",
-            component: MenuUser,
-            children: [
-                {
-                    path: '',
-                    name: 'checkout',
-                    component: PaymentPage2,
-                    meta: {hideFooterMap: true}
-                }
-            ]
-        },
-        {
-            path: "/tinh-nang-dang-phat-trien",
-            name: "fid",
-            component: FeatureInDevelopment,
-            meta: {requiresAuth: false}
-        },
-        {
-            path: "/cong-viec-cong-tac-vien",
-            name: "CollaboratorJobs",
-            component: MenuUser,
-            children: [
-                {
-                    path: '',
-                    name: 'list-collaborator-jobs',
-                    component: CollaboratorRecruitment
-                },
-                {
-                    path: ':id',
-                    name: 'collaborator-job-detail',
-                    component: CollaboratorJobDetail,
-                    props: true
-                },
-                {
-                    path: 'nhiem-vu-ca-nhan/:id',
-                    name: 'personal-task',
-                    component: PersonalTaskManager,
-                    props: true
-                }
-            ]
-        },
-        {
-            path: "/test",
-            name: 'testtt',
-            component: TestComponent
-        },
-        {
-            path: "/khong-tim-thay",
-            name: 'pageNotFound',
-            component: PageNotFound
-        },
-        {
-            path: "/-thg/quan-ly-hop-tac",
-            name: "InvestmentBranchManagement",
-            component: Menu,
-            children: [
-                {
-                    path: "",
-                    name: "investment-branch",
-                    component: InvestmentBranchManagement
-                }
-            ]
-        },
-        {
-            path: "/ho-so",
-            name: "Profile",
-            meta: {requiresAuth: true, loginFrom: "user", hideFooterMap: true},
-            component: MenuUser,
-            children: [
-                {
-                    path: '',
-                    name: 'profile',
-                    component: Profile,
-                    children: [
-                        {
-                            path: 'trung-tam-tai-khoan',
-                            name: 'AccountCenter',
-                            component: AccountCenter,
-                            props: route => ({
-                                user_card: route.meta.user_card
-                            }),
-                            meta: {
-                                user_card: null
-                            }
-                        },
-                        {
-                            path: 'thong-tin-tai-khoan',
-                            name: 'AccountInfo',
-                            component: AccountInfo,
-                            props: route => ({
-                                user_info: route.meta.user_info
-                            }),
-                            meta: {
-                                user_info: null,
-                                feature: "Chỉnh sửa thông tin cá nhân",
-                                keywords: [
-                                    'thong tin ca nhan',
-                                    'thông tin cá nhân',
-                                    'profile',
-                                    'personal info',
-                                    'ảnh hồ sơ',
-                                    'avatar',
-                                    'profile photo',
-                                    'photo',
-                                    'hồ sơ',
-                                    'họ tên',
-                                    'họ và tên',
-                                    'fullname',
-                                    'full name',
-                                    'loại hình đăng ký',
-                                    'registration type',
-                                    'ngày sinh',
-                                    'birthday',
-                                    'date of birth',
-                                    'giới tính',
-                                    'gender',
-                                    'nam',
-                                    'male',
-                                    'số điện thoại', 'sdt',
-                                    'phone',
-                                    'telephone',
-                                    'địa chỉ',
-                                    'address',
-                                    'edit info',
-                                    'chỉnh sửa',
-                                    'cập nhật thông tin'
-                                ]
+            {
+                path: 'ban-nhanh',
+                name: 'QuickSaleEditor',
+                component: cms,
+                children: [
+                    {
+                        path: 'header',
+                        name: 'Header',
+                        component: QSHeader
+                    },
+                    {
+                        path: 'dinh-gia-so-bo',
+                        name: 'qs1',
+                        component: QS1DinhGiaSoBo
+                    },
+                    {
+                        path: 'dong-y-gia-so-bo',
+                        name: 'qs2',
+                        component: QS2DongYGiaSoBo
+                    },
+                    {
+                        path: 'khao-sat',
+                        name: 'qs3',
+                        component: QS3KhaoSat
+                    },
+                    {
+                        path: 'danh-gia-giao-dich',
+                        name: 'qs4',
+                        component: QS4DanhGia
+                    },
+                    {
+                        path: "thoa-thuan",
+                        name: 'qs5',
+                        component: QS5ThoaThuan
+                    },
+                    {
+                        path: "y-tuong",
+                        name: 'qs6',
+                        component: QS6YTuong
+                    },
+                    {
+                        path: "trien-khai",
+                        name: 'qs7',
+                        component: QS7TrienKhai
+                    },
+                    {
+                        path: "tu-van-ho-tro",
+                        name: 'qs8',
+                        component: QS8TuVanHoTro
+                    },
+                    {
+                        path: "ho-tro-dam-phan",
+                        name: 'qs9',
+                        component: QS9HoTroDamPhan
+                    },
+                    {
+                        path: "ho-tro-phap-ly",
+                        name: 'qs10',
+                        component: QS10HoTroPhapLy
+                    },
+                    {
+                        path: "loi-ich",
+                        name: 'benefits',
+                        component: Benefits
+                    },
+                    {
+                        path: 'popup',
+                        name: 'popup',
+                        component: QSPopup
+                    },
+                    {
+                        path: 'anh-nen-3',
+                        name: 'anhNen3',
+                        component: QSImageBackground3
+                    }
 
-                            }
-                        },
-                        {
-                            path: 'bao-mat',
-                            name: 'Security',
-                            component: Security,
-                            props: route => ({
-                                maskEmail: route.meta.maskEmail
-                            }),
-                            meta: {
-                                maskEmail: "",
-                                feature: "Đăng nhập và mật khẩu",
-                                keywords: [
-                                    'doi mat khau',
-                                    'mat khau',
-                                    'mật khẩu',
-                                    'đăng nhập',
-                                    'login',
-                                    'security',
-                                    'bảo mật',
-                                    'thay đổi email',
-                                    'đổi email',
-                                    'change email',
-                                    'đổi mật khẩu',
-                                    'change password',
-                                    'reset password',
-                                    'quên mật khẩu',
-                                    'forgot password',
-                                    'quên pass',
-                                    'authentication'
-                                ]
-                            }
-                        },
-                        {
-                            path: 'thanh-toan',
-                            name: 'payment',
-                            component: Payment,
-                            meta: {
-                                feature: "Gói dịch vụ và thanh toán",
-                                keywords: [
-                                    'thanh toán',
-                                    'payment',
-                                    'tien',
-                                    'tiền',
-                                    'balance',
-                                    'số dư tài khoản',
-                                    'nạp tiền',
-                                    'nap tien',
-                                    'add balance',
-                                    'deposit',
-                                    'rút tiền',
-                                    'rut tien',
-                                    'withdraw',
-                                    'tài khoản ngân hàng',
-                                    'bank account',
-                                    'thống kê chi tiêu',
-                                    'thong ke chi tieu',
-                                    'chart',
-                                    'biểu đồ',
-                                    'chi tiêu tháng',
-                                    'lịch sử giao dịch',
-                                    'transaction history'
-                                ]
-                            }
-                        },
-                        {
-                            path: 'service-package',
-                            name: 'service-package',
-                            component: ServicePackageSystem,
-                            meta: {
-                                feature: "Gói dịch vụ",
-                                keywords: [
-                                    'goi dich vu',
-                                    'gói dịch vụ',
-                                    'nâng cấp gói',
-                                    'upgrade plan',
-                                    'membership',
-                                    'lịch sử gói',
-                                    'lịch sử đăng ký gói',
-                                    'plan history',
-                                    'hủy đăng ký gói',
-                                    'cancel membership',
-                                    'service',
-                                ]
-                            }
-                        },
-                        {
-                            path: 'goi-dich-vu',
-                            name: 'service-package',
-                            component: ServicePackageSystem,
-                        },
-                        {
-                            path: 'thanh-toan/lich-su-giao-dich',
-                            name: 'transaction-history',
-                            component: TransactionHistory
-                        },
-                        {
-                            path: 'goi-dich-vu-thanh-toan/quyen-loi-goi',
-                            name: 'package-benefits',
-                            component: PackageBenefits
-                        },
-                        {
-                            path: 'ho-tro',
-                            name: 'Support',
-                            component: Support,
-                            meta: {
-                                maskEmail: "",
-                                feature: "Hỗ trợ",
-                                keywords: [
-                                    'support',
-                                    'báo lỗi',
-                                    'hỗ trợ',
-                                    'trợ giúp',
-                                    'faq',
-                                    'hướng dẫn sử dụng',
-                                    'hdsd',
-                                    'how to use'
-                                ]
-                            }
-                        }
-                    ]
-                }
-            ]
+                ]
+            },
+            {
+                path: 'dinh-gia-bds',
+                name: 'EP',
+                component: cms,
+                children: [
+                    {
+                        path: 'header',
+                        name: 'EPHeader',
+                        component: Header
+                    },
+                    {
+                        path: 'quy-trinh-dinh-gia',
+                        name: 'EPProccess',
+                        component: Proccess
+                    },
+                    {
+                        path: 'cac-buoc-trong-quy-trinh',
+                        name: 'ProccessStep',
+                        component: ProccessStep
+                    },
+                    {
+                        path: 'gia-tri-bds-dua-tren',
+                        name: 'EPFactor',
+                        component: Factor
+                    },
+                    {
+                        path: 'ly-do',
+                        name: 'EPReason',
+                        component: Reason
+                    },
+                    {
+                        path: 'bang-phi',
+                        name: 'EPFee',
+                        component: Fee
+                    },
+                    {
+                        path: 'tinh-phi-nhanh',
+                        name: 'EPQuickFee',
+                        component: QuickFee
+                    },
+                    {
+                        path: 'cau-hoi-thuong-gap',
+                        name: 'EPFaq',
+                        component: Faq
+                    }
+
+                ]
+            },
+            {
+                path: 'tuyen-dung',
+                name: 'recruitmentEditor',
+                component: cms,
+                children: [
+                    {
+                        path: 'nut-ung-tuyen',
+                        name: 'applyBtn',
+                        component: ApplyBtn
+                    },
+                    {
+                        path: 'loi-ich',
+                        name: 'benefitsRC',
+                        component: BenefitsRC
+                    },
+                    {
+                        path: 'vi-tri-dang-tuyen',
+                        name: 'departmentRC',
+                        component: Department
+                    },
+                    {
+                        path: 'form-ung-tuyen',
+                        name: 'formRC',
+                        component: Form
+                    },
+                    {
+                        path: 'header',
+                        name: 'headerRC',
+                        component: HeaderRC
+                    },
+                    {
+                        path: 'co-hoi-viec-lam',
+                        name: 'jobPositionRC',
+                        component: JobPosition
+                    },
+                    {
+                        path: 'bai-viet-tuyen-dung',
+                        name: 'postRC',
+                        component: Post
+                    },
+                    {
+                        path: 'noi-bat',
+                        name: 'heroRC',
+                        component: HeroRC
+                    }
+                ]
+            },
+            {
+                path: 'tin-tuc',
+                name: 'NewsEditor',
+                component: cms,
+                children: [
+                    {
+                        path: 'tin-noi-bat',
+                        name: 'featuredNewsE',
+                        component: FeaturedNewsE
+                    },
+                    {
+                        path: 'tin-moi-nhat',
+                        name: 'latestNewsE',
+                        component: LatestNewsE
+                    },
+                    {
+                        path: 'danh-muc-tin-tuc',
+                        name: 'CategoryNewsE',
+                        component: CategoryNewsE
+                    },
+                    {
+                        path: 'dang-ky-nhan-tin',
+                        name: 'EmailSubcribe',
+                        component: EmailSubscribeE
+                    }
+                ]
+            },
+            {
+                path: 'lien-he',
+                name: 'contactEditor',
+                component: cms,
+                children: [
+                    {
+                        path: '',
+                        name: 'contactE',
+                        component: ContactE
+                    }
+                ]
+            },
+            {
+                path: 'hop-tac',
+                name: 'investmentEditor',
+                component: cms,
+                children: [
+                    {
+                        path: 'noi-bat',
+                        name: 'heroInvestment',
+                        component: HeroInvm
+                    },
+                    {
+                        path: 'danh-sach',
+                        name: 'invmList',
+                        component: InvmList
+                    },
+                    {
+                        path: 'hop-thoai',
+                        name: 'invmModal',
+                        component: InvmModal
+                    },
+                    {
+                        path: 'chi-tiet-noi-bat',
+                        name: 'detailHero',
+                        component: DetailHero
+                    },
+                    {
+                        path: 'chi-tiet-goi-dang-ky',
+                        name: 'detailPackage',
+                        component: DetailPackage
+                    },
+                    {
+                        path: 'chi-tiet-danh-sach-nguoi-hop-tac',
+                        name: 'detailInvestor',
+                        component: DetailInvestor
+                    }
+                ]
+            },
+            {
+                path: 'quan-ly-tin-tuc',
+                name: 'newsManagement',
+                component: cms,
+                children: [
+                    {
+                        path: '',
+                        name: 'newsM',
+                        component: NewsManagement
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        path: "/-thg/quan-ly-nguoi-dung",
+        component: Menu,
+        meta: {
+            requiresAuth: true,
+            enableTailwind: true,
+            loginFrom: "admin",
         },
-        {
-            path: "/hop-tac",
-            name: "Investments",
-            component: MenuUser,
-            children: [
-                {
-                    path: "",
-                    name: 'investments',
-                    component: Investments,
-                },
-                {
-                    path: ":id",
-                    name: "investment-detail",
-                    component: InvestmentDetail
-                }
-            ]
+        children: [
+            {
+                path: "",
+                name: "HostManager",
+                component: HostManager
+            }
+        ]
+    },
+    {
+        path: "/-thg/yeu-cau-rut-tien",
+        name: "1900009",
+        component: Menu,
+        meta: {
+            requiresAuth: true,
+            enableTailwind: true,
+            loginFrom: "admin",
         },
-        {
-            path: "/hop-tac/thanh-toan/:packageId",
-            name: "InvestmentPayment",
-            component: InvestmentPayment,
-            meta: {requiresAuth: true, loginFrom: "user"},
+        children: [
+            {
+                path: "",
+                name: "RutTienAdmin",
+                component: RutTienAdmin
+            },
+        ]
+    },
+    {
+        path: "/-thg/quan-ly-san-pham",
+        component: Menu,
+        meta: {
+            requiresAuth: true,
+            enableTailwind: true,
+            loginFrom: "admin",
         },
-        {
-            path: "/hop-tac/goi-hop-tac-da-dang-ky",
-            name: "invested",
-            component: MenuUser,
-            children: [
-                {
-                    path: "",
-                    name: "invested_investments",
-                    component: Invested
-                }
-            ]
-        },
-        {
-            path: "/-thg/quan-ly-nha-dau-tu",
-            name: "InvestorManagement",
-            component: Menu,
-            children: [
-                {
-                    path: "",
-                    name: "investor-management",
-                    component: InvestorManagement
-                }
-            ]
-        },
-        {
-            path: "/ga4-demo",
-            name: "GA4Demo",
-            component: MenuUser,
-            children: [
-                {
-                    path: '',
-                    name: 'ga4-demo',
-                    component: Ga4EventExample,
-                    meta: {hideFooterMap: true}
-                }
-            ]
-        },
-        {
-            path: "/:pathMatch(.*)*",
-            redirect:
-                "/", // nếu URL không hợp lệ → về login
+        children: [
+            {
+                path: "",
+                name: "ProductList",
+                component: ProductList
+            },
+            {
+                path: "tao-moi",
+                name: "ProductCreate",
+                component: ProductCreate
+            },
+            {
+                path: "cap-nhat/:id",
+                name: "ProductUpdate",
+                component: ProductUpdate,
+                props: true
+            },
+            {
+                path: ":id",
+                name: "ProductDetail",
+                component: ProductDetail,
+                props: true
+            }
+        ]
+    },
+    {
+        path: "/loi-de-nghi",
+        component: Test1,
+        meta: {
+            requiresAuth: false,
+            hideFooterMap: false,
+            enableTailwind: true
         }
-        ,
-    ]
-;
+    },
+    {
+        path: "/02",
+        component: Test1,
+        meta: {
+            requiresAuth: false,
+            hideFooterMap: false,
+            enableTailwind: true
+        }
+    },
+    {
+        path: "/san-pham-cua-ban",
+        component: MenuUser,
+        children: [
+            {
+                path: "",
+                name: "SANPHAM-CUABAN",
+                component: Test3,
+                meta: {
+                    requiresAuth: false,
+                    hideFooterMap: false,
+                    enableTailwind: true
+                }
+            }
+        ]
+    },
+    {
+        path: "/san-pham-thien-ha",
+        component: MenuUser,
+        meta: {
+            requiresAuth: false,
+            hideFooterMap: false,
+            enableTailwind: true
+        },
+        children: [
+            {
+                path: "",
+                name: "ProductUser",
+                component: ProductUser
+            },
+            {
+                path: ":slug-:id(\\d+)",
+                name: "ProductDetailSEO",
+                component: ProductDetail2,
+                props: true
+            },
+        ]
+    },
+    {
+        path: "/du-an-da-ban",
+        component: MenuUser,
+        meta: {
+            requiresAuth: false,
+            hideFooterMap: false,
+            enableTailwind: true
+        },
+        children: [
+            {
+                path: "",
+                name: "DuAnDaBan",
+                component: SoldProject
+            },
+        ]
+    },
+    {
+        path: "/-thg/loai-hinh",
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: '',
+                name: 'TypeManager',
+                component: TypeManager
+            }
+        ]
+    },
+    {
+        path: "/-thg/nhom",
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: '',
+                name: 'TeamManager',
+                component: TeamManager
+            }
+        ]
+    },
+    {
+        path: '/-thg/nhan-vien',
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: '',
+                name: 'EmployeeManager',
+                component: EmployeeManager
+            }
+        ]
+    },
+    {
+        path: '/-thg/phong-ban',
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: '',
+                name: 'DepartmentManager',
+                component: DepartmentManager
+            }
+        ]
+    },
+    {
+        path: '/-thg/dich-vu',
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: '',
+                name: 'ServiceManager',
+                component: ServiceManager
+            }
+        ]
+    },
+    {
+        path: '/-thg/phan-quyen',
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: '',
+                name: 'RolePermissionManager',
+                component: RolePermissionManager
+            }
+        ]
+    },
+    {
+        path: '/-thg/khach-hang',
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: '',
+                name: 'CustomerManager',
+                component: CustomerManager
+            }
+        ]
+    },
+    {
+        path: '/-thg/dinh-gia',
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: '',
+                name: 'AdminValuationManager',
+                component: AdminValuationManager
+            }
+        ]
+    },
+    {
+        path: '/bao-cao-dinh-gia',
+        component: MenuUser,
+        meta: {requiresAuth: true, loginFrom: "user", hideFooterMap: false},
+        children: [
+            {
+                path: '',
+                name: 'MyValuationManager',
+                component: MyValuationManager
+            }
+        ]
+    },
+    {
+        path: '/-thg/goi-he-thong',
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: '',
+                name: 'servicesystem',
+                component: ServiceSystemManager
+            }
+        ]
+    },
+    {
+        path: '/-thg/lich-hen',
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: '',
+                name: 'AppointmentManager',
+                component: AppointmentManager
+            }
+        ]
+    },
+    {
+        path: '/nhom-cua-toi',
+        component: MenuUser,
+        meta: {requiresAuth: true, loginFrom: "user", hideFooterMap: false},
+        children: [
+            {
+                path: '',
+                name: 'myTeamUser',
+                component: MyTeamMain
+            }
+        ]
+    },
+    {
+        path: '/-thg/lich-su-he-thong',
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: '',
+                name: 'auditlog',
+                component: AuditLogManager
+            }
+        ]
+    },
+    {
+        path: '/-thg/quan-ly',
+        name: 'homeAdmin',
+        component: HomeAdmin,
+        meta: {requiresAuth: true}
+    },
+    {
+        path: '/-thg/du-an',
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: '',
+                name: 'Project',
+                component: Project
+            },
+            {
+                path: 'tao-moi',
+                name: 'CreateProject',
+                component: CreateProject
+            },
+            {
+                path: 'hang-muc/:projectId?',
+                name: 'WorkItemManager',
+                component: WorkItemManager
+            },
+            {
+                path: 'cap-nhat/:projectId?',
+                name: 'UpdateProject',
+                component: UpdateProject
+            }
+        ]
+    },
+    {
+        path: "/",
+        name: "Landingpage",
+        component: MenuUser,
+        meta: { enableTailwind: true, requiresAuth: false },
+        children: [
+            {
+                path: '',
+                name: 'landingpage',
+                component: LandingPage
+            }
+        ]
+    },
+    {
+        path: "/giai-phap-ban-nhanh",
+        name: "QuickSale",
+        component: MenuUser,
+        meta: {
+            showQSPopup: true,
+            enableTailwind: true,
+            requiresAuth: false
+        },
+        children: [
+            {
+                path: '',
+                name: 'quick-sale',
+                component: QuickSaleSolution
+            }
+        ]
+    },
+    {
+        path: "/dinh-gia-bds",
+        name: "EstimateProperty",
+        meta:{ enableTailwind: true, requiresAuth: false },
+        component: MenuUser,
+        children: [
+            {
+                path: '',
+                name: 'estimate-property',
+                component: EstimateProperty
+            }
+        ]
+    },
+    {
+        path: "/du-an-da-ban",
+        name: "SoldProject",
+        component: MenuUser,
+        meta: {enableTailwind: true, requiresAuth: false},
+        children: [
+            {
+                path: '',
+                name: 'sold-project',
+                component: SoldProject
+            }
+        ]
+    },
+    {
+        path: "/dang-nhap",
+        name: "LoginUser",
+        component: MenuUser,
+        meta: { loginFrom: "user", requiresAuth: false},
+        children: [
+            {
+                path: '',
+                name: 'login-user',
+                component: LoginUser
+            }
+        ]
+    },
+    {
+        path: "/tuyen-dung",
+        name: "Recruitment",
+        component: MenuUser,
+        meta: { requiresAuth: false },
+        children: [
+            {
+                path: '',
+                name: 'recruitment',
+                component: Recruitment
+            }
+        ]
+    },
+    {
+        path: "/goi-dich-vu",
+        name: "ServicePackage",
+        component: MenuUser,
+        meta: { requiresAuth: false },
+        children: [
+            {
+                path: '',
+                name: 'service-package-system',
+                component: ServicePackageSystem
+            }
+        ]
+    },
+    {
+        path: "/lien-he",
+        name: "Contact",
+        component: MenuUser,
+        meta: { requiresAuth: false },
+        children: [
+            {
+                path: '',
+                name: 'contact',
+                component: Contact,
+                meta: {hideFooterMap: true}
+            }
+        ]
+    },
+    {
+        path: "/thanh-toan",
+        name: "Checkout",
+        component: MenuUser,
+        meta: { requiresAuth: false },
+        children: [
+            {
+                path: '',
+                name: 'checkout2',
+                component: PaymentPage,
+                meta: {hideFooterMap: false}
+            }
+        ]
+    },
+    {
+        path: "/thanh-toan-san-pham",
+        name: "Checkout1",
+        component: MenuUser,
+        meta: { requiresAuth: false },
+        children: [
+            {
+                path: '',
+                name: 'checkout11111',
+                component: PaymentPage2,
+                meta: {hideFooterMap: false}
+            }
+        ]
+    },
+    {
+        path: "/nap-tien-ca-nhan",
+        name: "Checkout114",
+        component: MenuUser,
+        meta: { requiresAuth: false },
+        children: [
+            {
+                path: '',
+                name: 'checkout11111111',
+                component: PaymentQR,
+                meta: {hideFooterMap: false}
+            }
+        ]
+    },
+    {
+        path: "/tinh-nang-dang-phat-trien",
+        name: "fid",
+        component: FeatureInDevelopment,
+        meta: {requiresAuth: false}
+    },
+    {
+        path: "/cong-viec-cong-tac-vien",
+        name: "CollaboratorJobs",
+        component: MenuUser,
+        meta: { requiresAuth: false },
+        children: [
+            {
+                path: '',
+                name: 'list-collaborator-jobs',
+                component: CollaboratorRecruitment
+            },
+            {
+                path: ':id',
+                name: 'collaborator-job-detail',
+                component: CollaboratorJobDetail,
+                props: true
+            },
+            {
+                path: 'nhiem-vu-ca-nhan/:id',
+                name: 'personal-task',
+                component: PersonalTaskManager,
+                props: true
+            }
+        ]
+    },
+    {
+        path: "/test",
+        name: 'testtt',
+        component: TestComponent
+    },
+    {
+        path: "/khong-tim-thay",
+        name: 'pageNotFound',
+        component: PageNotFound
+    },
+    {
+        path: "/-thg/quan-ly-hop-tac",
+        name: "InvestmentBranchManagement",
+        component: Menu,
+        children: [
+            {
+                path: "",
+                name: "investment-branch",
+                component: InvestmentBranchManagement
+            }
+        ]
+    },
+    {
+        path: "/ho-so",
+        name: "Profile",
+        meta: {requiresAuth: true, loginFrom: "user", hideFooterMap: false},
+        component: MenuUser,
+        children: [
+            {
+                path: '',
+                name: 'profile',
+                component: Profile,
+                children: [
+                    {
+                        path: 'trung-tam-tai-khoan',
+                        name: 'AccountCenter',
+                        component: AccountCenter,
+                        props: route => ({
+                            user_card: route.meta.user_card
+                        }),
+                        meta: {
+                            user_card: null
+                        }
+                    },
+                    {
+                        path: 'thong-tin-tai-khoan',
+                        name: 'AccountInfo',
+                        component: AccountInfo,
+                        props: route => ({
+                            user_info: route.meta.user_info
+                        }),
+                        meta: {
+                            user_info: null,
+                            feature: "Chỉnh sửa thông tin cá nhân",
+                            keywords: [
+                                'thong tin ca nhan',
+                                'thông tin cá nhân',
+                                'profile',
+                                'personal info',
+                                'ảnh hồ sơ',
+                                'avatar',
+                                'profile photo',
+                                'photo',
+                                'hồ sơ',
+                                'họ tên',
+                                'họ và tên',
+                                'fullname',
+                                'full name',
+                                'loại hình đăng ký',
+                                'registration type',
+                                'ngày sinh',
+                                'birthday',
+                                'date of birth',
+                                'giới tính',
+                                'gender',
+                                'nam',
+                                'male',
+                                'số điện thoại', 'sdt',
+                                'phone',
+                                'telephone',
+                                'địa chỉ',
+                                'address',
+                                'edit info',
+                                'chỉnh sửa',
+                                'cập nhật thông tin'
+                            ]
+
+                        }
+                    },
+                    {
+                        path: 'bao-mat',
+                        name: 'Security',
+                        component: Security,
+                        props: route => ({
+                            maskEmail: route.meta.maskEmail
+                        }),
+                        meta: {
+                            maskEmail: "",
+                            feature: "Đăng nhập và mật khẩu",
+                            keywords: [
+                                'doi mat khau',
+                                'mat khau',
+                                'mật khẩu',
+                                'đăng nhập',
+                                'login',
+                                'security',
+                                'bảo mật',
+                                'thay đổi email',
+                                'đổi email',
+                                'change email',
+                                'đổi mật khẩu',
+                                'change password',
+                                'reset password',
+                                'quên mật khẩu',
+                                'forgot password',
+                                'quên pass',
+                                'authentication'
+                            ]
+                        }
+                    },
+                    {
+                        path: 'thanh-toan',
+                        name: 'payment',
+                        component: Payment,
+                        meta: {
+                            feature: "Gói dịch vụ và thanh toán",
+                            keywords: [
+                                'thanh toán',
+                                'payment',
+                                'tien',
+                                'tiền',
+                                'balance',
+                                'số dư tài khoản',
+                                'nạp tiền',
+                                'nap tien',
+                                'add balance',
+                                'deposit',
+                                'rút tiền',
+                                'rut tien',
+                                'withdraw',
+                                'tài khoản ngân hàng',
+                                'bank account',
+                                'thống kê chi tiêu',
+                                'thong ke chi tieu',
+                                'chart',
+                                'biểu đồ',
+                                'chi tiêu tháng',
+                                'lịch sử giao dịch',
+                                'transaction history'
+                            ]
+                        }
+                    },
+                    {
+                        path: 'service-package',
+                        name: 'service-package',
+                        component: ServicePackageSystem,
+                        meta: {
+                            feature: "Gói dịch vụ",
+                            keywords: [
+                                'goi dich vu',
+                                'gói dịch vụ',
+                                'nâng cấp gói',
+                                'upgrade plan',
+                                'membership',
+                                'lịch sử gói',
+                                'lịch sử đăng ký gói',
+                                'plan history',
+                                'hủy đăng ký gói',
+                                'cancel membership',
+                                'service',
+                            ]
+                        }
+                    },
+                    {
+                        path: 'goi-dich-vu',
+                        name: 'service-package',
+                        component: ServicePackageSystem,
+                    },
+                    {
+                        path: 'thanh-toan/lich-su-giao-dich',
+                        name: 'transaction-history',
+                        component: TransactionHistory
+                    },
+                    {
+                        path: 'goi-dich-vu-thanh-toan/quyen-loi-goi',
+                        name: 'package-benefits',
+                        component: PackageBenefits
+                    },
+                    {
+                        path: 'ho-tro',
+                        name: 'Support',
+                        component: Support,
+                        meta: {
+                            maskEmail: "",
+                            feature: "Hỗ trợ",
+                            keywords: [
+                                'support',
+                                'báo lỗi',
+                                'hỗ trợ',
+                                'trợ giúp',
+                                'faq',
+                                'hướng dẫn sử dụng',
+                                'hdsd',
+                                'how to use'
+                            ]
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        path: "/hop-tac",
+        name: "Investments",
+        component: MenuUser,
+        meta: { requiresAuth: false },
+        children: [
+            {
+                path: "",
+                name: 'investments',
+                component: Investments,
+            },
+            {
+                path: ":id",
+                name: "investment-detail",
+                component: InvestmentDetail
+            }
+        ]
+    },
+    {
+        path: "/hop-tac/thanh-toan/:packageId",
+        name: "InvestmentPayment",
+        component: InvestmentPayment,
+        meta: {requiresAuth: true, loginFrom: "user"},
+    },
+    {
+        path: "/hop-tac/goi-hop-tac-da-dang-ky",
+        name: "invested",
+        component: MenuUser,
+        children: [
+            {
+                path: "",
+                name: "invested_investments",
+                component: Invested
+            }
+        ]
+    },
+    {
+        path: "/-thg/quan-ly-nha-dau-tu",
+        name: "InvestorManagement",
+        component: Menu,
+        children: [
+            {
+                path: "",
+                name: "investor-management",
+                component: InvestorManagement
+            }
+        ]
+    },
+    {
+        path: "/ga4-demo",
+        name: "GA4Demo",
+        component: MenuUser,
+        meta: { requiresAuth: false },
+        children: [
+            {
+                path: '',
+                name: 'ga4-demo',
+                component: Ga4EventExample,
+                meta: {hideFooterMap: true}
+            }
+        ]
+    },
+    {
+        path: "/:pathMatch(.*)*",
+        redirect: "/"
+    }
+];
 
 const router = createRouter({
     history: createWebHistory(),
     routes,
     scrollBehavior(to, from, savedPosition) {
-        // Nếu dùng nút back/forward trình duyệt
         if (savedPosition) {
             return savedPosition
         }
-
-        // Mặc định luôn cuộn lên đầu trang
         return {top: 0}
     }
 });
 
-// 🧩 Guard kiểm tra đăng nhập trước khi vào trang
 router.beforeEach((to, from, next) => {
     const auth = useAuthStore();
     const isLoggedIn = !!auth.accessToken;
+    const loginFrom = localStorage.getItem("loginFrom");
 
-    // Lấy loginFrom từ localStorage (rất quan trọng)
-    const loginFrom = localStorage.getItem("loginFrom"); // "admin" hoặc "user"
-
-    // Nếu route yêu cầu đăng nhập
     if (to.meta.requiresAuth) {
         if (!isLoggedIn) {
-
-            // ⭐ LƯU URL user định vào
             localStorage.setItem("redirectUrl", to.fullPath);
             console.log("Đã lưu redirectUrl", to.fullPath)
 
-            // Chưa login → đẩy về login đúng portal
             if (to.meta.loginFrom === "user") {
                 localStorage.setItem("loginFrom", "user");
-                // phát sự kiện mở modal
                 window.dispatchEvent(new Event('open-login-modal'))
                 return next(false);
             } else {
@@ -1246,7 +1356,6 @@ router.beforeEach((to, from, next) => {
         }
     }
 
-    // Nếu đã login mà vẫn vào /-thg/dang-nhap hoặc /dang-nhap
     if ((to.path === "/-thg/dang-nhap" || to.path === "/dang-nhap") && isLoggedIn) {
         if (loginFrom === "user") {
             return next("/");
@@ -1262,8 +1371,6 @@ router.beforeEach((to, from, next) => {
 router.afterEach((to) => {
     const id = "tailwind-admin-css";
     let link = document.getElementById(id);
-
-    // ⭐ CHỈ 1 DÒNG QUYẾT ĐỊNH
     const needTailwind = to.matched.some(r => r.meta.enableTailwind);
 
     if (needTailwind && !link) {
@@ -1280,5 +1387,3 @@ router.afterEach((to) => {
 });
 
 export default router;
-
-

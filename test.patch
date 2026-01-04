@@ -1,18 +1,151 @@
+<<<<<<< HEAD
 diff --git a/src/components/user/Home/components/MenuUser.vue b/src/components/user/Home/components/MenuUser.vue
 index fb9f3c9b19dc0bf49f32b13fbf7ebb2c7c62e16f..0db4bd0f84713f6a85276ce4739d2b60d9a64b9c 100644
 --- a/src/components/user/Home/components/MenuUser.vue
 +++ b/src/components/user/Home/components/MenuUser.vue
 @@ -155,50 +155,56 @@
    <PopupQuickSale v-if="showQSPopup" @close="closePopup"></PopupQuickSale>
+=======
+diff --git a/src/components/user/Profile/component/Payment.vue b/src/components/user/Profile/component/Payment.vue
+index 3b1b26c0f1ab3ffc7180068b18074e35a6d8d24c..150ebdb83bf6ca8ab7bbe73e5005c57824220353 100644
+--- a/src/components/user/Profile/component/Payment.vue
++++ b/src/components/user/Profile/component/Payment.vue
+@@ -1,237 +1,238 @@
+ <template>
+   <div class="service-payment-container">
+     <div class="security-header">
+       <h1 class="security-title">Gói dịch vụ và thanh toán</h1>
+     </div>
+     <div class="main-content">
+       <MembershipCard class="member-ship-card" :member-data="user_card"/>
+
+       <!-- Balance and Actions Section -->
+       <div class="balance-actions-section">
+         <div class="balance-card">
+           <div class="balance-header">
+             <h3 class="balance-title">Số dư tài khoản</h3>
+             <button class="eye-toggle" @click="toggleBalanceVisibility">
+               <i class="fas" :class="balanceVisible ? 'fa-eye' : 'fa-eye-slash'"></i>
+             </button>
+           </div>
+           <div class="balance-amount">
+-            <span class="amount" v-if="balanceVisible">1,250,000 VNĐ</span>
++            <span class="amount" v-if="balanceVisible">{{ formattedAvailableBalance }} VNĐ</span>
+             <span class="amount hidden" v-else>****** VNĐ</span>
+           </div>
++          <div class="pending-amount">
++            <span class="pending-label">Chờ rút</span>
++            <span class="pending-value" v-if="balanceVisible">{{ formattedPendingBalance }} VNĐ</span>
++            <span class="pending-value hidden" v-else>****** VNĐ</span>
++          </div>
+         </div>
+
+         <div class="action-buttons">
+           <button class="action-btn deposit">
+             <i class="fas fa-sign-in-alt"></i>
+             <span>Nạp tiền</span>
+           </button>
+           <button class="action-btn withdraw">
+             <i class="fas fa-sign-out-alt"></i>
+             <span>Rút tiền</span>
+           </button>
+           <button class="action-btn history" @click="router.push({name: 'transaction-history'})">
+             <i class="fas fa-history"></i>
+             <span>Lịch sử giao dịch</span>
+           </button>
+         </div>
+       </div>
+
+       <!-- Chart Section -->
+       <div class="chart-section">
+         <div class="chart-header">
+           <div class="chart-controls-left">
+             <select v-model="selectedMonth" class="month-select">
+               <option value="1">Tháng 1</option>
+               <option value="2">Tháng 2</option>
+               <option value="3">Tháng 3</option>
+               <option value="4">Tháng 4</option>
+               <option value="5">Tháng 5</option>
+               <option value="6">Tháng 6</option>
+               <option value="7">Tháng 7</option>
+               <option value="8">Tháng 8</option>
+               <option value="9">Tháng 9</option>
+               <option value="10">Tháng 10</option>
+               <option value="11">Tháng 11</option>
+               <option value="12">Tháng 12</option>
+             </select>
+-          </div>
+-          <div class="chart-controls-right">
+-            <button class="chart-btn download" @click="downloadChart">
+-              <i class="fas fa-download"></i>
+-              Tải xuống
+-            </button>
+-            <button class="chart-btn table-view" @click="toggleTableView">
+-              <i class="fas fa-table"></i>
+-              Xem dạng bảng
+-            </button>
++            <select v-model="selectedYear" class="year-select">
++              <option v-for="year in yearOptions" :key="year" :value="year">
++                Năm {{ year }}
++              </option>
++            </select>
+           </div>
+         </div>
+
+         <div class="chart-container">
+-          <Line v-if="!tableView" :data="chartData" :options="chartOptions" />
+-          <div v-else class="table-view">
+-            <table class="transaction-table">
+-              <thead>
+-              <tr>
+-                <th>Ngày</th>
+-                <th>Giao dịch</th>
+-                <th>Số tiền</th>
+-                <th>Trạng thái</th>
+-              </tr>
+-              </thead>
+-              <tbody>
+-              <tr v-for="item in tableData" :key="item.id">
+-                <td>{{ item.date }}</td>
+-                <td>{{ item.transaction }}</td>
+-                <td>{{ item.amount }}</td>
+-                <td :class="item.status">
+-                  <i v-if="item.status === 'success'" class="fas fa-check-circle status-icon success"></i>
+-                  <i v-else-if="item.status === 'pending'" class="fas fa-clock status-icon pending"></i>
+-                  {{ item.statusText }}
+-                </td>
+-              </tr>
+-              </tbody>
+-            </table>
+-          </div>
++          <Line :data="chartData" :options="chartOptions" />
+         </div>
+       </div>
+     </div>
+   </div>
+>>>>>>> 393b17d28853cd6b48553fd86e8619316721ff10
  </template>
 
  <script setup>
- import {ref, onMounted, onUnmounted, nextTick, computed, watch} from "vue";
- import {useRoute, useRouter} from 'vue-router'
- import Footer from "./Footer.vue";
- import {useAuthStore} from "../../../../stores/authStore.js";
- import PopupQuickSale from "../../QuickSaleSolution/Components/PopupQuickSale.vue";
+-import { ref, onMounted } from 'vue';
++import { computed, ref, onMounted, watch } from 'vue';
+ import {useRouter} from "vue-router";
+ import MembershipCard from "./MembershipCard.vue";
+ import { Line } from 'vue-chartjs';
++import api from "/src/api/api.js";
+ import {
+   Chart as ChartJS,
+   CategoryScale,
+   LinearScale,
+   PointElement,
+   LineElement,
+   Title,
+   Tooltip,
+   Legend,
+   Filler
+ } from 'chart.js';
 
+<<<<<<< HEAD
  const auth = useAuthStore();
  const menuRef = ref(null);
  const navLinks = ref(null);
@@ -155,3 +288,327 @@ index fb9f3c9b19dc0bf49f32b13fbf7ebb2c7c62e16f..0db4bd0f84713f6a85276ce4739d2b60
            userSubmenuEl.contains(e.target);
 
        if (!isClickInsideMenu) {
+=======
+ // Đăng ký các thành phần ChartJS
+ ChartJS.register(
+     CategoryScale,
+     LinearScale,
+     PointElement,
+     LineElement,
+     Title,
+     Tooltip,
+     Legend,
+     Filler
+ );
+
+ const props = defineProps({
+   user_card: Object
+ });
+ const router = useRouter()
+
+ // Balance visibility
+ const balanceVisible = ref(false);
++const availableBalance = ref(0);
++const pendingBalance = ref(0);
+
+ const toggleBalanceVisibility = () => {
+   balanceVisible.value = !balanceVisible.value;
+ };
+
+ // Chart data and options
+-const selectedMonth = ref('6');
+-const tableView = ref(false);
++const selectedMonth = ref(`${new Date().getMonth() + 1}`);
++const selectedYear = ref(new Date().getFullYear());
++const yearOptions = Array.from({ length: 5 }, (_, index) => new Date().getFullYear() - index);
+
+ const chartData = ref({
+-  labels: ['1', '5', '10', '15', '20', '25', '30'],
++  labels: [],
+   datasets: [
+     {
+       label: 'Chi tiêu (VND)',
+-      data: [1200000, 1900000, 1500000, 2500000, 2200000, 3000000, 2800000],
++      data: [],
+       borderColor: '#031358',
+       backgroundColor: 'rgba(3, 19, 88, 0.1)',
+       tension: 0.4,
+       fill: true,
+       pointBackgroundColor: '#031358',
+       pointBorderColor: '#ffffff',
+       pointBorderWidth: 2,
+       pointRadius: 5,
+     }
+   ]
+ });
+
+ const chartOptions = ref({
+   responsive: true,
+   maintainAspectRatio: false,
+   plugins: {
+     legend: {
+       display: true,
+       position: 'top',
+     },
+     title: {
+       display: true,
+-      text: 'Biểu đồ chi tiêu tháng ' + selectedMonth.value
++      text: `Biểu đồ chi tiêu tháng ${selectedMonth.value}/${selectedYear.value}`
+     }
+   },
+   scales: {
+     y: {
+       beginAtZero: true,
+       ticks: {
+         callback: function(value) {
+           return value.toLocaleString('vi-VN') + ' VND';
+         }
+       }
+     }
+   }
+ });
+
+-// Table data
+-const tableData = ref([
+-  { id: 1, date: '01/06/2024', transaction: 'Nạp tiền', amount: '2,000,000 VND', status: 'success', statusText: 'Thành công' },
+-  { id: 2, date: '05/06/2024', transaction: 'Mua gói Premium', amount: '500,000 VND', status: 'success', statusText: 'Thành công' },
+-  { id: 3, date: '10/06/2024', transaction: 'Rút tiền', amount: '1,000,000 VND', status: 'pending', statusText: 'Đang xử lý' },
+-  { id: 4, date: '15/06/2024', transaction: 'Nạp tiền', amount: '1,500,000 VND', status: 'success', statusText: 'Thành công' },
+-  { id: 5, date: '20/06/2024', transaction: 'Thanh toán hóa đơn', amount: '350,000 VND', status: 'success', statusText: 'Thành công' },
+-]);
+-
+-const downloadChart = () => {
+-  // Logic để tải biểu đồ dưới dạng PNG
+-  console.log('Download chart as PNG');
++const formatCurrency = (value) => {
++  const numberValue = Number(value || 0);
++  return numberValue.toLocaleString('vi-VN');
++};
++
++const formattedAvailableBalance = computed(() => formatCurrency(availableBalance.value));
++const formattedPendingBalance = computed(() => formatCurrency(pendingBalance.value));
++
++const fetchWalletBalance = async () => {
++  try {
++    const response = await api.get("/apithienha/profile/balance");
++    availableBalance.value = response.data?.soDuKhaDung ?? 0;
++    pendingBalance.value = response.data?.soDuChoRut ?? 0;
++  } catch (error) {
++    console.error("Không thể tải số dư ví:", error);
++  }
+ };
+
+-const toggleTableView = () => {
+-  tableView.value = !tableView.value;
++const fetchChartData = async () => {
++  try {
++    const response = await api.get("/apithienha/profile/chart", {
++      params: {
++        month: Number(selectedMonth.value),
++        year: Number(selectedYear.value),
++      },
++    });
++    chartData.value.labels = (response.data?.labels ?? []).map((label) => `${label}`);
++    chartData.value.datasets[0].data = response.data?.values ?? [];
++    chartOptions.value.plugins.title.text = `Biểu đồ chi tiêu tháng ${selectedMonth.value}/${selectedYear.value}`;
++  } catch (error) {
++    console.error("Không thể tải dữ liệu biểu đồ:", error);
++    chartData.value.labels = [];
++    chartData.value.datasets[0].data = [];
++  }
+ };
+
++watch([selectedMonth, selectedYear], () => {
++  fetchChartData();
++});
++
+ onMounted(() => {
+-  // Khởi tạo dữ liệu ngẫu nhiên cho biểu đồ
+-  const randomData = Array.from({length: 7}, () => Math.floor(Math.random() * 3000000) + 1000000);
+-  chartData.value.datasets[0].data = randomData;
++  fetchWalletBalance();
++  fetchChartData();
+ });
+ </script>
+
+ <style scoped>
+ .security-header {
+   text-align: center;
+   margin-bottom: 40px;
+   margin-top:60px  ;
+ }
+
+ .security-title {
+   font-size: 33px;
+   background: linear-gradient(to right, #031358, #0030FF);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+   background-clip: text;
+   margin: 0 0 15px 0;
+ }
+
+ .main-content {
+   max-width: 95%;
+   margin: 0 auto;
+   font-family: 'Ubuntu', sans-serif;
+ }
+
+@@ -256,50 +257,68 @@ onMounted(() => {
+   align-items: center;
+   margin-bottom: 15px;
+ }
+
+ .balance-title {
+   font-size: 18px;
+   color: #000;
+   margin: 0;
+ }
+
+ .eye-toggle {
+   background: none;
+   border: none;
+   cursor: pointer;
+   color: #031358;
+   font-size: 18px;
+   padding: 5px;
+ }
+
+ .balance-amount {
+   font-size: 28px;
+   font-weight: bold;
+   color: #031358;
+ }
+
++.pending-amount {
++  display: flex;
++  align-items: center;
++  gap: 8px;
++  font-size: 14px;
++  color: #6b7280;
++  margin-top: 6px;
++}
++
++.pending-label {
++  font-weight: 600;
++}
++
++.pending-value {
++  font-weight: 600;
++  color: #ff9800;
++}
++
+ .hidden {
+   letter-spacing: 3px;
+ }
+
+ .action-buttons {
+   flex: 60%;
+   display: flex;
+   gap: 15px;
+ }
+
+ .action-btn {
+   flex: 1;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   background: white;
+   border: none;
+   border-radius: 12px;
+   padding: 20px 10px;
+   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+   cursor: pointer;
+   transition: transform 0.2s;
+ }
+
+@@ -320,53 +339,56 @@ onMounted(() => {
+ }
+
+ /* Chart Section */
+ .chart-section {
+   background: white;
+   border-radius: 12px;
+   padding: 20px;
+   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+   margin-bottom: 30px;
+ }
+
+ .chart-header {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   margin-bottom: 20px;
+ }
+
+ .month-select {
+   padding: 8px 12px;
+   border: 1px solid #ddd;
+   border-radius: 6px;
+   font-family: 'Ubuntu', sans-serif;
+ }
+
+-.chart-controls-right {
+-  display: flex;
+-  gap: 10px;
++.year-select {
++  padding: 8px 12px;
++  border: 1px solid #ddd;
++  border-radius: 6px;
++  font-family: 'Ubuntu', sans-serif;
++  margin-left: 12px;
+ }
+
+ .chart-btn {
+   display: flex;
+   align-items: center;
+   gap: 8px;
+   padding: 8px 15px;
+   border: 1px solid #031358;
+   border-radius: 6px;
+   background: white;
+   color: #031358;
+   cursor: pointer;
+   font-family: 'Ubuntu', sans-serif;
+   transition: all 0.2s;
+ }
+
+ .chart-btn:hover {
+   background: #031358;
+   color: white;
+ }
+
+ .chart-container {
+   height: 400px;
+   position: relative;
+ }
+@@ -496,26 +518,26 @@ onMounted(() => {
+     justify-content: flex-start;
+     padding: 12px 15px;
+     min-height: auto;
+   }
+
+   .action-btn i {
+     margin-bottom: 0;
+     margin-right: 10px;
+     font-size: 18px;
+   }
+
+   .chart-btn {
+     font-size: 14px;
+     padding: 8px 10px;
+   }
+
+   .transaction-table {
+     font-size: 14px;
+   }
+
+   .transaction-table th,
+   .transaction-table td {
+     padding: 8px;
+   }
+ }
+-</style>
+\ No newline at end of file
++</style>
+>>>>>>> 393b17d28853cd6b48553fd86e8619316721ff10

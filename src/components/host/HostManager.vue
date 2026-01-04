@@ -6,6 +6,14 @@
     </h5>
 
     <div class="d-flex align-items-center justify-content-end gap-2">
+      <button
+          class="header-menu-toggle"
+          title="Ẩn/hiện menu"
+          @click="sidebar.toggle()"
+      >
+        <i class="fa-solid fa-bars"></i>
+        <span class="d-none d-md-inline">Menu</span>
+      </button>
       <NotificationBell />
       <div class="d-flex flex-column align-items-end text-end">
         <div class="fw-semibold text-dark">{{ info.fullName }}</div>
@@ -382,66 +390,66 @@
     </div>
     <div  class="w-100 text-center mb-4">
       <!-- TITLE -->
-      <hr/>
-      <div v-if="selectedType !== 'HOST'" class=" mb-5">
-        <h4 class="fw-bold w-100 text-start">Thống kê môi giới</h4>
-        <h4 class="fw-bold mb-4 " >
-          TOP môi giới chuyên nghiệp tại
-          <span class="text-primary">
-        {{ filters.tinh && filters.tinh.trim() !== ''
-              ? filters.tinh
-              : 'Toàn quốc' }}
-      </span>
-        </h4>
+<!--      <hr/>-->
+<!--      <div v-if="selectedType !== 'HOST'" class=" mb-5">-->
+<!--        <h4 class="fw-bold w-100 text-start">Thống kê môi giới</h4>-->
+<!--        <h4 class="fw-bold mb-4 " >-->
+<!--          TOP môi giới chuyên nghiệp tại-->
+<!--          <span class="text-primary">-->
+<!--        {{ filters.tinh && filters.tinh.trim() !== ''-->
+<!--              ? filters.tinh-->
+<!--              : 'Toàn quốc' }}-->
+<!--      </span>-->
+<!--        </h4>-->
 
-        <!-- CARD LIST -->
-        <div
-            v-if="podiumBrokers.length"
-            class="top-broker-podium"
-        >
-          <div
-              v-for="item in podiumBrokers"
-              :key="item.employeeId"
-              class="broker-card text-center podium-card"
-              :class="[`rank-${item.rank}`]"
-          >
-            <!-- AVATAR -->
+<!--        &lt;!&ndash; CARD LIST &ndash;&gt;-->
+<!--        <div-->
+<!--            v-if="podiumBrokers.length"-->
+<!--            class="top-broker-podium"-->
+<!--        >-->
+<!--          <div-->
+<!--              v-for="item in podiumBrokers"-->
+<!--              :key="item.employeeId"-->
+<!--              class="broker-card text-center podium-card"-->
+<!--              :class="[`rank-${item.rank}`]"-->
+<!--          >-->
+<!--            &lt;!&ndash; AVATAR &ndash;&gt;-->
 
-              <div
-                  v-if="item.rank <= 3"
-                  class="top-text"
-                  :class="getTopClass(item.rank)"
-              >
-                TOP {{ item.rank }}
-              </div>
-              <div class="avatar-wrapper mx-auto">
-                <img
-                    :src="item.avatar
-                ? 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + item.avatar
-                :  'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + 'vat-default.jpg'"
-                    class="avatar-img"
-                />
+<!--              <div-->
+<!--                  v-if="item.rank <= 3"-->
+<!--                  class="top-text"-->
+<!--                  :class="getTopClass(item.rank)"-->
+<!--              >-->
+<!--                TOP {{ item.rank }}-->
+<!--              </div>-->
+<!--              <div class="avatar-wrapper mx-auto">-->
+<!--                <img-->
+<!--                    :src="item.avatar-->
+<!--                ? 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + item.avatar-->
+<!--                :  'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + 'vat-default.jpg'"-->
+<!--                    class="avatar-img"-->
+<!--                />-->
 
-                <!-- BADGE -->
-                <img
-                    src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/huy-hieu.png"
-                    class="badge-icon"
-                    style="width: 45px; height: 45px"
-                />
-              </div>
+<!--                &lt;!&ndash; BADGE &ndash;&gt;-->
+<!--                <img-->
+<!--                    src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/huy-hieu.png"-->
+<!--                    class="badge-icon"-->
+<!--                    style="width: 45px; height: 45px"-->
+<!--                />-->
+<!--              </div>-->
 
-            <!-- NAME -->
-            <h6 class="fw-semibold mt-3 mb-1" style="font-size: 24px">
-              {{ item.fullName }}
-            </h6>
+<!--            &lt;!&ndash; NAME &ndash;&gt;-->
+<!--            <h6 class="fw-semibold mt-3 mb-1" style="font-size: 24px">-->
+<!--              {{ item.fullName }}-->
+<!--            </h6>-->
 
-            <!-- SOLD -->
-            <p class="text-muted small mb-0" style="font-size: 16px">
-              Đã bán {{ item.totalSold }} căn
-            </p>
-          </div>
-        </div>
-      </div>
+<!--            &lt;!&ndash; SOLD &ndash;&gt;-->
+<!--            <p class="text-muted small mb-0" style="font-size: 16px">-->
+<!--              Đã bán {{ item.totalSold }} căn-->
+<!--            </p>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
 
       <div
           v-if="otherBrokers.length"
@@ -530,6 +538,13 @@
           </div>
         </div>
       </section>
+      <!-- Trong template của file chính, sau phần biểu đồ thống kê -->
+      <div v-if="selectedType !== 'HOST'" class="w-100 text-center mb-4">
+        <!-- ... phần top môi giới và biểu đồ ... -->
+
+        <!-- CHÍNH SÁCH THƯỞNG MÔI GIỚI -->
+        <thuong-moi-gioi />
+      </div>
     </div>
 
 
@@ -562,10 +577,14 @@ import api from "/src/api/api.js";
 import provinces from "/src/assets/js/address.json";
 import CreateHostModal from "./CreateHostModal.vue";
 import HostUpdateModal from "./HostUpdateModal.vue";
+import HostDetailModal from "./HostDetailModal.vue";
 import { Bar } from 'vue-chartjs'
 import { useAuthStore } from "/src/stores/authStore.js";
+import { useSidebarStore } from "/src/stores/sidebarStore.js";
+import thuongMoiGioi from "./thuongMoiGioi.vue"
 const authStore = useAuthStore();
 const info = authStore.userInfo;
+const sidebar = useSidebarStore();
 // src/plugins/chart.js
 import {
   Chart as ChartJS,
@@ -1723,6 +1742,27 @@ th {
   animation: shimmer 3s linear infinite;
 }
 
+.header-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #cbd5f5;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
 
+.header-menu-toggle:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
 
+.header-menu-toggle:active {
+  transform: scale(0.98);
+}
 </style>

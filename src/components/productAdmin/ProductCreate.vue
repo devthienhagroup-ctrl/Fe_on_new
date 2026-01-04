@@ -1,7 +1,7 @@
 <template>
   <div class="container-fluid px-4 py-3">
     <!-- Header với Breadcrumb -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center justify-content-between">
       <div>
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb mb-2">
@@ -28,7 +28,13 @@
         <button type="button" class="btn btn-outline-warning d-flex align-items-center gap-2" @click="resetForm">
           <i class="fas fa-redo"></i><span>Đặt lại</span>
         </button>
-        <button type="button" class="btn btn-primary d-flex align-items-center gap-2 px-4" :disabled="isSubmitting" @click="submitForm">
+        <button
+          v-if="isLastTab"
+          type="button"
+          class="btn btn-primary d-flex align-items-center gap-2 px-4"
+          :disabled="isSubmitting"
+          @click="submitForm"
+        >
           <i class="fas fa-save"></i><span>{{ isSubmitting ? 'Đang xử lý...' : 'Lưu tài sản' }}</span>
         </button>
       </div>
@@ -37,8 +43,28 @@
     <div class="card border-0 shadow-sm">
       <div class="card-body p-4">
         <form @submit.prevent>
-                    <!-- Thông tin cơ bản -->
-          <section class="mb-5">
+          <div class="tab-navigation">
+            <ul class="nav nav-tabs flex-wrap">
+              <li v-for="tab in tabs" :key="tab.id" class="nav-item">
+                <button
+                  type="button"
+                  class="nav-link"
+                  :class="{
+                    active: activeTab === tab.id,
+                    completed: isTabCompleted(tab.id),
+                    pending: isTabPending(tab.id),
+                  }"
+                  @click="setActiveTab(tab.id)"
+                >
+                  <i :class="tab.icon" class="me-2"></i>{{ tab.label }}
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <div v-show="activeTab === 'basic'" class="tab-panel">
+            <!-- Thông tin cơ bản -->
+            <section class="mb-5">
             <div class="d-flex align-items-center mb-4 border-bottom pb-3">
               <div class="section-icon bg-primary-light">
                 <i class="fas fa-info-circle text-primary"></i>
@@ -118,26 +144,30 @@
                   <input type="number" min="0" step="1000000" class="form-control" v-model.number="form.giaNoiBo" placeholder="Giá nội bộ">
                   <span class="input-group-text bg-light">VNĐ</span>
                 </div>
+                <div class="d-flex align-items-center justify-content-between mt-1">
                 <small v-if="errors.giaNoiBo" class="text-danger">{{ errors.giaNoiBo }}</small>
-                <small v-else-if="form.giaNoiBo" class="text-info fw-medium mt-1 d-block">
+                <small v-if="form.giaNoiBo" class="text-info fw-medium">
                   <i class="fas fa-chart-line me-1"></i>{{ formatMoneyVN(form.giaNoiBo) }}
                 </small>
+                </div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
                   <i class="fas fa-bullseye text-danger"></i>
-                  <span>Kỳ vọng <span class="text-danger">*</span></span>
+                  <span>Mong muốn <span class="text-danger">*</span></span>
                 </label>
                 <div class="input-group input-group-md">
                   <span class="input-group-text"><i class="fas fa-chart-line"></i></span>
-                  <input  type="number" min="0" step="1000000" class="form-control" v-model.number="form.desire" placeholder="Giá kỳ vọng của chủ sở hữu">
+                  <input  type="number" min="0" step="1000000" class="form-control" v-model.number="form.desire" placeholder="Gía mong muốn của chủ sở hữu">
                   <span class="input-group-text bg-light">VNĐ</span>
                 </div>
+                <div class="d-flex align-items-center justify-content-between mt-1">
                 <small v-if="errors.desire" class="text-danger">{{ errors.desire }}</small>
-                <small v-else-if="form.desire" class="text-info fw-medium mt-1 d-block">
+                <small v-if="form.desire" class="text-info fw-medium">
                   <i class="fas fa-chart-line me-1"></i>{{ formatMoneyVN(form.desire) }}
                 </small>
+                </div>
               </div>
 
               <div class="col-md-2">
@@ -170,10 +200,12 @@
                 </select>
               </div>
             </div>
-          </section>
+            </section>
+          </div>
 
-          <!-- Địa chỉ &amp; vị trí -->
-          <section class="mb-5">
+          <div v-show="activeTab === 'address'" class="tab-panel">
+            <!-- Địa chỉ &amp; vị trí -->
+            <section class="mb-5">
             <div class="d-flex align-items-center mb-4 border-bottom pb-3">
               <div class="section-icon bg-success-light">
                 <i class="fas fa-map-marked-alt text-success"></i>
@@ -184,39 +216,10 @@
               </div>
             </div>
             <div class="row g-4">
-              <div class="col-md-4">
-                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                  <i class="fas fa-map-marker-alt text-danger"></i>
-                  <span>Tỉnh/Thành phố  <span class="text-danger">*</span></span>
-                </label>
-                <select class="form-select form-select-md" v-model="formAddress.province">
-                  <option value="">-- Chọn Tỉnh/TP --</option>
-                  <option v-for="province in provinceOptions" :key="province.code" :value="province.name">{{ province.name }}</option>
-                </select>
-                <small v-if="errors.address" class="text-danger">{{ errors.address }}</small>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                  <i class="fas fa-map-pin text-success"></i>
-                  <span>Xã/Phường <span class="text-danger">*</span></span>
-                </label>
-                <select class="form-select form-select-md" v-model="formAddress.ward" :disabled="!formAddress.province">
-                  <option value="">-- Chọn khu vực --</option>
-                  <option v-for="ward in wardOptions" :key="ward.name" :value="ward.name">{{ ward.name }}</option>
-                </select>
-                <small v-if="errors.address" class="text-danger">{{ errors.address }}</small>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                  <i class="fas fa-road text-secondary"></i>
-                  <span>Số nhà, đường  <span class="text-danger">*</span></span>
-                </label>
-                <input type="text" class="form-control " v-model.trim="formAddress.street" placeholder="Số nhà, tên đường">
-                <small v-if="errors.address" class="text-danger">{{ errors.address }}</small>
-              </div>
-
+              <Address5 v-model="form.address"></Address5>
+              <small v-if="errors.address" class="text-danger">
+                {{ errors.address }}
+              </small>
               <div class="col-md-4">
                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
                   <i class="fas fa-map-pin text-primary"></i>
@@ -261,10 +264,12 @@
                 <small v-if="errors.oldAddress" class="text-danger">{{ errors.oldAddress }}</small>
               </div>
             </div>
-          </section>
+            </section>
+          </div>
 
-          <!-- Thông tin pháp lý &amp; diện tích -->
-          <section class="mb-5">
+          <div v-show="activeTab === 'legal'" class="tab-panel">
+            <!-- Thông tin pháp lý &amp; diện tích -->
+            <section class="mb-5">
             <div class="d-flex align-items-center mb-4 border-bottom pb-3">
               <div class="section-icon bg-warning-light">
                 <i class="fas fa-balance-scale text-warning"></i>
@@ -364,6 +369,7 @@
                 <select class="form-select form-select-md" v-model="form.status">
                   <option value="">-- Chọn tình trạng --</option>
                   <option value="Chưa định giá">Mới</option>
+                  <option value="Bán giải pháp">Bán giải pháp</option>
                   <option value="Bán nhanh 30 ngày">Bán nhanh 30 ngày</option>
                   <option value="Đã bán">Đã bán</option>
                 </select>
@@ -469,10 +475,10 @@
                 <small v-if="errors.structure" class="text-danger">{{ errors.structure }}</small>
               </div>
             </div>
-          </section>
+            </section>
 
-          <!-- Người bán thành công -->
-          <section v-if="isSold" class="mb-5">
+            <!-- Người bán thành công -->
+            <section v-if="isSold" class="mb-5">
             <div class="d-flex align-items-center mb-4 border-bottom pb-3">
               <div class="section-icon bg-success-light">
                 <i class="fas fa-user-check text-success"></i>
@@ -545,10 +551,12 @@
 
               </div>
             </div>
-          </section>
+            </section>
+          </div>
 
-          <!-- Thông tin nhà (Chỉ hiển thị khi là nhà) -->
-          <section v-if="isHouse" class="mb-5">
+          <div v-show="activeTab === 'house' && isHouse" class="tab-panel">
+            <!-- Thông tin nhà (Chỉ hiển thị khi là nhà) -->
+            <section class="mb-5">
             <div class="d-flex align-items-center mb-4 border-bottom pb-3">
               <div class="section-icon bg-warning-light">
                 <i class="fas fa-home text-warning"></i>
@@ -698,10 +706,10 @@
               </div>
 
             </div>
-          </section>
+            </section>
 
-          <!-- Danh sách phòng -->
-          <section v-if="isHouse" class="mb-5">
+            <!-- Danh sách phòng -->
+            <section class="mb-5">
             <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
               <div class="d-flex align-items-center">
                 <div class="section-icon bg-info-light">
@@ -803,10 +811,70 @@
               </table>
               <div v-if="errors.rooms" class="text-danger small mt-2">{{ errors.rooms }}</div>
             </div>
-          </section>
+            </section>
+          </div>
 
-          <!-- Thông tin chủ tài sản -->
-          <section class="mb-5">
+          <div v-show="activeTab === 'manager'" class="tab-panel">
+            <section class="mb-5">
+              <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                <div class="section-icon bg-warning-light">
+                  <i class="fas fa-user-shield text-warning"></i>
+                </div>
+                <div>
+                  <h2 class="h5 fw-bold mb-1">Thông tin người quản lý( để trống -> mặc định là bạn )</h2>
+                  <p class="text-muted small mb-0">Tìm kiếm người quản lý trong hệ thống</p>
+                </div>
+              </div>
+
+              <div class="owner-mode-card">
+                <div class="row g-3 align-items-end">
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                      <i class="fas fa-search text-primary"></i>
+                      <span>Tìm người quản lý <span class="text-danger">*</span></span>
+                    </label>
+                    <div class="input-group input-group-md">
+                      <span class="input-group-text bg-light"><i class="fas fa-search text-muted"></i></span>
+                      <input
+                        type="text"
+                        class="form-control"
+                        v-model.trim="managerSearch"
+                        placeholder="Nhập số điện thoại hoặc email"
+                      >
+                    </div>
+                    <small v-if="errors.managerSearch" class="text-danger">{{ errors.managerSearch }}</small>
+                  </div>
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-primary w-100" @click="handleManagerLookup">
+                      <i class="fas fa-search me-1"></i>Tìm
+                    </button>
+                  </div>
+                </div>
+                <div v-if="managerLookupMessage" class="mt-3">
+                  <div :class="['alert', managerLookupMessage.includes('thành công') ? 'alert-success' : 'alert-danger', 'py-2 small']">
+                    <i :class="managerLookupMessage.includes('thành công') ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
+                    {{ managerLookupMessage }}
+                  </div>
+                </div>
+                <div v-if="hasManager" class="owner-info-card mt-3">
+                  <div class="owner-info-header">
+                    <i class="fas fa-user-check"></i>
+                    <span>Người quản lý trong hệ thống</span>
+                  </div>
+                  <div class="owner-info-body">
+                    <div class="owner-name">{{ managerInfo.fullName }}</div>
+                    <div class="owner-meta">
+                      <i class="fas fa-phone text-primary me-2"></i>{{ managerInfo.phone }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div v-show="activeTab === 'owner'" class="tab-panel">
+            <!-- Thông tin chủ tài sản -->
+            <section class="mb-5">
             <div class="d-flex align-items-center mb-4 border-bottom pb-3">
               <div class="section-icon bg-danger-light">
                 <i class="fas fa-user-tie text-danger"></i>
@@ -817,81 +885,208 @@
               </div>
             </div>
 
-            <div class="alert alert-warning border-warning bg-warning-light mb-4" v-if="isLookupMode">
-              <div class="d-flex align-items-start">
-                <i class="fas fa-info-circle mt-1 me-2 text-warning"></i>
-                <div>
-                  <p class="mb-1 fw-medium">Chế độ tìm kiếm chủ tài sản</p>
-                  <p class="small mb-0">Đối với hạng "Hợp tác" và "Bán nhanh 30 ngày", hệ thống sẽ tự động tìm và khóa thông tin khi tìm thấy chủ tài sản.</p>
-                </div>
+            <div class="owner-mode-switch mb-4">
+              <div class="form-check">
+                <input
+                    id="owner-nonsystem"
+                    v-model="ownerMode"
+                    class="form-check-input"
+                    type="radio"
+                    value="nonSystem"
+                />
+                <label class="form-check-label fw-semibold" for="owner-nonsystem">
+                  Chủ tài sản không sử dụng hệ thống
+                </label>
               </div>
+              <div class="form-check">
+                <input
+                  id="owner-system"
+                  v-model="ownerMode"
+                  class="form-check-input"
+                  type="radio"
+                  value="system"
+                />
+                <label class="form-check-label fw-semibold" for="owner-system">
+                  Chủ tài sản có sử dụng hệ thống
+                </label>
+              </div>
+
             </div>
 
-            <div class="row g-4">
-              <div class="col-md-4" v-if="isLookupMode">
-                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                  <i class="fas fa-search text-primary"></i>
-                  <span>Tìm chủ tài sản  <span class="text-danger">*</span></span>
-                </label>
-                <div class="input-group input-group-md">
-                  <span class="input-group-text bg-light"><i class="fas fa-search text-muted"></i></span>
-                  <input type="text" class="form-control" v-model.trim="ownerSearch"
-                         @blur="handleOwnerLookup"
-                         placeholder="Nhập số điện thoại hoặc email">
+            <div v-if="isSystemOwnerMode" class="owner-mode-card">
+              <div class="row g-3 align-items-end">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <i class="fas fa-search text-primary"></i>
+                    <span>Tìm chủ tài sản  <span class="text-danger">*</span></span>
+                  </label>
+                  <div class="input-group input-group-md">
+                    <span class="input-group-text bg-light"><i class="fas fa-search text-muted"></i></span>
+                    <input
+                      type="text"
+                      class="form-control"
+                      v-model.trim="ownerSearch"
+                      placeholder="Nhập số điện thoại hoặc email"
+                    >
+                  </div>
+                  <small v-if="errors.ownerSearch" class="text-danger">{{ errors.ownerSearch }}</small>
                 </div>
-                <div v-if="ownerLookupMessage" class="mt-2">
-                  <div :class="['alert', ownerLookupMessage.includes('thành công') ? 'alert-success' : 'alert-danger', 'py-2 small']">
-                    <i :class="ownerLookupMessage.includes('thành công') ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
-                    {{ ownerLookupMessage }}
+                <div class="col-md-2">
+                  <button type="button" class="btn btn-primary w-100" @click="handleOwnerLookup">
+                    <i class="fas fa-search me-1"></i>Tìm
+                  </button>
+                </div>
+              </div>
+              <div v-if="ownerLookupMessage" class="mt-3">
+                <div :class="['alert', ownerLookupMessage.includes('thành công') ? 'alert-success' : 'alert-danger', 'py-2 small']">
+                  <i :class="ownerLookupMessage.includes('thành công') ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
+                  {{ ownerLookupMessage }}
+                </div>
+              </div>
+              <div v-if="hasSystemOwner" class="owner-info-card mt-3">
+                <div class="owner-info-header">
+                  <i class="fas fa-user-check"></i>
+                  <span>Chủ tài sản trong hệ thống</span>
+                </div>
+                <div class="owner-info-body">
+                  <div class="owner-name">{{ form.ownerFullName }}</div>
+                  <div class="owner-meta">
+                    <i class="fas fa-phone text-primary me-2"></i>{{ form.ownerPhone }}
                   </div>
                 </div>
-                <small v-if="errors.ownerSearch" class="text-danger">{{ errors.ownerSearch }}</small>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                  <i class="fas fa-user text-success"></i>
-                  <span>Họ tên chủ  <span class="text-danger">*</span></span>
-                </label>
-                <div class="input-group input-group-md">
-                  <span class="input-group-text bg-light"><i class="fas fa-user text-muted"></i></span>
-                  <input type="text" class="form-control" v-model.trim="form.ownerFullName"
-                         :readonly="isLookupMode && form.ownerId"
-                         :class="{'bg-light': isLookupMode && form.ownerId}"
-                         placeholder="Họ và tên đầy đủ">
-                </div>
-                <small v-if="errors.ownerFullName" class="text-danger">{{ errors.ownerFullName }}</small>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                  <i class="fas fa-phone text-info"></i>
-                  <span>Số điện thoại  <span class="text-danger">*</span></span>
-                </label>
-                <div class="input-group input-group-md">
-                  <span class="input-group-text bg-light"><i class="fas fa-phone text-muted"></i></span>
-                  <input type="text" class="form-control" v-model.trim="form.ownerPhone"
-                         :readonly="isLookupMode && form.ownerId"
-                         :class="{'bg-light': isLookupMode && form.ownerId}"
-                         placeholder="Số điện thoại liên hệ">
-                </div>
-                <small v-if="errors.ownerPhone" class="text-danger">{{ errors.ownerPhone }}</small>
               </div>
             </div>
-            <div class="row g-4 mt-2">
+
+            <div v-else class="owner-mode-card">
+              <div class="d-flex gap-3 flex-wrap mb-3">
+                <div class="form-check">
+                  <input
+                      id="owner-new"
+                      v-model="nonSystemOwnerOption"
+                      class="form-check-input"
+                      type="radio"
+                      value="new"
+                  />
+                  <label class="form-check-label" for="owner-new">Nhập chủ mới</label>
+                </div>
+                <div class="form-check">
+                  <input
+                    id="owner-existing"
+                    v-model="nonSystemOwnerOption"
+                    class="form-check-input"
+                    type="radio"
+                    value="existing"
+                  />
+                  <label class="form-check-label" for="owner-existing">Chọn chủ đã có</label>
+                </div>
+
+              </div>
+
+              <div v-if="nonSystemOwnerOption === 'existing'" class="row g-3 align-items-end">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Tìm chủ theo SĐT <span class="text-danger">*</span></label>
+                  <input
+                    v-model.trim="nonSystemOwnerSearch"
+                    type="tel"
+                    class="form-control"
+                    placeholder="Nhập số điện thoại chủ"
+                  />
+                  <small v-if="errors.nonSystemOwnerSearch" class="text-danger">{{ errors.nonSystemOwnerSearch }}</small>
+                </div>
+                <div class="col-md-2">
+                  <button type="button" class="btn btn-primary w-100" @click="handleNonSystemOwnerLookup">
+                    <i class="fas fa-search me-1"></i>Tìm
+                  </button>
+                </div>
+
+                <div v-if="nonSystemLookupMessage" class="col-12">
+                  <div :class="['alert', nonSystemLookupMessage.includes('thành công') ? 'alert-success' : 'alert-danger', 'py-2 small']">
+                    <i :class="nonSystemLookupMessage.includes('thành công') ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
+                    {{ nonSystemLookupMessage }}
+                  </div>
+                </div>
+
+                <div v-if="nonSystemExistingOwner" class="col-12">
+                  <div class="owner-info-card">
+                    <div class="owner-info-header">
+                      <i class="fas fa-user"></i>
+                      <span>Chủ tài sản đã có</span>
+                    </div>
+                    <div class="owner-info-body">
+                      <div class="owner-name">{{ nonSystemExistingOwner.fullName }}</div>
+                      <div class="owner-meta">
+                        <i class="fas fa-phone text-primary me-2"></i>{{ nonSystemExistingOwner.phone }}
+                      </div>
+                      <div v-if="nonSystemExistingOwner.newAddress" class="owner-meta">
+                        <i class="fas fa-location-dot text-danger me-2"></i>{{ formatAddress(nonSystemExistingOwner.newAddress) }}
+                      </div>
+                      <div v-if="nonSystemExistingOwner.oldAddress" class="owner-note text-muted">
+                        Địa chỉ cũ: {{ nonSystemExistingOwner.oldAddress }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div v-else class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Họ và tên chủ mới <span class="text-danger">*</span></label>
+                  <input
+                    v-model="nonSystemNewOwner.fullName"
+                    type="text"
+                    class="form-control"
+                    placeholder="Nhập họ tên chủ mới"
+                  />
+                  <small v-if="errors.ownerFullName" class="text-danger">{{ errors.ownerFullName }}</small>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
+                  <input
+                    v-model="nonSystemNewOwner.phone"
+                    type="tel"
+                    class="form-control"
+                    placeholder="Nhập số điện thoại chủ mới"
+                  />
+                  <small v-if="errors.ownerPhone" class="text-danger">{{ errors.ownerPhone }}</small>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label fw-semibold">Giới tính</label>
+                  <select v-model="nonSystemNewOwner.gender" class="form-select">
+                    <option :value="null">Không xác định</option>
+                    <option :value="true">Nam</option>
+                    <option :value="false">Nữ</option>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <Address5 v-model="nonSystemNewOwner.newAddress"></Address5>
+                  <small v-if="errors.ownerNewAddress" class="text-danger">{{ errors.ownerNewAddress }}</small>
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-semibold">Địa chỉ cũ (nếu có)</label>
+                  <input
+                    v-model="nonSystemNewOwner.oldAddress"
+                    type="text"
+                    class="form-control"
+                    placeholder="Nhập địa chỉ cũ"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-4 mt-4">
               <div class="col-md-4">
                 <label class="form-label fw-semibold">
                   Liên hệ <span class="text-danger"> *</span>
                 </label>
 
                 <input
-                    v-model="form.lienHeMoKhoa"
-                    type="tel"
-                    class="form-control"
-                    placeholder="VD: 0909 123 456"
+                  v-model="form.lienHeMoKhoa"
+                  type="tel"
+                  class="form-control"
+                  placeholder="VD: 0909 123 456"
                 />
+                <small v-if="errors.lienHeMoKhoa" class="text-danger">{{ errors.lienHeMoKhoa }}</small>
               </div>
-              <small v-if="errors.lienHeMoKhoa" class="text-danger">{{ errors.lienHeMoKhoa }}</small>
               <!-- Hiện thông tin chủ khi MG mở khóa -->
               <div class="col-md-4">
                 <label class="form-label fw-semibold">
@@ -915,12 +1110,35 @@
                   <option :value="false">Không</option>
                 </select>
               </div>
-
-              <!-- Liên hệ khi mở khóa -->
-
             </div>
 
 
+          </section>
+
+          <!-- Mô tả ngắn -->
+          <section class="mb-4">
+            <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+              <div class="section-icon bg-info-light">
+                <i class="fas fa-pen-nib text-info"></i>
+              </div>
+              <div>
+                <h2 class="h5 fw-bold mb-1">Mô tả ngắn</h2>
+                <p class="text-muted small mb-0">Tóm tắt nhanh nổi bật của tài sản</p>
+              </div>
+            </div>
+
+            <div class="short-description-card">
+              <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                <i class="fas fa-align-left text-primary"></i>
+                <span>Nội dung mô tả</span>
+              </label>
+              <textarea
+                  class="form-control short-description-input"
+                  rows="4"
+                  v-model.trim="form.moTaNgan"
+                  placeholder="Ví dụ: Nhà góc 2 mặt tiền, gần trung tâm, phù hợp kinh doanh..."></textarea>
+              <small v-if="errors.moTaNgan" class="text-danger">{{ errors.moTaNgan }}</small>
+            </div>
           </section>
 
           <!-- Upload hồ sơ -->
@@ -944,13 +1162,28 @@
                 @update:files="handleFileUpdate"
             />
             <div v-if="errors.files" class="text-danger small mt-2">{{ errors.files }}</div>
+            <div v-if="errors.mainImage" class="text-danger small mt-2">{{ errors.mainImage }}</div>
           </section>
+          </div>
+
+          <div class="tab-actions d-flex justify-content-between align-items-center mt-4">
+            <button type="button" class="btn btn-outline-secondary" :disabled="isFirstTab" @click="goToPrevTab">
+              <i class="fas fa-arrow-left me-2"></i>Quay lại
+            </button>
+            <button v-if="!isLastTab" type="button" class="btn btn-primary" @click="goToNextTab">
+              Tiếp theo<i class="fas fa-arrow-right ms-2"></i>
+            </button>
+            <button
+                v-else
+                type="button"
+                class="btn btn-primary d-flex align-items-center gap-2 px-4"
+                :disabled="isSubmitting"
+                @click="submitForm"
+            >
+              <i class="fas fa-save"></i><span>{{ isSubmitting ? 'Đang xử lý...' : 'Lưu sản phẩm' }}</span>
+            </button>
+          </div>
         </form>
-        <div class="d-flex gap-2">
-          <button type="button" class="btn btn-primary d-flex align-items-center gap-2 px-4" :disabled="isSubmitting" @click="submitForm">
-            <i class="fas fa-save"></i><span>{{ isSubmitting ? 'Đang xử lý...' : 'Lưu sản phẩm' }}</span>
-          </button>
-        </div>
       </div>
     </div>
   </div>
@@ -959,10 +1192,12 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import api from '/src/api/api.js'
-import FileOrLand from '../land/FileOrLand.vue'
+import FileOrLand from './FileNew.vue'
 import addressData from '/src/assets/js/address.json'
-import {showLoading, updateAlertSuccess} from "../../assets/js/alertService.js";
+import {showLoading, updateAlertError, updateAlertSuccess} from "../../assets/js/alertService.js";
 import router from "../../router/index.js";
+import Address5 from "./Address5.vue";
+import {useAuthStore} from "../../stores/authStore.js";
 
 const handleNguoiBanLookup = async () => {
   if (!form.nguoiBanSearch) {
@@ -1016,6 +1251,7 @@ function formatMoneyVN(value) {
 const defaultRoom = () => ({ loaiPhong: '', soLuong: null, dienTich: null, moTa: '' })
 
 const form = reactive({
+  address: '',
   oldAddress: '',
   plotNumber: '',
   parcelNumber: '',
@@ -1054,6 +1290,13 @@ const form = reactive({
   ownerId: null,
   ownerFullName: '',
   ownerPhone: '',
+  ownerMode: 'system',
+  ownerOption: 'existing',
+  ownerGender: null,
+  ownerNewAddress: '',
+  ownerOldAddress: '',
+  nguoiQuanLyID: null,
+  moTaNgan: '',
   rooms: [defaultRoom()],
   hienThongTinChuKhiMoKhoa: true,
   hienLienHeKhiMoKhoa: true,
@@ -1065,12 +1308,30 @@ const form = reactive({
 
 })
 
-const formAddress = reactive({ street: '', ward: '', province: '' })
+
 const uploadedFiles = ref([])
 
 const errors = reactive({})
 const ownerSearch = ref('')
 const ownerLookupMessage = ref('')
+const ownerMode = ref('nonSystem')
+const managerSearch = ref('')
+const managerLookupMessage = ref('')
+const managerInfo = reactive({
+  fullName: '',
+  phone: '',
+})
+const nonSystemOwnerOption = ref('new')
+const nonSystemOwnerSearch = ref('')
+const nonSystemLookupMessage = ref('')
+const nonSystemExistingOwner = ref(null)
+const nonSystemNewOwner = reactive({
+  fullName: '',
+  phone: '',
+  gender: null,
+  newAddress: '',
+  oldAddress: '',
+})
 const isSubmitting = ref(false)
 
 const provinces = addressData || []
@@ -1078,7 +1339,36 @@ const provinceOptions = computed(() => provinces)
 const selectedProvince = computed(() => provinceOptions.value.find((p) => normalizeText(p.name) === normalizeText(formAddress.province)))
 const wardOptions = computed(() => selectedProvince.value?.wards || [])
 const isHouse = computed(() => form.loaiTaiSan === 'NHA')
-const isLookupMode = computed(() => ['HOPTAC', 'BN30N'].includes(form.phanLoaiHang))
+const isSystemOwnerMode = computed(() => ownerMode.value === 'system')
+const hasSystemOwner = computed(() => isSystemOwnerMode.value && form.ownerFullName && form.ownerPhone)
+const hasManager = computed(() => form.nguoiQuanLyID && managerInfo.fullName && managerInfo.phone)
+
+const tabs = computed(() => {
+  const baseTabs = [
+    { id: 'basic', label: 'Thông tin cơ bản', icon: 'fas fa-info-circle' },
+    { id: 'address', label: 'Địa chỉ', icon: 'fas fa-map-marked-alt' },
+    { id: 'legal', label: 'Pháp lý & diện tích', icon: 'fas fa-balance-scale' },
+  ]
+
+  if (isHouse.value) {
+    baseTabs.push({id: 'house', label: 'Thông tin nhà & phòng', icon: 'fas fa-home'})
+  }
+
+  if ( useAuthStore().hasPermission('PRODUCT_EDIT_MANAGER') ){
+    baseTabs.push({ id: 'manager', label: 'Người quản lý', icon: 'fas fa-user-shield' })
+  }
+
+  baseTabs.push({ id: 'owner', label: 'Chủ tài sản & hồ sơ', icon: 'fas fa-user-tie' })
+  return baseTabs
+})
+
+const activeTab = ref('basic')
+const tabOrder = computed(() => tabs.value.map((tab) => tab.id))
+const isFirstTab = computed(() => tabOrder.value.indexOf(activeTab.value) === 0)
+const isLastTab = computed(() => tabOrder.value.indexOf(activeTab.value) === tabOrder.value.length - 1)
+const getTabIndex = (tabId) => tabOrder.value.indexOf(tabId)
+const isTabCompleted = (tabId) => getTabIndex(tabId) < getTabIndex(activeTab.value)
+const isTabPending = (tabId) => getTabIndex(tabId) > getTabIndex(activeTab.value)
 
 // Helper functions
 const getLoaiTaiSanText = (value) => {
@@ -1101,31 +1391,66 @@ watch(
       }
     }
 )
+watch(isHouse, (value) => {
+  if (!value && activeTab.value === 'house') {
+    activeTab.value = 'legal'
+  }
+})
 
-watch(
-    () => formAddress.province,
-    (newProvince) => {
-      const province = provinceOptions.value.find((p) => normalizeText(p.name) === normalizeText(newProvince))
-      if (!province) {
-        formAddress.ward = ''
-        return
-      }
-      const wardStillValid = province.wards.find((ward) => normalizeText(ward.name) === normalizeText(formAddress.ward))
-      if (!wardStillValid) {
-        formAddress.ward = ''
-      }
-    }
-)
-
-watch(() => form.phanLoaiHang, () => {
+watch(ownerMode, (value) => {
+  form.ownerMode = value
   ownerLookupMessage.value = ''
   errors.ownerSearch = ''
-  if (isLookupMode.value) {
+  nonSystemLookupMessage.value = ''
+  errors.nonSystemOwnerSearch = ''
+
+  if (value === 'system') {
+    nonSystemOwnerSearch.value = ''
+    nonSystemExistingOwner.value = null
+    Object.assign(nonSystemNewOwner, {
+      fullName: '',
+      phone: '',
+      gender: null,
+      newAddress: '',
+      oldAddress: '',
+    })
+    form.ownerOption = nonSystemOwnerOption.value
+    form.ownerGender = null
+    form.ownerNewAddress = ''
+    form.ownerOldAddress = ''
+  } else {
+    ownerSearch.value = ''
+    form.ownerId = null
     form.ownerFullName = ''
     form.ownerPhone = ''
+  }
+})
+
+watch(nonSystemOwnerOption, (value) => {
+  form.ownerOption = value
+  nonSystemLookupMessage.value = ''
+  errors.nonSystemOwnerSearch = ''
+  nonSystemExistingOwner.value = null
+  if (value === 'existing') {
+    Object.assign(nonSystemNewOwner, {
+      fullName: '',
+      phone: '',
+      gender: null,
+      newAddress: '',
+      oldAddress: '',
+    })
+  } else {
     form.ownerId = null
   }
 })
+
+watch(nonSystemNewOwner, (value) => {
+  form.ownerFullName = value.fullName || ''
+  form.ownerPhone = value.phone || ''
+  form.ownerGender = value.gender ?? null
+  form.ownerNewAddress = value.newAddress || ''
+  form.ownerOldAddress = value.oldAddress || ''
+}, { deep: true })
 
 const addRoom = () => {
   form.rooms.push(defaultRoom())
@@ -1151,11 +1476,279 @@ const requireTextField = (value, key, message) => {
 
 const requireNumberField = (value, key, message, allowZero = false) => {
   const numberValue = Number(value)
-  if (value === null || value === undefined || value === '' || Number.isNaN(numberValue) || (!allowZero && numberValue <= 0)) {
+  if (value === null || value === undefined || value === '' || Number.isNaN(numberValue) || (!allowZero && numberValue < 0)) {
     errors[key] = message
     return false
   }
   return true
+}
+
+const formatAddress = (address) => {
+  if (!address) return ''
+  return address.replace(/\s*\/!!\s*/g, ', ')
+}
+
+const clearErrors = (fields) => {
+  fields.forEach((field) => {
+    if (errors[field]) {
+      delete errors[field]
+    }
+  })
+}
+
+const validateOwnerSection = () => {
+  let valid = true
+
+  if (ownerMode.value === 'system') {
+    if (!ownerSearch.value) {
+      errors.ownerSearch = 'Nhập phone hoặc email để tìm kiếm'
+      valid = false
+    } else if (!form.ownerId) {
+      errors.ownerSearch = 'Chưa tìm thấy chủ tài sản'
+      valid = false
+    }
+  } else if (nonSystemOwnerOption.value === 'existing') {
+    if (!nonSystemOwnerSearch.value) {
+      errors.nonSystemOwnerSearch = 'Nhập số điện thoại để tìm kiếm'
+      valid = false
+    } else if (!nonSystemExistingOwner.value) {
+      errors.nonSystemOwnerSearch = 'Chưa chọn được chủ đã có'
+      valid = false
+    }
+  } else {
+    if (!nonSystemNewOwner.fullName) {
+      errors.ownerFullName = 'Nhập họ tên chủ'
+      valid = false
+    }
+    if (!nonSystemNewOwner.phone) {
+      errors.ownerPhone = 'Nhập số điện thoại'
+      valid = false
+    } else if (!isValidVietnamPhone(nonSystemNewOwner.phone)) {
+      errors.ownerPhone = 'Số điện thoại không đúng định dạng'
+      valid = false
+    }
+    if (!nonSystemNewOwner.newAddress) {
+      errors.ownerNewAddress = 'Nhập địa chỉ mới'
+      valid = false
+    }
+  }
+
+  if (!form.lienHeMoKhoa) {
+    errors.lienHeMoKhoa = 'Vui lòng nhập số điện thoại liên hệ'
+    valid = false
+  } else if (!isValidVietnamPhone(form.lienHeMoKhoa)) {
+    errors.lienHeMoKhoa = 'Số điện thoại không đúng định dạng'
+    valid = false
+  }
+
+  return valid
+}
+
+const validateManagerSection = () => {
+  return  true
+}
+
+const validateTab = (tabId) => {
+  let isValid = true
+  const track = (valid) => {
+    if (!valid) isValid = false
+  }
+
+  if (tabId === 'basic') {
+    clearErrors(['loaiTaiSan', 'phanLoaiHang', 'donViSoHuu', 'giaBan', 'giaNoiBo', 'desire', 'phiMoiGioi'])
+    track(requireTextField(form.loaiTaiSan, 'loaiTaiSan', 'Bắt buộc chọn loại tài sản'))
+    track(requireTextField(form.phanLoaiHang, 'phanLoaiHang', 'Bắt buộc chọn phân loại'))
+    track(requireTextField(form.donViSoHuu, 'donViSoHuu', 'Chọn đơn vị sở hữu'))
+    track(requireNumberField(form.giaBan, 'giaBan', 'Vui lòng nhập giá bán hợp lệ'))
+    track(requireNumberField(form.giaNoiBo, 'giaNoiBo', 'Nhập giá nội bộ'))
+    track(requireNumberField(form.desire, 'desire', 'Nhập giá mong muốn'))
+    track(requireNumberField(form.phiMoiGioi, 'phiMoiGioi', 'Nhập phí môi giới', true))
+  }
+
+  if (tabId === 'address') {
+    clearErrors(['address', 'landPosition'])
+    if (!form.address) {
+      errors.address = 'Vui lòng nhập đầy đủ địa chỉ'
+      isValid = false
+    } else {
+      const parts = form.address.split('/!!')
+      if (parts.length < 3 || parts.some(p => !p || !p.trim())) {
+        errors.address = 'Vui lòng nhập đầy đủ địa chỉ'
+        isValid = false
+      }
+    }
+    track(requireTextField(form.landPosition, 'landPosition', 'Nhập vị trí đất'))
+  }
+
+  if (tabId === 'legal') {
+    clearErrors([
+      'plotNumber',
+      'parcelNumber',
+      'totalArea',
+      'ownershipRelation',
+      'landUseRight',
+      'status',
+      'matTienNha',
+      'chieuNgang',
+      'chieuDai',
+      'hienTrangDat',
+      'doRongDuong',
+      'loGioi',
+      'structure',
+      'nguoiBanSearch',
+      'giaBanThanhCong',
+    ])
+    track(requireTextField(form.plotNumber, 'plotNumber', 'Nhập số thửa'))
+    track(requireTextField(form.parcelNumber, 'parcelNumber', 'Nhập số tờ'))
+    track(requireNumberField(form.totalArea, 'totalArea', 'Nhập tổng diện tích hợp lệ'))
+    track(requireTextField(form.ownershipRelation, 'ownershipRelation', 'Nhập quan hệ sở hữu'))
+    track(requireTextField(form.landUseRight, 'landUseRight', 'Nhập quyền sử dụng đất'))
+    track(requireTextField(form.status, 'status', 'Chọn tình trạng'))
+    track(requireNumberField(form.matTienNha, 'matTienNha', 'Nhập mặt tiền hợp lệ'))
+    track(requireNumberField(form.chieuNgang, 'chieuNgang', 'Nhập chiều ngang hợp lệ'))
+    track(requireNumberField(form.chieuDai, 'chieuDai', 'Nhập chiều dài hợp lệ'))
+    track(requireTextField(form.hienTrangDat, 'hienTrangDat', 'Nhập hiện trạng đất'))
+    track(requireNumberField(form.doRongDuong, 'doRongDuong', 'Nhập độ rộng đường hợp lệ'))
+    track(requireNumberField(form.loGioi, 'loGioi', 'Nhập lộ giới hợp lệ'))
+    track(requireTextField(form.structure, 'structure', 'Nhập mô tả hình dạng/kết cấu'))
+
+    if (isSold.value) {
+      if (!form.nguoiBanId) {
+        errors.nguoiBanSearch = 'Bắt buộc chọn người bán'
+        isValid = false
+      }
+      if (!form.giaBanThanhCong || form.giaBanThanhCong <= 0) {
+        errors.giaBanThanhCong = 'Nhập giá bán thành công'
+        isValid = false
+      }
+    }
+  }
+
+  if (tabId === 'house' && isHouse.value) {
+    clearErrors([
+      'floorArea',
+      'loaiNha',
+      'tongSoPhong',
+      'soPhongNgu',
+      'soPhongTam',
+      'soTang',
+      'noiThat',
+      'hienTrangNha',
+      'namXayDung',
+      'rooms',
+      'soLau',
+    ])
+    track(requireNumberField(form.floorArea, 'floorArea', 'Nhập diện tích sàn hợp lệ'))
+    track(requireTextField(form.loaiNha, 'loaiNha', 'Nhập loại nhà'))
+    track(requireNumberField(form.tongSoPhong, 'tongSoPhong', 'Nhập tổng số phòng'))
+    track(requireNumberField(form.soPhongNgu, 'soPhongNgu', 'Nhập số phòng ngủ'))
+    track(requireNumberField(form.soPhongTam, 'soPhongTam', 'Nhập số phòng tắm'))
+    track(requireNumberField(form.soTang, 'soTang', 'Nhập số tầng'))
+    track(requireTextField(form.noiThat, 'noiThat', 'Nhập thông tin nội thất'))
+    track(requireTextField(form.hienTrangNha, 'hienTrangNha', 'Nhập hiện trạng nhà'))
+    track(requireTextField(form.namXayDung, 'namXayDung', 'Nhập năm xây dựng'))
+
+    if (form.soLau == null) {
+      errors.soLau = 'Nhập số lầu'
+      isValid = false
+    }
+
+    const hasRooms = form.rooms.length > 0
+    const invalidRoom = form.rooms.some((room) => {
+      const hasLoaiPhong = normalizeText(room.loaiPhong)
+      const hasSoLuong = typeof room.soLuong === 'number' && room.soLuong > 0
+      const hasDienTich = typeof room.dienTich === 'number' && room.dienTich > 0
+      const hasMoTa = normalizeText(room.moTa)
+      return !(hasLoaiPhong && hasSoLuong && hasDienTich && hasMoTa)
+    })
+
+    if (!hasRooms || invalidRoom) {
+      errors.rooms = 'Nhà phải có ít nhất 1 phòng và điền đủ loại phòng, số lượng, diện tích, mô tả'
+      isValid = false
+    }
+  }
+
+  if (tabId === 'manager') {
+    clearErrors(['managerSearch'])
+    track(validateManagerSection())
+  }
+
+  return isValid
+}
+
+const setActiveTab = (tabId) => {
+  if (!tabOrder.value.includes(tabId) || tabId === activeTab.value) return
+  const currentIndex = tabOrder.value.indexOf(activeTab.value)
+  const nextIndex = tabOrder.value.indexOf(tabId)
+  if (nextIndex > currentIndex && !validateTab(activeTab.value)) return
+  activeTab.value = tabId
+}
+
+const goToNextTab = () => {
+  const currentIndex = tabOrder.value.indexOf(activeTab.value)
+  const nextTab = tabOrder.value[currentIndex + 1]
+  if (!nextTab) return
+  if (!validateTab(activeTab.value)) return
+  activeTab.value = nextTab
+}
+
+const goToPrevTab = () => {
+  const currentIndex = tabOrder.value.indexOf(activeTab.value)
+  const prevTab = tabOrder.value[currentIndex - 1]
+  if (!prevTab) return
+  activeTab.value = prevTab
+}
+
+const tabFieldMap = {
+  basic: ['loaiTaiSan', 'phanLoaiHang', 'donViSoHuu', 'giaBan', 'giaNoiBo', 'desire', 'phiMoiGioi'],
+  address: ['address', 'landPosition', 'oldAddress'],
+  legal: [
+    'plotNumber',
+    'parcelNumber',
+    'totalArea',
+    'ownershipRelation',
+    'landUseRight',
+    'status',
+    'matTienNha',
+    'chieuNgang',
+    'chieuDai',
+    'hienTrangDat',
+    'doRongDuong',
+    'loGioi',
+    'structure',
+    'nguoiBanSearch',
+    'giaBanThanhCong',
+  ],
+  house: [
+    'floorArea',
+    'loaiNha',
+    'tongSoPhong',
+    'soPhongNgu',
+    'soPhongTam',
+    'soTang',
+    'noiThat',
+    'hienTrangNha',
+    'namXayDung',
+    'rooms',
+    'soLau',
+  ],
+  manager: ['managerSearch'],
+  owner: [
+    'ownerSearch',
+    'nonSystemOwnerSearch',
+    'ownerFullName',
+    'ownerPhone',
+    'ownerNewAddress',
+    'lienHeMoKhoa',
+    'moTaNgan',
+    'files',
+    'mainImage',
+  ],
+}
+
+const findTabForField = (field) => {
+  const order = tabOrder.value
+  return order.find((tab) => tabFieldMap[tab]?.includes(field)) || 'basic'
 }
 
 const validateForm = () => {
@@ -1172,12 +1765,19 @@ const validateForm = () => {
   track(requireTextField(form.donViSoHuu, 'donViSoHuu', 'Chọn đơn vị sở hữu'))
   track(requireNumberField(form.giaBan, 'giaBan', 'Vui lòng nhập giá bán hợp lệ'))
   track(requireNumberField(form.giaNoiBo, 'giaNoiBo', 'Nhập giá nội bộ'))
-  track(requireNumberField(form.desire, 'desire', 'Nhập kỳ vọng'))
+  track(requireNumberField(form.desire, 'desire', 'Nhập giá mong muốn'))
 
-  if (!formAddress.street || !formAddress.ward || !formAddress.province) {
+  if (!form.address) {
     errors.address = 'Vui lòng nhập đầy đủ địa chỉ'
     isValid = false
+  } else {
+    const parts = form.address.split('/!!')
+    if (parts.length < 3 || parts.some(p => !p || !p.trim())) {
+      errors.address = 'Vui lòng nhập đầy đủ địa chỉ'
+      isValid = false
+    }
   }
+
 
   track(requireTextField(form.landPosition, 'landPosition', 'Nhập vị trí đất'))
   track(requireTextField(form.plotNumber, 'plotNumber', 'Nhập số thửa'))
@@ -1195,29 +1795,11 @@ const validateForm = () => {
   track(requireTextField(form.structure, 'structure', 'Nhập mô tả hình dạng/kết cấu'))
   track(requireNumberField(form.phiMoiGioi, 'phiMoiGioi', 'Nhập phí môi giới', true))
 
-  if (!isLookupMode.value) {
-    if (!form.ownerFullName) {
-      errors.ownerFullName = 'Nhập họ tên chủ'
-      isValid = false
-    }
-    if (!form.ownerPhone) {
-      errors.ownerPhone = 'Nhập số điện thoại'
-      isValid = false
-    } else if (!isValidVietnamPhone(form.ownerPhone)) {
-      errors.ownerPhone = 'Số điện thoại không đúng định dạng'
-      isValid = false
-    }
-  } else if (!ownerSearch.value) {
-    errors.ownerSearch = 'Nhập phone hoặc email để tìm kiếm'
+  if (!validateOwnerSection()) {
     isValid = false
   }
 
-  // 🔐 Liên hệ khi MG mở khóa (LUÔN CÓ)
-  if (!form.lienHeMoKhoa) {
-    errors.lienHeMoKhoa = 'Vui lòng nhập số điện thoại liên hệ'
-    isValid = false
-  } else if (!isValidVietnamPhone(form.lienHeMoKhoa)) {
-    errors.lienHeMoKhoa = 'Số điện thoại không đúng định dạng'
+  if (!validateManagerSection()) {
     isValid = false
   }
 
@@ -1271,6 +1853,17 @@ const validateForm = () => {
     isValid = false
   }
 
+  const hasMainImage = uploadedFiles.value.some((file) => file && file.isOnTop && isImageFile(file.fileName))
+  if (!hasMainImage) {
+    errors.mainImage = 'Vui lòng chọn 1 ảnh chính'
+    isValid = false
+  }
+
+  if (!form.moTaNgan || form.moTaNgan.trim().length < 100) {
+    errors.moTaNgan = 'Mô tả ngắn tối thiểu 100 ký tự'
+    isValid = false
+  }
+
   return isValid
 }
 
@@ -1287,7 +1880,7 @@ const isValidVietnamPhone = (phone) => {
 
 const handleOwnerLookup = async () => {
   ownerLookupMessage.value = ''
-  if (!isLookupMode.value) return
+  if (!isSystemOwnerMode.value) return
   if (!ownerSearch.value) {
     errors.ownerSearch = 'Nhập phone hoặc email để tìm kiếm'
     return
@@ -1304,12 +1897,85 @@ const handleOwnerLookup = async () => {
       form.ownerId = data.id
       form.ownerFullName = data.fullName
       form.ownerPhone = data.phone
+      form.ownerGender = data.gender ?? null
+      form.ownerNewAddress = data.newAddress || ''
+      form.ownerOldAddress = data.oldAddress || ''
       ownerLookupMessage.value = 'Tìm thấy chủ tài sản thành công'
     } else {
+      form.ownerId = null
+      form.ownerFullName = ''
+      form.ownerPhone = ''
       ownerLookupMessage.value = 'Không tìm thấy chủ tài sản với thông tin đã nhập'
     }
   } catch (e) {
     ownerLookupMessage.value = 'Lỗi khi tìm kiếm chủ tài sản'
+  }
+}
+
+const handleManagerLookup = async () => {
+  managerLookupMessage.value = ''
+  if (!managerSearch.value) {
+    errors.managerSearch = 'Nhập phone hoặc email để tìm kiếm'
+    return
+  }
+  errors.managerSearch = ''
+  try {
+    const { data } = await api.get('/admin.thg/product/admin/tim-chu-tai-san', {
+      params: {
+        search: managerSearch.value,
+        phanLoaiHang: form.phanLoaiHang,
+      },
+    })
+    if (data) {
+      form.nguoiQuanLyID = data.id
+      managerInfo.fullName = data.fullName
+      managerInfo.phone = data.phone
+      managerLookupMessage.value = 'Tìm thấy người quản lý thành công'
+    } else {
+      form.nguoiQuanLyID = null
+      managerInfo.fullName = ''
+      managerInfo.phone = ''
+      managerLookupMessage.value = 'Không tìm thấy người quản lý với thông tin đã nhập'
+    }
+  } catch (e) {
+    managerLookupMessage.value = 'Lỗi khi tìm kiếm người quản lý'
+  }
+}
+
+const handleNonSystemOwnerLookup = async () => {
+  nonSystemLookupMessage.value = ''
+  nonSystemExistingOwner.value = null
+  const phone = nonSystemOwnerSearch.value.trim()
+  if (!phone) {
+    errors.nonSystemOwnerSearch = 'Nhập số điện thoại để tìm kiếm'
+    return
+  }
+  if (!/^[0-9]{9,11}$/.test(phone.replace(/\s+/g, ''))) {
+    errors.nonSystemOwnerSearch = 'Số điện thoại không hợp lệ'
+    return
+  }
+  errors.nonSystemOwnerSearch = ''
+  try {
+    const { data } = await api.get('/thg.user/my-land/tim-chu-nha-tam', {
+      params: { phone },
+    })
+    if (data && data.id) {
+      nonSystemExistingOwner.value = data
+      form.ownerId = data.id
+      form.ownerFullName = data.fullName || ''
+      form.ownerPhone = data.phone || ''
+      form.ownerGender = data.gender ?? null
+      form.ownerNewAddress = data.newAddress || ''
+      form.ownerOldAddress = data.oldAddress || ''
+      nonSystemLookupMessage.value = 'Tìm thấy chủ tài sản thành công'
+    } else {
+      form.ownerId = null
+      form.ownerFullName = ''
+      form.ownerPhone = ''
+      nonSystemLookupMessage.value = 'Không tìm thấy chủ tài sản'
+    }
+  } catch (e) {
+    nonSystemLookupMessage.value = 'Lỗi khi tìm kiếm chủ tài sản'
   }
 }
 
@@ -1325,6 +1991,7 @@ watch(() => form.status, (newStatus) => {
 
 const resetForm = () => {
   Object.assign(form, {
+    address:'',
     oldAddress: '',
     plotNumber: '',
     parcelNumber: '',
@@ -1364,46 +2031,92 @@ const resetForm = () => {
     ownerId: null,
     ownerFullName: '',
     ownerPhone: '',
+    ownerMode: 'system',
+    ownerOption: 'existing',
+    ownerGender: null,
+    ownerNewAddress: '',
+    ownerOldAddress: '',
+    nguoiQuanLyID: null,
     rooms: [defaultRoom()],
+    hienThongTinChuKhiMoKhoa: true,
+    hienLienHeKhiMoKhoa: true,
+    lienHeMoKhoa: '',
+    moTaNgan: '',
     nguoiBanId: null,
     nguoiBanTen: '',
     nguoiBanSearch: '',
     giaBanThanhCong: null,
   })
-  Object.assign(formAddress, { street: '', ward: '', province: '' })
+  form.address = ''
   ownerSearch.value = ''
   ownerLookupMessage.value = ''
+  ownerMode.value = 'system'
+  managerSearch.value = ''
+  managerLookupMessage.value = ''
+  managerInfo.fullName = ''
+  managerInfo.phone = ''
+  nonSystemOwnerOption.value = 'existing'
+  nonSystemOwnerSearch.value = ''
+  nonSystemLookupMessage.value = ''
+  nonSystemExistingOwner.value = null
+  Object.assign(nonSystemNewOwner, {
+    fullName: '',
+    phone: '',
+    gender: null,
+    newAddress: '',
+    oldAddress: '',
+  })
+  activeTab.value = 'basic'
   uploadedFiles.value = []
   Object.keys(errors).forEach((k) => (errors[k] = ''))
 }
 
 const buildFormData = () => {
-  const addressPayload = [formAddress.street, formAddress.ward, formAddress.province].join('/!!')
   const dto = {
     ...form,
-    address: addressPayload,
-    khuVucMa: formAddress.province || form.khuVucMa,
+    address: form.address,
+    khuVucMa: form.address.split('/!!')[2],
     rooms: isHouse.value ? form.rooms : [],
   }
+
   const fd = new FormData()
-  fd.append('dto',  new Blob( [JSON.stringify(dto)], { type: "application/json" }));
+
+  // 1️⃣ append DTO
+  fd.append(
+      'dto',
+      new Blob([JSON.stringify(dto)], { type: 'application/json' })
+  )
+
+  // 2️⃣ append ảnh ON TOP (chỉ 1 lần)
+  const mainFile = uploadedFiles.value.find(
+      (file) => file?.isOnTop && file.file instanceof File
+  )
+
+  if (mainFile) {
+    fd.append('newFileOntop', mainFile.file)
+  }
+
+  // 3️⃣ append các file còn lại (LOẠI ảnh onTop)
   uploadedFiles.value.forEach((file) => {
-    if (file.file instanceof File) {
+    if (
+        file.file instanceof File &&
+        !file.isOnTop // 🚨 CHỐT: loại ảnh onTop
+    ) {
       const key = file.isIG ? 'newLandBookFiles' : 'newFiles'
       fd.append(key, file.file)
     }
   })
+
   return fd
 }
+
 
 const submitForm = async () => {
   ownerLookupMessage.value = ''
   if (!validateForm()) {
-    // Scroll to first error
-
-
     const firstError = Object.keys(errors)[0]
     if (firstError) {
+      activeTab.value = findTabForField(firstError)
       const element = document.querySelector(`[v-model="${firstError}"]`) || document.querySelector(`select[v-model="${firstError}"]`)
       element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
@@ -1413,14 +2126,25 @@ const submitForm = async () => {
   isSubmitting.value = true
   try {
     const payload = buildFormData()
-    await showLoading(api.post('/admin.thg/product/admin/tao-moi', payload, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }));
-    updateAlertSuccess('Tạo tài sản thành công!');
-    resetForm();
-    router.push("/test01");
+
+    const res = await showLoading(
+        api.post('/admin.thg/product/admin/tao-moi', payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+    )
+    if (!res.data?.success) {
+      updateAlertError(
+          'Tạo tài sản thất bại!', res.data?.message
+      )
+      return
+    }
+
+    updateAlertSuccess('Tạo sản phẩm thành công!')
+    resetForm()
+    router.push('/-thg/quan-ly-san-pham')
+
   } catch (e) {
-    alert('Không thể tạo tài sản, vui lòng thử lại')
+    updateAlertError('Không thể tạo sản phẩm, vui lòng thử lại sau!')
   } finally {
     isSubmitting.value = false
   }
@@ -1447,6 +2171,104 @@ const submitForm = async () => {
   margin-right: 12px;
 }
 
+.tab-navigation .nav-tabs {
+  border-bottom: 1px solid #dee2e6;
+  gap: 4px;
+}
+
+.tab-navigation .nav-link {
+  border: 1px solid transparent;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  background: #f1f3f5;
+  color: #495057;
+  font-weight: 600;
+  padding: 10px 16px;
+  transition: all 0.2s ease;
+}
+
+.tab-navigation .nav-link.completed {
+  background: #e7f1ff;
+  color: #1d4ed8;
+}
+
+.tab-navigation .nav-link.pending {
+  opacity: 0.6;
+}
+
+.tab-navigation .nav-link.active {
+  background: #ffffff;
+  border-color: #dee2e6;
+  border-bottom-color: #ffffff;
+  color: #111827;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.tab-panel {
+  border: 1px solid #dee2e6;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  padding: 24px;
+  background: #fff;
+  margin-top: -1px;
+}
+
+.tab-actions {
+  border-top: 1px solid #e9ecef;
+  padding-top: 16px;
+}
+
+.owner-mode-switch {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.owner-mode-card {
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 20px;
+  background: #f8fafc;
+}
+
+.owner-info-card {
+  border-radius: 16px;
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
+}
+
+.owner-info-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
+}
+
+.owner-info-body {
+  padding: 16px;
+}
+
+.owner-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.owner-meta {
+  font-size: 0.95rem;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.owner-note {
+  font-size: 0.85rem;
+}
+
 .bg-primary-light { background-color: rgba(13, 110, 253, 0.1); }
 .bg-success-light { background-color: rgba(25, 135, 84, 0.1); }
 .bg-warning-light { background-color: rgba(255, 193, 7, 0.1); }
@@ -1464,6 +2286,10 @@ const submitForm = async () => {
   color: white;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+}
+
+.from-control{
+  border-radius: 10px !important;
 }
 
 .form-control:readonly {
@@ -1530,6 +2356,21 @@ const submitForm = async () => {
 /* Color coding for different field types */
 .text-primary { color: #4361ee !important; }
 .text-success { color: #28a745 !important; }
+
+.short-description-card {
+  background: #f7f9ff;
+  border: 1px solid rgba(67, 97, 238, 0.15);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.08);
+}
+
+.short-description-input {
+  border-radius: 10px;
+  border-color: rgba(67, 97, 238, 0.2);
+  resize: vertical;
+  min-height: 120px;
+}
 .text-warning { color: #ffc107 !important; }
 .text-info { color: #17a2b8 !important; }
 .text-danger { color: #dc3545 !important; }

@@ -735,7 +735,7 @@ onUnmounted(() => {
 .security-container {
   width: 95%;
   height: 100%;
-  font-family: 'Ubuntu', sans-serif;
+
   padding: 0px;
   box-sizing: border-box;
   margin: 0 auto;

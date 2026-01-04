@@ -1,7 +1,7 @@
 <template>
   <div class="service-payment-container">
     <div class="security-header">
-      <h1 class="security-title">Gói dịch vụ và thanh toán</h1>
+      <h1 class="security-title">Thanh toán và ví cá nhân</h1>
     </div>
     <div class="main-content">
       <MembershipCard class="member-ship-card" :member-data="user_card"/>
@@ -10,23 +10,28 @@
       <div class="balance-actions-section">
         <div class="balance-card">
           <div class="balance-header">
-            <h3 class="balance-title">Số dư tài khoản</h3>
+            <h3 class="balance-title">Số dư khả dụng</h3>
             <button class="eye-toggle" @click="toggleBalanceVisibility">
               <i class="fas" :class="balanceVisible ? 'fa-eye' : 'fa-eye-slash'"></i>
             </button>
           </div>
           <div class="balance-amount">
-            <span class="amount" v-if="balanceVisible">1,250,000 VNĐ</span>
+            <span class="amount" v-if="balanceVisible">{{ formattedAvailableBalance }} VNĐ</span>
             <span class="amount hidden" v-else>****** VNĐ</span>
+          </div>
+          <div class="pending-amount">
+            <span class="pending-label">Chờ rút</span>
+            <span class="pending-value" v-if="balanceVisible">{{ formattedPendingBalance }} VNĐ</span>
+            <span class="pending-value hidden" v-else>****** VNĐ</span>
           </div>
         </div>
 
         <div class="action-buttons">
-          <button class="action-btn deposit">
+          <button class="action-btn deposit" @click="$router.push('/nap-tien-ca-nhan')">
             <i class="fas fa-sign-in-alt"></i>
             <span>Nạp tiền</span>
           </button>
-          <button class="action-btn withdraw">
+          <button class="action-btn withdraw" @click="openWithdrawModal">
             <i class="fas fa-sign-out-alt"></i>
             <span>Rút tiền</span>
           </button>
@@ -55,56 +60,96 @@
               <option value="11">Tháng 11</option>
               <option value="12">Tháng 12</option>
             </select>
-          </div>
-          <div class="chart-controls-right">
-            <button class="chart-btn download" @click="downloadChart">
-              <i class="fas fa-download"></i>
-              Tải xuống
-            </button>
-            <button class="chart-btn table-view" @click="toggleTableView">
-              <i class="fas fa-table"></i>
-              Xem dạng bảng
-            </button>
+            <select v-model="selectedYear" class="year-select">
+              <option v-for="year in yearOptions" :key="year" :value="year">
+                Năm {{ year }}
+              </option>
+            </select>
           </div>
         </div>
 
         <div class="chart-container">
-          <Line v-if="!tableView" :data="chartData" :options="chartOptions" />
-          <div v-else class="table-view">
-            <table class="transaction-table">
-              <thead>
-              <tr>
-                <th>Ngày</th>
-                <th>Giao dịch</th>
-                <th>Số tiền</th>
-                <th>Trạng thái</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr v-for="item in tableData" :key="item.id">
-                <td>{{ item.date }}</td>
-                <td>{{ item.transaction }}</td>
-                <td>{{ item.amount }}</td>
-                <td :class="item.status">
-                  <i v-if="item.status === 'success'" class="fas fa-check-circle status-icon success"></i>
-                  <i v-else-if="item.status === 'pending'" class="fas fa-clock status-icon pending"></i>
-                  {{ item.statusText }}
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
+          <Line :data="chartData" :options="chartOptions"/>
         </div>
       </div>
     </div>
   </div>
+  <!-- WITHDRAW MODAL -->
+  <div v-if="showWithdrawModal" class="withdraw-overlay">
+    <div class="withdraw-modal">
+
+      <h3 class="modal-title">Rút tiền từ ví</h3>
+
+      <div class="modal-body">
+        <!-- BANK SELECT -->
+        <div class="bank-section">
+          <label>Ngân hàng</label>
+
+          <div class="bank-slider">
+            <div
+                v-for="bank in banks"
+                :key="bank.code"
+                class="bank-item"
+                :class="{ active: selectedBank?.code === bank.code }"
+                @click="selectBank(bank)"
+            >
+              <img :src="bank.logo" :alt="bank.name"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACCOUNT NUMBER -->
+        <div class="bank-account">
+          <label>Số tài khoản ngân hàng</label>
+          <input
+              type="text"
+              v-model="bankAccountNumber"
+              placeholder="Nhập số tài khoản"
+          />
+        </div>
+
+        <label>Số tiền muốn rút</label>
+
+        <input
+            type="text"
+            inputmode="numeric"
+            :value="withdrawAmountDisplay"
+            @input="onWithdrawInput"
+            placeholder="Nhập số tiền"
+        />
+
+
+        <div class="hint">
+          Số dư khả dụng:
+          <b style="color: blue">{{ formattedAvailableBalance }} VNĐ</b>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn cancel" @click="closeWithdrawModal">
+          Hủy
+        </button>
+
+        <button
+            class="btn submit"
+            :disabled="!canSubmitWithdraw"
+            @click="submitWithdraw"
+        >
+          Xác nhận rút
+        </button>
+      </div>
+
+    </div>
+  </div>
+
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import {computed, ref, onMounted, watch} from 'vue';
 import {useRouter} from "vue-router";
 import MembershipCard from "./MembershipCard.vue";
-import { Line } from 'vue-chartjs';
+import {Line} from 'vue-chartjs';
+import api from "/src/api/api.js";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -116,6 +161,46 @@ import {
   Legend,
   Filler
 } from 'chart.js';
+const banks = ref([
+  // BIG 4
+  { code: 'VCB', name: 'Vietcombank', shortName: 'VCB', logo: 'https://api.vietqr.io/img/VCB.png' },
+  { code: 'BIDV', name: 'BIDV', shortName: 'BIDV', logo: 'https://api.vietqr.io/img/BIDV.png' },
+  { code: 'MB', name: 'MB Bank', shortName: 'MB', logo: 'https://api.vietqr.io/img/MB.png' },
+  { code: 'CTG', name: 'VietinBank', shortName: 'CTG', logo: 'https://fingo.vn/wp-content/uploads/2022/11/vietinbank.png' },
+  { code: 'AGRIBANK', name: 'Agribank', shortName: 'AGR', logo: 'https://cdn.luatminhkhue.vn/lmk/article/2023/images%20(9).jpg' },
+
+  // TMCP lớn
+  { code: 'TCB', name: 'Techcombank', shortName: 'TCB', logo: 'https://api.vietqr.io/img/TCB.png' },
+  { code: 'ACB', name: 'Asia Commercial Bank', shortName: 'ACB', logo: 'https://api.vietqr.io/img/ACB.png' },
+  { code: 'VPB', name: 'VPBank', shortName: 'VPB', logo: 'https://api.vietqr.io/img/VPB.png' },
+  { code: 'STB', name: 'Sacombank', shortName: 'STB', logo: 'https://api.vietqr.io/img/STB.png' },
+  { code: 'TPB', name: 'TPBank', shortName: 'TPB', logo: 'https://api.vietqr.io/img/TPB.png' },
+  { code: 'HDB', name: 'HDBank', shortName: 'HDB', logo: 'https://api.vietqr.io/img/HDB.png' },
+  { code: 'VIB', name: 'VIB', shortName: 'VIB', logo: 'https://api.vietqr.io/img/VIB.png' },
+  { code: 'MSB', name: 'MSB', shortName: 'MSB', logo: 'https://api.vietqr.io/img/MSB.png' },
+  { code: 'OCB', name: 'OCB', shortName: 'OCB', logo: 'https://api.vietqr.io/img/OCB.png' },
+  { code: 'SCB', name: 'SCB', shortName: 'SCB', logo: 'https://api.vietqr.io/img/SCB.png' },
+  { code: 'SHB', name: 'SHB', shortName: 'SHB', logo: 'https://api.vietqr.io/img/SHB.png' },
+  { code: 'EXIM', name: 'Eximbank', shortName: 'EIB', logo: 'https://api.vietqr.io/img/EIB.png' },
+  { code: 'LPB', name: 'LPBank', shortName: 'LPB', logo: 'https://api.vietqr.io/img/LPB.png' },
+  { code: 'BAB', name: 'Bac A Bank', shortName: 'BAB', logo: 'https://api.vietqr.io/img/BAB.png' },
+  { code: 'SEAB', name: 'SeABank', shortName: 'SEAB', logo: 'https://api.vietqr.io/img/SEAB.png' },
+  { code: 'KLB', name: 'KienlongBank', shortName: 'KLB', logo: 'https://api.vietqr.io/img/KLB.png' },
+  { code: 'PGB', name: 'PG Bank', shortName: 'PGB', logo: 'https://api.vietqr.io/img/PGB.png' },
+  { code: 'ABB', name: 'ABBANK', shortName: 'ABB', logo: 'https://api.vietqr.io/img/ABB.png' },
+  { code: 'NAB', name: 'Nam A Bank', shortName: 'NAB', logo: 'https://api.vietqr.io/img/NAB.png' },
+  { code: 'BVB', name: 'BaoViet Bank', shortName: 'BVB', logo: 'https://api.vietqr.io/img/BVB.png' },
+  { code: 'VAB', name: 'VietABank', shortName: 'VAB', logo: 'https://api.vietqr.io/img/VAB.png' },
+
+  // NGÂN HÀNG SỐ / VÍ
+  { code: 'TPBANK', name: 'TPBank Digital', shortName: 'TPB', logo: 'https://api.vietqr.io/img/TPB.png' }
+])
+
+const selectedBank = ref(null)
+const bankAccountNumber = ref('')
+const selectBank = (bank) => {
+  selectedBank.value = bank
+}
 
 // Đăng ký các thành phần ChartJS
 ChartJS.register(
@@ -136,21 +221,24 @@ const router = useRouter()
 
 // Balance visibility
 const balanceVisible = ref(false);
+const availableBalance = ref(0);
+const pendingBalance = ref(0);
 
 const toggleBalanceVisibility = () => {
   balanceVisible.value = !balanceVisible.value;
 };
 
 // Chart data and options
-const selectedMonth = ref('6');
-const tableView = ref(false);
+const selectedMonth = ref(`${new Date().getMonth() + 1}`);
+const selectedYear = ref(new Date().getFullYear());
+const yearOptions = Array.from({length: 5}, (_, index) => new Date().getFullYear() - index);
 
 const chartData = ref({
-  labels: ['1', '5', '10', '15', '20', '25', '30'],
+  labels: [],
   datasets: [
     {
-      label: 'Chi tiêu (VND)',
-      data: [1200000, 1900000, 1500000, 2500000, 2200000, 3000000, 2800000],
+      label: 'Số dư (VND)',
+      data: [],
       borderColor: '#031358',
       backgroundColor: 'rgba(3, 19, 88, 0.1)',
       tension: 0.4,
@@ -163,6 +251,55 @@ const chartData = ref({
   ]
 });
 
+const withdrawAmount = ref(0)               // SỐ THẬT (gửi API)
+const withdrawAmountDisplay = ref('')       // HIỂN THỊ
+
+const formatNumber = (val) => {
+  if (!val) return ''
+  return val.toLocaleString('vi-VN')
+}
+
+const onWithdrawInput = (e) => {
+  let raw = e.target.value
+
+  // bỏ ký tự không phải số
+  raw = raw.replace(/\D/g, '')
+
+  if (!raw) {
+    withdrawAmount.value = 0
+    withdrawAmountDisplay.value = ''
+    return
+  }
+
+  const number = Number(raw)
+
+  withdrawAmount.value = number
+  withdrawAmountDisplay.value = formatNumber(number)
+}
+
+watch(
+    withdrawAmount,
+    (val) => {
+      if (!val || val <= 0) {
+        withdrawAmountDisplay.value = ''
+        return
+      }
+
+      // 🔒 KHỐNG CHẾ TRẦN
+      if (val > availableBalance.value) {
+        withdrawAmount.value = availableBalance.value
+        withdrawAmountDisplay.value = formatNumber(availableBalance.value)
+        return
+      }
+
+      // ✅ bình thường
+      withdrawAmountDisplay.value = formatNumber(val)
+    },
+    { flush: 'post' } // 🔥 bắt buộc
+)
+
+
+
 const chartOptions = ref({
   responsive: true,
   maintainAspectRatio: false,
@@ -173,14 +310,14 @@ const chartOptions = ref({
     },
     title: {
       display: true,
-      text: 'Biểu đồ chi tiêu tháng ' + selectedMonth.value
+      text: `Biểu đồ số dư tháng ${selectedMonth.value}/${selectedYear.value}`
     }
   },
   scales: {
     y: {
       beginAtZero: true,
       ticks: {
-        callback: function(value) {
+        callback: function (value) {
           return value.toLocaleString('vi-VN') + ' VND';
         }
       }
@@ -188,36 +325,143 @@ const chartOptions = ref({
   }
 });
 
-// Table data
-const tableData = ref([
-  { id: 1, date: '01/06/2024', transaction: 'Nạp tiền', amount: '2,000,000 VND', status: 'success', statusText: 'Thành công' },
-  { id: 2, date: '05/06/2024', transaction: 'Mua gói Premium', amount: '500,000 VND', status: 'success', statusText: 'Thành công' },
-  { id: 3, date: '10/06/2024', transaction: 'Rút tiền', amount: '1,000,000 VND', status: 'pending', statusText: 'Đang xử lý' },
-  { id: 4, date: '15/06/2024', transaction: 'Nạp tiền', amount: '1,500,000 VND', status: 'success', statusText: 'Thành công' },
-  { id: 5, date: '20/06/2024', transaction: 'Thanh toán hóa đơn', amount: '350,000 VND', status: 'success', statusText: 'Thành công' },
-]);
-
-const downloadChart = () => {
-  // Logic để tải biểu đồ dưới dạng PNG
-  console.log('Download chart as PNG');
+const formatCurrency = (value) => {
+  const numberValue = Number(value || 0);
+  return numberValue.toLocaleString('vi-VN');
 };
 
-const toggleTableView = () => {
-  tableView.value = !tableView.value;
+const formattedAvailableBalance = computed(() => formatCurrency(availableBalance.value));
+const formattedPendingBalance = computed(() => formatCurrency(pendingBalance.value));
+
+const fetchWalletBalance = async () => {
+  try {
+    const response = await api.get("/profile/balance");
+    availableBalance.value = response.data?.soDuKhaDung ?? 0;
+    pendingBalance.value = response.data?.soDuChoRut ?? 0;
+  } catch (error) {
+    console.error("Không thể tải số dư ví:", error);
+  }
 };
+
+const fetchChartData = async () => {
+  try {
+    const response = await api.get("/profile/chart", {
+      params: {
+        month: Number(selectedMonth.value),
+        year: Number(selectedYear.value),
+      },
+    });
+
+    const labels = (response.data?.labels ?? []).map(String);
+    const values = response.data?.values ?? [];
+
+    chartData.value = {
+      labels,
+      datasets: [
+        {
+          label: 'Số dư (VND)',
+          data: values,
+          borderColor: '#031358',
+          backgroundColor: 'rgba(3, 19, 88, 0.1)',
+          tension: 0.4,
+          fill: true,
+          pointBackgroundColor: '#031358',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+        }
+      ]
+    };
+
+    chartOptions.value.plugins.title.text =
+        `Biểu đồ số dư tháng ${selectedMonth.value}/${selectedYear.value}`;
+
+  } catch (error) {
+    console.error("Không thể tải dữ liệu biểu đồ:", error);
+
+    chartData.value = {
+      labels: [],
+      datasets: [
+        {
+          label: 'Số dư (VND)',
+          data: [],
+        }
+      ]
+    };
+  }
+};
+
+watch([selectedMonth, selectedYear], () => {
+  fetchChartData();
+});
 
 onMounted(() => {
-  // Khởi tạo dữ liệu ngẫu nhiên cho biểu đồ
-  const randomData = Array.from({length: 7}, () => Math.floor(Math.random() * 3000000) + 1000000);
-  chartData.value.datasets[0].data = randomData;
+  fetchWalletBalance();
+  fetchChartData();
 });
+
+import {showCenterError, updateAlertSuccess, showCenterSuccess} from '/src/assets/js/alertService.js'
+
+/* =========================
+   WITHDRAW MODAL
+========================= */
+
+const showWithdrawModal = ref(false)
+
+const openWithdrawModal = () => {
+  withdrawAmount.value = null
+  showWithdrawModal.value = true
+}
+
+const closeWithdrawModal = () => {
+  showWithdrawModal.value = false
+}
+
+const canSubmitWithdraw = computed(() => {
+  return (
+      withdrawAmount.value &&
+      withdrawAmount.value > 0 &&
+      withdrawAmount.value <= availableBalance.value &&
+      selectedBank.value &&
+      bankAccountNumber.value &&
+      bankAccountNumber.value.length >= 6
+  )
+})
+
+
+const submitWithdraw = async () => {
+  if (!canSubmitWithdraw.value) return
+
+  try {
+    await api.post('/profile/withdraw', {
+      amount: withdrawAmount.value,
+      bankName: selectedBank.value.name,
+      accountNumber: bankAccountNumber.value
+    })
+
+
+    showCenterSuccess('Yêu cầu rút tiền đã được gửi')
+
+    closeWithdrawModal()
+
+    // reload số dư
+    await fetchWalletBalance();
+
+  } catch (e) {
+    console.error(e)
+    showCenterError(
+        e.response?.data?.message || 'Rút tiền thất bại'
+    )
+  }
+}
+
 </script>
 
 <style scoped>
 .security-header {
   text-align: center;
   margin-bottom: 40px;
-  margin-top:60px  ;
+  margin-top: 60px;
 }
 
 .security-title {
@@ -232,7 +476,7 @@ onMounted(() => {
 .main-content {
   max-width: 95%;
   margin: 0 auto;
-  font-family: 'Ubuntu', sans-serif;
+
 }
 
 /* Balance and Actions Section */
@@ -276,6 +520,24 @@ onMounted(() => {
   font-size: 28px;
   font-weight: bold;
   color: #031358;
+}
+
+.pending-amount {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+.pending-label {
+  font-weight: 600;
+}
+
+.pending-value {
+  font-weight: 600;
+  color: #ff9800;
 }
 
 .hidden {
@@ -339,12 +601,15 @@ onMounted(() => {
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 6px;
-  font-family: 'Ubuntu', sans-serif;
+
 }
 
-.chart-controls-right {
-  display: flex;
-  gap: 10px;
+.year-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+
+  margin-left: 12px;
 }
 
 .chart-btn {
@@ -357,7 +622,7 @@ onMounted(() => {
   background: white;
   color: #031358;
   cursor: pointer;
-  font-family: 'Ubuntu', sans-serif;
+
   transition: all 0.2s;
 }
 
@@ -518,4 +783,191 @@ onMounted(() => {
     padding: 8px;
   }
 }
+
+/* =========================
+   WITHDRAW MODAL
+========================= */
+
+.withdraw-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 25, 54, 0.45);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.withdraw-modal {
+  width: 420px;
+  max-width: 90%;
+  background: white;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.09);
+  animation: modalFade .25s ease;
+}
+
+@keyframes modalFade {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.modal-title {
+  margin: 0 0 16px;
+  font-size: 32px;
+  color: #031358;
+  font-weight: 700;
+}
+
+.modal-body label {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.modal-body input {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.modal-body input:focus {
+  outline: none;
+  border-color: #031358;
+}
+
+.hint {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.modal-actions .btn {
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.modal-actions .cancel {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.modal-actions .submit {
+  background: #031358;
+  color: white;
+}
+
+.modal-actions .submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.bank-section {
+  margin-top: 14px;
+}
+
+.bank-section label {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.bank-slider {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.bank-slider::-webkit-scrollbar {
+  height: 6px;
+}
+
+.bank-slider::-webkit-scrollbar-thumb {
+  background: #c7c9d9;
+  border-radius: 10px;
+}
+
+.bank-item {
+  min-width: 90px;
+  padding: 8px 6px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  text-align: center;
+  transition: all .2s;
+  overflow: hidden;
+}
+
+.bank-item img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+
+  transform: scale(2.0);          /* 🔥 phóng từ tâm */
+  transform-origin: center center; /* 🔒 đảm bảo từ giữa */
+}
+
+.bank-item span {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bank-item:hover {
+  border-color: #031358;
+}
+
+.bank-item.active {
+  border-color: #031358;
+  background: rgba(3, 19, 88, 0.05);
+}
+
+/* ACCOUNT INPUT */
+.bank-account {
+  margin-top: 14px;
+}
+
+.bank-account label {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.bank-account input {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.bank-account input:focus {
+  outline: none;
+  border-color: #031358;
+}
+
 </style>

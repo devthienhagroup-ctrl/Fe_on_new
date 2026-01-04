@@ -265,7 +265,7 @@ onMounted(() => {
 .main-content {
   max-width: 95%;
   margin: 0 auto;
-  font-family: 'Ubuntu', sans-serif;
+
 }
 
 /* Balance and Actions Section */
@@ -372,7 +372,7 @@ onMounted(() => {
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 6px;
-  font-family: 'Ubuntu', sans-serif;
+
 }
 
 .chart-controls-right {
@@ -390,7 +390,7 @@ onMounted(() => {
   background: white;
   color: #031358;
   cursor: pointer;
-  font-family: 'Ubuntu', sans-serif;
+
   transition: all 0.2s;
 }
 

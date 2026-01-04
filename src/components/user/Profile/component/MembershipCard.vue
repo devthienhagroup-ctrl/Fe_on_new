@@ -3,13 +3,41 @@
       class="membership-card"
       :class="cardClass"
   >
-    <!-- Free Card -->
-    <div v-if="subscriptionPlan === 'Free'" class="free-card">
+    <!-- No Plan Card (mặc định) -->
+    <div v-if="subscriptionPlan === 'NoPlan'" class="no-plan-card">
       <div class="card-content">
         <div class="avatar-section">
           <div class="avatar-wrapper">
             <img
-                :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + memberData.avatar"
+                :src="avatarUrl"
+                :alt="memberData.fullName"
+                class="avatar"
+            />
+            <div class="camera-icon">
+              <i class="fa-solid fa-user"></i>
+            </div>
+          </div>
+        </div>
+        <div class="info-section">
+          <h3 class="member-name">{{ memberData.fullName }}</h3>
+          <p class="member-role">Vai trò: {{ memberData.role }}</p>
+          <p class="subscription-plan">Chưa có gói</p>
+          <div class="upgrade-prompt">
+            <button class="upgrade-btn" @click="$emit('upgrade')">
+              Nâng cấp ngay
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Free Card -->
+    <div v-else-if="subscriptionPlan === 'Plus'" class="free-card">
+      <div class="card-content">
+        <div class="avatar-section">
+          <div class="avatar-wrapper">
+            <img
+                :src="avatarUrl"
                 :alt="memberData.fullName"
                 class="avatar"
             />
@@ -21,13 +49,13 @@
         <div class="info-section">
           <h3 class="member-name">{{ memberData.fullName }}</h3>
           <p class="member-role">Vai trò: {{ memberData.role }}</p>
-          <p class="subscription-plan">Free Plan</p>
+          <p class="subscription-plan">Plus Plan</p>
         </div>
       </div>
     </div>
 
     <!-- VIP Card -->
-    <div v-else-if="subscriptionPlan === 'VIP'" class="vip-card">
+    <div v-else-if="subscriptionPlan === 'Pro'" class="vip-card">
       <img src="/imgs/circle-member-card.svg" alt="" class="circle c1">
       <img src="/imgs/circle-member-card.svg" alt="" class="circle c2">
       <img src="/imgs/circle-member-card.svg" alt="" class="circle c3">
@@ -36,7 +64,7 @@
         <div class="avatar-section">
           <div class="avatar-wrapper">
             <img
-                :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + memberData.avatar"
+                :src="avatarUrl"
                 :alt="memberData.fullName"
                 class="avatar"
             />
@@ -48,13 +76,13 @@
         <div class="info-section">
           <h3 class="member-name">{{ memberData.fullName }}</h3>
           <p class="member-role">Vai trò: {{ memberData.role }}</p>
-          <p class="subscription-plan">VIP Plan</p>
+          <p class="subscription-plan">Pro Plan</p>
         </div>
       </div>
     </div>
 
     <!-- VVIP Card -->
-    <div v-else-if="subscriptionPlan === 'VVIP'" class="vvip-card">
+    <div v-else-if="subscriptionPlan === 'Premium'" class="vvip-card">
       <div class="crown-icon">
         <img src="/imgs/crown.svg" alt="">
       </div>
@@ -62,7 +90,7 @@
         <div class="avatar-section">
           <div class="avatar-wrapper">
             <img
-                :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + memberData.avatar"
+                :src="avatarUrl"
                 :alt="memberData.fullName"
                 class="avatar"
             />
@@ -74,7 +102,7 @@
         <div class="info-section">
           <h3 class="member-name">{{ memberData.fullName }}</h3>
           <p class="member-role">Vai trò: {{ memberData.role }}</p>
-          <p class="subscription-plan">VVIP Plan</p>
+          <p class="subscription-plan">Premium Plan</p>
         </div>
       </div>
     </div>
@@ -92,18 +120,36 @@ const props = defineProps({
       fullName: '',
       avatar: '',
       role: '',
-      subscriptionPlan: 'Free'
+      subscriptionPlan: null
     })
   }
 })
 
-const subscriptionPlan = computed(() => props.memberData.subscriptionPlan)
+const emit = defineEmits(['upgrade'])
+
+// Xử lý subscriptionPlan với giá trị null/undefined
+const subscriptionPlan = computed(() => {
+  const plan = props.memberData.subscriptionPlan
+  // Nếu là null, undefined, hoặc chuỗi rỗng thì trả về 'NoPlan'
+  if (!plan || plan.trim() === '') {
+    return 'NoPlan'
+  }
+  return plan
+})
+
+const avatarUrl = computed(() => {
+  if (props.memberData.avatar) {
+    return 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + props.memberData.avatar
+  }
+  return 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/vat-default.jpg'
+})
 
 const cardClass = computed(() => {
   return {
-    'free-card-style': subscriptionPlan.value === 'Free',
-    'vip-card-style': subscriptionPlan.value === 'VIP',
-    'vvip-card-style': subscriptionPlan.value === 'VVIP'
+    'no-plan-style': subscriptionPlan.value === 'NoPlan',
+    'free-card-style': subscriptionPlan.value === 'Plus',
+    'vip-card-style': subscriptionPlan.value === 'Pro',
+    'vvip-card-style': subscriptionPlan.value === 'Premium'
   }
 })
 </script>
@@ -137,6 +183,78 @@ const cardClass = computed(() => {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+/* No Plan Card Styles */
+.no-plan-style {
+  background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+}
+
+.no-plan-card {
+  height: 100%;
+  position: relative;
+}
+
+.no-plan-card .avatar {
+  border-color: #999;
+  filter: grayscale(20%);
+}
+
+.no-plan-card .camera-icon {
+  background: linear-gradient(135deg, #999, #666);
+}
+
+.no-plan-card .member-name {
+  color: #444;
+  font-size: 24px;
+
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.no-plan-card .member-role {
+  color: #666;
+  font-size: 16px;
+  margin: 5px 0 10px 0;
+  opacity: 0.8;
+}
+
+.no-plan-card .subscription-plan {
+  background-color: #ddd;
+  color: #666;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  padding: 5px 15px;
+  border-radius: 10px;
+  display: inline-block;
+  width: fit-content;
+  margin-left: auto;
+}
+
+.upgrade-prompt {
+  margin-top: 15px;
+}
+
+.upgrade-btn {
+  background: linear-gradient(135deg, #0030FF, #031358);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 48, 255, 0.2);
+}
+
+.upgrade-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 48, 255, 0.3);
 }
 
 /* Free Card Styles */
@@ -272,7 +390,7 @@ const cardClass = computed(() => {
 }
 
 .member-name {
-  font-family: 'Ubuntu', sans-serif;
+
   font-weight: 500;
   margin: 0;
   line-height: 1.2;
@@ -370,6 +488,12 @@ const cardClass = computed(() => {
     font-size: 16px;
     margin: 0 auto;
   }
+
+  .upgrade-btn {
+    padding: 10px 25px;
+    font-size: 15px;
+  }
+
   .crown-icon {
     right: -10px;
     top: -40px;

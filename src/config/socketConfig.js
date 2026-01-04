@@ -20,6 +20,13 @@ export const SOCKET_CONFIG = {
   teamChatTopic: (teamId) => `/topic/my-team/${teamId}/chat`,
   checkoutTopic: (employeeId) => `/topic/checkout/${employeeId}`,
   teamEventTopic: (teamId) => `/topic/my-team/${teamId}/events`,
+  invitationTopic: (employeeId) => `/topic/invitations/${employeeId}`,
+  withdrawUserTopic(employeeId) {return `/topic/withdraw/user/${employeeId}`},
+  /* =========================
+     RÚT TIỀN – ADMIN
+  ========================= */
+  withdrawAdminTopic(adminId) {return `/topic/withdraw/admin/${adminId}`},
+
 
   invCheckoutTopic: (employeeId) => `/topic/checkout-inv/${employeeId}`,
 

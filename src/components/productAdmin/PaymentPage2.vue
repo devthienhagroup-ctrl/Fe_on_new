@@ -189,7 +189,9 @@ function particleStyle() {
 
 // === SOCKET LISTENER ===
 onMounted(async () => {
+  console.log('Hàm chạy1')
   await loadPaymentInfo();
+  console.log('Hàm chạy')
 
   const token = () => authStore.accessToken;
   socketService.connect(token);

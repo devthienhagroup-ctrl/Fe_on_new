@@ -116,6 +116,13 @@ const allMenuItems = [
     title: 'Quản trị nội dung',
     desc: 'Quản lý các trang nội dung'
   },
+  {
+    label: 'RUT',
+    route: '/-thg/yeu-cau-rut-tien',
+    icon: 'fa-solid fa-money-bill-transfer text-success fs-2',
+    title: 'Rút tiền',
+    desc: 'Quản lý yêu cầu rút tiền'
+  }
 
 
 ]

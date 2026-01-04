@@ -52,20 +52,6 @@
                 Thành viên
               </button>
             </li>
-            <li class="nav-item" role="presentation"
-                v-if="authStore.hasTeamPermission('TEAMUSER_APLLY_MEMBER')
-                || authStore.hasPermission('TEAMUSER_APLLY_MEMBER')">
-              <button
-                  class="nav-link"
-                  :class="{ active: activeTab === 'appliers' }"
-                  @click="activeTab = 'appliers'"
-                  type="button"
-                  role="tab"
-              >
-                <i class="fa-solid fa-user-plus me-2"></i>
-                Cộng tác viên
-              </button>
-            </li>
           </ul>
         </div>
 

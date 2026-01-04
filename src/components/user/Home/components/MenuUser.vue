@@ -97,6 +97,11 @@
                     <i class="fa-solid fa-clipboard-user"></i> Ứng tuyển CTV
                   </router-link>
                 </li>
+<!--                <li>-->
+<!--                  <router-link to="/moi-gioi" class="submenu-link" @click="closeAllSubmenus">-->
+<!--                    <i class="fa-solid fa-handshake"></i> Cộng đồng môi giới-->
+<!--                  </router-link>-->
+<!--                </li>-->
               </ul>
             </div>
           </div>
@@ -247,11 +252,13 @@ const isSolutionActive = computed(() => {
 });
 
 const isRecruitmentActive = computed(() => {
-  return route.path === '/tuyen-dung-menu' ||
-      route.path === '/tuyen-dung' ||
-      route.path === '/cong-viec-cong-tac-vien' ||
-      route.path.startsWith('/tuyen-dung');
+  return route.path === '/tuyen-dung-menu'
+      || route.path === '/tuyen-dung'
+      || route.path === '/cong-viec-cong-tac-vien'
+      || route.path === '/moi-gioi'
+      || route.path.startsWith('/tuyen-dung');
 });
+
 
 // Watch route changes
 watch(
@@ -610,6 +617,7 @@ onMounted(() => {
   nextTick(() => {
     initializeMenu();
   });
+
 
   chatScript = document.createElement('script')
   // chatScript.src = 'https://api.sale.ai.vn/static/widget.js?chatbotId=MjIz'
@@ -1145,11 +1153,7 @@ ul {
     background: linear-gradient(135deg, rgba(46, 204, 113, 0.1), rgba(223, 240, 223, 0.1));
   }
 
-  /* FIX: Hover vào dropdown */
-/*  .nav-item.dropdown .nav-link:hover::before {
-    width: 100%;
-    background: linear-gradient(135deg, rgba(3, 19, 88, 0.08), rgba(236, 254, 255, 0.08));
-  }*/
+
 }
 
 .submenu.active {
@@ -2217,6 +2221,11 @@ ul {
   .solution-item.active .dropdown-arrow {
     color: #F5A623;
   }
+}
+
+/* ===== ICON MÀU CỘNG ĐỒNG MÔI GIỚI ===== */
+.submenu-link .fa-handshake {
+  color: #e97b0e; /* xanh sky – cộng đồng, kết nối */
 }
 
 </style>
