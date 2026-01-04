@@ -109,6 +109,12 @@ const allMenuItems = [
     route: '/-thg/quan-tri-noi-dung/trang-chu/noi-bat',
     icon: 'fa-solid fa-file-lines text-primary fs-5',
     title: 'Nội dung'
+  },
+  {
+    label: 'RUT',
+    route: '/-thg/yeu-cau-rut-tien',
+    icon: 'fa-solid fa-money-bill-transfer text-success fs-5',
+    title: 'Tài chính'
   }
 
 ]

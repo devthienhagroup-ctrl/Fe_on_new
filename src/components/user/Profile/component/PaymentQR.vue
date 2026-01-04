@@ -1,6 +1,7 @@
 <template>
-  <div class="checkout-wrapper" style="margin-top: 20px">
-    <!-- Hiệu ứng sóng & thuyền -->
+  <div class="checkout-wrapper">
+
+    <!-- EFFECTS + SHIP -->
     <div class="wave-container">
       <div class="wave"></div>
       <div class="ship">
@@ -26,10 +27,10 @@
     <!-- CARD -->
     <div class="checkout-card">
       <button class="btn-back-top" @click="router.back()">
-        <i class="fa-solid fa-arrow-left"></i> Quay lại
+        <i class="fa-solid fa-arrow-left"></i>
+        Quay lại
       </button>
-
-      <!-- LEFT -->
+      <!-- LEFT SIDE -->
       <div class="left-section">
         <div class="bank-logos">
           <img src="/imgs/Logo_MB_new.png" class="bank-logo" />
@@ -43,33 +44,43 @@
         </div>
 
         <div class="info-list">
+
           <div class="info-row">
             <span class="info-label">Số tiền</span>
-            <strong class="price">{{ formattedAmount }} VNĐ</strong>
+            <strong class="price text-muted">
+              Người dùng tự nhập khi chuyển khoản
+            </strong>
           </div>
+
+
           <div class="info-row">
             <span class="info-label">Ngân hàng nhận</span>
             <strong>{{ bank }}</strong>
           </div>
+
           <div class="info-row">
             <span class="info-label">Số tài khoản</span>
             <strong>{{ accountNumber }}</strong>
           </div>
+
           <div class="info-row">
             <span class="info-label">Chủ tài khoản</span>
             <strong>{{ accountName }}</strong>
           </div>
         </div>
 
+        <!-- HƯỚNG DẪN -->
         <div class="manual-guide">
           <h4 class="guide-title">
             <i class="fas fa-info-circle"></i> Nếu không quét được QR
           </h4>
+
           <ul>
             <li>Chuyển khoản thủ công qua app.</li>
             <li>Số tài khoản: <strong>{{ accountNumber }}</strong></li>
             <li>Ngân hàng: <strong>{{ bank }}</strong></li>
             <li>Nội dung CK: <strong>{{ transactionCode }}</strong></li>
+
             <li class="warning">
               <i class="fas fa-exclamation-triangle"></i>
               <b>Lưu ý:</b> Sai nội dung → không xác nhận được giao dịch.
@@ -78,9 +89,10 @@
         </div>
       </div>
 
-      <!-- RIGHT: QR -->
+      <!-- RIGHT SIDE QR -->
       <div class="right-section">
         <h3 class="qr-title">Quét mã QR để thanh toán</h3>
+
         <div class="qr-container">
           <div class="qr-box">
             <img :src="qrUrl" class="qr-img" />
@@ -97,6 +109,7 @@
           <div v-else-if="status === 'failed'" class="status-icon failed">
             <i class="fas fa-times"></i>
           </div>
+
           <span class="status-text">{{ statusText }}</span>
         </div>
 
@@ -105,118 +118,142 @@
         </div>
       </div>
     </div>
+    <AppointmentModal
+        v-if="showModal"
+        :landAssetId="currentLandAssetId"
+        :valuationId="currentValuationId"
+        :asset-address="currentAddress"
+        :purpose="currenPurpose"
+        :show="showModal"
+        @close="showModal = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import api from "/src/api/api.js";
-import { useRouter } from "vue-router";
 import { socketService } from "/src/services/socketService.js";
 import { SOCKET_CONFIG } from "/src/config/socketConfig.js";
 import { useAuthStore } from "/src/stores/authStore.js";
+import { useRouter } from "vue-router";
+function particleStyle(i) {
+  const size = Math.random() * 4 + 2
+  const left = Math.random() * 100
+  const top = Math.random() * 100
+  const animationDuration = Math.random() * 12 + 8
+  const animationDelay = Math.random() * 2
 
-// === ROUTER & STORE ===
+  return {
+    width: `${size}px`,
+    height: `${size}px`,
+    left: `${left}%`,
+    top: `${top}%`,
+    animationDuration: `${animationDuration}s`,
+    animationDelay: `${animationDelay}s`,
+  }
+}
+
 const router = useRouter();
 const authStore = useAuthStore();
 
-// === GET ASSET ID FROM LOCAL STORAGE ===
-const assetId = localStorage.getItem("landAssetId");
-localStorage.removeItem("landAssetId");
-
-// === STATE ===
-const amount = ref(0);
+// =======================
+// 🔥 STATE
+// =======================
+const amount = ref(null); // nạp ví: user tự nhập
 const accountName = ref("");
 const accountNumber = ref("");
 const bank = ref("");
 const bankCode = ref("");
 const transactionCode = ref("");
+
 const qrUrl = ref("");
 const loading = ref(true);
-const status = ref("processing"); // processing | success | failed
 
-const statusText = computed(() => {
-  switch (status.value) {
-    case "processing": return "Đang chờ thanh toán...";
-    case "success": return "Đã thanh toán ✔";
-    case "failed": return "Thanh toán thất bại ✖";
-  }
-});
-
-const formattedAmount = computed(() => {
-  return amount.value.toLocaleString("vi-VN");
-});
-
-// === LOAD PAYMENT INFO ===
+// =======================
+// 🔥 GỌI API NẠP VÍ
+// =======================
 async function loadPaymentInfo() {
   try {
-    const res = await api.get(`/thg.user/my-land/checkout/land/${assetId}`);
+    const res = await api.get("/profile/wallet/payment-info");
     const data = res.data;
 
-    amount.value = data.amount;
     accountName.value = data.accountName;
     accountNumber.value = data.accountNumber;
     bank.value = data.bankName;
     bankCode.value = data.bankCode;
     transactionCode.value = data.transferContent;
 
+    // ❗ QR KHÔNG TRUYỀN AMOUNT (user tự nhập)
     qrUrl.value =
         `https://qr.sepay.vn/img?acc=${accountNumber.value}` +
         `&bank=${bankCode.value}` +
-        `&amount=${amount.value}` +
         `&des=${transactionCode.value}`;
+
   } catch (e) {
-    console.error("Lỗi tải PaymentInfoDTO", e);
+    console.error("Lỗi tải PaymentInfoDTO (nạp ví)", e);
   } finally {
     loading.value = false;
   }
 }
 
-// === PARTICLE STYLE ===
-function particleStyle() {
-  const size = Math.random() * 4 + 2;
-  const left = Math.random() * 100;
-  const animationDuration = Math.random() * 12 + 8;
-  const animationDelay = Math.random() * 2;
-  return {
-    width: `${size}px`,
-    height: `${size}px`,
-    left: `${left}%`,
-    animationDuration: `${animationDuration}s`,
-    animationDelay: `${animationDelay}s`,
-  };
-}
+// =======================
+// 🔥 SOCKET
+// =======================
+const status = ref("processing"); // processing | success | failed
 
-// === SOCKET LISTENER ===
 onMounted(async () => {
-  console.log('Hàm chạy1')
   await loadPaymentInfo();
-  console.log('Hàm chạy')
 
   const token = () => authStore.accessToken;
   socketService.connect(token);
+
   const employeeId = authStore.userInfo?.id;
 
   socketService.subscribe(
-      SOCKET_CONFIG.checkoutTopic(employeeId),
-      async (event) => {
-        if (!event || event.domain !== "CHECKOUT") return;
+      SOCKET_CONFIG.walletTopic(employeeId), // 👉 topic ví
+      (event) => {
+        console.log("📥 [WALLET EVENT]", event);
 
-        if (event.type === "PAYMENT_SUCCESS") {
+        if (!event || event.domain !== "WALLET") return;
+
+        if (event.type === "TOPUP_SUCCESS") {
           status.value = "success";
-          console.log( "Lụm" )
           setTimeout(() => {
-            router.push(`/san-pham-thien-ha/${assetId}`);
+            router.push("/vi-ca-nhan"); // hoặc trang profile
           }, 2000);
         }
 
-        if (event.type === "PAYMENT_FAILED") {
+        if (event.type === "TOPUP_FAILED") {
           status.value = "failed";
         }
       }
   );
 });
+
+// =======================
+// 🔥 FORMAT
+// =======================
+const formattedAmount = computed(() => {
+  if (!amount.value) return "—";
+  return amount.value.toLocaleString("vi-VN");
+});
+
+// =======================
+// 🔥 TRẠNG THÁI
+// =======================
+const statusText = computed(() => {
+  switch (status.value) {
+    case "processing":
+      return "Đang chờ nạp tiền...";
+    case "success":
+      return "Nạp tiền thành công ✔";
+    case "failed":
+      return "Nạp tiền thất bại ✖";
+  }
+});
 </script>
+
 
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");

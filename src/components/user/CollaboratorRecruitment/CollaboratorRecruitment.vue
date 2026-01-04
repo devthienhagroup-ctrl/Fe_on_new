@@ -80,32 +80,14 @@
                 class="filter-select"
                 @change="handleFilterChange"
             >
-              <option value="">Tất cả khu vực</option>
-              <option value="TP.HCM">TP.HCM</option>
-              <option value="Hà Nội">Hà Nội</option>
-              <option value="Đà Nẵng">Đà Nẵng</option>
-            </select>
-          </div>
-
-          <!-- Bộ lọc Quận/Huyện -->
-          <div class="filter-item" :class="{ active: districtFilter !== '' }">
-            <div class="filter-icon" @click="resetDistrictFilter">
-              <i class="fa-solid fa-map"></i>
-            </div>
-            <select
-                id="district-filter"
-                v-model="districtFilter"
-                class="filter-select"
-                @change="handleFilterChange"
-            >
-              <option value="">Tất cả Quận/Huyện</option>
-              <option value="Quận 1">Quận 1</option>
-              <option value="Quận 2">Quận 2</option>
-              <option value="Quận 3">Quận 3</option>
-              <option value="Quận 7">Quận 7</option>
-              <option value="Quận 9">Quận 9</option>
-              <option value="Bình Thạnh">Bình Thạnh</option>
-              <option value="Thủ Đức">Thủ Đức</option>
+              <option value="">Tất cả Tỉnh/Khu vực</option>
+              <option
+                  v-for="province in provinceOptions"
+                  :key="province"
+                  :value="province"
+              >
+                {{ province }}
+              </option>
             </select>
           </div>
 
@@ -121,11 +103,13 @@
                 @change="handleFilterChange"
             >
               <option value="">Tất cả Xã/Phường</option>
-              <option value="Phường 1">Phường 1</option>
-              <option value="Phường 2">Phường 2</option>
-              <option value="Phường 3">Phường 3</option>
-              <option value="Phú Thạnh">Phú Thạnh</option>
-              <option value="Tân Phong">Tân Phong</option>
+              <option
+                  v-for="ward in wardOptions"
+                  :key="ward"
+                  :value="ward"
+              >
+                {{ ward }}
+              </option>
             </select>
           </div>
 
@@ -204,12 +188,7 @@
                   <div class="job-detail salary">
                     <span class="icon money"><i class="fa-solid fa-money-bill-wave"></i> </span>
                     <span class="salary-text">
-                      <span v-if="isLoggedIn || job.salaryVisible">{{ formatSalary(job.salary) }}</span>
-                      <span v-else>{{ hideSalary(job.salary) }}</span>
-                      <span v-if="!isLoggedIn" class="toggle-salary" @click.stop="toggleSalaryVisibility(job.id)"
-                            v-html=" !job.salaryVisible ? `<i class='fa-solid fa-eye'></i>️` : `<i class='fa-solid fa-eye-slash'></i>`">
-
-                      </span>
+                      <span>{{ job.salary ? formatSalary(job.salary) : 'Chưa cập nhật' }}</span>
                     </span>
                   </div>
                 </div>
@@ -277,11 +256,7 @@
               </td>
               <td class="table-cell salary-cell">
                 <div class="salary-wrapper">
-                  <span v-if="isLoggedIn || job.salaryVisible">{{ formatSalary(job.salary) }}</span>
-                  <span v-else>{{ hideSalary(job.salary) }}</span>
-                  <span class="toggle-salary" @click="toggleSalaryVisibility(job.id)"
-                        v-html=" !job.salaryVisible ? `<i class='fa-solid fa-eye'></i>️` : `<i class='fa-solid fa-eye-slash'></i>`">
-                  </span>
+                  <span>{{ job.salary ? formatSalary(job.salary) : 'Chưa cập nhật' }}</span>
                 </div>
               </td>
               <td class="table-cell location-cell">
@@ -365,7 +340,7 @@
             <div class="modal-info-item">
               <span class="info-label">Mức lương</span>
               <span class="info-value">
-                {{ selectedJob?.salary ? formatSalary(selectedJob.salary) : 'Chưa cập nhật' }}
+                {{ selectedJob?.mucLuong ? formatSalary(selectedJob.mucLuong) : 'Chưa cập nhật' }}
               </span>
             </div>
             <div class="modal-info-item">
@@ -425,11 +400,9 @@
 
 <script setup>
 import {ref, computed, onMounted, watch} from 'vue'
-import {useRouter} from "vue-router";
 import Swal from "sweetalert2";
 import api from "../../../api/api.js";
-
-const router = useRouter()
+import addressData from "../../../assets/js/address.json";
 
 // Mock data for images (replace with actual imports in your project)
 const logoTHG = '/imgs/logoTHG.png'
@@ -449,10 +422,10 @@ const isLoading = ref(false)
 const totalPages = ref(1)
 
 // Reactive variables
-const isLoggedIn = ref(false) // Change to true to test logged in state
 const hoveredJob = ref(null)
 const currentPage = ref(1)
 const itemsPerPage = ref(6)
+const addressList = ref(addressData)
 
 // Computed properties
 const paginatedJobs = computed(() => {
@@ -474,63 +447,36 @@ const formatDate = (value) => {
   return new Intl.DateTimeFormat('vi-VN').format(date)
 }
 
-const hideSalary = (salary) => {
-  if (!salary) return '0 ₫'
-  const salaryStr = salary.toString()
-  return salaryStr.charAt(0) + 'x.xxx.xxx ₫'
-}
-
 const resolveImage = (image) => {
   if (!image) return logoTHG
   if (image.startsWith('http') || image.startsWith('/')) return image
   return `${ASSET_BASE_URL}${image}`
 }
 
+const formatAddressParts = (value) => {
+  if (!value) return ''
+  if (typeof value !== 'string') return value
+  return value
+      .split('/!!')
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .join(', ')
+}
+
 const getJobAddress = (job) => {
   if (!job) return 'Chưa cập nhật'
-  if (job.address) return job.address
-  if (job.location) return job.location
+  if (job.address) return formatAddressParts(job.address)
+  if (job.location) return formatAddressParts(job.location)
   if (job.ward || job.province) {
-    return [job.ward, job.province].filter(Boolean).join(', ')
+    return [formatAddressParts(job.ward), formatAddressParts(job.province)]
+        .filter(Boolean)
+        .join(', ')
   }
   return 'Chưa cập nhật'
 }
 
-const toggleSalaryVisibility = (jobId) => {
-  // Kiểm tra nếu chưa đăng nhập
-  if (!isLoggedIn.value) {
-    showLoginAlert();
-    return;
-  }
-
-  const job = availableJobs.value.find(j => j.id === jobId)
-  if (job) {
-    job.salaryVisible = !job.salaryVisible
-  }
-}
-
-// Thêm hàm hiển thị thông báo đăng nhập
-const showLoginAlert = () => {
-  Swal.fire({
-    title: 'Yêu cầu đăng nhập',
-    text: 'Bạn cần đăng nhập để xem mức lương chi tiết',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Đăng nhập',
-    cancelButtonText: 'Để sau',
-    confirmButtonColor: '#0030FF',
-    cancelButtonColor: '#6c757d'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Chuyển hướng đến trang đăng nhập
-      router.push('/dang-nhap');
-    }
-  });
-}
-
 // Filter variables
 const locationFilter = ref('')
-const districtFilter = ref('')
 const wardFilter = ref('')
 const showSalaryModal = ref(false)
 const salaryRange = ref({
@@ -540,11 +486,6 @@ const salaryRange = ref({
 
 const resetLocationFilter = () => {
   locationFilter.value = ''
-  handleFilterChange()
-}
-
-const resetDistrictFilter = () => {
-  districtFilter.value = ''
   handleFilterChange()
 }
 
@@ -585,6 +526,19 @@ const applyJob = ref(null)
 const selectedFile = ref(null)
 const isSubmitting = ref(false)
 
+const provinceOptions = computed(() => {
+  return addressList.value.map((province) => province.name)
+})
+
+const wardOptions = computed(() => {
+  if (locationFilter.value) {
+    const province = addressList.value.find((item) => item.name === locationFilter.value)
+    return province?.wards?.map((ward) => ward.name) || []
+  }
+  const allWards = addressList.value.flatMap((province) => province.wards || [])
+  return [...new Set(allWards.map((ward) => ward.name))]
+})
+
 const fetchWorkItems = async () => {
   isLoading.value = true
   try {
@@ -593,15 +547,15 @@ const fetchWorkItems = async () => {
       size: itemsPerPage.value,
       title: searchQuery.value || null,
       province: locationFilter.value || null,
-      ward: wardFilter.value || districtFilter.value || null,
+      ward: wardFilter.value || null,
       minSalary: salaryRange.value.min > 0 ? salaryRange.value.min : null,
       maxSalary: salaryRange.value.max < 50000000 ? salaryRange.value.max : null
     }
 
-    const res = await api.get('/thg/public/work-items', { params })
+    const res = await api.get('/thg/work-items', { params })
     const { content, totalPages: total } = res.data || {}
     availableJobs.value = Array.isArray(content)
-        ? content.map((job) => ({ ...job, salaryVisible: false }))
+        ? content
         : []
     totalPages.value = total || 1
   } catch (error) {
@@ -657,7 +611,7 @@ const submitApplication = async () => {
     const formData = new FormData()
     formData.append('cv', selectedFile.value)
 
-    await api.post(`/thg/public/work-items/${applyJob.value.id}/apply`, formData, {
+    await api.post(`/thg/work-items/${applyJob.value.id}/apply`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
 
@@ -687,6 +641,12 @@ watch(searchQuery, () => {
   searchTimeout = setTimeout(() => {
     handleFilterChange()
   }, 400)
+})
+
+watch(locationFilter, (newValue, oldValue) => {
+  if (newValue !== oldValue) {
+    wardFilter.value = ''
+  }
 })
 
 onMounted(() => {
@@ -1787,6 +1747,10 @@ thead {
   max-height: 90vh;
   overflow-y: auto;
   z-index: 2;
+}
+
+.job-modal .modal-card.modal-apply {
+  width: min(560px, 92vw);
 }
 
 .job-modal .modal-close {

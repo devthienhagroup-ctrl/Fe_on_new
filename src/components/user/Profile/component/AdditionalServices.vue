@@ -20,7 +20,7 @@
       </button>
     </div>
 
-    <div class="service-item" @click="navigateTo('cancel-subscription')">
+    <div class="service-item mb-3" @click="cancelPackage">
       <div class="service-info">
         <h3 class="service-title">Hủy đăng ký gói hiện tại</h3>
         <p class="service-subtitle">Dừng dịch vụ không cần thiết một cách nhanh chóng và an toàn.</p>
@@ -36,10 +36,49 @@
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+import { defineEmits } from 'vue'
 
+const emit = defineEmits(['cancel-package'])
 const navigateTo = (routeName) => {
   router.push({ name: routeName });
 };
+
+import { confirmYesNo, showLoading, updateAlertError, updateAlertSuccess } from '/src/assets/js/alertService.js'
+import api from "/src/api/api.js"
+const cancelPackage = async () => {
+   await confirmYesNo(
+      'Hủy gói dịch vụ?',
+      `
+      <div style="line-height:1.6;font-size:18px;text-align:left">
+        <b style="color:#dc2626">⚠️ Lưu ý:</b><br/>
+        Việc hủy gói sẽ làm <b>mất quyền truy cập</b> các tính năng nâng cao khi gói hết hạn!<br/>
+        Bạn có chắc chắn muốn tiếp tục?
+      </div>
+    `, async () => { try {
+    // 🌀 loading + call API
+    const res = await showLoading(
+        api.post('/profile/cancel-package')
+    )
+
+    const data = res.data
+
+    // ❌ nghiệp vụ fail
+    if (!data.success) {
+      updateAlertError('Thất bại', 'Bạn không có góiđịch vụ nào!')
+      return
+    }
+
+    updateAlertSuccess('Thành công', 'Đã hủy gói dịch vụ, bạn vẫn có thể dùng ưu đãi của gói đến khi gói hết hạn')
+     emit('cancel-package')
+
+  } catch (e) {
+    console.error(e)
+  }}
+  )
+
+
+}
+
 </script>
 
 <style scoped>

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 px-3 py-3" >
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 px-3 py-3" style="margin-top: 60px !important;">
     <div class="max-w-[1600px] mx-auto">
       <!-- Bộ lọc nâng cao -->
       <div class="bg-white rounded-xl shadow-lg border border-slate-300 mb-4 p-4"
@@ -19,7 +19,7 @@
           <!-- Nút chuyển đổi giữa bảng và thẻ -->
           <div class="filter-actions">
             <button
-                @click="$router.push('/-thg/quan-ly-san-pham/tao-moi')"
+                @click="$router.push('/user/quan-ly-san-pham/tao-moi')"
                 class="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-lg hover:from-amber-600 hover:to-yellow-600 transition-all shadow-md hover:shadow-lg text-sm"
             >
               <i class="fa-solid fa-plus text-xs"></i>

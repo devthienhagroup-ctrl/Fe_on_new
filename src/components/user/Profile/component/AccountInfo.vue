@@ -7,7 +7,7 @@
         <div class="avatar-section">
           <div class="avatar-container">
             <img
-                :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+user_info.avatar || '/default-avatar.png'"
+                :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+ (user_info.avatar || 'default-avatar.png')"
                 alt="Avatar"
                 class="avatar"
             />
@@ -544,7 +544,7 @@ onMounted(() => {
 .personal-info {
   width: 100%;
   height: 100%;
-  font-family: 'Ubuntu', sans-serif;
+
   padding: 20px 0;
 }
 
@@ -703,7 +703,7 @@ onMounted(() => {
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: 'Ubuntu', sans-serif;
+
 }
 
 .edit-btn:hover {
@@ -798,7 +798,7 @@ onMounted(() => {
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 16px;
-  font-family: 'Ubuntu', sans-serif;
+
   box-sizing: border-box;
 }
 
@@ -868,7 +868,7 @@ onMounted(() => {
   padding: 10px 20px;
   border-radius: 6px;
   cursor: pointer;
-  font-family: 'Ubuntu', sans-serif;
+
 }
 
 .save-btn {
@@ -878,7 +878,7 @@ onMounted(() => {
   padding: 10px 20px;
   border-radius: 6px;
   cursor: pointer;
-  font-family: 'Ubuntu', sans-serif;
+
 }
 
 .cancel-btn:hover,

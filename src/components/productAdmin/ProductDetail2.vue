@@ -830,6 +830,7 @@ const formatWard = (addressDetail) => {
   return ward;
 };
 import { useAuthStore } from "/src/stores/authStore.js";
+import {handleServiceUsageResponse, showCenterSuccess} from "../../assets/js/alertService.js";
 const authStore = useAuthStore();
 const auth = useAuthStore();
 
@@ -852,14 +853,21 @@ async function handleUnlock(asset) {
     // Gọi API kiểm tra có được unlock không
     const res = await api.get(`/thg.user/my-land/checkout/check/${asset.id}`);
 
-    if (res?.data?.unlocked === true) {
-      // ✅ Nếu đã được mở khóa → reload trang
-      location.reload();
-    } else {
-      // ❌ Chưa đủ điều kiện → lưu vào localStorage và chuyển qua thanh toán
-      localStorage.setItem("landAssetId", asset.id);
-      router.push("/thanh-toan-san-pham");
-    }
+    const ok = handleServiceUsageResponse(res.data, {
+      router, // 👈 TRUYỀN ROUTER VÀO
+      onContinue: () => {
+        localStorage.setItem("landAssetId", asset.id);
+        router.push("/thanh-toan-san-pham");
+      }
+    })
+
+
+    if(!ok)
+      return;
+
+    showCenterSuccess("Mở khóa sản phẩm thành công!")
+    location.reload();
+
   } catch (e) {
     console.error("❌ Lỗi khi gọi API kiểm tra mở khóa", e);
   }

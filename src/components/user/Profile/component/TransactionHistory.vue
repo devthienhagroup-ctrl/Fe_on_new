@@ -69,15 +69,27 @@
                 <h4 class="transaction-title">{{ transaction.title }}</h4>
                 <div class="transaction-meta">
                   <span class="transaction-time">{{ transaction.time }}</span>
+
                   <span
                       :class="[
-                      'transaction-status',
-                      transaction.status === 'success' ? 'status-success' : 'status-failed'
-                    ]"
+      'transaction-status',
+      transaction.status === 'success'
+        ? 'status-success'
+        : transaction.status === 'pending'
+          ? 'status-pending'
+          : 'status-failed'
+    ]"
                   >
-                    {{ transaction.status === 'success' ? 'Thành công' : 'Thất bại' }}
-                  </span>
+    {{
+                      transaction.status === 'success'
+                          ? 'Thành công'
+                          : transaction.status === 'pending'
+                              ? 'Đang xử lý'
+                              : 'Thất bại'
+                    }}
+  </span>
                 </div>
+
                 <div class="transaction-balance">
                   SD: {{ formatCurrency(transaction.balance) }}
                 </div>
@@ -99,109 +111,80 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import api from '/src/api/api.js'
 
-// Dữ liệu mẫu cho lịch sử giao dịch
-const transactions = ref([
-  {
-    id: 1,
-    date: '2024-05-15',
-    type: 'deposit',
-    title: 'Nạp tiền vào ví',
-    amount: 5000000,
-    status: 'success',
-    time: '2024-05-15 14:30:25',
-    balance: 15000000
-  },
-  {
-    id: 2,
-    date: '2024-05-15',
-    type: 'payment',
-    title: 'Thanh toán hóa đơn điện',
-    amount: -350000,
-    status: 'success',
-    time: '2024-05-15 09:15:10',
-    balance: 14650000
-  },
-  {
-    id: 3,
-    date: '2024-05-14',
-    type: 'withdraw',
-    title: 'Rút tiền về ngân hàng',
-    amount: -2000000,
-    status: 'failed',
-    time: '2024-05-14 16:45:30',
-    balance: 12650000
-  },
-  {
-    id: 4,
-    date: '2024-05-14',
-    type: 'deposit',
-    title: 'Nhận chuyển khoản',
-    amount: 3000000,
-    status: 'success',
-    time: '2024-05-14 11:20:15',
-    balance: 15650000
-  }
-])
+/* ===============================
+   STATE
+================================ */
+const transactions = ref([])
+const groupedTransactions = ref({})
 
-// Tính toán ngày mặc định (hôm nay và 1 tháng trước)
+/* ===============================
+   DATE RANGE
+================================ */
+const formatDateForInput = (date) => {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
 const getDefaultDates = () => {
   const today = new Date()
   const oneMonthAgo = new Date()
   oneMonthAgo.setMonth(today.getMonth() - 1)
-
   return {
     startDate: formatDateForInput(oneMonthAgo),
     endDate: formatDateForInput(today)
   }
 }
 
-// Định dạng ngày thành yyyy-MM-dd cho input
-const formatDateForInput = (date) => {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
+const filterDates = ref(getDefaultDates())
 
-// Định dạng ngày thành dd/MM/yyyy để hiển thị
+/* ===============================
+   FORMAT
+================================ */
 const formatDisplayDate = (dateString) => {
-  const date = new Date(dateString)
-  const day = String(date.getDate()).padStart(2, '0')
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const year = date.getFullYear()
-  return `${day}/${month}/${year}`
+  const d = new Date(dateString)
+  return d.toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
 }
 
-// Định dạng tiền tệ
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND'
-  }).format(amount)
+  }).format(amount || 0)
 }
 
-// Lọc giao dịch theo ngày
-const filterDates = ref(getDefaultDates())
-
-// Nhóm giao dịch theo ngày
-const groupedTransactions = ref({})
-
-// Hàm nhóm giao dịch theo ngày
-const groupTransactionsByDate = () => {
-  const grouped = {}
-
-  transactions.value.forEach(transaction => {
-    if (!grouped[transaction.date]) {
-      grouped[transaction.date] = []
-    }
-    grouped[transaction.date].push(transaction)
-  })
-
-  groupedTransactions.value = grouped
+/* ===============================
+   MAP NGHIỆP VỤ
+================================ */
+const mapTitle = (type) => {
+  switch (type) {
+    case 'NAP_VI': return 'Nạp tiền vào ví'
+    case 'RUT_TIEN': return 'Rút tiền về ngân hàng'
+    case 'THANH_TOAN': return 'Thanh toán gói dịch vụ'
+    case 'MUA_GOI': return 'Mua gói dịch vụ'
+    default: return type
+  }
 }
 
-// Lấy icon class theo loại giao dịch
+const mapType = (type) => {
+  if (type === 'NAP_VI') return 'deposit'
+  if (type === 'RUT_TIEN') return 'withdraw'
+  return 'payment'
+}
+
+const mapAmount = (tx) => {
+  if (tx.title === 'NAP_VI') return Math.abs(tx.amount)
+  if (tx.title === 'RUT_TIEN' || tx.title === 'MUA_GOI' || tx.title === 'THANH_TOAN') return -Math.abs(tx.amount)
+  return tx.amount
+}
+
 const getTransactionIconClass = (type) => {
   const icons = {
     deposit: 'fas fa-arrow-up',
@@ -211,22 +194,86 @@ const getTransactionIconClass = (type) => {
   return icons[type] || 'fas fa-question'
 }
 
-// Lấy màu cho số tiền
 const getAmountColor = (amount) => {
   return amount >= 0 ? '#00a86b' : '#ff4444'
 }
 
-// Xử lý thay đổi ngày
-const handleDateChange = () => {
-  // Ở đây bạn có thể thêm logic lọc giao dịch theo khoảng ngày
-  console.log('Date range changed:', filterDates.value)
+/* ===============================
+   GROUP BY DATE
+================================ */
+const groupTransactionsByDate = () => {
+  const grouped = {}
+
+  transactions.value.forEach(tx => {
+    if (!grouped[tx.date]) {
+      grouped[tx.date] = []
+    }
+    grouped[tx.date].push(tx)
+  })
+
+  groupedTransactions.value = grouped
 }
 
-// Khởi tạo
+/* ===============================
+   API CALL
+================================ */
+const fetchTransactions = async () => {
+  try {
+    const { startDate, endDate } = filterDates.value
+
+    const res = await api.get('/profile/transactions', {
+      params: {
+        fromDate: startDate,
+        toDate: endDate
+      }
+    })
+
+    transactions.value = (res.data || []).map((tx, index) => ({
+      id: index + 1,
+      date: tx.transactionDate.slice(0, 10),     // yyyy-MM-dd
+      time: tx.transactionDate,
+      title: mapTitle(tx.title),
+      type: mapType(tx.title),
+      status: tx.status?.toLowerCase(),
+      amount: mapAmount(tx),
+      balance: tx.soTienConLai
+    }))
+
+    groupTransactionsByDate()
+
+  } catch (e) {
+    console.error('Không thể tải lịch sử ví', e)
+    transactions.value = []
+    groupedTransactions.value = {}
+  }
+}
+
+/* ===============================
+   EVENTS
+================================ */
+const handleDateChange = () => {
+  fetchTransactions()
+}
+
+/* ===============================
+   INIT
+================================ */
 onMounted(() => {
-  groupTransactionsByDate()
+  fetchTransactions()
+})
+
+/* expose nếu template dùng */
+defineExpose({
+  groupedTransactions,
+  filterDates,
+  formatDisplayDate,
+  formatCurrency,
+  getTransactionIconClass,
+  getAmountColor,
+  handleDateChange
 })
 </script>
+
 
 <style scoped>
 .security-header {
@@ -246,7 +293,7 @@ onMounted(() => {
 .main-content {
   max-width: 95%;
   margin: 0 auto;
-  font-family: 'Ubuntu', sans-serif;
+
 }
 
 /* Bộ lọc ngày */
@@ -296,7 +343,7 @@ onMounted(() => {
   border-radius: 4px;
   background-color: #f9f9f9;
   min-width: 140px;
-  font-family: 'Ubuntu', sans-serif;
+
   font-size: 14px;
   color: #333;
 }
@@ -459,4 +506,26 @@ onMounted(() => {
     font-size: 18px;
   }
 }
+.transaction-status {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-success {
+  background: rgba(16,185,129,.12);
+  color: #10b981;
+}
+
+.status-pending {
+  background: rgba(245,158,11,.12);
+  color: #f59e0b;
+}
+
+.status-failed {
+  background: rgba(239,68,68,.12);
+  color: #ef4444;
+}
+
 </style>

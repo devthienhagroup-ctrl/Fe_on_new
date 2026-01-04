@@ -77,7 +77,7 @@
               <span v-else class="text-muted small">Không có tệp</span>
             </td>
             <td class="text-end">
-              <div class="d-flex justify-content-end gap-2">
+              <div v-if="canTakeAction(applicant.status)" class="d-flex justify-content-end gap-2">
                 <button
                   type="button"
                   class="btn btn-sm btn-outline-success"
@@ -181,7 +181,7 @@
 import { computed, ref, watch } from "vue";
 import api from "../../../api/api.js";
 import { fetchPrivateDownloadUrl } from "../../../api/fileApi.js";
-import { showError } from "../../../assets/js/alertService.js";
+import { showError, showSuccess } from "../../../assets/js/alertService.js";
 
 const props = defineProps({
   projectId: {
@@ -234,6 +234,8 @@ const mapApplicant = (item) => {
     jobTitle: item?.tenViTri ?? "Chưa cập nhật",
     appliedDate: formatDate(item?.ngayUngTuyen),
     status: item?.trangThai ?? "Đang đánh giá",
+    workItemId: item?.workItemId ?? null,
+    applicationId: item?.ungTuyenId ?? null,
     file: file
       ? {
           id: file.id,
@@ -262,25 +264,25 @@ const fetchApplicants = async () => {
   }
 };
 
+const triggerBrowserDownload = (url, fileName) => {
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.target = "_blank";
+  anchor.rel = "noopener";
+  if (fileName) anchor.download = fileName;
+  anchor.click();
+};
+
 const openFile = async (file) => {
   if (!file) return;
   try {
-    if (file.isPrivate) {
-      const downloadUrl = await fetchPrivateDownloadUrl(file.id);
-      if (!downloadUrl) {
-        showError("Không thể tải tệp đính kèm.");
-        return;
-      }
-      window.open(downloadUrl, "_blank");
+    const downloadUrl = await fetchPrivateDownloadUrl(file.id);
+    if (!downloadUrl) {
+      showError("Không thể tải tệp đính kèm.");
       return;
     }
 
-    if (file.url) {
-      window.open(file.url, "_blank");
-      return;
-    }
-
-    showError("Không tìm thấy đường dẫn tệp.");
+    triggerBrowserDownload(downloadUrl, file.fileName);
   } catch (error) {
     console.error("Không thể mở tệp đính kèm:", error);
     showError("Không thể tải tệp đính kèm.");
@@ -318,17 +320,31 @@ const closeModals = () => {
   selectedApplicant.value = null;
 };
 
-const submitAccept = () => {
+const submitDecision = async ({ isAccepted }) => {
   if (!selectedApplicant.value) return;
-  selectedApplicant.value.status = "Đạt yêu cầu";
-  closeModals();
+  const payload = {
+    workItemId: selectedApplicant.value.workItemId,
+    ungTuyenId: selectedApplicant.value.applicationId,
+    flag: isAccepted,
+    lyDo: rejectReason.value.trim() || null,
+    thuChao: welcomeMessage.value.trim() || null
+  };
+
+  try {
+    await api.post("/admin.thg/project/work/ung-tuyen/duyet", payload);
+    selectedApplicant.value.status = isAccepted ? "Đạt yêu cầu" : "Không phù hợp";
+    showSuccess(isAccepted ? "Đã chấp nhận ứng viên." : "Đã từ chối ứng viên.");
+    closeModals();
+  } catch (error) {
+    console.error("Không thể cập nhật trạng thái ứng tuyển:", error);
+    showError("Không thể cập nhật trạng thái ứng tuyển.");
+  }
 };
 
-const submitReject = () => {
-  if (!selectedApplicant.value) return;
-  selectedApplicant.value.status = "Không phù hợp";
-  closeModals();
-};
+const submitAccept = () => submitDecision({ isAccepted: true });
+const submitReject = () => submitDecision({ isAccepted: false });
+
+const canTakeAction = (status) => status === "Đang đánh giá";
 
 const statusClass = (status) => {
   switch (status) {

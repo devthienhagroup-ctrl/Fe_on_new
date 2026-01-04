@@ -21,7 +21,11 @@ export const SOCKET_CONFIG = {
   checkoutTopic: (employeeId) => `/topic/checkout/${employeeId}`,
   teamEventTopic: (teamId) => `/topic/my-team/${teamId}/events`,
   invitationTopic: (employeeId) => `/topic/invitations/${employeeId}`,
-
+  withdrawUserTopic(employeeId) {return `/topic/withdraw/user/${employeeId}`},
+  /* =========================
+     RÚT TIỀN – ADMIN
+  ========================= */
+  withdrawAdminTopic(adminId) {return `/topic/withdraw/admin/${adminId}`},
 
 
 

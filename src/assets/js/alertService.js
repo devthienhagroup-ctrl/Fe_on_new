@@ -210,14 +210,22 @@ export async function confirmYesNo(title, message, onConfirm) {
         showCancelButton: true,
         confirmButtonText: "Đồng ý",
         cancelButtonText: "Hủy",
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
+        confirmButtonColor: "#2563eb",   // xanh premium
+        cancelButtonColor: "#64748b",    // xám dịu
+
+        customClass: {
+            popup: 'swal-rounded',
+            confirmButton: 'swal-btn-confirm',
+            cancelButton: 'swal-btn-cancel',
+            title: 'swal-title'
+        }
     });
 
     if (isConfirmed && typeof onConfirm === "function") {
         onConfirm();
     }
 }
+
 
 
 /** ✔️ Thành công - hiển thị giữa màn hình */
@@ -258,3 +266,184 @@ export function showCenterWarning(title, text = "") {
         timerProgressBar: true,
     });
 }
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+function showServiceExpiredAlert(message, flag, onContinue, router) {
+
+    if (!router) {
+        console.error('Router is required for showServiceExpiredAlert')
+        return
+    }
+
+    const isNoPackage = flag === 'service_no'
+
+    Swal.fire({
+        icon: 'warning',
+        title: isNoPackage
+            ? 'Bạn chưa có gói dịch vụ'
+            : 'Gói dịch vụ đã hết lượt',
+
+        html: `
+          <div class="service-alert-content">
+            <div class="service-alert-msg">
+              ${message || 'Không thể tiếp tục thao tác'}
+            </div>
+            <div class="service-alert-note">
+              ${
+            isNoPackage
+                ? 'Vui lòng đăng ký gói dịch vụ để tiếp tục.'
+                : 'Vui lòng đăng ký hoặc nâng cấp gói.'
+        }
+            </div>
+          </div>
+        `,
+
+        showCancelButton: true,
+        showDenyButton: true,
+
+        confirmButtonText: '📝 Đăng ký ngay',
+        denyButtonText: '➡️ Tiếp tục',
+        cancelButtonText: 'Để sau',
+
+        reverseButtons: true,
+
+        /* ✅ QUAN TRỌNG: GẮN CLASS CSS */
+        customClass: {
+            popup: 'service-alert-popup',
+            title: 'service-alert-title',
+            confirmButton: 'service-alert-confirm',
+            denyButton: 'service-alert-deny',
+            cancelButton: 'service-alert-cancel'
+        }
+
+    }).then(result => {
+
+        // 📝 Đăng ký ngay
+        if (result.isConfirmed) {
+            router.push('/ho-so/goi-dich-vu')
+            return
+        }
+
+        // ➡️ Tiếp tục
+        if (result.isDenied && typeof onContinue === 'function') {
+            onContinue()
+        }
+    })
+}
+
+
+export function handleServiceUsageResponse(resData, options = {}) {
+
+    if (!resData) return false
+
+    const { onContinue, router } = options
+
+    if (resData.success === false) {
+
+        if (resData.flag === 'service_no' || resData.flag === 'service_false') {
+
+            showServiceExpiredAlert(
+                resData.msg,
+                resData.flag,
+                onContinue,
+                router // 👈 TRUYỀN ROUTER
+            )
+
+            return false
+        }
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Không thể thực hiện',
+            text: resData.msg || 'Có lỗi xảy ra'
+        })
+
+        return false
+    }
+
+    return true
+}
+
+
+function showServiceExpiredAlert2(message, flag, router) {
+
+    if (!router) return
+
+    const isNoPackage = flag === 'service_no'
+
+    Swal.fire({
+        icon: 'warning',
+        title: isNoPackage
+            ? 'Bạn chưa có gói dịch vụ'
+            : 'Gói dịch vụ đã hết lượt',
+
+        html: `
+          <div class="service-alert-content">
+            <div class="service-alert-msg">
+              ${message || 'Không thể tiếp tục thao tác'}
+            </div>
+            <div class="service-alert-note">
+              ${
+            isNoPackage
+                ? 'Vui lòng đăng ký gói dịch vụ để tiếp tục.'
+                : 'Vui lòng đăng ký hoặc nâng cấp gói.'
+        }
+            </div>
+          </div>
+        `,
+
+        showCancelButton: true,
+        showDenyButton: false,
+
+        confirmButtonText: '📝 Đăng ký ngay',
+        cancelButtonText: 'Để sau',
+
+        reverseButtons: true,
+
+        customClass: {
+            popup: 'service-alert-popup',
+            title: 'service-alert-title',
+            confirmButton: 'service-alert-confirm',
+            cancelButton: 'service-alert-cancel'
+        }
+
+    }).then(result => {
+        if (result.isConfirmed) {
+            router.push('/ho-so/goi-dich-vu')
+        }
+    })
+}
+
+
+export function handleServiceUsageResponse2(resData, options = {}) {
+
+    if (!resData) return false
+
+    const { router } = options
+
+    if (resData.success === false) {
+
+        if (resData.flag === 'service_no' || resData.flag === 'service_false') {
+
+            showServiceExpiredAlert(
+                resData.msg,
+                resData.flag,
+                router
+            )
+
+            return false
+        }
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Không thể thực hiện',
+            text: resData.msg || 'Có lỗi xảy ra'
+        })
+
+        return false
+    }
+
+    return true
+}
+

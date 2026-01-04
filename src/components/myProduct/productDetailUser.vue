@@ -1,5 +1,5 @@
 <template>
-  <div v-if="asset" class="executive-container">
+  <div v-if="asset" class="executive-container" style="margin-top: 60px !important;">
 
     <!-- HEADER CARD -->
     <div class="executive-header">
@@ -14,7 +14,7 @@
             <div class="header-actions">
               <button
                   class="action-btn btn-edit"
-                  @click="$router.push(`/-thg/quan-ly-san-pham/cap-nhat/${asset.id}`)"
+                  @click="$router.push(`/user/quan-ly-san-pham/cap-nhat/${asset.id}`)"
               >
                 <i class="fa-solid fa-pen"></i>
                 <span>Cập nhật thông tin</span>
@@ -622,7 +622,12 @@ import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import FileOrLand from "/src/components/productAdmin/FileNew.vue";
 import HopTacMoiGioi from "/src/components/productAdmin/HopTacMoiGioi.vue";
-import {showCenterError, showCenterWarning} from "/src/assets/js/alertService.js";
+import {
+  handleServiceUsageResponse,
+  handleServiceUsageResponse2,
+  showCenterError,
+  showCenterWarning
+} from "/src/assets/js/alertService.js";
 
 const activeTab = ref("DETAIL") // DETAIL | FILE
 const route = useRoute();
@@ -938,34 +943,93 @@ const closeRegisterModal = () => {
 
 const submitRegisterLetter = async () => {
   if (!registerLetter.value.trim()) {
-    showCenterWarning("Vui lòng nhập thư đăng ký.");
-    return;
+    showCenterWarning('Vui lòng nhập thư đăng ký.')
+    return
   }
 
   try {
-    await api.post(
-        "/user.thg/product/user/register-letter",
+    const res = await api.post(
+        '/user.thg/product/user/register-letter',
         null,
         {
           params: {
-            landId: id, // hoặc item.id
-            thuDK: registerLetter.value.trim(),
-          },
+            landId: id,
+            thuDK: registerLetter.value.trim()
+          }
         }
-    );
+    )
 
-    showCenterSuccess("Gửi thư đăng ký thành công");
-    closeRegisterModal();
+    // ===== XỬ LÝ THẲNG RESPONSE =====
+    if (res.data?.success === false) {
+
+      if (res.data.flag === 'service_no' || res.data.flag === 'service_false') {
+        Swal.fire({
+          icon: 'warning',
+          title: res.data.flag === 'service_no'
+              ? 'Bạn chưa có gói dịch vụ'
+              : 'Gói dịch vụ đã hết lượt',
+
+          html: `
+            <div class="service-alert-content">
+              <div class="service-alert-msg">
+                ${res.data.msg || 'Không thể tiếp tục thao tác'}
+              </div>
+              <div class="service-alert-note">
+                ${
+              res.data.flag === 'service_no'
+                  ? 'Vui lòng đăng ký gói dịch vụ để tiếp tục.'
+                  : 'Vui lòng đăng ký hoặc nâng cấp gói.'
+          }
+              </div>
+            </div>
+          `,
+
+          showCancelButton: true,
+          showDenyButton: false,
+
+          confirmButtonText: '📝 Đăng ký ngay',
+          cancelButtonText: 'Để sau',
+
+          reverseButtons: true,
+
+          customClass: {
+            popup: 'service-alert-popup',
+            title: 'service-alert-title',
+            confirmButton: 'service-alert-confirm',
+            cancelButton: 'service-alert-cancel'
+          }
+        }).then(result => {
+          if (result.isConfirmed) {
+            router.push('/ho-so/goi-dich-vu')
+          }
+        })
+
+        return
+      }
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Không thể thực hiện',
+        text: res.data.msg || 'Có lỗi xảy ra'
+      })
+      return
+    }
+    // ===== END =====
+
+    showCenterSuccess('Gửi thư đăng ký thành công')
+    closeRegisterModal()
+
   } catch (e) {
-    console.error(e);
+    console.error(e)
 
     const msg =
         e?.response?.data ||
-        "Gửi thư đăng ký thất bại, vui lòng thử lại";
+        'Gửi thư đăng ký thất bại, vui lòng thử lại'
 
-    showCenterError(msg);
+    showCenterError(msg)
   }
-};
+}
+
 
 
 const openRegisterModal = () => {

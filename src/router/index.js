@@ -121,6 +121,11 @@ import Test from "../components/productAdmin/test.vue";
 import Test1 from "../components/productAdmin/test1.vue";
 import Test3 from "../components/myProduct/test3.vue";
 import productDetailUser from "../components/myProduct/productDetailUser.vue"
+import PaymentQR from "../components/user/Profile/component/PaymentQR.vue";
+import rutTienAdmin from "../components/rutTienAdmin.vue"
+import productCreateUser from "../components/productUser/productCreateUser.vue"
+import productUpdate from "../components/productUser/ProductUpdate.vue"
+import RutTienAdmin from "../components/rutTienAdmin.vue";
 
 const routes = [
         {
@@ -129,10 +134,28 @@ const routes = [
             component: LoginForm,
         },
     {
-        path: "/user/quan-ly-san-pham/:id",
-        name: "QLSAN-DETAIL",
-        component: productDetailUser,
-    },
+        path: "/user/quan-ly-san-pham",
+        component: MenuUser,
+        children: [
+            {
+                path: ":id",
+                name: "QLSAN-DETAIL",
+                component: productDetailUser,
+            },
+            {
+                path: "cap-nhat/:id",
+                name: "QLSAN-DETAIL-UPDATE",
+                component: productUpdate,
+            },
+            {
+                path: "tao-moi",
+                name: "QLSAN-CREATE",
+                component: productCreateUser,
+            }
+        ]
+    }
+,
+
     {
             path: "/moi-gioi",
             name: "MoiGioiShow",
@@ -521,6 +544,23 @@ const routes = [
             }]
         },
         {
+            path: "/-thg/yeu-cau-rut-tien",
+            name: "1900009",
+            component: Menu,
+            meta: {
+                requiresAuth: true,
+                enableTailwind: true,
+                loginFrom: "admin",
+            },
+            children: [
+                {
+                    path: "",
+                    name: "RutTienAdmin",
+                    component: RutTienAdmin
+                },
+            ]
+        },
+        {
         path: "/-thg/quan-ly-san-pham",
         component: Menu,
         meta: {
@@ -528,6 +568,7 @@ const routes = [
             enableTailwind: true,
             loginFrom: "admin",
         },
+
         children: [
             {
                 path: "",
@@ -556,8 +597,8 @@ const routes = [
 
 
     {
-        path: "/01",
-        component: Test,
+        path: "/loi-de-nghi",
+        component: Test1,
         meta: {
             requiresAuth: false,
             hideFooterMap: false,
@@ -573,16 +614,23 @@ const routes = [
             enableTailwind: true
         }
     },
-    {
-        path: "/03",
-        component: Test3,
-        meta: {
-            requiresAuth: false,
-            hideFooterMap: false,
-            enableTailwind: true
-        }
-    },
-    {
+        {
+            path: "/san-pham-cua-ban",
+            component: MenuUser,
+            children: [
+                {
+                    path: "",
+                    name: "SANPHAM-CUABAN",
+                    component: Test3,
+                    meta: {
+                        requiresAuth: false,
+                        hideFooterMap: false,
+                        enableTailwind: true
+                    }
+                }
+            ]
+        },
+        {
         path: "/san-pham-thien-ha",
         component: MenuUser,
         meta: {
@@ -932,6 +980,20 @@ const routes = [
                 path: '',
                 name: 'checkout11111',
                 component: PaymentPage2,
+                meta: {hideFooterMap: false}
+            }
+        ]
+    },
+    {
+        path: "/nap-tien-ca-nhan",
+        name: "Checkout114",
+        component: MenuUser,
+        meta: { requiresAuth: false },
+        children: [
+            {
+                path: '',
+                name: 'checkout11111111',
+                component: PaymentQR,
                 meta: {hideFooterMap: false}
             }
         ]
