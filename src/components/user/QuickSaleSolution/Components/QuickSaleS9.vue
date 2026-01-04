@@ -31,13 +31,7 @@
         </div>
         <div class="text-content-wrapper">
           <div class="text-content fade-right">
-            <p :style="{
-              marginBottom: '20px',
-              lineHeight: sectionData.content.styles.lineHeight,
-              fontSize: sectionData.content.styles.fontSize,
-              color: sectionData.content.styles.color,
-              textAlign: 'justify'
-            }">
+            <p class="content-text">
               {{ sectionData.content.text }}
             </p>
           </div>
@@ -234,7 +228,16 @@ if(props.sectionData) {
   transform: translateY(-50px);
 }
 
-/* Responsive - giữ nguyên CSS gốc */
+/* Thêm class mới cho nội dung text */
+.content-text {
+  margin-bottom: 20px !important;
+  line-height: v-bind('sectionData.content.styles.lineHeight || "1.6"');
+  font-size: v-bind('sectionData.content.styles.fontSize || "17px"');
+  color: v-bind('sectionData.content.styles.color || "#333"');
+  text-align: justify !important;
+}
+
+/* Responsive - sử dụng !important để ghi đè inline styles */
 @media (max-width: 1400px) {
   .section9::before {
     content: "";
@@ -249,7 +252,7 @@ if(props.sectionData) {
   }
 
   .st-title {
-    width: 100%;
+    width: 100% !important;
   }
   .st-title::before, .st-title::after {
     display: none !important;
@@ -260,125 +263,155 @@ if(props.sectionData) {
   .top-img::before,
   .mid-img::before,
   .bot-img::before {
-    display: none;
+    display: none !important;
   }
 
   .st-title {
     position: relative;
   }
   .st-title::after {
-    display: block;
+    display: none !important;
     content: "";
     position: absolute;
-    border-left: 2px dashed v-bind('sectionData.styles?.borderColor || "#C2CBF0"');
-    width: 2px;
-    height: 100%;
-    left: 0;
-    top: 0;
-    bottom: 0;
+    border-left: 2px dashed v-bind('sectionData.styles?.borderColor || "#C2CBF0"') !important;
+    width: 2px !important;
+    height: 100% !important;
+    left: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
   }
 
   .top-img img,
   .mid-img img,
   .bot-img img {
-    max-width: 80%;
-    height: auto;
+    max-width: 80% !important;
+    height: auto !important;
   }
 }
 
 @media (max-width: 1308px) {
   .img-right::before,
-  .text-content-wrapper::before { display: none }
-  .text-content-wrapper::before { height: 300%; }
-  .right-imgimg { transform: translate(0, 0); height: 100%; }
-  .right-img { height: 145px; }
+  .text-content-wrapper::before {
+    display: none !important;
+  }
+  .text-content-wrapper::before {
+    height: 300% !important;
+  }
+  .right-img img {
+    transform: translate(0, 0) !important;
+    height: 100% !important;
+  }
+  .right-img {
+    height: 145px !important;
+  }
 }
 
 @media (max-width: 992px) {
   .main-content-wrapper {
-    flex-direction: column;
-    gap: 20px;
+    flex-direction: column !important;
+    gap: 20px !important;
   }
   .left-content-section,
   .right-content-section {
-    flex: none;
-    width: 100%;
+    flex: none !important;
+    width: 100% !important;
   }
 
   .right-content-section::before,
-  .text-content-wrapper::before { display: none }
+  .text-content-wrapper::before {
+    display: none !important;
+  }
 
   .section9 {
-    position: relative;
+    position: relative !important;
   }
   .bottom-right-img {
-    display: none;
+    display: none !important;
   }
   .text-content-wrapper {
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 20px;
-    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1) !important;
+    border-radius: 20px !important;
+    padding: 20px !important;
+    max-width: 100% !important;
   }
-  .right-imgimg {
-    border-radius: 50px;
-    height: 100%;
+  .right-img img {
+    border-radius: 50px !important;
+    height: 100% !important;
   }
-  .right-img { height: 100%; }
+  .right-img {
+    height: 100% !important;
+  }
+
+  .content-text {
+    text-align: left !important;
+  }
 }
 
 @media (max-width: 768px) {
   .section {
-    padding: 20px;
-    margin-bottom: 30px;
-    margin-top: 150px;
+    padding: 20px !important;
+    margin-bottom: 30px !important;
+    margin-top: 150px !important;
   }
 
   .top-img,
   .mid-img,
   .bot-img {
-    text-align: center;
+    text-align: center !important;
   }
 
   .top-img img,
   .mid-img img,
   .bot-img img {
-    margin: 0 auto;
-    max-width: 100%;
+    margin: 0 auto !important;
+    max-width: 100% !important;
     transform: none !important;
   }
 
   .mid-img,
   .bot-img {
     transform: none !important;
-    margin-top: 20px;
+    margin-top: 20px !important;
   }
 
   .right-content-section {
-    transform: none;
+    transform: none !important;
   }
 
   .text-content-wrapper {
-    margin-top: 20px;
+    margin-top: 20px !important;
+  }
+
+  .content-text {
+    text-align: left !important;
+    font-size: 16px !important;
+    line-height: 1.5 !important;
   }
 }
 
 @media (max-width: 576px) {
   .section {
-    padding: 15px;
-    margin-top: 100px;
+    padding: 15px !important;
+    margin-top: 100px !important;
   }
 
   .section9 .title-component {
-    transform: translateY(-30px);
+    transform: translateY(-30px) !important;
   }
 
   .left-content-section {
-    padding-top: 20px;
+    padding-top: 20px !important;
   }
 
   .section9::before {
-    left: 63px;
-    top: 0;
+    left: 63px !important;
+    top: 0 !important;
+  }
+
+  .content-text {
+    font-size: 15px !important;
+    line-height: 1.4 !important;
+    text-align: left !important;
   }
 }
 </style>

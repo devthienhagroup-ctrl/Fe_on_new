@@ -3,115 +3,166 @@ import axios from 'axios'
 import { useAuthStore } from '../stores/authStore'
 import router from "../router/index.js"
 import { showAlert, showError } from "../assets/js/alertService.js";
+
+/* ===================== CONFIG ===================== */
+
 const api = axios.create({
     baseURL: 'http://localhost:8084/apithienha',
-    withCredentials: true, // để gửi kèm cookie refreshToken
+    withCredentials: true, // gửi cookie refreshToken
 })
 
+/**
+ * Các API PUBLIC – PHẢI KHỚP 100% với requestMatchers().permitAll()
+ */
+const PUBLIC_API_PREFIX = [
+    "/thg/public/",
+    "/thg/api/auth/",
+    "/user.thg/product/user/",
+    "/uploads/",
+    "/uploadpss/",
+    "/ws-thg/",
+    "/webhook/"
+]
 
-// Gắn Authorization cho mọi request
+const isPublicApi = (url = "") =>
+    PUBLIC_API_PREFIX.some(prefix => url.startsWith(prefix))
+
+/* ===================== REQUEST INTERCEPTOR ===================== */
+
 api.interceptors.request.use(
     (config) => {
         const auth = useAuthStore()
-        if (auth?.accessToken) {
+        const url = config?.url || ""
+
+        // 🔍 DEBUG REQUEST
+        console.debug("[API REQUEST]", {
+            url,
+            method: config.method,
+            isPublic: isPublicApi(url),
+            hasToken: !!auth?.accessToken
+        })
+
+        // ❌ KHÔNG gắn token cho PUBLIC API
+        if (!isPublicApi(url) && auth?.accessToken) {
             config.headers = config.headers || {}
             config.headers.Authorization = `Bearer ${auth.accessToken}`
         }
+
         return config
     },
     (error) => Promise.reject(error)
 )
 
-// Xử lý 401/403
-let refreshPromise = null;
+/* ===================== RESPONSE INTERCEPTOR ===================== */
+
+let refreshPromise = null
 
 api.interceptors.response.use(
     (res) => {
-        if (res?.config?._retryCount) delete res.config._retryCount;
-        return res;
+        if (res?.config?._retryCount) delete res.config._retryCount
+        return res
     },
     async (error) => {
-        const { response, config } = error || {};
-        const status = response?.status;
-        const originalRequest = config;
-        const auth = useAuthStore();
+        const { response, config } = error || {}
+        const status = response?.status
+        const originalRequest = config
+        const auth = useAuthStore()
 
-        originalRequest._retryCount = originalRequest._retryCount || 0;
+        if (!originalRequest) return Promise.reject(error)
 
-        const isAuthEndpoint = originalRequest?.url?.includes("/thg/api/auth/");
-        const alreadyRetried = originalRequest?.__isRetryRequest === true;
+        const url = originalRequest.url || ""
+        const publicApi = isPublicApi(url)
 
-        // ⭐ Không retry nếu lỗi 500
+        originalRequest._retryCount = originalRequest._retryCount || 0
+        const alreadyRetried = originalRequest.__isRetryRequest === true
+
+        // 🔍 DEBUG RESPONSE
+        console.error("[API RESPONSE ERROR]", {
+            url,
+            status,
+            isPublic: publicApi,
+            retryCount: originalRequest._retryCount,
+            alreadyRetried
+        })
+
+        /* ========= 500 – KHÔNG ĐỘNG GÌ ========= */
         if (status === 500) {
-            console.warn("Server error 500 — giữ nguyên trạng thái, không logout, không redirect.");
-            return Promise.reject(error);
+            console.warn("❌ 500 Server error – bỏ qua interceptor")
+            return Promise.reject(error)
         }
 
-        // 🔁 Tự refresh token (trừ khi lỗi 500)
+        /* ========= PUBLIC API 401 – TUYỆT ĐỐI KHÔNG LOGOUT ========= */
+        if (status === 401 && publicApi) {
+            console.warn("⚠️ 401 từ PUBLIC API – IGNORE", url)
+            return Promise.reject(error)
+        }
+
+        /* ========= REFRESH TOKEN – CHỈ KHI 401 PRIVATE ========= */
         if (
+            status === 401 &&
+            !publicApi &&
             !alreadyRetried &&
-            !isAuthEndpoint &&
             auth?.accessToken &&
             originalRequest._retryCount < 1
         ) {
             try {
-                originalRequest._retryCount++;
+                originalRequest._retryCount++
+
+                console.info("🔁 Attempt refresh token…")
 
                 if (!refreshPromise) {
-                    refreshPromise = auth.refetch().finally(() => (refreshPromise = null));
+                    refreshPromise = auth.refetch()
+                        .finally(() => refreshPromise = null)
                 }
 
-                await refreshPromise;
+                await refreshPromise
 
-                originalRequest.__isRetryRequest = true;
+                const newAuth = useAuthStore()
+
+                originalRequest.__isRetryRequest = true
                 originalRequest.headers = {
                     ...originalRequest.headers,
-                    Authorization: `Bearer ${auth.accessToken}`,
-                };
-
-                return api.request(originalRequest);
-            } catch (e) {
-                console.error("Token refresh failed:", e);
-
-                // ❗ Nếu token lỗi nhưng không phải 500 thì mới logout
-                if (status !== 500) {
-                    await auth.logout();
-                    const link = localStorage.getItem("loginFrom");
-                    if (link === "admin") router.push("/-thg/dang-nhap");
-                    else router.push("/dang-nhap");
-
-                    showError("Phiên đăng nhập hết hạn", "Vui lòng đăng nhập lại");
+                    Authorization: `Bearer ${newAuth.accessToken}`,
                 }
 
-                return Promise.reject(e);
+                console.info("✅ Retry original request after refresh:", url)
+
+                return api.request(originalRequest)
+
+            } catch (e) {
+                console.error("❌ Refresh token FAILED", e)
+
+                await auth.logout()
+                const link = localStorage.getItem("loginFrom")
+                router.push(link === "admin" ? "/-thg/dang-nhap" : "/dang-nhap")
+
+                showError("Phiên đăng nhập hết hạn", "Vui lòng đăng nhập lại")
+                return Promise.reject(e)
             }
         }
 
-        // 🚫 403 nhưng không phải 500 → xử lý cảnh báo (không logout nếu bạn muốn)
+        /* ========= 403 – KHÔNG LOGOUT ========= */
         if (status === 403) {
             showAlert(
-                "Cảnh báo truy cập trái phép!",
-                "Bạn không có quyền thực hiện hành động này."
-            );
-            // Không logout, không redirect khi 500
-            const link = localStorage.getItem("loginFrom");
-            if (link === "admin") router.push("/-thg/quan-ly");
-            else router.push("/");
+                "Không có quyền",
+                "Bạn không được phép thực hiện hành động này."
+            )
+            return Promise.reject(error)
         }
 
-        // 🚪 401 mà không refresh được → logout (nhưng không logout nếu 500)
-        if (status === 401 && !isAuthEndpoint && status !== 500) {
-            await auth.logout();
-            const link = localStorage.getItem("loginFrom");
-            if (link === "admin") router.push("/-thg/dang-nhap");
-            else router.push("/dang-nhap");
+        /* ========= 401 PRIVATE nhưng không refresh được ========= */
+        if (status === 401 && !publicApi) {
+            console.error("🚪 401 PRIVATE – LOGOUT", url)
 
-            showError("Phiên đăng nhập không hợp lệ", "Vui lòng đăng nhập lại");
+            await auth.logout()
+            const link = localStorage.getItem("loginFrom")
+            router.push(link === "admin" ? "/-thg/dang-nhap" : "/dang-nhap")
+
+            showError("Phiên đăng nhập không hợp lệ", "Vui lòng đăng nhập lại")
         }
 
-        return Promise.reject(error);
+        return Promise.reject(error)
     }
-);
-
+)
 
 export default api

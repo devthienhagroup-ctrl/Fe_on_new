@@ -11,50 +11,149 @@
             {{ config.topInvestorsTitle }}
           </div>
           <div class="top-investors-grid">
-            <div class="top-investor-compact top-1" :style="top1Style">
+            <!-- Top 1 (bên trái) -->
+            <div
+                v-if="topInvestors.length > 0"
+                :key="topInvestors[0].id"
+                class="top-investor-compact"
+                :class="['top-1']"
+                :style="getTopInvestorStyle(0)"
+            >
               <div class="compact-avatar-wrapper">
-                <div class="compact-avatar" :style="compactAvatarStyle">
-                  <img :src="topInvestors[0].avatar" alt="Avatar"/>
+                <div class="compact-avatar" :style="getAvatarStyle(0)">
+                  <img :src="getAvatarUrl(topInvestors[0].avatar)" :alt="topInvestors[0].fullName"/>
                   <i class="fas fa-crown crown-icon" :style="crownIconStyle"></i>
                 </div>
               </div>
               <div class="compact-info">
-                <h4 class="compact-name" :style="compactNameStyle">{{ topInvestors[0].name }}</h4>
+                <h4 class="compact-name" :style="getNameStyle(0)">{{ topInvestors[0].fullName || 'N/A' }}</h4>
                 <p class="compact-package" :style="compactPackageStyle">
-                  <span>{{ config.packageLabel }}</span>{{ topInvestors[0].package + ' - ' + topInvestors[0].rate }}
+                  <span>{{ config.packageLabel }}</span>
+                  {{ topInvestors[0].invmName || 'N/A' }} - {{ topInvestors[0].profitPercent || 0 }}%
                 </p>
               </div>
-              <div class="compact-badge" :style="top1BadgeStyle">{{ config.top1Badge }}</div>
+              <div class="compact-badge" :style="getBadgeStyle(0)">
+                {{ config.top1Badge }}
+              </div>
             </div>
 
-            <div class="top-investor-compact top-2" :style="top2Style">
+            <!-- Placeholder cho top 1 nếu không có -->
+            <div
+                v-else
+                :key="'placeholder-1'"
+                class="top-investor-compact placeholder"
+                :style="getPlaceholderStyle(0)"
+            >
               <div class="compact-avatar-wrapper">
-                <div class="compact-avatar" :style="compactAvatarStyle">
-                  <img :src="topInvestors[1].avatar" alt="Avatar"/>
+                <div class="compact-avatar placeholder-avatar" :style="compactAvatarStyle">
+                  <i class="fas fa-user placeholder-icon"></i>
                 </div>
               </div>
               <div class="compact-info">
-                <h4 class="compact-name" :style="compactNameStyle">{{ topInvestors[1].name }}</h4>
-                <p class="compact-package" :style="compactPackageStyle">
-                  <span>{{ config.packageLabel }}</span>{{ topInvestors[1].package + ' - ' + topInvestors[1].rate }}
+                <h4 class="compact-name placeholder-text" :style="compactNameStyle">Chưa có nhà đầu tư</h4>
+                <p class="compact-package placeholder-text" :style="compactPackageStyle">
+                  <span>{{ config.packageLabel }}</span>Chưa có
                 </p>
               </div>
-              <div class="compact-badge" :style="top2BadgeStyle">{{ config.top2Badge }}</div>
+              <div class="compact-badge placeholder-badge" :style="getPlaceholderBadgeStyle(0)">
+                1
+              </div>
             </div>
 
-            <div class="top-investor-compact top-3" :style="top3Style">
+            <!-- Top 2 (ở giữa) -->
+            <div
+                v-if="topInvestors.length > 1"
+                :key="topInvestors[1].id"
+                class="top-investor-compact"
+                :class="['top-2']"
+                :style="getTopInvestorStyle(1)"
+            >
               <div class="compact-avatar-wrapper">
-                <div class="compact-avatar" :style="compactAvatarStyle">
-                  <img :src="topInvestors[2].avatar" alt="Avatar"/>
+                <div class="compact-avatar" :style="getAvatarStyle(1)">
+                  <img :src="getAvatarUrl(topInvestors[1].avatar)" :alt="topInvestors[1].fullName"/>
                 </div>
               </div>
               <div class="compact-info">
-                <h4 class="compact-name" :style="compactNameStyle">{{ topInvestors[2].name }}</h4>
+                <h4 class="compact-name" :style="getNameStyle(1)">{{ topInvestors[1].fullName || 'N/A' }}</h4>
                 <p class="compact-package" :style="compactPackageStyle">
-                  <span>{{ config.packageLabel }}</span>{{ topInvestors[2].package + ' - ' + topInvestors[2].rate }}
+                  <span>{{ config.packageLabel }}</span>
+                  {{ topInvestors[1].invmName || 'N/A' }} - {{ topInvestors[1].profitPercent || 0 }}%
                 </p>
               </div>
-              <div class="compact-badge" :style="top3BadgeStyle">{{ config.top3Badge }}</div>
+              <div class="compact-badge" :style="getBadgeStyle(1)">
+                {{ config.top2Badge }}
+              </div>
+            </div>
+
+            <!-- Placeholder cho top 2 nếu không có -->
+            <div
+                v-else-if="placeholderCount >= 2"
+                :key="'placeholder-2'"
+                class="top-investor-compact placeholder"
+                :style="getPlaceholderStyle(1)"
+            >
+              <div class="compact-avatar-wrapper">
+                <div class="compact-avatar placeholder-avatar" :style="compactAvatarStyle">
+                  <i class="fas fa-user placeholder-icon"></i>
+                </div>
+              </div>
+              <div class="compact-info">
+                <h4 class="compact-name placeholder-text" :style="compactNameStyle">Chưa có nhà đầu tư</h4>
+                <p class="compact-package placeholder-text" :style="compactPackageStyle">
+                  <span>{{ config.packageLabel }}</span>Chưa có
+                </p>
+              </div>
+              <div class="compact-badge placeholder-badge" :style="getPlaceholderBadgeStyle(1)">
+                2
+              </div>
+            </div>
+
+            <!-- Top 3 (bên phải) -->
+            <div
+                v-if="topInvestors.length > 2"
+                :key="topInvestors[2].id"
+                class="top-investor-compact"
+                :class="['top-3']"
+                :style="getTopInvestorStyle(2)"
+            >
+              <div class="compact-avatar-wrapper">
+                <div class="compact-avatar" :style="getAvatarStyle(2)">
+                  <img :src="getAvatarUrl(topInvestors[2].avatar)" :alt="topInvestors[2].fullName"/>
+                </div>
+              </div>
+              <div class="compact-info">
+                <h4 class="compact-name" :style="getNameStyle(2)">{{ topInvestors[2].fullName || 'N/A' }}</h4>
+                <p class="compact-package" :style="compactPackageStyle">
+                  <span>{{ config.packageLabel }}</span>
+                  {{ topInvestors[2].invmName || 'N/A' }} - {{ topInvestors[2].profitPercent || 0 }}%
+                </p>
+              </div>
+              <div class="compact-badge" :style="getBadgeStyle(2)">
+                {{ config.top3Badge }}
+              </div>
+            </div>
+
+            <!-- Placeholder cho top 3 nếu không có -->
+            <div
+                v-else-if="placeholderCount >= 3"
+                :key="'placeholder-3'"
+                class="top-investor-compact placeholder"
+                :style="getPlaceholderStyle(2)"
+            >
+              <div class="compact-avatar-wrapper">
+                <div class="compact-avatar placeholder-avatar" :style="compactAvatarStyle">
+                  <i class="fas fa-user placeholder-icon"></i>
+                </div>
+              </div>
+              <div class="compact-info">
+                <h4 class="compact-name placeholder-text" :style="compactNameStyle">Chưa có nhà đầu tư</h4>
+                <p class="compact-package placeholder-text" :style="compactPackageStyle">
+                  <span>{{ config.packageLabel }}</span>Chưa có
+                </p>
+              </div>
+              <div class="compact-badge placeholder-badge" :style="getPlaceholderBadgeStyle(2)">
+                3
+              </div>
             </div>
           </div>
         </div>
@@ -68,60 +167,57 @@
             </tr>
             </thead>
             <tbody :style="tableBodyStyle">
-            <tr v-for="(person, index) in investors" :key="index">
-              <td>{{ index + 4 }}</td>
-              <td>{{ person.name }}</td>
-              <td>{{ person.date }}</td>
-              <td>{{ person.package }}</td>
-              <td>{{ person.rate }}</td>
+            <tr v-for="(investor, index) in investorsContent" :key="investor.id">
+              <td>{{ (pageInfo.number * pageInfo.size) + index + 1 }}</td>
+              <td>{{ investor.fullName || 'N/A' }}</td>
+              <td>{{ formatDate(investor.investedAt) }}</td>
+              <td>{{investor.invmName}}</td>
+              <td>{{ formatCurrency(investor.invmAmount) }}</td>
+              <td>{{ investor.profitPercent || 0 }}%</td>
+            </tr>
+
+            <!-- Hiển thị placeholder nếu không có dữ liệu -->
+            <tr v-if="investorsContent.length === 0">
+              <td :colspan="config.tableHeaders.length" class="no-data">Chưa có nhà đầu tư nào</td>
             </tr>
             </tbody>
           </table>
+
+          <!-- Phân trang -->
+          <div class="pagination-container" v-if="pageInfo.totalPages > 1">
+            <button
+                @click="prevPage"
+                :disabled="pageInfo.number === 0"
+                class="pagination-btn"
+            >
+              ←
+            </button>
+            <span class="page-info">
+              Trang {{ pageInfo.number + 1 }} / {{ pageInfo.totalPages }}
+            </span>
+            <button
+                @click="nextPage"
+                :disabled="pageInfo.number >= pageInfo.totalPages - 1"
+                class="pagination-btn"
+            >
+              →
+            </button>
+            <select v-model="pageInfo.size" @change="onPageSizeChange" class="page-size-select">
+              <option value="5">5 dòng/trang</option>
+              <option value="10">10 dòng/trang</option>
+              <option value="20">20 dòng/trang</option>
+              <option value="50">50 dòng/trang</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <!-- Bên phải: Form đăng ký -->
+      <!-- Bên phải: Form đăng ký đơn giản -->
       <div class="right-section">
         <div class="form-container" :style="formContainerStyle">
           <h2 class="form-title" :style="formTitleStyle">{{ config.formTitle }}</h2>
 
-          <form @submit.prevent="submitForm">
-            <div class="form-group">
-              <label for="name" :style="labelStyle">
-                {{ config.nameLabel }} <span class="required" :style="requiredStyle">*</span>
-              </label>
-              <input
-                  type="text"
-                  id="name"
-                  v-model="formData.name"
-                  :style="inputStyle"
-                  required
-              >
-            </div>
-
-            <div class="form-group">
-              <label for="phone" :style="labelStyle">
-                {{ config.phoneLabel }} <span class="required" :style="requiredStyle">*</span>
-              </label>
-              <input
-                  type="tel"
-                  id="phone"
-                  v-model="formData.phone"
-                  :style="inputStyle"
-                  required
-              >
-            </div>
-
-            <div class="form-group">
-              <label for="email" :style="labelStyle">{{ config.emailLabel }}</label>
-              <input
-                  type="email"
-                  id="email"
-                  v-model="formData.email"
-                  :style="inputStyle"
-              >
-            </div>
-
+          <div class="simple-form" v-if="!isFormDisabled">
             <div class="form-group">
               <label for="package" :style="labelStyle">
                 {{ config.packageSelectLabel }} <span class="required" :style="requiredStyle">*</span>
@@ -129,36 +225,24 @@
               <div class="custom-select">
                 <select
                     id="package"
-                    v-model="formData.selectedPackage"
+                    v-model="selectedPackage"
                     :style="inputStyle"
                     required
-                    @focus="showOptions = true"
-                    @blur="hideOptions"
                 >
                   <option value="" disabled>{{ config.packagePlaceholder }}</option>
                   <option
-                      v-for="(pkg, index) in packagesText"
-                      :key="index"
-                      :value="pkg"
+                      v-for="pkg in packages"
+                      :key="pkg.id"
+                      :value="pkg.id"
                   >
-                    {{ pkg }}
+                    {{ pkg.name }} - {{ formatCurrency(pkg.amount) }} - {{ pkg.profitPercent }}%
                   </option>
                 </select>
-                <div class="select-arrow" :class="{ rotated: showOptions }" :style="selectArrowStyle">▼</div>
+                <div class="select-arrow" :style="selectArrowStyle">▼</div>
               </div>
             </div>
 
-            <div class="form-group">
-              <label for="note" :style="labelStyle">{{ config.noteLabel }}</label>
-              <textarea
-                  id="note"
-                  v-model="formData.note"
-                  rows="4"
-                  :style="textareaStyle"
-              ></textarea>
-            </div>
-
-            <button type="submit" class="submit-btn" :style="submitBtnStyle">
+            <button @click="registerInvestment" class="submit-btn" :style="submitBtnStyle">
               {{ config.submitButtonText }}
             </button>
 
@@ -166,7 +250,19 @@
               <span class="check-icon" :style="checkIconStyle">{{ config.checkIcon }}</span>
               <span>{{ config.callToActionText }}</span>
             </div>
-          </form>
+          </div>
+
+          <!-- Hiển thị khi user đã đăng ký -->
+          <div v-else class="already-registered">
+            <div class="already-registered-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="already-registered-title">Bạn đã đăng ký đầu tư</h3>
+            <p class="already-registered-message">Cảm ơn bạn đã tham gia đầu tư.</p>
+            <button class="already-registered-btn" disabled>
+              <i class="fas fa-check"></i> Đã đăng ký
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -174,7 +270,11 @@
 </template>
 
 <script setup>
-import {ref, reactive, computed} from 'vue'
+import {ref, reactive, computed, defineEmits} from 'vue'
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
+
+// Khai báo emits
+const emit = defineEmits(['page-change', 'payment'])
 
 // Config object
 let config = reactive({
@@ -186,16 +286,12 @@ let config = reactive({
   top2Badge: '2',
   top3Badge: '3',
   formTitle: 'Đăng ký góp vốn ngay',
-  nameLabel: 'Họ và tên',
-  phoneLabel: 'Số điện thoại',
-  emailLabel: 'Email',
   packageSelectLabel: 'Gói đầu tư dự kiến đăng ký',
   packagePlaceholder: 'Chọn gói đầu tư',
-  noteLabel: 'Ghi chú',
   submitButtonText: 'Đăng ký ngay',
   checkIcon: '✓',
   callToActionText: 'Đăng ký ngay để được liên hệ tư vấn sớm nhất',
-  tableHeaders: ['STT', 'Họ Tên', 'Ngày góp vốn', 'Gói góp vốn', 'Tỷ lệ'],
+  tableHeaders: ['STT', 'Họ Tên', 'Ngày góp vốn', 'Số tiền đầu tư', 'Lợi nhuận (%)'],
 
   // Colors
   primaryColor: '#031358',
@@ -209,10 +305,14 @@ let config = reactive({
   hoverBlueBg: 'rgba(219, 234, 254, 0.7)',
   textColor: '#031358',
   requiredColor: '#e53e3e',
+  placeholderColor: '#a0aec0',
+  successColor: '#10b981',
 
   // Gradients
   primaryGradient: 'linear-gradient(135deg, #031358, #2a5298)',
   goldGradient: 'linear-gradient(135deg, gold, #ffd700)',
+  silverGradient: 'linear-gradient(135deg, #c0c0c0, #d9d9d9)',
+  bronzeGradient: 'linear-gradient(135deg, #cd7f32, #d98c3a)',
 
   // Sizes
   mainTitleFontSize: '33px',
@@ -253,31 +353,287 @@ let config = reactive({
 
   // Specific styles
   top1Background: 'linear-gradient(135deg, #fff9e6, #fff)',
-  top2BorderColor: '#0030ff',
-  top3BorderColor: '#031358',
+  top2Background: 'linear-gradient(135deg, #f7f7f7, #fff)',
+  top3Background: 'linear-gradient(135deg, #fef4e8, #fff)',
+  placeholderBackground: 'linear-gradient(135deg, #f8f9fa, #fff)',
 
   // Avatar sizes
   compactAvatarSize: '50px',
   top1CompactAvatarSize: '55px',
 
   // Badge sizes
-  compactBadgeSize: '35px'
+  compactBadgeSize: '35px',
+
+  // Height cho các container top
+  top1Height: '180px',
+  top2Height: '160px',
+  top3Height: '160px',
+  placeholderHeight: '150px'
 })
 
 const props = defineProps({
-  sectionData: Object
+  sectionConfig: Object,
+  packages: Array,
+  investors: Object, // Nhận Page object từ cha
+  currentUserHasInvested: {
+    type: Boolean,
+    default: null // null = chưa đăng nhập hoặc chưa xác định
+  }
 });
 
-if(props.sectionData) {
-  config = props.sectionData;
-  console.log("Đã lấy data từ cha");
+if(props.sectionConfig) {
+  Object.assign(config, props.sectionConfig);
+  console.log("Đã lấy config từ cha");
+}
+
+// Kiểm tra form có bị disable không
+const isFormDisabled = computed(() => {
+  return props.currentUserHasInvested === true;
+})
+
+// Xử lý investors Page object
+const pageInfo = reactive({
+  size: props.investors?.page?.size || 10,
+  number: props.investors?.page?.number || 0,
+  totalElements: props.investors?.page?.totalElements || 0,
+  totalPages: props.investors?.page?.totalPages || 1
+})
+
+// Computed để lấy content từ investors
+const investorsContent = computed(() => {
+  return props.investors?.content || [];
+})
+
+// Computed để lấy top 3 investors (content đã được sắp xếp từ API)
+const topInvestors = computed(() => {
+  if (!investorsContent.value || investorsContent.value.length === 0) return [];
+  return investorsContent.value.slice(0, 3);
+})
+
+// Computed để tính placeholder count
+const placeholderCount = computed(() => {
+  return Math.max(0, 3 - topInvestors.value.length);
+})
+
+// Format packages từ API
+const packages = computed(() => {
+  return props.packages || [];
+})
+
+// Format currency
+const formatCurrency = (amount) => {
+  if (!amount) return '0 VNĐ';
+  if (amount >= 1000000000) {
+    return `${(amount / 1000000000).toFixed(1)} tỷ`;
+  } else if (amount >= 1000000) {
+    return `${(amount / 1000000).toFixed(0)} triệu`;
+  }
+  return amount.toLocaleString('vi-VN') + ' VNĐ';
+}
+
+// Format date
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
+  } catch {
+    return dateString;
+  }
+}
+
+// Lấy URL avatar
+const getAvatarUrl = (avatarPath) => {
+  if (!avatarPath) return 'https://i.pravatar.cc/150?img=0';
+  if (avatarPath.startsWith('http')) return avatarPath;
+  return baseImgaeUrl+avatarPath; // Thay bằng base URL thực tế
+}
+
+// Selected package
+const selectedPackage = ref('');
+
+// Đăng ký đầu tư
+const registerInvestment = () => {
+  if (!selectedPackage.value) {
+    alert('Vui lòng chọn gói đầu tư!')
+    return
+  }
+
+  // Emit sự kiện với packageId
+  emit('payment', selectedPackage.value)
+}
+
+// Xử lý phân trang
+const prevPage = () => {
+  if (pageInfo.number > 0) {
+    pageInfo.number--;
+    emitPageChange();
+  }
+}
+
+const nextPage = () => {
+  if (pageInfo.number < pageInfo.totalPages - 1) {
+    pageInfo.number++;
+    emitPageChange();
+  }
+}
+
+const onPageSizeChange = () => {
+  pageInfo.number = 0; // Reset về trang đầu khi thay đổi kích thước trang
+  emitPageChange();
+}
+
+const emitPageChange = () => {
+  emit('page-change', {
+    page: pageInfo.number,
+    size: pageInfo.size
+  });
 }
 
 // Computed styles
+const getTopInvestorStyle = (index) => {
+  const baseStyle = {
+    height: config.top2Height,
+    background: config.top2Background,
+    borderColor: config.silverColor,
+    alignSelf: 'flex-end'
+  };
+
+  if (index === 0) {
+    // Top 1: bên trái, cao nhất
+    return {
+      ...baseStyle,
+      height: config.top1Height,
+      background: config.top1Background,
+      borderColor: config.goldColor,
+      order: 1, // Trái
+      alignSelf: 'flex-start'
+    };
+  } else if (index === 1) {
+    // Top 2: ở giữa, thấp hơn
+    return {
+      ...baseStyle,
+      height: config.top2Height,
+      background: config.top2Background,
+      borderColor: config.silverColor,
+      order: 2, // Giữa
+      alignSelf: 'center'
+    };
+  } else if (index === 2) {
+    // Top 3: bên phải, thấp hơn
+    return {
+      ...baseStyle,
+      height: config.top3Height,
+      background: config.top3Background,
+      borderColor: config.bronzeColor,
+      order: 3, // Phải
+      alignSelf: 'flex-end'
+    };
+  }
+
+  return baseStyle;
+}
+
+const getAvatarStyle = (index) => {
+  const baseStyle = {
+    width: config.compactAvatarSize,
+    height: config.compactAvatarSize,
+    borderRadius: config.avatarBorderRadius,
+    border: `${config.avatarBorderWidth} solid ${config.secondaryColor}`
+  };
+
+  if (index === 0) {
+    baseStyle.width = config.top1CompactAvatarSize;
+    baseStyle.height = config.top1CompactAvatarSize;
+    baseStyle.borderColor = config.goldColor;
+  } else if (index === 1) {
+    baseStyle.borderColor = config.silverColor;
+  } else if (index === 2) {
+    baseStyle.borderColor = config.bronzeColor;
+  }
+
+  return baseStyle;
+}
+
+const getNameStyle = (index) => ({
+  color: config.textColor,
+  fontSize: index === 0 ? config.top1CompactNameFontSize : config.compactNameFontSize
+})
+
+const getBadgeStyle = (index) => {
+  const baseStyle = {
+    width: config.compactBadgeSize,
+    height: config.compactBadgeSize
+  };
+
+  if (index === 0) {
+    return {
+      ...baseStyle,
+      background: config.goldGradient,
+      color: config.textColor
+    };
+  } else if (index === 1) {
+    return {
+      ...baseStyle,
+      background: config.silverGradient,
+      color: config.whiteColor
+    };
+  } else {
+    return {
+      ...baseStyle,
+      background: config.bronzeGradient,
+      color: config.whiteColor
+    };
+  }
+}
+
+// Placeholder styles
+const getPlaceholderStyle = (position) => {
+  const baseStyle = {
+    height: config.placeholderHeight,
+    background: config.placeholderBackground,
+    borderColor: config.placeholderColor,
+    opacity: 0.7,
+    alignSelf: 'flex-end'
+  };
+
+  if (position === 0) {
+    return {
+      ...baseStyle,
+      order: 1,
+      height: config.top1Height,
+      alignSelf: 'flex-start'
+    };
+  } else if (position === 1) {
+    return {
+      ...baseStyle,
+      order: 2,
+      height: config.top2Height,
+      alignSelf: 'center'
+    };
+  } else {
+    return {
+      ...baseStyle,
+      order: 3,
+      height: config.top3Height,
+      alignSelf: 'flex-end'
+    };
+  }
+}
+
+const getPlaceholderBadgeStyle = (position) => ({
+  background: config.primaryGradient,
+  color: config.whiteColor,
+  width: config.compactBadgeSize,
+  height: config.compactBadgeSize,
+  opacity: 0.5
+})
+
+// Các computed styles khác (giữ nguyên)
 const mainTitleStyle = computed(() => ({
   fontSize: config.mainTitleFontSize,
-  background: config.primaryGradient,
-  color: 'transparent'
+  color: config.primaryColor,
+  background: 'transparent'
 }))
 
 const topInvestorsCompactStyle = computed(() => ({
@@ -311,40 +667,6 @@ const compactNameStyle = computed(() => ({
 const compactPackageStyle = computed(() => ({
   color: config.accentColor,
   fontSize: config.compactPackageFontSize
-}))
-
-const top1Style = computed(() => ({
-  background: config.top1Background,
-  borderColor: config.goldColor
-}))
-
-const top2Style = computed(() => ({
-  borderColor: config.top2BorderColor
-}))
-
-const top3Style = computed(() => ({
-  borderColor: config.top3BorderColor
-}))
-
-const top1BadgeStyle = computed(() => ({
-  background: config.goldGradient,
-  color: config.textColor,
-  width: config.compactBadgeSize,
-  height: config.compactBadgeSize
-}))
-
-const top2BadgeStyle = computed(() => ({
-  background: config.primaryGradient,
-  color: config.whiteColor,
-  width: config.compactBadgeSize,
-  height: config.compactBadgeSize
-}))
-
-const top3BadgeStyle = computed(() => ({
-  background: config.primaryGradient,
-  color: config.whiteColor,
-  width: config.compactBadgeSize,
-  height: config.compactBadgeSize
 }))
 
 const tableContainerStyle = computed(() => ({
@@ -389,13 +711,6 @@ const inputStyle = computed(() => ({
   color: config.textColor
 }))
 
-const textareaStyle = computed(() => ({
-  borderLeft: `${config.borderLeftWidth} solid ${config.borderLeftColor}`,
-  borderRadius: config.inputBorderRadius,
-  backgroundColor: config.whiteColor,
-  color: config.textColor
-}))
-
 const selectArrowStyle = computed(() => ({
   color: config.secondaryColor
 }))
@@ -415,91 +730,6 @@ const checkIconStyle = computed(() => ({
   background: config.primaryGradient,
   color: config.whiteColor
 }))
-
-// Dữ liệu bảng nhà đầu tư
-const allInvestors = ref([
-  {name: 'Nguyễn Thanh Tùng', date: '10/03/2024', package: '300.000.000', rate: '15%'},
-  {name: 'Trần Minh Tuyết', date: '15/03/2024', package: '30.000.000', rate: '1.5%'},
-  {name: 'Lê Quang Khải', date: '22/03/2024', package: '50.000.000', rate: '2.5%'},
-  {name: 'Phạm Bảo Trâm', date: '27/03/2024', package: '70.000.000', rate: '3.5%'},
-  {name: 'Hoàng Đức Thiện', date: '05/04/2024', package: '100.000.000', rate: '5%'},
-  {name: 'Đỗ Ngọc Phương', date: '12/04/2024', package: '150.000.000', rate: '7.5%'},
-  {name: 'Vũ Quốc Đạt', date: '18/04/2024', package: '200.000.000', rate: '10%'},
-  {name: 'Vũ Hoàng Minh', date: '25/04/2024', package: '300.000.000', rate: '15%'},
-  {name: 'Nguyễn Thanh Bình', date: '02/05/2024', package: '50.000.000', rate: '2.5%'},
-  {name: 'Phạm Minh Khang', date: '08/05/2024', package: '70.000.000', rate: '3.5%'},
-  {name: 'Lê Thảo Nhi', date: '14/05/2024', package: '150.000.000', rate: '7.5%'},
-  {name: 'Đặng Anh Tuấn', date: '20/05/2024', package: '200.000.000', rate: '10%'}
-])
-
-// Sắp xếp danh sách theo gói góp vốn giảm dần
-const sortedInvestors = computed(() => {
-  return [...allInvestors.value].sort((a, b) => {
-    const aValue = parseInt(a.package.replace(/\./g, ''));
-    const bValue = parseInt(b.package.replace(/\./g, ''));
-    return bValue - aValue;
-  });
-})
-
-// Lấy top 3 nhà đầu tư
-const topInvestors = computed(() => {
-  return sortedInvestors.value.slice(0, 3).map(investor => ({
-    ...investor,
-    avatar: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70) + 1}`
-  }));
-})
-
-// Lấy danh sách từ người thứ 4 trở đi
-const investors = computed(() => {
-  return sortedInvestors.value.slice(3);
-})
-
-// Dữ liệu gói đầu tư
-const packagesText = ref([
-  "Gói 20 triệu - 1%",
-  "Gói 30 triệu - 1,5%",
-  "Gói 50 triệu - 2,5%",
-  "Gói 70 triệu - 3,5%",
-  "Gói 100 triệu - 5%",
-  "Gói 150 triệu - 7,5%",
-  "Gói 200 triệu - 10%",
-  "Gói 300 triệu - 15%"
-])
-
-// Dữ liệu form
-const formData = reactive({
-  name: '',
-  phone: '',
-  email: '',
-  selectedPackage: '',
-  note: ''
-})
-
-// State cho hiệu ứng select
-const showOptions = ref(false)
-
-// Hàm ẩn options với delay để cho phép click
-const hideOptions = () => {
-  setTimeout(() => {
-    showOptions.value = false
-  }, 150)
-}
-
-// Hàm submit form
-const submitForm = () => {
-  // Xử lý submit form ở đây
-  console.log('Form data:', formData)
-  alert('Đăng ký thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.')
-
-  // Reset form sau khi submit
-  Object.assign(formData, {
-    name: '',
-    phone: '',
-    email: '',
-    selectedPackage: '',
-    note: ''
-  })
-}
 </script>
 
 <style scoped>
@@ -568,7 +798,7 @@ const submitForm = () => {
 .top-investors-title {
   font-size: v-bind('config.topInvestorsTitleFontSize');
   text-align: center;
-  margin-bottom: 15px;
+  margin-bottom: 25px;
   color: v-bind('config.primaryColor');
   font-weight: 700;
   position: relative;
@@ -577,23 +807,26 @@ const submitForm = () => {
 .top-investors-title::after {
   content: '';
   position: absolute;
-  bottom: -5px;
+  bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
-  width: 60px;
-  height: 2px;
+  width: 80px;
+  height: 3px;
   background: v-bind('config.primaryGradient');
-  border-radius: 1px;
+  border-radius: 2px;
 }
 
 .top-investors-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 15px;
+  align-items: end;
+  min-height: 200px;
 }
 
 .top-investor-compact {
   display: flex;
+  flex-direction: column;
   align-items: center;
   background: v-bind('config.lightBlueBg');
   border-radius: 10px;
@@ -601,29 +834,46 @@ const submitForm = () => {
   position: relative;
   transition: all v-bind('config.transitionDuration') ease;
   border: 2px solid transparent;
+  height: v-bind('config.top2Height');
 }
 
-.top-investor-compact:hover {
-  transform: translateY(-2px);
+.top-investor-compact:hover:not(.placeholder) {
+  transform: translateY(-5px);
   box-shadow: v-bind('config.hoverShadow');
+}
+
+.top-investor-compact.placeholder {
+  opacity: 0.7;
+  cursor: default;
 }
 
 .top-investor-compact.top-1 {
   background: v-bind('config.top1Background');
   border-color: v-bind('config.goldColor');
-  order: 2;
+  order: 1;
+  height: v-bind('config.top1Height');
+  align-self: flex-start;
 }
 
 .top-investor-compact.top-2 {
-  order: 1;
-  margin-top: 30px;
-  border-color: v-bind('config.top2BorderColor');
+  background: v-bind('config.top2Background');
+  border-color: v-bind('config.silverColor');
+  order: 2;
+  height: v-bind('config.top2Height');
+  align-self: center;
 }
 
 .top-investor-compact.top-3 {
+  background: v-bind('config.top3Background');
+  border-color: v-bind('config.bronzeColor');
   order: 3;
-  margin-top: 40px;
-  border-color: v-bind('config.top3BorderColor');
+  height: v-bind('config.top3Height');
+  align-self: flex-end;
+}
+
+.compact-avatar-wrapper {
+  position: relative;
+  margin-bottom: 10px;
 }
 
 .compact-avatar {
@@ -632,12 +882,6 @@ const submitForm = () => {
   border-radius: v-bind('config.avatarBorderRadius');
   overflow: hidden;
   border: v-bind('config.avatarBorderWidth') solid v-bind('config.secondaryColor');
-  flex-shrink: 0;
-}
-
-.compact-avatar-wrapper {
-  position: relative;
-  margin-right: 12px;
 }
 
 .top-1 .compact-avatar {
@@ -646,26 +890,48 @@ const submitForm = () => {
   height: v-bind('config.top1CompactAvatarSize');
 }
 
+.top-2 .compact-avatar {
+  border-color: v-bind('config.silverColor');
+}
+
+.top-3 .compact-avatar {
+  border-color: v-bind('config.bronzeColor');
+}
+
 .compact-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
+.compact-avatar.placeholder-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-color: v-bind('config.placeholderColor');
+}
+
+.placeholder-icon {
+  font-size: 20px;
+  color: v-bind('config.placeholderColor');
+}
+
 .crown-icon {
   position: absolute;
-  top: -8px;
+  top: -15px;
   left: 50%;
   transform: translateX(-50%);
   color: v-bind('config.goldColor');
-  font-size: 16px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  z-index: 10;
+  font-size: 20px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  z-index: 15;
 }
 
 .compact-info {
-  flex: 1;
-  min-width: 0;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 10px;
 }
 
 .compact-name {
@@ -680,6 +946,12 @@ const submitForm = () => {
 
 .top-1 .compact-name {
   font-size: v-bind('config.top1CompactNameFontSize');
+}
+
+.compact-name.placeholder-text,
+.compact-package.placeholder-text {
+  color: v-bind('config.placeholderColor');
+  font-style: italic;
 }
 
 .compact-package {
@@ -697,8 +969,8 @@ const submitForm = () => {
 
 .compact-badge {
   position: absolute;
-  top: -10px;
-  right: -10px;
+  top: -12px;
+  right: -12px;
   background: v-bind('config.primaryGradient');
   color: v-bind('config.whiteColor');
   width: v-bind('config.compactBadgeSize');
@@ -707,13 +979,29 @@ const submitForm = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
+  z-index: 10;
 }
 
 .top-1 .compact-badge {
   background: v-bind('config.goldGradient');
   color: v-bind('config.textColor');
+  font-size: 13px;
+  width: 40px;
+  height: 40px;
+}
+
+.top-2 .compact-badge {
+  background: v-bind('config.silverGradient');
+}
+
+.top-3 .compact-badge {
+  background: v-bind('config.bronzeGradient');
+}
+
+.compact-badge.placeholder-badge {
+  opacity: 0.5;
 }
 
 .table-container {
@@ -760,6 +1048,59 @@ tbody td {
   color: v-bind('config.textColor');
 }
 
+.no-data {
+  text-align: center;
+  color: v-bind('config.placeholderColor');
+  font-style: italic;
+  padding: 30px !important;
+}
+
+/* Phân trang */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  gap: 15px;
+  background: v-bind('config.whiteColor');
+  border-top: 1px solid #e2e8f0;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  background: v-bind('config.primaryGradient');
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.pagination-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 14px;
+  color: v-bind('config.textColor');
+}
+
+.page-size-select {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 5px;
+  background: white;
+  color: v-bind('config.textColor');
+  margin-left: 20px;
+}
+
 .form-container {
   background-color: v-bind('config.lightBlueBg');
   border-radius: v-bind('config.borderRadius');
@@ -776,8 +1117,14 @@ tbody td {
   text-align: center;
 }
 
+.simple-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 0;
 }
 
 label {
@@ -830,10 +1177,6 @@ input:focus, textarea:focus, select:focus {
   color: v-bind('config.secondaryColor');
 }
 
-.select-arrow.rotated {
-  transform: translateY(-50%) rotate(180deg);
-}
-
 textarea {
   resize: vertical;
   min-height: 100px;
@@ -850,7 +1193,6 @@ textarea {
   font-weight: 500;
   cursor: pointer;
   transition: all v-bind('config.transitionDuration') ease;
-  margin-top: 10px;
   position: relative;
   overflow: hidden;
 }
@@ -886,6 +1228,53 @@ textarea {
   font-size: 8px;
 }
 
+/* Already registered styles */
+.already-registered {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.already-registered-icon {
+  font-size: 48px;
+  color: v-bind('config.successColor');
+  margin-bottom: 20px;
+}
+
+.already-registered-title {
+  font-size: 20px;
+  color: v-bind('config.textColor');
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.already-registered-message {
+  font-size: 14px;
+  color: v-bind('config.textColor');
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+.already-registered-btn {
+  width: 100%;
+  padding: 15px;
+  background: v-bind('config.successColor');
+  color: white;
+  border: none;
+  border-radius: v-bind('config.inputBorderRadius');
+  font-size: 16px;
+  font-weight: 500;
+  cursor: not-allowed;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.already-registered-btn i {
+  font-size: 18px;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .content-wrapper {
@@ -894,6 +1283,18 @@ textarea {
 
   .left-section, .right-section {
     flex: 0 0 100%;
+  }
+
+  .top-investors-grid {
+    gap: 10px;
+  }
+
+  .top-investor-compact {
+    height: 140px;
+  }
+
+  .top-investor-compact.top-1 {
+    height: 150px;
   }
 }
 
@@ -908,11 +1309,34 @@ textarea {
 
   .top-investors-grid {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 15px;
+    align-items: center;
   }
 
-  .top-investor-compact {
-    padding: 10px;
+  .top-investor-compact,
+  .top-investor-compact.top-1,
+  .top-investor-compact.top-2,
+  .top-investor-compact.top-3 {
+    height: auto;
+    order: 0;
+    align-self: stretch;
+    flex-direction: row;
+    align-items: center;
+    padding: 15px;
+  }
+
+  .compact-avatar-wrapper {
+    margin-bottom: 0;
+    margin-right: 15px;
+  }
+
+  .compact-info {
+    text-align: left;
+    margin-bottom: 0;
+  }
+
+  .top-investors-title {
+    font-size: 18px;
   }
 
   .compact-avatar {
@@ -933,6 +1357,14 @@ textarea {
     font-size: 11px;
   }
 
+  .top-1 .compact-name {
+    font-size: 15px;
+  }
+
+  .top-1 .compact-package {
+    font-size: 12px;
+  }
+
   thead th {
     font-size: 16px;
     padding: 12px 8px;
@@ -950,6 +1382,28 @@ textarea {
   .form-title {
     font-size: 22px;
   }
+
+  .pagination-container {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .page-size-select {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+
+  .already-registered-icon {
+    font-size: 36px;
+  }
+
+  .already-registered-title {
+    font-size: 18px;
+  }
+
+  .already-registered-message {
+    font-size: 13px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -958,7 +1412,56 @@ textarea {
   }
 
   .top-investors-title {
-    font-size: 18px;
+    font-size: 16px;
+  }
+
+  .top-investor-compact {
+    padding: 10px;
+  }
+
+  .compact-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .top-1 .compact-avatar {
+    width: 45px;
+    height: 45px;
+  }
+
+  .compact-name {
+    font-size: 12px;
+  }
+
+  .compact-package {
+    font-size: 10px;
+  }
+
+  .top-1 .compact-name {
+    font-size: 14px;
+  }
+
+  .top-1 .compact-package {
+    font-size: 11px;
+  }
+
+  .compact-badge {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+    top: -8px;
+    right: -8px;
+  }
+
+  .top-1 .compact-badge {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+
+  .crown-icon {
+    font-size: 16px;
+    top: -12px;
   }
 }
 </style>

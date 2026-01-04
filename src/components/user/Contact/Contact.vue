@@ -1,4 +1,5 @@
 <template>
+  <!-- Template giữ nguyên không thay đổi -->
   <div class="contact-page" :style="{ marginTop: config.styles.marginTop }">
     <!-- Header Section -->
     <header class="contact-header" :style="headerStyles">
@@ -110,7 +111,7 @@
 import {ref, reactive, computed, onMounted} from 'vue'
 import api from "../../../api/api.js";
 
-// Configuration object
+// Configuration object - CHỈNH FONT SIZE NHỎ HƠN Ở ĐÂY
 let config = {
   content: {
     header: {
@@ -190,15 +191,15 @@ let config = {
     mainMaxWidth: '1400px',
     mainPadding: '40px 20px',
     headerTitle: {
-      fontSize: '40px',
+      fontSize: '32px', // Giảm từ 40px xuống 32px
       fontWeight: '700'
     },
     headerSubtitle: {
-      fontSize: '20px',
+      fontSize: '18px', // Giảm từ 20px xuống 18px
       fontWeight: '300'
     },
     formTitle: {
-      fontSize: '40px',
+      fontSize: '32px', // Giảm từ 40px xuống 32px
       fontWeight: '700'
     },
     addressSectionHeight: '250px',
@@ -222,7 +223,7 @@ onMounted(async ()=> {
   await fetchData();
 })
 
-// Computed styles
+// Computed styles - CHỈNH FONT SIZE Ở CÁC COMPUTED STYLES
 const headerStyles = computed(() => ({
   height: '300px',
   background: `linear-gradient(135deg,
@@ -253,7 +254,7 @@ const addressCardStyles = computed(() => ({
 }))
 
 const addressItemStyles = computed(() => ({
-  fontSize: '20px',
+  fontSize: '18px', // Giảm từ 20px xuống 18px
   cursor: 'pointer',
   padding: '10px',
   borderRadius: '5px',
@@ -271,7 +272,7 @@ const contactCardStyles = computed(() => ({
   borderRadius: config.styles.borderRadius,
   boxShadow: config.styles.boxShadow,
   padding: '20px',
-  fontSize: '20px',
+  fontSize: '18px', // Giảm từ 20px xuống 18px
   display: 'flex',
   alignItems: 'center',
   gap: '15px',
@@ -282,7 +283,7 @@ const contactCardStyles = computed(() => ({
 
 const contactIconStyles = computed(() => ({
   color: config.colors.primary,
-  fontSize: '24px',
+  fontSize: '22px', // Giảm từ 24px xuống 22px
   flexShrink: '0'
 }))
 
@@ -305,7 +306,7 @@ const supportFormStyles = computed(() => ({
 
 const formInputStyles = computed(() => ({
   width: '100%',
-  fontSize: '20px',
+  fontSize: '18px', // Giảm từ 20px xuống 18px
   padding: '10px 0',
   border: 'none',
   borderBottom: `2px solid ${config.colors.grayLight}`,
@@ -316,7 +317,7 @@ const formInputStyles = computed(() => ({
 
 const formTextareaStyles = computed(() => ({
   width: '100%',
-  fontSize: '20px',
+  fontSize: '18px', // Giảm từ 20px xuống 18px
   padding: '10px 0',
   border: 'none',
   borderBottom: `2px solid ${config.colors.grayLight}`,
@@ -334,7 +335,7 @@ const submitBtnStyles = computed(() => ({
   border: 'none',
   borderRadius: '5px',
   padding: '15px',
-  fontSize: '20px',
+  fontSize: '18px', // Giảm từ 20px xuống 18px
   fontWeight: '700',
   cursor: 'pointer',
   transition: `all ${config.styles.transitionDuration} ease`
@@ -346,7 +347,7 @@ const thankYouMessageStyles = computed(() => ({
   borderRadius: config.styles.borderRadius,
   boxShadow: config.styles.boxShadow,
   padding: '20px',
-  fontSize: '20px',
+  fontSize: '18px', // Giảm từ 20px xuống 18px
   lineHeight: '1.6'
 }))
 
@@ -383,9 +384,9 @@ const activeMapUrl = ref(config.departments.locations[0].mapUrl)
 // Get address icon styles
 const getAddressIconStyles = (locationId) => ({
   color: activeLocation.value === locationId ? config.colors.secondary : config.colors.grayLight,
-  fontSize: '20px',
-  width: '20px',
-  height: '20px',
+  fontSize: '18px', // Giảm từ 20px xuống 18px
+  width: '18px',
+  height: '18px',
   marginTop: '3px',
   transition: `all ${config.styles.transitionDuration} ease`,
   flexShrink: '0'
@@ -555,7 +556,7 @@ const submitForm = () => {
   10%, 90% { opacity: 1; transform: translateY(0); }
 }
 
-/* Responsive Design */
+/* Responsive Design - CẬP NHẬT FONT SIZE RESPONSIVE */
 @media (max-width: 1200px) {
   .contact-container {
     flex-direction: column;
@@ -574,31 +575,31 @@ const submitForm = () => {
 
 @media (max-width: 768px) {
   .header-title {
-    font-size: 28px;
+    font-size: 24px; /* Giảm từ 28px xuống 24px */
   }
 
   .header-subtitle {
-    font-size: 18px;
+    font-size: 16px; /* Giảm từ 18px xuống 16px */
   }
 
   .form-title {
-    font-size: 28px;
+    font-size: 24px; /* Giảm từ 28px xuống 24px */
   }
 
   .contact-card, .address-item {
-    font-size: 18px;
+    font-size: 16px; /* Giảm từ 18px xuống 16px */
   }
 
   .form-input, .form-textarea {
-    font-size: 18px;
+    font-size: 16px; /* Giảm từ 18px xuống 16px */
   }
 
   .submit-btn {
-    font-size: 18px;
+    font-size: 16px; /* Giảm từ 18px xuống 16px */
   }
 
   .thank-you-message {
-    font-size: 18px;
+    font-size: 16px; /* Giảm từ 18px xuống 16px */
   }
 
   .address-section {

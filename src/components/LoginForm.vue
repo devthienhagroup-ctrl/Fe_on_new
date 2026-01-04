@@ -118,6 +118,8 @@ const login = async () => {
         })
     )
 
+    localStorage.setItem('remember', String(remember.value))
+
     const accessToken = res.data?.accessToken
     if (accessToken) {
       // ✅ Lưu token & email vào Pinia store

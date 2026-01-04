@@ -1,0 +1,47 @@
+/*
+ * Menu Color Variables - Dùng chung cho tất cả menu components
+ * File này giúp quản lý màu sắc tập trung, dễ bảo trì
+ */
+
+:root {
+    /* ===== BASE COLORS ===== */
+    --color-home: #4A90E2;
+    --color-solution: #F5A623;
+    --color-consignment: #7ED321;
+    --color-project: #50E3C2;
+    --color-recruitment: #4A4A4A;
+    --color-news: #3498DB;
+    --color-contact: #2ECC71;
+    --color-estimate: rgb(255, 106, 0);
+    --color-ivm: #BD10E0;
+    --color-collaborator: #9B59B6;
+
+    /* ===== DESKTOP GRADIENTS ===== */
+    --gradient-home: linear-gradient(135deg, rgba(74, 144, 226, 0.15), rgba(236, 254, 255, 0.15));
+    --gradient-solution: linear-gradient(135deg, rgba(245, 166, 35, 0.15), rgba(255, 233, 201, 0.15));
+    --gradient-consignment: linear-gradient(135deg, rgba(126, 211, 33, 0.15), rgba(232, 245, 232, 0.15));
+    --gradient-project: linear-gradient(135deg, rgba(80, 227, 194, 0.15), rgba(209, 236, 236, 0.15));
+    --gradient-recruitment: linear-gradient(135deg, rgba(74, 74, 74, 0.15), rgba(240, 240, 240, 0.15));
+    --gradient-news: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(217, 235, 253, 0.15));
+    --gradient-contact: linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(223, 240, 223, 0.15));
+
+    /* ===== MOBILE GRADIENTS ===== */
+    --mobile-gradient-home: linear-gradient(90deg, rgba(74, 144, 226, 0.15), rgba(236, 254, 255, 0.15));
+    --mobile-gradient-solution: linear-gradient(90deg, rgba(245, 166, 35, 0.15), rgba(255, 233, 201, 0.15));
+    --mobile-gradient-consignment: linear-gradient(90deg, rgba(126, 211, 33, 0.15), rgba(232, 245, 232, 0.15));
+    --mobile-gradient-project: linear-gradient(90deg, rgba(80, 227, 194, 0.15), rgba(209, 236, 236, 0.15));
+    --mobile-gradient-recruitment: linear-gradient(90deg, rgba(74, 74, 74, 0.15), rgba(240, 240, 240, 0.15));
+    --mobile-gradient-news: linear-gradient(90deg, rgba(52, 152, 219, 0.15), rgba(217, 235, 253, 0.15));
+    --mobile-gradient-contact: linear-gradient(90deg, rgba(46, 204, 113, 0.15), rgba(223, 240, 223, 0.15));
+
+    /* ===== SUBMENU ICON COLORS ===== */
+    --submenu-icon-bolt: #f59e0b;
+    --submenu-icon-fire: #ef4444;
+    --submenu-icon-bullhorn: #6366f1;
+    --submenu-icon-users: #10b981;
+    --submenu-icon-clipboard: #8b5cf6;
+
+    /* ===== SPECIAL STATES ===== */
+    --dropdown-hover-gradient: linear-gradient(135deg, rgba(3, 19, 88, 0.12), rgba(236, 254, 255, 0.12));
+    --dropdown-active-gradient: linear-gradient(135deg, rgba(3, 19, 88, 0.08), rgba(236, 254, 255, 0.08));
+}

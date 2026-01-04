@@ -1,3 +1,5 @@
+body {
+}
 /* style.css */
 /* Global styles - nhưng được scoped bằng wrapper class */
 .rich-text-editor-wrapper .tiptap:first-child {

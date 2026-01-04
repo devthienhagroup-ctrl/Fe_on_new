@@ -606,7 +606,7 @@ const stopAutoScroll = () => {
 
 onMounted(() => {
   startAutoScroll()
-
+  console.log(props.latestNews)
   const el = carouselRef.value
   if (el) {
     el.addEventListener('mouseenter', stopAutoScroll)

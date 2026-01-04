@@ -16,8 +16,8 @@
       <!-- Logo Section -->
       <div class="sidebar-header">
         <div class="logo" v-if="!isCollapsed || isMobile">
-          <i class="fas fa-cube"></i>
-          <span>CMS Pro</span>
+          <img src="/imgs/logoTHG.png" alt="logoTHG" width="50px" height="50px">
+          <span style="color:#374151;">QT. Nội dung</span>
         </div>
         <div class="logo-collapsed" v-else>
           <i class="fas fa-cube"></i>

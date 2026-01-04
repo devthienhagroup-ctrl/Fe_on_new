@@ -21,6 +21,7 @@ export const SOCKET_CONFIG = {
   checkoutTopic: (employeeId) => `/topic/checkout/${employeeId}`,
   teamEventTopic: (teamId) => `/topic/my-team/${teamId}/events`,
 
+  invCheckoutTopic: (employeeId) => `/topic/checkout-inv/${employeeId}`,
 
   // --- Hàng đợi riêng user (convertAndSendToUser) ---
   userQueue: (userId) => `/queue/users/${userId}`,

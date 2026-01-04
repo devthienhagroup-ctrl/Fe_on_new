@@ -627,7 +627,7 @@ onMounted(() => {
 }
 
 /* Mobile (576px - 768px) */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .header-container {
     min-height: v-bind('config.header.mobileMinHeight');
     margin-top: 60px;

@@ -164,6 +164,7 @@ const heroImageStyle = computed(() => ({
 }
 
 .hero-content {
+  margin-top: 20px;
   max-width: v-bind('config.container.maxWidth');
   width: 100%;
   position: relative;
@@ -231,69 +232,69 @@ const heroImageStyle = computed(() => ({
 /* Responsive adjustments */
 @media (max-width: 1200px) {
   .text-container {
-    margin-left: 100px;
-    padding-right: 250px;
+    margin-left: 100px !important;
+    padding-right: 250px !important;
   }
 
   .hero-image {
-    max-width: 300px;
+    max-width: 300px !important;
   }
 }
 
 @media (max-width: 800px) {
   .hero-section {
-    padding-bottom: 50px;
+    padding-bottom: 50px !important;
   }
 
   .logo-container {
-    width: 90%;
-    height: 300px;
-    display: flex;
-    align-items: center;
-    justify-items: center;
+    width: 90% !important;
+    height: 300px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-items: center !important;
   }
 
   .text-container {
-    margin-left: 20px;
-    padding-right: 20px;
-    transform: translateY(-150px);
+    margin-left: 20px !important;
+    padding: 0 !important;
+    transform: translateY(-150px) !important;
   }
 
   .text-content {
-    font-size: 16px;
-    padding: 20px;
+    font-size: 16px !important;
+    padding: 20px !important;
   }
 
   .hero-image {
-    top: -250px;
-    max-width: 250px;
-    margin: 0 auto;
-    display: none;
+    top: -250px !important;
+    max-width: 250px !important;
+    margin: 0 auto !important;
+    display: none !important;
   }
 
   .text-container {
-    transform: translateY(0);
-    display: block;
-    margin: 0 auto;
+    transform: translateY(0) !important;
+    display: block !important;
+    margin: 0 auto !important;
   }
 
   .logo-container {
-    width: 100%;
-    padding: 0;
+    width: 100% !important;
+    padding: 0 !important;
   }
 
   .company-logo {
-    display: block;
-    margin: 0 auto;
+    display: block !important;
+    margin: 0 auto !important;
   }
 
   .text-content::before {
-    display: none;
+    display: none !important;
   }
 
   .hero-content {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
   }
 }
 </style>

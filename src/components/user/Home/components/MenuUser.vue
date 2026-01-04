@@ -59,8 +59,8 @@
         </router-link>
       </li>
       <li class="nav-item project-item">
-        <router-link to="/tinh-nang-dang-phat-trien" class="nav-link">
-          <i class="fas fa-project-diagram column-icon"></i> Dự án
+        <router-link to="/du-an-da-ban" class="nav-link">
+          <i class="fas fa-project-diagram column-icon"></i> Dự án đã bán
         </router-link>
       </li>
 
@@ -123,17 +123,17 @@
 
         <!-- User Icon with Submenu -->
         <div class="user-menu-container">
-          <a href="#" class="icon-link user-icon" id="user-icon">
+          <a @click="openAuthModalFromUserIcon" class="icon-link user-icon" id="user-icon">
             <i class="fa-solid fa-user"></i>
           </a>
-          <div class="user-submenu" id="user-submenu">
+          <div v-if="auth.userInfo != null"  class="user-submenu" id="user-submenu">
             <router-link to="/ho-so/trung-tam-tai-khoan" class="user-submenu-link">
-              <i class="fas fa-user-circle"></i> Cá nhân
+              <i class="fas fa-user-circle"></i> Tài khoản
             </router-link>
-            <router-link v-if="auth.userInfo == null" to="/dang-nhap" class="user-submenu-link">
-              <i class="fas fa-sign-in-alt"></i> Đăng nhập
-            </router-link>
-            <a v-else href="#" class="user-submenu-link" @click.prevent="handleLogout">
+<!--            <div v-if="auth.userInfo == null" @click="showAuthModal=true" class="user-submenu-link">-->
+<!--              <i class="fas fa-sign-in-alt"></i> Đăng nhập-->
+<!--            </div>-->
+            <a href="#" class="user-submenu-link" @click.prevent="handleLogout">
               <i class="fas fa-sign-out-alt"></i> Đăng xuất
             </a>
           </div>
@@ -153,14 +153,33 @@
   </div>
   <Footer :showMap="!route.meta.hideFooterMap" />
   <PopupQuickSale v-if="showQSPopup" @close="closePopup"></PopupQuickSale>
+  <FloatingContact></FloatingContact>
+  <!-- Modal đăng nhập/đăng ký -->
+  <AuthModal
+      v-if="showAuthModal"
+      @close="showAuthModal = false"
+      @open-forgot="showForgotPassword = true"
+  />
+
+  <!-- Modal quên mật khẩu -->
+  <ForgotPassword
+      v-if="showForgotPassword"
+      @close="showForgotPassword = false"
+      @back-to-login="backToLoginFromForgot"
+  />
+
+
 </template>
 
 <script setup>
-import {ref, onMounted, onUnmounted, nextTick, computed, watch} from "vue";
+import {ref, onMounted, onUnmounted, nextTick, computed, watch, onBeforeUnmount} from "vue";
 import {useRoute, useRouter} from 'vue-router'
 import Footer from "./Footer.vue";
 import {useAuthStore} from "../../../../stores/authStore.js";
 import PopupQuickSale from "../../QuickSaleSolution/Components/PopupQuickSale.vue";
+import FloatingContact from "../FloatingContact.vue";
+import AuthModal from "../../Login/Modal/AuthModal.vue";
+import ForgotPassword from "../../Login/Modal/ForgotPassword.vue";
 
 const auth = useAuthStore();
 const menuRef = ref(null);
@@ -171,12 +190,35 @@ const recruitmentSubmenu = ref(null);
 const userSubmenu = ref(null);
 const userMenuContainer = ref(null);
 
+
+// State quản lý modal
+const showAuthModal = ref(false)
+const showForgotPassword = ref(false)
+const showOTPModal = ref(false)
+
+
+const openAuthModalFromUserIcon = () => {
+  if(auth.userInfo == null) {showAuthModal.value=true}
+}
+
+// Navigation functions
+const backToLoginFromForgot = () => {
+  showForgotPassword.value = false
+  showAuthModal.value = true
+}
+
 const route = useRoute()
 const router = useRouter();
 
 const showQSPopup = ref(route.meta.showQSPopup || false);
 
 const resetMobileMenuState = () => {
+  if (menuRef.value) {
+    menuRef.value.classList.remove('hide-menu');
+  }
+  lastY = 0;
+  upDistance = 0;
+
   if (window.innerWidth > 1024) return;
 
   if (solutionSubmenu.value) {
@@ -283,6 +325,32 @@ const hideMenuOnLinkClick = () => {
   });
 };
 
+// Hàm xử lý đóng menu khi cuộn trên mobile
+const handleScrollForMobileMenu = () => {
+  if (window.innerWidth <= 1024) {
+    // Đóng menu chính và các submenu khi cuộn
+    if (navLinks.value?.classList.contains('active')) {
+      navLinks.value.classList.remove('active');
+    }
+
+    if (hamburger.value?.classList.contains('active')) {
+      hamburger.value.classList.remove('active');
+    }
+
+    if (solutionSubmenu.value?.classList.contains('active')) {
+      solutionSubmenu.value.classList.remove('active');
+    }
+
+    if (recruitmentSubmenu.value?.classList.contains('active')) {
+      recruitmentSubmenu.value.classList.remove('active');
+    }
+
+    if (userSubmenu.value?.classList.contains('active')) {
+      userSubmenu.value.classList.remove('active');
+    }
+  }
+};
+
 const handleScroll = () => {
   const y = window.scrollY;
 
@@ -305,6 +373,12 @@ const handleScroll = () => {
   }
 
   lastY = y;
+};
+
+// Hàm kết hợp cả xử lý ẩn menu và đóng menu mobile
+const combinedScrollHandler = () => {
+  handleScroll(); // Giữ nguyên chức năng ẩn menu khi cuộn
+  handleScrollForMobileMenu(); // Đóng menu trên mobile
 };
 
 // Hàm xử lý submenu hover
@@ -463,41 +537,21 @@ const initializeMenu = () => {
   });
 
   // Mobile submenu toggle for Solution (sử dụng hàm toggleSubmenu)
-  if (solutionLink && solutionSubmenuEl) {
-    solutionLink.addEventListener('click', function (e) {
-      if (window.innerWidth <= 1024) {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleSubmenu('solution');
-      }
+  if (solutionBack && solutionSubmenuEl) {
+    solutionBack.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      solutionSubmenuEl.classList.remove('active');
     });
-
-    if (solutionBack) {
-      solutionBack.addEventListener('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        solutionSubmenuEl.classList.remove('active');
-      });
-    }
   }
 
   // Mobile submenu toggle for Recruitment (sử dụng hàm toggleSubmenu)
-  if (recruitmentLink && recruitmentSubmenuEl) {
-    recruitmentLink.addEventListener('click', function (e) {
-      if (window.innerWidth <= 1024) {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleSubmenu('recruitment');
-      }
+  if (recruitmentBack && recruitmentSubmenuEl) {
+    recruitmentBack.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      recruitmentSubmenuEl.classList.remove('active');
     });
-
-    if (recruitmentBack) {
-      recruitmentBack.addEventListener('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        recruitmentSubmenuEl.classList.remove('active');
-      });
-    }
   }
 
   // Mobile submenu toggle for User
@@ -547,16 +601,32 @@ const initializeMenu = () => {
   });
 };
 
+let chatScript = null
+
+// Trong onMounted, thay đổi sự kiện scroll
 onMounted(() => {
-  window.addEventListener("scroll", handleScroll);
+  window.addEventListener("scroll", combinedScrollHandler); // Thay handleScroll bằng combinedScrollHandler
 
   nextTick(() => {
     initializeMenu();
   });
+
+  chatScript = document.createElement('script')
+  // chatScript.src = 'https://api.sale.ai.vn/static/widget.js?chatbotId=MjIz'
+  chatScript.async = true
+  chatScript.id = 'botchat-script'
+  document.body.appendChild(chatScript)
+
+
+  //Bắt sự kiện mở modal đăng nhập
+  window.addEventListener('open-login-modal', () => {
+    showAuthModal.value = true
+  })
 });
 
 onUnmounted(() => {
-  window.removeEventListener("scroll", handleScroll);
+  window.removeEventListener("scroll", combinedScrollHandler); // Cũng thay ở đây
+
   // Clear timeout khi component unmount
   if (userSubmenuTimeout) {
     clearTimeout(userSubmenuTimeout);
@@ -568,19 +638,46 @@ onUnmounted(() => {
     clearTimeout(recruitmentSubmenuTimeout);
   }
 });
+
+onBeforeUnmount(() => {
+  if (chatScript) {
+    document.body.removeChild(chatScript)
+  }
+})
 </script>
 
 <style scoped>
-/* ===== MENU CHA BO GÓC KHI HOVER ===== */
+/* ===== BREAKPOINTS CHUẨN ===== */
+/*
+  - Mobile: 0-767px
+  - Tablet: 768px-1023px
+  - Desktop nhỏ: 1024px-1279px
+  - Desktop trung bình: 1280px-1439px
+  - Desktop lớn: 1440px trở lên
+*/
+
+/* ===== HIỆU ỨNG HOVER MỚI - TRƯỢT TỪ TRÁI SANG PHẢI ===== */
 .nav-item > .nav-link {
   border-radius: 14px;
   padding: 8px 16px;
-  transition: background .25s ease, color .25s ease;
+  transition: color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
   margin: 0 2px;
 }
 
-.nav-item > .nav-link:hover {
+/* Hiệu ứng nền trượt từ trái sang phải */
+.nav-item > .nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
   border-radius: 14px;
+  z-index: -1;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hide-menu {
@@ -614,8 +711,23 @@ ul {
   padding: 0 40px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   position: relative;
-  z-index: 1000;
+  z-index: 500;
 }
+
+/* Các submenu cũng giữ dưới 500 */
+.submenu {
+  z-index: 501; /* <-- CAO HƠN MENU NHƯNG THẤP HƠN AUTHMODAL */
+}
+
+.user-submenu {
+  z-index: 502; /* <-- CAO HƠN SUBMENU */
+}
+
+/* Mobile menu */
+.nav-links {
+  z-index: 503; /* <-- CHO MOBILE */
+}
+
 
 .logo {
   height: 100%;
@@ -625,7 +737,7 @@ ul {
   color: white;
   font-weight: bold;
   border-radius: 4px;
-  z-index: 1001;
+  z-index: 500;
 }
 
 .logo img {
@@ -659,6 +771,7 @@ ul {
   transition: all 0.3s ease;
   color: #333;
   white-space: nowrap;
+  font-weight: normal;
 }
 
 .nav-link img, .nav-link i {
@@ -685,10 +798,12 @@ ul {
   top: -10px;
 }
 
+/* ===== ACTIVE STATE - KHÔNG IN ĐẬM, DÙNG MÀU TƯƠNG ỨNG ===== */
 .nav-link.router-link-active,
 .nav-link.router-link-exact-active {
-  font-weight: 600;
+  font-weight: normal;
   position: relative;
+  color: inherit;
 }
 
 .nav-link.router-link-active::after,
@@ -697,26 +812,35 @@ ul {
   position: absolute;
   width: calc(100% - 32px);
   height: 3px;
-  background-color: #0030ff;
+  background-color: currentColor;
   border-radius: 2px;
   left: 50%;
   transform: translateX(-50%);
   bottom: -8px;
+  animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Responsive từ 1024px đến 1230px - Ẩn chữ, chỉ hiện icon */
-@media (min-width: 1024px) and (max-width: 1277px) {
+/* Animation cho thanh active */
+@keyframes slideIn {
+  from {
+    width: 0;
+  }
+  to {
+    width: calc(100% - 32px);
+  }
+}
+
+/* Responsive từ 1024px đến 1279px - Desktop nhỏ */
+@media (min-width: 1024px) and (max-width: 1279px) {
   .nav-link {
     position: relative;
     padding: 8px 12px;
   }
 
-  /* Ẩn chữ trong nav-link */
   .nav-link:not(.router-link-active):not(.router-link-exact-active):not(:hover) {
     font-size: 0;
   }
 
-  /* Đảm bảo icon vẫn hiển thị */
   .nav-link:not(.router-link-active):not(.router-link-exact-active):not(:hover) i,
   .nav-link:not(.router-link-active):not(.router-link-exact-active):not(:hover) img {
     font-size: 16px;
@@ -725,7 +849,6 @@ ul {
     visibility: visible;
   }
 
-  /* Giữ nguyên hiển thị đầy đủ cho link active */
   .nav-link.router-link-active,
   .nav-link.router-link-exact-active {
     font-size: 15px;
@@ -736,7 +859,6 @@ ul {
     margin-right: 8px;
   }
 
-  /* Giữ nguyên hiển thị đầy đủ cho link hover */
   .nav-link:hover {
     font-size: 15px;
   }
@@ -745,35 +867,34 @@ ul {
     margin-right: 8px;
   }
 
-  /* Điều chỉnh khoảng cách giữa các item */
   .nav-item {
     margin: 0 4px;
   }
 
-  /* Điều chỉnh kích thước logo nếu cần */
   .logo img {
     height: 70%;
   }
 }
 
-/* Cập nhật thêm cho responsive nhỏ hơn */
-@media (max-width: 1277px) {
+/* Desktop trung bình */
+@media (min-width: 1280px) and (max-width: 1439px) {
   .navbar {
-    padding: 0 15px;
-  }
-
-  .nav-links {
-    gap: 0;
+    padding: 0 30px;
   }
 }
 
-/* Trên mobile */
-@media (max-width: 1024px) {
+/* Mobile & Tablet */
+@media (max-width: 1023px) {
+  .navbar {
+    padding: 0 20px;
+  }
+
   .nav-link.router-link-active::after,
   .nav-link.router-link-exact-active::after {
     bottom: 5px;
     width: calc(100% - 30px);
   }
+
   .submenu-link {
     padding: 12px 16px;
     font-size: 14px;
@@ -783,9 +904,6 @@ ul {
   }
 }
 
-.nav-link:hover {
-  color: #031358;
-}
 
 .divider {
   color: #ddd;
@@ -848,12 +966,12 @@ ul {
 }
 
 /* ===== SUBMENU DESKTOP - FIX LỖI XUỐNG DÒNG ===== */
-@media (min-width: 1025px) {
+@media (min-width: 1024px) {
   .submenu {
     position: absolute;
     top: 60px;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(-10px) scale(0.98);
     width: auto;
     padding: 20px 24px;
     border-radius: 16px;
@@ -861,13 +979,19 @@ ul {
     box-shadow: 0 20px 40px rgba(0,0,0,.12),
     inset 0 0 0 1px rgba(99,102,241,.12);
     display: none;
-    z-index: 999;
+    z-index: 1001;
     white-space: nowrap;
     animation: submenuFade .25s ease;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
   }
 
   .submenu.active {
     display: block;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+    pointer-events: auto;
   }
 
   .submenu-columns {
@@ -913,30 +1037,24 @@ ul {
     padding-right: 30px !important;
   }
 
-  .nav-item.dropdown .nav-link:hover {
-    background: linear-gradient(135deg, #eef2ff, #ecfeff);
-    border-radius: 14px;
-  }
-
   /* Dropdown arrow cho menu có con - FIX VỊ TRÍ CHÍNH XÁC */
   .dropdown-arrow {
     position: absolute;
     right: 12px;
     top: 50%;
-    transform: translateY(-50%) rotate(0deg); /* ĐẢM BẢO TRẠNG THÁI BAN ĐẦU */
+    transform: translateY(-50%) rotate(0deg);
     font-size: 10px;
     transition: transform 0.3s ease;
     line-height: 1;
     pointer-events: none;
   }
 
-  /* FIX: Khi menu cha active thì mũi tên không bị lệch */
   .nav-item.dropdown.active .nav-link {
     padding-right: 30px !important;
   }
 
   .nav-item.dropdown.active .dropdown-arrow {
-    transform: translateY(-50%) rotate(180deg); /* KHI ACTIVE, MŨI TÊN XOAY XUỐNG */
+    transform: translateY(-50%) rotate(180deg);
     right: 12px;
     top: 50%;
   }
@@ -944,10 +1062,13 @@ ul {
   /* Khi hover vào menu có con, hiển thị submenu */
   .nav-item.dropdown:hover .submenu {
     display: block;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+    pointer-events: auto;
   }
 
   .nav-item.dropdown:hover .dropdown-arrow {
-    transform: translateY(-50%) rotate(180deg); /* KHI HOVER, MŨI TÊN XOAY XUỐNG */
+    transform: translateY(-50%) rotate(180deg);
   }
 
   /* Khi menu active được hover - MẤT HIỆU ỨNG ACTIVE */
@@ -960,7 +1081,7 @@ ul {
 
   .nav-link.router-link-active:hover,
   .nav-link.router-link-exact-active:hover,
-  .nav-item.active .nav-link:hover {
+  .nav-item.active:not(.solution-item) .nav-link:hover {
     color: #333 !important;
     font-weight: normal;
   }
@@ -982,6 +1103,53 @@ ul {
     transform: scale(1.15);
     filter: drop-shadow(0 0 6px currentColor);
   }
+
+  /* ===== HIỆU ỨNG HOVER DESKTOP - TRƯỢT TỪ TRÁI ===== */
+  .home-item .nav-link:hover::before {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(74, 144, 226, 0.1), rgba(236, 254, 255, 0.1));
+  }
+
+  .quick-sale-item .nav-link:hover::before {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(245, 166, 35, 0.1), rgba(255, 233, 201, 0.1));
+  }
+
+  .consignment-item .nav-link:hover::before {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(126, 211, 33, 0.1), rgba(232, 245, 232, 0.1));
+  }
+
+  .solution-item .nav-link:hover::before {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(245, 166, 35, 0.1), rgba(255, 233, 201, 0.1));
+  }
+
+  .project-item .nav-link:hover::before {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(80, 227, 194, 0.1), rgba(209, 236, 236, 0.1));
+  }
+
+  .recruitment-item .nav-link:hover::before {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(74, 74, 74, 0.1), rgba(240, 240, 240, 0.1));
+  }
+
+  .news-item .nav-link:hover::before {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(217, 235, 253, 0.1));
+  }
+
+  .contact-item .nav-link:hover::before {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.1), rgba(223, 240, 223, 0.1));
+  }
+
+  /* FIX: Hover vào dropdown */
+/*  .nav-item.dropdown .nav-link:hover::before {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(3, 19, 88, 0.08), rgba(236, 254, 255, 0.08));
+  }*/
 }
 
 .submenu.active {
@@ -1008,7 +1176,7 @@ ul {
   transition: 0.3s;
 }
 
-/* Dropdown arrow cơ bản - FIX CHO MOBILE */
+/* Dropdown arrow cơ bản */
 .dropdown-arrow {
   position: absolute;
   right: 16px;
@@ -1021,7 +1189,7 @@ ul {
 }
 
 .dropdown.active .dropdown-arrow {
-  transform: translateY(-50%) rotate(180deg); /* FIX: THÊM translateY(-50%) */
+  transform: translateY(-50%) rotate(180deg);
 }
 
 /* Mobile Submenu Header */
@@ -1072,15 +1240,15 @@ ul {
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 1000;
+  z-index: 500;
   background-color: white;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive styles */
-@media (max-width: 1600px) {
+@media (max-width: 1439px) {
   .navbar {
-    padding: 0 20px;
+    padding: 0 30px;
   }
 
   .nav-item {
@@ -1088,27 +1256,38 @@ ul {
   }
 }
 
-@media (max-width: 1435px) {
+@media (max-width: 1279px) {
   .nav-links {
     gap: 0;
   }
 }
 
-@media (max-width: 1392px) {
+@media (max-width: 1199px) {
   .nav-item>a {
-    font-size: 13px;
+    font-size: 15px;
+  }
+  .nav-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    font-size: 15px;
+    height: 85%;
+    position: relative;
+    transition: all 0.3s ease;
+    color: #333;
+    white-space: nowrap;
   }
 }
 
 /* Desktop hover cũng xoay */
-@media (min-width: 1025px) {
+@media (min-width: 1024px) {
   .nav-item.dropdown:hover .dropdown-arrow {
     transform: translateY(-50%) rotate(180deg);
   }
 }
 
-/* FIX RESPONSIVE TRÊN THIẾT BỊ DI ĐỘNG */
-@media (max-width: 1024px) {
+/* ===== MOBILE & TABLET (0-1023px) ===== */
+@media (max-width: 1023px) {
   .hamburger {
     display: flex;
     padding: 10px;
@@ -1128,7 +1307,7 @@ ul {
     flex-direction: column;
     height: auto;
     align-items: flex-start;
-    padding: 0; /* FIX: Thay đổi padding từ 20px xuống 0 */
+    padding: 0;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     transform: translateY(-100%);
     opacity: 0;
@@ -1147,10 +1326,12 @@ ul {
   }
 
   .nav-item {
-    margin: 0; /* FIX: Đặt margin về 0 */
+    margin: 0;
     height: auto;
     width: 100%;
-    border-bottom: 1px solid #f0f0f0; /* Thêm đường phân cách */
+    border-bottom: 1px solid #f0f0f0;
+    position: relative;
+    overflow: hidden;
   }
 
   .nav-item:last-child {
@@ -1160,22 +1341,23 @@ ul {
   .nav-link {
     height: auto;
     width: 100%;
-    padding: 16px 20px !important; /* FIX: Tăng padding cho dễ click */
+    padding: 16px 20px !important;
     margin: 0 !important;
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Để mũi tên ở bên phải */
+    justify-content: space-between;
+    border-radius: 0 !important;
   }
 
-  /* FIX: Trên mobile, mũi tên dropdown */
+  /* Trên mobile, mũi tên dropdown */
   .dropdown-arrow {
-    position: static; /* FIX: Không dùng absolute trên mobile */
-    margin-left: auto; /* Đẩy mũi tên sang bên phải */
-    transform: translateY(0); /* Reset transform */
+    position: static;
+    margin-left: auto;
+    transform: translateY(0);
   }
 
   .dropdown.active .dropdown-arrow {
-    transform: rotate(180deg); /* Chỉ xoay, không translate */
+    transform: rotate(180deg);
   }
 
   .nav-links {
@@ -1192,6 +1374,101 @@ ul {
 
   .divider {
     display: none;
+  }
+
+  /* ===== FIX HOVER MOBILE - NỀN TOÀN ROW ===== */
+  .nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Màu nền khi hover/active trên mobile */
+  .home-item .nav-link:hover::before,
+  .home-item .nav-link.router-link-active::before,
+  .home-item .nav-link.router-link-exact-active::before {
+    left: 0;
+    background: linear-gradient(90deg, rgba(74, 144, 226, 0.1), rgba(236, 254, 255, 0.1));
+  }
+
+  .solution-item .nav-link:hover::before,
+  .solution-item .nav-link.router-link-active::before,
+  .solution-item .nav-link.router-link-exact-active::before {
+    left: 0;
+    background: linear-gradient(90deg, rgba(245, 166, 35, 0.1), rgba(255, 233, 201, 0.1));
+  }
+
+  .consignment-item .nav-link:hover::before,
+  .consignment-item .nav-link.router-link-active::before,
+  .consignment-item .nav-link.router-link-exact-active::before {
+    left: 0;
+    background: linear-gradient(90deg, rgba(126, 211, 33, 0.1), rgba(232, 245, 232, 0.1));
+  }
+
+  .project-item .nav-link:hover::before,
+  .project-item .nav-link.router-link-active::before,
+  .project-item .nav-link.router-link-exact-active::before {
+    left: 0;
+    background: linear-gradient(90deg, rgba(80, 227, 194, 0.1), rgba(209, 236, 236, 0.1));
+  }
+
+  .recruitment-item .nav-link:hover::before,
+  .recruitment-item .nav-link.router-link-active::before,
+  .recruitment-item .nav-link.router-link-exact-active::before {
+    left: 0;
+    background: linear-gradient(90deg, rgba(74, 74, 74, 0.1), rgba(240, 240, 240, 0.1));
+  }
+
+  .news-item .nav-link:hover::before,
+  .news-item .nav-link.router-link-active::before,
+  .news-item .nav-link.router-link-exact-active::before {
+    left: 0;
+    background: linear-gradient(90deg, rgba(52, 152, 219, 0.1), rgba(217, 235, 253, 0.1));
+  }
+
+  .contact-item .nav-link:hover::before,
+  .contact-item .nav-link.router-link-active::before,
+  .contact-item .nav-link.router-link-exact-active::before {
+    left: 0;
+    background: linear-gradient(90deg, rgba(46, 204, 113, 0.1), rgba(223, 240, 223, 0.1));
+  }
+
+  /* FIX: Màu chữ khi hover trên mobile */
+  .nav-link:hover {
+    color: inherit !important;
+  }
+
+  .home-item .nav-link:hover {
+    color: #4A90E2 !important;
+  }
+
+  .solution-item .nav-link:hover {
+    color: #F5A623 !important;
+  }
+
+  .consignment-item .nav-link:hover {
+    color: #7ED321 !important;
+  }
+
+  .project-item .nav-link:hover {
+    color: #50E3C2 !important;
+  }
+
+  .recruitment-item .nav-link:hover {
+    color: #4A4A4A !important;
+  }
+
+  .news-item .nav-link:hover {
+    color: #3498DB !important;
+  }
+
+  .contact-item .nav-link:hover {
+    color: #2ECC71 !important;
   }
 
   /* Mobile Submenu Overlay */
@@ -1224,7 +1501,7 @@ ul {
   }
 
   .submenu-columns {
-    display: block; /* FIX: Dùng block thay vì grid */
+    display: block;
     padding: 0;
   }
 
@@ -1245,7 +1522,7 @@ ul {
   }
 
   .submenu-link {
-    padding: 16px 20px !important; /* FIX: Tăng padding cho dễ click */
+    padding: 16px 20px !important;
     font-size: 15px;
     margin: 0;
     border-radius: 0;
@@ -1272,7 +1549,7 @@ ul {
 
   /* Trên mobile - menu có con */
   .nav-item.dropdown .nav-link {
-    padding-right: 20px !important; /* FIX: Giảm padding-right */
+    padding-right: 20px !important;
   }
 }
 
@@ -1282,7 +1559,15 @@ ul {
   z-index: 1001;
 }
 
-@media (max-width: 768px) {
+/* Tablet (768px-1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .navbar {
+    padding: 0 20px;
+  }
+}
+
+/* Mobile (0-767px) */
+@media (max-width: 767px) {
   .navbar {
     height: 60px;
     padding: 0 15px;
@@ -1313,17 +1598,18 @@ ul {
   }
 
   .logo img {
-    height: 30px; /* FIX: Giảm kích thước logo trên mobile */
+    height: 30px;
   }
 }
 
+/* Mobile nhỏ (0-480px) */
 @media (max-width: 480px) {
   .navbar {
     padding: 0 10px;
   }
 
   .logo {
-    min-width: 100px; /* FIX: Đảm bảo logo không bị thu nhỏ quá */
+    min-width: 100px;
   }
 
   .logo img {
@@ -1358,7 +1644,7 @@ ul {
 }
 
 /* Đảm bảo nav-icons luôn hiển thị và căn phải */
-@media (max-width: 1024px) {
+@media (max-width: 1023px) {
   .nav-right {
     margin-left: auto;
   }
@@ -1394,13 +1680,13 @@ ul {
 }
 
 /* Khi màn hình hẹp (tầm 1200px trở xuống) */
-@media (max-width: 1200px) {
+@media (max-width: 1199px) {
   .nav-links {
     flex: 1 1 auto;
     justify-content: center;
     overflow-x: auto;
     scrollbar-width: none;
-    -webkit-overflow-scrolling: touch; /* Cho scroll mượt trên iOS */
+    -webkit-overflow-scrolling: touch;
   }
 
   .nav-links::-webkit-scrollbar {
@@ -1412,7 +1698,7 @@ ul {
   }
 }
 
-/* User Submenu Styles */
+/* ===== USER SUBMENU STYLES - FIXED VERSION ===== */
 .user-menu-container {
   position: relative;
   display: inline-block;
@@ -1420,63 +1706,107 @@ ul {
 
 .user-submenu {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 5px);
   right: 0;
   background-color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  min-width: 180px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  min-width: 200px;
   padding: 8px 0;
   display: none;
-  z-index: 1001;
-  margin-top: 0;
+  z-index: 1002;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
 }
 
 .user-submenu.active {
   display: block;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.user-menu-container:hover .user-submenu,
+.user-submenu:hover {
+  display: block !important;
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  pointer-events: auto !important;
+}
+
+/* Đảm bảo user submenu không bị đóng khi di chuyển chuột */
+.user-submenu::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: 0;
+  width: 100%;
+  height: 20px;
+  background: transparent;
 }
 
 .user-submenu-link {
   display: flex;
   align-items: center;
-  padding: 10px 16px;
+  padding: 12px 20px;
   color: #333;
   text-decoration: none;
   font-size: 14px;
   transition: all 0.2s ease;
   border-bottom: 1px solid #f0f0f0;
-  border-radius: 4px;
-  margin: 2px 8px;
+  border-radius: 0;
+  margin: 0;
+  position: relative;
+  overflow: hidden;
 }
 
 .user-submenu-link:last-child {
   border-bottom: none;
 }
 
+/* Hiệu ứng hover cho user submenu links */
+.user-submenu-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(3, 19, 88, 0.1), rgba(240, 240, 240, 0.1));
+  transition: left 0.3s ease;
+  z-index: -1;
+}
+
+.user-submenu-link:hover::before {
+  left: 0;
+}
+
 .user-submenu-link:hover {
-  background-color: #f8f9fa;
   color: #031358;
+  padding-left: 24px;
 }
 
 .user-submenu-link i {
-  margin-right: 10px;
+  margin-right: 12px;
   width: 16px;
   text-align: center;
   color: #031358;
+  transition: transform 0.3s ease;
 }
 
-.user-menu-container:hover .user-submenu,
-.user-submenu:hover {
-  display: block;
+.user-submenu-link:hover i {
+  transform: scale(1.1);
 }
 
 /* Mobile styles for user submenu */
-@media (max-width: 1024px) {
+@media (max-width: 1023px) {
   .user-submenu {
-    position: fixed;
-    top: 60px;
-    left: 0;
-    width: 100%;
+    position: fixed !important;
+    top: 60px !important;
+    left: 0 !important;
+    width: 100% !important;
     background-color: white;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     border-radius: 0;
@@ -1487,10 +1817,12 @@ ul {
 
   .user-submenu.active {
     display: block;
+    opacity: 1;
+    transform: translateY(0);
   }
 
   .user-submenu-link {
-    padding: 16px 20px;
+    padding: 16px 20px !important;
     font-size: 16px;
     border-bottom: 1px solid #e0e0e0;
     margin: 0;
@@ -1502,9 +1834,9 @@ ul {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .user-submenu {
-    top: 60px;
+    top: 60px !important;
   }
 }
 
@@ -1521,93 +1853,134 @@ ul {
 .contact-item .nav-link i { color: #2ECC71; }
 .solution-item .nav-link i { color: #F5A623; }
 
-/* HOVER BO GÓC THEO MÀU ICON */
-.home-item .nav-link:hover {
-  background: linear-gradient(135deg, #eef2ff, #ecfeff) !important;
-  border-radius: 14px;
+/* MÀU CHỮ KHI ACTIVE - KHÔNG IN ĐẬM */
+.home-item .nav-link.router-link-active,
+.home-item .nav-link.router-link-exact-active {
   color: #4A90E2 !important;
-  padding: 8px 16px !important;
-  margin: 0 2px;
 }
 
-.quick-sale-item .nav-link:hover {
-  background: linear-gradient(135deg, #FFF3E0, #FFE9C9) !important;
-  border-radius: 14px;
+.quick-sale-item .nav-link.router-link-active,
+.quick-sale-item .nav-link.router-link-exact-active {
   color: #F5A623 !important;
-  padding: 8px 16px !important;
-  margin: 0 2px;
 }
 
-.consignment-item .nav-link:hover {
-  background: linear-gradient(135deg, #F1F8E9, #E8F5E8) !important;
-  border-radius: 14px;
+.consignment-item .nav-link.router-link-active,
+.consignment-item .nav-link.router-link-exact-active {
   color: #7ED321 !important;
-  padding: 8px 16px !important;
-  margin: 0 2px;
 }
 
-.ivm-item .nav-link:hover {
-  background: linear-gradient(135deg, #F3E5F5, #EBD4F2) !important;
-  border-radius: 14px;
+.ivm-item .nav-link.router-link-active,
+.ivm-item .nav-link.router-link-exact-active {
   color: #BD10E0 !important;
-  padding: 8px 16px !important;
-  margin: 0 2px;
 }
 
-.project-item .nav-link:hover {
-  background: linear-gradient(135deg, #E0F2F1, #D1ECEC) !important;
-  border-radius: 14px;
+.project-item .nav-link.router-link-active,
+.project-item .nav-link.router-link-exact-active {
   color: #50E3C2 !important;
-  padding: 8px 16px !important;
-  margin: 0 2px;
 }
 
-.estimate-item .nav-link:hover {
-  background: linear-gradient(135deg, #FFEBEE, #FFDDE1) !important;
-  border-radius: 14px;
+.estimate-item .nav-link.router-link-active,
+.estimate-item .nav-link.router-link-exact-active {
   color: rgb(255, 106, 0) !important;
-  padding: 8px 16px !important;
-  margin: 0 2px;
 }
 
-.recruitment-item .nav-link:hover {
-  background: linear-gradient(135deg, #FAFAFA, #F0F0F0) !important;
-  border-radius: 14px;
+.recruitment-item .nav-link.router-link-active,
+.recruitment-item .nav-link.router-link-exact-active {
   color: #4A4A4A !important;
-  padding: 8px 16px !important;
-  margin: 0 2px;
 }
 
-.collaborator-item .nav-link:hover {
-  background: linear-gradient(135deg, #F3E5F5, #EBD4F2) !important;
-  border-radius: 14px;
+.collaborator-item .nav-link.router-link-active,
+.collaborator-item .nav-link.router-link-exact-active {
   color: #9B59B6 !important;
-  padding: 8px 16px !important;
-  margin: 0 2px;
 }
 
-.news-item .nav-link:hover {
-  background: linear-gradient(135deg, #E3F2FD, #D9EBFD) !important;
-  border-radius: 14px;
+.news-item .nav-link.router-link-active,
+.news-item .nav-link.router-link-exact-active {
   color: #3498DB !important;
-  padding: 8px 16px !important;
-  margin: 0 2px;
 }
 
-.contact-item .nav-link:hover {
-  background: linear-gradient(135deg, #E8F5E8, #DFF0DF) !important;
-  border-radius: 14px;
+.contact-item .nav-link.router-link-active,
+.contact-item .nav-link.router-link-exact-active {
   color: #2ECC71 !important;
-  padding: 8px 16px !important;
-  margin: 0 2px;
 }
 
-.solution-item .nav-link:hover {
-  background: linear-gradient(135deg, #FFF3E0, #FFE9C9) !important;
-  border-radius: 14px;
+.solution-item .nav-link.router-link-active,
+.solution-item .nav-link.router-link-exact-active {
   color: #F5A623 !important;
-  padding: 8px 16px !important;
-  margin: 0 2px;
+}
+
+.recruitment-item .nav-link.router-link-active,
+.recruitment-item .nav-link.router-link-exact-active {
+  color: #4A4A4A !important;
+}
+
+/* ===== HOVER BO GÓC THEO MÀU ICON - DESKTOP ===== */
+@media (min-width: 1024px) {
+  .home-item .nav-link:hover {
+    background: transparent !important;
+    border-radius: 14px;
+    color: #4A90E2 !important;
+  }
+
+  .quick-sale-item .nav-link:hover {
+    background: transparent !important;
+    border-radius: 14px;
+    color: #F5A623 !important;
+  }
+
+  .consignment-item .nav-link:hover {
+    background: transparent !important;
+    border-radius: 14px;
+    color: #7ED321 !important;
+  }
+
+  .ivm-item .nav-link:hover {
+    background: transparent !important;
+    border-radius: 14px;
+    color: #BD10E0 !important;
+  }
+
+  .project-item .nav-link:hover {
+    background: transparent !important;
+    border-radius: 14px;
+    color: #50E3C2 !important;
+  }
+
+  .estimate-item .nav-link:hover {
+    background: transparent !important;
+    border-radius: 14px;
+    color: rgb(255, 106, 0) !important;
+  }
+
+  .recruitment-item .nav-link:hover {
+    background: transparent !important;
+    border-radius: 14px;
+    color: #4A4A4A !important;
+  }
+
+  .collaborator-item .nav-link:hover {
+    background: transparent !important;
+    border-radius: 14px;
+    color: #9B59B6 !important;
+  }
+
+  .news-item .nav-link:hover {
+    background: transparent !important;
+    border-radius: 14px;
+    color: #3498DB !important;
+  }
+
+  .contact-item .nav-link:hover {
+    background: transparent !important;
+    border-radius: 14px;
+    color: #2ECC71 !important;
+  }
+
+  .solution-item .nav-link:hover {
+    background: transparent !important;
+    border-radius: 14px;
+    color: #F5A623 !important;
+  }
 }
 
 .nav-link:hover i {
@@ -1615,7 +1988,7 @@ ul {
   transition: transform 0.3s ease;
 }
 
-@media (min-width: 1024px) and (max-width: 1277px) {
+@media (min-width: 1024px) and (max-width: 1279px) {
   .nav-link:not(.router-link-active):not(.router-link-exact-active):not(:hover) i {
     font-size: 13px;
   }
@@ -1694,6 +2067,7 @@ ul {
 .solution-item.active .nav-link,
 .recruitment-item.active .nav-link {
   position: relative;
+  color: inherit !important;
 }
 
 .solution-item.active .nav-link::after,
@@ -1755,16 +2129,16 @@ ul {
   min-width: fit-content;
 }
 
-@media (min-width: 1025px) {
+@media (min-width: 1024px) {
   .nav-item.dropdown .nav-link:hover {
-    background: linear-gradient(135deg, #eef2ff, #ecfeff);
+    background: transparent !important;
     border-radius: 14px;
   }
 
   .nav-item.dropdown .nav-link.router-link-active:hover,
   .nav-item.dropdown .nav-link.router-link-exact-active:hover,
   .nav-item.dropdown.active .nav-link:hover {
-    background: linear-gradient(135deg, #eef2ff, #ecfeff) !important;
+    background: transparent !important;
     color: #333 !important;
   }
 
@@ -1775,4 +2149,74 @@ ul {
     width: 0;
   }
 }
+
+/* Desktop lớn (1440px trở lên) */
+@media (min-width: 1440px) {
+  .navbar {
+    padding: 0 60px;
+  }
+
+  .nav-link {
+    font-size: 16px;
+  }
+
+  .submenu {
+    padding: 24px 32px;
+  }
+}
+
+/* ===== HIỆU ỨNG ICON HOVER ===== */
+.nav-link i {
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.nav-link:hover i {
+  transform: scale(1.15);
+}
+
+/* ===== FIX HOVER ACTIVE STATE DESKTOP ===== */
+@media (min-width: 1024px) {
+  .nav-item.dropdown.active .nav-link::before {
+  }
+
+  .solution-item.active .nav-link::before {
+    background: linear-gradient(135deg, rgba(245, 166, 35, 0.1), rgba(255, 233, 201, 0.1));
+  }
+
+  .recruitment-item.active .nav-link::before {
+    background: linear-gradient(135deg, rgba(74, 74, 74, 0.1), rgba(240, 240, 240, 0.1));
+  }
+}
+
+/* ===== FIX Z-INDEX ===== */
+.submenu {
+  z-index: 1001;
+}
+
+.user-submenu {
+  z-index: 1002;
+}
+
+.nav-links {
+  z-index: 999;
+}
+
+@media (min-width: 1024px) {
+  .solution-item .nav-link.router-link-active,
+  .solution-item .nav-link.router-link-exact-active {
+    color: #F5A623;
+  }
+
+  .solution-item .nav-link.router-link-active::after,
+  .solution-item .nav-link.router-link-exact-active::after {
+    background-color: #F5A623;
+  }
+}
+
+@media (min-width: 1024px) {
+  .solution-item.active .dropdown-arrow {
+    color: #F5A623;
+  }
+}
+
 </style>

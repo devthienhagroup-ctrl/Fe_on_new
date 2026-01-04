@@ -35,6 +35,13 @@
       </button>
       <button
           class="tab-button"
+          :class="{ active: activeTab === 'notifications' }"
+          @click="activeTab = 'notifications'"
+      >
+        <i class="fas fa-bell"></i> Thông báo
+      </button>
+      <button
+          class="tab-button"
           :class="{ active: activeTab === 'advanced' }"
           @click="activeTab = 'advanced'"
       >
@@ -375,6 +382,81 @@
         </div>
       </div>
 
+      <!-- Tab Thông báo -->
+      <div v-if="activeTab === 'notifications'" class="notifications-settings">
+        <div class="settings-grid">
+          <div class="setting-section" style="grid-column: 1 / -1;">
+            <div class="notifications-header">
+              <h3><i class="fas fa-bell"></i> Quản lý Thông báo</h3>
+              <button class="btn btn-primary" @click="addNotification">
+                <i class="fas fa-plus"></i> Thêm Thông báo
+              </button>
+            </div>
+
+            <div class="notifications-list">
+              <div v-for="(notification, index) in content.notifications" :key="index" class="notification-item">
+                <div class="notification-header" @click="toggleNotificationEdit(index)">
+                  <div class="notification-preview">
+                    <div class="notification-icon">
+                      <i :class="notification.icon"></i>
+                    </div>
+                    <div class="notification-message-preview">
+                      {{ notification.message.length > 100 ? notification.message.substring(0, 100) + '...' : notification.message }}
+                    </div>
+                  </div>
+                  <div class="notification-actions">
+                    <button class="btn-icon" @click.stop="moveNotificationUp(index)" :disabled="index === 0">
+                      <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <button class="btn-icon" @click.stop="moveNotificationDown(index)" :disabled="index === content.notifications.length - 1">
+                      <i class="fas fa-arrow-down"></i>
+                    </button>
+                    <button class="btn-icon btn-delete" @click.stop="removeNotification(index)">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div v-if="editingNotificationIndex === index" class="notification-edit-form">
+                  <div class="form-group">
+                    <label for="notification-icon">Icon</label>
+                    <IconPicker v-model="notification.icon"/>
+                    <small class="form-hint">VD: fa-solid fa-house</small>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="notification-message">Nội dung thông báo</label>
+                    <textarea
+                        id="notification-message"
+                        v-model="notification.message"
+                        placeholder="Nguyễn Văn Sơn vừa chốt thành công căn hộ 2PN tại Quận 7 với giá 3.2 tỷ."
+                        rows="3"
+                    ></textarea>
+                  </div>
+
+                  <div class="form-actions">
+                    <button class="btn btn-secondary" @click="cancelNotificationEdit">
+                      Hủy
+                    </button>
+                    <button class="btn btn-primary" @click="saveNotificationEdit">
+                      Lưu
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="content.notifications.length === 0" class="empty-notifications">
+                <i class="fas fa-bell-slash"></i>
+                <p>Chưa có thông báo nào được thêm</p>
+                <button class="btn btn-primary" @click="addNotification">
+                  <i class="fas fa-plus"></i> Thêm thông báo đầu tiên
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Tab Nâng cao -->
       <div v-if="activeTab === 'advanced'" class="advanced-settings">
         <div class="settings-grid">
@@ -498,6 +580,7 @@ import IconPicker from "../../../RichTextEditor/IconPicker.vue";
 // ========== STATE MANAGEMENT ==========
 const activeTab = ref('general')
 const isLoading = ref(false)
+const editingNotificationIndex = ref(-1)
 
 // Gradient colors state với opacity
 const gradientColors = reactive({
@@ -595,7 +678,13 @@ const content = reactive({
     mobileBreakpoint: '768px',
     mobileLogoWidth: '80px',
     mobileLogoHeight: '80px'
-  }
+  },
+  notifications: [
+    {
+      icon: 'fa-solid fa-house',
+      message: 'Nguyễn Văn Sơn vừa chốt thành công căn hộ 2PN tại Quận 7 với giá 3.2 tỷ.'
+    }
+  ]
 })
 
 // Toast notification
@@ -632,6 +721,73 @@ const showToast = (message, type = 'info') => {
   setTimeout(() => {
     toast.show = false
   }, 3000)
+}
+
+// ========== NOTIFICATION FUNCTIONS ==========
+const addNotification = () => {
+  content.notifications.push({
+    icon: 'fa-solid fa-bell',
+    message: 'Thông báo mới'
+  })
+  editingNotificationIndex.value = content.notifications.length - 1
+  showToast('Đã thêm thông báo mới', 'success')
+}
+
+const removeNotification = (index) => {
+  if (confirm('Bạn có chắc chắn muốn xóa thông báo này?')) {
+    content.notifications.splice(index, 1)
+    if (editingNotificationIndex.value === index) {
+      editingNotificationIndex.value = -1
+    } else if (editingNotificationIndex.value > index) {
+      editingNotificationIndex.value--
+    }
+    showToast('Đã xóa thông báo', 'success')
+  }
+}
+
+const moveNotificationUp = (index) => {
+  if (index > 0) {
+    const temp = content.notifications[index]
+    content.notifications[index] = content.notifications[index - 1]
+    content.notifications[index - 1] = temp
+
+    if (editingNotificationIndex.value === index) {
+      editingNotificationIndex.value = index - 1
+    } else if (editingNotificationIndex.value === index - 1) {
+      editingNotificationIndex.value = index
+    }
+  }
+}
+
+const moveNotificationDown = (index) => {
+  if (index < content.notifications.length - 1) {
+    const temp = content.notifications[index]
+    content.notifications[index] = content.notifications[index + 1]
+    content.notifications[index + 1] = temp
+
+    if (editingNotificationIndex.value === index) {
+      editingNotificationIndex.value = index + 1
+    } else if (editingNotificationIndex.value === index + 1) {
+      editingNotificationIndex.value = index
+    }
+  }
+}
+
+const toggleNotificationEdit = (index) => {
+  if (editingNotificationIndex.value === index) {
+    editingNotificationIndex.value = -1
+  } else {
+    editingNotificationIndex.value = index
+  }
+}
+
+const saveNotificationEdit = () => {
+  editingNotificationIndex.value = -1
+  showToast('Đã lưu thông báo', 'success')
+}
+
+const cancelNotificationEdit = () => {
+  editingNotificationIndex.value = -1
 }
 
 // ========== COLOR CONVERSION FUNCTIONS ==========
@@ -795,6 +951,11 @@ const loadData = async () => {
 
       // Update content with loaded data
       Object.assign(content, data)
+
+      // Ensure notifications array exists
+      if (!content.notifications) {
+        content.notifications = []
+      }
 
       // Initialize gradient colors
       const titleColors = parseGradientColors(content.gradients.title);
@@ -986,6 +1147,102 @@ onMounted(() => {
   flex: 1;
 }
 
+/* Notifications Styles */
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.notification-item {
+  background-color: white;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.notification-item.editing {
+  border-color: #4a6cf7;
+  box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
+}
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.notification-header:hover {
+  background-color: #e9ecef;
+}
+
+.notification-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.notification-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4a6cf7 0%, #6a8cff 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.notification-message-preview {
+  font-size: 0.95rem;
+  color: #495057;
+  line-height: 1.4;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.notification-edit-form {
+  padding: 20px;
+  border-top: 1px solid #e9ecef;
+  background-color: #f8f9ff;
+}
+
+.empty-notifications {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+.empty-notifications i {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  display: block;
+  color: #adb5bd;
+}
+
+.empty-notifications p {
+  margin: 0 0 20px 0;
+  font-size: 1rem;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .info-content p strong {
@@ -1005,7 +1262,19 @@ onMounted(() => {
     width: 40px;
     height: 35px;
   }
+
+  .notification-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .notification-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
+
 .pricing-editor {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f8f9fa;

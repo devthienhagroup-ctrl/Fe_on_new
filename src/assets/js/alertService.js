@@ -258,3 +258,17 @@ export function showCenterWarning(title, text = "") {
         timerProgressBar: true,
     });
 }
+
+// 🌀 Hiển thị loading thông thường (trả về hàm đóng)
+export function showLoadingMessage(message = "Đang xử lý...") {
+    Swal.fire({
+        title: message,
+        text: "Vui lòng chờ trong giây lát...",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading(),
+    });
+
+    // Trả về hàm để đóng loading
+    return () => Swal.close();
+}

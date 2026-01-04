@@ -6,7 +6,7 @@
       <!-- Hiển thị ảnh SVG từ đường dẫn -->
       <div class="image-container">
         <img
-            src="/imgs/oops-404.svg"
+            src="/imgs/pageNotFound.svg"
             alt="404 - Không tìm thấy trang"
             class="oops-image"
             @error="handleImageError"

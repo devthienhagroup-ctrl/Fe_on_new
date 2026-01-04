@@ -12,28 +12,30 @@
         </button>
       </div>
 
-      <!-- Content -->
-      <div class="popup-content">
-        <p class="main-text" v-html="data.mainText"></p>
+      <!-- Content - Thêm wrapper có thể cuộn -->
+      <div class="popup-content-wrapper">
+        <div class="popup-content">
+          <p class="main-text" v-html="data.mainText"></p>
 
-        <p class="sub-text">{{ data.subText }}</p>
+          <p class="sub-text">{{ data.subText }}</p>
 
-        <div class="content-columns">
-          <div class="left-col">
-            <ul class="benefits-list">
-              <li
-                  v-for="(benefit, index) in data.benefits"
-                  :key="index"
-                  class="benefit-item"
-              >
-                <i :class="benefit.icon"></i>
-                <span>{{ benefit.text }}</span>
-              </li>
-            </ul>
-          </div>
+          <div class="content-columns">
+            <div class="left-col">
+              <ul class="benefits-list">
+                <li
+                    v-for="(benefit, index) in data.benefits"
+                    :key="index"
+                    class="benefit-item"
+                >
+                  <i :class="benefit.icon"></i>
+                  <span>{{ benefit.text }}</span>
+                </li>
+              </ul>
+            </div>
 
-          <div class="right-col">
-            <img :src="data.image.src" :alt="data.image.alt" />
+            <div class="right-col">
+              <img :src="data.image.src" :alt="data.image.alt" />
+            </div>
           </div>
         </div>
       </div>
@@ -102,6 +104,8 @@ const closePopup = () => {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 16px; /* Thêm padding để popup không chạm vào cạnh màn hình */
+  box-sizing: border-box;
 }
 
 .popup-container {
@@ -109,8 +113,11 @@ const closePopup = () => {
   border-radius: 12px;
   width: 90%;
   max-width: 800px;
+  max-height: 90vh; /* Quan trọng: Giới hạn chiều cao tối đa */
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   overflow: hidden;
+  display: flex;
+  flex-direction: column; /* Sử dụng flex để bố cục */
 }
 
 .popup-header {
@@ -120,6 +127,7 @@ const closePopup = () => {
   padding: 16px 20px;
   border-bottom: 1px solid #e5e5e5;
   background-color: v-bind('data.styles.backgroundColor');
+  flex-shrink: 0; /* Ngăn header co lại */
 }
 
 .header-left {
@@ -154,6 +162,13 @@ const closePopup = () => {
 .close-btn:hover {
   background-color: #e9ecef;
   color: #333;
+}
+
+/* Wrapper mới cho phép cuộn */
+.popup-content-wrapper {
+  overflow-y: auto; /* Cho phép cuộn dọc */
+  flex-grow: 1; /* Chiếm không gian còn lại */
+  max-height: calc(90vh - 130px); /* Tính toán chiều cao tối đa (trừ header và footer) */
 }
 
 .popup-content {
@@ -225,6 +240,7 @@ const closePopup = () => {
   display: flex;
   justify-content: flex-end;
   background-color: v-bind('data.styles.backgroundColor');
+  flex-shrink: 0; /* Ngăn footer co lại */
 }
 
 .ok-btn {
@@ -244,6 +260,21 @@ const closePopup = () => {
 
 /* Responsive */
 @media (max-width: 768px) {
+  .popup-overlay {
+    padding: 12px;
+    align-items: flex-start; /* Căn popup lên trên trên mobile */
+    padding-top: 40px; /* Tạo khoảng cách từ top */
+  }
+
+  .popup-container {
+    width: 100%;
+    max-height: 85vh; /* Giảm chiều cao tối đa trên mobile */
+  }
+
+  .popup-content-wrapper {
+    max-height: calc(85vh - 130px);
+  }
+
   .content-columns {
     flex-direction: column;
   }
@@ -255,6 +286,35 @@ const closePopup = () => {
 
   .right-col img {
     max-width: 80%;
+    height: auto;
+  }
+}
+
+/* Thêm cho màn hình rất nhỏ */
+@media (max-width: 480px) {
+  .popup-overlay {
+    padding: 8px;
+    padding-top: 30px;
+  }
+
+  .popup-container {
+    max-height: 80vh;
+  }
+
+  .popup-content-wrapper {
+    max-height: calc(80vh - 130px);
+  }
+
+  .popup-content {
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .main-text, .sub-text, .benefit-item span {
+    font-size: 14px;
   }
 }
 </style>

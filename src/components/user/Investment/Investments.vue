@@ -54,6 +54,7 @@ const selectedProject = ref(null)
 
 // Hàm mở modal
 const openModal = (branch) => {
+  console.log("open modal with:", branch)
   selectedProject.value = branch
   showModal.value = true
 }
@@ -65,15 +66,15 @@ const closeModal = () => {
 }
 
 // Hàm xử lý thanh toán
-const handlePayment = (paymentData) => {
-  console.log('Payment data:', paymentData)
-  // Xử lý thanh toán ở đây
+const handlePayment = (packageId) => {
+  console.log('Payment data:', packageId)
+  router.push('/hop-tac/thanh-toan/'+packageId)
   closeModal()
 }
 
 // Hàm xem chi tiết
 const viewDetails = (index) => {
-  router.push('/investments/' + index)
+  router.push('/hop-tac/' + index)
 }
 </script>
 

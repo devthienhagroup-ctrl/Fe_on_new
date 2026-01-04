@@ -105,8 +105,7 @@ const handleLogin = async () => {
   try {
     // ❗ KHÔNG BAO HÀM POST TRONG showLoading NỮA
     const res = await showLoading(api.post('/thg/api/auth/login', body));
-
-
+    localStorage.setItem('remember', String(loginForm.value.rememberMe))
 
     const { accessToken, userInfo, listPermission, listAuthority } = res.data;
 
@@ -134,13 +133,12 @@ const handleLogin = async () => {
         }else{
           router.push("/-thg/quan-ly")
         }
-         // hoặc / cho user
+        // hoặc / cho user
       }
     }, 1200)
 
   } catch (err) {
     // ❗ BẮT LẤY LỖI DÙ BE TRẢ CÁI GÌ
-
     updateAlertError("Sai thông tin đăng nhập!", "Sai email hoặc mật khẩu");
   }
 };
@@ -352,4 +350,3 @@ input[type="email"]:focus {
   background-color: #020c3a;
 }
 </style>
-

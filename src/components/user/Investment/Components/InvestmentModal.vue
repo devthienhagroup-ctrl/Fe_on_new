@@ -66,14 +66,14 @@
           <div class="packages-grid">
             <div
                 v-for="(pkg, index) in packagesData"
-                :key="index"
+                :key="pkg.id || index"
                 class="package-card"
-                :class="{ 'selected': selectedPackage === index }"
-                @click="selectPackage(index)"
+                :class="{ 'selected': selectedPackageId === pkg.id }"
+                @click="selectPackage(pkg.id)"
             >
               <div class="package-header">
-                <h4 class="package-name">{{ packagesText[index] }}</h4>
-                <div class="checkmark" v-if="selectedPackage === index">
+                <h4 class="package-name">{{ pkg.packageName }}</h4>
+                <div class="checkmark" v-if="selectedPackageId === pkg.id">
                   <i class="fas fa-check"></i>
                 </div>
               </div>
@@ -86,26 +86,34 @@
                   <span class="label">{{ config.labels.ownershipPercentage }}:</span>
                   <span class="value highlight">{{ pkg.phanTramGoi }}%</span>
                 </div>
+                <div class="package-item">
+                  <span class="label">kỳ hạn đầu tư:</span>
+                  <span class="value duration">{{ pkg.durationMonths }} tháng</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Thông tin thanh toán -->
-        <div class="payment-section" v-if="selectedPackage !== null">
+        <div class="payment-section" v-if="selectedPackageId !== null">
           <h3 class="section-title">{{ config.labels.paymentInfo }}</h3>
           <div class="payment-summary">
             <div class="summary-item">
-              <span class="label">{{ config.labels.selectedPackage }}:</span>
-              <span class="value">{{ packagesText[selectedPackage] }}</span>
+              <span class="label">{{ config.labels.packageName }}:</span>
+              <span class="value">{{ selectedPackage?.packageName }}</span>
             </div>
             <div class="summary-item">
               <span class="label">{{ config.labels.contributionAmount }}:</span>
-              <span class="value highlight">{{ formatCurrency(packagesData[selectedPackage].goiDauTu) }}</span>
+              <span class="value highlight">{{ formatCurrency(selectedPackage?.goiDauTu) }}</span>
             </div>
             <div class="summary-item">
               <span class="label">{{ config.labels.ownershipRate }}:</span>
-              <span class="value">{{ packagesData[selectedPackage].phanTramGoi }}%</span>
+              <span class="value">{{ selectedPackage?.phanTramGoi }}%</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">{{ config.labels.durationMonths }}:</span>
+              <span class="value">{{ selectedPackage?.durationMonths }} tháng</span>
             </div>
           </div>
         </div>
@@ -119,7 +127,7 @@
         </button>
         <button
             class="btn btn-primary"
-            :disabled="selectedPackage === null"
+            :disabled="selectedPackageId === null"
             @click="handlePayment"
         >
           <i class="fas fa-credit-card"></i>
@@ -131,7 +139,7 @@
 </template>
 
 <script setup>
-import {ref, defineProps, defineEmits, watch, computed} from 'vue'
+import { ref, defineProps, defineEmits, watch, computed } from 'vue'
 
 // Config object
 let config = {
@@ -147,11 +155,13 @@ let config = {
     wordFormat: 'Chữ viết',
     numberFormat: 'Số nguyên',
     investmentPackage: 'Gói đầu tư',
-    ownershipPercentage: 'Phần trăm sở hữu',
+    ownershipPercentage: 'Lợi nhuận (%)',
+    durationMonths: 'Thời hạn',
+    packageName: 'Tên gói',
     paymentInfo: 'Thông tin thanh toán',
     selectedPackage: 'Gói đã chọn',
     contributionAmount: 'Số tiền góp',
-    ownershipRate: 'Tỷ lệ sở hữu'
+    ownershipRate: 'Tỷ lệ lợi nhuận'
   },
   buttons: {
     cancel: 'Hủy bỏ',
@@ -203,73 +213,40 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  projectData: {
-    type: Object,
-    default: () => ({
-      title: '',
-      timeLeft: '',
-      totalCapital: 0,
-      progress: 0,
-      contributors: 0
-    })
-  },
+  projectData: Object,
   sectionData: Object
 })
 
-
-if(props.sectionData) {
+if (props.sectionData) {
   config = props.sectionData;
   console.log("Đã lấy data từ cha");
 }
+
 // Emits
 const emit = defineEmits(['close', 'payment'])
 
 // State
-const selectedPackage = ref(null)
+const selectedPackageId = ref(null)
 const useShortFormat = ref(false)
 
-// Dữ liệu gói đầu tư
-const packagesData = ref([
-  {
-    goiDauTu: 20000000,
-    phanTramGoi: 1.0
-  },
-  {
-    goiDauTu: 30000000,
-    phanTramGoi: 1.5
-  },
-  {
-    goiDauTu: 50000000,
-    phanTramGoi: 2.5
-  },
-  {
-    goiDauTu: 70000000,
-    phanTramGoi: 3.5
-  },
-  {
-    goiDauTu: 100000000,
-    phanTramGoi: 5.0
-  },
-  {
-    goiDauTu: 150000000,
-    phanTramGoi: 7.5
-  },
-  {
-    goiDauTu: 200000000,
-    phanTramGoi: 10.0
-  },
-  {
-    goiDauTu: 300000000,
-    phanTramGoi: 15.0
+// Dữ liệu gói đầu tư từ projectData
+const packagesData = computed(() => {
+  if (props.projectData?.originalData?.packages) {
+    return props.projectData.originalData.packages.map(pkg => ({
+      id: pkg.id, // Đảm bảo package có id
+      goiDauTu: pkg.amount,
+      phanTramGoi: pkg.profitPercent,
+      durationMonths: pkg.durationMonths,
+      packageName: pkg.name
+    }));
   }
-])
+  return [];
+})
 
-// Text hiển thị cho các gói
-const packagesText = computed(() => {
-  return packagesData.value.map(pkg => {
-    const amountInMillions = pkg.goiDauTu / 1000000;
-    return `Gói ${amountInMillions} triệu - ${pkg.phanTramGoi}%`;
-  });
+// Gói đã chọn (computed)
+const selectedPackage = computed(() => {
+  if (selectedPackageId.value === null) return null;
+  return packagesData.value.find(pkg => pkg.id === selectedPackageId.value);
 })
 
 // Theo dõi sự thay đổi của visible prop
@@ -285,28 +262,25 @@ watch(() => props.visible, (newVal) => {
 
 // Methods
 const closeModal = () => {
-  selectedPackage.value = null
-  document.body.classList.remove('body-no-scroll') // Đảm bảo xóa class khi đóng modal
+  selectedPackageId.value = null
+  document.body.classList.remove('body-no-scroll')
   emit('close')
 }
 
-const selectPackage = (index) => {
-  selectedPackage.value = index
+const selectPackage = (packageId) => {
+  selectedPackageId.value = packageId
 }
 
 const handlePayment = () => {
-  if (selectedPackage.value !== null) {
-    const paymentData = {
-      project: props.projectData.title,
-      package: packagesText.value[selectedPackage.value],
-      amount: packagesData.value[selectedPackage.value].goiDauTu,
-      ownership: packagesData.value[selectedPackage.value].phanTramGoi
-    }
-    emit('payment', paymentData)
+  if (selectedPackageId.value !== null) {
+    // Chỉ emit packageId, component cha sẽ xử lý thông tin chi tiết
+    emit('payment', selectedPackageId.value)
   }
 }
 
 const formatCurrency = (amount, useShortFormat = false) => {
+  if (!amount) return '0';
+
   if (useShortFormat) {
     let result;
     if (amount >= 1000000000) {
@@ -648,6 +622,11 @@ input:checked + .slider:before {
 
 .package-item .value.highlight {
   color: v-bind('config.styles.colors.successDark');
+  font-weight: 600;
+}
+
+.package-item .value.duration {
+  color: v-bind('config.styles.colors.primary');
   font-weight: 600;
 }
 

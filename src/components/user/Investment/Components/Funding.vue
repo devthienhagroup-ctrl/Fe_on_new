@@ -4,101 +4,160 @@
       {{ config.text.pageTitle }}
     </h1>
 
-    <div class="branches-list">
-      <div
-          v-for="(branch, index) in branches"
-          :key="index"
-          class="branch-item"
-          @mouseenter="hoverItem(index)"
-          @mouseleave="resetItem(index)"
-      >
-        <div class="branch-image-container">
-          <img
-              :src="branch.image"
-              :alt="branch.title"
-              class="branch-image"
-              :class="{ 'zoomed': branch.isHovered }"
-          />
-        </div>
+    <!-- Loading State -->
+    <div v-if="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Đang tải dữ liệu...</p>
+    </div>
 
-        <div class="branch-content">
-          <h3 class="branch-title">{{ branch.title }}</h3>
+    <!-- Error State -->
+    <div v-else-if="error" class="error-state">
+      <i class="fas fa-exclamation-triangle error-icon"></i>
+      <p>{{ error }}</p>
+      <button class="retry-btn" @click="fetchBranches">
+        <i class="fas fa-redo"></i>
+        Thử lại
+      </button>
+    </div>
 
-          <div class="branch-info">
-            <div class="capital-info">
-              <span class="label">
-                {{ config.text.totalCapital }}
-              </span>
-              <span class="value">{{ formatCurrency(branch.totalCapital) }}</span>
-            </div>
-
-            <div class="progress-section">
-              <div class="progress-info">
-                <span class="label">
-                  <i :class="config.icons.progress" class="icon"></i>
-                  {{ config.text.progress }}
-                </span>
-                <span class="value">{{ branch.progress }}%</span>
-              </div>
-              <div class="progress-bar">
-                <div
-                    class="progress-fill"
-                    :style="{
-                    width: branch.currentProgress + '%',
-                    background: config.gradient.progress
-                  }"
-                    :class="{ 'animating': branch.isAnimating }"
-                ></div>
-              </div>
-            </div>
-
-            <div class="additional-info">
-              <div class="time-left">
-                <i :class="config.icons.time" class="icon"></i>
-                <span>{{ branch.timeLeft }}</span>
-              </div>
-              <div class="contributors">
-                <i :class="config.icons.contributors" class="icon"></i>
-                <span>{{ branch.contributors }} {{ config.text.contributorsText }}</span>
-              </div>
+    <!-- Main Content -->
+    <template v-else>
+      <div class="branches-list">
+        <div
+            v-for="(branch, index) in branches"
+            :key="branch.id"
+            class="branch-item"
+            @mouseenter="hoverItem(index)"
+            @mouseleave="resetItem(index)"
+        >
+          <div class="branch-image-container">
+            <img
+                :src="baseImgaeUrl+branch.image"
+                :alt="branch.title"
+                class="branch-image"
+                :class="{ 'zoomed': branch.isHovered }"
+                @error="handleImageError"
+            />
+            <!-- Status Badge -->
+            <div class="status-badge" :class="branch.status.toLowerCase()">
+              {{ getStatusText(branch.status) }}
             </div>
           </div>
 
-          <div
-              class="action-buttons"
-              :class="{ 'visible': branch.isHovered }"
-          >
-            <button
-                class="btn contribute-btn"
-                @click="$emit('openModal', branch)"
-                :style="{
-                border: `2px solid ${config.colors.primary}`,
-                color: config.colors.primary
-              }"
+          <div class="branch-content">
+            <h3 class="branch-title">{{ branch.title }}</h3>
+            <p class="branch-description">{{ branch.description }}</p>
+
+            <div class="branch-info">
+              <div class="capital-info">
+                <span class="label">
+                  {{ config.text.totalCapital }}
+                </span>
+                <span class="value">{{ formatCurrency(branch.totalCapital) }}</span>
+              </div>
+
+              <div class="progress-section" v-if="branch.progress !== null">
+                <div class="progress-info">
+                  <span class="label">
+                    <i :class="config.icons.progress" class="icon"></i>
+                    {{ config.text.progress }}
+                  </span>
+                  <span class="value">{{ branch.progress }}%</span>
+                </div>
+                <div class="progress-bar">
+                  <div
+                      class="progress-fill"
+                      :style="{
+                      width: branch.currentProgress + '%',
+                      background: config.gradient.progress
+                    }"
+                      :class="{ 'animating': branch.isAnimating }"
+                  ></div>
+                </div>
+              </div>
+
+              <div class="additional-info">
+                <div class="time-left">
+                  <i :class="config.icons.time" class="icon"></i>
+                  <span>{{ branch.timeLeft }}</span>
+                </div>
+                <div class="contributors">
+                  <i :class="config.icons.contributors" class="icon"></i>
+                  <span>{{ branch.contributors }} {{ config.text.contributorsText }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div
+                class="action-buttons"
+                :class="{ 'visible': branch.isHovered }"
             >
-              <i :class="config.icons.contribute" class="icon"></i>
-              {{ config.buttons.contribute }}
-            </button>
-            <button
-                class="btn details-btn"
-                @click="$emit('viewDetails', index)"
-                :style="{
-                background: config.gradient.buttonSecondary,
-                color: config.colors.buttonSecondaryText
-              }"
-            >
-              <i :class="config.icons.details" class="icon"></i>
-              {{ config.buttons.details }}
-            </button>
+              <button
+                  class="btn contribute-btn"
+                  @click="$emit('openModal', branch)"
+                  :style="{
+                  border: `2px solid ${config.colors.primary}`,
+                  color: config.colors.primary
+                }"
+                  :disabled="branch.status !== 'OPEN'"
+              >
+                <i :class="config.icons.contribute" class="icon"></i>
+                {{ branch.status === 'OPEN' ? config.buttons.contribute : 'Đã đóng' }}
+              </button>
+              <button
+                  class="btn details-btn"
+                  @click="$emit('viewDetails', branch.originalData.slug)"
+                  :style="{
+                  background: config.gradient.buttonSecondary,
+                  color: config.colors.buttonSecondaryText
+                }"
+              >
+                <i :class="config.icons.details" class="icon"></i>
+                {{ config.buttons.details }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <!-- Pagination -->
+      <div class="pagination" v-if="page.totalPages > 1">
+        <button
+            class="pagination-btn prev"
+            @click="goToPage(page.number - 1)"
+            :disabled="page.number === 0"
+        >
+          <i class="fas fa-chevron-left"></i>
+          Trang trước
+        </button>
+
+        <div class="page-info">
+          <span class="current-page">Trang {{ page.number + 1 }}</span>
+          <span class="total-pages">/ {{ page.totalPages }}</span>
+        </div>
+
+        <button
+            class="pagination-btn next"
+            @click="goToPage(page.number + 1)"
+            :disabled="page.number >= page.totalPages - 1"
+        >
+          Trang sau
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <!-- No Data -->
+      <div v-if="branches.length === 0" class="no-data">
+        <i class="fas fa-inbox"></i>
+        <p>Không có dự án nào để hiển thị</p>
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup>
-import { ref, onUnmounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import api from "../../../../api/api.js";
 
 // Định nghĩa emits
 const emit = defineEmits(['openModal', 'viewDetails'])
@@ -150,78 +209,107 @@ if(props.sectionData) {
   console.log("Đã lấy data từ cha");
 }
 
-// Tạo danh sách chi nhánh mẫu
-const branches = ref([
-  {
-    title: "Góp vốn để mở chi nhánh Quận 1",
-    image: "/imgs/ivm1.jpg",
-    totalCapital: 500000000,
-    progress: 65,
-    currentProgress: 65,
-    timeLeft: "15 ngày",
-    contributors: 124,
-    isHovered: false,
-    isAnimating: false
-  },
-  {
-    title: "Góp vốn để mở chi nhánh Quận 2",
-    image: "/imgs/ivm2.jpg",
-    totalCapital: 450000000,
-    progress: 42,
-    currentProgress: 42,
-    timeLeft: "22 ngày",
-    contributors: 89,
-    isHovered: false,
-    isAnimating: false
-  },
-  {
-    title: "Góp vốn để mở chi nhánh Quận 3",
-    image: "/imgs/ivm3.jpg",
-    totalCapital: 600000000,
-    progress: 78,
-    currentProgress: 78,
-    timeLeft: "8 ngày",
-    contributors: 156,
-    isHovered: false,
-    isAnimating: false
-  },
-  {
-    title: "Góp vốn để mở chi nhánh Quận 4",
-    image: "/imgs/ivm4.jpg",
-    totalCapital: 350000000,
-    progress: 25,
-    currentProgress: 25,
-    timeLeft: "30 ngày",
-    contributors: 67,
-    isHovered: false,
-    isAnimating: false
-  },
-  {
-    title: "Góp vốn để mở chi nhánh Quận 5",
-    image: "/imgs/ivm5.jpg",
-    totalCapital: 550000000,
-    progress: 58,
-    currentProgress: 58,
-    timeLeft: "18 ngày",
-    contributors: 112,
-    isHovered: false,
-    isAnimating: false
-  },
-  {
-    title: "Góp vốn để mở chi nhánh Bình Dương",
-    image: "/imgs/ivm6.jpg",
-    totalCapital: 550000000,
-    progress: 20,
-    currentProgress: 20,
-    timeLeft: "18 ngày",
-    contributors: 12,
-    isHovered: false,
-    isAnimating: false
-  }
-])
+// Data states
+const branches = ref([])
+const loading = ref(true)
+const error = ref(null)
+const page = ref({
+  size: 6,
+  number: 0,
+  totalElements: 0,
+  totalPages: 1
+})
 
 // Thêm biến để theo dõi animation
 const animationFrameIds = ref({})
+
+// Fetch data từ API
+const fetchBranches = async () => {
+  try {
+    loading.value = true
+    error.value = null
+
+    const response = await api.get(`/thg/public/investment/getAll?page=${page.value.number}&size=${page.value.size}`)
+
+    // Update pagination info
+    page.value = response.data.page || {
+      size: 6,
+      number: 0,
+      totalElements: 0,
+      totalPages: 1
+    }
+
+    // Map API data to local structure
+    branches.value = (response.data.content || []).map(item => ({
+      id: item.id,
+      title: item.name,
+      description: item.description,
+      image: item.thumbnail,
+      totalCapital: item.targetAmount,
+      progress: item.progressPercent || 0,
+      currentProgress: item.progressPercent || 0,
+      timeLeft: calculateTimeLeft(item.endDate),
+      contributors: item.investorsCount || 0,
+      status: item.status,
+      isHovered: false,
+      isAnimating: false,
+      // Keep original data for details
+      originalData: item
+    }))
+
+  } catch (err) {
+    console.error('Error fetching branches:', err)
+    error.value = 'Không thể tải dữ liệu. Vui lòng thử lại sau.'
+    branches.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+// Calculate time left from end date
+const calculateTimeLeft = (endDate) => {
+  if (!endDate) return 'Không xác định'
+
+  const end = new Date(endDate)
+  const now = new Date()
+  const diffTime = end - now
+
+  if (diffTime <= 0) return 'Đã kết thúc'
+
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+  if (diffDays > 30) {
+    const months = Math.floor(diffDays / 30)
+    return `${months} tháng`
+  }
+
+  return `${diffDays} ngày`
+}
+
+// Get status text
+const getStatusText = (status) => {
+  const statusMap = {
+    'OPEN': 'Đang mở',
+    'CLOSED': 'Đã đóng',
+    'DRAFT': 'Nháp',
+    'COMPLETED': 'Hoàn thành'
+  }
+  return statusMap[status] || status
+}
+
+// Handle image loading error
+const handleImageError = (event) => {
+  event.target.src = '/imgs/default-branch.jpg' // Fallback image
+}
+
+// Pagination navigation
+const goToPage = (pageNumber) => {
+  if (pageNumber >= 0 && pageNumber < page.value.totalPages) {
+    page.value.number = pageNumber
+    fetchBranches()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
 
 // Hàm xử lý hover vào item
 const hoverItem = (index) => {
@@ -294,7 +382,19 @@ const formatCurrency = (amount) => {
   }).format(amount)
 }
 
+// Lifecycle hooks
+onMounted(() => {
+  fetchBranches()
+})
+
+// Watch for page number changes
+watch(() => page.value.number, () => {
+  fetchBranches()
+})
+
 // Dọn dẹp animation frames khi component unmount
+import { onUnmounted } from 'vue'
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
 onUnmounted(() => {
   Object.values(animationFrameIds.value).forEach(id => {
     cancelAnimationFrame(id)
@@ -321,10 +421,66 @@ onUnmounted(() => {
   background-clip: text;
 }
 
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 60px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid v-bind('config.colors.border');
+  border-top: 3px solid v-bind('config.colors.primary');
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.error-state {
+  text-align: center;
+  padding: 40px;
+  background: #fee;
+  border-radius: 10px;
+  border: 1px solid #fcc;
+}
+
+.error-icon {
+  font-size: 3rem;
+  color: #e53e3e;
+  margin-bottom: 20px;
+}
+
+.retry-btn {
+  background: v-bind('config.colors.primary');
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.3s;
+}
+
+.retry-btn:hover {
+  opacity: 0.9;
+}
+
+/* Branches List */
 .branches-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 25px;
+  margin-bottom: 40px;
 }
 
 .branch-item {
@@ -344,6 +500,7 @@ onUnmounted(() => {
 .branch-image-container {
   height: 200px;
   overflow: hidden;
+  position: relative;
 }
 
 .branch-image {
@@ -357,16 +514,59 @@ onUnmounted(() => {
   transform: scale(1.1);
 }
 
+.status-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.open {
+  background: #10b981;
+  color: white;
+}
+
+.status-badge.closed {
+  background: #ef4444;
+  color: white;
+}
+
+.status-badge.draft {
+  background: #6b7280;
+  color: white;
+}
+
+.status-badge.completed {
+  background: #3b82f6;
+  color: white;
+}
+
 .branch-content {
   padding: 20px;
 }
 
 .branch-title {
   color: v-bind('config.colors.primary');
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   font-size: 1.2rem;
   font-weight: 600;
   line-height: 1.4;
+}
+
+.branch-description {
+  color: v-bind('config.colors.secondary');
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .branch-info {
@@ -415,11 +615,11 @@ onUnmounted(() => {
 .progress-fill {
   height: 100%;
   border-radius: 4px;
-  transition: width 0.3s ease; /* Transition mượt mà hơn */
+  transition: width 0.3s ease;
 }
 
 .progress-fill.animating {
-  transition: width 0.05s ease; /* Reset nhanh nhưng vẫn mượt */
+  transition: width 0.05s ease;
 }
 
 .additional-info {
@@ -473,15 +673,77 @@ onUnmounted(() => {
   background: transparent;
 }
 
-.contribute-btn:hover {
+.contribute-btn:hover:not(:disabled) {
   background: v-bind('config.colors.primary');
   color: white !important;
   transform: translateY(-2px);
 }
 
+.contribute-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .details-btn:hover {
   background: v-bind('config.gradient.buttonSecondaryHover');
   transform: translateY(-2px);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-top: 40px;
+  padding: 20px 0;
+  border-top: 1px solid v-bind('config.colors.border');
+}
+
+.pagination-btn {
+  background: v-bind('config.gradient.buttonSecondary');
+  border: 1px solid v-bind('config.colors.border');
+  color: v-bind('config.colors.secondary');
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: v-bind('config.gradient.buttonSecondaryHover');
+  color: v-bind('config.colors.primary');
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 1rem;
+  color: v-bind('config.colors.secondary');
+}
+
+.current-page {
+  color: v-bind('config.colors.primary');
+  font-weight: 600;
+}
+
+/* No Data */
+.no-data {
+  text-align: center;
+  padding: 60px;
+  color: v-bind('config.colors.secondary');
+}
+
+.no-data i {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  opacity: 0.5;
 }
 
 /* Responsive */
@@ -496,6 +758,11 @@ onUnmounted(() => {
 
   .action-buttons {
     flex-direction: column;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 15px;
   }
 }
 </style>
