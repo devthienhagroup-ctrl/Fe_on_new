@@ -27,7 +27,7 @@
                     <div class="d-flex align-items-center gap-2 mb-1">
                       <img
                           v-if="applicant.avatar"
-                          :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/' + applicant.avatar"
+                          :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + applicant.avatar"
                           class="rounded-circle shadow-sm"
                           width="32"
                           height="32"
@@ -65,7 +65,7 @@
                     <!-- Avatar -->
                     <img
                         v-if="task.assignee?.avatar"
-                        :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/' + task.assignee.avatar"
+                        :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + task.assignee.avatar"
                         class="rounded-circle shadow-sm"
                         width="35"
                         height="35"

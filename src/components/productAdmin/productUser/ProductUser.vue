@@ -555,7 +555,7 @@ function processItems(items) {
         ...item,
         imageUrl: item.imageUrl
             ? item.imageUrl
-            : "https://s3.cloudfly.vn/thg-storage/uploads-public/default.jpg"
+            : "https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg"
       }))
       : [];
 }

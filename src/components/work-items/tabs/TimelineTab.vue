@@ -328,7 +328,7 @@ const ROLE_LABEL = {
   VIEWER: 'Quan sát'
 }
 
-const ASSET_BASE_URL = ' https://s3.cloudfly.vn/thg-storage/uploads-public/'
+const ASSET_BASE_URL = ' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'
 const DEFAULT_MEMBER_AVATAR = 'https://placehold.co/40x40?text=--'
 const DEFAULT_DEPARTMENT_AVATAR = 'https://placehold.co/36x36?text=PB'
 const DEFAULT_TEAM_AVATAR = 'https://placehold.co/36x36?text=TM'
