@@ -231,7 +231,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'contact', 'activate'])
 
-const BASE_URL = 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'
+const BASE_URL = 'https://s3.cloudfly.vn/thg-storage/uploads-public/'
 
 // Format functions
 const formatAddress = (raw) => {

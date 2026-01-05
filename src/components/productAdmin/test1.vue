@@ -358,7 +358,7 @@ watch(thongKe, buildCharts, { deep: true })
 </script>
 
 <template>
-  <div class="page">
+  <div class="page" style="margin-top: 60px !important;">
     <!-- ===== HERO ===== -->
     <section class="hero">
       <div class="hero__bg"></div>
@@ -495,7 +495,7 @@ watch(thongKe, buildCharts, { deep: true })
 
             <div class="manager">
               <div class="avatar">
-                <img v-if="r.nguoiAvatarQuanLy" :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'
+                <img v-if="r.nguoiAvatarQuanLy" :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/'
                 + (r.nguoiAvatarQuanLy == null ? 'vat-default.jpg': r.nguoiAvatarQuanLy )"
                      alt="avatar" />
                 <div v-else class="avatar__fallback">

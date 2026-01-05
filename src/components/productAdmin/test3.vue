@@ -725,7 +725,7 @@ async function fetchFilteredAssets() {
     landAssets.value = Array.isArray(res.data.content)
         ? res.data.content.map(item => ({
           ...item,
-          imageUrl: item.imageUrl || "https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg"
+          imageUrl: item.imageUrl || "https://s3.cloudfly.vn/thg-storage/uploads-public/default.jpg"
         }))
         : [];
 

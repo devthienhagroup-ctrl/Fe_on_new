@@ -68,7 +68,7 @@
               <td class="avatar-col">
               <div class="broker-avatar">
                 <img
-                    :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'
+                    :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/'
                 + (broker.avatar == null ? 'vat-default.jpg': broker.avatar )"
                     :alt="broker.name"
                     @error="handleImageError"
@@ -99,7 +99,7 @@
               <div v-if="broker.idTeam" class="group-info">
                 <div class="group-avatar">
                   <img
-                      :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'
+                      :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/'
                 + (broker.avatarTeam == null ? 'vat-default.jpg': broker.avatarTeam )"
                       :alt="broker.nameTeam"
                       @error="handleGroupImageError"

@@ -20,7 +20,7 @@
           <div class="text-secondary small"> {{ info.role}} </div>
         </div>
         <img
-        :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+        :src="' https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
         alt="Avatar"
             class="rounded-circle border border-light-subtle"
             width="46"
@@ -122,7 +122,15 @@ const allMenuItems = [
     icon: 'fa-solid fa-money-bill-transfer text-success fs-2',
     title: 'Rút tiền',
     desc: 'Quản lý yêu cầu rút tiền'
+  },
+  {
+    label: 'YCHT',
+    route: '/-thg/yeu-cau-hop-tac',
+    icon: 'fa-solid fa-handshake text-primary fs-2',
+    title: 'Yêu cầu hợp tác',
+    desc: 'Quản lý các yêu cầu hợp tác từ môi giới'
   }
+
 
 
 ]

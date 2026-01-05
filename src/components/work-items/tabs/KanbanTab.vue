@@ -137,7 +137,7 @@
                       <img
                         class="avatar-small"
                         :src="item.implementer.avatar
-                          ? ` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${item.implementer.avatar}`
+                          ? ` https://s3.cloudfly.vn/thg-storage/uploads-public/${item.implementer.avatar}`
                           : '/images/default-avatar.png'"
                         alt="Avatar nhân viên"
                       />
@@ -150,7 +150,7 @@
                       <img
                         class="avatar-small"
                         :src="item.implementerTeam.avatar
-                          ? ` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${item.implementerTeam.avatar}`
+                          ? ` https://s3.cloudfly.vn/thg-storage/uploads-public/${item.implementerTeam.avatar}`
                           : '/images/default-team.png'"
                         alt="Avatar nhóm"
                       />
@@ -467,7 +467,7 @@
                     <div class="avatar-option rounded-circle overflow-hidden" style="width: 35px; height: 35px;">
                       <img
                           v-if="task.createBy && task.createBy.avatar"
-                          :src="` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${task.createBy.avatar}`"
+                          :src="` https://s3.cloudfly.vn/thg-storage/uploads-public/${task.createBy.avatar}`"
                           alt="avatar"
                           class="w-100 h-100 object-fit-cover"
                       />
@@ -489,7 +489,7 @@
                     <div class="avatar-option rounded-circle overflow-hidden" style="width: 35px; height: 35px;">
                       <img
                           v-if="task.asigger?.avatar"
-                          :src="` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${task.asigger.avatar}`"
+                          :src="` https://s3.cloudfly.vn/thg-storage/uploads-public/${task.asigger.avatar}`"
                           alt="avatar"
                           class="w-100 h-100 object-fit-cover"
                       />
@@ -528,7 +528,7 @@
                           >
                             <img
                                 v-if="avatar"
-                                :src="` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${avatar}`"
+                                :src="` https://s3.cloudfly.vn/thg-storage/uploads-public/${avatar}`"
                                 class="object-fit-cover"
                                 style="width: 35px !important; height: 35px!important; "
                                 alt="avatar"
@@ -558,7 +558,7 @@
                           >
                             <img
                                 v-if="avatar"
-                                :src="` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${avatar}`"
+                                :src="` https://s3.cloudfly.vn/thg-storage/uploads-public/${avatar}`"
                                 class="w-100 h-100 object-fit-cover"
                                 alt="avatar"
                             />
@@ -584,7 +584,7 @@
                       <div class="avatar-option rounded-circle overflow-hidden" style="width: 35px; height: 35px;">
                         <img
                             v-if="selectedExecutor?.avatar"
-                            :src="` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${selectedExecutor.avatar}`"
+                            :src="` https://s3.cloudfly.vn/thg-storage/uploads-public/${selectedExecutor.avatar}`"
                             class="object-fit-cover"
                             style="width: 35px !important; height: 35px!important; "
                             alt="avatar"
@@ -802,7 +802,7 @@
                   >
                     <img
                         v-if="log.avatar"
-                        :src="` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${log.avatar}`"
+                        :src="` https://s3.cloudfly.vn/thg-storage/uploads-public/${log.avatar}`"
                         alt="avatar"
                         class="w-100 h-100 object-fit-cover"
                     />

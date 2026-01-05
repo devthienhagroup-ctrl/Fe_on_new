@@ -115,6 +115,13 @@ const allMenuItems = [
     route: '/-thg/yeu-cau-rut-tien',
     icon: 'fa-solid fa-money-bill-transfer text-success fs-5',
     title: 'Tài chính'
+  },
+  {
+    label: 'YCHT',
+    route: '/-thg/yeu-cau-hop-tac',
+    icon: 'fa-solid fa-handshake text-primary fs-5',
+    title: 'YC hợp tác',
+    desc: 'Quản lý các yêu cầu hợp tác từ môi giới'
   }
 
 ]

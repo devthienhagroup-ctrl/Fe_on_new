@@ -598,21 +598,34 @@ const routes = [
     },
     {
         path: "/loi-de-nghi",
-        component: Test1,
+        component: MenuUser,
         meta: {
-            requiresAuth: false,
-            hideFooterMap: false,
-            enableTailwind: true
-        }
+            requiresAuth: true,
+            loginFrom: "user",
+        },
+        children: [
+            {
+                path: "",
+                name: "LDN",
+                component: Test1
+            }
+        ]
     },
     {
-        path: "/02",
-        component: Test1,
+        path: "/-thg/yeu-cau-hop-tac",
+        component: Menu,
         meta: {
-            requiresAuth: false,
-            hideFooterMap: false,
-            enableTailwind: true
-        }
+            requiresAuth: true,
+            enableTailwind: true,
+            loginFrom: "admin",
+        },
+        children: [
+            {
+                path: "",
+                name: "YCHT_ADMIN",
+                component: Test
+            }
+        ]
     },
     {
         path: "/san-pham-cua-ban",
@@ -623,7 +636,7 @@ const routes = [
                 name: "SANPHAM-CUABAN",
                 component: Test3,
                 meta: {
-                    requiresAuth: false,
+                    requiresAuth: true,
                     hideFooterMap: false,
                     enableTailwind: true
                 }

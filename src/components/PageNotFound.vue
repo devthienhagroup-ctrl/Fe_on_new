@@ -1,17 +1,17 @@
 <template>
   <div class="page-404">
     <div class="container">
-      <img class="logo" src="/imgs/logoTHG.png" alt="logo-THG">
+<!--      <img class="logo" src="/imgs/logoTHG.png" alt="logo-THG">-->
 
-      <!-- Hiển thị ảnh SVG từ đường dẫn -->
-      <div class="image-container">
-        <img
-            src="/imgs/pageNotFound.svg"
-            alt="404 - Không tìm thấy trang"
-            class="oops-image"
-            @error="handleImageError"
-        />
-      </div>
+<!--      &lt;!&ndash; Hiển thị ảnh SVG từ đường dẫn &ndash;&gt;-->
+<!--      <div class="image-container">-->
+<!--        <img-->
+<!--            src="/imgs/pageNotFound.svg"-->
+<!--            alt="404 - Không tìm thấy trang"-->
+<!--            class="oops-image"-->
+<!--            @error="handleImageError"-->
+<!--        />-->
+<!--      </div>-->
 
       <div class="content">
         <h1 class="title">Oops! Trang không tìm thấy</h1>
