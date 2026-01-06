@@ -174,6 +174,15 @@ const menuData = ref([
     }
   },
   {
+    id: 11,
+    name: 'Trang chủ mới',
+    slug: 'trang-chu-moi',
+    sections: {
+      'global-css': 'CSS toàn cục',
+      'noi-dung-chinh': 'Nội dung chính'
+    }
+  },
+  {
     id: 2,
     name: 'Tin tức',
     slug: 'tin-tuc',
@@ -273,6 +282,7 @@ const isMobile = computed(() => window.innerWidth <= 768)
 const getMenuIcon = (slug) => {
   const icons = {
     'trang-chu': 'fas fa-home',
+    'trang-chu-moi': 'fas fa-home',
     'tin-tuc': 'fas fa-newspaper',
     'lien-he': 'fas fa-envelope',
     'ban-nhanh': 'fas fa-bolt',

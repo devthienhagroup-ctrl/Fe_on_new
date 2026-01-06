@@ -130,6 +130,10 @@ import PaymentQR from "../components/user/Profile/component/PaymentQR.vue";
 import productCreateUser from "../components/productUser/productCreateUser.vue"
 import productUpdate from "../components/productUser/ProductUpdate.vue"
 import RutTienAdmin from "../components/rutTienAdmin.vue";
+import Layout from "../components/user/Home/NewHome/Layout.vue";
+import MainContentHome from "../components/user/Home/NewHome/MainContentHome.vue";
+import GlobalCSS from "../components/cms/components/homeNew/GlobalCSS.vue";
+import MainContent from "../components/cms/components/homeNew/MainContent.vue";
 
 const routes = [
     {
@@ -264,6 +268,23 @@ const routes = [
                         path: 'anh-nen-danh-gia',
                         name: 'reviewBackgroundImage',
                         component: ReviewsBackgroundImage
+                    }
+                ]
+            },
+            {
+                path: 'trang-chu-moi',
+                name: 'HomeNew',
+                component: cms,
+                children: [
+                    {
+                        path: 'global-css',
+                        name: 'GlobalCSS',
+                        component: GlobalCSS
+                    },
+                    {
+                        path: 'noi-dung-chinh',
+                        name: 'MainContent',
+                        component: MainContent
                     }
                 ]
             },
@@ -1055,7 +1076,12 @@ const routes = [
     {
         path: "/test",
         name: 'testtt',
-        component: TestComponent
+        component: TestComponent,
+        meta: {
+            enableTailwind: true,
+            newCustomScroll: true,
+            useAOS: true
+        }
     },
     {
         path: "/khong-tim-thay",
@@ -1312,6 +1338,22 @@ const routes = [
         ]
     },
     {
+        path: "/trang-chu",
+        name: "Home",
+        component: Layout,
+        children: [
+            {
+                path: '',
+                name: "home",
+                component: MainContentHome
+            }
+        ], meta: {
+            enableTailwind: true,
+            newCustomScroll: true,
+            useAOS: true
+        }
+    },
+    {
         path: "/ga4-demo",
         name: "GA4Demo",
         component: MenuUser,
@@ -1343,60 +1385,108 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
+    console.group(`=== Navigation từ "${from.fullPath || '/'}" đến "${to.fullPath}" ===`);
+
     const auth = useAuthStore();
     const isLoggedIn = !!auth.accessToken;
     const loginFrom = localStorage.getItem("loginFrom");
 
+    console.log("1. Trạng thái hiện tại:");
+    console.log("   - isLoggedIn:", isLoggedIn);
+    console.log("   - accessToken:", auth.accessToken ? "Có" : "Không");
+    console.log("   - loginFrom trong localStorage:", loginFrom);
+    console.log("   - to.meta.requiresAuth:", to.meta.requiresAuth);
+    console.log("   - to.meta.loginFrom:", to.meta.loginFrom);
+
     if (to.meta.requiresAuth) {
+        console.log("2. Route yêu cầu xác thực");
+
         if (!isLoggedIn) {
+            console.log("3. Người dùng CHƯA đăng nhập");
+            console.log("   - Lưu redirectUrl:", to.fullPath);
             localStorage.setItem("redirectUrl", to.fullPath);
-            console.log("Đã lưu redirectUrl", to.fullPath)
 
             if (to.meta.loginFrom === "user") {
+                console.log("4. Đăng nhập từ trang user");
                 localStorage.setItem("loginFrom", "user");
-                window.dispatchEvent(new Event('open-login-modal'))
+                console.log("   - Kích hoạt mở modal đăng nhập");
+                window.dispatchEvent(new Event('open-login-modal'));
+                console.log("   - Dừng navigation, ở lại trang hiện tại");
+                console.groupEnd();
                 return next(false);
             } else {
+                console.log("4. Đăng nhập từ trang admin");
                 localStorage.setItem("loginFrom", "admin");
+                console.log("   - Chuyển hướng đến trang đăng nhập admin");
+                console.groupEnd();
                 return next("/-thg/dang-nhap");
             }
         } else {
+            console.log("3. Người dùng ĐÃ đăng nhập");
             if (to.meta.loginFrom === "user") {
                 localStorage.setItem("loginFrom", "user");
+                console.log("   - Đặt loginFrom thành 'user'");
             } else {
                 localStorage.setItem("loginFrom", "admin");
+                console.log("   - Đặt loginFrom thành 'admin'");
             }
         }
+    } else {
+        console.log("2. Route KHÔNG yêu cầu xác thực");
     }
 
     if ((to.path === "/-thg/dang-nhap" || to.path === "/dang-nhap") && isLoggedIn) {
+        console.log("5. Truy cập trang đăng nhập khi đã đăng nhập");
+        console.log("   - loginFrom:", loginFrom);
+
         if (loginFrom === "user") {
+            console.log("   - Chuyển hướng về trang chủ user");
+            console.groupEnd();
             return next("/");
         }
         if (loginFrom === "admin") {
+            console.log("   - Chuyển hướng về trang quản lý admin");
+            console.groupEnd();
             return next("/-thg/quan-ly");
         }
     }
 
+    console.log("6. Cho phép navigation tiếp tục");
+    console.groupEnd();
     next();
 });
 
-router.afterEach((to) => {
+router.afterEach((to, from, failure) => {
+    // Nếu có failure hoặc navigation không thành công, không xử lý tailwind
+    if (failure) {
+        return;
+    }
+
+    console.log("Bắt đầu kiểm tra tailwind");
     const id = "tailwind-admin-css";
     let link = document.getElementById(id);
     const needTailwind = to.matched.some(r => r.meta.enableTailwind);
 
     if (needTailwind && !link) {
+        console.log(to.path + " Cần tailwind");
         link = document.createElement("link");
         link.id = id;
         link.rel = "stylesheet";
-        link.href = "/tailwind-admin.css";
+        link.href = "/tailwind-admin-compiled.css";
         document.head.appendChild(link);
     }
 
     if (!needTailwind && link) {
+        console.log(to.path + " Không cần tailwind");
         link.remove();
     }
-});
 
+    // Kiểm tra để add style cho scroll
+    const cls = "use-custom-scroll";
+    if (to.meta.newCustomScroll) {
+        document.body.classList.add(cls);
+    } else {
+        document.body.classList.remove(cls);
+    }
+});
 export default router;
