@@ -58,6 +58,7 @@ import HostManager from "../components/host/HostManager.vue";
 
 import Ga4EventExample from "../components/Ga4EventExample.vue";
 import PaymentPage2 from "../components/productAdmin/PaymentPage2.vue";
+import AppointmentsPage from "../components/Appointments/AppointmentsPage.vue";
 
 import cms from "/src/components/cms/cms.vue";
 import Banner from "../components/cms/components/home/Banner.vue";
@@ -816,6 +817,18 @@ const routes = [
                 path: '',
                 name: 'AppointmentManager',
                 component: AppointmentManager
+            }
+        ]
+    },
+    {
+        path: '/-thg/quan-ly-lich-hen',
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: '',
+                name: 'AppointmentsPage',
+                component: AppointmentsPage
             }
         ]
     },
