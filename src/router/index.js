@@ -132,6 +132,12 @@ import productUpdate from "../components/productUser/ProductUpdate.vue"
 import RutTienAdmin from "../components/rutTienAdmin.vue";
 
 const routes = [
+    // {
+    //     path: "/test/dat-lich",
+    //     name: "TeamCollaboration",
+    //     component: TeamCollaborationLayout,
+    //     meta: { requiresAuth: false, enableTailwind: true },
+    // },
     {
         path: "/-thg/dang-nhap",
         name: "LoginForm",

@@ -1,614 +1,711 @@
-<<<<<<< HEAD
-diff --git a/src/components/user/Home/components/MenuUser.vue b/src/components/user/Home/components/MenuUser.vue
-index fb9f3c9b19dc0bf49f32b13fbf7ebb2c7c62e16f..0db4bd0f84713f6a85276ce4739d2b60d9a64b9c 100644
---- a/src/components/user/Home/components/MenuUser.vue
-+++ b/src/components/user/Home/components/MenuUser.vue
-@@ -155,50 +155,56 @@
-   <PopupQuickSale v-if="showQSPopup" @close="closePopup"></PopupQuickSale>
-=======
-diff --git a/src/components/user/Profile/component/Payment.vue b/src/components/user/Profile/component/Payment.vue
-index 3b1b26c0f1ab3ffc7180068b18074e35a6d8d24c..150ebdb83bf6ca8ab7bbe73e5005c57824220353 100644
---- a/src/components/user/Profile/component/Payment.vue
-+++ b/src/components/user/Profile/component/Payment.vue
-@@ -1,237 +1,238 @@
- <template>
-   <div class="service-payment-container">
-     <div class="security-header">
-       <h1 class="security-title">Gói dịch vụ và thanh toán</h1>
-     </div>
-     <div class="main-content">
-       <MembershipCard class="member-ship-card" :member-data="user_card"/>
-
-       <!-- Balance and Actions Section -->
-       <div class="balance-actions-section">
-         <div class="balance-card">
-           <div class="balance-header">
-             <h3 class="balance-title">Số dư tài khoản</h3>
-             <button class="eye-toggle" @click="toggleBalanceVisibility">
-               <i class="fas" :class="balanceVisible ? 'fa-eye' : 'fa-eye-slash'"></i>
-             </button>
-           </div>
-           <div class="balance-amount">
--            <span class="amount" v-if="balanceVisible">1,250,000 VNĐ</span>
-+            <span class="amount" v-if="balanceVisible">{{ formattedAvailableBalance }} VNĐ</span>
-             <span class="amount hidden" v-else>****** VNĐ</span>
-           </div>
-+          <div class="pending-amount">
-+            <span class="pending-label">Chờ rút</span>
-+            <span class="pending-value" v-if="balanceVisible">{{ formattedPendingBalance }} VNĐ</span>
-+            <span class="pending-value hidden" v-else>****** VNĐ</span>
+diff --git a/src/modules/team-collaboration/TeamCollaborationLayout.vue b/src/modules/team-collaboration/TeamCollaborationLayout.vue
+new file mode 100644
+index 0000000000000000000000000000000000000000..3b21da2e7cdb54339add7d820d7f72993649d574
+--- /dev/null
++++ b/src/modules/team-collaboration/TeamCollaborationLayout.vue
+@@ -0,0 +1,139 @@
++<template>
++  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-violet-100">
++    <div class="flex min-h-screen">
++      <TeamSidebar :active-menu="activeMenu" @update:activeMenu="activeMenu = $event" />
++      <div class="flex-1 flex flex-col gap-6 p-6">
++        <TeamHeader :notification-count="notificationCount" />
++
++        <section class="grid grid-cols-1 lg:grid-cols-4 gap-4">
++          <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-4">
++            <p class="text-sm text-slate-500">Tổng số team</p>
++            <p class="text-2xl font-semibold text-slate-800">{{ teams.length }}</p>
 +          </div>
-         </div>
-
-         <div class="action-buttons">
-           <button class="action-btn deposit">
-             <i class="fas fa-sign-in-alt"></i>
-             <span>Nạp tiền</span>
-           </button>
-           <button class="action-btn withdraw">
-             <i class="fas fa-sign-out-alt"></i>
-             <span>Rút tiền</span>
-           </button>
-           <button class="action-btn history" @click="router.push({name: 'transaction-history'})">
-             <i class="fas fa-history"></i>
-             <span>Lịch sử giao dịch</span>
-           </button>
-         </div>
-       </div>
-
-       <!-- Chart Section -->
-       <div class="chart-section">
-         <div class="chart-header">
-           <div class="chart-controls-left">
-             <select v-model="selectedMonth" class="month-select">
-               <option value="1">Tháng 1</option>
-               <option value="2">Tháng 2</option>
-               <option value="3">Tháng 3</option>
-               <option value="4">Tháng 4</option>
-               <option value="5">Tháng 5</option>
-               <option value="6">Tháng 6</option>
-               <option value="7">Tháng 7</option>
-               <option value="8">Tháng 8</option>
-               <option value="9">Tháng 9</option>
-               <option value="10">Tháng 10</option>
-               <option value="11">Tháng 11</option>
-               <option value="12">Tháng 12</option>
-             </select>
--          </div>
--          <div class="chart-controls-right">
--            <button class="chart-btn download" @click="downloadChart">
--              <i class="fas fa-download"></i>
--              Tải xuống
--            </button>
--            <button class="chart-btn table-view" @click="toggleTableView">
--              <i class="fas fa-table"></i>
--              Xem dạng bảng
--            </button>
-+            <select v-model="selectedYear" class="year-select">
-+              <option v-for="year in yearOptions" :key="year" :value="year">
-+                Năm {{ year }}
-+              </option>
-+            </select>
-           </div>
-         </div>
-
-         <div class="chart-container">
--          <Line v-if="!tableView" :data="chartData" :options="chartOptions" />
--          <div v-else class="table-view">
--            <table class="transaction-table">
--              <thead>
--              <tr>
--                <th>Ngày</th>
--                <th>Giao dịch</th>
--                <th>Số tiền</th>
--                <th>Trạng thái</th>
--              </tr>
--              </thead>
--              <tbody>
--              <tr v-for="item in tableData" :key="item.id">
--                <td>{{ item.date }}</td>
--                <td>{{ item.transaction }}</td>
--                <td>{{ item.amount }}</td>
--                <td :class="item.status">
--                  <i v-if="item.status === 'success'" class="fas fa-check-circle status-icon success"></i>
--                  <i v-else-if="item.status === 'pending'" class="fas fa-clock status-icon pending"></i>
--                  {{ item.statusText }}
--                </td>
--              </tr>
--              </tbody>
--            </table>
--          </div>
-+          <Line :data="chartData" :options="chartOptions" />
-         </div>
-       </div>
-     </div>
-   </div>
->>>>>>> 393b17d28853cd6b48553fd86e8619316721ff10
- </template>
-
- <script setup>
--import { ref, onMounted } from 'vue';
-+import { computed, ref, onMounted, watch } from 'vue';
- import {useRouter} from "vue-router";
- import MembershipCard from "./MembershipCard.vue";
- import { Line } from 'vue-chartjs';
-+import api from "/src/api/api.js";
- import {
-   Chart as ChartJS,
-   CategoryScale,
-   LinearScale,
-   PointElement,
-   LineElement,
-   Title,
-   Tooltip,
-   Legend,
-   Filler
- } from 'chart.js';
-
-<<<<<<< HEAD
- const auth = useAuthStore();
- const menuRef = ref(null);
- const navLinks = ref(null);
- const hamburger = ref(null);
- const solutionSubmenu = ref(null);
- const recruitmentSubmenu = ref(null);
- const userSubmenu = ref(null);
- const userMenuContainer = ref(null);
-
- const route = useRoute()
- const router = useRouter();
-
- const showQSPopup = ref(route.meta.showQSPopup || false);
-
- const resetMobileMenuState = () => {
-+  if (menuRef.value) {
-+    menuRef.value.classList.remove('hide-menu');
-+  }
-+  lastY = 0;
-+  upDistance = 0;
++          <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-4">
++            <p class="text-sm text-slate-500">Sản phẩm đang quản lý</p>
++            <p class="text-2xl font-semibold text-slate-800">{{ products.length }}</p>
++          </div>
++          <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-4">
++            <p class="text-sm text-slate-500">Yêu cầu chờ duyệt</p>
++            <p class="text-2xl font-semibold text-amber-500">{{ pendingRequests }}</p>
++          </div>
++          <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-4">
++            <p class="text-sm text-slate-500">Tin nhắn chưa đọc</p>
++            <p class="text-2xl font-semibold text-blue-600">{{ unreadMessageCount }}</p>
++          </div>
++        </section>
 +
-   if (window.innerWidth > 1024) return;
-
-   if (solutionSubmenu.value) {
-     solutionSubmenu.value.classList.remove('active');
-   }
-   if (recruitmentSubmenu.value) {
-     recruitmentSubmenu.value.classList.remove('active');
-   }
-   if (userSubmenu.value) {
-     userSubmenu.value.classList.remove('active');
-   }
-   if (navLinks.value) {
-     navLinks.value.classList.remove('active');
-   }
-   if (hamburger.value) {
-     hamburger.value.classList.remove('active');
-   }
- };
-
- // Computed properties for active state - Cập nhật để bao gồm cả route giả
- const isSolutionActive = computed(() => {
-   return route.path === '/giai-phap' ||
-       route.path === '/giai-phap-ban-nhanh' ||
-       route.path === '/dinh-gia-bds' ||
-       route.path.startsWith('/giai-phap');
-@@ -441,85 +447,65 @@ const initializeMenu = () => {
-   if (solutionLink && solutionSubmenuEl) {
-     solutionSubmenuTimeout = setupSubmenuHover(solutionLink.parentElement, solutionSubmenuEl);
-   }
-
-   // Setup submenu hover for Recruitment
-   if (recruitmentLink && recruitmentSubmenuEl) {
-     recruitmentSubmenuTimeout = setupSubmenuHover(recruitmentLink.parentElement, recruitmentSubmenuEl);
-   }
-
-   // Mobile menu toggle
-   hamburgerEl.addEventListener('click', function (e) {
-     e.preventDefault();
-     e.stopPropagation();
-
-     navLinksEl.classList.toggle('active');
-     hamburgerEl.classList.toggle('active');
-
-     if (!navLinksEl.classList.contains('active')) {
-       userSubmenuEl.classList.remove('active');
-       if (solutionSubmenuEl) solutionSubmenuEl.classList.remove('active');
-       if (recruitmentSubmenuEl) recruitmentSubmenuEl.classList.remove('active');
-     }
-   });
-
-   // Mobile submenu toggle for Solution (sử dụng hàm toggleSubmenu)
--  if (solutionLink && solutionSubmenuEl) {
--    solutionLink.addEventListener('click', function (e) {
--      if (window.innerWidth <= 1024) {
--        e.preventDefault();
--        e.stopPropagation();
--        toggleSubmenu('solution');
--      }
-+  if (solutionBack && solutionSubmenuEl) {
-+    solutionBack.addEventListener('click', function (e) {
-+      e.preventDefault();
-+      e.stopPropagation();
-+      solutionSubmenuEl.classList.remove('active');
-     });
--
--    if (solutionBack) {
--      solutionBack.addEventListener('click', function (e) {
--        e.preventDefault();
--        e.stopPropagation();
--        solutionSubmenuEl.classList.remove('active');
--      });
--    }
-   }
-
-   // Mobile submenu toggle for Recruitment (sử dụng hàm toggleSubmenu)
--  if (recruitmentLink && recruitmentSubmenuEl) {
--    recruitmentLink.addEventListener('click', function (e) {
--      if (window.innerWidth <= 1024) {
--        e.preventDefault();
--        e.stopPropagation();
--        toggleSubmenu('recruitment');
--      }
-+  if (recruitmentBack && recruitmentSubmenuEl) {
-+    recruitmentBack.addEventListener('click', function (e) {
-+      e.preventDefault();
-+      e.stopPropagation();
-+      recruitmentSubmenuEl.classList.remove('active');
-     });
--
--    if (recruitmentBack) {
--      recruitmentBack.addEventListener('click', function (e) {
--        e.preventDefault();
--        e.stopPropagation();
--        recruitmentSubmenuEl.classList.remove('active');
--      });
--    }
-   }
-
-   // Mobile submenu toggle for User
-   userIcon.addEventListener('click', function (e) {
-     if (window.innerWidth <= 1024) {
-       e.preventDefault();
-       e.stopPropagation();
-       userSubmenuEl.classList.toggle('active');
-       // Đóng các submenu khác
-       if (solutionSubmenuEl) solutionSubmenuEl.classList.remove('active');
-       if (recruitmentSubmenuEl) recruitmentSubmenuEl.classList.remove('active');
-     }
-   });
-
-   // Close menu when clicking outside on mobile
-   document.addEventListener('click', function (e) {
-     if (window.innerWidth <= 1024) {
-       const isClickInsideMenu =
-           navLinksEl.contains(e.target) ||
-           hamburgerEl.contains(e.target) ||
-           (solutionSubmenuEl && solutionSubmenuEl.contains(e.target)) ||
-           (recruitmentSubmenuEl && recruitmentSubmenuEl.contains(e.target)) ||
-           userSubmenuEl.contains(e.target);
-
-       if (!isClickInsideMenu) {
-=======
- // Đăng ký các thành phần ChartJS
- ChartJS.register(
-     CategoryScale,
-     LinearScale,
-     PointElement,
-     LineElement,
-     Title,
-     Tooltip,
-     Legend,
-     Filler
- );
-
- const props = defineProps({
-   user_card: Object
- });
- const router = useRouter()
-
- // Balance visibility
- const balanceVisible = ref(false);
-+const availableBalance = ref(0);
-+const pendingBalance = ref(0);
-
- const toggleBalanceVisibility = () => {
-   balanceVisible.value = !balanceVisible.value;
- };
-
- // Chart data and options
--const selectedMonth = ref('6');
--const tableView = ref(false);
-+const selectedMonth = ref(`${new Date().getMonth() + 1}`);
-+const selectedYear = ref(new Date().getFullYear());
-+const yearOptions = Array.from({ length: 5 }, (_, index) => new Date().getFullYear() - index);
-
- const chartData = ref({
--  labels: ['1', '5', '10', '15', '20', '25', '30'],
-+  labels: [],
-   datasets: [
-     {
-       label: 'Chi tiêu (VND)',
--      data: [1200000, 1900000, 1500000, 2500000, 2200000, 3000000, 2800000],
-+      data: [],
-       borderColor: '#031358',
-       backgroundColor: 'rgba(3, 19, 88, 0.1)',
-       tension: 0.4,
-       fill: true,
-       pointBackgroundColor: '#031358',
-       pointBorderColor: '#ffffff',
-       pointBorderWidth: 2,
-       pointRadius: 5,
-     }
-   ]
- });
-
- const chartOptions = ref({
-   responsive: true,
-   maintainAspectRatio: false,
-   plugins: {
-     legend: {
-       display: true,
-       position: 'top',
-     },
-     title: {
-       display: true,
--      text: 'Biểu đồ chi tiêu tháng ' + selectedMonth.value
-+      text: `Biểu đồ chi tiêu tháng ${selectedMonth.value}/${selectedYear.value}`
-     }
-   },
-   scales: {
-     y: {
-       beginAtZero: true,
-       ticks: {
-         callback: function(value) {
-           return value.toLocaleString('vi-VN') + ' VND';
-         }
-       }
-     }
-   }
- });
-
--// Table data
--const tableData = ref([
--  { id: 1, date: '01/06/2024', transaction: 'Nạp tiền', amount: '2,000,000 VND', status: 'success', statusText: 'Thành công' },
--  { id: 2, date: '05/06/2024', transaction: 'Mua gói Premium', amount: '500,000 VND', status: 'success', statusText: 'Thành công' },
--  { id: 3, date: '10/06/2024', transaction: 'Rút tiền', amount: '1,000,000 VND', status: 'pending', statusText: 'Đang xử lý' },
--  { id: 4, date: '15/06/2024', transaction: 'Nạp tiền', amount: '1,500,000 VND', status: 'success', statusText: 'Thành công' },
--  { id: 5, date: '20/06/2024', transaction: 'Thanh toán hóa đơn', amount: '350,000 VND', status: 'success', statusText: 'Thành công' },
--]);
--
--const downloadChart = () => {
--  // Logic để tải biểu đồ dưới dạng PNG
--  console.log('Download chart as PNG');
-+const formatCurrency = (value) => {
-+  const numberValue = Number(value || 0);
-+  return numberValue.toLocaleString('vi-VN');
-+};
++        <main class="flex-1">
++          <div v-if="activeMenu === 'teams'" class="grid gap-6">
++            <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-6">
++              <h3 class="text-xl font-semibold text-slate-800">Danh sách Team</h3>
++              <p class="text-sm text-slate-500">Saler tạo và điều phối team xử lý sản phẩm.</p>
++            </div>
++            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
++              <div
++                v-for="team in teams"
++                :key="team.id"
++                class="bg-white rounded-2xl shadow-xl border border-slate-100 p-5 hover:-translate-y-0.5 hover:shadow-2xl transition-all duration-200"
++              >
++                <div class="flex items-center justify-between">
++                  <h4 class="text-lg font-semibold text-slate-800">{{ team.name }}</h4>
++                  <span class="text-xs font-semibold bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
++                    {{ team.performance }}
++                  </span>
++                </div>
++                <div class="mt-4 space-y-2 text-sm text-slate-600">
++                  <p><span class="font-semibold text-slate-700">Lead:</span> {{ team.lead }}</p>
++                  <p><span class="font-semibold text-slate-700">Thành viên:</span> {{ team.members }}</p>
++                  <p><span class="font-semibold text-slate-700">Chuyên môn:</span> {{ team.focus }}</p>
++                </div>
++                <div class="mt-4 flex items-center gap-2">
++                  <span class="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-1 rounded-full">Chat nội bộ</span>
++                  <span class="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">Nhiệm vụ</span>
++                </div>
++              </div>
++            </div>
++          </div>
 +
-+const formattedAvailableBalance = computed(() => formatCurrency(availableBalance.value));
-+const formattedPendingBalance = computed(() => formatCurrency(pendingBalance.value));
++          <div v-else-if="activeMenu === 'collaborations'">
++            <CollaborationList :requests="requests" :products="products" :teams="teams" />
++          </div>
 +
-+const fetchWalletBalance = async () => {
-+  try {
-+    const response = await api.get("/apithienha/profile/balance");
-+    availableBalance.value = response.data?.soDuKhaDung ?? 0;
-+    pendingBalance.value = response.data?.soDuChoRut ?? 0;
-+  } catch (error) {
-+    console.error("Không thể tải số dư ví:", error);
-+  }
- };
-
--const toggleTableView = () => {
--  tableView.value = !tableView.value;
-+const fetchChartData = async () => {
-+  try {
-+    const response = await api.get("/apithienha/profile/chart", {
-+      params: {
-+        month: Number(selectedMonth.value),
-+        year: Number(selectedYear.value),
-+      },
-+    });
-+    chartData.value.labels = (response.data?.labels ?? []).map((label) => `${label}`);
-+    chartData.value.datasets[0].data = response.data?.values ?? [];
-+    chartOptions.value.plugins.title.text = `Biểu đồ chi tiêu tháng ${selectedMonth.value}/${selectedYear.value}`;
-+  } catch (error) {
-+    console.error("Không thể tải dữ liệu biểu đồ:", error);
-+    chartData.value.labels = [];
-+    chartData.value.datasets[0].data = [];
-+  }
- };
-
-+watch([selectedMonth, selectedYear], () => {
-+  fetchChartData();
++          <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
++            <div class="space-y-4">
++              <div
++                v-for="context in chatContexts"
++                :key="context.id"
++                class="bg-white rounded-2xl shadow-xl border border-slate-100 p-4 cursor-pointer hover:-translate-y-0.5 hover:shadow-2xl transition-all duration-200"
++                :class="activeChatId === context.id ? 'ring-2 ring-indigo-300' : ''"
++                @click="activeChatId = context.id"
++              >
++                <div class="flex items-center justify-between">
++                  <p class="font-semibold text-slate-800">{{ context.title }}</p>
++                  <span v-if="context.unread" class="text-xs font-semibold bg-red-500 text-white rounded-full px-2 py-0.5 shadow-md">
++                    {{ context.unread }}
++                  </span>
++                </div>
++                <p class="text-xs text-slate-400 mt-2">{{ context.subtitle }}</p>
++                <p class="text-sm text-slate-600 mt-2">
++                  {{ getTeam(context.teamId)?.name }}
++                  <template v-if="context.type === 'collaboration'">
++                    <span class="text-slate-300">•</span>
++                    {{ getProduct(context.productId)?.name }}
++                  </template>
++                </p>
++              </div>
++            </div>
++            <div class="lg:col-span-2">
++              <ChatBox
++                :chat-context="activeChatContext"
++                :messages="activeMessages"
++                :team-name="getTeam(activeChatContext.teamId)?.name || ''"
++                :product-name="activeChatContext.type === 'collaboration' ? getProduct(activeChatContext.productId)?.name || '' : ''"
++              />
++            </div>
++          </div>
++        </main>
++      </div>
++    </div>
++  </div>
++</template>
++
++<script setup>
++import { computed, ref } from "vue";
++import TeamSidebar from "./sidebar/TeamSidebar.vue";
++import TeamHeader from "./header/TeamHeader.vue";
++import CollaborationList from "./collaborations/CollaborationList.vue";
++import ChatBox from "./chat/ChatBox.vue";
++import {
++  mockTeams,
++  mockProducts,
++  mockRequests,
++  mockChatContexts,
++  mockMessages,
++} from "./mock/mockState";
++
++const activeMenu = ref("collaborations");
++const activeChatId = ref(mockChatContexts[0].id);
++
++const teams = ref(mockTeams);
++const products = ref(mockProducts);
++const requests = ref(mockRequests);
++const chatContexts = ref(mockChatContexts);
++const unreadMessageCount = ref(5);
++
++const pendingRequests = computed(
++  () => requests.value.filter((request) => request.status === "pending").length
++);
++
++const notificationCount = computed(() => pendingRequests.value + unreadMessageCount.value);
++
++const getTeam = (id) => teams.value.find((item) => item.id === id);
++const getProduct = (id) => products.value.find((item) => item.id === id);
++
++const activeChatContext = computed(
++  () => chatContexts.value.find((context) => context.id === activeChatId.value) || chatContexts.value[0]
++);
++
++const activeMessages = computed(() => mockMessages[activeChatContext.value.id] || []);
++</script>
+diff --git a/src/modules/team-collaboration/chat/ChatBox.vue b/src/modules/team-collaboration/chat/ChatBox.vue
+new file mode 100644
+index 0000000000000000000000000000000000000000..4a27f8e65527127bd7fe9fa5f21c061030889076
+--- /dev/null
++++ b/src/modules/team-collaboration/chat/ChatBox.vue
+@@ -0,0 +1,93 @@
++<template>
++  <section class="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 space-y-4">
++    <div class="flex flex-col gap-2">
++      <div class="flex items-center gap-3">
++        <span
++          class="px-3 py-1 rounded-full text-xs font-semibold"
++          :class="chatContext.type === 'team' ? 'bg-blue-100 text-blue-700' : 'bg-indigo-100 text-indigo-700'"
++        >
++          {{ chatContext.type === 'team' ? 'Team Chat' : 'Product Collaboration Chat' }}
++        </span>
++        <h3 class="text-xl font-semibold text-slate-800">{{ chatContext.title }}</h3>
++      </div>
++      <div class="text-sm text-slate-500">
++        <span class="font-semibold text-slate-700">Team:</span>
++        {{ teamName }}
++        <template v-if="chatContext.type === 'collaboration'">
++          <span class="mx-2 text-slate-300">|</span>
++          <span class="font-semibold text-slate-700">Sản phẩm:</span>
++          {{ productName }}
++        </template>
++      </div>
++      <p class="text-xs text-slate-400">{{ chatContext.subtitle }}</p>
++    </div>
++
++    <div class="space-y-4 max-h-[360px] overflow-y-auto pr-2">
++      <div
++        v-for="message in messages"
++        :key="message.id"
++        class="flex items-start gap-3"
++      >
++        <div
++          class="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-semibold shadow-lg"
++          :class="avatarColor(message.accent)"
++        >
++          {{ message.sender.split(' ').slice(-1)[0].charAt(0) }}
++        </div>
++        <div class="flex-1">
++          <div class="flex items-center justify-between">
++            <p class="font-semibold text-slate-800">
++              {{ message.sender }}
++              <span class="text-xs text-slate-400 font-normal">• {{ message.role }}</span>
++            </p>
++            <span class="text-xs text-slate-400">{{ message.time }}</span>
++          </div>
++          <div class="mt-2 bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 shadow-sm">
++            <p class="text-sm text-slate-600">{{ message.content }}</p>
++          </div>
++        </div>
++      </div>
++    </div>
++
++    <div class="flex items-center gap-3 rounded-2xl bg-slate-50 border border-slate-100 px-4 py-3 shadow-inner">
++      <input
++        type="text"
++        class="flex-1 bg-transparent outline-none text-sm text-slate-600"
++        placeholder="Nhập tin nhắn nội bộ hoặc theo ngữ cảnh hợp tác..."
++      />
++      <button
++        type="button"
++        class="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold shadow-md hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200"
++      >
++        Gửi
++      </button>
++    </div>
++  </section>
++</template>
++
++<script setup>
++const props = defineProps({
++  chatContext: {
++    type: Object,
++    required: true,
++  },
++  messages: {
++    type: Array,
++    required: true,
++  },
++  teamName: {
++    type: String,
++    required: true,
++  },
++  productName: {
++    type: String,
++    default: "",
++  },
 +});
 +
- onMounted(() => {
--  // Khởi tạo dữ liệu ngẫu nhiên cho biểu đồ
--  const randomData = Array.from({length: 7}, () => Math.floor(Math.random() * 3000000) + 1000000);
--  chartData.value.datasets[0].data = randomData;
-+  fetchWalletBalance();
-+  fetchChartData();
++const avatarColor = (accent) => {
++  if (accent === "indigo") return "bg-indigo-500";
++  if (accent === "emerald") return "bg-emerald-500";
++  return "bg-blue-500";
++};
++</script>
+diff --git a/src/modules/team-collaboration/collaborations/CollaborationList.vue b/src/modules/team-collaboration/collaborations/CollaborationList.vue
+new file mode 100644
+index 0000000000000000000000000000000000000000..86db45680637c25282afae1b3808acbb891c89c3
+--- /dev/null
++++ b/src/modules/team-collaboration/collaborations/CollaborationList.vue
+@@ -0,0 +1,83 @@
++<template>
++  <section class="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 space-y-4">
++    <div class="flex items-center justify-between">
++      <div>
++        <h3 class="text-xl font-semibold text-slate-800">Yêu cầu hợp tác</h3>
++        <p class="text-sm text-slate-500">CTV chỉ gửi yêu cầu theo sản phẩm, Saler quyết định team xử lý.</p>
++      </div>
++      <div class="text-sm text-slate-500">Tổng: {{ requests.length }}</div>
++    </div>
++
++    <div class="grid gap-4">
++      <div
++        v-for="request in requests"
++        :key="request.id"
++        class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 px-5 py-4 shadow-sm hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200"
++      >
++        <div class="space-y-2">
++          <p class="text-lg font-semibold text-slate-800">{{ getProduct(request.productId)?.name }}</p>
++          <p class="text-sm text-slate-500">CTV: {{ request.collaborator }}</p>
++          <p class="text-xs text-slate-400">Thời gian gửi: {{ request.requestedAt }}</p>
++        </div>
++        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
++          <span
++            class="px-3 py-1.5 rounded-full text-xs font-semibold shadow-md"
++            :class="statusStyles[request.status]"
++          >
++            {{ statusLabels[request.status] }}
++          </span>
++          <div v-if="request.status === 'approved'" class="text-sm text-slate-500">
++            Team phụ trách:
++            <span class="font-semibold text-slate-700">{{ getTeam(request.assignedTeamId)?.name }}</span>
++          </div>
++          <div class="flex items-center gap-2" v-if="request.status === 'pending'">
++            <button
++              type="button"
++              class="px-4 py-2 rounded-xl bg-emerald-500 text-white text-sm font-semibold shadow-md hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200"
++            >
++              Phê duyệt
++            </button>
++            <button
++              type="button"
++              class="px-4 py-2 rounded-xl bg-red-500 text-white text-sm font-semibold shadow-md hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200"
++            >
++              Từ chối
++            </button>
++          </div>
++        </div>
++      </div>
++    </div>
++  </section>
++</template>
++
++<script setup>
++const props = defineProps({
++  requests: {
++    type: Array,
++    required: true,
++  },
++  products: {
++    type: Array,
++    required: true,
++  },
++  teams: {
++    type: Array,
++    required: true,
++  },
++});
++
++const statusLabels = {
++  pending: "Đang chờ",
++  approved: "Đã duyệt",
++  rejected: "Từ chối",
++};
++
++const statusStyles = {
++  pending: "bg-amber-100 text-amber-700",
++  approved: "bg-emerald-100 text-emerald-700",
++  rejected: "bg-red-100 text-red-700",
++};
++
++const getProduct = (id) => props.products.find((item) => item.id === id);
++const getTeam = (id) => props.teams.find((item) => item.id === id);
++</script>
+diff --git a/src/modules/team-collaboration/header/TeamHeader.vue b/src/modules/team-collaboration/header/TeamHeader.vue
+new file mode 100644
+index 0000000000000000000000000000000000000000..e842ca413e4bb1bb7c0e0dc58c5a963052e68fc7
+--- /dev/null
++++ b/src/modules/team-collaboration/header/TeamHeader.vue
+@@ -0,0 +1,26 @@
++<template>
++  <header class="flex items-center justify-between bg-white/80 backdrop-blur rounded-2xl shadow-xl border border-slate-100 px-6 py-4">
++    <div>
++      <p class="text-sm uppercase tracking-widest text-slate-400">Đội nhóm – Hợp tác</p>
++      <h1 class="text-2xl font-semibold text-slate-800">Quản trị hợp tác sản phẩm</h1>
++    </div>
++    <div class="flex items-center gap-4">
++      <div class="text-right">
++        <p class="text-sm text-slate-500">Thông báo</p>
++        <p class="text-lg font-semibold text-slate-800">{{ notificationCount }}</p>
++      </div>
++      <NotificationBell :count="notificationCount" />
++    </div>
++  </header>
++</template>
++
++<script setup>
++import NotificationBell from "../notifications/NotificationBell.vue";
++
++defineProps({
++  notificationCount: {
++    type: Number,
++    default: 0,
++  },
++});
++</script>
+diff --git a/src/modules/team-collaboration/index.ts b/src/modules/team-collaboration/index.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..f66f2dcb8b5cf5902aa1886d084ee94c2ba1f90f
+--- /dev/null
++++ b/src/modules/team-collaboration/index.ts
+@@ -0,0 +1,4 @@
++import TeamCollaborationLayout from "./TeamCollaborationLayout.vue";
++
++export default TeamCollaborationLayout;
++export { TeamCollaborationLayout };
+diff --git a/src/modules/team-collaboration/mock/mockState.ts b/src/modules/team-collaboration/mock/mockState.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..2499dd6cee689a9b3ae868f80d0230349277a69e
+--- /dev/null
++++ b/src/modules/team-collaboration/mock/mockState.ts
+@@ -0,0 +1,150 @@
++export const mockTeams = [
++  {
++    id: 1,
++    name: "Team Indigo",
++    lead: "Nguyễn Minh Tâm",
++    members: 8,
++    focus: "Căn hộ cao cấp",
++    performance: "98% SLA",
++  },
++  {
++    id: 2,
++    name: "Team Aurora",
++    lead: "Lê Hoàng Anh",
++    members: 6,
++    focus: "Nhà phố trung tâm",
++    performance: "94% SLA",
++  },
++  {
++    id: 3,
++    name: "Team Emerald",
++    lead: "Trần Gia Huy",
++    members: 10,
++    focus: "Khu đô thị mới",
++    performance: "96% SLA",
++  },
++];
++
++export const mockProducts = [
++  {
++    id: 101,
++    name: "BĐS Sky Tower Q1",
++    location: "Quận 1, TP.HCM",
++    price: "12.5 tỷ",
++    status: "Độc quyền",
++  },
++  {
++    id: 102,
++    name: "BĐS Riverside Villa",
++    location: "Quận 2, TP.HCM",
++    price: "18.2 tỷ",
++    status: "Mở bán",
++  },
++  {
++    id: 103,
++    name: "BĐS Midtown Office",
++    location: "Quận 3, TP.HCM",
++    price: "9.8 tỷ",
++    status: "Đang thương lượng",
++  },
++];
++
++export const mockRequests = [
++  {
++    id: 201,
++    productId: 101,
++    collaborator: "CTV Phạm Tuấn",
++    status: "pending",
++    requestedAt: "09:30 12/08/2024",
++  },
++  {
++    id: 202,
++    productId: 102,
++    collaborator: "CTV Linh Chi",
++    status: "approved",
++    assignedTeamId: 3,
++    requestedAt: "14:05 11/08/2024",
++  },
++  {
++    id: 203,
++    productId: 103,
++    collaborator: "CTV Văn Nam",
++    status: "rejected",
++    requestedAt: "10:10 10/08/2024",
++  },
++];
++
++export const mockChatContexts = [
++  {
++    id: "team-chat",
++    type: "team",
++    teamId: 1,
++    title: "Team Chat",
++    subtitle: "Trao đổi nội bộ - không gắn sản phẩm",
++    unread: 2,
++  },
++  {
++    id: "collab-101",
++    type: "collaboration",
++    teamId: 3,
++    productId: 102,
++    title: "Collaboration Chat",
++    subtitle: "Hợp tác sản phẩm",
++    unread: 3,
++  },
++];
++
++export const mockMessages = {
++  "team-chat": [
++    {
++      id: 1,
++      sender: "Nguyễn Minh Tâm",
++      role: "Trưởng nhóm",
++      content: "Mọi người cập nhật tiến độ tuần này trước 17h nhé.",
++      time: "09:15",
++      accent: "indigo",
++    },
++    {
++      id: 2,
++      sender: "Lê Hoàng Anh",
++      role: "Sales Lead",
++      content: "Team Aurora đã chốt lịch xem BĐS Sky Tower sáng mai.",
++      time: "09:18",
++      accent: "blue",
++    },
++    {
++      id: 3,
++      sender: "CTV Phạm Tuấn",
++      role: "Cộng tác viên",
++      content: "Em đã gửi checklist hồ sơ pháp lý qua drive.",
++      time: "09:21",
++      accent: "emerald",
++    },
++  ],
++  "collab-101": [
++    {
++      id: 1,
++      sender: "CTV Linh Chi",
++      role: "Cộng tác viên",
++      content: "Khách muốn xem BĐS Riverside Villa vào chiều thứ 5.",
++      time: "08:40",
++      accent: "blue",
++    },
++    {
++      id: 2,
++      sender: "Trần Gia Huy",
++      role: "Trưởng nhóm",
++      content: "Team Emerald sẽ hỗ trợ lịch xem và chuẩn bị hồ sơ giá.",
++      time: "08:45",
++      accent: "indigo",
++    },
++    {
++      id: 3,
++      sender: "CTV Linh Chi",
++      role: "Cộng tác viên",
++      content: "Cảm ơn anh, em sẽ cập nhật khách ngay.",
++      time: "08:47",
++      accent: "emerald",
++    },
++  ],
++};
+diff --git a/src/modules/team-collaboration/notifications/NotificationBell.vue b/src/modules/team-collaboration/notifications/NotificationBell.vue
+new file mode 100644
+index 0000000000000000000000000000000000000000..e02d27f1e8ae8cc92067b296a14655779d4e6040
+--- /dev/null
++++ b/src/modules/team-collaboration/notifications/NotificationBell.vue
+@@ -0,0 +1,26 @@
++<template>
++  <div class="relative">
++    <div class="flex items-center justify-center w-11 h-11 rounded-2xl bg-white shadow-xl border border-slate-100">
++      <i class="fa-solid fa-bell text-slate-700 text-lg"></i>
++    </div>
++    <span
++      v-if="count > 0"
++      class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full shadow-md px-2 py-0.5"
++    >
++      {{ count }}
++    </span>
++    <span
++      v-if="count > 0"
++      class="absolute -top-1.5 right-1 w-2.5 h-2.5 rounded-full bg-red-500 shadow-md"
++    ></span>
++  </div>
++</template>
++
++<script setup>
++defineProps({
++  count: {
++    type: Number,
++    default: 0,
++  },
++});
++</script>
+diff --git a/src/modules/team-collaboration/sidebar/TeamSidebar.vue b/src/modules/team-collaboration/sidebar/TeamSidebar.vue
+new file mode 100644
+index 0000000000000000000000000000000000000000..5db70eae6aec89a80b5344df494a94c50d76e92e
+--- /dev/null
++++ b/src/modules/team-collaboration/sidebar/TeamSidebar.vue
+@@ -0,0 +1,49 @@
++<template>
++  <aside class="w-64 bg-slate-900 text-white shadow-2xl flex flex-col px-5 py-6 gap-6">
++    <div class="space-y-1">
++      <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Saler Control</p>
++      <h2 class="text-xl font-semibold text-white">Đội nhóm – Hợp tác</h2>
++    </div>
++    <nav class="flex flex-col gap-3">
++      <button
++        v-for="item in menuItems"
++        :key="item.key"
++        type="button"
++        @click="emit('update:activeMenu', item.key)"
++        class="group flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition-all duration-200"
++        :class="
++          activeMenu === item.key
++            ? 'bg-indigo-600 text-white shadow-xl -translate-y-0.5'
++            : 'bg-slate-800/70 text-slate-200 hover:-translate-y-0.5 hover:shadow-2xl'
++        "
++      >
++        <span class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10">
++          <i :class="item.icon" class="text-lg"></i>
++        </span>
++        <span class="font-medium">{{ item.label }}</span>
++      </button>
++    </nav>
++    <div class="mt-auto rounded-2xl bg-slate-800/70 p-4 shadow-lg">
++      <p class="text-sm text-slate-300">Trạng thái hợp tác</p>
++      <p class="text-lg font-semibold text-white">Đang hoạt động</p>
++      <p class="text-xs text-slate-400 mt-1">Cập nhật 5 phút trước</p>
++    </div>
++  </aside>
++</template>
++
++<script setup>
++defineProps({
++  activeMenu: {
++    type: String,
++    required: true,
++  },
++});
++
++const emit = defineEmits(["update:activeMenu"]);
++
++const menuItems = [
++  { key: "teams", label: "Teams", icon: "fa-solid fa-people-group" },
++  { key: "collaborations", label: "Collaborations", icon: "fa-solid fa-handshake" },
++  { key: "chat", label: "Chat", icon: "fa-solid fa-comments" },
++];
++</script>
+diff --git a/src/router/index.js b/src/router/index.js
+index e543a7600a1e81308e821ef0b77fea21780a7af3..171adb8483fc48b46d82bc819823de3f3894e698 100644
+--- a/src/router/index.js
++++ b/src/router/index.js
+@@ -108,52 +108,59 @@ import CategoryNewsE from "../components/cms/components/news/CategoryNewsE.vue";
+ import EmailSubscribeE from "../components/cms/components/news/EmailSubscribeE.vue";
+ import ContactE from "../components/cms/components/contact/Contact.vue"
+ import DetailHero from "../components/cms/components/investment/DetailHero.vue";
+ import DetailPackage from "../components/cms/components/investment/DetailPackage.vue";
+ import DetailInvestor from "../components/cms/components/investment/DetailInvestor.vue";
+ import HeroInvm from "../components/cms/components/investment/Hero.vue";
+ import InvmList from "../components/cms/components/investment/InvestmentList.vue";
+ import InvmModal from "../components/cms/components/investment/InvestmentModal.vue";
+ import NewsManagement from "../components/cms/news/NewsManagement.vue";
+ import NewsDetail from "../components/user/News/NewsDetail.vue";
+ import InvestmentBranchManagement from "../components/Investment/InvestmentBranchManagement.vue";
+ import PageNotFound from "../components/PageNotFound.vue";
+ import SoldProject from "../components/user/SoldProject/SoldProject.vue";
+ import InvestmentPayment from "../components/user/Investment/InvestmentPayment.vue";
+ import Invested from "../components/user/Investment/Invested/Invested.vue";
+ import InvestorManagement from "../components/user/Investment/Invested/InvestorManagement.vue";
+ import moigioi from "../components/user/MoiGioi/moigioi.vue";
+ import Test from "../components/productAdmin/test.vue";
+ import Test1 from "../components/productAdmin/test1.vue";
+ import Test3 from "../components/myProduct/test3.vue";
+ import productDetailUser from "../components/myProduct/productDetailUser.vue"
+ import PaymentQR from "../components/user/Profile/component/PaymentQR.vue";
+ import productCreateUser from "../components/productUser/productCreateUser.vue"
+ import productUpdate from "../components/productUser/ProductUpdate.vue"
+ import RutTienAdmin from "../components/rutTienAdmin.vue";
++import TeamCollaborationLayout from "../modules/team-collaboration/TeamCollaborationLayout.vue";
+
+ const routes = [
++    {
++        path: "/test/doi-nhom",
++        name: "TeamCollaboration",
++        component: TeamCollaborationLayout,
++        meta: { requiresAuth: false },
++    },
+     {
+         path: "/-thg/dang-nhap",
+         name: "LoginForm",
+         component: LoginForm,
+     },
+     {
+         path: "/user/quan-ly-san-pham",
+         component: MenuUser,
+         children: [
+             {
+                 path: ":id",
+                 name: "QLSAN-DETAIL",
+                 component: productDetailUser,
+             },
+             {
+                 path: "cap-nhat/:id",
+                 name: "QLSAN-DETAIL-UPDATE",
+                 component: productUpdate,
+             },
+             {
+                 path: "tao-moi",
+                 name: "QLSAN-CREATE",
+                 component: productCreateUser,
+             }
+         ]
+@@ -1377,26 +1384,26 @@ router.beforeEach((to, from, next) => {
+             return next("/-thg/quan-ly");
+         }
+     }
+
+     next();
  });
- </script>
 
- <style scoped>
- .security-header {
-   text-align: center;
-   margin-bottom: 40px;
-   margin-top:60px  ;
- }
+ router.afterEach((to) => {
+     const id = "tailwind-admin-css";
+     let link = document.getElementById(id);
+     const needTailwind = to.matched.some(r => r.meta.enableTailwind);
 
- .security-title {
-   font-size: 33px;
-   background: linear-gradient(to right, #031358, #0030FF);
-   -webkit-background-clip: text;
-   -webkit-text-fill-color: transparent;
-   background-clip: text;
-   margin: 0 0 15px 0;
- }
+     if (needTailwind && !link) {
+         link = document.createElement("link");
+         link.id = id;
+         link.rel = "stylesheet";
+         link.href = "/tailwind-admin.css";
+         document.head.appendChild(link);
+     }
 
- .main-content {
-   max-width: 95%;
-   margin: 0 auto;
-   font-family: 'Ubuntu', sans-serif;
- }
+     if (!needTailwind && link) {
+         link.remove();
+     }
+ });
 
-@@ -256,50 +257,68 @@ onMounted(() => {
-   align-items: center;
-   margin-bottom: 15px;
- }
-
- .balance-title {
-   font-size: 18px;
-   color: #000;
-   margin: 0;
- }
-
- .eye-toggle {
-   background: none;
-   border: none;
-   cursor: pointer;
-   color: #031358;
-   font-size: 18px;
-   padding: 5px;
- }
-
- .balance-amount {
-   font-size: 28px;
-   font-weight: bold;
-   color: #031358;
- }
-
-+.pending-amount {
-+  display: flex;
-+  align-items: center;
-+  gap: 8px;
-+  font-size: 14px;
-+  color: #6b7280;
-+  margin-top: 6px;
-+}
-+
-+.pending-label {
-+  font-weight: 600;
-+}
-+
-+.pending-value {
-+  font-weight: 600;
-+  color: #ff9800;
-+}
-+
- .hidden {
-   letter-spacing: 3px;
- }
-
- .action-buttons {
-   flex: 60%;
-   display: flex;
-   gap: 15px;
- }
-
- .action-btn {
-   flex: 1;
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   justify-content: center;
-   background: white;
-   border: none;
-   border-radius: 12px;
-   padding: 20px 10px;
-   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-   cursor: pointer;
-   transition: transform 0.2s;
- }
-
-@@ -320,53 +339,56 @@ onMounted(() => {
- }
-
- /* Chart Section */
- .chart-section {
-   background: white;
-   border-radius: 12px;
-   padding: 20px;
-   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-   margin-bottom: 30px;
- }
-
- .chart-header {
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   margin-bottom: 20px;
- }
-
- .month-select {
-   padding: 8px 12px;
-   border: 1px solid #ddd;
-   border-radius: 6px;
-   font-family: 'Ubuntu', sans-serif;
- }
-
--.chart-controls-right {
--  display: flex;
--  gap: 10px;
-+.year-select {
-+  padding: 8px 12px;
-+  border: 1px solid #ddd;
-+  border-radius: 6px;
-+  font-family: 'Ubuntu', sans-serif;
-+  margin-left: 12px;
- }
-
- .chart-btn {
-   display: flex;
-   align-items: center;
-   gap: 8px;
-   padding: 8px 15px;
-   border: 1px solid #031358;
-   border-radius: 6px;
-   background: white;
-   color: #031358;
-   cursor: pointer;
-   font-family: 'Ubuntu', sans-serif;
-   transition: all 0.2s;
- }
-
- .chart-btn:hover {
-   background: #031358;
-   color: white;
- }
-
- .chart-container {
-   height: 400px;
-   position: relative;
- }
-@@ -496,26 +518,26 @@ onMounted(() => {
-     justify-content: flex-start;
-     padding: 12px 15px;
-     min-height: auto;
-   }
-
-   .action-btn i {
-     margin-bottom: 0;
-     margin-right: 10px;
-     font-size: 18px;
-   }
-
-   .chart-btn {
-     font-size: 14px;
-     padding: 8px 10px;
-   }
-
-   .transaction-table {
-     font-size: 14px;
-   }
-
-   .transaction-table th,
-   .transaction-table td {
-     padding: 8px;
-   }
- }
--</style>
+-export default router;
 \ No newline at end of file
-+</style>
->>>>>>> 393b17d28853cd6b48553fd86e8619316721ff10
++export default router;
