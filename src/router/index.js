@@ -58,6 +58,7 @@ import HostManager from "../components/host/HostManager.vue";
 
 import Ga4EventExample from "../components/Ga4EventExample.vue";
 import PaymentPage2 from "../components/productAdmin/PaymentPage2.vue";
+import AppointmentsPage from "../components/Appointments/AppointmentsPage.vue";
 
 import cms from "/src/components/cms/cms.vue";
 import Banner from "../components/cms/components/home/Banner.vue";
@@ -136,6 +137,12 @@ import GlobalCSS from "../components/cms/components/homeNew/GlobalCSS.vue";
 import MainContent from "../components/cms/components/homeNew/MainContent.vue";
 
 const routes = [
+    // {
+    //     path: "/test/dat-lich",
+    //     name: "TeamCollaboration",
+    //     component: TeamCollaborationLayout,
+    //     meta: { requiresAuth: false, enableTailwind: true },
+    // },
     {
         path: "/-thg/dang-nhap",
         name: "LoginForm",
@@ -835,6 +842,18 @@ const routes = [
         ]
     },
     {
+        path: '/-thg/quan-ly-lich-hen',
+        component: Menu,
+        meta: {requiresAuth: true, loginFrom: "admin"},
+        children: [
+            {
+                path: '',
+                name: 'AppointmentsPage',
+                component: AppointmentsPage
+            }
+        ]
+    },
+    {
         path: '/nhom-cua-toi',
         component: MenuUser,
         meta: {requiresAuth: true, loginFrom: "user", hideFooterMap: false},
@@ -1481,6 +1500,7 @@ router.afterEach((to, from, failure) => {
         link.remove();
     }
 
+
     // Kiểm tra để add style cho scroll
     const cls = "use-custom-scroll";
     if (to.meta.newCustomScroll) {
@@ -1490,3 +1510,4 @@ router.afterEach((to, from, failure) => {
     }
 });
 export default router;
+

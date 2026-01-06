@@ -24,7 +24,7 @@
         </div>
 
         <img v-if="info.avatarUrl"
-             :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
+             :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
              class="rounded-circle border"
              style="width: 36px; height: 36px; object-fit: cover;" />
 
@@ -366,7 +366,7 @@ async function loadData() {
     items.value = res.data.map(item => ({
       ...item,
       customerAvatarFull: item.customerAvatar
-          ? `https://s3.cloudfly.vn/thg-storage/uploads-public/${item.customerAvatar}`
+          ? `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${item.customerAvatar}`
           : "/imgs/default-user.png",
     }));
 

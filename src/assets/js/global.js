@@ -87,7 +87,7 @@ export const logout = async (accessToken) => {
 
     localStorage.removeItem('remember');
 }
-export const baseImgaeUrl="https://s3.cloudfly.vn/thg-storage/uploads-public/";
+export const baseImgaeUrl="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/";
 
 export function slugify(str = '') {
     return str

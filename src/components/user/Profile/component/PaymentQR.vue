@@ -1,5 +1,5 @@
 <template>
-  <div class="checkout-wrapper">
+  <div class="checkout-wrapper" style="margin-top: 30px !important;">
 
     <!-- EFFECTS + SHIP -->
     <div class="wave-container">
@@ -91,7 +91,7 @@
 
       <!-- RIGHT SIDE QR -->
       <div class="right-section">
-        <h3 class="qr-title">Quét mã QR để thanh toán</h3>
+        <h3 class="qr-title">Quét mã QR để nạp tiền vào ví</h3>
 
         <div class="qr-container">
           <div class="qr-box">
@@ -100,19 +100,6 @@
             <div class="qr-shine"></div>
           </div>
         </div>
-
-        <div class="payment-status">
-          <div v-if="status === 'processing'" class="status-icon spinner"></div>
-          <div v-else-if="status === 'success'" class="status-icon success">
-            <i class="fas fa-check"></i>
-          </div>
-          <div v-else-if="status === 'failed'" class="status-icon failed">
-            <i class="fas fa-times"></i>
-          </div>
-
-          <span class="status-text">{{ statusText }}</span>
-        </div>
-
         <div class="sepay-container">
           <img src="/imgs/logo-sepay-color-in-white.png" class="sepay-logo" />
         </div>
@@ -635,10 +622,11 @@ const statusText = computed(() => {
 .qr-container { position: relative; }
 
 .qr-box {
-  width: 220px;
-  height: 220px;
+  width: 250px;
+  height: 250px;
   background: white;
   padding: 14px;
+  margin-top: 30px;
   border-radius: 16px;
   position: relative;
   box-shadow: 0 10px 24px rgba(85, 96, 255, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.8);

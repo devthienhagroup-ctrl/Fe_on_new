@@ -359,7 +359,6 @@ const registerForm = reactive({
   gender: '', // true/false as string
   address: {
     city: '',
-    district: '',
     ward: '',
     specific: '',
     old: ''
@@ -643,7 +642,7 @@ const handleRegisterSubmit = async () => {
       name: registerForm.fullName,
       phone: registerForm.phone,
       gender: registerForm.gender === 'true', // Chuyển string sang boolean
-      address: `${registerForm.address.specific}, ${registerForm.address.ward}, ${registerForm.address.district}, ${registerForm.address.city}`,
+      address: `${registerForm.address.specific}/!! ${registerForm.address.ward}/!! ${registerForm.address.city}`,
       oldAddress: registerForm.address.old || null,
       role: registerForm.userType, // BROKER hoặc HOST
       password: registerForm.password,

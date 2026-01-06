@@ -1,614 +1,518 @@
-<<<<<<< HEAD
-diff --git a/src/components/user/Home/components/MenuUser.vue b/src/components/user/Home/components/MenuUser.vue
-index fb9f3c9b19dc0bf49f32b13fbf7ebb2c7c62e16f..0db4bd0f84713f6a85276ce4739d2b60d9a64b9c 100644
---- a/src/components/user/Home/components/MenuUser.vue
-+++ b/src/components/user/Home/components/MenuUser.vue
-@@ -155,50 +155,56 @@
-   <PopupQuickSale v-if="showQSPopup" @close="closePopup"></PopupQuickSale>
-=======
-diff --git a/src/components/user/Profile/component/Payment.vue b/src/components/user/Profile/component/Payment.vue
-index 3b1b26c0f1ab3ffc7180068b18074e35a6d8d24c..150ebdb83bf6ca8ab7bbe73e5005c57824220353 100644
---- a/src/components/user/Profile/component/Payment.vue
-+++ b/src/components/user/Profile/component/Payment.vue
-@@ -1,237 +1,238 @@
- <template>
-   <div class="service-payment-container">
-     <div class="security-header">
-       <h1 class="security-title">Gói dịch vụ và thanh toán</h1>
-     </div>
-     <div class="main-content">
-       <MembershipCard class="member-ship-card" :member-data="user_card"/>
-
-       <!-- Balance and Actions Section -->
-       <div class="balance-actions-section">
-         <div class="balance-card">
-           <div class="balance-header">
-             <h3 class="balance-title">Số dư tài khoản</h3>
-             <button class="eye-toggle" @click="toggleBalanceVisibility">
-               <i class="fas" :class="balanceVisible ? 'fa-eye' : 'fa-eye-slash'"></i>
-             </button>
-           </div>
-           <div class="balance-amount">
--            <span class="amount" v-if="balanceVisible">1,250,000 VNĐ</span>
-+            <span class="amount" v-if="balanceVisible">{{ formattedAvailableBalance }} VNĐ</span>
-             <span class="amount hidden" v-else>****** VNĐ</span>
-           </div>
-+          <div class="pending-amount">
-+            <span class="pending-label">Chờ rút</span>
-+            <span class="pending-value" v-if="balanceVisible">{{ formattedPendingBalance }} VNĐ</span>
-+            <span class="pending-value hidden" v-else>****** VNĐ</span>
-+          </div>
-         </div>
-
-         <div class="action-buttons">
-           <button class="action-btn deposit">
-             <i class="fas fa-sign-in-alt"></i>
-             <span>Nạp tiền</span>
-           </button>
-           <button class="action-btn withdraw">
-             <i class="fas fa-sign-out-alt"></i>
-             <span>Rút tiền</span>
-           </button>
-           <button class="action-btn history" @click="router.push({name: 'transaction-history'})">
-             <i class="fas fa-history"></i>
-             <span>Lịch sử giao dịch</span>
-           </button>
-         </div>
+diff --git a/src/components/Appointments/AppointmentsPage.vue b/src/components/Appointments/AppointmentsPage.vue
+index e23aa9c37da364dcba2ff8b0aa89b6cfc5dbf0d8..d8684aae8fffa284a70a4062376b8ed921486107 100644
+--- a/src/components/Appointments/AppointmentsPage.vue
++++ b/src/components/Appointments/AppointmentsPage.vue
+@@ -114,50 +114,64 @@ function showToast(title, body, type = 'info') {
+   t.innerHTML = `
+       <div class="ico"><i class="fa-solid ${icon}"></i></div>
+       <div class="t">
+         <div class="a">${title}</div>
+         <div class="b">${body || ''}</div>
        </div>
+       <button class="x" aria-label="close"><i class="fa-solid fa-xmark"></i></button>
+     `;
+   wrap.appendChild(t);
 
-       <!-- Chart Section -->
-       <div class="chart-section">
-         <div class="chart-header">
-           <div class="chart-controls-left">
-             <select v-model="selectedMonth" class="month-select">
-               <option value="1">Tháng 1</option>
-               <option value="2">Tháng 2</option>
-               <option value="3">Tháng 3</option>
-               <option value="4">Tháng 4</option>
-               <option value="5">Tháng 5</option>
-               <option value="6">Tháng 6</option>
-               <option value="7">Tháng 7</option>
-               <option value="8">Tháng 8</option>
-               <option value="9">Tháng 9</option>
-               <option value="10">Tháng 10</option>
-               <option value="11">Tháng 11</option>
-               <option value="12">Tháng 12</option>
-             </select>
--          </div>
--          <div class="chart-controls-right">
--            <button class="chart-btn download" @click="downloadChart">
--              <i class="fas fa-download"></i>
--              Tải xuống
--            </button>
--            <button class="chart-btn table-view" @click="toggleTableView">
--              <i class="fas fa-table"></i>
--              Xem dạng bảng
--            </button>
-+            <select v-model="selectedYear" class="year-select">
-+              <option v-for="year in yearOptions" :key="year" :value="year">
-+                Năm {{ year }}
-+              </option>
-+            </select>
+   const kill = () => {
+     t.remove();
+   };
+   t.querySelector('.x').addEventListener('click', kill);
+   setTimeout(kill, 3800);
+ }
+
+ const demoToday = new Date(2026, 0, 3);
+ const selectedDateISO = ref('2026-01-03');
+ const calendarMonth = ref(new Date(2026, 0, 1));
+
+ const activeRange = ref('all');
+ const activeStatus = ref('ALL');
+ const searchQuery = ref('');
+ const editId = ref(null);
++const isModalOpen = ref(false);
++const modalForm = reactive({
++  customer: '',
++  phone: '',
++  date: '',
++  time: TIME_SLOTS[0],
++  staff: STAFFS[0],
++  consultant: CONSULTANTS[0],
++  status: 'UP',
++  consultStatus: 'CARE',
++  customerType: 'OWNER',
++  rating: 'CARE',
++  note: '',
++});
+
+ function makeHistory(actor, action, desc) {
+   return { ts: nowISO(), actor, action, desc };
+ }
+
+ const appointments = ref([
+   {
+     id: 1,
+     customer: 'Nguyễn Văn A',
+     phone: '0987 654 321',
+     date: '2026-01-03',
+     time: '10:00',
+     staff: 'Lê Hiếu',
+     consultant: 'Tư vấn 1',
+     status: 'UP',
+     consultStatus: 'SUCCESS',
+     customerType: 'OWNER',
+     rating: 'POTENTIAL',
+     creator: 'Lê Hiếu',
+     note: 'Khách ưu tiên làm nhanh.',
+     history: [makeHistory('Lê Hiếu', 'CREATE', 'Tạo lịch hẹn.')],
+   },
+   {
+     id: 2,
+     customer: 'Trần Thị B',
+@@ -640,98 +654,92 @@ function saveFromForm() {
+   selectedDateISO.value = date;
+   $('#fDate').value = date;
+
+   showToast('Đã tạo lịch hẹn', `${customer}: ${formatVNDate(date)} • ${time}`, 'success');
+   generateCalendar();
+   updateDaySchedule();
+   updateFilteredAppointments();
+   resetForm();
+ }
+
+ function renderHistory(appt) {
+   const history = (appt.history || []).slice(0, 80);
+   historyItems.value = history.map((h) => {
+     const dt = new Date(h.ts);
+     const stamp = `${pad2(dt.getHours())}:${pad2(dt.getMinutes())} • ${pad2(dt.getDate())}/${pad2(dt.getMonth() + 1)}/${dt.getFullYear()}`;
+     return { ...h, stamp };
+   });
+ }
+
+ function openModal(id) {
+   const appt = appointments.value.find((x) => x.id === id);
+   if (!appt) return;
+
+   editId.value = id;
+
+-  $('#mCustomer').value = appt.customer || '';
+-  $('#mPhone').value = appt.phone || '';
+-  $('#mDate').value = appt.date;
+-
+-  $('#mTime').innerHTML = TIME_SLOTS.map((t) => `<option value="${t}">${t}</option>`).join('');
+-  $('#mTime').value = appt.time;
+-
+-  fillSelect($('#mStaff'), STAFFS, appt.staff);
+-  fillSelect($('#mConsultant'), CONSULTANTS, appt.consultant);
+-
+-  $('#mStatus').value = appt.status;
+-  $('#mConsultStatus').value = appt.consultStatus || 'CARE';
+-  $('#mCustomerType').value = appt.customerType || 'OWNER';
+-  $('#mRating').value = appt.rating || 'CARE';
+-  $('#mNote').value = appt.note || '';
++  modalForm.customer = appt.customer || '';
++  modalForm.phone = appt.phone || '';
++  modalForm.date = appt.date;
++  modalForm.time = TIME_SLOTS.includes(appt.time) ? appt.time : TIME_SLOTS[0];
++  modalForm.staff = STAFFS.includes(appt.staff) ? appt.staff : STAFFS[0];
++  modalForm.consultant = CONSULTANTS.includes(appt.consultant) ? appt.consultant : CONSULTANTS[0];
++  modalForm.status = appt.status;
++  modalForm.consultStatus = appt.consultStatus || 'CARE';
++  modalForm.customerType = appt.customerType || 'OWNER';
++  modalForm.rating = appt.rating || 'CARE';
++  modalForm.note = appt.note || '';
+
+   renderHistory(appt);
+
+-  $('#modalBackdrop').classList.add('open');
+-  $('#modalBackdrop').setAttribute('aria-hidden', 'false');
++  isModalOpen.value = true;
+ }
+
+ function closeModal() {
+-  $('#modalBackdrop').classList.remove('open');
+-  $('#modalBackdrop').setAttribute('aria-hidden', 'true');
++  isModalOpen.value = false;
+   editId.value = null;
+ }
+
+ function saveModal() {
+   if (editId.value == null) return;
+   const idx = appointments.value.findIndex((x) => x.id === editId.value);
+   if (idx < 0) return;
+
+   const current = appointments.value[idx];
+
+   const next = {
+     ...current,
+-    customer: $('#mCustomer').value.trim() || current.customer,
+-    phone: $('#mPhone').value.trim(),
+-    date: $('#mDate').value,
+-    time: $('#mTime').value,
+-    staff: $('#mStaff').value,
+-    consultant: $('#mConsultant').value,
+-    status: $('#mStatus').value,
+-    consultStatus: $('#mConsultStatus').value,
+-    customerType: $('#mCustomerType').value,
+-    rating: $('#mRating').value,
+-    note: $('#mNote').value.trim(),
++    customer: modalForm.customer.trim() || current.customer,
++    phone: modalForm.phone.trim(),
++    date: modalForm.date,
++    time: modalForm.time,
++    staff: modalForm.staff,
++    consultant: modalForm.consultant,
++    status: modalForm.status,
++    consultStatus: modalForm.consultStatus,
++    customerType: modalForm.customerType,
++    rating: modalForm.rating,
++    note: modalForm.note.trim(),
+   };
+
+   if (next.status !== 'CANCELLED') {
+     const conflict = hasConflict({ id: next.id, date: next.date, time: next.time, staff: next.staff });
+     if (conflict) {
+       showToast(
+         'Trùng lịch theo nhân viên',
+         `${next.staff} đã có lịch ${formatVNDate(conflict.date)} • ${conflict.time} với ${conflict.customer}.`,
+         'error',
+       );
+       return;
+     }
+   }
+
+   const changes = [];
+   if (current.date !== next.date || current.time !== next.time) {
+     changes.push(`Dời lịch: ${formatVNDate(current.date)} • ${current.time} → ${formatVNDate(next.date)} • ${next.time}.`);
+   }
+   if (current.staff !== next.staff) {
+     changes.push(`Đổi NV phụ trách: ${current.staff} → ${next.staff}.`);
+   }
+   if (current.consultant !== next.consultant) {
+     changes.push(`Đổi NV tư vấn: ${current.consultant || '-'} → ${next.consultant || '-'}.`);
+   }
+   if (current.status !== next.status) {
+@@ -894,138 +902,127 @@ function initFormButtons() {
+ }
+
+ function initCalendarNav() {
+   $('#prevMonthBtn').addEventListener('click', () => {
+     calendarMonth.value = new Date(calendarMonth.value.getFullYear(), calendarMonth.value.getMonth() - 1, 1);
+     generateCalendar();
+   });
+   $('#nextMonthBtn').addEventListener('click', () => {
+     calendarMonth.value = new Date(calendarMonth.value.getFullYear(), calendarMonth.value.getMonth() + 1, 1);
+     generateCalendar();
+   });
+ }
+
+ function initDayButtons() {
+   $('#jumpToFormBtn').addEventListener('click', () => {
+     $('#fDate').value = selectedDateISO.value;
+     $('#formSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+     highlightForm();
+   });
+   $('#refreshDayBtn').addEventListener('click', () => {
+     updateDaySchedule();
+     showToast('Đã làm mới', `Day Schedule • ${formatVNDate(selectedDateISO.value)}`, 'success');
+   });
+ }
+
+-function initModal() {
+-  $('#modalCloseBtn').addEventListener('click', closeModal);
+-  $('#modalCancelBtn').addEventListener('click', closeModal);
+-  $('#modalSaveBtn').addEventListener('click', saveModal);
+-  $('#modalBackdrop').addEventListener('click', (e) => {
+-    if (e.target === $('#modalBackdrop')) closeModal();
+-  });
+-
+-  const closeOnEscape = (e) => {
+-    if (e.key === 'Escape') closeModal();
+-  };
+-  registerWindowListener('keydown', closeOnEscape);
+-}
+-
+ function initExport() {
+   $('#exportBtn').addEventListener('click', exportCSV);
+ }
+
+ function toggleActionMenu(id) {
+   openActionMenuId.value = openActionMenuId.value === id ? null : id;
+ }
+
+ function handleAction(type, appt, event) {
+   openActionMenuId.value = null;
+   if (type === 'edit') {
+     openModal(appt.id);
+   } else if (type === 'status') {
+     openStatusPopover(event.currentTarget, appt.id);
+   } else if (type === 'delete') {
+     appointments.value = appointments.value.filter((x) => x.id !== appt.id);
+     generateCalendar();
+     updateDaySchedule();
+     updateFilteredAppointments();
+     showToast('Đã xoá lịch hẹn', appt.customer || 'Đã xoá.', 'success');
+   }
+ }
+
+ function getStatusInfo(status) {
+   return STATUS[status];
+ }
+
+ function getConsultInfo(status) {
+   return CONSULT_STATUS[status] || CONSULT_STATUS.CARE;
+ }
+
+ function getCustomerTypeInfo(value) {
+   return CUSTOMER_TYPE[value] || Object.values(CUSTOMER_TYPE)[0];
+ }
+
+ function getRatingInfo(value) {
+   return RATING[value] || Object.values(RATING)[0];
+ }
+
+ onMounted(() => {
+   if (!rootRef.value) return;
+
+   selectedDateISO.value = '2026-01-03';
+   $('#fDate').value = selectedDateISO.value;
+
+   fillSelect($('#fStaff'), STAFFS, 'Lê Hiếu');
+   fillSelect($('#fConsultant'), CONSULTANTS, 'Tư vấn 1');
+-  fillSelect($('#mStaff'), STAFFS, 'Lê Hiếu');
+-  fillSelect($('#mConsultant'), CONSULTANTS, 'Tư vấn 1');
+
+   initTimeSelection();
+   initStatusSelection();
+   initConsultSelection();
+   initStatusFilter();
+   initFilterTabs();
+   initSearch();
+   initCreateBtn();
+   initFormButtons();
+   initCalendarNav();
+   initDayButtons();
+-  initModal();
+   initExport();
+
+   registerWindowListener('click', (e) => {
+     if (!e.target.closest('[data-action-menu="1"]') && !e.target.closest('[data-action-btn="1"]')) {
+       openActionMenuId.value = null;
+     }
+   });
+
+   generateCalendar();
+   updateDaySchedule();
+   updateFilteredAppointments();
+
+   showToast('Sẵn sàng', 'Đã thêm NV tư vấn + KQ tư vấn + phân loại + đánh giá.', 'success');
++
++  registerWindowListener('keydown', (e) => {
++    if (e.key === 'Escape' && isModalOpen.value) {
++      closeModal();
++    }
++  });
+ });
+
+ onBeforeUnmount(() => {
+   cleanupHandlers.forEach((cleanup) => cleanup());
+ });
+ </script>
+
+ <template>
+   <div ref="rootRef" class="appointments-page">
+     <div class="toast-wrap" id="toastWrap"></div>
+
+     <div class="appointments-container">
+       <main class="main-content">
+         <div class="header">
+           <div class="page-title">
+             <h2>Quản lý lịch hẹn</h2>
+             <p>Tạo, theo dõi và cập nhật trạng thái + tư vấn + phân loại + đánh giá</p>
+           </div>
+
+           <div class="search-bar">
+             <i class="fas fa-search search-icon"></i>
+             <input id="searchInput" type="text" placeholder="Tìm theo tên / SĐT / NV phụ trách / NV tư vấn..." />
            </div>
          </div>
 
-         <div class="chart-container">
--          <Line v-if="!tableView" :data="chartData" :options="chartOptions" />
--          <div v-else class="table-view">
--            <table class="transaction-table">
--              <thead>
--              <tr>
--                <th>Ngày</th>
--                <th>Giao dịch</th>
--                <th>Số tiền</th>
--                <th>Trạng thái</th>
--              </tr>
--              </thead>
--              <tbody>
--              <tr v-for="item in tableData" :key="item.id">
--                <td>{{ item.date }}</td>
--                <td>{{ item.transaction }}</td>
--                <td>{{ item.amount }}</td>
--                <td :class="item.status">
--                  <i v-if="item.status === 'success'" class="fas fa-check-circle status-icon success"></i>
--                  <i v-else-if="item.status === 'pending'" class="fas fa-clock status-icon pending"></i>
--                  {{ item.statusText }}
--                </td>
--              </tr>
--              </tbody>
--            </table>
--          </div>
-+          <Line :data="chartData" :options="chartOptions" />
+@@ -1367,153 +1364,165 @@ onBeforeUnmount(() => {
+           </div>
+         </section>
+       </main>
+     </div>
+
+     <div
+       class="status-pop"
+       id="statusPopover"
+       :class="{ open: statusPopover.open }"
+       :style="{ top: statusPopover.top, left: statusPopover.left }"
+     >
+       <button
+         v-for="option in statusPopover.options"
+         :key="option.key"
+         class="opt"
+         @click.stop="handleStatusOptionClick(option)"
+       >
+         <span>{{ option.label }}</span>
+         <span
+           class="dot"
+           :style="{ background: option.dot, boxShadow: option.active ? '0 0 0 3px rgba(15,23,42,.06)' : '' }"
+         ></span>
+       </button>
+     </div>
+
+-    <div class="backdrop" id="modalBackdrop" aria-hidden="true">
++    <div v-if="isModalOpen" class="backdrop open" id="modalBackdrop" aria-hidden="false" @click.self="closeModal">
+       <div class="modal" role="dialog" aria-modal="true">
+         <div class="modal-head">
+           <h4 id="modalTitle">Sửa lịch hẹn</h4>
+-          <button class="modal-close" id="modalCloseBtn"><i class="fa-solid fa-xmark"></i></button>
++          <button class="modal-close" type="button" @click="closeModal">
++            <i class="fa-solid fa-xmark"></i>
++          </button>
+         </div>
+
+         <div class="modal-body">
+           <div>
+             <div class="form-grid">
+               <div class="form-group">
+                 <label class="form-label">Khách hàng</label>
+-                <input id="mCustomer" type="text" class="form-input" />
++                <input id="mCustomer" v-model="modalForm.customer" type="text" class="form-input" />
+               </div>
+               <div class="form-group">
+                 <label class="form-label">Số điện thoại</label>
+-                <input id="mPhone" type="text" class="form-input" />
++                <input id="mPhone" v-model="modalForm.phone" type="text" class="form-input" />
+               </div>
+
+               <div class="form-group">
+                 <label class="form-label">Ngày hẹn</label>
+-                <input id="mDate" type="date" class="form-input" />
++                <input id="mDate" v-model="modalForm.date" type="date" class="form-input" />
+               </div>
+               <div class="form-group">
+                 <label class="form-label">Giờ hẹn</label>
+-                <select id="mTime" class="form-select"></select>
++                <select id="mTime" v-model="modalForm.time" class="form-select">
++                  <option v-for="slot in TIME_SLOTS" :key="slot" :value="slot">{{ slot }}</option>
++                </select>
+               </div>
+
+               <div class="form-group">
+                 <label class="form-label">NV phụ trách</label>
+-                <select id="mStaff" class="form-select"></select>
++                <select id="mStaff" v-model="modalForm.staff" class="form-select">
++                  <option v-for="staff in STAFFS" :key="staff" :value="staff">{{ staff }}</option>
++                </select>
+               </div>
+               <div class="form-group">
+                 <label class="form-label">NV tư vấn</label>
+-                <select id="mConsultant" class="form-select"></select>
++                <select id="mConsultant" v-model="modalForm.consultant" class="form-select">
++                  <option v-for="consultant in CONSULTANTS" :key="consultant" :value="consultant">
++                    {{ consultant }}
++                  </option>
++                </select>
+               </div>
+
+               <div class="form-group">
+                 <label class="form-label">Tình trạng (đến lịch)</label>
+-                <select id="mStatus" class="form-select">
++                <select id="mStatus" v-model="modalForm.status" class="form-select">
+                   <option value="UP">Đã lên</option>
+                   <option value="NOT_UP">Chưa lên</option>
+                   <option value="POSTPONED">Tạm hoãn</option>
+                   <option value="CANCELLED">Huỷ</option>
+                 </select>
+               </div>
+
+               <div class="form-group">
+                 <label class="form-label">Tình trạng tư vấn</label>
+-                <select id="mConsultStatus" class="form-select">
++                <select id="mConsultStatus" v-model="modalForm.consultStatus" class="form-select">
+                   <option value="SUCCESS">Thành công</option>
+                   <option value="FAIL">Thất bại</option>
+                   <option value="CARE">Chăm sóc</option>
+                 </select>
+               </div>
+
+               <div class="form-group">
+                 <label class="form-label">Phân loại khách hàng</label>
+-                <select id="mCustomerType" class="form-select">
++                <select id="mCustomerType" v-model="modalForm.customerType" class="form-select">
+                   <option value="OWNER">Chính chủ</option>
+                   <option value="BROKER">Môi giới</option>
+                   <option value="RELATIVE">Người thân</option>
+                 </select>
+               </div>
+
+               <div class="form-group">
+                 <label class="form-label">Đánh giá</label>
+-                <select id="mRating" class="form-select">
++                <select id="mRating" v-model="modalForm.rating" class="form-select">
+                   <option value="POTENTIAL">Tiềm năng</option>
+                   <option value="NOT_POTENTIAL">Không tiềm năng</option>
+                   <option value="CARE">Chăm sóc</option>
+                 </select>
+               </div>
+             </div>
+
+             <div class="form-group">
+               <label class="form-label">Ghi chú</label>
+-              <textarea id="mNote" class="form-textarea"></textarea>
++              <textarea id="mNote" v-model="modalForm.note" class="form-textarea"></textarea>
+             </div>
+           </div>
+
+           <div class="modal-panel">
+             <h5><i class="fa-solid fa-clock-rotate-left"></i>Lịch sử thay đổi</h5>
+             <div class="history" id="historyList">
+               <div v-if="!historyItems.length" style="font-weight:800; color:#94a3b8; font-size:12.5px;">
+                 Chưa có lịch sử.
+               </div>
+               <div v-else>
+                 <div v-for="item in historyItems" :key="item.ts" class="h-item">
+                   <div class="h-top">
+                     <span>{{ item.actor }} • {{ item.action }}</span>
+                     <span>{{ item.stamp }}</span>
+                   </div>
+                   <div class="h-desc">{{ item.desc || '' }}</div>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+
+         <div class="modal-foot">
+-          <button class="btn btn-secondary" id="modalCancelBtn">Đóng</button>
+-          <button class="btn btn-primary" id="modalSaveBtn"><i class="fa-solid fa-floppy-disk"></i>Lưu thay đổi</button>
++          <button class="btn btn-secondary" type="button" @click="closeModal">Đóng</button>
++          <button class="btn btn-primary" type="button" @click="saveModal">
++            <i class="fa-solid fa-floppy-disk"></i>Lưu thay đổi
++          </button>
          </div>
        </div>
      </div>
    </div>
->>>>>>> 393b17d28853cd6b48553fd86e8619316721ff10
  </template>
 
- <script setup>
--import { ref, onMounted } from 'vue';
-+import { computed, ref, onMounted, watch } from 'vue';
- import {useRouter} from "vue-router";
- import MembershipCard from "./MembershipCard.vue";
- import { Line } from 'vue-chartjs';
-+import api from "/src/api/api.js";
- import {
-   Chart as ChartJS,
-   CategoryScale,
-   LinearScale,
-   PointElement,
-   LineElement,
-   Title,
-   Tooltip,
-   Legend,
-   Filler
- } from 'chart.js';
-
-<<<<<<< HEAD
- const auth = useAuthStore();
- const menuRef = ref(null);
- const navLinks = ref(null);
- const hamburger = ref(null);
- const solutionSubmenu = ref(null);
- const recruitmentSubmenu = ref(null);
- const userSubmenu = ref(null);
- const userMenuContainer = ref(null);
-
- const route = useRoute()
- const router = useRouter();
-
- const showQSPopup = ref(route.meta.showQSPopup || false);
-
- const resetMobileMenuState = () => {
-+  if (menuRef.value) {
-+    menuRef.value.classList.remove('hide-menu');
-+  }
-+  lastY = 0;
-+  upDistance = 0;
-+
-   if (window.innerWidth > 1024) return;
-
-   if (solutionSubmenu.value) {
-     solutionSubmenu.value.classList.remove('active');
-   }
-   if (recruitmentSubmenu.value) {
-     recruitmentSubmenu.value.classList.remove('active');
-   }
-   if (userSubmenu.value) {
-     userSubmenu.value.classList.remove('active');
-   }
-   if (navLinks.value) {
-     navLinks.value.classList.remove('active');
-   }
-   if (hamburger.value) {
-     hamburger.value.classList.remove('active');
-   }
- };
-
- // Computed properties for active state - Cập nhật để bao gồm cả route giả
- const isSolutionActive = computed(() => {
-   return route.path === '/giai-phap' ||
-       route.path === '/giai-phap-ban-nhanh' ||
-       route.path === '/dinh-gia-bds' ||
-       route.path.startsWith('/giai-phap');
-@@ -441,85 +447,65 @@ const initializeMenu = () => {
-   if (solutionLink && solutionSubmenuEl) {
-     solutionSubmenuTimeout = setupSubmenuHover(solutionLink.parentElement, solutionSubmenuEl);
-   }
-
-   // Setup submenu hover for Recruitment
-   if (recruitmentLink && recruitmentSubmenuEl) {
-     recruitmentSubmenuTimeout = setupSubmenuHover(recruitmentLink.parentElement, recruitmentSubmenuEl);
-   }
-
-   // Mobile menu toggle
-   hamburgerEl.addEventListener('click', function (e) {
-     e.preventDefault();
-     e.stopPropagation();
-
-     navLinksEl.classList.toggle('active');
-     hamburgerEl.classList.toggle('active');
-
-     if (!navLinksEl.classList.contains('active')) {
-       userSubmenuEl.classList.remove('active');
-       if (solutionSubmenuEl) solutionSubmenuEl.classList.remove('active');
-       if (recruitmentSubmenuEl) recruitmentSubmenuEl.classList.remove('active');
-     }
-   });
-
-   // Mobile submenu toggle for Solution (sử dụng hàm toggleSubmenu)
--  if (solutionLink && solutionSubmenuEl) {
--    solutionLink.addEventListener('click', function (e) {
--      if (window.innerWidth <= 1024) {
--        e.preventDefault();
--        e.stopPropagation();
--        toggleSubmenu('solution');
--      }
-+  if (solutionBack && solutionSubmenuEl) {
-+    solutionBack.addEventListener('click', function (e) {
-+      e.preventDefault();
-+      e.stopPropagation();
-+      solutionSubmenuEl.classList.remove('active');
-     });
--
--    if (solutionBack) {
--      solutionBack.addEventListener('click', function (e) {
--        e.preventDefault();
--        e.stopPropagation();
--        solutionSubmenuEl.classList.remove('active');
--      });
--    }
-   }
-
-   // Mobile submenu toggle for Recruitment (sử dụng hàm toggleSubmenu)
--  if (recruitmentLink && recruitmentSubmenuEl) {
--    recruitmentLink.addEventListener('click', function (e) {
--      if (window.innerWidth <= 1024) {
--        e.preventDefault();
--        e.stopPropagation();
--        toggleSubmenu('recruitment');
--      }
-+  if (recruitmentBack && recruitmentSubmenuEl) {
-+    recruitmentBack.addEventListener('click', function (e) {
-+      e.preventDefault();
-+      e.stopPropagation();
-+      recruitmentSubmenuEl.classList.remove('active');
-     });
--
--    if (recruitmentBack) {
--      recruitmentBack.addEventListener('click', function (e) {
--        e.preventDefault();
--        e.stopPropagation();
--        recruitmentSubmenuEl.classList.remove('active');
--      });
--    }
-   }
-
-   // Mobile submenu toggle for User
-   userIcon.addEventListener('click', function (e) {
-     if (window.innerWidth <= 1024) {
-       e.preventDefault();
-       e.stopPropagation();
-       userSubmenuEl.classList.toggle('active');
-       // Đóng các submenu khác
-       if (solutionSubmenuEl) solutionSubmenuEl.classList.remove('active');
-       if (recruitmentSubmenuEl) recruitmentSubmenuEl.classList.remove('active');
-     }
-   });
-
-   // Close menu when clicking outside on mobile
-   document.addEventListener('click', function (e) {
-     if (window.innerWidth <= 1024) {
-       const isClickInsideMenu =
-           navLinksEl.contains(e.target) ||
-           hamburgerEl.contains(e.target) ||
-           (solutionSubmenuEl && solutionSubmenuEl.contains(e.target)) ||
-           (recruitmentSubmenuEl && recruitmentSubmenuEl.contains(e.target)) ||
-           userSubmenuEl.contains(e.target);
-
-       if (!isClickInsideMenu) {
-=======
- // Đăng ký các thành phần ChartJS
- ChartJS.register(
-     CategoryScale,
-     LinearScale,
-     PointElement,
-     LineElement,
-     Title,
-     Tooltip,
-     Legend,
-     Filler
- );
-
- const props = defineProps({
-   user_card: Object
- });
- const router = useRouter()
-
- // Balance visibility
- const balanceVisible = ref(false);
-+const availableBalance = ref(0);
-+const pendingBalance = ref(0);
-
- const toggleBalanceVisibility = () => {
-   balanceVisible.value = !balanceVisible.value;
- };
-
- // Chart data and options
--const selectedMonth = ref('6');
--const tableView = ref(false);
-+const selectedMonth = ref(`${new Date().getMonth() + 1}`);
-+const selectedYear = ref(new Date().getFullYear());
-+const yearOptions = Array.from({ length: 5 }, (_, index) => new Date().getFullYear() - index);
-
- const chartData = ref({
--  labels: ['1', '5', '10', '15', '20', '25', '30'],
-+  labels: [],
-   datasets: [
-     {
-       label: 'Chi tiêu (VND)',
--      data: [1200000, 1900000, 1500000, 2500000, 2200000, 3000000, 2800000],
-+      data: [],
-       borderColor: '#031358',
-       backgroundColor: 'rgba(3, 19, 88, 0.1)',
-       tension: 0.4,
-       fill: true,
-       pointBackgroundColor: '#031358',
-       pointBorderColor: '#ffffff',
-       pointBorderWidth: 2,
-       pointRadius: 5,
-     }
-   ]
- });
-
- const chartOptions = ref({
-   responsive: true,
-   maintainAspectRatio: false,
-   plugins: {
-     legend: {
-       display: true,
-       position: 'top',
-     },
-     title: {
-       display: true,
--      text: 'Biểu đồ chi tiêu tháng ' + selectedMonth.value
-+      text: `Biểu đồ chi tiêu tháng ${selectedMonth.value}/${selectedYear.value}`
-     }
-   },
-   scales: {
-     y: {
-       beginAtZero: true,
-       ticks: {
-         callback: function(value) {
-           return value.toLocaleString('vi-VN') + ' VND';
-         }
-       }
-     }
-   }
- });
-
--// Table data
--const tableData = ref([
--  { id: 1, date: '01/06/2024', transaction: 'Nạp tiền', amount: '2,000,000 VND', status: 'success', statusText: 'Thành công' },
--  { id: 2, date: '05/06/2024', transaction: 'Mua gói Premium', amount: '500,000 VND', status: 'success', statusText: 'Thành công' },
--  { id: 3, date: '10/06/2024', transaction: 'Rút tiền', amount: '1,000,000 VND', status: 'pending', statusText: 'Đang xử lý' },
--  { id: 4, date: '15/06/2024', transaction: 'Nạp tiền', amount: '1,500,000 VND', status: 'success', statusText: 'Thành công' },
--  { id: 5, date: '20/06/2024', transaction: 'Thanh toán hóa đơn', amount: '350,000 VND', status: 'success', statusText: 'Thành công' },
--]);
--
--const downloadChart = () => {
--  // Logic để tải biểu đồ dưới dạng PNG
--  console.log('Download chart as PNG');
-+const formatCurrency = (value) => {
-+  const numberValue = Number(value || 0);
-+  return numberValue.toLocaleString('vi-VN');
-+};
-+
-+const formattedAvailableBalance = computed(() => formatCurrency(availableBalance.value));
-+const formattedPendingBalance = computed(() => formatCurrency(pendingBalance.value));
-+
-+const fetchWalletBalance = async () => {
-+  try {
-+    const response = await api.get("/apithienha/profile/balance");
-+    availableBalance.value = response.data?.soDuKhaDung ?? 0;
-+    pendingBalance.value = response.data?.soDuChoRut ?? 0;
-+  } catch (error) {
-+    console.error("Không thể tải số dư ví:", error);
-+  }
- };
-
--const toggleTableView = () => {
--  tableView.value = !tableView.value;
-+const fetchChartData = async () => {
-+  try {
-+    const response = await api.get("/apithienha/profile/chart", {
-+      params: {
-+        month: Number(selectedMonth.value),
-+        year: Number(selectedYear.value),
-+      },
-+    });
-+    chartData.value.labels = (response.data?.labels ?? []).map((label) => `${label}`);
-+    chartData.value.datasets[0].data = response.data?.values ?? [];
-+    chartOptions.value.plugins.title.text = `Biểu đồ chi tiêu tháng ${selectedMonth.value}/${selectedYear.value}`;
-+  } catch (error) {
-+    console.error("Không thể tải dữ liệu biểu đồ:", error);
-+    chartData.value.labels = [];
-+    chartData.value.datasets[0].data = [];
-+  }
- };
-
-+watch([selectedMonth, selectedYear], () => {
-+  fetchChartData();
-+});
-+
- onMounted(() => {
--  // Khởi tạo dữ liệu ngẫu nhiên cho biểu đồ
--  const randomData = Array.from({length: 7}, () => Math.floor(Math.random() * 3000000) + 1000000);
--  chartData.value.datasets[0].data = randomData;
-+  fetchWalletBalance();
-+  fetchChartData();
- });
- </script>
-
  <style scoped>
- .security-header {
-   text-align: center;
-   margin-bottom: 40px;
-   margin-top:60px  ;
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+ .appointments-page{
+   min-height:100vh;
+   background:#f5f7fa;
+   color:#0f172a;
+   line-height:1.6;
  }
 
- .security-title {
-   font-size: 33px;
-   background: linear-gradient(to right, #031358, #0030FF);
-   -webkit-background-clip: text;
-   -webkit-text-fill-color: transparent;
-   background-clip: text;
-   margin: 0 0 15px 0;
- }
+ *{ margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; }
 
- .main-content {
-   max-width: 95%;
-   margin: 0 auto;
-   font-family: 'Ubuntu', sans-serif;
- }
+ .appointments-container{ min-height:100vh; }
 
-@@ -256,50 +257,68 @@ onMounted(() => {
-   align-items: center;
-   margin-bottom: 15px;
- }
-
- .balance-title {
-   font-size: 18px;
-   color: #000;
-   margin: 0;
- }
-
- .eye-toggle {
-   background: none;
-   border: none;
-   cursor: pointer;
-   color: #031358;
-   font-size: 18px;
-   padding: 5px;
- }
-
- .balance-amount {
-   font-size: 28px;
-   font-weight: bold;
-   color: #031358;
- }
-
-+.pending-amount {
-+  display: flex;
-+  align-items: center;
-+  gap: 8px;
-+  font-size: 14px;
-+  color: #6b7280;
-+  margin-top: 6px;
-+}
-+
-+.pending-label {
-+  font-weight: 600;
-+}
-+
-+.pending-value {
-+  font-weight: 600;
-+  color: #ff9800;
-+}
-+
- .hidden {
-   letter-spacing: 3px;
- }
-
- .action-buttons {
-   flex: 60%;
-   display: flex;
-   gap: 15px;
- }
-
- .action-btn {
-   flex: 1;
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   justify-content: center;
-   background: white;
-   border: none;
-   border-radius: 12px;
-   padding: 20px 10px;
-   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-   cursor: pointer;
-   transition: transform 0.2s;
- }
-
-@@ -320,53 +339,56 @@ onMounted(() => {
- }
-
- /* Chart Section */
- .chart-section {
-   background: white;
-   border-radius: 12px;
-   padding: 20px;
-   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-   margin-bottom: 30px;
- }
-
- .chart-header {
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   margin-bottom: 20px;
- }
-
- .month-select {
-   padding: 8px 12px;
-   border: 1px solid #ddd;
-   border-radius: 6px;
-   font-family: 'Ubuntu', sans-serif;
- }
-
--.chart-controls-right {
--  display: flex;
--  gap: 10px;
-+.year-select {
-+  padding: 8px 12px;
-+  border: 1px solid #ddd;
-+  border-radius: 6px;
-+  font-family: 'Ubuntu', sans-serif;
-+  margin-left: 12px;
- }
-
- .chart-btn {
-   display: flex;
-   align-items: center;
-   gap: 8px;
-   padding: 8px 15px;
-   border: 1px solid #031358;
-   border-radius: 6px;
-   background: white;
-   color: #031358;
-   cursor: pointer;
-   font-family: 'Ubuntu', sans-serif;
-   transition: all 0.2s;
- }
-
- .chart-btn:hover {
-   background: #031358;
-   color: white;
- }
-
- .chart-container {
-   height: 400px;
-   position: relative;
- }
-@@ -496,26 +518,26 @@ onMounted(() => {
-     justify-content: flex-start;
-     padding: 12px 15px;
-     min-height: auto;
-   }
-
-   .action-btn i {
-     margin-bottom: 0;
-     margin-right: 10px;
-     font-size: 18px;
-   }
-
-   .chart-btn {
-     font-size: 14px;
-     padding: 8px 10px;
-   }
-
-   .transaction-table {
-     font-size: 14px;
-   }
-
-   .transaction-table th,
-   .transaction-table td {
-     padding: 8px;
-   }
- }
--</style>
-\ No newline at end of file
-+</style>
->>>>>>> 393b17d28853cd6b48553fd86e8619316721ff10
+ /* Main */
+ .main-content{ width:100%; padding:22px; }
+ .header{
+   display:flex; justify-content:space-between; align-items:center;
+   margin-bottom:18px; gap:16px; flex-wrap:wrap;

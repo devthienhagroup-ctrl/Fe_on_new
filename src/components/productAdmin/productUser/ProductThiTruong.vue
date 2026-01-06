@@ -38,7 +38,7 @@
 
                 <!-- Status badge - FIXED -->
                 <div v-if="item.status === 'Đã kiểm duyệt'" class="status-badge">
-                  <img src="https://s3.cloudfly.vn/thg-storage/uploads-public/icon-kiem-duỵet.png"
+                  <img src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png"
                        alt="checked"
                        class="badge-image"
                   />
