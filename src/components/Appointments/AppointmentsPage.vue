@@ -1,98 +1,117 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, reactive, onMounted, onBeforeUnmount } from 'vue';
 
 const rootRef = ref(null);
 const cleanupHandlers = [];
+
+const statTotal = ref(0);
+const statSelectedDay = ref(0);
+const statUp = ref(0);
+const statPending = ref(0);
+
+const activeFilterText = ref('Tất cả');
+const activeFilterCount = ref(0);
+const filteredAppointments = ref([]);
+const daySlots = ref([]);
+const dayTitle = ref('');
+const calendarTitle = ref('');
+const calendarCells = ref([]);
+const historyItems = ref([]);
+const openActionMenuId = ref(null);
+const dragOverSlot = ref(null);
+
+const statusPopover = reactive({
+  open: false,
+  top: '0px',
+  left: '0px',
+  options: [],
+  handler: null,
+});
 
 const registerWindowListener = (event, handler, options) => {
   window.addEventListener(event, handler, options);
   cleanupHandlers.push(() => window.removeEventListener(event, handler, options));
 };
 
-onMounted(() => {
-  if (!rootRef.value) return;
+const $ = (sel, root = rootRef.value) => (root ? root.querySelector(sel) : null);
+const $$ = (sel, root = rootRef.value) => Array.from(root ? root.querySelectorAll(sel) : []);
+const pad2 = (n) => String(n).padStart(2, '0');
+const nowISO = () => new Date().toISOString();
 
-  // ===== Helpers =====
-  const $ = (sel, root = rootRef.value) => (root ? root.querySelector(sel) : null);
-  const $$ = (sel, root = rootRef.value) => Array.from(root ? root.querySelectorAll(sel) : []);
-  const pad2 = (n) => String(n).padStart(2, '0');
-  const nowISO = () => new Date().toISOString();
+const currentUser = { name: 'Lê Hiếu' }; // demo
+const STAFFS = ['Lê Hiếu', 'Nguyễn Văn A', 'Trần Thị B', 'Phạm Văn C'];
+const CONSULTANTS = ['Lê Hiếu', 'Nguyễn Văn A', 'Trần Thị B', 'Phạm Văn C', 'Tư vấn 1', 'Tư vấn 2'];
 
-  const currentUser = { name: 'Lê Hiếu' }; // demo
-  const STAFFS = ['Lê Hiếu', 'Nguyễn Văn A', 'Trần Thị B', 'Phạm Văn C'];
-  const CONSULTANTS = ['Lê Hiếu', 'Nguyễn Văn A', 'Trần Thị B', 'Phạm Văn C', 'Tư vấn 1', 'Tư vấn 2'];
+const STATUS = {
+  UP: { label: 'Đã lên', cls: 'status-up-option', dot: '#27ae60' },
+  NOT_UP: { label: 'Chưa lên', cls: 'status-not-up-option', dot: '#f39c12' },
+  POSTPONED: { label: 'Tạm hoãn', cls: 'status-postponed-option', dot: '#2980b9' },
+  CANCELLED: { label: 'Huỷ', cls: 'status-cancelled-option', dot: '#e74c3c' },
+};
 
-  const STATUS = {
-    UP: { label: 'Đã lên', cls: 'status-up-option', dot: '#27ae60' },
-    NOT_UP: { label: 'Chưa lên', cls: 'status-not-up-option', dot: '#f39c12' },
-    POSTPONED: { label: 'Tạm hoãn', cls: 'status-postponed-option', dot: '#2980b9' },
-    CANCELLED: { label: 'Huỷ', cls: 'status-cancelled-option', dot: '#e74c3c' },
-  };
+const CONSULT_STATUS = {
+  SUCCESS: { label: 'Thành công', cls: 'consult-success-badge', icon: 'fa-circle-check' },
+  FAIL: { label: 'Thất bại', cls: 'consult-fail-badge', icon: 'fa-circle-xmark' },
+  CARE: { label: 'Chăm sóc', cls: 'consult-care-badge', icon: 'fa-hand-holding-heart' },
+};
 
-  const CONSULT_STATUS = {
-    SUCCESS: { label: 'Thành công', cls: 'consult-success-badge', icon: 'fa-circle-check' },
-    FAIL: { label: 'Thất bại', cls: 'consult-fail-badge', icon: 'fa-circle-xmark' },
-    CARE: { label: 'Chăm sóc', cls: 'consult-care-badge', icon: 'fa-hand-holding-heart' },
-  };
+const CUSTOMER_TYPE = {
+  OWNER: { label: 'Chính chủ', cls: 'chip-owner' },
+  BROKER: { label: 'Môi giới', cls: 'chip-broker' },
+  RELATIVE: { label: 'Người thân', cls: 'chip-relative' },
+};
 
-  const CUSTOMER_TYPE = {
-    OWNER: { label: 'Chính chủ', cls: 'chip-owner' },
-    BROKER: { label: 'Môi giới', cls: 'chip-broker' },
-    RELATIVE: { label: 'Người thân', cls: 'chip-relative' },
-  };
+const RATING = {
+  POTENTIAL: { label: 'Tiềm năng', cls: 'chip-potential' },
+  NOT_POTENTIAL: { label: 'Không tiềm năng', cls: 'chip-not-potential' },
+  CARE: { label: 'Chăm sóc', cls: 'chip-care' },
+};
 
-  const RATING = {
-    POTENTIAL: { label: 'Tiềm năng', cls: 'chip-potential' },
-    NOT_POTENTIAL: { label: 'Không tiềm năng', cls: 'chip-not-potential' },
-    CARE: { label: 'Chăm sóc', cls: 'chip-care' },
-  };
+const TIME_SLOTS = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'];
 
-  const TIME_SLOTS = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'];
+function formatVNDate(yyyyMMdd) {
+  const [y, m, d] = yyyyMMdd.split('-');
+  return `${d}/${m}/${y}`;
+}
+function toISODate(d) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+function startOfWeek(dateObj) {
+  const d = new Date(dateObj);
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1) - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+function endOfWeek(dateObj) {
+  const s = startOfWeek(dateObj);
+  const e = new Date(s);
+  e.setDate(e.getDate() + 7);
+  return e;
+}
+function initials(name) {
+  const parts = String(name || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (parts.length === 0) return 'NA';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
-  function formatVNDate(yyyyMMdd) {
-    const [y, m, d] = yyyyMMdd.split('-');
-    return `${d}/${m}/${y}`;
-  }
-  function toISODate(d) {
-    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-  }
-  function startOfWeek(dateObj) {
-    const d = new Date(dateObj);
-    const day = d.getDay();
-    const diff = (day === 0 ? -6 : 1) - day;
-    d.setDate(d.getDate() + diff);
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }
-  function endOfWeek(dateObj) {
-    const s = startOfWeek(dateObj);
-    const e = new Date(s);
-    e.setDate(e.getDate() + 7);
-    return e;
-  }
-  function initials(name) {
-    const parts = String(name || '')
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean);
-    if (parts.length === 0) return 'NA';
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  }
-
-  // ===== Toast =====
-  function showToast(title, body, type = 'info') {
-    const wrap = $('#toastWrap');
-    if (!wrap) return;
-    const icon =
-      type === 'error'
-        ? 'fa-triangle-exclamation'
-        : type === 'success'
-          ? 'fa-circle-check'
-          : 'fa-circle-info';
-    const t = document.createElement('div');
-    t.className = 'toast';
-    t.innerHTML = `
+function showToast(title, body, type = 'info') {
+  const wrap = $('#toastWrap');
+  if (!wrap) return;
+  const icon =
+    type === 'error'
+      ? 'fa-triangle-exclamation'
+      : type === 'success'
+        ? 'fa-circle-check'
+        : 'fa-circle-info';
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `
       <div class="ico"><i class="fa-solid ${icon}"></i></div>
       <div class="t">
         <div class="a">${title}</div>
@@ -100,1021 +119,862 @@ onMounted(() => {
       </div>
       <button class="x" aria-label="close"><i class="fa-solid fa-xmark"></i></button>
     `;
-    wrap.appendChild(t);
+  wrap.appendChild(t);
 
-    const kill = () => {
-      t.remove();
-    };
-    t.querySelector('.x').addEventListener('click', kill);
-    setTimeout(kill, 3800);
+  const kill = () => {
+    t.remove();
+  };
+  t.querySelector('.x').addEventListener('click', kill);
+  setTimeout(kill, 3800);
+}
+
+const demoToday = new Date(2026, 0, 3);
+const selectedDateISO = ref('2026-01-03');
+const calendarMonth = ref(new Date(2026, 0, 1));
+
+const activeRange = ref('all');
+const activeStatus = ref('ALL');
+const searchQuery = ref('');
+const editId = ref(null);
+
+function makeHistory(actor, action, desc) {
+  return { ts: nowISO(), actor, action, desc };
+}
+
+const appointments = ref([
+  {
+    id: 1,
+    customer: 'Nguyễn Văn A',
+    phone: '0987 654 321',
+    date: '2026-01-03',
+    time: '10:00',
+    staff: 'Lê Hiếu',
+    consultant: 'Tư vấn 1',
+    status: 'UP',
+    consultStatus: 'SUCCESS',
+    customerType: 'OWNER',
+    rating: 'POTENTIAL',
+    creator: 'Lê Hiếu',
+    note: 'Khách ưu tiên làm nhanh.',
+    history: [makeHistory('Lê Hiếu', 'CREATE', 'Tạo lịch hẹn.')],
+  },
+  {
+    id: 2,
+    customer: 'Trần Thị B',
+    phone: '0912 345 678',
+    date: '2026-01-03',
+    time: '14:00',
+    staff: 'Nguyễn Văn A',
+    consultant: 'Tư vấn 2',
+    status: 'NOT_UP',
+    consultStatus: 'CARE',
+    customerType: 'RELATIVE',
+    rating: 'CARE',
+    creator: 'Lê Hiếu',
+    note: 'Gọi xác nhận trước 1h.',
+    history: [makeHistory('Lê Hiếu', 'CREATE', 'Tạo lịch hẹn.')],
+  },
+  {
+    id: 3,
+    customer: 'Phạm Văn C',
+    phone: '0933 222 111',
+    date: '2026-01-02',
+    time: '09:00',
+    staff: 'Lê Hiếu',
+    consultant: 'Nguyễn Văn A',
+    status: 'CANCELLED',
+    consultStatus: 'FAIL',
+    customerType: 'BROKER',
+    rating: 'NOT_POTENTIAL',
+    creator: 'Nguyễn Văn A',
+    note: '',
+    history: [
+      makeHistory('Nguyễn Văn A', 'CREATE', 'Tạo lịch hẹn.'),
+      makeHistory('Nguyễn Văn A', 'STATUS', 'Đổi trạng thái: Huỷ.'),
+    ],
+  },
+  {
+    id: 4,
+    customer: 'Lê Văn D',
+    phone: '0978 876 543',
+    date: '2026-01-01',
+    time: '15:00',
+    staff: 'Trần Thị B',
+    consultant: 'Tư vấn 1',
+    status: 'POSTPONED',
+    consultStatus: 'CARE',
+    customerType: 'OWNER',
+    rating: 'CARE',
+    creator: 'Lê Hiếu',
+    note: 'Dời vì khách bận.',
+    history: [
+      makeHistory('Lê Hiếu', 'CREATE', 'Tạo lịch hẹn.'),
+      makeHistory('Lê Hiếu', 'STATUS', 'Đổi trạng thái: Tạm hoãn.'),
+    ],
+  },
+  {
+    id: 5,
+    customer: 'Mai H.',
+    phone: '0901 111 222',
+    date: '2026-01-10',
+    time: '11:00',
+    staff: 'Phạm Văn C',
+    consultant: 'Tư vấn 2',
+    status: 'NOT_UP',
+    consultStatus: 'FAIL',
+    customerType: 'BROKER',
+    rating: 'NOT_POTENTIAL',
+    creator: 'Lê Hiếu',
+    note: '',
+    history: [makeHistory('Lê Hiếu', 'CREATE', 'Tạo lịch hẹn.')],
+  },
+]);
+
+function hasConflict({ id = null, date, time, staff }) {
+  return appointments.value.find(
+    (a) =>
+      a.id !== id &&
+      a.date === date &&
+      a.time === time &&
+      a.staff === staff &&
+      a.status !== 'CANCELLED',
+  );
+}
+
+function applyFilters(list) {
+  let out = [...list];
+  const refDate = new Date(`${selectedDateISO.value}T00:00:00`);
+  const refISO = selectedDateISO.value;
+
+  if (activeRange.value === 'today') {
+    out = out.filter((a) => a.date === refISO);
+  } else if (activeRange.value === 'week') {
+    const s = startOfWeek(refDate);
+    const e = endOfWeek(refDate);
+    out = out.filter((a) => {
+      const d = new Date(`${a.date}T00:00:00`);
+      return d >= s && d < e;
+    });
+  } else if (activeRange.value === 'month') {
+    const y = refDate.getFullYear();
+    const m = refDate.getMonth();
+    out = out.filter((a) => {
+      const d = new Date(`${a.date}T00:00:00`);
+      return d.getFullYear() === y && d.getMonth() === m;
+    });
   }
 
-  // ===== State =====
-  const demoToday = new Date(2026, 0, 3);
-  let selectedDateISO = '2026-01-03';
-  let calendarMonth = new Date(2026, 0, 1);
-
-  let activeRange = 'all';
-  let activeStatus = 'ALL';
-  let searchQuery = '';
-  let editId = null;
-
-  // ===== Data model =====
-  // appointment: {
-  //   id, customer, phone, date, time,
-  //   staff, consultant,
-  //   status, consultStatus,
-  //   customerType, rating,
-  //   creator, note, history:[]
-  // }
-  function makeHistory(actor, action, desc) {
-    return { ts: nowISO(), actor, action, desc };
+  if (activeStatus.value !== 'ALL') {
+    out = out.filter((a) => a.status === activeStatus.value);
   }
 
-  let appointments = [
-    {
-      id: 1,
-      customer: 'Nguyễn Văn A',
-      phone: '0987 654 321',
-      date: '2026-01-03',
-      time: '10:00',
-      staff: 'Lê Hiếu',
-      consultant: 'Tư vấn 1',
-      status: 'UP',
-      consultStatus: 'SUCCESS',
-      customerType: 'OWNER',
-      rating: 'POTENTIAL',
-      creator: 'Lê Hiếu',
-      note: 'Khách ưu tiên làm nhanh.',
-      history: [makeHistory('Lê Hiếu', 'CREATE', 'Tạo lịch hẹn.')],
-    },
-    {
-      id: 2,
-      customer: 'Trần Thị B',
-      phone: '0912 345 678',
-      date: '2026-01-03',
-      time: '14:00',
-      staff: 'Nguyễn Văn A',
-      consultant: 'Tư vấn 2',
-      status: 'NOT_UP',
-      consultStatus: 'CARE',
-      customerType: 'RELATIVE',
-      rating: 'CARE',
-      creator: 'Lê Hiếu',
-      note: 'Gọi xác nhận trước 1h.',
-      history: [makeHistory('Lê Hiếu', 'CREATE', 'Tạo lịch hẹn.')],
-    },
-    {
-      id: 3,
-      customer: 'Phạm Văn C',
-      phone: '0933 222 111',
-      date: '2026-01-02',
-      time: '09:00',
-      staff: 'Lê Hiếu',
-      consultant: 'Nguyễn Văn A',
-      status: 'CANCELLED',
-      consultStatus: 'FAIL',
-      customerType: 'BROKER',
-      rating: 'NOT_POTENTIAL',
-      creator: 'Nguyễn Văn A',
-      note: '',
-      history: [
-        makeHistory('Nguyễn Văn A', 'CREATE', 'Tạo lịch hẹn.'),
-        makeHistory('Nguyễn Văn A', 'STATUS', 'Đổi trạng thái: Huỷ.'),
-      ],
-    },
-    {
-      id: 4,
-      customer: 'Lê Văn D',
-      phone: '0978 876 543',
-      date: '2026-01-01',
-      time: '15:00',
-      staff: 'Trần Thị B',
-      consultant: 'Tư vấn 1',
-      status: 'POSTPONED',
-      consultStatus: 'CARE',
-      customerType: 'OWNER',
-      rating: 'CARE',
-      creator: 'Lê Hiếu',
-      note: 'Dời vì khách bận.',
-      history: [
-        makeHistory('Lê Hiếu', 'CREATE', 'Tạo lịch hẹn.'),
-        makeHistory('Lê Hiếu', 'STATUS', 'Đổi trạng thái: Tạm hoãn.'),
-      ],
-    },
-    {
-      id: 5,
-      customer: 'Mai H.',
-      phone: '0901 111 222',
-      date: '2026-01-10',
-      time: '11:00',
-      staff: 'Phạm Văn C',
-      consultant: 'Tư vấn 2',
-      status: 'NOT_UP',
-      consultStatus: 'FAIL',
-      customerType: 'BROKER',
-      rating: 'NOT_POTENTIAL',
-      creator: 'Lê Hiếu',
-      note: '',
-      history: [makeHistory('Lê Hiếu', 'CREATE', 'Tạo lịch hẹn.')],
-    },
-  ];
-
-  // ===== Conflict rule =====
-  // Block if same staff + same date + same time with status != CANCELLED
-  function hasConflict({ id = null, date, time, staff }) {
-    return appointments.find(
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.trim().toLowerCase();
+    out = out.filter(
       (a) =>
-        a.id !== id &&
-        a.date === date &&
-        a.time === time &&
-        a.staff === staff &&
-        a.status !== 'CANCELLED',
+        (a.customer || '').toLowerCase().includes(q) ||
+        (a.phone || '').toLowerCase().includes(q) ||
+        (a.staff || '').toLowerCase().includes(q) ||
+        (a.consultant || '').toLowerCase().includes(q) ||
+        (a.creator || '').toLowerCase().includes(q),
     );
   }
 
-  // ===== Filtering =====
-  function applyFilters(list) {
-    let out = [...list];
-    const ref = new Date(`${selectedDateISO}T00:00:00`);
-    const refISO = selectedDateISO;
+  out.sort((a, b) => `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`));
+  return out;
+}
 
-    if (activeRange === 'today') {
-      out = out.filter((a) => a.date === refISO);
-    } else if (activeRange === 'week') {
-      const s = startOfWeek(ref);
-      const e = endOfWeek(ref);
-      out = out.filter((a) => {
-        const d = new Date(`${a.date}T00:00:00`);
-        return d >= s && d < e;
-      });
-    } else if (activeRange === 'month') {
-      const y = ref.getFullYear();
-      const m = ref.getMonth();
-      out = out.filter((a) => {
-        const d = new Date(`${a.date}T00:00:00`);
-        return d.getFullYear() === y && d.getMonth() === m;
-      });
-    }
+function updateStats(filtered) {
+  statTotal.value = filtered.length;
 
-    if (activeStatus !== 'ALL') {
-      out = out.filter((a) => a.status === activeStatus);
-    }
+  const dayCount = appointments.value.filter((a) => a.date === selectedDateISO.value).length;
+  statSelectedDay.value = dayCount;
 
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      out = out.filter(
-        (a) =>
-          (a.customer || '').toLowerCase().includes(q) ||
-          (a.phone || '').toLowerCase().includes(q) ||
-          (a.staff || '').toLowerCase().includes(q) ||
-          (a.consultant || '').toLowerCase().includes(q) ||
-          (a.creator || '').toLowerCase().includes(q),
-      );
-    }
+  const up = filtered.filter((a) => a.status === 'UP').length;
+  statUp.value = up;
 
-    out.sort((a, b) => `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`));
-    return out;
+  const pending = filtered.filter((a) => ['NOT_UP', 'POSTPONED'].includes(a.status)).length;
+  statPending.value = pending;
+}
+
+function updateFilteredAppointments() {
+  const filtered = applyFilters(appointments.value);
+  filteredAppointments.value = filtered;
+
+  activeFilterCount.value = filtered.length;
+  activeFilterText.value =
+    (activeRange.value === 'all'
+      ? 'Tất cả'
+      : activeRange.value === 'today'
+        ? 'Hôm nay'
+        : activeRange.value === 'week'
+          ? 'Tuần này'
+          : 'Tháng này') +
+    (activeStatus.value !== 'ALL' ? ` • ${STATUS[activeStatus.value].label}` : '');
+
+  updateStats(filtered);
+}
+
+function monthTitle(d) {
+  const m = d.getMonth() + 1;
+  const y = d.getFullYear();
+  return `Tháng ${m}, ${y}`;
+}
+
+function generateCalendar() {
+  calendarTitle.value = monthTitle(calendarMonth.value);
+  const year = calendarMonth.value.getFullYear();
+  const month = calendarMonth.value.getMonth();
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevMonthDays = new Date(year, month, 0).getDate();
+
+  const monthKey = `${year}-${pad2(month + 1)}`;
+  const apptDays = new Set(
+    appointments.value
+      .filter((a) => a.date.startsWith(monthKey) && a.status !== 'CANCELLED')
+      .map((a) => Number(a.date.slice(-2))),
+  );
+
+  const cells = [];
+  for (let i = firstDay - 1; i >= 0; i -= 1) {
+    cells.push({
+      key: `prev-${i}`,
+      label: prevMonthDays - i,
+      iso: null,
+      currentMonth: false,
+      classes: ['date', 'other-month'],
+    });
   }
 
-  // ===== Render stats =====
-  function renderStats(filtered) {
-    $('#statTotal').textContent = filtered.length;
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const iso = `${year}-${pad2(month + 1)}-${pad2(day)}`;
+    const classes = ['date', 'current-month'];
 
-    const dayCount = appointments.filter((a) => a.date === selectedDateISO).length;
-    $('#statSelectedDay').textContent = dayCount;
+    if (iso === toISODate(demoToday)) classes.push('today');
+    if (iso === selectedDateISO.value) classes.push('selected');
+    if (apptDays.has(day)) classes.push('has-appointment');
 
-    const up = filtered.filter((a) => a.status === 'UP').length;
-    $('#statUp').textContent = up;
-
-    const pending = filtered.filter((a) => ['NOT_UP', 'POSTPONED'].includes(a.status)).length;
-    $('#statPending').textContent = pending;
+    cells.push({
+      key: `current-${iso}`,
+      label: day,
+      iso,
+      currentMonth: true,
+      classes,
+    });
   }
 
-  // ===== UI bits =====
-  function statusBadgeHTML(appt) {
-    const s = STATUS[appt.status];
-    return `
-      <span class="status-badge ${s.cls}" data-status-badge="1" data-id="${appt.id}">
-        ${s.label}
-        <i class="fa-solid fa-chevron-down" style="font-size:11px; opacity:.85;"></i>
-      </span>
-    `;
+  const totalCells = 42;
+  const nextMonthDays = totalCells - (firstDay + daysInMonth);
+  for (let i = 1; i <= nextMonthDays; i += 1) {
+    cells.push({
+      key: `next-${i}`,
+      label: i,
+      iso: null,
+      currentMonth: false,
+      classes: ['date', 'other-month'],
+    });
   }
 
-  function consultBadgeHTML(appt) {
-    const c = CONSULT_STATUS[appt.consultStatus] || CONSULT_STATUS.CARE;
-    return `<span class="consult-badge ${c.cls}"><i class="fa-solid ${c.icon}"></i>${c.label}</span>`;
+  calendarCells.value = cells;
+}
+
+function handleCalendarClick(cell) {
+  if (!cell.currentMonth || !cell.iso) return;
+  selectedDateISO.value = cell.iso;
+  $('#fDate').value = cell.iso;
+  generateCalendar();
+  updateFilteredAppointments();
+  updateDaySchedule();
+}
+
+function apptsForSelectedDay() {
+  return appointments.value
+    .filter((a) => a.date === selectedDateISO.value)
+    .sort((a, b) => a.time.localeCompare(b.time));
+}
+
+function updateDaySchedule() {
+  dayTitle.value = `Day Schedule • ${formatVNDate(selectedDateISO.value)}`;
+  const list = apptsForSelectedDay();
+  statSelectedDay.value = list.length;
+
+  const byTime = new Map();
+  TIME_SLOTS.forEach((t) => byTime.set(t, []));
+  list.forEach((a) => {
+    if (!byTime.has(a.time)) byTime.set(a.time, []);
+    byTime.get(a.time).push(a);
+  });
+
+  daySlots.value = TIME_SLOTS.map((t) => ({
+    time: t,
+    appointments: byTime.get(t) || [],
+  }));
+}
+
+function handleDragStart(e, appt) {
+  if (appt.status === 'CANCELLED') return;
+  e.dataTransfer.setData('text/plain', String(appt.id));
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleDragOver(e, time) {
+  e.preventDefault();
+  dragOverSlot.value = time;
+}
+
+function handleDragLeave(time) {
+  if (dragOverSlot.value === time) dragOverSlot.value = null;
+}
+
+function handleDrop(e, targetTime) {
+  e.preventDefault();
+  dragOverSlot.value = null;
+
+  const id = Number(e.dataTransfer.getData('text/plain'));
+  if (!id || !targetTime) return;
+
+  const appt = appointments.value.find((x) => x.id === id);
+  if (!appt) return;
+
+  if (appt.status === 'CANCELLED') {
+    showToast('Không thể dời giờ', 'Lịch đã huỷ không được kéo thả.', 'error');
+    return;
   }
 
-  function chipHTML(map, value) {
-    const it = map[value] || Object.values(map)[0];
-    return `<span class="chip ${it.cls}">${it.label}</span>`;
-  }
+  if (appt.date === selectedDateISO.value && appt.time === targetTime) return;
 
-  // ===== Render table =====
-  function renderTable() {
-    const tbody = $('#appointmentsTbody');
-    const filtered = applyFilters(appointments);
-
-    $('#activeFilterCount').textContent = filtered.length;
-    $('#activeFilterText').textContent =
-      (activeRange === 'all'
-        ? 'Tất cả'
-        : activeRange === 'today'
-          ? 'Hôm nay'
-          : activeRange === 'week'
-            ? 'Tuần này'
-            : 'Tháng này') +
-      (activeStatus !== 'ALL' ? ` • ${STATUS[activeStatus].label}` : '');
-
-    tbody.innerHTML = filtered
-      .map(
-        (a) => `
-      <tr data-row-id="${a.id}">
-        <td>
-          <div class="customer-info">
-            <div class="customer-avatar">${initials(a.customer)}</div>
-            <div>
-              <div class="customer-name">${a.customer}</div>
-              <div class="customer-phone">${a.phone || ''}</div>
-            </div>
-          </div>
-        </td>
-        <td><span class="pill-muted"><i class="fa-regular fa-calendar"></i>${formatVNDate(a.date)} • ${a.time}</span></td>
-        <td>${a.staff}</td>
-        <td>${a.consultant || '-'}</td>
-        <td>${consultBadgeHTML(a)}</td>
-        <td>${chipHTML(CUSTOMER_TYPE, a.customerType)}</td>
-        <td>${chipHTML(RATING, a.rating)}</td>
-        <td style="position:relative;">${statusBadgeHTML(a)}</td>
-        <td>${a.creator}</td>
-        <td>
-          <div class="action-dropdown">
-            <button class="action-btn" data-action-btn="1" data-id="${a.id}">
-              <i class="fas fa-ellipsis-v"></i>
-            </button>
-            <div class="menu-pop" data-action-menu="1" data-id="${a.id}">
-              <button data-act="edit" data-id="${a.id}"><i class="fa-regular fa-pen-to-square"></i> Sửa lịch hẹn</button>
-              <button data-act="status" data-id="${a.id}"><i class="fa-solid fa-rotate"></i> Đổi tình trạng</button>
-              <button data-act="delete" data-id="${a.id}"><i class="fa-regular fa-trash-can"></i> Xoá lịch hẹn</button>
-            </div>
-          </div>
-        </td>
-      </tr>
-    `,
-      )
-      .join('');
-
-    renderStats(filtered);
-  }
-
-  // ===== Calendar =====
-  function monthTitle(d) {
-    const m = d.getMonth() + 1;
-    const y = d.getFullYear();
-    return `Tháng ${m}, ${y}`;
-  }
-
-  function generateCalendar() {
-    $('#calendarTitle').textContent = monthTitle(calendarMonth);
-
-    const calendarDates = $('#calendarDates');
-    const year = calendarMonth.getFullYear();
-    const month = calendarMonth.getMonth();
-
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const prevMonthDays = new Date(year, month, 0).getDate();
-
-    calendarDates.innerHTML = '';
-
-    const monthKey = `${year}-${pad2(month + 1)}`;
-    const apptDays = new Set(
-      appointments
-        .filter((a) => a.date.startsWith(monthKey) && a.status !== 'CANCELLED')
-        .map((a) => Number(a.date.slice(-2))),
+  const conflict = hasConflict({ id: appt.id, date: selectedDateISO.value, time: targetTime, staff: appt.staff });
+  if (conflict) {
+    showToast(
+      'Trùng lịch theo nhân viên',
+      `${appt.staff} đã có lịch ${formatVNDate(conflict.date)} • ${conflict.time} với ${conflict.customer}.`,
+      'error',
     );
-
-    for (let i = firstDay - 1; i >= 0; i -= 1) {
-      const el = document.createElement('div');
-      el.className = 'date other-month';
-      el.textContent = prevMonthDays - i;
-      calendarDates.appendChild(el);
-    }
-
-    for (let day = 1; day <= daysInMonth; day += 1) {
-      const iso = `${year}-${pad2(month + 1)}-${pad2(day)}`;
-      const el = document.createElement('div');
-      el.className = 'date current-month';
-      el.textContent = day;
-
-      if (iso === toISODate(demoToday)) el.classList.add('today');
-      if (iso === selectedDateISO) el.classList.add('selected');
-      if (apptDays.has(day)) el.classList.add('has-appointment');
-
-      el.addEventListener('click', () => {
-        selectedDateISO = iso;
-        $('#fDate').value = iso;
-        generateCalendar();
-        renderTable();
-        renderDaySchedule();
-      });
-
-      calendarDates.appendChild(el);
-    }
-
-    const totalCells = 42;
-    const nextMonthDays = totalCells - (firstDay + daysInMonth);
-    for (let i = 1; i <= nextMonthDays; i += 1) {
-      const el = document.createElement('div');
-      el.className = 'date other-month';
-      el.textContent = i;
-      calendarDates.appendChild(el);
-    }
+    return;
   }
 
-  // ===== Day schedule (view + drag) =====
-  function apptsForSelectedDay() {
-    return appointments
-      .filter((a) => a.date === selectedDateISO)
-      .sort((a, b) => a.time.localeCompare(b.time));
+  const from = `${formatVNDate(appt.date)} • ${appt.time}`;
+  const to = `${formatVNDate(selectedDateISO.value)} • ${targetTime}`;
+
+  appt.date = selectedDateISO.value;
+  appt.time = targetTime;
+  appt.history = appt.history || [];
+  appt.history.unshift({ ts: nowISO(), actor: currentUser.name, action: 'RESCHEDULE', desc: `Dời lịch: ${from} → ${to}.` });
+
+  showToast('Đã dời giờ', `${appt.customer}: ${from} → ${to}`, 'success');
+  generateCalendar();
+  updateDaySchedule();
+  updateFilteredAppointments();
+}
+
+function closeStatusPopover() {
+  statusPopover.open = false;
+  statusPopover.options = [];
+  if (statusPopover.handler) {
+    window.removeEventListener('click', statusPopover.handler);
+    statusPopover.handler = null;
+  }
+}
+
+function setStatus(id, newStatus, source = 'STATUS') {
+  const appt = appointments.value.find((x) => x.id === id);
+  if (!appt) return;
+
+  const old = appt.status;
+  if (old === newStatus) return;
+
+  appt.status = newStatus;
+  appt.history = appt.history || [];
+  appt.history.unshift({ ts: nowISO(), actor: currentUser.name, action: source, desc: `Đổi trạng thái: ${STATUS[old].label} → ${STATUS[newStatus].label}.` });
+
+  showToast('Đã cập nhật trạng thái', `${appt.customer}: ${STATUS[newStatus].label}`, 'success');
+  generateCalendar();
+  updateDaySchedule();
+  updateFilteredAppointments();
+}
+
+function openStatusPopover(anchorEl, id) {
+  const appt = appointments.value.find((x) => x.id === id);
+  if (!appt) return;
+
+  if (statusPopover.handler) {
+    window.removeEventListener('click', statusPopover.handler);
+    statusPopover.handler = null;
   }
 
-  function apptCardHTML(a) {
-    const st = STATUS[a.status];
-    const cs = CONSULT_STATUS[a.consultStatus] || CONSULT_STATUS.CARE;
-    const disabledDrag = a.status === 'CANCELLED' ? 'draggable="false"' : 'draggable="true"';
-    const dragCls = a.status === 'CANCELLED' ? 'style="opacity:.6; cursor:not-allowed;"' : '';
-    return `
-      <div class="appt-card" ${disabledDrag} ${dragCls} data-appt-card="1" data-id="${a.id}">
-        <span class="appt-badge" style="background:${st.dot};"></span>
-        <div class="appt-main">
-          <div class="n">${a.customer}</div>
-          <div class="m">${a.phone || ''}</div>
-          <div class="appt-meta">${a.staff} • ${st.label}</div>
-          <div class="appt-sub">TV: ${a.consultant || '-'} • ${cs.label}</div>
-        </div>
-        <div class="appt-cta">
-          <button class="btn-primary" style="color: red" title="Sửa" data-mini="edit" data-id="${a.id}"><i class="fa-regular fa-pen-to-square"></i></button>
-          <button class="mini-btn" title="Đổi trạng thái" data-mini="status" data-id="${a.id}"><i class="fa-solid fa-rotate"></i></button>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderDaySchedule() {
-    $('#dayTitle').textContent = `Day Schedule • ${formatVNDate(selectedDateISO)}`;
-    const list = apptsForSelectedDay();
-    $('#statSelectedDay').textContent = list.length;
-
-    const byTime = new Map();
-    TIME_SLOTS.forEach((t) => byTime.set(t, []));
-    list.forEach((a) => {
-      if (!byTime.has(a.time)) byTime.set(a.time, []);
-      byTime.get(a.time).push(a);
-    });
-
-    const slotsWrap = $('#slots');
-    slotsWrap.innerHTML = TIME_SLOTS.map(
-      (t) => `
-      <div class="slot">
-        <div class="slot-time">${t}</div>
-        <div class="slot-drop" data-slot="1" data-time="${t}">
-          ${(byTime.get(t) || []).map(apptCardHTML).join('') || `<span style="font-weight:800; color:#94a3b8; font-size:12.5px;">Kéo thả lịch vào đây</span>`}
-        </div>
-      </div>
-    `,
-    ).join('');
-
-    // drag sources
-    $$('#slots [data-appt-card="1"]').forEach((card) => {
-      const id = Number(card.getAttribute('data-id'));
-      const a = appointments.find((x) => x.id === id);
-      if (!a || a.status === 'CANCELLED') return;
-
-      card.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', String(id));
-        e.dataTransfer.effectAllowed = 'move';
-      });
-    });
-
-    // drop targets
-    $$('#slots [data-slot="1"]').forEach((slot) => {
-      slot.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        slot.classList.add('over');
-      });
-      slot.addEventListener('dragleave', () => slot.classList.remove('over'));
-      slot.addEventListener('drop', (e) => {
-        e.preventDefault();
-        slot.classList.remove('over');
-
-        const id = Number(e.dataTransfer.getData('text/plain'));
-        const targetTime = slot.getAttribute('data-time');
-        if (!id || !targetTime) return;
-
-        const a = appointments.find((x) => x.id === id);
-        if (!a) return;
-
-        if (a.status === 'CANCELLED') {
-          showToast('Không thể dời giờ', 'Lịch đã huỷ không được kéo thả.', 'error');
-          return;
-        }
-
-        if (a.date === selectedDateISO && a.time === targetTime) return;
-
-        const conflict = hasConflict({ id: a.id, date: selectedDateISO, time: targetTime, staff: a.staff });
-        if (conflict) {
-          showToast(
-            'Trùng lịch theo nhân viên',
-            `${a.staff} đã có lịch ${formatVNDate(conflict.date)} • ${conflict.time} với ${conflict.customer}.`,
-            'error',
-          );
-          return;
-        }
-
-        const from = `${formatVNDate(a.date)} • ${a.time}`;
-        const to = `${formatVNDate(selectedDateISO)} • ${targetTime}`;
-
-        a.date = selectedDateISO;
-        a.time = targetTime;
-        a.history = a.history || [];
-        a.history.unshift({ ts: nowISO(), actor: currentUser.name, action: 'RESCHEDULE', desc: `Dời lịch: ${from} → ${to}.` });
-
-        showToast('Đã dời giờ', `${a.customer}: ${from} → ${to}`, 'success');
-        generateCalendar();
-        renderDaySchedule();
-        renderTable();
-      });
-    });
-  }
-
-  // ===== Quick status popover (for appointment status only) =====
-  function closeStatusPopover() {
-    const pop = $('#statusPopover');
-    if (!pop) return;
-    pop.classList.remove('open');
-    if (pop._handler) {
-      window.removeEventListener('click', pop._handler);
-      pop._handler = null;
-    }
-  }
-
-  function setStatus(id, newStatus, source = 'STATUS') {
-    const a = appointments.find((x) => x.id === id);
-    if (!a) return;
-
-    const old = a.status;
-    if (old === newStatus) return;
-
-    a.status = newStatus;
-    a.history = a.history || [];
-    a.history.unshift({ ts: nowISO(), actor: currentUser.name, action: source, desc: `Đổi trạng thái: ${STATUS[old].label} → ${STATUS[newStatus].label}.` });
-
-    showToast('Đã cập nhật trạng thái', `${a.customer}: ${STATUS[newStatus].label}`, 'success');
-    generateCalendar();
-    renderDaySchedule();
-    renderTable();
-  }
-
-  function openStatusPopover(anchorEl, id) {
-    const a = appointments.find((x) => x.id === id);
-    if (!a) return;
-
-    const pop = $('#statusPopover');
-    pop.innerHTML = Object.keys(STATUS)
-      .map((k) => {
-        const s = STATUS[k];
-        const active = k === a.status;
-        return `
-        <button class="opt" data-set-status="${k}" data-id="${id}">
-          <span>${s.label}</span>
-          <span class="dot" style="background:${s.dot}; ${active ? 'box-shadow:0 0 0 3px rgba(15,23,42,.06)' : ''}"></span>
-        </button>
-      `;
-      })
-      .join('');
-
-    const rect = anchorEl.getBoundingClientRect();
-    const top = rect.bottom + window.scrollY + 8;
-    const left = Math.min(rect.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - 240);
-    pop.style.top = `${top}px`;
-    pop.style.left = `${left}px`;
-    pop.classList.add('open');
-
-    const handler = (e) => {
-      const btn = e.target.closest('[data-set-status]');
-      if (btn) {
-        const st = btn.getAttribute('data-set-status');
-        const apptId = Number(btn.getAttribute('data-id'));
-        setStatus(apptId, st, 'STATUS');
-        closeStatusPopover();
-        return;
-      }
-      if (!e.target.closest('#statusPopover') && !e.target.closest('[data-status-badge="1"]') && !e.target.closest('[data-mini="status"]')) {
-        closeStatusPopover();
-      }
+  statusPopover.options = Object.keys(STATUS).map((k) => {
+    const s = STATUS[k];
+    return {
+      key: k,
+      label: s.label,
+      dot: s.dot,
+      active: k === appt.status,
+      id,
     };
+  });
 
-    window.addEventListener('click', handler, { once: false });
-    pop._handler = handler;
-  }
+  const rect = anchorEl.getBoundingClientRect();
+  const top = rect.bottom + window.scrollY + 8;
+  const left = Math.min(rect.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - 240);
+  statusPopover.top = `${top}px`;
+  statusPopover.left = `${left}px`;
+  statusPopover.open = true;
 
-  // ===== Form helpers =====
-  function getSelectedTime() {
-    const t = $('.time-option.selected');
-    return t ? t.textContent.trim() : '10:00';
-  }
-  function getSelectedStatusFromForm() {
-    const s = $('#statusSelection .status-option.selected');
-    return s ? s.getAttribute('data-status') : 'UP';
-  }
-  function getSelectedConsultStatusFromForm() {
-    const s = $('#consultSelection .consult-option.selected');
-    return s ? s.getAttribute('data-consult') : 'SUCCESS';
-  }
-
-  function fillSelect(sel, options, selected) {
-    sel.innerHTML = options.map((x) => `<option ${x === selected ? 'selected' : ''}>${x}</option>`).join('');
-  }
-
-  function resetForm() {
-    $('#formTitle').textContent = 'Tạo lịch hẹn mới';
-    $('#fCustomer').value = '';
-    $('#fPhone').value = '';
-    $('#fDate').value = selectedDateISO;
-
-    fillSelect($('#fStaff'), STAFFS, 'Lê Hiếu');
-    fillSelect($('#fConsultant'), CONSULTANTS, 'Tư vấn 1');
-
-    $('#fCustomerType').value = 'OWNER';
-    $('#fRating').value = 'POTENTIAL';
-
-    $$('#timeSelection .time-option').forEach((x) => x.classList.remove('selected'));
-    $$('#timeSelection .time-option').find((x) => x.textContent.trim() === '10:00')?.classList.add('selected');
-
-    $$('#statusSelection .status-option').forEach((x) => x.classList.remove('selected'));
-    $('#statusSelection .status-option[data-status="UP"]').classList.add('selected');
-
-    $$('#consultSelection .consult-option').forEach((x) => x.classList.remove('selected'));
-    $('#consultSelection .consult-option[data-consult="SUCCESS"]').classList.add('selected');
-
-    $('#fNote').value = '';
-  }
-
-  function highlightForm() {
-    const form = $('#formSection');
-    const old = form.style.boxShadow;
-    form.style.boxShadow = '0 0 0 3px rgba(77, 124, 254, 0.22)';
-    setTimeout(() => {
-      form.style.boxShadow = old || '0 4px 12px rgba(0,0,0,.05)';
-    }, 900);
-  }
-
-  function saveFromForm() {
-    const customer = $('#fCustomer').value.trim();
-    if (!customer) {
-      highlightForm();
-      $('#fCustomer').focus();
-      showToast('Thiếu thông tin', 'Vui lòng nhập tên khách hàng.', 'error');
-      return;
+  const handler = (e) => {
+    if (!e.target.closest('#statusPopover') && !e.target.closest('[data-status-badge="1"]') && !e.target.closest('[data-mini="status"]')) {
+      closeStatusPopover();
     }
+  };
 
-    const phone = $('#fPhone').value.trim();
-    const staff = $('#fStaff').value;
-    const consultant = $('#fConsultant').value;
-    const date = $('#fDate').value;
-    const time = getSelectedTime();
-    const status = getSelectedStatusFromForm();
-    const consultStatus = getSelectedConsultStatusFromForm();
-    const customerType = $('#fCustomerType').value;
-    const rating = $('#fRating').value;
-    const note = $('#fNote').value.trim();
+  window.addEventListener('click', handler, { once: false });
+  statusPopover.handler = handler;
+}
 
-    const conflict = hasConflict({ id: null, date, time, staff });
+function handleStatusOptionClick(option) {
+  setStatus(option.id, option.key, 'STATUS');
+  closeStatusPopover();
+}
+
+function getSelectedTime() {
+  const t = $('.time-option.selected');
+  return t ? t.textContent.trim() : '10:00';
+}
+function getSelectedStatusFromForm() {
+  const s = $('#statusSelection .status-option.selected');
+  return s ? s.getAttribute('data-status') : 'UP';
+}
+function getSelectedConsultStatusFromForm() {
+  const s = $('#consultSelection .consult-option.selected');
+  return s ? s.getAttribute('data-consult') : 'SUCCESS';
+}
+
+function fillSelect(sel, options, selected) {
+  sel.innerHTML = options.map((x) => `<option ${x === selected ? 'selected' : ''}>${x}</option>`).join('');
+}
+
+function resetForm() {
+  $('#formTitle').textContent = 'Tạo lịch hẹn mới';
+  $('#fCustomer').value = '';
+  $('#fPhone').value = '';
+  $('#fDate').value = selectedDateISO.value;
+
+  fillSelect($('#fStaff'), STAFFS, 'Lê Hiếu');
+  fillSelect($('#fConsultant'), CONSULTANTS, 'Tư vấn 1');
+
+  $('#fCustomerType').value = 'OWNER';
+  $('#fRating').value = 'POTENTIAL';
+
+  $$('#timeSelection .time-option').forEach((x) => x.classList.remove('selected'));
+  $$('#timeSelection .time-option').find((x) => x.textContent.trim() === '10:00')?.classList.add('selected');
+
+  $$('#statusSelection .status-option').forEach((x) => x.classList.remove('selected'));
+  $('#statusSelection .status-option[data-status="UP"]').classList.add('selected');
+
+  $$('#consultSelection .consult-option').forEach((x) => x.classList.remove('selected'));
+  $('#consultSelection .consult-option[data-consult="SUCCESS"]').classList.add('selected');
+
+  $('#fNote').value = '';
+}
+
+function highlightForm() {
+  const form = $('#formSection');
+  const old = form.style.boxShadow;
+  form.style.boxShadow = '0 0 0 3px rgba(77, 124, 254, 0.22)';
+  setTimeout(() => {
+    form.style.boxShadow = old || '0 4px 12px rgba(0,0,0,.05)';
+  }, 900);
+}
+
+function saveFromForm() {
+  const customer = $('#fCustomer').value.trim();
+  if (!customer) {
+    highlightForm();
+    $('#fCustomer').focus();
+    showToast('Thiếu thông tin', 'Vui lòng nhập tên khách hàng.', 'error');
+    return;
+  }
+
+  const phone = $('#fPhone').value.trim();
+  const staff = $('#fStaff').value;
+  const consultant = $('#fConsultant').value;
+  const date = $('#fDate').value;
+  const time = getSelectedTime();
+  const status = getSelectedStatusFromForm();
+  const consultStatus = getSelectedConsultStatusFromForm();
+  const customerType = $('#fCustomerType').value;
+  const rating = $('#fRating').value;
+  const note = $('#fNote').value.trim();
+
+  const conflict = hasConflict({ id: null, date, time, staff });
+  if (conflict) {
+    showToast(
+      'Trùng lịch theo nhân viên',
+      `${staff} đã có lịch ${formatVNDate(conflict.date)} • ${conflict.time} với ${conflict.customer}.`,
+      'error',
+    );
+    return;
+  }
+
+  const nextId = Math.max(0, ...appointments.value.map((a) => a.id)) + 1;
+  const appt = {
+    id: nextId,
+    customer,
+    phone,
+    staff,
+    consultant,
+    date,
+    time,
+    status,
+    consultStatus,
+    customerType,
+    rating,
+    creator: currentUser.name,
+    note,
+    history: [makeHistory(currentUser.name, 'CREATE', 'Tạo lịch hẹn.')],
+  };
+
+  appointments.value.push(appt);
+
+  selectedDateISO.value = date;
+  $('#fDate').value = date;
+
+  showToast('Đã tạo lịch hẹn', `${customer}: ${formatVNDate(date)} • ${time}`, 'success');
+  generateCalendar();
+  updateDaySchedule();
+  updateFilteredAppointments();
+  resetForm();
+}
+
+function renderHistory(appt) {
+  const history = (appt.history || []).slice(0, 80);
+  historyItems.value = history.map((h) => {
+    const dt = new Date(h.ts);
+    const stamp = `${pad2(dt.getHours())}:${pad2(dt.getMinutes())} • ${pad2(dt.getDate())}/${pad2(dt.getMonth() + 1)}/${dt.getFullYear()}`;
+    return { ...h, stamp };
+  });
+}
+
+function openModal(id) {
+  const appt = appointments.value.find((x) => x.id === id);
+  if (!appt) return;
+
+  editId.value = id;
+
+  $('#mCustomer').value = appt.customer || '';
+  $('#mPhone').value = appt.phone || '';
+  $('#mDate').value = appt.date;
+
+  $('#mTime').innerHTML = TIME_SLOTS.map((t) => `<option value="${t}">${t}</option>`).join('');
+  $('#mTime').value = appt.time;
+
+  fillSelect($('#mStaff'), STAFFS, appt.staff);
+  fillSelect($('#mConsultant'), CONSULTANTS, appt.consultant);
+
+  $('#mStatus').value = appt.status;
+  $('#mConsultStatus').value = appt.consultStatus || 'CARE';
+  $('#mCustomerType').value = appt.customerType || 'OWNER';
+  $('#mRating').value = appt.rating || 'CARE';
+  $('#mNote').value = appt.note || '';
+
+  renderHistory(appt);
+
+  $('#modalBackdrop').classList.add('open');
+  $('#modalBackdrop').setAttribute('aria-hidden', 'false');
+}
+
+function closeModal() {
+  $('#modalBackdrop').classList.remove('open');
+  $('#modalBackdrop').setAttribute('aria-hidden', 'true');
+  editId.value = null;
+}
+
+function saveModal() {
+  if (editId.value == null) return;
+  const idx = appointments.value.findIndex((x) => x.id === editId.value);
+  if (idx < 0) return;
+
+  const current = appointments.value[idx];
+
+  const next = {
+    ...current,
+    customer: $('#mCustomer').value.trim() || current.customer,
+    phone: $('#mPhone').value.trim(),
+    date: $('#mDate').value,
+    time: $('#mTime').value,
+    staff: $('#mStaff').value,
+    consultant: $('#mConsultant').value,
+    status: $('#mStatus').value,
+    consultStatus: $('#mConsultStatus').value,
+    customerType: $('#mCustomerType').value,
+    rating: $('#mRating').value,
+    note: $('#mNote').value.trim(),
+  };
+
+  if (next.status !== 'CANCELLED') {
+    const conflict = hasConflict({ id: next.id, date: next.date, time: next.time, staff: next.staff });
     if (conflict) {
       showToast(
         'Trùng lịch theo nhân viên',
-        `${staff} đã có lịch ${formatVNDate(conflict.date)} • ${conflict.time} với ${conflict.customer}.`,
+        `${next.staff} đã có lịch ${formatVNDate(conflict.date)} • ${conflict.time} với ${conflict.customer}.`,
         'error',
       );
       return;
     }
+  }
 
-    const nextId = Math.max(0, ...appointments.map((a) => a.id)) + 1;
-    const appt = {
-      id: nextId,
-      customer,
-      phone,
-      staff,
-      consultant,
-      date,
-      time,
-      status,
-      consultStatus,
-      customerType,
-      rating,
-      creator: currentUser.name,
-      note,
-      history: [makeHistory(currentUser.name, 'CREATE', 'Tạo lịch hẹn.')],
-    };
+  const changes = [];
+  if (current.date !== next.date || current.time !== next.time) {
+    changes.push(`Dời lịch: ${formatVNDate(current.date)} • ${current.time} → ${formatVNDate(next.date)} • ${next.time}.`);
+  }
+  if (current.staff !== next.staff) {
+    changes.push(`Đổi NV phụ trách: ${current.staff} → ${next.staff}.`);
+  }
+  if (current.consultant !== next.consultant) {
+    changes.push(`Đổi NV tư vấn: ${current.consultant || '-'} → ${next.consultant || '-'}.`);
+  }
+  if (current.status !== next.status) {
+    changes.push(`Đổi tình trạng: ${STATUS[current.status].label} → ${STATUS[next.status].label}.`);
+  }
+  if ((current.consultStatus || '') !== (next.consultStatus || '')) {
+    changes.push(`Đổi tình trạng tư vấn: ${CONSULT_STATUS[current.consultStatus]?.label || '-'} → ${CONSULT_STATUS[next.consultStatus]?.label || '-'}.`);
+  }
+  if ((current.customerType || '') !== (next.customerType || '')) {
+    changes.push(`Đổi phân loại KH: ${CUSTOMER_TYPE[current.customerType]?.label || '-'} → ${CUSTOMER_TYPE[next.customerType]?.label || '-'}.`);
+  }
+  if ((current.rating || '') !== (next.rating || '')) {
+    changes.push(`Đổi đánh giá: ${RATING[current.rating]?.label || '-'} → ${RATING[next.rating]?.label || '-'}.`);
+  }
+  if ((current.note || '') !== (next.note || '')) {
+    changes.push('Cập nhật ghi chú.');
+  }
+  if ((current.customer || '') !== (next.customer || '') || (current.phone || '') !== (next.phone || '')) {
+    changes.push('Cập nhật thông tin khách.');
+  }
 
-    appointments.push(appt);
+  next.history = next.history || [];
+  if (changes.length) {
+    next.history.unshift(makeHistory(currentUser.name, 'EDIT', changes.join(' ')));
+  }
 
-    selectedDateISO = date;
-    $('#fDate').value = date;
+  appointments.value[idx] = next;
 
-    showToast('Đã tạo lịch hẹn', `${customer}: ${formatVNDate(date)} • ${time}`, 'success');
-    generateCalendar();
-    renderDaySchedule();
-    renderTable();
+  selectedDateISO.value = next.date;
+  $('#fDate').value = next.date;
+
+  showToast('Đã lưu thay đổi', `${next.customer}: ${formatVNDate(next.date)} • ${next.time}`, 'success');
+  generateCalendar();
+  updateDaySchedule();
+  updateFilteredAppointments();
+  closeModal();
+}
+
+function exportCSV() {
+  const filtered = applyFilters(appointments.value);
+  const header = [
+    'Khách hàng',
+    'SĐT',
+    'Ngày',
+    'Giờ',
+    'NV phụ trách',
+    'NV tư vấn',
+    'Tình trạng',
+    'KQ tư vấn',
+    'Phân loại',
+    'Đánh giá',
+    'Người tạo',
+    'Ghi chú',
+  ];
+
+  const rows = filtered.map((a) => [
+    a.customer,
+    a.phone,
+    a.date,
+    a.time,
+    a.staff,
+    a.consultant,
+    STATUS[a.status].label,
+    CONSULT_STATUS[a.consultStatus]?.label || '',
+    CUSTOMER_TYPE[a.customerType]?.label || '',
+    RATING[a.rating]?.label || '',
+    a.creator,
+    a.note || '',
+  ]);
+
+  const csv = [header, ...rows]
+    .map((r) => r.map((v) => `"${String(v || '').replaceAll('"', '""')}"`).join(','))
+    .join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `lich-hen_${selectedDateISO.value}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+
+  showToast('Xuất file thành công', `Đã xuất ${filtered.length} dòng CSV.`, 'success');
+}
+
+function initTimeSelection() {
+  const timeOptions = $$('.time-option');
+  timeOptions.forEach((option) => {
+    option.addEventListener('click', function handleTimeClick() {
+      timeOptions.forEach((opt) => opt.classList.remove('selected'));
+      this.classList.add('selected');
+    });
+  });
+}
+
+function initStatusSelection() {
+  const statusOptions = $$('#statusSelection .status-option');
+  statusOptions.forEach((option) => {
+    option.addEventListener('click', function handleStatusClick() {
+      statusOptions.forEach((opt) => opt.classList.remove('selected'));
+      this.classList.add('selected');
+    });
+  });
+}
+
+function initConsultSelection() {
+  const opts = $$('#consultSelection .consult-option');
+  opts.forEach((option) => {
+    option.addEventListener('click', function handleConsultClick() {
+      opts.forEach((o) => o.classList.remove('selected'));
+      this.classList.add('selected');
+    });
+  });
+}
+
+function initStatusFilter() {
+  const tags = $$('#statusFilter .status-tag');
+  tags.forEach((tag) => {
+    tag.addEventListener('click', () => {
+      tags.forEach((t) => t.classList.remove('active'));
+      tag.classList.add('active');
+      activeStatus.value = tag.getAttribute('data-status');
+      updateFilteredAppointments();
+    });
+  });
+}
+
+function initFilterTabs() {
+  const btns = $$('#filterTabs .filter-btn');
+  btns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      btns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeRange.value = btn.getAttribute('data-range');
+      updateFilteredAppointments();
+    });
+  });
+}
+
+function initSearch() {
+  $('#searchInput').addEventListener('input', (e) => {
+    searchQuery.value = e.target.value || '';
+    updateFilteredAppointments();
+  });
+}
+
+function initCreateBtn() {
+  $('#createAppointmentBtn').addEventListener('click', () => {
+    $('#formSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    highlightForm();
     resetForm();
-  }
+  });
+}
 
-  // ===== Modal edit (with history) =====
-  function renderHistory(a) {
-    const wrap = $('#historyList');
-    const history = (a.history || []).slice(0, 80);
-    if (history.length === 0) {
-      wrap.innerHTML = `<div style="font-weight:800; color:#94a3b8; font-size:12.5px;">Chưa có lịch sử.</div>`;
-      return;
-    }
-    wrap.innerHTML = history
-      .map((h) => {
-        const dt = new Date(h.ts);
-        const stamp = `${pad2(dt.getHours())}:${pad2(dt.getMinutes())} • ${pad2(dt.getDate())}/${pad2(dt.getMonth() + 1)}/${dt.getFullYear()}`;
-        return `
-        <div class="h-item">
-          <div class="h-top">
-            <span>${h.actor} • ${h.action}</span>
-            <span>${stamp}</span>
-          </div>
-          <div class="h-desc">${h.desc || ''}</div>
-        </div>
-      `;
-      })
-      .join('');
-  }
+function initFormButtons() {
+  $('#cancelFormBtn').addEventListener('click', () => resetForm());
+  $('#saveFormBtn').addEventListener('click', () => saveFromForm());
+}
 
-  function openModal(id) {
-    const a = appointments.find((x) => x.id === id);
-    if (!a) return;
-
-    editId = id;
-
-    $('#mCustomer').value = a.customer || '';
-    $('#mPhone').value = a.phone || '';
-    $('#mDate').value = a.date;
-
-    $('#mTime').innerHTML = TIME_SLOTS.map((t) => `<option value="${t}">${t}</option>`).join('');
-    $('#mTime').value = a.time;
-
-    fillSelect($('#mStaff'), STAFFS, a.staff);
-    fillSelect($('#mConsultant'), CONSULTANTS, a.consultant);
-
-    $('#mStatus').value = a.status;
-    $('#mConsultStatus').value = a.consultStatus || 'CARE';
-    $('#mCustomerType').value = a.customerType || 'OWNER';
-    $('#mRating').value = a.rating || 'CARE';
-    $('#mNote').value = a.note || '';
-
-    renderHistory(a);
-
-    $('#modalBackdrop').classList.add('open');
-    $('#modalBackdrop').setAttribute('aria-hidden', 'false');
-  }
-
-  function closeModal() {
-    $('#modalBackdrop').classList.remove('open');
-    $('#modalBackdrop').setAttribute('aria-hidden', 'true');
-    editId = null;
-  }
-
-  function saveModal() {
-    if (editId == null) return;
-    const idx = appointments.findIndex((x) => x.id === editId);
-    if (idx < 0) return;
-
-    const current = appointments[idx];
-
-    const next = {
-      ...current,
-      customer: $('#mCustomer').value.trim() || current.customer,
-      phone: $('#mPhone').value.trim(),
-      date: $('#mDate').value,
-      time: $('#mTime').value,
-      staff: $('#mStaff').value,
-      consultant: $('#mConsultant').value,
-      status: $('#mStatus').value,
-      consultStatus: $('#mConsultStatus').value,
-      customerType: $('#mCustomerType').value,
-      rating: $('#mRating').value,
-      note: $('#mNote').value.trim(),
-    };
-
-    if (next.status !== 'CANCELLED') {
-      const conflict = hasConflict({ id: next.id, date: next.date, time: next.time, staff: next.staff });
-      if (conflict) {
-        showToast(
-          'Trùng lịch theo nhân viên',
-          `${next.staff} đã có lịch ${formatVNDate(conflict.date)} • ${conflict.time} với ${conflict.customer}.`,
-          'error',
-        );
-        return;
-      }
-    }
-
-    const changes = [];
-    if (current.date !== next.date || current.time !== next.time) {
-      changes.push(`Dời lịch: ${formatVNDate(current.date)} • ${current.time} → ${formatVNDate(next.date)} • ${next.time}.`);
-    }
-    if (current.staff !== next.staff) {
-      changes.push(`Đổi NV phụ trách: ${current.staff} → ${next.staff}.`);
-    }
-    if (current.consultant !== next.consultant) {
-      changes.push(`Đổi NV tư vấn: ${current.consultant || '-'} → ${next.consultant || '-'}.`);
-    }
-    if (current.status !== next.status) {
-      changes.push(`Đổi tình trạng: ${STATUS[current.status].label} → ${STATUS[next.status].label}.`);
-    }
-    if ((current.consultStatus || '') !== (next.consultStatus || '')) {
-      changes.push(`Đổi tình trạng tư vấn: ${CONSULT_STATUS[current.consultStatus]?.label || '-'} → ${CONSULT_STATUS[next.consultStatus]?.label || '-'}.`);
-    }
-    if ((current.customerType || '') !== (next.customerType || '')) {
-      changes.push(`Đổi phân loại KH: ${CUSTOMER_TYPE[current.customerType]?.label || '-'} → ${CUSTOMER_TYPE[next.customerType]?.label || '-'}.`);
-    }
-    if ((current.rating || '') !== (next.rating || '')) {
-      changes.push(`Đổi đánh giá: ${RATING[current.rating]?.label || '-'} → ${RATING[next.rating]?.label || '-'}.`);
-    }
-    if ((current.note || '') !== (next.note || '')) {
-      changes.push('Cập nhật ghi chú.');
-    }
-    if ((current.customer || '') !== (next.customer || '') || (current.phone || '') !== (next.phone || '')) {
-      changes.push('Cập nhật thông tin khách.');
-    }
-
-    next.history = next.history || [];
-    if (changes.length) {
-      next.history.unshift(makeHistory(currentUser.name, 'EDIT', changes.join(' ')));
-    }
-
-    appointments[idx] = next;
-
-    selectedDateISO = next.date;
-    $('#fDate').value = next.date;
-
-    showToast('Đã lưu thay đổi', `${next.customer}: ${formatVNDate(next.date)} • ${next.time}`, 'success');
+function initCalendarNav() {
+  $('#prevMonthBtn').addEventListener('click', () => {
+    calendarMonth.value = new Date(calendarMonth.value.getFullYear(), calendarMonth.value.getMonth() - 1, 1);
     generateCalendar();
-    renderDaySchedule();
-    renderTable();
-    closeModal();
+  });
+  $('#nextMonthBtn').addEventListener('click', () => {
+    calendarMonth.value = new Date(calendarMonth.value.getFullYear(), calendarMonth.value.getMonth() + 1, 1);
+    generateCalendar();
+  });
+}
+
+function initDayButtons() {
+  $('#jumpToFormBtn').addEventListener('click', () => {
+    $('#fDate').value = selectedDateISO.value;
+    $('#formSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    highlightForm();
+  });
+  $('#refreshDayBtn').addEventListener('click', () => {
+    updateDaySchedule();
+    showToast('Đã làm mới', `Day Schedule • ${formatVNDate(selectedDateISO.value)}`, 'success');
+  });
+}
+
+function initModal() {
+  $('#modalCloseBtn').addEventListener('click', closeModal);
+  $('#modalCancelBtn').addEventListener('click', closeModal);
+  $('#modalSaveBtn').addEventListener('click', saveModal);
+  $('#modalBackdrop').addEventListener('click', (e) => {
+    if (e.target === $('#modalBackdrop')) closeModal();
+  });
+
+  const closeOnEscape = (e) => {
+    if (e.key === 'Escape') closeModal();
+  };
+  registerWindowListener('keydown', closeOnEscape);
+}
+
+function initExport() {
+  $('#exportBtn').addEventListener('click', exportCSV);
+}
+
+function toggleActionMenu(id) {
+  openActionMenuId.value = openActionMenuId.value === id ? null : id;
+}
+
+function handleAction(type, appt, event) {
+  openActionMenuId.value = null;
+  if (type === 'edit') {
+    openModal(appt.id);
+  } else if (type === 'status') {
+    openStatusPopover(event.currentTarget, appt.id);
+  } else if (type === 'delete') {
+    appointments.value = appointments.value.filter((x) => x.id !== appt.id);
+    generateCalendar();
+    updateDaySchedule();
+    updateFilteredAppointments();
+    showToast('Đã xoá lịch hẹn', appt.customer || 'Đã xoá.', 'success');
   }
+}
 
-  // ===== Action menus =====
-  function closeAllActionMenus() {
-    $$('[data-action-menu="1"]').forEach((m) => m.classList.remove('open'));
-  }
+function getStatusInfo(status) {
+  return STATUS[status];
+}
 
-  // ===== Export CSV =====
-  function exportCSV() {
-    const filtered = applyFilters(appointments);
-    const header = [
-      'Khách hàng',
-      'SĐT',
-      'Ngày',
-      'Giờ',
-      'NV phụ trách',
-      'NV tư vấn',
-      'Tình trạng',
-      'KQ tư vấn',
-      'Phân loại',
-      'Đánh giá',
-      'Người tạo',
-      'Ghi chú',
-    ];
+function getConsultInfo(status) {
+  return CONSULT_STATUS[status] || CONSULT_STATUS.CARE;
+}
 
-    const rows = filtered.map((a) => [
-      a.customer,
-      a.phone,
-      a.date,
-      a.time,
-      a.staff,
-      a.consultant,
-      STATUS[a.status].label,
-      CONSULT_STATUS[a.consultStatus]?.label || '',
-      CUSTOMER_TYPE[a.customerType]?.label || '',
-      RATING[a.rating]?.label || '',
-      a.creator,
-      a.note || '',
-    ]);
+function getCustomerTypeInfo(value) {
+  return CUSTOMER_TYPE[value] || Object.values(CUSTOMER_TYPE)[0];
+}
 
-    const csv = [header, ...rows]
-      .map((r) => r.map((v) => `"${String(v || '').replaceAll('"', '""')}"`).join(','))
-      .join('\n');
+function getRatingInfo(value) {
+  return RATING[value] || Object.values(RATING)[0];
+}
 
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `lich-hen_${selectedDateISO}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+onMounted(() => {
+  if (!rootRef.value) return;
 
-    showToast('Xuất file thành công', `Đã xuất ${filtered.length} dòng CSV.`, 'success');
-  }
+  selectedDateISO.value = '2026-01-03';
+  $('#fDate').value = selectedDateISO.value;
 
-  // ===== Init UI interactions =====
-  function initTimeSelection() {
-    const timeOptions = $$('.time-option');
-    timeOptions.forEach((option) => {
-      option.addEventListener('click', function handleTimeClick() {
-        timeOptions.forEach((opt) => opt.classList.remove('selected'));
-        this.classList.add('selected');
-      });
-    });
-  }
-
-  function initStatusSelection() {
-    const statusOptions = $$('#statusSelection .status-option');
-    statusOptions.forEach((option) => {
-      option.addEventListener('click', function handleStatusClick() {
-        statusOptions.forEach((opt) => opt.classList.remove('selected'));
-        this.classList.add('selected');
-      });
-    });
-  }
-
-  function initConsultSelection() {
-    const opts = $$('#consultSelection .consult-option');
-    opts.forEach((option) => {
-      option.addEventListener('click', function handleConsultClick() {
-        opts.forEach((o) => o.classList.remove('selected'));
-        this.classList.add('selected');
-      });
-    });
-  }
-
-  function initStatusFilter() {
-    const tags = $$('#statusFilter .status-tag');
-    tags.forEach((tag) => {
-      tag.addEventListener('click', () => {
-        tags.forEach((t) => t.classList.remove('active'));
-        tag.classList.add('active');
-        activeStatus = tag.getAttribute('data-status');
-        renderTable();
-      });
-    });
-  }
-
-  function initFilterTabs() {
-    const btns = $$('#filterTabs .filter-btn');
-    btns.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        btns.forEach((b) => b.classList.remove('active'));
-        btn.classList.add('active');
-        activeRange = btn.getAttribute('data-range');
-        renderTable();
-      });
-    });
-  }
-
-  function initSearch() {
-    $('#searchInput').addEventListener('input', (e) => {
-      searchQuery = e.target.value || '';
-      renderTable();
-    });
-  }
-
-  function initCreateBtn() {
-    $('#createAppointmentBtn').addEventListener('click', () => {
-      $('#formSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      highlightForm();
-      resetForm();
-    });
-  }
-
-  function initFormButtons() {
-    $('#cancelFormBtn').addEventListener('click', () => resetForm());
-    $('#saveFormBtn').addEventListener('click', () => saveFromForm());
-  }
-
-  function initCalendarNav() {
-    $('#prevMonthBtn').addEventListener('click', () => {
-      calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1);
-      generateCalendar();
-    });
-    $('#nextMonthBtn').addEventListener('click', () => {
-      calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1);
-      generateCalendar();
-    });
-  }
-
-  function initDayButtons() {
-    $('#jumpToFormBtn').addEventListener('click', () => {
-      $('#fDate').value = selectedDateISO;
-      $('#formSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      highlightForm();
-    });
-    $('#refreshDayBtn').addEventListener('click', () => {
-      renderDaySchedule();
-      showToast('Đã làm mới', `Day Schedule • ${formatVNDate(selectedDateISO)}`, 'success');
-    });
-  }
-
-  function initTableDelegation() {
-    $('#appointmentsTbody').addEventListener('click', (e) => {
-      const actionBtn = e.target.closest('[data-action-btn="1"]');
-      if (actionBtn) {
-        e.stopPropagation();
-        const id = Number(actionBtn.getAttribute('data-id'));
-        const menu = $(`[data-action-menu="1"][data-id="${id}"]`);
-        if (menu) {
-          const open = menu.classList.contains('open');
-          closeAllActionMenus();
-          if (!open) menu.classList.add('open');
-        }
-        return;
-      }
-
-      const act = e.target.closest('[data-act]');
-      if (act) {
-        e.stopPropagation();
-        const id = Number(act.getAttribute('data-id'));
-        const type = act.getAttribute('data-act');
-
-        closeAllActionMenus();
-
-        if (type === 'edit') {
-          openModal(id);
-        } else if (type === 'status') {
-          const badge = $(`[data-status-badge="1"][data-id="${id}"]`);
-          if (badge) openStatusPopover(badge, id);
-          else openModal(id);
-        } else if (type === 'delete') {
-          const a = appointments.find((x) => x.id === id);
-          appointments = appointments.filter((x) => x.id !== id);
-          generateCalendar();
-          renderDaySchedule();
-          renderTable();
-          showToast('Đã xoá lịch hẹn', a ? a.customer : 'Đã xoá.', 'success');
-        }
-        return;
-      }
-
-      const badge = e.target.closest('[data-status-badge="1"]');
-      if (badge) {
-        e.stopPropagation();
-        const id = Number(badge.getAttribute('data-id'));
-        openStatusPopover(badge, id);
-      }
-    });
-
-    const closeMenus = (e) => {
-      if (!e.target.closest('[data-action-menu="1"]') && !e.target.closest('[data-action-btn="1"]')) {
-        closeAllActionMenus();
-      }
-    };
-    registerWindowListener('click', closeMenus);
-  }
-
-  function initDayDelegation() {
-    $('#slots').addEventListener('click', (e) => {
-      const mini = e.target.closest('[data-mini]');
-      if (mini) {
-        const id = Number(mini.getAttribute('data-id'));
-        const type = mini.getAttribute('data-mini');
-        if (type === 'edit') openModal(id);
-        if (type === 'status') openStatusPopover(mini, id);
-      }
-    });
-  }
-
-  function initModal() {
-    $('#modalCloseBtn').addEventListener('click', closeModal);
-    $('#modalCancelBtn').addEventListener('click', closeModal);
-    $('#modalSaveBtn').addEventListener('click', saveModal);
-    $('#modalBackdrop').addEventListener('click', (e) => {
-      if (e.target === $('#modalBackdrop')) closeModal();
-    });
-
-    const closeOnEscape = (e) => {
-      if (e.key === 'Escape') closeModal();
-    };
-    registerWindowListener('keydown', closeOnEscape);
-  }
-
-  function initExport() {
-    $('#exportBtn').addEventListener('click', exportCSV);
-  }
-
-  // ===== Boot =====
-  selectedDateISO = '2026-01-03';
-  $('#fDate').value = selectedDateISO;
-
-  // fill selects
   fillSelect($('#fStaff'), STAFFS, 'Lê Hiếu');
   fillSelect($('#fConsultant'), CONSULTANTS, 'Tư vấn 1');
   fillSelect($('#mStaff'), STAFFS, 'Lê Hiếu');
@@ -1130,14 +990,18 @@ onMounted(() => {
   initFormButtons();
   initCalendarNav();
   initDayButtons();
-  initTableDelegation();
-  initDayDelegation();
   initModal();
   initExport();
 
+  registerWindowListener('click', (e) => {
+    if (!e.target.closest('[data-action-menu="1"]') && !e.target.closest('[data-action-btn="1"]')) {
+      openActionMenuId.value = null;
+    }
+  });
+
   generateCalendar();
-  renderDaySchedule();
-  renderTable();
+  updateDaySchedule();
+  updateFilteredAppointments();
 
   showToast('Sẵn sàng', 'Đã thêm NV tư vấn + KQ tư vấn + phân loại + đánh giá.', 'success');
 });
@@ -1168,25 +1032,25 @@ onBeforeUnmount(() => {
         <section class="stats">
           <div class="stat">
             <div class="k">Tổng lịch hẹn (theo bộ lọc)</div>
-            <div class="v" id="statTotal">0</div>
+            <div class="v">{{ statTotal }}</div>
             <div class="hint">Cập nhật theo tab / trạng thái / tìm kiếm</div>
             <div class="i"><i class="fa-solid fa-layer-group"></i></div>
           </div>
           <div class="stat">
             <div class="k">Trong ngày đang chọn</div>
-            <div class="v" id="statSelectedDay">0</div>
+            <div class="v">{{ statSelectedDay }}</div>
             <div class="hint">Số lịch trong Day Schedule</div>
             <div class="i"><i class="fa-solid fa-calendar-day"></i></div>
           </div>
           <div class="stat">
             <div class="k">Đã lên</div>
-            <div class="v" id="statUp">0</div>
+            <div class="v">{{ statUp }}</div>
             <div class="hint">Trong danh sách đang lọc</div>
             <div class="i"><i class="fa-solid fa-circle-check"></i></div>
           </div>
           <div class="stat">
             <div class="k">Chưa lên / Tạm hoãn</div>
-            <div class="v" id="statPending">0</div>
+            <div class="v">{{ statPending }}</div>
             <div class="hint">Trong danh sách đang lọc</div>
             <div class="i"><i class="fa-solid fa-bell"></i></div>
           </div>
@@ -1218,7 +1082,7 @@ onBeforeUnmount(() => {
           <div class="stack">
             <section class="calendar-section">
               <div class="calendar-header">
-                <h3 id="calendarTitle">Tháng 1, 2026</h3>
+                <h3 id="calendarTitle">{{ calendarTitle }}</h3>
                 <div class="calendar-nav">
                   <button class="calendar-nav-btn" id="prevMonthBtn"><i class="fas fa-chevron-left"></i></button>
                   <button class="calendar-nav-btn" id="nextMonthBtn"><i class="fas fa-chevron-right"></i></button>
@@ -1235,13 +1099,22 @@ onBeforeUnmount(() => {
                 <div class="day-name">T7</div>
               </div>
 
-              <div class="calendar-dates" id="calendarDates"></div>
+              <div class="calendar-dates" id="calendarDates">
+                <div
+                  v-for="cell in calendarCells"
+                  :key="cell.key"
+                  :class="cell.classes"
+                  @click="handleCalendarClick(cell)"
+                >
+                  {{ cell.label }}
+                </div>
+              </div>
             </section>
 
             <section class="day-section" id="daySection">
               <div class="day-head">
                 <div class="day-title">
-                  <h4 id="dayTitle">Day Schedule • 03/01/2026</h4>
+                  <h4 id="dayTitle">{{ dayTitle }}</h4>
                   <p id="daySub">Kéo thả để dời giờ. Click badge để đổi trạng thái. Tất cả thay đổi có lịch sử.</p>
                 </div>
                 <div class="day-actions">
@@ -1250,7 +1123,50 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <div class="slots" id="slots"></div>
+              <div class="slots" id="slots">
+                <div v-for="slot in daySlots" :key="slot.time" class="slot">
+                  <div class="slot-time">{{ slot.time }}</div>
+                  <div
+                    class="slot-drop"
+                    data-slot="1"
+                    :data-time="slot.time"
+                    :class="{ over: dragOverSlot === slot.time }"
+                    @dragover="handleDragOver($event, slot.time)"
+                    @dragleave="handleDragLeave(slot.time)"
+                    @drop="handleDrop($event, slot.time)"
+                  >
+                    <template v-if="slot.appointments.length">
+                      <div
+                        v-for="appt in slot.appointments"
+                        :key="appt.id"
+                        class="appt-card"
+                        data-appt-card="1"
+                        :data-id="appt.id"
+                        :draggable="appt.status !== 'CANCELLED'"
+                        :class="{ disabled: appt.status === 'CANCELLED' }"
+                        @dragstart="handleDragStart($event, appt)"
+                      >
+                        <span class="appt-badge" :style="{ background: getStatusInfo(appt.status).dot }"></span>
+                        <div class="appt-main">
+                          <div class="n">{{ appt.customer }}</div>
+                          <div class="m">{{ appt.phone || '' }}</div>
+                          <div class="appt-meta">{{ appt.staff }} • {{ getStatusInfo(appt.status).label }}</div>
+                          <div class="appt-sub">TV: {{ appt.consultant || '-' }} • {{ getConsultInfo(appt.consultStatus).label }}</div>
+                        </div>
+                        <div class="appt-cta">
+                          <button class="mini-btn" title="Sửa" @click.stop="openModal(appt.id)">
+                            <i class="fa-regular fa-pen-to-square"></i>
+                          </button>
+                          <button class="mini-btn" title="Đổi trạng thái" data-mini="status" @click.stop="openStatusPopover($event.currentTarget, appt.id)">
+                            <i class="fa-solid fa-rotate"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </template>
+                    <span v-else style="font-weight:800; color:#94a3b8; font-size:12.5px;">Kéo thả lịch vào đây</span>
+                  </div>
+                </div>
+              </div>
             </section>
           </div>
 
@@ -1355,9 +1271,9 @@ onBeforeUnmount(() => {
             <h3>Lịch hẹn gần đây</h3>
             <div class="pill-muted" id="activeFilterPill">
               <i class="fa-solid fa-filter"></i>
-              <span id="activeFilterText">Tất cả</span>
+              <span id="activeFilterText">{{ activeFilterText }}</span>
               <span style="opacity:.6;">•</span>
-              <span id="activeFilterCount">0</span>
+              <span id="activeFilterCount">{{ activeFilterCount }}</span>
             </div>
           </div>
 
@@ -1377,14 +1293,101 @@ onBeforeUnmount(() => {
                   <th style="width:90px;">Thao tác</th>
                 </tr>
               </thead>
-              <tbody id="appointmentsTbody"></tbody>
+              <tbody id="appointmentsTbody">
+                <tr v-for="appt in filteredAppointments" :key="appt.id" :data-row-id="appt.id">
+                  <td>
+                    <div class="customer-info">
+                      <div class="customer-avatar">{{ initials(appt.customer) }}</div>
+                      <div>
+                        <div class="customer-name">{{ appt.customer }}</div>
+                        <div class="customer-phone">{{ appt.phone || '' }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="pill-muted">
+                      <i class="fa-regular fa-calendar"></i>{{ formatVNDate(appt.date) }} • {{ appt.time }}
+                    </span>
+                  </td>
+                  <td>{{ appt.staff }}</td>
+                  <td>{{ appt.consultant || '-' }}</td>
+                  <td>
+                    <span class="consult-badge" :class="getConsultInfo(appt.consultStatus).cls">
+                      <i class="fa-solid" :class="getConsultInfo(appt.consultStatus).icon"></i>
+                      {{ getConsultInfo(appt.consultStatus).label }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="chip" :class="getCustomerTypeInfo(appt.customerType).cls">
+                      {{ getCustomerTypeInfo(appt.customerType).label }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="chip" :class="getRatingInfo(appt.rating).cls">
+                      {{ getRatingInfo(appt.rating).label }}
+                    </span>
+                  </td>
+                  <td style="position:relative;">
+                    <span
+                      class="status-badge"
+                      data-status-badge="1"
+                      :data-id="appt.id"
+                      :class="getStatusInfo(appt.status).cls"
+                      @click.stop="openStatusPopover($event.currentTarget, appt.id)"
+                    >
+                      {{ getStatusInfo(appt.status).label }}
+                      <i class="fa-solid fa-chevron-down" style="font-size:11px; opacity:.85;"></i>
+                    </span>
+                  </td>
+                  <td>{{ appt.creator }}</td>
+                  <td>
+                    <div class="action-dropdown">
+                      <button class="action-btn" data-action-btn="1" :data-id="appt.id" @click.stop="toggleActionMenu(appt.id)">
+                        <i class="fas fa-ellipsis-v"></i>
+                      </button>
+                      <div class="menu-pop" data-action-menu="1" :data-id="appt.id" :class="{ open: openActionMenuId === appt.id }">
+                        <button @click.stop="handleAction('edit', appt, $event)">
+                          <i class="fa-regular fa-pen-to-square"></i>
+                          Sửa lịch hẹn
+                        </button>
+                        <button @click.stop="handleAction('status', appt, $event)">
+                          <i class="fa-solid fa-rotate"></i>
+                          Đổi tình trạng
+                        </button>
+                        <button @click.stop="handleAction('delete', appt, $event)">
+                          <i class="fa-regular fa-trash-can"></i>
+                          Xoá lịch hẹn
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </div>
         </section>
       </main>
     </div>
 
-    <div class="status-pop" id="statusPopover"></div>
+    <div
+      class="status-pop"
+      id="statusPopover"
+      :class="{ open: statusPopover.open }"
+      :style="{ top: statusPopover.top, left: statusPopover.left }"
+    >
+      <button
+        v-for="option in statusPopover.options"
+        :key="option.key"
+        class="opt"
+        @click.stop="handleStatusOptionClick(option)"
+      >
+        <span>{{ option.label }}</span>
+        <span
+          class="dot"
+          :style="{ background: option.dot, boxShadow: option.active ? '0 0 0 3px rgba(15,23,42,.06)' : '' }"
+        ></span>
+      </button>
+    </div>
 
     <div class="backdrop" id="modalBackdrop" aria-hidden="true">
       <div class="modal" role="dialog" aria-modal="true">
@@ -1469,7 +1472,20 @@ onBeforeUnmount(() => {
 
           <div class="modal-panel">
             <h5><i class="fa-solid fa-clock-rotate-left"></i>Lịch sử thay đổi</h5>
-            <div class="history" id="historyList"></div>
+            <div class="history" id="historyList">
+              <div v-if="!historyItems.length" style="font-weight:800; color:#94a3b8; font-size:12.5px;">
+                Chưa có lịch sử.
+              </div>
+              <div v-else>
+                <div v-for="item in historyItems" :key="item.ts" class="h-item">
+                  <div class="h-top">
+                    <span>{{ item.actor }} • {{ item.action }}</span>
+                    <span>{{ item.stamp }}</span>
+                  </div>
+                  <div class="h-desc">{{ item.desc || '' }}</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1705,6 +1721,10 @@ onBeforeUnmount(() => {
   cursor:grab;
   user-select:none;
   min-width: 260px;
+}
+.appt-card.disabled{
+  opacity:.6;
+  cursor:not-allowed;
 }
 .appt-card:active{ cursor:grabbing; }
 .appt-badge{ width:10px; height:10px; border-radius:50%; margin-top:6px; flex:0 0 auto; }
