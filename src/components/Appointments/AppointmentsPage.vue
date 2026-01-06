@@ -1070,7 +1070,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="action-buttons">
-            <button class="btn btn-secondary" id="exportBtn"><i class="fas fa-download"></i>Xuất file</button>
+<!--            <button class="btn btn-secondary" id="exportBtn"><i class="fas fa-download"></i>Xuất file</button>-->
             <button class="btn btn-primary" id="createAppointmentBtn"><i class="fas fa-plus"></i>Tạo lịch hẹn</button>
           </div>
         </div>
@@ -1387,7 +1387,7 @@ onBeforeUnmount(() => {
     </div>
 
     <div v-if="isModalOpen" class="backdrop" @click.self="closeModal">
-      <div class="modal" role="dialog" aria-modal="true">
+      <div class="editor-modal" role="dialog" aria-modal="true">
         <div class="modal-head">
           <h4 id="modalTitle">Sửa lịch hẹn</h4>
           <button class="modal-close" type="button" @click="closeModal">
@@ -1530,7 +1530,7 @@ onBeforeUnmount(() => {
 .page-title h2{ font-size:22px; font-weight:800; color:#0b1220; }
 .page-title p{ font-size:13px; color:#64748b; margin-top:4px; }
 
-.search-bar{ position:relative; width:320px; max-width:100%; }
+.search-bar{ position:relative; width:420px; max-width:100%; }
 .search-bar input{
   width:100%; padding:12px 14px 12px 40px;
   border:1px solid rgba(15,23,42,.08);
@@ -1568,9 +1568,28 @@ onBeforeUnmount(() => {
 
 /* Filters */
 .filters{
-  display:flex; justify-content:space-between; align-items:center;
-  margin-bottom:16px; flex-wrap:wrap; gap:12px;
+  display:flex;
+  align-items:center;
+  margin-bottom:16px;
+  gap:12px;
+  flex-wrap:wrap;
 }
+
+/* ✅ TẤT CẢ MẶC ĐỊNH CĂN TRÁI */
+.filter-tabs,
+.status-filter{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+/* ✅ CHỈ NÚT TẠO MỚI CĂN PHẢI */
+.action-buttons{
+  margin-left:auto;
+  display:flex;
+  gap:10px;
+}
+
 .filter-tabs{ display:flex; gap:8px; flex-wrap:wrap; }
 .filter-btn{
   padding:10px 14px; border:1px solid rgba(15,23,42,.08); background:#ffffff;
@@ -1592,7 +1611,8 @@ onBeforeUnmount(() => {
   transition:.2s ease;
   user-select:none;
 }
-.status-tag.active{ box-shadow: inset 0 0 0 2px rgba(15,23,42,.10); transform: translateY(-1px); }
+.status-tag.active{ box-shadow: inset 0 0 0 2px rgba(30, 41, 243, 0.1); transform: translateY(-1px); border: solid 1px #283e91
+}
 .status-all{ background:#f1f5f9; color:#334155; }
 .status-up{ background:#e7f7ef; color:#27ae60; }
 .status-not-up{ background:#fff4e6; color:#f39c12; }
@@ -1615,7 +1635,9 @@ onBeforeUnmount(() => {
   background:#ffffff; color:#4d7cfe;
   border:1px solid rgba(77,124,254,.45);
 }
-.btn-secondary:hover{ background:rgba(77,124,254,.06); }
+.btn-secondary:hover{ background:rgba(77,124,254,.06); color: #0942cb;
+  border:1px solid #0942cb;
+}
 
 /* Layout */
 .appointment-container{
@@ -1789,7 +1811,9 @@ onBeforeUnmount(() => {
   cursor:pointer; transition:.18s ease; font-weight:900;
   border:2px solid transparent; user-select:none; font-size:13px;
 }
-.status-option.selected{ border-color: rgba(15,23,42,.35); }
+.status-option.selected{
+  border: 2px solid rgba(18, 86, 246, 0.35) !important;
+}
 .status-up-option{ background:#e7f7ef; color:#27ae60; }
 .status-not-up-option{ background:#fff4e6; color:#f39c12; }
 .status-postponed-option{ background:#e3f2fd; color:#2980b9; }
@@ -1803,7 +1827,7 @@ onBeforeUnmount(() => {
   cursor:pointer; transition:.18s ease; font-weight:900;
   border:2px solid transparent; user-select:none; font-size:13px;
 }
-.consult-option.selected{ border-color: rgba(15,23,42,.35); }
+.consult-option.selected{ border: 2px solid rgba(18, 86, 246, 0.35) !important; }
 .consult-success{ background:#e7f7ef; color:#27ae60; }
 .consult-fail{ background:#ffeaea; color:#e74c3c; }
 .consult-care{ background:#e3f2fd; color:#2980b9; }
@@ -1904,7 +1928,8 @@ tr:hover td{ background: rgba(77,124,254,.03); }
   z-index:50;
   animation: pop .12s ease-out;
 }
-.menu-pop.open{ display:block; }
+.menu-pop.open{ display:block; background-color: rgb(253, 253, 253)
+}
 @keyframes pop{ from{ transform: translateY(-4px); opacity:.7; } to{ transform: translateY(0); opacity:1; } }
 .menu-pop button{
   width:100%; text-align:left;
@@ -1931,7 +1956,7 @@ tr:hover td{ background: rgba(77,124,254,.03); }
   min-width:210px;
   animation: pop .12s ease-out;
 }
-.status-pop.open{ display:block; }
+.status-pop.open{ display:block }
 .status-pop .opt{
   width:100%;
   border:none;
@@ -1947,21 +1972,37 @@ tr:hover td{ background: rgba(77,124,254,.03); }
 
 /* Modal */
 .backdrop{
-  position:fixed; inset:0;
-  background: rgba(2,6,23,.55);
-  align-items:center; justify-content:center;
-  z-index:100;
-  padding:18px;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  padding: 24px;
 }
-.modal{
-  width: min(980px, 100%);
-  background:#ffffff;
-  border-radius: 20px;
-  border:1px solid rgba(255,255,255,.08);
-  box-shadow: 0 30px 80px rgba(0,0,0,.35);
-  overflow:hidden;
+
+.editor-modal{
+  width: min(980px, 95vw);
+  background: #f8fafc;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+
+  /* ❌ BỎ TOÀN BỘ CÁI NÀY */
+  /* top: 50%; */
+  /* left: 50%; */
+  /* transform: translate(-50%, -50%); */
+
+  /* animation OK */
   animation: modalIn .16s ease-out;
 }
+
+
 @keyframes modalIn{ from{ transform: translateY(8px); opacity:.75; } to{ transform: translateY(0); opacity:1; } }
 
 .modal-head{

@@ -131,6 +131,7 @@ import PaymentQR from "../components/user/Profile/component/PaymentQR.vue";
 import productCreateUser from "../components/productUser/productCreateUser.vue"
 import productUpdate from "../components/productUser/ProductUpdate.vue"
 import RutTienAdmin from "../components/rutTienAdmin.vue";
+import DemoGiaoDien from "../components/thiet-kegiandien/marketing-cap-da-ta.vue"
 
 const routes = [
     // {
@@ -143,6 +144,11 @@ const routes = [
         path: "/-thg/dang-nhap",
         name: "LoginForm",
         component: LoginForm,
+    },
+    {
+        path: '/giao-dien',
+        component: DemoGiaoDien,
+        meta: {requiresAuth: false, loginFrom: "admin", enableTailwind: true},
     },
     {
         path: "/user/quan-ly-san-pham",
