@@ -136,6 +136,20 @@ const activeRange = ref('all');
 const activeStatus = ref('ALL');
 const searchQuery = ref('');
 const editId = ref(null);
+const isModalOpen = ref(false);
+const modalForm = reactive({
+  customer: '',
+  phone: '',
+  date: '',
+  time: TIME_SLOTS[0],
+  staff: STAFFS[0],
+  consultant: CONSULTANTS[0],
+  status: 'UP',
+  consultStatus: 'CARE',
+  customerType: 'OWNER',
+  rating: 'CARE',
+  note: '',
+});
 
 function makeHistory(actor, action, desc) {
   return { ts: nowISO(), actor, action, desc };
@@ -662,31 +676,25 @@ function openModal(id) {
 
   editId.value = id;
 
-  $('#mCustomer').value = appt.customer || '';
-  $('#mPhone').value = appt.phone || '';
-  $('#mDate').value = appt.date;
-
-  $('#mTime').innerHTML = TIME_SLOTS.map((t) => `<option value="${t}">${t}</option>`).join('');
-  $('#mTime').value = appt.time;
-
-  fillSelect($('#mStaff'), STAFFS, appt.staff);
-  fillSelect($('#mConsultant'), CONSULTANTS, appt.consultant);
-
-  $('#mStatus').value = appt.status;
-  $('#mConsultStatus').value = appt.consultStatus || 'CARE';
-  $('#mCustomerType').value = appt.customerType || 'OWNER';
-  $('#mRating').value = appt.rating || 'CARE';
-  $('#mNote').value = appt.note || '';
+  modalForm.customer = appt.customer || '';
+  modalForm.phone = appt.phone || '';
+  modalForm.date = appt.date;
+  modalForm.time = TIME_SLOTS.includes(appt.time) ? appt.time : TIME_SLOTS[0];
+  modalForm.staff = STAFFS.includes(appt.staff) ? appt.staff : STAFFS[0];
+  modalForm.consultant = CONSULTANTS.includes(appt.consultant) ? appt.consultant : CONSULTANTS[0];
+  modalForm.status = appt.status;
+  modalForm.consultStatus = appt.consultStatus || 'CARE';
+  modalForm.customerType = appt.customerType || 'OWNER';
+  modalForm.rating = appt.rating || 'CARE';
+  modalForm.note = appt.note || '';
 
   renderHistory(appt);
 
-  $('#modalBackdrop').classList.add('open');
-  $('#modalBackdrop').setAttribute('aria-hidden', 'false');
+  isModalOpen.value = true;
 }
 
 function closeModal() {
-  $('#modalBackdrop').classList.remove('open');
-  $('#modalBackdrop').setAttribute('aria-hidden', 'true');
+  isModalOpen.value = false;
   editId.value = null;
 }
 
@@ -699,17 +707,17 @@ function saveModal() {
 
   const next = {
     ...current,
-    customer: $('#mCustomer').value.trim() || current.customer,
-    phone: $('#mPhone').value.trim(),
-    date: $('#mDate').value,
-    time: $('#mTime').value,
-    staff: $('#mStaff').value,
-    consultant: $('#mConsultant').value,
-    status: $('#mStatus').value,
-    consultStatus: $('#mConsultStatus').value,
-    customerType: $('#mCustomerType').value,
-    rating: $('#mRating').value,
-    note: $('#mNote').value.trim(),
+    customer: modalForm.customer.trim() || current.customer,
+    phone: modalForm.phone.trim(),
+    date: modalForm.date,
+    time: modalForm.time,
+    staff: modalForm.staff,
+    consultant: modalForm.consultant,
+    status: modalForm.status,
+    consultStatus: modalForm.consultStatus,
+    customerType: modalForm.customerType,
+    rating: modalForm.rating,
+    note: modalForm.note.trim(),
   };
 
   if (next.status !== 'CANCELLED') {
@@ -916,20 +924,6 @@ function initDayButtons() {
   });
 }
 
-function initModal() {
-  $('#modalCloseBtn').addEventListener('click', closeModal);
-  $('#modalCancelBtn').addEventListener('click', closeModal);
-  $('#modalSaveBtn').addEventListener('click', saveModal);
-  $('#modalBackdrop').addEventListener('click', (e) => {
-    if (e.target === $('#modalBackdrop')) closeModal();
-  });
-
-  const closeOnEscape = (e) => {
-    if (e.key === 'Escape') closeModal();
-  };
-  registerWindowListener('keydown', closeOnEscape);
-}
-
 function initExport() {
   $('#exportBtn').addEventListener('click', exportCSV);
 }
@@ -977,8 +971,6 @@ onMounted(() => {
 
   fillSelect($('#fStaff'), STAFFS, 'Lê Hiếu');
   fillSelect($('#fConsultant'), CONSULTANTS, 'Tư vấn 1');
-  fillSelect($('#mStaff'), STAFFS, 'Lê Hiếu');
-  fillSelect($('#mConsultant'), CONSULTANTS, 'Tư vấn 1');
 
   initTimeSelection();
   initStatusSelection();
@@ -990,7 +982,6 @@ onMounted(() => {
   initFormButtons();
   initCalendarNav();
   initDayButtons();
-  initModal();
   initExport();
 
   registerWindowListener('click', (e) => {
@@ -1004,6 +995,12 @@ onMounted(() => {
   updateFilteredAppointments();
 
   showToast('Sẵn sàng', 'Đã thêm NV tư vấn + KQ tư vấn + phân loại + đánh giá.', 'success');
+
+  registerWindowListener('keydown', (e) => {
+    if (e.key === 'Escape' && isModalOpen.value) {
+      closeModal();
+    }
+  });
 });
 
 onBeforeUnmount(() => {
@@ -1389,11 +1386,13 @@ onBeforeUnmount(() => {
       </button>
     </div>
 
-    <div class="backdrop" id="modalBackdrop" aria-hidden="true">
+    <div v-if="isModalOpen" class="backdrop" @click.self="closeModal">
       <div class="modal" role="dialog" aria-modal="true">
         <div class="modal-head">
           <h4 id="modalTitle">Sửa lịch hẹn</h4>
-          <button class="modal-close" id="modalCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+          <button class="modal-close" type="button" @click="closeModal">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
 
         <div class="modal-body">
@@ -1401,34 +1400,42 @@ onBeforeUnmount(() => {
             <div class="form-grid">
               <div class="form-group">
                 <label class="form-label">Khách hàng</label>
-                <input id="mCustomer" type="text" class="form-input" />
+                <input id="mCustomer" v-model="modalForm.customer" type="text" class="form-input" />
               </div>
               <div class="form-group">
                 <label class="form-label">Số điện thoại</label>
-                <input id="mPhone" type="text" class="form-input" />
+                <input id="mPhone" v-model="modalForm.phone" type="text" class="form-input" />
               </div>
 
               <div class="form-group">
                 <label class="form-label">Ngày hẹn</label>
-                <input id="mDate" type="date" class="form-input" />
+                <input id="mDate" v-model="modalForm.date" type="date" class="form-input" />
               </div>
               <div class="form-group">
                 <label class="form-label">Giờ hẹn</label>
-                <select id="mTime" class="form-select"></select>
+                <select id="mTime" v-model="modalForm.time" class="form-select">
+                  <option v-for="slot in TIME_SLOTS" :key="slot" :value="slot">{{ slot }}</option>
+                </select>
               </div>
 
               <div class="form-group">
                 <label class="form-label">NV phụ trách</label>
-                <select id="mStaff" class="form-select"></select>
+                <select id="mStaff" v-model="modalForm.staff" class="form-select">
+                  <option v-for="staff in STAFFS" :key="staff" :value="staff">{{ staff }}</option>
+                </select>
               </div>
               <div class="form-group">
                 <label class="form-label">NV tư vấn</label>
-                <select id="mConsultant" class="form-select"></select>
+                <select id="mConsultant" v-model="modalForm.consultant" class="form-select">
+                  <option v-for="consultant in CONSULTANTS" :key="consultant" :value="consultant">
+                    {{ consultant }}
+                  </option>
+                </select>
               </div>
 
               <div class="form-group">
                 <label class="form-label">Tình trạng (đến lịch)</label>
-                <select id="mStatus" class="form-select">
+                <select id="mStatus" v-model="modalForm.status" class="form-select">
                   <option value="UP">Đã lên</option>
                   <option value="NOT_UP">Chưa lên</option>
                   <option value="POSTPONED">Tạm hoãn</option>
@@ -1438,7 +1445,7 @@ onBeforeUnmount(() => {
 
               <div class="form-group">
                 <label class="form-label">Tình trạng tư vấn</label>
-                <select id="mConsultStatus" class="form-select">
+                <select id="mConsultStatus" v-model="modalForm.consultStatus" class="form-select">
                   <option value="SUCCESS">Thành công</option>
                   <option value="FAIL">Thất bại</option>
                   <option value="CARE">Chăm sóc</option>
@@ -1447,7 +1454,7 @@ onBeforeUnmount(() => {
 
               <div class="form-group">
                 <label class="form-label">Phân loại khách hàng</label>
-                <select id="mCustomerType" class="form-select">
+                <select id="mCustomerType" v-model="modalForm.customerType" class="form-select">
                   <option value="OWNER">Chính chủ</option>
                   <option value="BROKER">Môi giới</option>
                   <option value="RELATIVE">Người thân</option>
@@ -1456,7 +1463,7 @@ onBeforeUnmount(() => {
 
               <div class="form-group">
                 <label class="form-label">Đánh giá</label>
-                <select id="mRating" class="form-select">
+                <select id="mRating" v-model="modalForm.rating" class="form-select">
                   <option value="POTENTIAL">Tiềm năng</option>
                   <option value="NOT_POTENTIAL">Không tiềm năng</option>
                   <option value="CARE">Chăm sóc</option>
@@ -1466,7 +1473,7 @@ onBeforeUnmount(() => {
 
             <div class="form-group">
               <label class="form-label">Ghi chú</label>
-              <textarea id="mNote" class="form-textarea"></textarea>
+              <textarea id="mNote" v-model="modalForm.note" class="form-textarea"></textarea>
             </div>
           </div>
 
@@ -1490,8 +1497,10 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="modal-foot">
-          <button class="btn btn-secondary" id="modalCancelBtn">Đóng</button>
-          <button class="btn btn-primary" id="modalSaveBtn"><i class="fa-solid fa-floppy-disk"></i>Lưu thay đổi</button>
+          <button class="btn btn-secondary" type="button" @click="closeModal">Đóng</button>
+          <button class="btn btn-primary" type="button" @click="saveModal">
+            <i class="fa-solid fa-floppy-disk"></i>Lưu thay đổi
+          </button>
         </div>
       </div>
     </div>
@@ -1940,12 +1949,10 @@ tr:hover td{ background: rgba(77,124,254,.03); }
 .backdrop{
   position:fixed; inset:0;
   background: rgba(2,6,23,.55);
-  display:none;
   align-items:center; justify-content:center;
   z-index:100;
   padding:18px;
 }
-.backdrop.open{ display:flex; }
 .modal{
   width: min(980px, 100%);
   background:#ffffff;
