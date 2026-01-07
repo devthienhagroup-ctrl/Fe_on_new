@@ -15,6 +15,13 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 
+//AOS
+import AOS from "aos";
+import "aos/dist/aos.css";
+
+//
+import "./components/user/UI/GlobalUI.css"
+
 // App init
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
@@ -40,3 +47,22 @@ document.addEventListener("contextmenu", (event) => {
     event.preventDefault();
     console.log("[Security] Right click disabled.");
 });
+
+
+// init 1 lần
+AOS.init({
+    once: true,
+    duration: 700,
+    easing: "ease-out-cubic",
+});
+
+// refresh mỗi lần đổi route
+router.afterEach((to) => {
+    if (!to.meta.useAOS) return;
+
+    setTimeout(() => {
+        AOS.refreshHard();
+    }, 80);
+});
+
+import "/src/assets/css/global.css"

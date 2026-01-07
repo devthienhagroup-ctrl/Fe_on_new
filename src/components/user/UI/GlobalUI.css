@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* =========================
+   Base
+   ========================= */
+:root {
+    font-family: var(--fontFamily, 'Inter', sans-serif);
+}
+
+/* =========================
+   Glass Card
+   ========================= */
+.glass-card-base {
+    background: rgba(255, 255, 255, var(--glass-bg-opacity));
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid rgba(255, 255, 255, var(--glass-border-opacity));
+    transition: all 0.4s ease;
+}
+
+.glass-card-base:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, var(--glass-bg-hover-opacity));
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--glass-shadow-hover);
+}
+
+/* =========================
+   Gradients
+   ========================= */
+.gradient-blue-purple {
+    background: linear-gradient(
+            to right,
+            var(--color-blue-500),
+            var(--color-purple-500)
+    );
+}
+
+.gradient-blue-purple-diagonal {
+    background: linear-gradient(
+            to bottom right,
+            var(--color-blue-500),
+            var(--color-purple-500)
+    );
+}
+
+.gradient-text-blue-purple {
+    background: linear-gradient(
+            to right,
+            var(--gradient-primary-from),
+            var(--gradient-primary-to)
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.text-gradient {
+    background: linear-gradient(
+            to right,
+            var(--gradient-text-from),
+            var(--gradient-text-to)
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* =========================
+   Button
+   ========================= */
+.btn-gradient {
+    background-size: 200% auto;
+    background-image: linear-gradient(
+            to right,
+            var(--gradient-primary-from) 0%,
+            var(--gradient-primary-to) 51%,
+            var(--gradient-primary-from) 100%
+    );
+    transition: 0.5s;
+}
+
+.btn-gradient:hover {
+    background-position: right center;
+}
+
+/* =========================
+   Map
+   ========================= */
+.map-filter {
+    filter:
+            grayscale(var(--map-grayscale))
+            invert(var(--map-invert))
+            contrast(var(--map-contrast));
+    transition: filter 0.5s ease;
+}
+
+.map-filter:hover {
+    filter: none;
+}

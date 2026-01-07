@@ -1,1707 +1,1370 @@
 <template>
-  <div class="mkt-data-system">
-    <!-- Header -->
-    <div class="header">
-      <div class="header-left">
-        <h1 class="page-title">
-          <i class="fas fa-users"></i>
-          Quản lý Dữ liệu Khách hàng - Phòng Marketing
-        </h1>
-        <p class="page-subtitle">Nhập và quản lý thông tin khách hàng từ nhiều nền tảng</p>
-      </div>
-      <div class="header-right">
-        <div class="user-info">
-          <div class="user-avatar">
-            <i class="fas fa-user-tie"></i>
+  <div id="refined-dashboard" class="refined-dashboard">
+    <!-- Compact Header -->
+    <div class="dashboard-header">
+      <div class="container">
+        <div class="header-content">
+          <div class="d-flex align-items-center gap-3">
+            <div class="brand-icon">
+              <i class="fa-solid fa-chart-pie"></i>
+            </div>
+            <div>
+              <h1 class="dashboard-title">Bảng điều khiển Marketing</h1>
+              <p class="dashboard-subtitle">Nhập liệu & phân tích theo thời gian thực</p>
+            </div>
           </div>
-          <div class="user-details">
-            <span class="user-name">Nhân viên Marketing</span>
-            <span class="user-role">Phòng Marketing</span>
+          <div class="header-actions">
+            <button @click="generateSampleData" class="btn btn-sm btn-outline">
+              <i class="fas fa-sparkles"></i> Dữ liệu mẫu
+            </button>
+            <button @click="exportData" class="btn btn-sm btn-primary">
+              <i class="fas fa-download"></i> Xuất dữ liệu
+            </button>
           </div>
-          <button class="logout-btn">
-            <i class="fas fa-sign-out-alt"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Dashboard Stats -->
-    <div class="dashboard-stats">
-      <div class="stat-card">
-        <div class="stat-icon primary">
-          <i class="fas fa-calendar-day"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Hôm nay</h3>
-          <p class="stat-value">{{ stats.today }}</p>
-          <p class="stat-desc">khách hàng đã nhập</p>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon success">
-          <i class="fas fa-calendar-alt"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Tháng trước</h3>
-          <p class="stat-value">{{ stats.lastMonth }}</p>
-          <p class="stat-desc">khách hàng đã nhập</p>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon info">
-          <i class="fas fa-phone-volume"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Liên lạc được</h3>
-          <p class="stat-value">{{ stats.contacted }}</p>
-          <p class="stat-desc">khách hàng</p>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon warning">
-          <i class="fas fa-phone-slash"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-title">Không liên lạc được</h3>
-          <p class="stat-value">{{ stats.notContacted }}</p>
-          <p class="stat-desc">khách hàng</p>
         </div>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="main-content">
-      <!-- Form Section -->
-      <div class="card form-card">
-        <div class="card-header">
-          <h2 class="card-title">
-            <i class="fas fa-user-plus"></i>
-            Thêm khách hàng mới
-          </h2>
-          <div class="card-subtitle">Nhập thông tin khách hàng từ các nền tảng</div>
+    <div class="container main-content">
+      <div class="row g-4">
+        <!-- Left: Compact Form -->
+        <div class="col-lg-5">
+          <div class="form-panel">
+            <div class="panel-header">
+              <h3>
+                <span class="icon-label" style="background: linear-gradient(135deg, #FF6B6B, #FF8E53);">
+                  <i class="fas fa-user-edit"></i>
+                </span>
+                Nhập khách hàng
+              </h3>
+              <span class="badge">Mới</span>
+            </div>
+
+            <form @submit.prevent="submitData" class="compact-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Họ tên *</label>
+                  <div class="input-icon">
+                    <span class="icon-chip" style="background: linear-gradient(135deg, #36D1DC, #5B86E5); color: white;">
+                      <i class="fas fa-user"></i>
+                    </span>
+                    <input
+                        v-model="formData.name"
+                        type="text"
+                        class="form-control"
+                        placeholder="Nguyễn Văn A"
+                        required
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Số điện thoại *</label>
+                  <div class="input-icon">
+                    <span class="icon-chip" style="background: linear-gradient(135deg, #FF416C, #FF4B2B); color: white;">
+                      <i class="fas fa-phone"></i>
+                    </span>
+                    <input
+                        v-model="formData.phone"
+                        type="tel"
+                        class="form-control"
+                        placeholder="09xxxxxxxx"
+                        required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <!-- Province/City Searchable Dropdown -->
+                <div class="form-group">
+                  <label>Tỉnh/Thành</label>
+                  <div class="input-icon" style="position: relative;">
+    <span class="icon-chip" style="background: linear-gradient(135deg, #8344C5, #3A7BD5); color: white;">
+      <i class="fas fa-location-dot"></i>
+    </span>
+                    <input
+                        v-model="provinceSearch"
+                        @focus="provinceDropdownOpen = true"
+                        @input="provinceDropdownOpen = true"
+                        @blur="closeProvinceDropdown"
+                        type="text"
+                        class="form-control"
+                        placeholder="Tìm tỉnh/thành"
+                        autocomplete="off"
+                        style="cursor: pointer;"
+                    />
+                    <ul
+                        v-if="provinceDropdownOpen && filteredProvinces.length"
+                        class="province-dropdown"
+                        style="position: absolute; left: 0; right: 0; top: 110%; z-index: 10; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; max-height: 180px; overflow-y: auto; margin: 0; padding: 0;"
+                    >
+                      <li
+                          v-for="province in filteredProvinces"
+                          :key="province.name"
+                          @mousedown.prevent="selectProvince(province)"
+                          style="padding: 0.5rem 1rem; cursor: pointer; list-style: none;"
+                          :style="{ background: province.name === formData.area ? '#e0e7ff' : 'transparent' }"
+                      >
+                        {{ province.name }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Tên tỉnh cũ</label>
+                  <div class="input-icon">
+                    <span class="icon-chip"
+                          style="background: linear-gradient(135deg, #6b7280, #707f98); color: #f9fafb;">
+                      <i class="fas fa-map-marked-alt"></i>
+                    </span>
+                    <input
+                        v-model="formData.oldArea"
+                        type="text"
+                        class="form-control"
+                        placeholder="Tên tỉnh cũ (nếu có)"
+                    />
+                  </div>
+                </div>
+
+              </div>
+              <div class="form-group">
+                <label>Giá</label>
+                <div class="input-icon">
+                    <span class="icon-chip" style="background: linear-gradient(135deg, #00b09b, #96c93d); color: white;">
+                      <i class="fas fa-coins"></i>
+                    </span>
+                  <input
+                      v-model="formData.price"
+                      type="number"
+                      class="form-control"
+                      placeholder="0"
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Phân loại</label>
+                <div class="type-buttons">
+                  <button
+                      v-for="type in customerTypes"
+                      :key="type.id"
+                      type="button"
+                      :class="['type-btn', type.id, { active: formData.type === type.id }]"
+                      @click="formData.type = type.id"
+                  >
+                    <i :class="type.icon"></i>
+                    {{ type.label }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Ghi chú</label>
+                <div class="input-icon">
+                  <span class="icon-chip" style="background: linear-gradient(135deg, #FF9966, #FF5E62); color: white;">
+                    <i class="fas fa-note-sticky"></i>
+                  </span>
+                  <textarea
+                      v-model="formData.note"
+                      class="form-control"
+                      rows="2"
+                      placeholder="Thông tin bổ sung..."
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- Upload tiny -->
+              <div class="form-group">
+                <label>Đính kèm (tuỳ chọn)</label>
+                <div class="upload-row">
+                  <label class="upload-btn" title="Tải tệp nhỏ">
+                    <i class="fas fa-paperclip"></i>
+                    <span>Up file</span>
+                    <input class="upload-input" type="file" @change="onPickFile" />
+                  </label>
+                  <div class="upload-meta" v-if="pickedFileName">
+                    <i class="fas fa-file-lines"></i>
+                    <span class="text-truncate">{{ pickedFileName }}</span>
+                    <button type="button" class="upload-clear" @click="clearPickedFile" title="Bỏ chọn">
+                      <i class="fas fa-xmark"></i>
+                    </button>
+                  </div>
+                  <div class="upload-meta muted" v-else>
+                    <i class="fas fa-circle-info"></i>
+                    <span>Chọn tệp (nhỏ) để lưu kèm</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-check"></i> Ghi nhận
+                </button>
+                <button type="button" @click="clearForm" class="btn btn-text">
+                  Xoá
+                </button>
+                <div class="entry-counter">
+                  <small>{{ submissionCount }} lượt</small>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="stats-panel mt-4">
+            <div class="panel-header">
+              <h4>
+                <span class="icon-label" style="background: linear-gradient(135deg, #3A7BD5, #00D2FF);">
+                  <i class="fas fa-tachometer-alt"></i>
+                </span>
+                Thống kê nhanh
+              </h4>
+            </div>
+            <div class="mini-stats">
+              <div class="mini-stat stat-a">
+                <div class="stat-value sm">{{ quickStats.today }}</div>
+                <div class="stat-label">Hôm nay</div>
+              </div>
+              <div class="mini-stat stat-b">
+                <div class="stat-value sm">{{ quickStats.successRate }}%</div>
+                <div class="stat-label">Thành công</div>
+              </div>
+              <div class="mini-stat stat-c">
+                <div class="stat-value sm">{{ quickStats.avgValue }}M</div>
+                <div class="stat-label">Giá trị TB</div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="card-body">
-          <form @submit.prevent="submitForm" class="customer-form">
-            <div class="form-grid">
-              <!-- Row 1 -->
-              <div class="form-group">
-                <label class="form-label required">Họ tên khách hàng</label>
-                <input
-                    type="text"
-                    v-model="formData.fullName"
-                    class="form-control"
-                    placeholder="Nhập họ tên đầy đủ"
-                    required
-                >
+        <!-- Right: Analytics Panels -->
+        <div class="col-lg-7">
+          <!-- Performance Metrics -->
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="metric-card metric-card-call">
+                <div class="metric-header">
+                  <h4>
+                    <span class="icon-label" style="background: linear-gradient(135deg, #00C9FF, #92FE9D);">
+                      <i class="fas fa-phone-volume"></i>
+                    </span>
+                    Hiệu suất cuộc gọi
+                  </h4>
+                </div>
+                <div class="metric-content">
+                  <div class="metric-value">84%</div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 84%"></div>
+                  </div>
+                  <div class="metric-details">
+                    <span>Kết nối: 168</span>
+                    <span>Không kết nối: 32</span>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              <div class="form-group">
-                <label class="form-label required">Số điện thoại</label>
-                <input
-                    type="tel"
-                    v-model="formData.phone"
-                    class="form-control"
-                    placeholder="Nhập số điện thoại"
-                    required
-                >
+            <div class="col-md-6">
+              <div class="metric-card metric-card-revenue">
+                <div class="metric-header">
+                  <h4>
+                    <span class="icon-label" style="background: linear-gradient(135deg, #FF8A00, #FFC837);">
+                      <i class="fas fa-money-bill-wave"></i>
+                    </span>
+                    Tổng giá trị
+                  </h4>
+                </div>
+                <div class="metric-content">
+                  <div class="row align-items-center">
+                    <!-- Cột trái: Text -->
+                    <div class="col-7">
+                      <div class="metric-main">
+                        <div class="metric-value metric-value-sm" style="font-size: 16px">
+                          ₫{{ formatCurrency(totalValue) }}
+                        </div>
+                        <div class="metric-sub">Tổng khách nhập</div>
+                      </div>
+                    </div>
+
+                    <!-- Cột phải: Progress -->
+                    <div class="col-5 text-start">
+                      <div class="target-progress target-progress-lg d-inline-flex justify-content-end">
+                        <div
+                            class="progress-circle progress-circle-lg"
+                            :style="{ '--progress': '78' }"
+                        >
+                          <span>78%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
+            </div>
+          </div>
 
-              <div class="form-group">
-                <label class="form-label required">Khu vực (tỉnh/thành)</label>
-                <select
-                    v-model="formData.area"
-                    class="form-control"
-                    required
-                >
-                  <option value="">Chọn tỉnh/thành</option>
-                  <option v-for="area in areas" :key="area" :value="area">{{ area }}</option>
+          <!-- ✅ Phân bổ theo khu vực: thu nhỏ còn 1/2 -->
+          <div class="row" style="padding: 0.8rem;">
+            <div class="col-7 chart-panel chart-panel-distribution mt-2">
+              <div class="panel-header">
+                <h4>
+                  <span class="icon-label" style="background: linear-gradient(135deg, #FD746C, #FF9068);">
+                    <i class="fas fa-chart-pie"></i>
+                  </span>
+                  Phân bổ theo tỉnh/thành
+                </h4>
+                <select class="form-control form-control-sm period-select">
+                  <option>Tháng này</option>
+                  <option>Tháng trước</option>
                 </select>
               </div>
+              <div class="distribution-chart">
+                <div class="chart-graphic chart-graphic-sm">
+                  <canvas ref="distributionCanvas"></canvas>
+                </div>
+                <!-- ✅ Hiển thị tổng giá trị -->
+              </div>
+            </div>
+            <div class="col-5 status-stack mt-2 ps-4" style="padding-right: 0px">
+              <div class="status-item success">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                  <div class="status-count">892</div>
+                  <div class="status-label">Khách lên văn phòng</div>
+                </div>
+              </div>
 
-              <!-- Row 2 -->
-              <div class="form-group">
-                <label class="form-label required">Giá bán (VNĐ)</label>
-                <input
-                    type="number"
-                    v-model="formData.price"
-                    class="form-control"
-                    placeholder="Nhập giá bán"
-                    required
+              <div class="status-item pending">
+                <i class="fas fa-clock"></i>
+                <div>
+                  <div class="status-count">124</div>
+                  <div class="status-label">Cuộc gọi thành công</div>
+                </div>
+              </div>
+
+              <div class="status-item failed">
+                <i class="fas fa-times-circle"></i>
+                <div>
+                  <div class="status-count">56</div>
+                  <div class="status-label">Không liên lạc được</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- ✅ 3 thẻ thống kê: đưa lên, nằm riêng (không chung thẻ) -->
+
+
+          <!-- Weekly Activity (Chart.js Bar) -->
+          <div class="chart-panel chart-panel-activity mt-4">
+            <div class="panel-header panel-header-activity">
+              <h4>
+                <span class="icon-label" style="background: linear-gradient(135deg, #9D50BB, #6E48AA);">
+                  <i class="fas fa-chart-bar"></i>
+                </span>
+                Hoạt động nhập liệu
+              </h4>
+
+              <div class="activity-filter">
+                <button
+                    type="button"
+                    class="seg-btn"
+                    :class="{ active: activityRange === 'week' }"
+                    @click="setActivityRange('week')"
                 >
-                <div class="form-hint">Giá ban đầu chủ nhà ra</div>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Ảnh tài sản</label>
-                <div class="file-upload">
-                  <input
-                      type="file"
-                      ref="fileInput"
-                      @change="handleFileUpload"
-                      accept="image/*"
-                      class="file-input"
-                  >
-                  <div class="file-upload-area" @click="triggerFileInput">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p v-if="!formData.image">Chọn file ảnh</p>
-                    <p v-else>{{ formData.image.name }}</p>
-                    <span class="file-hint">Chọn file từ máy tính</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label required">Phân loại</label>
-                <div class="radio-group">
-                  <label class="radio-label" v-for="type in customerTypes" :key="type.value">
-                    <input
-                        type="radio"
-                        v-model="formData.type"
-                        :value="type.value"
-                        required
-                    >
-                    <span class="radio-custom"></span>
-                    {{ type.label }}
-                  </label>
-                </div>
-              </div>
-
-              <!-- Row 3 -->
-              <div class="form-group full-width">
-                <label class="form-label">Ghi chú</label>
-                <textarea
-                    v-model="formData.notes"
-                    class="form-control"
-                    rows="3"
-                    placeholder="Ghi chú thêm về khách hàng..."
-                ></textarea>
+                  Tuần
+                </button>
+                <button
+                    type="button"
+                    class="seg-btn"
+                    :class="{ active: activityRange === 'month' }"
+                    @click="setActivityRange('month')"
+                >
+                  Tháng
+                </button>
+                <button
+                    type="button"
+                    class="seg-btn"
+                    :class="{ active: activityRange === 'year' }"
+                    @click="setActivityRange('year')"
+                >
+                  Năm
+                </button>
               </div>
             </div>
 
-            <div class="form-actions">
-              <button type="button" class="btn btn-secondary" @click="resetForm">
-                <i class="fas fa-redo"></i>
-                Làm mới
-              </button>
-              <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i>
-                {{ isEditing ? 'Cập nhật' : 'Thêm khách hàng' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Customer List -->
-      <div class="card list-card">
-        <div class="card-header">
-          <div class="card-header-left">
-            <h2 class="card-title">
-              <i class="fas fa-list"></i>
-              Danh sách khách hàng đang xử lý
-            </h2>
-            <div class="card-subtitle">Dữ liệu chưa được chuyển đến Telesale</div>
-          </div>
-
-          <div class="card-header-right">
-            <div class="search-box">
-              <i class="fas fa-search"></i>
-              <input
-                  type="text"
-                  v-model="searchQuery"
-                  placeholder="Tìm kiếm theo tên, SĐT, khu vực..."
-                  class="search-input"
-              >
+            <div class="activity-chart-wrap activity-chart-wrap-lg">
+              <canvas ref="activityCanvas"></canvas>
             </div>
 
-            <div class="action-buttons">
-              <button
-                  class="btn btn-danger"
-                  @click="deleteSelected"
-                  :disabled="selectedCustomers.length === 0"
-              >
-                <i class="fas fa-trash"></i>
-                Xóa đã chọn
-              </button>
-
-              <button
-                  class="btn btn-primary"
-                  @click="transferSelected"
-                  :disabled="selectedCustomers.length === 0"
-              >
-                <i class="fas fa-paper-plane"></i>
-                Cấp data đã chọn
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="customer-table">
-              <thead>
-              <tr>
-                <th width="50">
-                  <input
-                      type="checkbox"
-                      v-model="selectAll"
-                      @change="toggleSelectAll"
-                  >
-                </th>
-                <th>Họ tên</th>
-                <th>SĐT</th>
-                <th>Khu vực</th>
-                <th>Giá bán</th>
-                <th>Phân loại</th>
-                <th>Trạng thái</th>
-                <th>Ngày nhập</th>
-                <th>Thao tác</th>
-              </tr>
-              </thead>
-
-              <tbody>
-              <tr v-if="filteredCustomers.length === 0">
-                <td colspan="9" class="empty-state">
-                  <i class="fas fa-inbox"></i>
-                  <p>Không có dữ liệu khách hàng đang xử lý</p>
-                </td>
-              </tr>
-
-              <tr
-                  v-for="customer in filteredCustomers"
-                  :key="customer.id"
-                  :class="{ selected: isSelected(customer.id) }"
-              >
-                <td>
-                  <input
-                      type="checkbox"
-                      :value="customer.id"
-                      v-model="selectedCustomers"
-                  >
-                </td>
-                <td>
-                  <div class="customer-name">
-                    {{ customer.fullName }}
-                    <span v-if="customer.notes" class="note-indicator" title="Có ghi chú">
-                        <i class="fas fa-sticky-note"></i>
-                      </span>
-                  </div>
-                </td>
-                <td>{{ customer.phone }}</td>
-                <td>
-                  <span class="area-badge">{{ customer.area }}</span>
-                </td>
-                <td class="price-cell">{{ formatPrice(customer.price) }} VNĐ</td>
-                <td>
-                    <span :class="['type-badge', getTypeClass(customer.type)]">
-                      {{ customer.type }}
-                    </span>
-                </td>
-                <td>
-                    <span :class="['status-badge', getStatusClass(customer.status)]">
-                      {{ getStatusText(customer.status) }}
-                    </span>
-                </td>
-                <td>{{ formatDate(customer.dateAdded) }}</td>
-                <td>
-                  <div class="action-buttons">
-                    <button
-                        class="btn-icon btn-edit"
-                        @click="editCustomer(customer)"
-                        title="Chỉnh sửa"
-                    >
-                      <i class="fas fa-edit"></i>
-                    </button>
-                    <button
-                        class="btn-icon btn-delete"
-                        @click="deleteCustomer(customer.id)"
-                        title="Xóa"
-                    >
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="table-footer">
-            <div class="selected-count">
-              Đã chọn: {{ selectedCustomers.length }} / {{ filteredCustomers.length }}
-            </div>
-
-            <div class="telesale-info">
-              <div class="telesale-stat">
-                <i class="fas fa-user"></i>
-                <span>Telesale 1: {{ telesaleEmployees[0].todayCount }}/5 data hôm nay</span>
-              </div>
-              <div class="telesale-stat">
-                <i class="fas fa-user"></i>
-                <span>Telesale 2: {{ telesaleEmployees[1].todayCount }}/5 data hôm nay</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Charts Section -->
-      <div class="card chart-card">
-        <div class="card-header">
-          <h2 class="card-title">
-            <i class="fas fa-chart-bar"></i>
-            Thống kê theo khu vực
-          </h2>
-        </div>
-
-        <div class="card-body">
-          <div class="chart-container">
-            <div class="chart">
-              <div
-                  v-for="(count, area) in stats.byArea"
-                  :key="area"
-                  class="chart-bar"
-                  :style="{ height: (count / maxAreaCount * 100) + '%' }"
-                  :title="`${area}: ${count} khách`"
-              >
-                <div class="bar-label">{{ count }}</div>
-              </div>
-            </div>
-            <div class="chart-labels">
-              <div v-for="(count, area) in stats.byArea" :key="area" class="chart-label">
-                {{ area }}
-              </div>
+            <div class="activity-note">
+              Biểu đồ cột hiển thị số lượng nhập theo {{ activityRangeLabel }}.
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Transfer Modal -->
-    <div v-if="showTransferModal" class="modal-overlay" @click.self="closeModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h3 class="modal-title">
-            <i class="fas fa-paper-plane"></i>
-            Chuyển dữ liệu đến Telesale
-          </h3>
-          <button class="modal-close" @click="closeModal">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-
-        <div class="modal-body">
-          <p class="modal-text">
-            Chọn nhân viên Telesale để nhận <strong>{{ selectedCustomers.length }}</strong> data khách hàng:
-          </p>
-
-          <div class="employee-list">
-            <div
-                v-for="employee in telesaleEmployees"
-                :key="employee.id"
-                :class="['employee-card', { selected: selectedEmployee === employee.id }]"
-                @click="selectEmployee(employee.id)"
-            >
-              <div class="employee-avatar">
-                <i class="fas fa-user-tie"></i>
-              </div>
-              <div class="employee-info">
-                <h4>{{ employee.name }}</h4>
-                <p class="employee-status">
-                  Đã nhận: {{ employee.todayCount }}/{{ employee.dailyLimit }} data hôm nay
-                </p>
-                <div class="progress-bar">
-                  <div
-                      class="progress-fill"
-                      :style="{ width: (employee.todayCount / employee.dailyLimit * 100) + '%' }"
-                  ></div>
-                </div>
-              </div>
-              <div class="employee-check">
-                <i class="fas fa-check" v-if="selectedEmployee === employee.id"></i>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="selectedEmployee" class="transfer-summary">
-            <div class="summary-item">
-              <i class="fas fa-users"></i>
-              <span>Số lượng: {{ selectedCustomers.length }} khách hàng</span>
-            </div>
-            <div class="summary-item">
-              <i class="fas fa-user-check"></i>
-              <span>Người nhận: {{ getEmployeeName(selectedEmployee) }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button class="btn btn-secondary" @click="closeModal">
-            Hủy
-          </button>
-          <button
-              class="btn btn-primary"
-              @click="confirmTransfer"
-              :disabled="!selectedEmployee"
-          >
-            <i class="fas fa-paper-plane"></i>
-            Xác nhận chuyển
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Notification container injected by JS -->
   </div>
 </template>
 
-<script>
-export default {
-  name: 'MktDataSystem',
+<script setup>
+import { ref, reactive, computed, onMounted, watch, onBeforeUnmount, nextTick } from "vue";
+import Chart from "chart.js/auto";
+import addressData from '/src/assets/js/address.json'
 
-  data() {
-    return {
-      // Form data
-      formData: {
-        fullName: '',
-        phone: '',
-        area: '',
-        price: '',
-        image: null,
-        type: 'Chủ nhà',
-        notes: ''
+const provinces = ref(addressData)
+const formData = reactive({
+  name: "",
+  phone: "",
+  area: "",
+  oldArea: null,
+  type: "",
+  price: "",
+  note: "",
+});
+
+const submissionCount = ref(0);
+const totalValue = ref(2435000000); // 2.435 tỷ
+
+const customerTypes = [
+  { id: "CHINH_CHU", label: "Chủ nhà", icon: "fas fa-house-user" },
+  { id: "MOI_GIOI", label: "Môi giới", icon: "fas fa-handshake" },
+  { id: "NGUOI_THAN", label: "Người thân", icon: "fas fa-people-group" },
+];
+
+const quickStats = reactive({
+  today: 24,
+  successRate: 84,
+  avgValue: 2.4,
+});
+
+/* =========================
+   DISTRIBUTION CHART (Chart.js)
+========================= */
+const distributionCanvas = ref(null);
+let distributionChart = null;
+const distributionData = reactive([
+  { id: "hcm", name: "TP. Hồ Chí Minh", value: 850000000, count: 40, color: "#FF416C" },
+  { id: "hn",  name: "Hà Nội",         value: 650000000, count: 30, color: "#36D1DC" },
+  { id: "dn",  name: "Đà Nẵng",        value: 450000000, count: 20, color: "#5B86E5" },
+  { id: "bd",  name: "Bình Dương",     value: 285000000, count: 15, color: "#FF8A00" },
+  { id: "dna", name: "Đồng Nai",       value: 205000000, count: 10, color: "#8344C5" },
+]);
+
+// Tính tổng giá trị phân bổ
+const totalDistributionValue = computed(() => {
+  return distributionData.reduce((sum, region) => sum + region.value, 0);
+});
+
+const renderDistributionChart = () => {
+  const el = distributionCanvas.value;
+  if (!el) return;
+
+  if (distributionChart) {
+    distributionChart.destroy();
+  }
+
+  const totalCount = distributionData.reduce(
+      (sum, r) => sum + r.count,
+      0
+  );
+
+  distributionChart = new Chart(el, {
+    type: 'doughnut',
+    data: {
+      labels: distributionData.map(r => r.name),
+      datasets: [
+        {
+          data: distributionData.map(r => r.count),
+          backgroundColor: distributionData.map(r => r.color),
+          borderWidth: 2,
+          borderColor: '#ffffff',
+          hoverOffset: 15,
+          hoverBorderWidth: 3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '65%',
+
+      // ===============================
+      // VẼ CHỮ GIỮA – KHÔNG PLUGIN
+      // ===============================
+      animation: {
+        animateRotate: true,
+        animateScale: true,
+        onComplete(animation) {
+          const chart = animation.chart;
+          const { ctx, chartArea } = chart;
+          if (!chartArea) return;
+
+          const centerX = (chartArea.left + chartArea.right) / 2;
+          const centerY = (chartArea.top + chartArea.bottom) / 2;
+
+          ctx.save();
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+
+          // Dòng 1: TỔNG
+          ctx.font = '700 14px Inter, system-ui, sans-serif';
+          ctx.fillStyle = '#475569';
+          ctx.fillText('TỔNG', centerX, centerY - 14);
+
+          // Dòng 2: Tổng giá trị
+          ctx.font = '700 18px Inter, system-ui, sans-serif';
+          ctx.fillStyle = '#0f172a';
+          ctx.fillText(
+              formatCurrency(totalDistributionValue.value),
+              centerX,
+              centerY + 10
+          );
+
+          ctx.restore();
+        }
       },
 
-      // Edit state
-      isEditing: false,
-      editingId: null,
+      plugins: {
+        // ===============================
+        // LEGEND
+        // ===============================
+        legend: {
+          display: true,
+          position: 'right',
+          labels: {
+            usePointStyle: true,
+            pointStyle: 'circle',
+            padding: 20,
+            color: '#1e293b',
+            font: {
+              size: 12,
+              family: "'Inter', system-ui, sans-serif"
+            },
+            generateLabels(chart) {
+              const data = chart.data;
+              if (!data.labels.length) return [];
 
-      // Search
-      searchQuery: '',
+              return data.labels.map((label, i) => {
+                const value = data.datasets[0].data[i];
+                const percent = ((value / totalCount) * 100).toFixed(1);
 
-      // Selection
-      selectedCustomers: [],
-      selectAll: false,
+                return {
+                  text: `${label} – ${value} KH (${percent}%)`,
+                  fillStyle: data.datasets[0].backgroundColor[i],
+                  strokeStyle: data.datasets[0].backgroundColor[i],
+                  index: i
+                };
+              });
+            }
+          }
+        },
 
-      // Modal
-      showTransferModal: false,
-      selectedEmployee: null,
+        // ===============================
+        // TOOLTIP (ĐÈ CHỮ TỔNG)
+        // ===============================
+        tooltip: {
+          backgroundColor: 'rgb(15,23,42)',
+          titleColor: '#ffffff',
+          bodyColor: '#e5e7eb',
+          footerColor: '#c7d2fe',
+          padding: 12,
+          cornerRadius: 8,
+          displayColors: true,
+          bodySpacing: 4,
+          footerMarginTop: 8,
 
-      // Data
-      customers: [],
-      nextId: 4,
+          callbacks: {
+            label(context) {
+              const label = context.label || '';
+              const count = context.raw;
+              const percent = ((count / totalCount) * 100).toFixed(1);
+              const region = distributionData[context.dataIndex];
 
-      // Telesale employees
-      telesaleEmployees: [
-        { id: 'telesale1', name: 'Nguyễn Văn A', dailyLimit: 5, todayCount: 0 },
-        { id: 'telesale2', name: 'Trần Thị B', dailyLimit: 5, todayCount: 0 }
-      ],
+              return [
+                `${label}: ${count} khách hàng (${percent}%)`,
+                `Giá trị: ${formatCurrency(region.value)}`
+              ];
+            },
+            footer(contexts) {
+              const region = distributionData[contexts[0].dataIndex];
+              const valuePercent = (
+                  (region.value / totalDistributionValue.value) *
+                  100
+              ).toFixed(1);
 
-      // Areas
-      areas: [
-        'Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng',
-        'Cần Thơ', 'Khánh Hòa', 'Bình Dương', 'Đồng Nai',
-        'Hà Tĩnh', 'Nghệ An', 'Thừa Thiên Huế', 'Quảng Nam'
-      ],
-
-      // Customer types
-      customerTypes: [
-        { value: 'Chủ nhà', label: 'Chủ nhà' },
-        { value: 'Môi giới', label: 'Môi giới' },
-        { value: 'Người thân', label: 'Người thân' }
-      ],
-
-      // Stats
-      stats: {
-        today: 0,
-        lastMonth: 24,
-        contacted: 18,
-        notContacted: 6,
-        byArea: {
-          'Hà Nội': 8,
-          'TP. Hồ Chí Minh': 7,
-          'Đà Nẵng': 3,
-          'Khác': 6
+              return `Chiếm ${valuePercent}% tổng giá trị`;
+            }
+          }
         }
-      }
-    }
-  },
-
-  computed: {
-    // Filter customers based on search query and status
-    filteredCustomers() {
-      return this.customers.filter(customer => {
-        // Only show pending or overlimit customers (not transferred)
-        if (customer.status === 'transferred') return false;
-
-        // Apply search filter
-        const query = this.searchQuery.toLowerCase();
-        return (
-            customer.fullName.toLowerCase().includes(query) ||
-            customer.phone.includes(query) ||
-            customer.area.toLowerCase().includes(query)
-        );
-      });
-    },
-
-    // Calculate max area count for chart scaling
-    maxAreaCount() {
-      return Math.max(...Object.values(this.stats.byArea));
-    }
-  },
-
-  watch: {
-    // Update stats when customers change
-    customers: {
-      handler() {
-        this.updateStats();
       },
-      deep: true
-    }
-  },
 
-  created() {
-    this.initializeData();
-  },
-
-  methods: {
-    // Initialize with sample data
-    initializeData() {
-      this.customers = [
-        {
-          id: 1,
-          fullName: 'Nguyễn Văn An',
-          phone: '0912345678',
-          area: 'Hà Nội',
-          price: '2500000000',
-          image: null,
-          notes: 'Khách hàng quan tâm bán nhà mặt phố',
-          type: 'Chủ nhà',
-          status: 'pending',
-          dateAdded: new Date().toISOString().split('T')[0]
-        },
-        {
-          id: 2,
-          fullName: 'Trần Thị Bình',
-          phone: '0923456789',
-          area: 'TP. Hồ Chí Minh',
-          price: '3500000000',
-          image: null,
-          notes: 'Cần bán gấp căn hộ chung cư',
-          type: 'Môi giới',
-          status: 'overlimit',
-          dateAdded: new Date().toISOString().split('T')[0]
-        },
-        {
-          id: 3,
-          fullName: 'Lê Văn Cường',
-          phone: '0934567890',
-          area: 'Đà Nẵng',
-          price: '1800000000',
-          image: null,
-          notes: 'Nhà riêng 3 tầng',
-          type: 'Chủ nhà',
-          status: 'pending',
-          dateAdded: new Date().toISOString().split('T')[0]
-        }
-      ];
-
-      this.nextId = 4;
-      this.updateStats();
-    },
-
-    // Update statistics
-    updateStats() {
-      const today = new Date().toISOString().split('T')[0];
-      this.stats.today = this.customers.filter(c => c.dateAdded === today).length;
-    },
-
-    // Handle form submission
-    submitForm() {
-      if (this.isEditing) {
-        // Update existing customer
-        const index = this.customers.findIndex(c => c.id === this.editingId);
-        if (index !== -1) {
-          this.customers[index] = {
-            ...this.customers[index],
-            ...this.formData
-          };
-          console.log(`Đã cập nhật khách hàng: ${this.formData.fullName}`);
-        }
-      } else {
-        // Add new customer
-        const newCustomer = {
-          id: this.nextId++,
-          ...this.formData,
-          status: 'pending',
-          dateAdded: new Date().toISOString().split('T')[0]
-        };
-
-        this.customers.push(newCustomer);
-        console.log(`Đã thêm khách hàng: ${this.formData.fullName}`);
-
-        // Auto transfer if possible
-        this.autoTransferData(newCustomer.id);
-      }
-
-      this.resetForm();
-    },
-
-    // Auto transfer data to telesale with less data
-    autoTransferData(customerId) {
-      const minCount = Math.min(
-          this.telesaleEmployees[0].todayCount,
-          this.telesaleEmployees[1].todayCount
-      );
-
-      const availableEmployee = this.telesaleEmployees.find(
-          emp => emp.todayCount === minCount && emp.todayCount < emp.dailyLimit
-      );
-
-      if (availableEmployee) {
-        const customerIndex = this.customers.findIndex(c => c.id === customerId);
-        if (customerIndex !== -1) {
-          this.customers[customerIndex].status = 'transferred';
-          this.customers[customerIndex].transferredTo = availableEmployee.id;
-
-          availableEmployee.todayCount++;
-
-          console.log(`Đã tự động chuyển data cho ${availableEmployee.name}`);
-          console.log(`${availableEmployee.name}: ${availableEmployee.todayCount}/${availableEmployee.dailyLimit}`);
-
-          alert(`Data đã được tự động chuyển cho ${availableEmployee.name}`);
-        }
-      } else {
-        // Mark as overlimit if both employees are at limit
-        const customerIndex = this.customers.findIndex(c => c.id === customerId);
-        if (customerIndex !== -1) {
-          this.customers[customerIndex].status = 'overlimit';
-          console.log('Cả hai nhân viên đã đạt giới hạn. Data sẽ được xử lý thủ công.');
-        }
-      }
-    },
-
-    // Handle file upload
-    handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        this.formData.image = file;
-      }
-    },
-
-    // Trigger file input click
-    triggerFileInput() {
-      this.$refs.fileInput.click();
-    },
-
-    // Edit customer
-    editCustomer(customer) {
-      this.formData = { ...customer };
-      this.isEditing = true;
-      this.editingId = customer.id;
-
-      // Scroll to form
-      document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
-    },
-
-    // Reset form
-    resetForm() {
-      this.formData = {
-        fullName: '',
-        phone: '',
-        area: '',
-        price: '',
-        image: null,
-        type: 'Chủ nhà',
-        notes: ''
-      };
-
-      this.isEditing = false;
-      this.editingId = null;
-
-      // Reset file input
-      if (this.$refs.fileInput) {
-        this.$refs.fileInput.value = '';
-      }
-    },
-
-    // Delete customer
-    deleteCustomer(id) {
-      if (confirm('Bạn có chắc chắn muốn xóa khách hàng này?')) {
-        const index = this.customers.findIndex(c => c.id === id);
-        if (index !== -1) {
-          this.customers.splice(index, 1);
-          console.log('Đã xóa khách hàng');
-        }
-      }
-    },
-
-    // Delete selected customers
-    deleteSelected() {
-      if (this.selectedCustomers.length === 0) return;
-
-      if (confirm(`Bạn có chắc chắn muốn xóa ${this.selectedCustomers.length} khách hàng đã chọn?`)) {
-        this.customers = this.customers.filter(
-            customer => !this.selectedCustomers.includes(customer.id)
-        );
-        this.selectedCustomers = [];
-        console.log('Đã xóa khách hàng đã chọn');
-      }
-    },
-
-    // Check if customer is selected
-    isSelected(id) {
-      return this.selectedCustomers.includes(id);
-    },
-
-    // Toggle select all
-    toggleSelectAll() {
-      if (this.selectAll) {
-        this.selectedCustomers = this.filteredCustomers.map(c => c.id);
-      } else {
-        this.selectedCustomers = [];
-      }
-    },
-
-    // Transfer selected customers
-    transferSelected() {
-      if (this.selectedCustomers.length === 0) {
-        alert('Vui lòng chọn ít nhất một khách hàng để chuyển data');
-        return;
-      }
-
-      // Check if any employee has capacity
-      const hasCapacity = this.telesaleEmployees.some(
-          emp => emp.todayCount < emp.dailyLimit
-      );
-
-      if (hasCapacity) {
-        this.showTransferModal = true;
-      } else {
-        alert('Cả hai nhân viên Telesale đã đạt giới hạn data hôm nay. Vui lòng thử lại vào ngày mai.');
-      }
-    },
-
-    // Select employee for transfer
-    selectEmployee(employeeId) {
-      const employee = this.telesaleEmployees.find(emp => emp.id === employeeId);
-
-      // Check if employee has capacity for selected customers
-      if (employee.todayCount + this.selectedCustomers.length > employee.dailyLimit) {
-        alert(`${employee.name} chỉ còn ${employee.dailyLimit - employee.todayCount} slot trống.`);
-        return;
-      }
-
-      this.selectedEmployee = employeeId;
-    },
-
-    // Get employee name by ID
-    getEmployeeName(employeeId) {
-      const employee = this.telesaleEmployees.find(emp => emp.id === employeeId);
-      return employee ? employee.name : '';
-    },
-
-    // Confirm transfer
-    confirmTransfer() {
-      if (!this.selectedEmployee || this.selectedCustomers.length === 0) return;
-
-      const employee = this.telesaleEmployees.find(emp => emp.id === this.selectedEmployee);
-
-      // Update customer status
-      this.selectedCustomers.forEach(id => {
-        const customerIndex = this.customers.findIndex(c => c.id === id);
-        if (customerIndex !== -1) {
-          this.customers[customerIndex].status = 'transferred';
-          this.customers[customerIndex].transferredTo = this.selectedEmployee;
-        }
-      });
-
-      // Update employee count
-      employee.todayCount += this.selectedCustomers.length;
-
-      console.log(`Đã chuyển ${this.selectedCustomers.length} data cho ${employee.name}`);
-      console.log(`${employee.name}: ${employee.todayCount}/${employee.dailyLimit}`);
-
-      // Close modal and reset selection
-      this.closeModal();
-      this.selectedCustomers = [];
-
-      alert(`Đã chuyển ${this.selectedCustomers.length} data cho ${employee.name}`);
-    },
-
-    // Close modal
-    closeModal() {
-      this.showTransferModal = false;
-      this.selectedEmployee = null;
-    },
-
-    // Format price
-    formatPrice(price) {
-      return Number(price).toLocaleString('vi-VN');
-    },
-
-    // Format date
-    formatDate(dateString) {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('vi-VN');
-    },
-
-    // Get status class
-    getStatusClass(status) {
-      switch (status) {
-        case 'pending': return 'status-pending';
-        case 'transferred': return 'status-transferred';
-        case 'overlimit': return 'status-overlimit';
-        default: return '';
-      }
-    },
-
-    // Get status text
-    getStatusText(status) {
-      switch (status) {
-        case 'pending': return 'Đang chờ';
-        case 'transferred': return 'Đã chuyển';
-        case 'overlimit': return 'Vượt giới hạn';
-        default: return '';
-      }
-    },
-
-    // Get type class
-    getTypeClass(type) {
-      switch (type) {
-        case 'Chủ nhà': return 'type-owner';
-        case 'Môi giới': return 'type-broker';
-        case 'Người thân': return 'type-relative';
-        default: return '';
+      interaction: {
+        intersect: false,
+        mode: 'index'
       }
     }
+  });
+};
+
+/* =========================
+   WEEKLY ACTIVITY (Chart.js)
+========================= */
+const activityCanvas = ref(null);
+let activityChart = null;
+
+const activityRange = ref("week");
+const activityRangeLabel = computed(() => {
+  if (activityRange.value === "week") return "tuần";
+  if (activityRange.value === "month") return "tháng";
+  return "năm";
+});
+
+const activityDataMap = {
+  week: {
+    labels: ["T2", "T3", "T4", "T5", "T6", "T7", "CN"],
+    data: [5, 7, 6, 9, 8, 10, 6],
+  },
+  month: {
+    labels: ["Tuần 1", "Tuần 2", "Tuần 3", "Tuần 4"],
+    data: [38, 42, 35, 50],
+  },
+  year: {
+    labels: ["Th1","Th2","Th3","Th4","Th5","Th6","Th7","Th8","Th9","Th10","Th11","Th12"],
+    data: [120, 140, 135, 150, 160, 170, 165, 180, 175, 190, 200, 210],
+  },
+};
+
+function renderActivityChart() {
+  const el = activityCanvas.value;
+  if (!el) return;
+
+  const cfg = activityDataMap[activityRange.value];
+
+  if (activityChart) {
+    activityChart.destroy();
+    activityChart = null;
+  }
+
+  activityChart = new Chart(el, {
+    type: "bar",
+    data: {
+      labels: cfg.labels,
+      datasets: [
+        {
+          label: "Số lượng nhập",
+          data: cfg.data,
+          backgroundColor: "rgba(79, 70, 229, 0.72)",
+          borderRadius: 6,
+          barPercentage: 0.42,
+          categoryPercentage: 0.62,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#0f172a",
+          titleColor: "#fff",
+          bodyColor: "#e5e7eb",
+          padding: 10,
+        },
+      },
+      scales: {
+        x: {
+          offset: true,
+          grid: {
+            drawBorder: false,
+            color: "rgba(148, 163, 184, 0.20)",
+          },
+          ticks: {
+            color: "#334155",
+            font: { size: 11 },
+          },
+        },
+        y: {
+          beginAtZero: true,
+          grid: {
+            drawBorder: false,
+            color: "rgba(148, 163, 184, 0.20)",
+            borderDash: [4, 4],
+          },
+          ticks: {
+            color: "#334155",
+            font: { size: 11 },
+          },
+        },
+      },
+    },
+  });
+}
+
+function setActivityRange(r) {
+  activityRange.value = r;
+}
+
+/* ===== Helper Functions ===== */
+function formatCurrency(value) {
+  if (value >= 1000000000) {
+    return (value / 1000000000).toFixed(3).replace('.', ',') + 'B';
+  } else if (value >= 1000000) {
+    return (value / 1000000).toFixed(1).replace('.', ',') + 'M';
+  } else {
+    return value.toLocaleString('vi-VN');
   }
 }
+
+/* ===== Upload ===== */
+const pickedFileName = ref("");
+function onPickFile(e) {
+  const f = e?.target?.files?.[0];
+  pickedFileName.value = f ? f.name : "";
+}
+function clearPickedFile() {
+  pickedFileName.value = "";
+}
+
+/* ===== Existing actions ===== */
+import api from "/src/api/api.js"
+import { showWarning, showSuccess, showError} from "../../assets/js/alertService.js";
+
+async function submitData() {
+  try {
+    const form = new FormData();
+
+    // DTO gửi cho backend
+    const dto = {
+      name: formData.name,
+      phone: formData.phone,
+      area: formData.area,
+      oldArea: formData.oldArea,
+      type: formData.type,
+      price: formData.price,
+      note: formData.note,
+    };
+
+    form.append(
+        "dto",
+        new Blob([JSON.stringify(dto)], { type: "application/json" })
+    );
+
+    // File upload (nếu có)
+    const fileInput = document.getElementById("fileInput");
+    if (fileInput?.files?.length) {
+      Array.from(fileInput.files).forEach(f => {
+        form.append("files", f);
+      });
+    }
+
+    // 🚀 CALL API
+    const res = await api.post(
+        "/customer-crm/marketing/create",
+        form,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true, // nếu dùng session / cookie
+        }
+    );
+
+    const data = res.data;
+    if( !res.success ){
+      showWarning(data?.message || "Gửi dữ liệu không thành công. Vui lòng thử lại!");
+      return;
+    }
+
+    // ======================
+    // API THÀNH CÔNG
+    // ======================
+    submissionCount.value++;
+
+    // Toast / notification
+    showSuccess(`Đã ghi nhận dữ liệu lượt #${submissionCount.value}`);
+
+    clearForm();
+
+  } catch (err) {
+    console.error(err);
+    showError("Gửi dữ liệu thất bại. Vui lòng thử lại!");
+  }
+}
+
+
+function clearForm() {
+  formData.name = "";
+  formData.phone = "";
+  formData.area = "";
+  formData.type = "";
+  formData.price = "";
+  formData.note = "";
+  clearPickedFile();
+}
+
+function generateSampleData() {
+  const names = ["Lê Minh Anh", "Trần Quốc Bảo", "Phạm Thị Cẩm", "Nguyễn Đức Duy"];
+  const areaList = ["hcm", "hn", "dn", "bd", "dna"];
+  const types = ["CHINH_CHU", "MOI_GIOI", "NGUOI_THAN"];
+
+  formData.name = names[Math.floor(Math.random() * names.length)];
+  formData.phone = `09${Math.floor(Math.random() * 90000000 + 10000000)}`;
+  formData.area = areaList[Math.floor(Math.random() * areaList.length)];
+  formData.type = types[Math.floor(Math.random() * types.length)];
+  formData.price = Math.floor(Math.random() * 5000 + 500);
+  formData.note = "Quan tâm dịch vụ. Nhắc gọi lại tuần sau.";
+
+  quickStats.today++;
+  quickStats.avgValue = (Math.random() * 0.5 + 2.2).toFixed(1);
+}
+
+function exportData() {
+  const dataStr = JSON.stringify(
+      {
+        entries: submissionCount.value,
+        exportTime: new Date().toISOString(),
+        stats: quickStats,
+        distribution: distributionData,
+        totalValue: totalValue.value,
+      },
+      null,
+      2
+  );
+
+  const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+  const link = document.createElement("a");
+  link.setAttribute("href", dataUri);
+  link.setAttribute("download", `marketing-data-${new Date().toISOString().split("T")[0]}.json`);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+// Watch và lifecycle hooks
+watch(activityRange, () => renderActivityChart());
+
+onMounted(() => {
+  renderActivityChart();
+  renderDistributionChart();
+});
+
+onBeforeUnmount(() => {
+  if (activityChart) activityChart.destroy();
+  if (distributionChart) distributionChart.destroy();
+});
+
+const provinceSearch = ref('');
+const provinceDropdownOpen = ref(false);
+
+const filteredProvinces = computed(() =>
+    provinces.value.filter(p =>
+        p.name.toLowerCase().includes(provinceSearch.value.toLowerCase())
+    )
+);
+
+function selectProvince(province) {
+  formData.area = province.name;
+  provinceSearch.value = province.name;
+  provinceDropdownOpen.value = false;
+}
+
+function closeProvinceDropdown() {
+  setTimeout(() => {
+    provinceDropdownOpen.value = false;
+    // If user didn't select, keep the last valid name
+    const selected = provinces.value.find(p => p.name === formData.area);
+    provinceSearch.value = selected ? selected.name : '';
+  }, 120);
+}
+
+// Sync input when area changes (e.g. on clearForm)
+watch(() => formData.area, val => {
+  const selected = provinces.value.find(p => p.name === val);
+  provinceSearch.value = selected ? selected.name : '';
+});
+
 </script>
 
 <style scoped>
-/* Reset and base styles */
-.mkt-data-system {
+/* ===== MODERN DASHBOARD STYLES ===== */
+.refined-dashboard {
   min-height: 100vh;
-  background-color: #f8fafc;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-/* Header */
-.header {
-  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-  color: white;
-  padding: 20px 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.header-left .page-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 5px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-left .page-subtitle {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 14px;
-  opacity: 0.9;
+  line-height: 1.5;
+  color: #1e293b;
 }
 
-.user-info {
+/* ===== HEADER ===== */
+.dashboard-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1rem 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
   display: flex;
   align-items: center;
-  gap: 15px;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 10px 20px;
-  border-radius: 50px;
-  backdrop-filter: blur(10px);
+  justify-content: space-between;
 }
 
-.user-avatar {
+.brand-icon {
   width: 40px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-}
-
-.user-details {
-  display: flex;
-  flex-direction: column;
-}
-
-.user-name {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.user-role {
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-.logout-btn {
-  background: none;
-  border: none;
   color: white;
   font-size: 18px;
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 5px;
-  transition: background-color 0.2s;
 }
 
-.logout-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+.dashboard-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.025em;
 }
 
-/* Dashboard Stats */
-.dashboard-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-  padding: 30px;
+.dashboard-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
 }
 
-.stat-card {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
+.header-actions {
   display: flex;
-  align-items: center;
-  gap: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s, box-shadow 0.2s;
+  gap: 0.75rem;
 }
 
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-}
-
-.stat-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
-  display: flex;
+/* ===== Icon Labels ===== */
+.icon-label {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-}
-
-.stat-icon.primary { background: #e0f2fe; color: #0369a1; }
-.stat-icon.success { background: #dcfce7; color: #166534; }
-.stat-icon.info { background: #f0f9ff; color: #0c4a6e; }
-.stat-icon.warning { background: #fef3c7; color: #92400e; }
-
-.stat-content {
-  flex: 1;
-}
-
-.stat-title {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  margin-right: 8px;
+  color: white;
   font-size: 14px;
-  color: #64748b;
-  margin-bottom: 5px;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   font-weight: 500;
+  font-size: 0.875rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.stat-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 2px;
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
 }
 
-.stat-desc {
-  font-size: 12px;
-  color: #94a3b8;
-}
-
-/* Main Content */
-.main-content {
-  padding: 0 30px 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-}
-
-/* Cards */
-.card {
+.btn-outline {
   background: white;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
+.btn-outline:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.btn-primary {
+  background: #4f46e5;
+  color: white;
+  border-color: #4f46e5;
+}
+
+.btn-primary:hover {
+  background: #4338ca;
+  border-color: #4338ca;
+}
+
+.btn-text {
+  background: transparent;
+  color: #64748b;
+  border: none;
+}
+
+.btn-text:hover {
+  color: #4f46e5;
+}
+
+/* ===== PANELS ===== */
+.main-content {
+  padding: 1.5rem 0;
+}
+
+.form-panel,
+.stats-panel,
+.metric-card,
+.chart-panel {
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 }
 
-.card-header {
-  padding: 20px 30px;
-  border-bottom: 1px solid #e2e8f0;
+/* ⭐ THÊM MÀU NỀN CHO THẺ LỚN */
+.form-panel {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #eef2ff 0%, #ffffff 65%);
+}
+
+.stats-panel {
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #ecfeff 0%, #ffffff 65%);
+}
+
+.metric-card {
+  padding: 1.25rem;
+  height: 100%;
+  background: #ffffff;
+}
+
+.metric-card-call {
+  background: linear-gradient(135deg, #ecfeff 0%, #ffffff 65%);
+}
+
+.metric-card-revenue {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 65%);
+}
+
+/* ✅ Doanh thu: chữ nhỏ lại + vòng to hơn */
+.metric-content-split {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
+  gap: 1rem;
 }
-
-.card-header-left {
-  flex: 1;
+.metric-value-sm {
+  font-size: 1.25rem;
+  font-weight: 800;
 }
-
-.card-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 5px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.card-subtitle {
-  font-size: 14px;
+.metric-sub {
+  margin-top: 0.2rem;
+  font-size: 0.8rem;
   color: #64748b;
 }
+.target-progress-lg .progress-circle-lg {
+  width: 96px;
+  height: 96px;
+}
+.target-progress-lg .progress-circle-lg::before {
+  width: 72px;
+  height: 72px;
+}
 
-.card-header-right {
+.chart-panel {
+  padding: 1.25rem;
+  background: #ffffff;
+}
+
+.chart-panel-distribution {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffffff 65%);
+}
+
+.chart-panel-activity {
+  background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 65%);
+}
+
+.panel-header {
   display: flex;
   align-items: center;
-  gap: 20px;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-.card-body {
-  padding: 30px;
+.panel-header h3,
+.panel-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-/* Form */
-.customer-form {
-  width: 100%;
+.badge {
+  background: #e0e7ff;
+  color: #4f46e5;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
-.form-grid {
+/* ===== INPUT ICONS ===== */
+.input-icon {
+  position: relative;
+}
+.icon-chip {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.input-icon .form-control {
+  padding-left: 48px;
+}
+
+/* ===== FORM ===== */
+.compact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.form-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
-  margin-bottom: 30px;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
 }
 
 .form-group {
-  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.form-group.full-width {
-  grid-column: 1 / -1;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
+.form-group label {
+  font-size: 0.8125rem;
+  font-weight: 500;
   color: #475569;
-  font-size: 14px;
-}
-
-.form-label.required::after {
-  content: ' *';
-  color: #ef4444;
 }
 
 .form-control {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 14px;
-  transition: all 0.2s;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  color: #1e293b;
   background: white;
+  transition: all 0.2s ease;
 }
 
 .form-control:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
 .form-control::placeholder {
   color: #94a3b8;
 }
 
-.form-hint {
-  font-size: 12px;
+/* ===== TYPE BUTTONS ===== */
+.type-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.type-btn {
+  padding: 0.7rem 0.55rem;
+  background: rgba(248, 250, 252, 0.9);
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
   color: #64748b;
-  margin-top: 5px;
-}
-
-/* File Upload */
-.file-upload {
-  position: relative;
-}
-
-.file-input {
-  display: none;
-}
-
-.file-upload-area {
-  border: 2px dashed #cbd5e1;
-  border-radius: 8px;
-  padding: 30px;
-  text-align: center;
+  font-size: 0.8125rem;
   cursor: pointer;
-  transition: all 0.2s;
-  background: #f8fafc;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
 }
 
-.file-upload-area:hover {
-  border-color: #3b82f6;
-  background: #f0f9ff;
+.type-btn:hover {
+  border-color: #cbd5e1;
+  background: rgba(241, 245, 249, 0.95);
 }
 
-.file-upload-area i {
-  font-size: 32px;
-  color: #94a3b8;
-  margin-bottom: 10px;
+.type-btn.active {
+  background: #e0e7ff;
+  border-color: #4f46e5;
+  color: #4f46e5;
 }
 
-.file-upload-area p {
-  margin: 0;
-  font-weight: 500;
-  color: #475569;
-}
-
-.file-hint {
-  font-size: 12px;
-  color: #64748b;
-  margin-top: 5px;
-}
-
-/* Radio Group */
-.radio-group {
-  display: flex;
-  gap: 20px;
-  margin-top: 10px;
-}
-
-.radio-label {
+/* ===== UPLOAD ===== */
+.upload-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  color: #475569;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
-
-.radio-label input[type="radio"] {
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 999px;
+  border: 1px dashed rgba(148, 163, 184, 0.8);
+  background: rgba(255, 255, 255, 0.75);
+  color: #475569;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.upload-btn:hover {
+  border-color: rgba(79, 70, 229, 0.45);
+  color: #4f46e5;
+  background: rgba(224, 231, 255, 0.35);
+}
+.upload-input {
   display: none;
 }
-
-.radio-custom {
-  width: 18px;
-  height: 18px;
-  border: 2px solid #cbd5e1;
-  border-radius: 50%;
-  position: relative;
-  transition: all 0.2s;
+.upload-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(248, 250, 252, 0.85);
+  color: #334155;
+  font-size: 0.82rem;
+  max-width: 280px;
+}
+.upload-meta.muted {
+  color: #64748b;
+  background: rgba(248, 250, 252, 0.75);
+}
+.upload-clear {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  padding: 0 4px;
+  cursor: pointer;
+}
+.upload-clear:hover {
+  color: #ef4444;
 }
 
-.radio-label input[type="radio"]:checked + .radio-custom {
-  border-color: #3b82f6;
-  background: #3b82f6;
-}
-
-.radio-label input[type="radio"]:checked + .radio-custom::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
-  background: white;
-  border-radius: 50%;
-}
-
-/* Textarea */
-textarea.form-control {
-  resize: vertical;
-  min-height: 80px;
-}
-
-/* Buttons */
+/* ===== ACTIONS ===== */
 .form-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 15px;
-  padding-top: 20px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
   align-items: center;
-  gap: 8px;
-  transition: all 0.2s;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background: #3b82f6;
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #2563eb;
-}
-
-.btn-secondary {
-  background: #e2e8f0;
-  color: #475569;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: #cbd5e1;
-}
-
-.btn-danger {
-  background: #ef4444;
-  color: white;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background: #dc2626;
-}
-
-/* Search Box */
-.search-box {
-  position: relative;
-  min-width: 300px;
-}
-
-.search-box i {
-  position: absolute;
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #94a3b8;
-}
-
-.search-input {
-  width: 100%;
-  padding: 12px 16px 12px 45px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 14px;
-  background: white;
-  transition: all 0.2s;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* Table */
-.table-responsive {
-  overflow-x: auto;
-}
-
-.customer-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.customer-table thead {
-  background: #f1f5f9;
-}
-
-.customer-table th {
-  padding: 16px;
-  text-align: left;
-  font-weight: 600;
-  color: #475569;
-  font-size: 14px;
-  white-space: nowrap;
-  border-bottom: 2px solid #e2e8f0;
-}
-
-.customer-table td {
-  padding: 16px;
-  border-bottom: 1px solid #e2e8f0;
-  font-size: 14px;
-  color: #475569;
-}
-
-.customer-table tbody tr:hover {
-  background: #f8fafc;
-}
-
-.customer-table tbody tr.selected {
-  background: #f0f9ff;
-}
-
-/* Table cells */
-.customer-name {
-  font-weight: 600;
-  color: #1e293b;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.note-indicator {
-  color: #f59e0b;
-  font-size: 12px;
-}
-
-.area-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  background: #e0f2fe;
-  color: #0369a1;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.price-cell {
-  font-weight: 600;
-  color: #1e293b;
-}
-
-/* Badges */
-.type-badge,
-.status-badge {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.type-owner { background: #dcfce7; color: #166534; }
-.type-broker { background: #fef3c7; color: #92400e; }
-.type-relative { background: #e0e7ff; color: #3730a3; }
-
-.status-pending { background: #fef3c7; color: #92400e; }
-.status-transferred { background: #dcfce7; color: #166534; }
-.status-overlimit { background: #fee2e2; color: #991b1b; }
-
-/* Action Buttons */
-.action-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-icon {
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 14px;
-}
-
-.btn-edit {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.btn-edit:hover {
-  background: #bfdbfe;
-}
-
-.btn-delete {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.btn-delete:hover {
-  background: #fecaca;
-}
-
-/* Table Footer */
-.table-footer {
-  display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding-top: 20px;
-  margin-top: 20px;
-  border-top: 1px solid #e2e8f0;
+  margin-top: 0.6rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
 }
 
-.selected-count {
-  font-size: 14px;
-  color: #475569;
-  font-weight: 500;
-}
-
-.telesale-info {
-  display: flex;
-  gap: 30px;
-}
-
-.telesale-stat {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #475569;
-}
-
-.telesale-stat i {
-  color: #3b82f6;
-}
-
-/* Empty State */
-.empty-state {
-  text-align: center;
-  padding: 60px !important;
+.entry-counter small {
   color: #94a3b8;
+  font-size: 0.8125rem;
 }
 
-.empty-state i {
-  font-size: 48px;
-  margin-bottom: 20px;
-  color: #cbd5e1;
+/* ===== MINI STATS (smaller + color each) ===== */
+.mini-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
 }
 
-.empty-state p {
-  font-size: 16px;
-  margin: 0;
-}
-
-/* Chart */
-.chart-card .card-body {
-  padding: 30px;
-}
-
-.chart-container {
-  display: flex;
-  align-items: flex-end;
-  gap: 20px;
-  height: 200px;
-}
-
-.chart {
-  display: flex;
-  align-items: flex-end;
-  gap: 30px;
-  flex: 1;
-  height: 100%;
-  padding-bottom: 30px;
-}
-
-.chart-bar {
-  flex: 1;
-  background: linear-gradient(to top, #3b82f6, #60a5fa);
-  border-radius: 6px 6px 0 0;
-  min-height: 20px;
-  position: relative;
-  transition: height 0.3s;
-}
-
-.chart-bar:hover {
-  opacity: 0.8;
-}
-
-.bar-label {
-  position: absolute;
-  top: -25px;
-  left: 0;
-  right: 0;
+.mini-stat {
   text-align: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: #475569;
-}
-
-.chart-labels {
-  display: flex;
-  gap: 30px;
-  width: 100%;
-  margin-top: 10px;
-}
-
-.chart-label {
-  flex: 1;
-  text-align: center;
-  font-size: 12px;
-  color: #64748b;
-  font-weight: 500;
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-  backdrop-filter: blur(3px);
-}
-
-.modal {
-  background: white;
+  padding: 0.85rem 0.75rem;
   border-radius: 12px;
-  width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow: hidden;
-  animation: modalAppear 0.3s ease;
+  border: 1px solid rgba(226, 232, 240, 0.9);
 }
+.stat-a { background: linear-gradient(135deg, rgba(224,231,255,0.8), rgba(255,255,255,0.9)); }
+.stat-b { background: linear-gradient(135deg, rgba(209,250,229,0.8), rgba(255,255,255,0.9)); }
+.stat-c { background: linear-gradient(135deg, rgba(207,250,254,0.8), rgba(255,255,255,0.9)); }
 
-@keyframes modalAppear {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.15rem;
 }
-
-.modal-header {
-  padding: 20px 30px;
-  border-bottom: 1px solid #e2e8f0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.stat-value.sm {
+  font-size: 1.18rem;
+  letter-spacing: -0.01em;
 }
-
-.modal-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1e293b;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.modal-close {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: #f1f5f9;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+.stat-label {
+  font-size: 0.72rem;
   color: #64748b;
-  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
 }
 
-.modal-close:hover {
-  background: #e2e8f0;
-  color: #475569;
-}
-
-.modal-body {
-  padding: 30px;
-  max-height: 60vh;
-  overflow-y: auto;
-}
-
-.modal-text {
-  margin-bottom: 20px;
-  color: #475569;
-  line-height: 1.6;
-}
-
-.modal-text strong {
-  color: #1e293b;
-}
-
-.modal-footer {
-  padding: 20px 30px;
-  border-top: 1px solid #e2e8f0;
+/* ===== METRICS ===== */
+.metric-header {
   display: flex;
-  justify-content: flex-end;
-  gap: 15px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
-/* Employee List */
-.employee-list {
+.metric-header h4 {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.metric-trend {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+}
+
+.metric-trend.up {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.metric-content {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  margin-bottom: 30px;
+  gap: 0.75rem;
 }
 
-.employee-card {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 15px;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.employee-card:hover {
-  border-color: #cbd5e1;
-}
-
-.employee-card.selected {
-  border-color: #3b82f6;
-  background: #f0f9ff;
-}
-
-.employee-avatar {
-  width: 50px;
-  height: 50px;
-  background: #e0f2fe;
-  color: #0369a1;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-}
-
-.employee-info {
-  flex: 1;
-}
-
-.employee-info h4 {
-  margin: 0 0 5px 0;
-  font-size: 16px;
-  color: #1e293b;
-}
-
-.employee-status {
-  margin: 0 0 10px 0;
-  font-size: 12px;
-  color: #64748b;
+.metric-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 .progress-bar {
@@ -1713,112 +1376,259 @@ textarea.form-control {
 
 .progress-fill {
   height: 100%;
-  background: #3b82f6;
+  background: linear-gradient(90deg, #4f46e5, #7c3aed);
   border-radius: 3px;
-  transition: width 0.3s;
 }
 
-.employee-check {
-  width: 24px;
-  height: 24px;
-  border: 2px solid #cbd5e1;
-  border-radius: 50%;
+.metric-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+.target-progress {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #3b82f6;
 }
 
-.employee-card.selected .employee-check {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: white;
-}
-
-/* Transfer Summary */
-.transfer-summary {
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 20px;
-  margin-top: 20px;
-}
-
-.summary-item {
+.progress-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: conic-gradient(#4f46e5 calc(var(--progress) * 3.6deg), #e2e8f0 0deg);
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-  font-size: 14px;
-  color: #475569;
+  justify-content: center;
+  position: relative;
 }
 
-.summary-item:last-child {
-  margin-bottom: 0;
+.progress-circle::before {
+  content: "";
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: white;
+  border-radius: 50%;
 }
 
-.summary-item i {
-  color: #3b82f6;
+.progress-circle span {
+  position: relative;
+  z-index: 1;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f172a;
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .form-grid {
-    grid-template-columns: repeat(2, 1fr);
+/* ===== DISTRIBUTION CHART ===== */
+.period-select {
+  width: auto;
+  min-width: 120px;
+  font-size: 0.8125rem;
+}
+
+.distribution-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.75rem;
+}
+
+.chart-graphic {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.chart-graphic-sm {
+  width: 90%;
+  height: 200px;
+}
+
+.total-value-display {
+  text-align: center;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+  border-radius: 10px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  margin-top: 0.5rem;
+}
+
+.total-value-label {
+  font-size: 0.8125rem;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.total-value-amount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* ===== STATUS STACK (separate cards) ===== */
+.status-stack {
+  display: grid;
+  gap: 0.85rem;
+}
+.status-item {
+  padding: 0.95rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.85);
+}
+.status-item.success { background: linear-gradient(135deg, rgba(224,231,255,0.75), rgba(255,255,255,0.92)); }
+.status-item.pending { background: linear-gradient(135deg, rgba(254,243,199,0.7), rgba(255,255,255,0.92)); }
+.status-item.failed  { background: linear-gradient(135deg, rgba(254,226,226,0.72), rgba(255,255,255,0.92)); }
+
+.status-item i { font-size: 1.25rem; }
+.status-item.success i { color: #4f46e5; }
+.status-item.pending i { color: #f59e0b; }
+.status-item.failed i { color: #ef4444; }
+
+.status-count {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+.status-label {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* ===== WEEKLY ACTIVITY ===== */
+.panel-header-activity {
+  margin-bottom: 0.75rem;
+}
+
+.activity-filter {
+  display: inline-flex;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 10px;
+  padding: 0.25rem;
+}
+
+.seg-btn {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.seg-btn:hover {
+  color: #334155;
+  background: rgba(241, 245, 249, 0.9);
+}
+
+.seg-btn.active {
+  background: #4f46e5;
+  color: #fff;
+}
+
+.activity-chart-wrap {
+  height: 240px;
+  padding-top: 0.75rem;
+}
+.activity-chart-wrap-lg {
+  height: 320px;
+}
+
+.activity-note {
+  margin-top: 0.6rem;
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+/* ===== NOTIFICATIONS ===== */
+.success-notification {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: #10b981;
+  color: white;
+  padding: 0.85rem 1.1rem;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  animation: slideIn 0.25s ease;
+  z-index: 1000;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 992px) {
+  .form-row {
+    grid-template-columns: 1fr;
   }
 
-  .dashboard-stats {
-    grid-template-columns: repeat(2, 1fr);
+  .chart-visual {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.2rem;
+  }
+
+  .chart-graphic-sm {
+    align-self: center;
+  }
+
+  .half-panel,
+  .status-stack {
+    max-width: 100%;
   }
 }
 
 @media (max-width: 768px) {
-  .header {
+  .header-content {
     flex-direction: column;
     align-items: flex-start;
-    gap: 20px;
+    gap: 1rem;
   }
 
-  .header-right {
-    width: 100%;
+  .type-buttons {
+    grid-template-columns: 1fr;
   }
 
-  .user-info {
+  .activity-filter {
     width: 100%;
     justify-content: space-between;
   }
-
-  .card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-  }
-
-  .card-header-right {
-    width: 100%;
-    flex-direction: column;
-  }
-
-  .search-box {
-    min-width: 100%;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .dashboard-stats {
-    grid-template-columns: 1fr;
-  }
-
-  .telesale-info {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .table-footer {
-    flex-direction: column;
-    gap: 15px;
-    align-items: flex-start;
-  }
 }
+
+.chart-graphic canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+.province-dropdown {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+  font-size: 0.95em;
+}
+.province-dropdown li:hover {
+  background: #f1f5f9;
+}
+
 </style>
