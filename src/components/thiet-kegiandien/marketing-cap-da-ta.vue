@@ -44,7 +44,7 @@
             <form @submit.prevent="submitData" class="compact-form">
               <div class="form-row">
                 <div class="form-group">
-                  <label>Họ tên *</label>
+                  <label>Họ tên <span class="required">*</span></label>
                   <div class="input-icon">
                     <span class="icon-chip" style="background: linear-gradient(135deg, #36D1DC, #5B86E5); color: white;">
                       <i class="fas fa-user"></i>
@@ -60,7 +60,7 @@
                 </div>
 
                 <div class="form-group">
-                  <label>Số điện thoại *</label>
+                  <label>Số điện thoại <span class="required">*</span></label>
                   <div class="input-icon">
                     <span class="icon-chip" style="background: linear-gradient(135deg, #FF416C, #FF4B2B); color: white;">
                       <i class="fas fa-phone"></i>
@@ -79,8 +79,8 @@
               <div class="form-row">
                 <!-- Province/City Searchable Dropdown -->
                 <div class="form-group">
-                  <label>Tỉnh/Thành</label>
-                  <div class="input-icon" style="position: relative;">
+                  <label>Tỉnh/Thành <span class="required">*</span></label>
+                  <div class="input-icon select-like" :class="{ open: provinceDropdownOpen }" style="position: relative;">
     <span class="icon-chip" style="background: linear-gradient(135deg, #8344C5, #3A7BD5); color: white;">
       <i class="fas fa-location-dot"></i>
     </span>
@@ -95,6 +95,9 @@
                         autocomplete="off"
                         style="cursor: pointer;"
                     />
+                    <span class="select-caret" aria-hidden="true" @mousedown.prevent="toggleProvinceDropdown">
+                      <i class="fas fa-chevron-down"></i>
+                    </span>
                     <ul
                         v-if="provinceDropdownOpen && filteredProvinces.length"
                         class="province-dropdown"
@@ -131,21 +134,25 @@
 
               </div>
               <div class="form-group">
-                <label>Giá</label>
+                <label>Giá <span class="required">*</span></label>
                 <div class="input-icon">
                     <span class="icon-chip" style="background: linear-gradient(135deg, #00b09b, #96c93d); color: white;">
                       <i class="fas fa-coins"></i>
                     </span>
                   <input
-                      v-model="formData.price"
-                      type="number"
+                      :value="priceDisplay"
+                      type="text"
+                      inputmode="numeric"
                       class="form-control"
                       placeholder="0"
+                      @input="handlePriceInput"
+                      @blur="syncPriceDisplay"
+                      required
                   />
                 </div>
               </div>
               <div class="form-group">
-                <label>Phân loại</label>
+                <label>Phân loại <span class="required">*</span></label>
                 <div class="type-buttons">
                   <button
                       v-for="type in customerTypes"
@@ -182,7 +189,7 @@
                   <label class="upload-btn" title="Tải tệp nhỏ">
                     <i class="fas fa-paperclip"></i>
                     <span>Up file</span>
-                    <input class="upload-input" type="file" @change="onPickFile" />
+                    <input id="fileInput" class="upload-input" type="file" @change="onPickFile" />
                   </label>
                   <div class="upload-meta" v-if="pickedFileName">
                     <i class="fas fa-file-lines"></i>
@@ -199,15 +206,24 @@
               </div>
 
               <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-check"></i> Ghi nhận
-                </button>
-                <button type="button" @click="clearForm" class="btn btn-text">
-                  Xoá
-                </button>
-                <div class="entry-counter">
-                  <small>{{ submissionCount }} lượt</small>
+                <div>
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-check"></i> Ghi nhận
+                  </button>
+                  <button
+                      type="button"
+                      @click="clearForm"
+                      class="btn ms-2"
+                      style="background-color: #fcfc60; font-weight: 600!important;"
+                  >
+                    <i class="fas fa-rotate-right me-1"></i>
+                    Làm mới
+                  </button>
                 </div>
+                  <div class="entry-counter">
+                    <small>{{ submissionCount }} lượt</small>
+                  </div>
+
               </div>
             </form>
           </div>
@@ -422,13 +438,15 @@ const formData = reactive({
   phone: "",
   area: "",
   oldArea: null,
-  type: "",
+  type: "CHINH_CHU",
   price: "",
   note: "",
 });
 
 const submissionCount = ref(0);
 const totalValue = ref(2435000000); // 2.435 tỷ
+
+const priceDisplay = ref("");
 
 const customerTypes = [
   { id: "CHINH_CHU", label: "Chủ nhà", icon: "fas fa-house-user" },
@@ -721,6 +739,27 @@ function formatCurrency(value) {
   }
 }
 
+function normalizePriceInput(value) {
+  return value.replace(/[^\d]/g, "");
+}
+
+function formatPriceDisplay(value) {
+  if (!value) return "";
+  return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function handlePriceInput(event) {
+  const raw = normalizePriceInput(event.target.value);
+  priceDisplay.value = formatPriceDisplay(raw);
+  formData.price = raw ? Number(raw) : "";
+}
+
+function syncPriceDisplay() {
+  const raw = normalizePriceInput(priceDisplay.value);
+  priceDisplay.value = formatPriceDisplay(raw);
+  formData.price = raw ? Number(raw) : "";
+}
+
 /* ===== Upload ===== */
 const pickedFileName = ref("");
 function onPickFile(e) {
@@ -735,8 +774,34 @@ function clearPickedFile() {
 import api from "/src/api/api.js"
 import { showWarning, showSuccess, showError} from "../../assets/js/alertService.js";
 
+function validateForm() {
+  if (!formData.name?.trim()) {
+    showWarning("Vui lòng nhập họ tên.");
+    return false;
+  }
+  if (!formData.phone?.trim()) {
+    showWarning("Vui lòng nhập số điện thoại.");
+    return false;
+  }
+  if (!formData.area?.trim()) {
+    showWarning("Vui lòng chọn tỉnh/thành.");
+    return false;
+  }
+  if (!formData.price) {
+    showWarning("Vui lòng nhập giá bán.");
+    return false;
+  }
+  if (!formData.type) {
+    showWarning("Vui lòng chọn phân loại.");
+    return false;
+  }
+  return true;
+}
+
 async function submitData() {
   try {
+    if (!validateForm()) return;
+
     const form = new FormData();
 
     // DTO gửi cho backend
@@ -802,9 +867,11 @@ function clearForm() {
   formData.name = "";
   formData.phone = "";
   formData.area = "";
+  formData.oldArea = "";
   formData.type = "";
   formData.price = "";
   formData.note = "";
+  priceDisplay.value = "";
   clearPickedFile();
 }
 
@@ -817,7 +884,9 @@ function generateSampleData() {
   formData.phone = `09${Math.floor(Math.random() * 90000000 + 10000000)}`;
   formData.area = areaList[Math.floor(Math.random() * areaList.length)];
   formData.type = types[Math.floor(Math.random() * types.length)];
-  formData.price = Math.floor(Math.random() * 5000 + 500);
+  const samplePrice = Math.floor(Math.random() * 5000 + 500) * 100000;
+  formData.price = samplePrice;
+  priceDisplay.value = formatPriceDisplay(String(samplePrice));
   formData.note = "Quan tâm dịch vụ. Nhắc gọi lại tuần sau.";
 
   quickStats.today++;
@@ -881,6 +950,10 @@ function closeProvinceDropdown() {
     const selected = provinces.value.find(p => p.name === formData.area);
     provinceSearch.value = selected ? selected.name : '';
   }, 120);
+}
+
+function toggleProvinceDropdown() {
+  provinceDropdownOpen.value = !provinceDropdownOpen.value;
 }
 
 // Sync input when area changes (e.g. on clearForm)
@@ -961,6 +1034,36 @@ watch(() => formData.area, val => {
   margin-right: 8px;
   color: white;
   font-size: 14px;
+}
+
+.required {
+  color: #ef4444;
+  margin-left: 4px;
+}
+
+.select-like .form-control {
+  padding-right: 2rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.select-like.open .form-control {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.select-caret {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  pointer-events: auto;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.select-like.open .select-caret {
+  transform: translateY(-50%) rotate(180deg);
+  color: #4338ca;
 }
 
 /* ===== BUTTONS ===== */
