@@ -9,7 +9,7 @@
             class="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(148,163,184,0.12)_1px,transparent_0)] [background-size:22px_22px] opacity-30"></div>
       </div>
 
-      <div class="container mx-auto px-6 py-16 lg:py-24 max-w-none">
+      <div class="container mx-auto px-6 py-16 lg:py-24 ">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div>
             <p class="inline-flex items-center gap-2 text-sm font-semibold tracking-wide text-blue-400">
