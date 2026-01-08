@@ -8,7 +8,7 @@
       :style="cardStyles"
   >
     <!-- Icon Container -->
-    <div v-if="iconClass" :class="iconClass" :style="iconContainerStyles">
+    <div v-if="iconName" :class="iconContainerClasses" :style="iconContainerStyles">
       <i :class="iconName" class="transition" :style="iconStyles"></i>
     </div>
 
@@ -18,32 +18,32 @@
     </h3>
 
     <!-- Content - flex-grow để chiếm không gian còn lại -->
-    <div class="text-slate-400 text-sm leading-relaxed flex-grow text-justify">
+    <div class="text-slate-400 text-sm leading-relaxed flex-grow text-justify font-open-sans">
       <slot></slot>
     </div>
 
-    <!-- Link - luôn ở dưới cùng -->
-    <div class="mt-6 space-y-3">
+    <!-- Link - chỉ hiển thị khi có link hoặc quickAccessUrl hoặc slot link -->
+    <div v-if="hasLinkSection" class="mt-6 space-y-3">
       <!-- Container cho 2 nút hiển thị cùng hàng -->
       <!-- Link chính -->
       <div class="flex flex-row gap-3">
-        <a
+        <router-link
             v-if="link"
-            :href="link"
+            :to="link"
             :class="linkClasses"
-            class="inline-flex items-center gap-2 justify-center flex-1 text-center"
+            class="glass-card-link inline-flex items-center gap-2 justify-center flex-1 text-center"
             :style="linkStyles"
         >
           {{ linkText }}
           <i class="fas fa-chevron-right text-xs transition"></i>
-        </a>
+        </router-link>
 
         <!-- Nút Truy cập nhanh -->
         <router-link
             v-if="quickAccessUrl"
             :to="quickAccessUrl"
             :class="quickAccessClasses"
-            class="inline-flex items-center gap-2 justify-center flex-1 text-center"
+            class="glass-card-quick-access inline-flex items-center gap-2 justify-center flex-1 text-center"
             :style="quickAccessStyles"
         >
           <i class="fas fa-bolt text-xs transition"></i>
@@ -64,7 +64,6 @@ const auth = useAuthStore();
 const props = defineProps({
   title: String,
   iconName: String,
-  iconClass: String,
   link: String,
   linkText: {
     type: String,
@@ -102,34 +101,42 @@ const isHexColor = computed(() => {
   return /^#[0-9A-F]{6}$/i.test(props.color);
 });
 
-// Preset color classes (unchanged)
+// Sửa preset color classes để điều chỉnh hover effect
 const presetColorClasses = {
   blue: {
     title: 'group-hover:text-blue-400',
-    icon: 'text-blue-400 group-hover:text-blue-300',
-    link: 'bg-blue-500/10 text-blue-300 border-blue-500/20 hover:text-white hover:border-blue-500',
-    quickAccess: 'text-blue-400 hover:bg-blue-700 hover:text-white border-blue-600'
+    iconContainer: 'bg-blue-500/10 group-hover:bg-blue-700 text-blue-400 group-hover:text-white',
+    icon: 'text-blue-400 group-hover:text-white',
+    // Sửa: Nút "Xem chi tiết" có hiệu ứng hover solid fill
+    link: 'text-blue-400 glass-card-border glass-card-border-blue hover:bg-blue-700 hover:text-white hover:border-blue-700',
+    // Sửa: Nút "Truy cập nhanh" có hiệu ứng gradient từ trái sang phải
+    quickAccess: 'text-blue-400 glass-card-border glass-card-border-blue hover:text-white hover:border-blue-700 glass-card-quick-access-base'
   },
   purple: {
     title: 'group-hover:text-purple-400',
-    icon: 'text-purple-400 group-hover:text-purple-300',
-    link: 'bg-purple-500/10 text-purple-300 border-purple-500/20 hover:text-white hover:border-purple-500',
-    quickAccess: 'text-purple-400 hover:bg-purple-500 hover:text-white border-purple-600'
+    iconContainer: 'bg-purple-500/10 group-hover:bg-purple-500 text-purple-400 group-hover:text-white',
+    icon: 'text-purple-400 group-hover:text-white',
+    link: 'text-purple-400 glass-card-border glass-card-border-purple hover:bg-purple-500 hover:text-white hover:border-purple-500',
+    quickAccess: 'text-purple-400 glass-card-border glass-card-border-purple hover:text-white hover:border-purple-500 glass-card-quick-access-base'
   },
   teal: {
     title: 'group-hover:text-teal-400',
-    icon: 'text-teal-400 group-hover:text-teal-300',
-    link: 'bg-teal-500/10 text-teal-300 border-teal-500/20 hover:text-white hover:border-teal-500',
-    quickAccess: 'text-teal-400 hover:bg-teal-500 hover:text-white border-teal-600'
+    iconContainer: 'bg-teal-500/10 group-hover:bg-teal-500 text-teal-400 group-hover:text-white',
+    icon: 'text-teal-400 group-hover:text-white',
+    link: 'text-teal-400 glass-card-border glass-card-border-teal hover:bg-teal-500 hover:text-white hover:border-teal-500',
+    quickAccess: 'text-teal-400 glass-card-border glass-card-border-teal hover:text-white hover:border-teal-500 glass-card-quick-access-base'
   }
 }
 
-// Base classes for hex colors
+// Sửa base classes cho hex colors
 const hexBaseClasses = {
   title: 'group-hover:opacity-90',
+  iconContainer: '',
   icon: 'opacity-90 group-hover:opacity-100',
-  link: 'border-opacity-20 hover:text-white hover:border-opacity-100',
-  quickAccess: 'hover:text-white border-opacity-50'
+  // Sửa: Nút "Xem chi tiết" có hiệu ứng hover solid fill
+  link: 'glass-card-border glass-card-border-hex hover:text-white',
+  // Sửa: Nút "Truy cập nhanh" có hiệu ứng gradient từ trái sang phải
+  quickAccess: 'glass-card-border glass-card-border-hex hover:text-white glass-card-quick-access-base'
 }
 
 const paddingClasses = {
@@ -146,35 +153,104 @@ const cardClasses = computed(() => {
   ].join(' ')
 })
 
+// Kiểm tra xem có phần link không
+const hasLinkSection = computed(() => {
+  return props.link || props.quickAccessUrl || hasSlotLink.value;
+});
+
+// Kiểm tra xem có slot link không
+const hasSlotLink = computed(() => {
+  // Giả sử bạn có cách để kiểm tra slot
+  // Nếu không thể kiểm tra slot, bạn có thể dùng một prop khác
+  return false; // Thay đổi nếu có cách kiểm tra slot
+});
+
 // Dynamic styles cho các thành phần
 const hexColor = computed(() => props.color);
 
-// Icon styles
+// Icon container classes
+const iconContainerClasses = computed(() => {
+  // Base classes cho icon container
+  const baseClasses = [
+    'w-16 h-16 rounded-xl flex items-center justify-center mb-4',
+    'bg-gradient-to-br from-white/5 to-transparent',
+    'transition duration-300'
+  ].join(' ');
+
+  if (isHexColor.value) {
+    return baseClasses;
+  }
+
+  // Nếu là preset color, thêm các class tương ứng
+  return [
+    baseClasses,
+    presetColorClasses[props.color].iconContainer
+  ].join(' ');
+});
+
+// Icon classes
+const iconClasses = computed(() => {
+  if (isHexColor.value) {
+    return [
+      'transition duration-300',
+      hexBaseClasses.icon
+    ].join(' ')
+  }
+
+  return [
+    'transition duration-300',
+    presetColorClasses[props.color].icon
+  ].join(' ')
+});
+
+// Icon styles cho hex colors
 const iconStyles = computed(() => {
   if (!isHexColor.value) return {};
   return {
-    '--icon-color': hexColor.value,
-    '--icon-hover-color': adjustColor(hexColor.value, 20) // Làm sáng hơn 20% khi hover
+    'color': hexColor.value,
   };
 });
 
+// Icon container styles cho hex colors - SỬA LẠI Ở ĐÂY
 const iconContainerStyles = computed(() => {
   if (!isHexColor.value) return {};
+
+  // Chuyển hex sang rgba để có opacity
+  const hex = hexColor.value;
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+
   return {
+    '--icon-bg-color': `rgba(${r}, ${g}, ${b}, 0.1)`,
     '--icon-color': hexColor.value,
   };
 });
 
 const titleClasses = computed(() => {
+  const baseClasses = [
+    'text-xl font-bold text-white transition duration-300',
+    'font-open-sans'
+  ];
+
+  // Thêm margin-bottom dựa trên padding
+  if (props.padding === 'small') {
+    baseClasses.push('mb-1', 'text-left');
+  } else if (props.padding === 'large') {
+    baseClasses.push('mb-3');
+  } else {
+    baseClasses.push('mb-3');
+  }
+
   if (isHexColor.value) {
     return [
-      'text-xl font-bold text-white mb-3 transition duration-300',
+      ...baseClasses,
       hexBaseClasses.title
     ].join(' ')
   }
 
   return [
-    'text-xl font-bold text-white mb-3 transition duration-300',
+    ...baseClasses,
     presetColorClasses[props.color].title
   ].join(' ')
 })
@@ -182,14 +258,16 @@ const titleClasses = computed(() => {
 const linkClasses = computed(() => {
   if (isHexColor.value) {
     return [
-      'px-4 py-2 rounded-xl text-sm font-semibold border transition duration-300',
-      hexBaseClasses.link
+      'px-4 py-2 rounded-xl text-sm font-semibold transition duration-300',
+      hexBaseClasses.link,
+      'font-open-sans'
     ].join(' ')
   }
 
   return [
-    'px-4 py-2 rounded-xl text-sm font-semibold border transition duration-300',
-    presetColorClasses[props.color].link
+    'px-4 py-2 rounded-xl text-sm font-semibold transition duration-300',
+    presetColorClasses[props.color].link,
+    'font-open-sans'
   ].join(' ')
 })
 
@@ -197,38 +275,46 @@ const linkClasses = computed(() => {
 const quickAccessClasses = computed(() => {
   if (isHexColor.value) {
     return [
-      'px-4 py-2 rounded-xl text-sm font-semibold border transition duration-300',
-      hexBaseClasses.quickAccess
+      'px-4 py-2 rounded-xl text-sm font-semibold transition duration-300',
+      hexBaseClasses.quickAccess,
+      'font-open-sans'
     ].join(' ')
   }
 
   return [
-    'px-4 py-2 rounded-xl text-sm font-semibold border transition duration-300',
-    presetColorClasses[props.color].quickAccess
+    'px-4 py-2 rounded-xl text-sm font-semibold transition duration-300',
+    presetColorClasses[props.color].quickAccess,
+    'font-open-sans'
   ].join(' ')
 })
 
 // Dynamic styles for hex colors
+// Sửa linkStyles cho hex colors (nút "Xem chi tiết")
 const linkStyles = computed(() => {
   if (!isHexColor.value) return {};
 
   return {
-    'background-color': `${hexColor.value}10`,
     'color': hexColor.value,
-    'border-color': `${hexColor.value}20`,
-    '--hover-color': hexColor.value,
-    '--hover-border-color': hexColor.value
+    '--border-color': hexColor.value,
+    '--hover-bg-color': hexColor.value,
+    '--hover-border-color': adjustColor(hexColor.value, -10), // Màu đậm hơn 1 chút
   };
 });
 
+// Sửa quickAccessStyles cho hex colors (nút "Truy cập nhanh")
 const quickAccessStyles = computed(() => {
   if (!isHexColor.value) return {};
 
+  // Tạo gradient từ màu chính sang màu đậm hơn
+  const mainColor = hexColor.value;
+  const darkerColor = adjustColor(hexColor.value, -15); // Đậm hơn 15%
+
   return {
     'color': hexColor.value,
-    'border-color': `${hexColor.value}50`,
-    '--hover-color': hexColor.value,
-    '--hover-bg-color': hexColor.value
+    '--border-color': hexColor.value,
+    '--gradient-from': mainColor,
+    '--gradient-to': darkerColor,
+    '--hover-border-color': darkerColor,
   };
 });
 
@@ -236,7 +322,7 @@ const titleStyles = computed(() => {
   if (!isHexColor.value) return {};
 
   return {
-    '--hover-color': adjustColor(hexColor.value, 40), // Làm sáng hơn cho title khi hover
+    '--hover-color': adjustColor(hexColor.value, 40),
     'color': 'white'
   };
 });
@@ -268,30 +354,44 @@ function adjustColor(hex, percent) {
 </script>
 
 <style scoped>
-i {
-  font-size: 24px;
-  transition: color 0.3s ease;
+/* Font Open Sans */
+.font-open-sans {
+  font-family: 'Open Sans', sans-serif;
 }
 
-/* Base styles for hex colors */
-.glass-card-base[style*="--card-color"] {
-  & .fas {
-    color: var(--icon-color, inherit);
-  }
+i {
+  font-size: 24px;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
 
-  & i.transition {
-    color: var(--icon-color, inherit);
-  }
+/* Icon container transition */
+.glass-card-base > div:first-child {
+  transition: all 0.3s ease;
+}
 
-  &:hover {
-    & .fas {
-      color: var(--icon-hover-color, var(--icon-color));
-    }
+/* Icon hover effect cho preset colors */
+.glass-card-base:hover > div:first-child i {
+  transform: scale(1.1);
+}
 
-    & i.transition {
-      color: var(--icon-hover-color, var(--icon-color));
-    }
-  }
+/* Hex color icon container styles - ĐÃ SỬA */
+.glass-card-base[style*="--card-color"] > div:first-child {
+  background-color: var(--icon-bg-color, inherit) !important;
+}
+
+.glass-card-base[style*="--card-color"]:hover > div:first-child {
+  background-color: var(--card-color) !important;
+}
+
+/* Icon color cho hex colors */
+.glass-card-base[style*="--card-color"] > div:first-child i {
+  color: var(--icon-color, inherit) !important;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.glass-card-base[style*="--card-color"]:hover > div:first-child i {
+  color: white !important;
+  transform: scale(1.1);
 }
 
 /* Title hover effect */
@@ -305,56 +405,145 @@ i {
   }
 }
 
-/* Link button styles */
-.glass-card-base[style*="--hover-color"] {
-  & a[style*="--hover-color"] {
-    transition: all 0.3s ease;
-
-    & i {
-      transition: color 0.3s ease;
-    }
-
-    &:hover {
-      background-color: var(--hover-color) !important;
-      border-color: var(--hover-border-color, var(--hover-color)) !important;
-
-      & i {
-        color: white !important;
-      }
-    }
-  }
+/* Custom border classes để tránh xung đột với Bootstrap */
+.glass-card-border {
+  border-width: 1px !important;
+  border-style: solid !important;
 }
 
-/* Quick access button styles */
-.glass-card-base[style*="--hover-bg-color"] {
-  & .router-link[style*="--hover-bg-color"] {
-    transition: all 0.3s ease;
+.glass-card-border-blue {
+  border-color: rgb(96 165 250) !important;
+}
 
-    & i {
-      transition: color 0.3s ease;
-    }
+.glass-card-border-purple {
+  border-color: rgb(192 132 252) !important;
+}
 
-    &:hover {
-      background-color: var(--hover-bg-color) !important;
+.glass-card-border-teal {
+  border-color: rgb(45 212 191) !important;
+}
 
-      & i {
-        color: white !important;
-      }
-    }
-  }
+.glass-card-border-hex {
+  border-color: var(--border-color, currentColor) !important;
+}
+
+/* Link button styles - GIỮ NGUYÊN HIỆU ỨNG CŨ */
+.glass-card-link {
+  transition: all 0.3s ease;
+  background-color: transparent;
+}
+
+.glass-card-link:hover {
+  color: white !important;
+}
+
+.glass-card-link:hover i {
+  color: white !important;
+}
+
+/* Link button styles cho nút "Xem chi tiết" với hex colors - HIỆU ỨNG FILL */
+.glass-card-link[style*="--hover-bg-color"] {
+  transition: all 0.3s ease;
+  background-color: transparent;
+}
+
+.glass-card-link[style*="--hover-bg-color"]:hover {
+  background-color: var(--hover-bg-color) !important;
+  border-color: var(--hover-border-color) !important;
+  color: white !important;
+}
+
+/* Preset color styles cho nút "Xem chi tiết" - HIỆU ỨNG FILL */
+.glass-card-link.text-blue-400:hover {
+  background-color: rgb(37 99 235) !important;
+  border-color: rgb(37 99 235) !important;
+}
+
+.glass-card-link.text-purple-400:hover {
+  background-color: rgb(147 51 234) !important;
+  border-color: rgb(147 51 234) !important;
+}
+
+.glass-card-link.text-teal-400:hover {
+  background-color: rgb(13 148 136) !important;
+  border-color: rgb(13 148 136) !important;
+}
+
+/* Base class cho nút truy cập nhanh */
+.glass-card-quick-access-base {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  background-color: transparent;
+  transition: all 0.3s ease;
+}
+
+/* Hiệu ứng gradient fill từ trái sang phải cho nút "Truy cập nhanh" với hex colors */
+.glass-card-quick-access[style*="--gradient-from"] {
+  position: relative;
+  z-index: 1;
+}
+
+.glass-card-quick-access[style*="--gradient-from"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--gradient-from) 0%, var(--gradient-to) 100%);
+  transition: left 0.3s ease;
+  z-index: -1;
+}
+
+.glass-card-quick-access[style*="--gradient-from"]:hover::before {
+  left: 0;
+}
+
+.glass-card-quick-access[style*="--gradient-from"]:hover {
+  border-color: var(--hover-border-color) !important;
+  color: white !important;
+}
+
+/* Preset color cho nút "Truy cập nhanh" - HIỆU ỨNG GRADIENT FILL TỪ TRÁI SANG PHẢI */
+.glass-card-quick-access.text-blue-400::before {
+  background: linear-gradient(90deg, rgb(59 130 246) 0%, rgb(37 99 235) 100%);
+}
+
+.glass-card-quick-access.text-purple-400::before {
+  background: linear-gradient(90deg, rgb(168 85 247) 0%, rgb(147 51 234) 100%);
+}
+
+.glass-card-quick-access.text-teal-400::before {
+  background: linear-gradient(90deg, rgb(20 184 166) 0%, rgb(13 148 136) 100%);
+}
+
+/* Đảm bảo icon trong nút cũng đổi màu khi hover */
+.glass-card-quick-access:hover i {
+  color: white !important;
 }
 
 /* Preset color fallbacks */
-.hover\:bg-blue-700:hover {
-  background-color: rgb(29 78 216 / 1);
+.bg-blue-500\/10 {
+  background-color: rgb(59 130 246 / 0.1);
+}
+.bg-purple-500\/10 {
+  background-color: rgb(168 85 247 / 0.1);
+}
+.bg-teal-500\/10 {
+  background-color: rgb(20 184 166 / 0.1);
 }
 
-.hover\:bg-purple-500:hover {
-  background-color: rgb(168 85 247 / 1);
+.group-hover\:bg-blue-700:hover {
+  background-color: rgb(29 78 216 / 1) !important;
 }
 
-.hover\:bg-teal-500:hover {
-  background-color: rgb(20 184 166 / 1);
+.group-hover\:bg-purple-500:hover {
+  background-color: rgb(168 85 247 / 1) !important;
+}
+
+.group-hover\:bg-teal-500:hover {
+  background-color: rgb(20 184 166 / 1) !important;
 }
 
 /* Icon color adjustments for preset */
@@ -366,5 +555,44 @@ i {
 }
 .text-teal-400 {
   color: rgb(45 212 191 / 1);
+}
+
+.group-hover\:text-white:hover {
+  color: white !important;
+}
+
+/* Thêm styles cho preset quick access buttons để đảm bảo hiệu ứng gradient */
+.glass-card-quick-access-base::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  transition: left 0.3s ease;
+  z-index: -1;
+}
+
+.glass-card-quick-access-base:hover::before {
+  left: 0;
+}
+
+/* Đảm bảo text và icon nổi lên trên gradient */
+.glass-card-quick-access-base > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Hiệu ứng cho preset quick access khi hover */
+.glass-card-quick-access.text-blue-400:hover {
+  border-color: rgb(37 99 235) !important;
+}
+
+.glass-card-quick-access.text-purple-400:hover {
+  border-color: rgb(147 51 234) !important;
+}
+
+.glass-card-quick-access.text-teal-400:hover {
+  border-color: rgb(13 148 136) !important;
 }
 </style>

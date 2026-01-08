@@ -172,24 +172,24 @@
               <div class="form-group">
                 <label>Nút Khám phá</label>
                 <div class="form-row">
-                  <input type="text" v-model="content.buttons.explore.text" placeholder="Khám phá ngay" />
-                  <input type="text" v-model="content.buttons.explore.href" placeholder="#services" />
+                  <input type="text" v-model="content.buttons.explore.text" placeholder="Khám phá ngay"/>
+                  <input type="text" v-model="content.buttons.explore.href" placeholder="#services"/>
                 </div>
               </div>
 
               <div class="form-group">
                 <label>Nút Xem hồ sơ</label>
                 <div class="form-row">
-                  <input type="text" v-model="content.buttons.profile.text" placeholder="Xem hồ sơ" />
-                  <input type="text" v-model="content.buttons.profile.href" placeholder="https://..." />
+                  <input type="text" v-model="content.buttons.profile.text" placeholder="Xem hồ sơ"/>
+                  <input type="text" v-model="content.buttons.profile.href" placeholder="https://..."/>
                 </div>
               </div>
 
               <div class="form-group">
                 <label>Nút Liên hệ</label>
                 <div class="form-row">
-                  <input type="text" v-model="content.buttons.contact.text" placeholder="Liên hệ để được tư vấn" />
-                  <input type="text" v-model="content.buttons.contact.href" placeholder="#contact" />
+                  <input type="text" v-model="content.buttons.contact.text" placeholder="Liên hệ để được tư vấn"/>
+                  <input type="text" v-model="content.buttons.contact.href" placeholder="#contact"/>
                 </div>
               </div>
             </div>
@@ -307,11 +307,11 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Giá trị</label>
-                  <input type="text" v-model="stat.value" placeholder="200+" />
+                  <input type="text" v-model="stat.value" placeholder="200+"/>
                 </div>
                 <div class="form-group">
                   <label>Nhãn</label>
-                  <input type="text" v-model="stat.label" placeholder="Dự án hoàn thành" />
+                  <input type="text" v-model="stat.label" placeholder="Dự án hoàn thành"/>
                 </div>
               </div>
 
@@ -350,7 +350,8 @@
                   <button class="btn-icon" @click="moveServiceUp(index)" :disabled="index === 0">
                     <i class="fas fa-arrow-up"></i>
                   </button>
-                  <button class="btn-icon" @click="moveServiceDown(index)" :disabled="index === content.services.length - 1">
+                  <button class="btn-icon" @click="moveServiceDown(index)"
+                          :disabled="index === content.services.length - 1">
                     <i class="fas fa-arrow-down"></i>
                   </button>
                   <button class="btn-icon btn-danger" @click="removeService(index)">
@@ -361,12 +362,13 @@
 
               <div class="form-group">
                 <label>Tiêu đề</label>
-                <input type="text" v-model="service.title" placeholder="Phát triển đội nhóm" />
+                <input type="text" v-model="service.title" placeholder="Phát triển đội nhóm"/>
               </div>
 
               <div class="form-group">
                 <label>Mô tả</label>
-                <textarea v-model="service.description" rows="3" placeholder="Tạo dựng và mở rộng đội nhóm..."></textarea>
+                <textarea v-model="service.description" rows="3"
+                          placeholder="Tạo dựng và mở rộng đội nhóm..."></textarea>
               </div>
 
               <div class="form-row">
@@ -381,20 +383,27 @@
                 <div class="form-group">
                   <label>Biểu tượng</label>
                   <div class="input-with-icon">
-                    <IconPicker v-model="service.iconName" />
+                    <IconPicker v-model="service.iconName"/>
                   </div>
                 </div>
               </div>
 
+
+              <!-- Thành: -->
               <div class="form-row">
                 <div class="form-group">
-                  <label>URL truy cập nhanh</label>
-                  <input type="text" v-model="service.quickAccessUrl" placeholder="/nhom-cua-toi" />
+                  <label>Liên kết chính</label>
+                  <input type="text" v-model="service.link" placeholder="#"/>
                 </div>
                 <div class="form-group">
-                  <label>Link văn bản</label>
-                  <input type="text" v-model="service.linkText" placeholder="Xem chi tiết" />
+                  <label>Văn bản liên kết</label>
+                  <input type="text" v-model="service.linkText" placeholder="Xem chi tiết"/>
                 </div>
+              </div>
+
+              <div class="form-group">
+                <label>URL truy cập nhanh</label>
+                <input type="text" v-model="service.quickAccessUrl" placeholder="/nhom-cua-toi"/>
               </div>
             </div>
 
@@ -424,29 +433,29 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Giá trị</label>
-                  <input type="text" v-model="card.value" placeholder="359 Căn" />
+                  <input type="text" v-model="card.value" placeholder="359 Căn"/>
                 </div>
                 <div class="form-group">
                   <label>Nhãn</label>
-                  <input type="text" v-model="card.label" placeholder="Đã bán trong năm 2025" />
+                  <input type="text" v-model="card.label" placeholder="Đã bán trong năm 2025"/>
                 </div>
               </div>
 
 
-                <div class="form-group">
-                  <label>Màu sắc</label>
-                  <ColorInputWithGlobalColors
-                      v-model="card.color"
-                      placeholder="blue"
-                      return-type="key" :colors="globalColors"
-                  />
+              <div class="form-group">
+                <label>Màu sắc</label>
+                <ColorInputWithGlobalColors
+                    v-model="card.color"
+                    placeholder="blue"
+                    return-type="key" :colors="globalColors"
+                />
+              </div>
+              <div class="form-group">
+                <label>Biểu tượng</label>
+                <div class="input-with-icon">
+                  <IconPicker v-model="card.icon"/>
                 </div>
-                <div class="form-group">
-                  <label>Biểu tượng</label>
-                  <div class="input-with-icon">
-                    <IconPicker v-model="card.icon" />
-                  </div>
-                </div>
+              </div>
 
             </div>
 
@@ -517,34 +526,34 @@
 
               <div class="form-group">
                 <label>Tên</label>
-                <input type="text" v-model="location.name" placeholder="Hồ Chí Minh (HQ)" />
+                <input type="text" v-model="location.name" placeholder="Hồ Chí Minh (HQ)"/>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
                   <label>Vị trí top (%)</label>
-                  <input type="text" v-model="location.position.top" placeholder="55%" />
+                  <input type="text" v-model="location.position.top" placeholder="55%"/>
                 </div>
                 <div class="form-group">
                   <label>Vị trí left (%)</label>
-                  <input type="text" v-model="location.position.left" placeholder="78%" />
+                  <input type="text" v-model="location.position.left" placeholder="78%"/>
                 </div>
               </div>
 
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Màu sắc</label>
-                  <ColorInputWithGlobalColors
-                      v-model="location.color"
-                      placeholder="blue-500"
-                      return-type="key" :colors="globalColors"
-                  />
-                </div>
-                <div class="form-group">
-                  <label>Kích thước</label>
-                  <input type="text" v-model="location.size" placeholder="6" />
-                </div>
+
+              <div class="form-group">
+                <label>Màu sắc</label>
+                <ColorInputWithGlobalColors
+                    v-model="location.color"
+                    placeholder="blue-500"
+                    return-type="key" :colors="globalColors"
+                />
               </div>
+              <div class="form-group">
+                <label>Kích thước</label>
+                <input type="text" v-model="location.size" placeholder="6"/>
+              </div>
+
             </div>
 
             <button class="btn btn-secondary" @click="addLocation">
@@ -572,7 +581,8 @@
                   <button class="btn-icon" @click="moveTestimonialUp(index)" :disabled="index === 0">
                     <i class="fas fa-arrow-up"></i>
                   </button>
-                  <button class="btn-icon" @click="moveTestimonialDown(index)" :disabled="index === content.testimonials.length - 1">
+                  <button class="btn-icon" @click="moveTestimonialDown(index)"
+                          :disabled="index === content.testimonials.length - 1">
                     <i class="fas fa-arrow-down"></i>
                   </button>
                   <button class="btn-icon btn-danger" @click="removeTestimonial(index)">
@@ -584,23 +594,24 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Tên</label>
-                  <input type="text" v-model="testimonial.name" placeholder="Nguyễn Văn Nam" />
+                  <input type="text" v-model="testimonial.name" placeholder="Nguyễn Văn Nam"/>
                 </div>
                 <div class="form-group">
                   <label>Vị trí</label>
-                  <input type="text" v-model="testimonial.position" placeholder="CTO, Công ty ABC" />
+                  <input type="text" v-model="testimonial.position" placeholder="CTO, Công ty ABC"/>
                 </div>
               </div>
 
               <div class="form-group">
                 <label>Trích dẫn</label>
-                <textarea v-model="testimonial.quote" rows="3" placeholder="Thiên Hà Group mang đến giải pháp..."></textarea>
+                <textarea v-model="testimonial.quote" rows="3"
+                          placeholder="Thiên Hà Group mang đến giải pháp..."></textarea>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
                   <label>Chữ viết tắt</label>
-                  <input type="text" v-model="testimonial.initials" placeholder="NV" />
+                  <input type="text" v-model="testimonial.initials" placeholder="NV"/>
                 </div>
                 <div class="form-group">
                   <label>Màu sắc</label>
@@ -612,7 +623,7 @@
                 </div>
                 <div class="form-group">
                   <label>Đánh giá (sao)</label>
-                  <input type="number" v-model="testimonial.rating" min="1" max="5" placeholder="5" />
+                  <input type="number" v-model="testimonial.rating" min="1" max="5" placeholder="5"/>
                 </div>
               </div>
             </div>
@@ -716,7 +727,7 @@ const content = reactive({
     },
     profile: {
       text: "Xem hồ sơ",
-      href: "https://www.youtube.com/watch?v=JPedlPJSBkg",
+      href: "https://www.youtube.com/watch?v=JZ1YvvYo2hA&t",
       target: "_blank",
       variant: "outline",
       color: "white",
@@ -892,6 +903,7 @@ const toast = reactive({
 
 // ========== CONSTANTS ==========
 import {baseImgaeUrl} from "../../../../assets/js/global.js";
+
 const BASE_IMAGE_URL = baseImgaeUrl;
 const TEMP_PREFIX = 'temp/'
 const SECTION_ID = 56
@@ -1285,7 +1297,7 @@ const addService = () => {
     title: "",
     description: "",
     color: "blue",
-    link: "#",
+    link: "#", // Thêm dòng này
     linkText: "Xem chi tiết",
     iconName: "fas fa-star",
     iconClass: "",
@@ -1421,7 +1433,7 @@ const moveTestimonialDown = (index) => {
   }
 }
 
-const globalColors =ref({});
+const globalColors = ref({});
 
 const loadDataColors = async () => {
   const response = await api.get('/cms/getSection/55')

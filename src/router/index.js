@@ -131,10 +131,12 @@ import PaymentQR from "../components/user/Profile/component/PaymentQR.vue";
 import productCreateUser from "../components/productUser/productCreateUser.vue"
 import productUpdate from "../components/productUser/ProductUpdate.vue"
 import RutTienAdmin from "../components/rutTienAdmin.vue";
-import Layout from "../components/user/Home/NewHome/Layout.vue";
-import MainContentHome from "../components/user/Home/NewHome/MainContentHome.vue";
-import GlobalCSS from "../components/cms/components/homeNew/GlobalCSS.vue";
-import MainContent from "../components/cms/components/homeNew/MainContent.vue";
+import Layout from "../components/user/NewUser/NewHome/Layout.vue";
+import MainContentHome from "../components/user/NewUser/NewHome/MainContentHome.vue";
+import GlobalCSS from "../components/cms/NewCms/homeNew/GlobalCSS.vue";
+import MainContent from "../components/cms/NewCms/homeNew/MainContent.vue";
+import QuickSale30D from "../components/user/NewUser/QuickSale30D/QuickSale30D.vue";
+import QuickSale from "../components/cms/NewCms/QuickSaleNew/QuickSale.vue";
 
 const routes = [
     // {
@@ -173,7 +175,7 @@ const routes = [
         path: "/moi-gioi",
         name: "MoiGioiShow",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -186,7 +188,7 @@ const routes = [
         path: "/tin-tuc",
         name: "News",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -371,6 +373,18 @@ const routes = [
                         component: QSImageBackground3
                     }
 
+                ]
+            },
+            {
+                path: 'ban-nhanh-moi',
+                name: 'QuickSaleNew',
+                component: cms,
+                children: [
+                    {
+                        path: 'noi-dung-chinh',
+                        name: 'NewQuickSale',
+                        component: QuickSale
+                    }
                 ]
             },
             {
@@ -914,7 +928,7 @@ const routes = [
         path: "/",
         name: "Landingpage",
         component: MenuUser,
-        meta: { enableTailwind: true, requiresAuth: false },
+        meta: {enableTailwind: true, requiresAuth: false},
         children: [
             {
                 path: '',
@@ -943,7 +957,7 @@ const routes = [
     {
         path: "/dinh-gia-bds",
         name: "EstimateProperty",
-        meta:{ enableTailwind: true, requiresAuth: false },
+        meta: {enableTailwind: true, requiresAuth: false},
         component: MenuUser,
         children: [
             {
@@ -970,7 +984,7 @@ const routes = [
         path: "/dang-nhap",
         name: "LoginUser",
         component: MenuUser,
-        meta: { loginFrom: "user", requiresAuth: false},
+        meta: {loginFrom: "user", requiresAuth: false},
         children: [
             {
                 path: '',
@@ -983,7 +997,7 @@ const routes = [
         path: "/tuyen-dung",
         name: "Recruitment",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -996,7 +1010,7 @@ const routes = [
         path: "/goi-dich-vu",
         name: "ServicePackage",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -1009,7 +1023,7 @@ const routes = [
         path: "/lien-he",
         name: "Contact",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -1023,7 +1037,7 @@ const routes = [
         path: "/thanh-toan",
         name: "Checkout",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -1037,7 +1051,7 @@ const routes = [
         path: "/thanh-toan-san-pham",
         name: "Checkout1",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -1051,7 +1065,7 @@ const routes = [
         path: "/nap-tien-ca-nhan",
         name: "Checkout114",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -1071,7 +1085,7 @@ const routes = [
         path: "/cong-viec-cong-tac-vien",
         name: "CollaboratorJobs",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -1312,7 +1326,7 @@ const routes = [
         path: "/hop-tac",
         name: "Investments",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: "",
@@ -1357,26 +1371,32 @@ const routes = [
         ]
     },
     {
-        path: "/trang-chu",
+        path: "/",
         name: "Home",
         component: Layout,
-        children: [
-            {
-                path: '',
-                name: "home",
-                component: MainContentHome
-            }
-        ], meta: {
+        meta: {
             enableTailwind: true,
             newCustomScroll: true,
             useAOS: true
-        }
+        },
+        children: [
+            {
+                path: 'trang-chu',
+                name: "home",
+                component: MainContentHome
+            },
+            {
+                path: 'ban-nhanh-bds',
+                name: "quickSaleNew",
+                component: QuickSale30D
+            }
+        ]
     },
     {
         path: "/ga4-demo",
         name: "GA4Demo",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',

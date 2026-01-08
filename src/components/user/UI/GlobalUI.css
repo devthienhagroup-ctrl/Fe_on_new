@@ -74,11 +74,84 @@
             var(--gradient-primary-to) 51%,
             var(--gradient-primary-from) 100%
     );
-    transition: 0.5s;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.btn-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.2),
+            transparent
+    );
+    transition: left 0.7s ease;
+    z-index: -1;
 }
 
 .btn-gradient:hover {
     background-position: right center;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-gradient:hover::before {
+    left: 100%;
+}
+
+.btn-gradient:active {
+    transform: translateY(-1px) scale(1.02);
+    transition: all 0.2s ease;
+}
+
+/* Hiệu ứng pulse */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(var(--gradient-primary-rgb), 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(var(--gradient-primary-rgb), 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(var(--gradient-primary-rgb), 0);
+    }
+}
+
+.btn-gradient.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Hiệu ứng bounce */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.btn-gradient.bounce:hover {
+    animation: bounce 0.6s ease;
+}
+
+/* Hiệu ứng glow */
+.btn-gradient.glow {
+    box-shadow: 0 0 15px var(--gradient-primary-from);
+}
+
+.btn-gradient.glow:hover {
+    box-shadow: 0 0 25px var(--gradient-primary-from),
+    0 0 35px var(--gradient-primary-from);
+    filter: brightness(1.1);
 }
 
 /* =========================
@@ -94,4 +167,18 @@
 
 .map-filter:hover {
     filter: none;
+}
+
+/* Glassmorphism Card */
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.4s ease;
+}
+.glass-card:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(139, 92, 246, 0.5);
+    box-shadow: 0 20px 40px -15px rgba(139, 92, 246, 0.3);
 }
