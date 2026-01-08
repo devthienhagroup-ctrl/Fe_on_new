@@ -11,17 +11,17 @@
       </div>
     </header>
 
-    <div class="main-container">
+    <div class="main-container" :class="{ 'with-detail': selectedCustomer }">
       <!-- Sidebar với thống kê -->
       <aside class="sidebar">
         <div class="stats-widget">
           <h3><i class="fas fa-chart-bar"></i> Thống kê hôm nay</h3>
           <div class="stat-item">
-            <span class="stat-label">Số cuộc gọi:</span>
+            <span class="stat-label">Số khách lên VP:</span>
             <span class="stat-value">{{ todayStats.totalCalls }}</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">Thành công:</span>
+            <span class="stat-label">Liên lạc được:</span>
             <span class="stat-value success">{{ todayStats.successfulCalls }}</span>
           </div>
           <div class="stat-item">
@@ -211,7 +211,7 @@
                       title="Zalo"
                       @click.stop
                   >
-                    <i class="fas fa-comment-dots"></i> zalo:
+                    <i class="fas fa-comment-dots"></i> zalo: {{ customer.phone }}
                   </a>
                   <a
                       class="contact-icon tel"
@@ -219,7 +219,7 @@
                       title="Điện thoại"
                       @click.stop
                   >
-                    <i class="fas fa-phone"></i> tel:
+                    <i class="fas fa-phone"></i> tel: {{ customer.phone }}
                   </a>
                 </div>
                 <div class="call-status" v-if="customer.lastCall">
@@ -232,6 +232,15 @@
           <div class="pagination" v-if="activeTab === 'contacted' && totalPages > 1">
             <button class="page-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
               <i class="fas fa-chevron-left"></i>
+            </button>
+            <button
+                v-for="page in pageNumbers"
+                :key="`page-${page}`"
+                class="page-btn"
+                :class="{ active: currentPage === page }"
+                @click="changePage(page)"
+            >
+              {{ page }}
             </button>
             <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
             <button class="page-btn" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
@@ -250,21 +259,21 @@
           </button>
         </div>
 
-        <div class="detail-content">
+        <div class="detail-content" v-if="selectedCustomer">
           <div class="customer-detail-header">
             <div
                 class="detail-avatar avatar-initials"
-                :style="{ backgroundColor: getAvatarColor(selectedCustomer.name) }"
+                :style="selectedCustomer ? { backgroundColor: getAvatarColor(selectedCustomer.name) } : {}"
             >
-              {{ getInitials(selectedCustomer.name) }}
+              {{ selectedCustomer ? getInitials(selectedCustomer.name) : '' }}
             </div>
             <div class="detail-name-info">
-              <h4>{{ selectedCustomer.name }}</h4>
-              <p class="detail-phone">{{ selectedCustomer.phone }}</p>
-              <p class="detail-received">Tiếp nhận: {{ formatReceivedAt(selectedCustomer.receivedAt) }}</p>
+              <h4>{{ selectedCustomer ? selectedCustomer.name : '' }}</h4>
+              <p class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</p>
+              <p class="detail-received">Tiếp nhận: {{ selectedCustomer ? formatReceivedAt(selectedCustomer.receivedAt) : '' }}</p>
               <p class="detail-type">
-                <span :class="`type-badge ${selectedCustomer.type}`">
-                  {{ getCustomerTypeLabel(selectedCustomer.type) }}
+                <span :class="selectedCustomer ? `type-badge ${selectedCustomer.type}` : 'type-badge'">
+                  {{ selectedCustomer ? getCustomerTypeLabel(selectedCustomer.type) : '' }}
                 </span>
               </p>
             </div>
@@ -336,22 +345,10 @@
 
           <div class="detail-actions">
             <button
-                class="action-btn success"
-                @click="markCustomerStatus('success')"
-            >
-              <i class="fas fa-calendar-check"></i> Đặt lịch thành công
-            </button>
-            <button
                 class="action-btn move-btn"
                 @click="moveToContacted"
             >
-              <i class="fas fa-exchange-alt"></i> Chuyển sang đã liên hệ
-            </button>
-            <button
-                class="action-btn danger"
-                @click="markCustomerStatus('wrong_number')"
-            >
-              <i class="fas fa-times-circle"></i> Đánh dấu sai số
+              <i class="fas fa-save"></i> Lưu thông tin
             </button>
           </div>
         </div>
@@ -401,75 +398,7 @@ export default {
         { value: 'unreachable', label: 'Không liên lạc được' },
         { value: 'care', label: 'Chăm sóc' }
       ],
-      newCustomers: [
-        {
-          id: 1,
-          name: 'Nguyễn Văn An',
-          phone: '0912345678',
-          receivedAt: '2024-03-14T09:10:00',
-          province: 'Hà Nội',
-          oldProvince: 'Hải Phòng',
-          type: 'owner',
-          notes: [
-            { date: '2024-03-15', time: '14:30', content: 'Khách quan tâm đến chính sách ưu đãi' },
-            { date: '2024-03-16', time: '10:15', content: 'Hẹn gọi lại vào chiều thứ 6' }
-          ],
-          tags: ['potential_7'],
-          lastCall: '2024-03-16T10:15:00'
-        },
-        {
-          id: 2,
-          name: 'Trần Thị Bình',
-          phone: '0923456789',
-          receivedAt: '2024-03-15T11:20:00',
-          province: 'TP. Hồ Chí Minh',
-          oldProvince: null,
-          type: 'relative',
-          notes: [
-            { date: '2024-03-17', time: '09:20', content: 'Khách hỏi về thời gian làm việc' }
-          ],
-          tags: [],
-          lastCall: '2024-03-17T09:20:00'
-        },
-        {
-          id: 3,
-          name: 'Lê Văn Cường',
-          phone: '0934567890',
-          receivedAt: '2024-03-15T14:05:00',
-          province: 'Đà Nẵng',
-          oldProvince: 'Quảng Nam',
-          type: 'broker',
-          notes: [],
-          tags: ['care'],
-          lastCall: null
-        },
-        {
-          id: 4,
-          name: 'Phạm Thị Dung',
-          phone: '0945678901',
-          receivedAt: '2024-03-16T08:40:00',
-          province: 'Hải Phòng',
-          oldProvince: null,
-          type: 'owner',
-          notes: [
-            { date: '2024-03-16', time: '16:45', content: 'Khách bận, hẹn gọi lại sáng thứ 2' }
-          ],
-          tags: ['potential_14'],
-          lastCall: '2024-03-16T16:45:00'
-        },
-        {
-          id: 5,
-          name: 'Hoàng Văn Em',
-          phone: '0956789012',
-          receivedAt: '2024-03-16T15:30:00',
-          province: 'Cần Thơ',
-          oldProvince: 'Vĩnh Long',
-          type: 'relative',
-          notes: [],
-          tags: [],
-          lastCall: null
-        }
-      ],
+      newCustomers: [], // Sẽ gán từ API
       contactedCustomers: [
         {
           id: 6,
@@ -522,10 +451,13 @@ export default {
     };
   },
   watch: {
-    activeTab() {
+    activeTab(newVal) {
       this.currentPage = 1;
       this.statusFilter = 'all';
       this.searchQuery = '';
+      if (newVal === 'new') {
+        this.loadKhachMoiTiepNhan();
+      }
     },
     statusFilter() {
       this.currentPage = 1;
@@ -557,6 +489,10 @@ export default {
     totalPages() {
       if (this.activeTab !== 'contacted') return 1;
       return Math.max(1, Math.ceil(this.filteredCustomers.length / this.pageSize));
+    },
+    pageNumbers() {
+      if (this.activeTab !== 'contacted') return [];
+      return Array.from({ length: this.totalPages }, (_, index) => index + 1);
     },
     pagedCustomers() {
       if (this.activeTab !== 'contacted') return this.filteredCustomers;
@@ -806,9 +742,9 @@ export default {
     // Lấy nhãn loại khách hàng
     getCustomerTypeLabel(type) {
       const typeLabels = {
-        'broker': 'Môi giới',
-        'owner': 'Chủ nhà',
-        'relative': 'Người thân'
+        'MOI_GIOI': 'Môi giới',
+        'CHINH_CHU': 'Chủ nhà',
+        'NGUOI_THAN': 'Người thân'
       };
       return typeLabels[type] || type;
     },
@@ -834,8 +770,7 @@ export default {
     },
 
     changePage(page) {
-      const nextPage = Math.min(Math.max(page, 1), this.totalPages);
-      this.currentPage = nextPage;
+      this.currentPage = Math.min(Math.max(page, 1), this.totalPages);
     },
 
     // Lấy ký tự viết tắt từ tên khách hàng
@@ -891,9 +826,52 @@ export default {
     formatNoteDate(isoString) {
       const date = new Date(isoString);
       return date.toLocaleDateString('vi-VN');
-    }
+    },
+
+    async loadKhachMoiTiepNhan() {
+      try {
+        const data = await fetchKhachMoiTiepNhan();
+        // Chuyển đổi dữ liệu API về đúng định dạng newCustomers
+        this.newCustomers = (data || []).map((item, idx) => ({
+          id: idx + 1, // hoặc item.id nếu backend trả về
+          name: item.hoTen,
+          phone: item.soDienThoai,
+          receivedAt: item.thoiGianTiepNhan,
+          province: item.tinhMoi,
+          oldProvince: item.tinhCu || null,
+          type: item.type, // hoặc xác định từ dữ liệu nếu có
+          notes: item.ghiChu ? [{ date: item.thoiGianTiepNhan.split('T')[0], time: item.thoiGianTiepNhan.split('T')[1]?.slice(0,5) || '', content: item.ghiChu }] : [],
+          tags: [],
+          lastCall: null,
+          files: item.files || null
+        }));
+      } catch (err) {
+        this.newCustomers = [];
+      }
+    },
   }
 };
+
+// Gọi api lấy dữ liệu thực tế ở đây
+import api from "/src/api/api.js"
+export async function fetchKhachMoiTiepNhan() {
+  try {
+    const res = await api.get(
+        "/customer-crm/telesales/khach-moi-tiep-nhan",
+        {
+          withCredentials: true // nếu bạn dùng cookie/session
+        }
+    );
+
+    console.log("👉 Khách mới tiếp nhận:", res.data);
+
+    return res.data;
+  } catch (err) {
+    console.error("❌ Lỗi lấy khách mới tiếp nhận:", err);
+    throw err;
+  }
+}
+fetchKhachMoiTiepNhan();
 </script>
 
 <style scoped>
@@ -981,21 +959,38 @@ body {
   gap: 25px;
 }
 
-.stats-widget, .chart-widget {
-  background: linear-gradient(145deg, #ffffff 0%, #eef3ff 100%);
-  border: 1px solid #d7e0ec;
+.stats-widget,
+.chart-widget {
   border-radius: 14px;
   padding: 18px;
-  box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
+  box-shadow: 0 10px 20px rgba(31, 45, 61, 0.08);
 }
 
-.stats-widget h3, .chart-widget h3 {
+.stats-widget {
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 55%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+}
+
+.chart-widget {
+  background: linear-gradient(135deg, #f8fafc 0%, #ecfeff 55%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+}
+
+.stats-widget h3,
+.chart-widget h3 {
   font-size: 16px;
   margin-bottom: 15px;
-  color: #3f51b5;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.stats-widget h3 {
+  color: #334155;
+}
+
+.chart-widget h3 {
+  color: #334155;
 }
 
 .stat-item {
@@ -1079,11 +1074,11 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #ffffff 0%, #eef4ff 100%);
-  border: 1px solid #d7e0ec;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 55%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
   padding: 15px 20px;
   border-radius: 14px;
-  box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
+  box-shadow: 0 10px 20px rgba(31, 45, 61, 0.08);
 }
 
 .view-controls {
@@ -1093,25 +1088,25 @@ body {
 
 .tab-btn {
   padding: 10px 20px;
-  border: 1px solid #cfd7e3;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
-  background: linear-gradient(135deg, #f4f7ff 0%, #dbe6ff 100%);
-  color: #3a4a5e;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+  color: #334155;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 8px;
   transition: all 0.3s;
-  box-shadow: 0 6px 12px rgba(47, 63, 99, 0.12);
+  box-shadow: 0 6px 12px rgba(15, 23, 42, 0.08);
 }
 
 .tab-btn.active {
-  background-color: #ffffff;
-  color: #16a34a;
-  border-color: #16a34a;
-  box-shadow: 0 6px 12px rgba(22, 163, 74, 0.25);
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  color: #ffffff;
+  border-color: #c7d2fe;
+  box-shadow: 0 8px 16px rgba(99, 102, 241, 0.25);
 }
 
 .tab-btn:hover:not(.active) {
@@ -1138,16 +1133,16 @@ body {
 .filter-group select {
   padding: 8px 12px;
   border-radius: 10px;
-  border: 1px solid #cfd7e3;
-  background-color: #f8fbff;
+  border: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
   font-size: 14px;
-  color: #344054;
+  color: #334155;
 }
 
 .refresh-btn {
   padding: 8px 15px;
-  background: linear-gradient(135deg, #e3ecff 0%, #c6d7ff 100%);
-  border: 1px solid #c5d5f3;
+  background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%);
+  border: 1px solid #e2e8f0;
   border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
@@ -1155,7 +1150,7 @@ body {
   align-items: center;
   gap: 5px;
   transition: background 0.3s;
-  color: #2f3f63;
+  color: #ffffff;
 }
 
 .refresh-btn:hover {
@@ -1164,17 +1159,17 @@ body {
 
 /* Chart container */
 .chart-container-large {
-  background: linear-gradient(145deg, #ffffff 0%, #eef3ff 100%);
-  border: 1px solid #d7e0ec;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 55%, #eef2ff 100%);
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
   padding: 20px;
-  box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
+  box-shadow: 0 10px 20px rgba(31, 45, 61, 0.08);
 }
 
 .chart-container-large h3 {
   font-size: 18px;
   margin-bottom: 15px;
-  color: #3f51b5;
+  color: #334155;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1187,11 +1182,11 @@ body {
 
 /* Customer section */
 .customer-section {
-  background: linear-gradient(145deg, #ffffff 0%, #eef3ff 100%);
-  border: 1px solid #d7e0ec;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 45%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
   padding: 20px;
-  box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
+  box-shadow: 0 10px 20px rgba(31, 45, 61, 0.08);
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1203,6 +1198,11 @@ body {
   align-items: center;
   margin-bottom: 20px;
   gap: 15px;
+}
+
+.main-container.with-detail .section-header {
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .section-title {
@@ -1217,18 +1217,27 @@ body {
   gap: 12px;
 }
 
+.main-container.with-detail .section-controls {
+  flex-wrap: nowrap;
+}
+
+.main-container.with-detail .section-controls .search-box {
+  flex: 1;
+  min-width: 240px;
+}
+
 .status-filter {
-  background: #ffffff;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   padding: 6px 10px;
   border-radius: 12px;
-  border: 1px solid #2563eb;
+  border: 1px solid #e2e8f0;
 }
 
 .type-filter {
-  background: #ffffff;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   padding: 6px 10px;
   border-radius: 12px;
-  border: 1px solid #16a34a;
+  border: 1px solid #e2e8f0;
 }
 
 .status-filter select {
@@ -1237,7 +1246,7 @@ body {
 
 .section-header h3 {
   font-size: 18px;
-  color: #3f51b5;
+  color: #1e293b;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1252,10 +1261,10 @@ body {
   width: 100%;
   padding: 10px 15px 10px 40px;
   border-radius: 12px;
-  border: 1px solid #cfd7e3;
-  background: linear-gradient(135deg, #f8fbff 0%, #eef4ff 100%);
+  border: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
   font-size: 14px;
-  color: #344054;
+  color: #334155;
 }
 
 .search-box i {
@@ -1280,10 +1289,10 @@ body {
   align-items: center;
   padding: 15px;
   border-radius: 14px;
-  border: 1px solid #cfd7e3;
+  border: 1px solid #e2e8f0;
   cursor: pointer;
   transition: all 0.2s;
-  background: linear-gradient(135deg, #ffffff 0%, #f4f7ff 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 45%, #eef2ff 100%);
 }
 
 .customer-card:hover {
@@ -1292,9 +1301,9 @@ body {
 }
 
 .customer-card.selected {
-  border-color: #3f51b5;
-  background-color: #f2f6ff;
-  box-shadow: inset 0 0 0 1px rgba(63, 81, 181, 0.15);
+  border-color: #c7d2fe;
+  background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.2);
 }
 
 .customer-avatar {
@@ -1334,17 +1343,17 @@ body {
   white-space: nowrap;
 }
 
-.customer-type.broker {
+.customer-type.MOI_GIOI {
   background-color: #1e88e5;
   color: #ffffff;
 }
 
-.customer-type.owner {
+.customer-type.CHINH_CHU {
   background-color: #2e7d32;
   color: #ffffff;
 }
 
-.customer-type.relative {
+.customer-type.NGUOI_THAN {
   background-color: #6a1b9a;
   color: #ffffff;
 }
@@ -1361,7 +1370,8 @@ body {
 
 .customer-phone {
   font-size: 14px;
-  color: #666;
+  color: #4daf36;
+  font-weight: 600;
   margin-bottom: 4px;
   display: flex;
   align-items: center;
@@ -1369,8 +1379,8 @@ body {
 }
 
 .customer-received {
-  font-size: 13px;
-  color: #64748b;
+  font-size: 14px;
+  color: #444444;
   margin-bottom: 6px;
   display: flex;
   align-items: center;
@@ -1378,8 +1388,9 @@ body {
 }
 
 .customer-location {
-  font-size: 13px;
-  color: #888;
+  font-size: 14px;
+  font-weight: 600;
+  color: #c92222;
   margin-bottom: 8px;
   display: flex;
   gap: 10px;
@@ -1397,9 +1408,9 @@ body {
 
 .customer-notes-preview {
   font-size: 13px;
-  color: #666;
-  background: #f8fafc;
-  border: 1px solid #cbd5f5;
+  color: #334155;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 1px solid #e2e8f0;
   padding: 5px 8px;
   border-radius: 10px;
   margin-bottom: 8px;
@@ -1473,15 +1484,15 @@ body {
 }
 
 .contact-icon.zalo {
-  background-color: #0068ff;
+  background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%);
   color: #ffffff;
-  border-color: #0068ff;
+  border-color: #cbd5f5;
 }
 
 .contact-icon.tel {
-  background-color: #16a34a;
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
   color: #ffffff;
-  border-color: #16a34a;
+  border-color: #c7d2fe;
 }
 
 .call-status {
@@ -1495,8 +1506,8 @@ body {
 /* Detail panel */
 .detail-panel {
   width: 400px;
-  background: linear-gradient(160deg, #ffffff 0%, #eef4ff 100%);
-  border-left: 1px solid #cfd7e3;
+  background: linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%);
+  border-left: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -1504,16 +1515,16 @@ body {
 
 .detail-header {
   padding: 15px 20px;
-  border-bottom: 1px solid #cfd7e3;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #f5f8ff, #eef4ff);
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
 }
 
 .detail-header h3 {
   font-size: 18px;
-  color: #3f51b5;
+  color: #1e293b;
 }
 
 .close-btn {
@@ -1580,15 +1591,15 @@ body {
   color: #ffffff;
 }
 
-.type-badge.broker {
+.type-badge.MOI_GIOI {
   background-color: #1e88e5;
 }
 
-.type-badge.owner {
+.type-badge.CHINH_CHU {
   background-color: #2e7d32;
 }
 
-.type-badge.relative {
+.type-badge.NGUOI_THAN {
   background-color: #6a1b9a;
 }
 
@@ -1647,11 +1658,11 @@ body {
 .notes-container {
   max-height: 200px;
   overflow-y: auto;
-  border: 1px solid #cfd7e3;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 10px;
   margin-bottom: 15px;
-  background: linear-gradient(135deg, #f8fbff 0%, #edf3ff 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
 }
 
 .notes-list {
@@ -1693,8 +1704,8 @@ body {
 .add-note-form textarea {
   width: 100%;
   padding: 12px;
-  border: 1px solid #cfd7e3;
-  background-color: #f8fbff;
+  border: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
   border-radius: 12px;
   font-family: inherit;
   font-size: 14px;
@@ -1789,6 +1800,12 @@ body {
   border-radius: 12px;
   cursor: pointer;
   box-shadow: 0 6px 12px rgba(47, 63, 99, 0.12);
+}
+
+.page-btn.active {
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  border-color: #c7d2fe;
+  color: #ffffff;
 }
 
 .page-btn:disabled {

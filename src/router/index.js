@@ -139,18 +139,18 @@ import MainContent from "../components/cms/components/homeNew/MainContent.vue";
 import test from "../components/thiet-kegiandien/marketing-cap-da-ta.vue"
 import test1 from "../components/thiet-kegiandien/telesales-lien-he-khach-hang.vue"
 const routes = [
-    {
-        path: "/test/dat-lich",
-        name: "TeamCollaboration",
-        component: test,
-        meta: { requiresAuth: false, enableTailwind: false},
-    },
-    {
-        path: "/test/tele-sales",
-        name: "TELESALES",
-        component: test1,
-        meta: { requiresAuth: false, enableTailwind: false},
-    },
+    // {
+    //     path: "/test/dat-lich",
+    //     name: "TeamCollaboration",
+    //     component: test,
+    //     meta: { requiresAuth: false, enableTailwind: false},
+    // },
+    // {
+    //     path: "/test/tele-sales",
+    //     name: "TELESALES",
+    //     component: test1,
+    //     meta: { requiresAuth: false, enableTailwind: false},
+    // },
     {
         path: "/-thg/dang-nhap",
         name: "LoginForm",
