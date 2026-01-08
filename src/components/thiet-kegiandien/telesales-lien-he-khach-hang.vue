@@ -132,6 +132,15 @@
                   <option value="care">Chăm sóc</option>
                 </select>
               </div>
+              <div class="filter-group type-filter">
+                <label for="typeFilter">Phân loại:</label>
+                <select id="typeFilter" v-model="typeFilter">
+                  <option value="all">Tất cả</option>
+                  <option value="owner">Chủ nhà</option>
+                  <option value="broker">Môi giới</option>
+                  <option value="relative">Người thân</option>
+                </select>
+              </div>
               <div class="search-box">
                 <input
                     type="text"
@@ -167,6 +176,9 @@
                 <p class="customer-phone">
                   <i class="fas fa-phone"></i> {{ customer.phone }}
                 </p>
+                <p class="customer-received">
+                  <i class="fas fa-clock"></i> Tiếp nhận: {{ formatReceivedAt(customer.receivedAt) }}
+                </p>
                 <div class="customer-location">
                   <span class="location-current">
                     <i class="fas fa-map-marker-alt"></i> {{ customer.province }}
@@ -192,13 +204,24 @@
               </div>
 
               <div class="customer-actions">
-                <button
-                    class="call-btn"
-                    @click.stop="callCustomer(customer)"
-                    :disabled="isCalling"
-                >
-                  <i class="fas fa-phone"></i> Gọi
-                </button>
+                <div class="contact-icons">
+                  <a
+                      class="contact-icon zalo"
+                      :href="`zalo:${customer.phone}`"
+                      title="Zalo"
+                      @click.stop
+                  >
+                    <i class="fas fa-comment-dots"></i> zalo:
+                  </a>
+                  <a
+                      class="contact-icon tel"
+                      :href="`tel:${customer.phone}`"
+                      title="Điện thoại"
+                      @click.stop
+                  >
+                    <i class="fas fa-phone"></i> tel:
+                  </a>
+                </div>
                 <div class="call-status" v-if="customer.lastCall">
                   <i class="fas fa-clock"></i>
                   {{ formatTime(customer.lastCall) }}
@@ -238,6 +261,7 @@
             <div class="detail-name-info">
               <h4>{{ selectedCustomer.name }}</h4>
               <p class="detail-phone">{{ selectedCustomer.phone }}</p>
+              <p class="detail-received">Tiếp nhận: {{ formatReceivedAt(selectedCustomer.receivedAt) }}</p>
               <p class="detail-type">
                 <span :class="`type-badge ${selectedCustomer.type}`">
                   {{ getCustomerTypeLabel(selectedCustomer.type) }}
@@ -334,43 +358,6 @@
       </div>
     </div>
 
-    <!-- Modal cuộc gọi -->
-    <div class="call-modal" v-if="isCalling">
-      <div class="call-modal-content">
-        <h3><i class="fas fa-phone-volume"></i> Đang gọi...</h3>
-        <div class="call-info">
-          <p class="call-customer-name">{{ callCustomerName }}</p>
-          <p class="call-customer-phone">{{ callCustomerPhone }}</p>
-          <div class="call-timer">
-            <i class="fas fa-clock"></i> 00:{{ callTimer.toString().padStart(2, '0') }}
-          </div>
-        </div>
-        <div class="call-actions">
-          <button class="call-action-btn end-call" @click="endCall">
-            <i class="fas fa-phone-slash"></i> Kết thúc
-          </button>
-          <button class="call-action-btn add-note-call" @click="showNoteAfterCall = true">
-            <i class="fas fa-sticky-note"></i> Thêm ghi chú
-          </button>
-        </div>
-
-        <div class="call-note-section" v-if="showNoteAfterCall">
-          <textarea
-              v-model="callNote"
-              placeholder="Ghi chú sau cuộc gọi..."
-              rows="3"
-          ></textarea>
-          <div class="call-note-actions">
-            <button class="call-note-btn save-note" @click="saveCallNote">
-              <i class="fas fa-save"></i> Lưu ghi chú
-            </button>
-            <button class="call-note-btn cancel-note" @click="cancelCallNote">
-              <i class="fas fa-times"></i> Bỏ qua
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -383,16 +370,10 @@ export default {
     return {
       activeTab: 'new',
       selectedCustomer: null,
-      isCalling: false,
-      callCustomerName: '',
-      callCustomerPhone: '',
-      callTimer: 0,
-      callInterval: null,
-      showNoteAfterCall: false,
-      callNote: '',
       newNote: '',
       searchQuery: '',
       statusFilter: 'all',
+      typeFilter: 'all',
       currentPage: 1,
       pageSize: 4,
       selectedTimeRange: 'month',
@@ -425,6 +406,7 @@ export default {
           id: 1,
           name: 'Nguyễn Văn An',
           phone: '0912345678',
+          receivedAt: '2024-03-14T09:10:00',
           province: 'Hà Nội',
           oldProvince: 'Hải Phòng',
           type: 'owner',
@@ -439,6 +421,7 @@ export default {
           id: 2,
           name: 'Trần Thị Bình',
           phone: '0923456789',
+          receivedAt: '2024-03-15T11:20:00',
           province: 'TP. Hồ Chí Minh',
           oldProvince: null,
           type: 'relative',
@@ -452,6 +435,7 @@ export default {
           id: 3,
           name: 'Lê Văn Cường',
           phone: '0934567890',
+          receivedAt: '2024-03-15T14:05:00',
           province: 'Đà Nẵng',
           oldProvince: 'Quảng Nam',
           type: 'broker',
@@ -463,6 +447,7 @@ export default {
           id: 4,
           name: 'Phạm Thị Dung',
           phone: '0945678901',
+          receivedAt: '2024-03-16T08:40:00',
           province: 'Hải Phòng',
           oldProvince: null,
           type: 'owner',
@@ -476,6 +461,7 @@ export default {
           id: 5,
           name: 'Hoàng Văn Em',
           phone: '0956789012',
+          receivedAt: '2024-03-16T15:30:00',
           province: 'Cần Thơ',
           oldProvince: 'Vĩnh Long',
           type: 'relative',
@@ -489,6 +475,7 @@ export default {
           id: 6,
           name: 'Vũ Thị Phương',
           phone: '0967890123',
+          receivedAt: '2024-03-10T09:05:00',
           province: 'Bình Dương',
           oldProvince: 'Đồng Nai',
           type: 'owner',
@@ -496,13 +483,14 @@ export default {
             { date: '2024-03-10', time: '11:30', content: 'Đã đặt lịch thành công ngày 20/3' },
             { date: '2024-03-15', time: '15:20', content: 'Xác nhận lại lịch hẹn' }
           ],
-          tags: ['success', 'care'],
+          tags: ['success'],
           lastCall: '2024-03-15T15:20:00'
         },
         {
           id: 7,
           name: 'Đặng Văn Quân',
           phone: '0978901234',
+          receivedAt: '2024-03-11T13:15:00',
           province: 'Hà Nội',
           oldProvince: null,
           type: 'broker',
@@ -516,6 +504,7 @@ export default {
           id: 8,
           name: 'Bùi Thị Hà',
           phone: '0989012345',
+          receivedAt: '2024-03-12T10:25:00',
           province: 'TP. Hồ Chí Minh',
           oldProvince: 'Long An',
           type: 'owner',
@@ -541,6 +530,9 @@ export default {
     statusFilter() {
       this.currentPage = 1;
     },
+    typeFilter() {
+      this.currentPage = 1;
+    },
     searchQuery() {
       this.currentPage = 1;
     }
@@ -550,7 +542,7 @@ export default {
       const customers = this.activeTab === 'new' ? this.newCustomers : this.contactedCustomers;
 
       if (!this.searchQuery.trim()) {
-        return this.filterByStatus(customers);
+        return this.filterByType(this.filterByStatus(customers));
       }
 
       const query = this.searchQuery.toLowerCase();
@@ -560,7 +552,7 @@ export default {
           customer.province.toLowerCase().includes(query) ||
           (customer.oldProvince && customer.oldProvince.toLowerCase().includes(query))
       );
-      return this.filterByStatus(filtered);
+      return this.filterByType(this.filterByStatus(filtered));
     },
     totalPages() {
       if (this.activeTab !== 'contacted') return 1;
@@ -746,61 +738,6 @@ export default {
       this.newNote = '';
     },
 
-    // Gọi khách hàng
-    callCustomer(customer) {
-      this.isCalling = true;
-      this.callCustomerName = customer.name;
-      this.callCustomerPhone = customer.phone;
-      this.callTimer = 0;
-      this.callNote = '';
-      this.showNoteAfterCall = false;
-
-      // Bắt đầu đếm thời gian cuộc gọi
-      this.callInterval = setInterval(() => {
-        this.callTimer++;
-      }, 1000);
-    },
-
-    // Kết thúc cuộc gọi
-    endCall() {
-      clearInterval(this.callInterval);
-      this.isCalling = false;
-      this.showNoteAfterCall = false;
-
-      // Cập nhật thời gian cuộc gọi cuối cùng
-      if (this.selectedCustomer) {
-        this.selectedCustomer.lastCall = new Date().toISOString();
-      }
-    },
-
-    // Lưu ghi chú cuộc gọi
-    saveCallNote() {
-      if (this.callNote.trim() && this.selectedCustomer) {
-        const now = new Date();
-        const note = {
-          date: now.toISOString().split('T')[0],
-          time: now.toTimeString().slice(0, 5),
-          content: this.callNote
-        };
-
-        if (!this.selectedCustomer.notes) {
-          this.selectedCustomer.notes = [];
-        }
-
-        this.selectedCustomer.notes.unshift(note);
-        this.callNote = '';
-        this.showNoteAfterCall = false;
-        this.endCall();
-      }
-    },
-
-    // Hủy ghi chú cuộc gọi
-    cancelCallNote() {
-      this.callNote = '';
-      this.showNoteAfterCall = false;
-      this.endCall();
-    },
-
     // Thêm ghi chú mới
     addNote() {
       if (this.newNote.trim() && this.selectedCustomer) {
@@ -858,12 +795,12 @@ export default {
     toggleCustomerTag(tag) {
       if (!this.selectedCustomer) return;
 
-      const index = this.selectedCustomer.tags.indexOf(tag);
-      if (index === -1) {
-        this.selectedCustomer.tags.push(tag);
-      } else {
-        this.selectedCustomer.tags.splice(index, 1);
+      if (this.selectedCustomer.tags.includes(tag)) {
+        this.selectedCustomer.tags = [];
+        return;
       }
+
+      this.selectedCustomer.tags = [tag];
     },
 
     // Lấy nhãn loại khách hàng
@@ -887,6 +824,13 @@ export default {
         return customers;
       }
       return customers.filter(customer => customer.tags.includes(this.statusFilter));
+    },
+
+    filterByType(customers) {
+      if (this.typeFilter === 'all') {
+        return customers;
+      }
+      return customers.filter(customer => customer.type === this.typeFilter);
     },
 
     changePage(page) {
@@ -931,6 +875,18 @@ export default {
       return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
     },
 
+    formatReceivedAt(isoString) {
+      if (!isoString) return '-';
+      const date = new Date(isoString);
+      return date.toLocaleString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    },
+
     // Định dạng ngày ghi chú
     formatNoteDate(isoString) {
       const date = new Date(isoString);
@@ -941,24 +897,6 @@ export default {
 </script>
 
 <style scoped>
-/* Biến màu sắc */
-:root {
-  --primary-color: #3f51b5;
-  --secondary-color: #2196f3;
-  --success-color: #4caf50;
-  --warning-color: #ff9800;
-  --danger-color: #f44336;
-  --light-color: #f5f5f5;
-  --dark-color: #333;
-  --gray-color: #9e9e9e;
-  --border-color: #d6dce5;
-  --surface-color: #fdfdfd;
-  --surface-alt: #f7f9fc;
-  --panel-gradient: linear-gradient(145deg, #ffffff 0%, #eef3ff 100%);
-  --sidebar-width: 280px;
-  --detail-panel-width: 200px;
-}
-
 /* Reset và kiểu cơ bản */
 * {
   margin: 0;
@@ -981,7 +919,7 @@ body {
 
 /* Header */
 .app-header {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  background: linear-gradient(135deg, #3f51b5, #2196f3);
   color: white;
   padding: 15px 25px;
   display: flex;
@@ -1033,8 +971,8 @@ body {
 
 /* Sidebar */
 .sidebar {
-  width: var(--sidebar-width);
-  background-color: var(--surface-alt);
+  width: 280px;
+  background-color: #f7f9fc;
   border-right: 1px solid #cfd7e3;
   overflow-y: auto;
   padding: 20px;
@@ -1044,9 +982,9 @@ body {
 }
 
 .stats-widget, .chart-widget {
-  background: var(--panel-gradient);
+  background: linear-gradient(145deg, #ffffff 0%, #eef3ff 100%);
   border: 1px solid #d7e0ec;
-  border-radius: 8px;
+  border-radius: 14px;
   padding: 18px;
   box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
 }
@@ -1054,7 +992,7 @@ body {
 .stats-widget h3, .chart-widget h3 {
   font-size: 16px;
   margin-bottom: 15px;
-  color: var(--primary-color);
+  color: #3f51b5;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1079,15 +1017,15 @@ body {
 }
 
 .stat-value.success {
-  color: var(--success-color);
+  color: #4caf50;
 }
 
 .stat-value.failed {
-  color: var(--danger-color);
+  color: #f44336;
 }
 
 .stat-value.warning {
-  color: var(--warning-color);
+  color: #ff9800;
 }
 
 .progress-container {
@@ -1109,7 +1047,7 @@ body {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
+  background: linear-gradient(to right, #2196f3, #3f51b5);
   border-radius: 4px;
   transition: width 0.3s ease;
 }
@@ -1144,7 +1082,7 @@ body {
   background: linear-gradient(135deg, #ffffff 0%, #eef4ff 100%);
   border: 1px solid #d7e0ec;
   padding: 15px 20px;
-  border-radius: 8px;
+  border-radius: 14px;
   box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
 }
 
@@ -1156,7 +1094,7 @@ body {
 .tab-btn {
   padding: 10px 20px;
   border: 1px solid #cfd7e3;
-  border-radius: 6px;
+  border-radius: 12px;
   background: linear-gradient(135deg, #f4f7ff 0%, #dbe6ff 100%);
   color: #3a4a5e;
   cursor: pointer;
@@ -1170,10 +1108,10 @@ body {
 }
 
 .tab-btn.active {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-  box-shadow: 0 6px 12px rgba(63, 81, 181, 0.25);
+  background-color: #ffffff;
+  color: #16a34a;
+  border-color: #16a34a;
+  box-shadow: 0 6px 12px rgba(22, 163, 74, 0.25);
 }
 
 .tab-btn:hover:not(.active) {
@@ -1199,7 +1137,7 @@ body {
 
 .filter-group select {
   padding: 8px 12px;
-  border-radius: 4px;
+  border-radius: 10px;
   border: 1px solid #cfd7e3;
   background-color: #f8fbff;
   font-size: 14px;
@@ -1210,7 +1148,7 @@ body {
   padding: 8px 15px;
   background: linear-gradient(135deg, #e3ecff 0%, #c6d7ff 100%);
   border: 1px solid #c5d5f3;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
   display: flex;
@@ -1226,9 +1164,9 @@ body {
 
 /* Chart container */
 .chart-container-large {
-  background: var(--panel-gradient);
+  background: linear-gradient(145deg, #ffffff 0%, #eef3ff 100%);
   border: 1px solid #d7e0ec;
-  border-radius: 8px;
+  border-radius: 14px;
   padding: 20px;
   box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
 }
@@ -1236,7 +1174,7 @@ body {
 .chart-container-large h3 {
   font-size: 18px;
   margin-bottom: 15px;
-  color: var(--primary-color);
+  color: #3f51b5;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1249,9 +1187,9 @@ body {
 
 /* Customer section */
 .customer-section {
-  background: var(--panel-gradient);
+  background: linear-gradient(145deg, #ffffff 0%, #eef3ff 100%);
   border: 1px solid #d7e0ec;
-  border-radius: 8px;
+  border-radius: 14px;
   padding: 20px;
   box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
   flex: 1;
@@ -1280,10 +1218,17 @@ body {
 }
 
 .status-filter {
-  background: #f0f5ff;
+  background: #ffffff;
   padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid #cfd7e3;
+  border-radius: 12px;
+  border: 1px solid #2563eb;
+}
+
+.type-filter {
+  background: #ffffff;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid #16a34a;
 }
 
 .status-filter select {
@@ -1292,7 +1237,7 @@ body {
 
 .section-header h3 {
   font-size: 18px;
-  color: var(--primary-color);
+  color: #3f51b5;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1306,7 +1251,7 @@ body {
 .search-box input {
   width: 100%;
   padding: 10px 15px 10px 40px;
-  border-radius: 6px;
+  border-radius: 12px;
   border: 1px solid #cfd7e3;
   background: linear-gradient(135deg, #f8fbff 0%, #eef4ff 100%);
   font-size: 14px;
@@ -1334,7 +1279,7 @@ body {
   display: flex;
   align-items: center;
   padding: 15px;
-  border-radius: 8px;
+  border-radius: 14px;
   border: 1px solid #cfd7e3;
   cursor: pointer;
   transition: all 0.2s;
@@ -1342,12 +1287,12 @@ body {
 }
 
 .customer-card:hover {
-  border-color: var(--secondary-color);
+  border-color: #2196f3;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
 }
 
 .customer-card.selected {
-  border-color: var(--primary-color);
+  border-color: #3f51b5;
   background-color: #f2f6ff;
   box-shadow: inset 0 0 0 1px rgba(63, 81, 181, 0.15);
 }
@@ -1390,18 +1335,18 @@ body {
 }
 
 .customer-type.broker {
-  background-color: #e3f2fd;
-  color: #1565c0;
+  background-color: #1e88e5;
+  color: #ffffff;
 }
 
 .customer-type.owner {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background-color: #2e7d32;
+  color: #ffffff;
 }
 
 .customer-type.relative {
-  background-color: #f3e5f5;
-  color: #7b1fa2;
+  background-color: #6a1b9a;
+  color: #ffffff;
 }
 
 .customer-info {
@@ -1418,6 +1363,15 @@ body {
   font-size: 14px;
   color: #666;
   margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.customer-received {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 6px;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -1444,10 +1398,10 @@ body {
 .customer-notes-preview {
   font-size: 13px;
   color: #666;
-  background: linear-gradient(135deg, #f2f6fc 0%, #e8effa 100%);
-  border: 1px solid #dbe4f3;
+  background: #f8fafc;
+  border: 1px solid #cbd5f5;
   padding: 5px 8px;
-  border-radius: 4px;
+  border-radius: 10px;
   margin-bottom: 8px;
   display: flex;
   align-items: center;
@@ -1463,38 +1417,34 @@ body {
 .customer-tag {
   font-size: 11px;
   padding: 3px 8px;
-  border-radius: 12px;
+  border-radius: 999px;
   font-weight: 500;
+  color: #ffffff;
 }
 
 .customer-tag.potential_7 {
-  background-color: #e3f2fd;
-  color: #1565c0;
+  background-color: #1e88e5;
 }
 
 .customer-tag.potential_14 {
-  background-color: #f3e5f5;
-  color: #7b1fa2;
+  background-color: #6a1b9a;
 }
 
 .customer-tag.success {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background-color: #2e7d32;
 }
 
 .customer-tag.wrong_number {
-  background-color: #fff3e0;
-  color: #ef6c00;
+  background-color: #f57c00;
 }
 
 .customer-tag.unreachable {
-  background-color: #ffebee;
-  color: #c62828;
+  background-color: #c62828;
 }
 
 .customer-tag.care {
-  background-color: #fff8e1;
-  color: #f9a825;
+  background-color: #f9a825;
+  color: #1f2937;
 }
 
 .customer-actions {
@@ -1504,28 +1454,34 @@ body {
   gap: 10px;
 }
 
-.call-btn {
-  padding: 8px 20px;
-  background: linear-gradient(135deg, #55c46a 0%, #2e7d32 100%);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
+.contact-icons {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.contact-icon {
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  transition: background 0.3s;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
 }
 
-.call-btn:hover:not(:disabled) {
-  background-color: #3d8b40;
+.contact-icon.zalo {
+  background-color: #0068ff;
+  color: #ffffff;
+  border-color: #0068ff;
 }
 
-.call-btn:disabled {
-  background-color: #a5d6a7;
-  cursor: not-allowed;
+.contact-icon.tel {
+  background-color: #16a34a;
+  color: #ffffff;
+  border-color: #16a34a;
 }
 
 .call-status {
@@ -1538,7 +1494,7 @@ body {
 
 /* Detail panel */
 .detail-panel {
-  width: var(--detail-panel-width);
+  width: 400px;
   background: linear-gradient(160deg, #ffffff 0%, #eef4ff 100%);
   border-left: 1px solid #cfd7e3;
   display: flex;
@@ -1557,7 +1513,7 @@ body {
 
 .detail-header h3 {
   font-size: 18px;
-  color: var(--primary-color);
+  color: #3f51b5;
 }
 
 .close-btn {
@@ -1567,11 +1523,11 @@ body {
   color: #666;
   cursor: pointer;
   padding: 5px;
-  border-radius: 6px;
+  border-radius: 10px;
 }
 
 .close-btn:hover {
-  color: var(--danger-color);
+  color: #f44336;
 }
 
 .detail-content {
@@ -1610,32 +1566,36 @@ body {
   margin-bottom: 8px;
 }
 
+.detail-received {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
 .type-badge {
   padding: 5px 12px;
-  border-radius: 15px;
+  border-radius: 999px;
   font-size: 13px;
   font-weight: 500;
+  color: #ffffff;
 }
 
 .type-badge.broker {
-  background-color: #e3f2fd;
-  color: #1565c0;
+  background-color: #1e88e5;
 }
 
 .type-badge.owner {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background-color: #2e7d32;
 }
 
 .type-badge.relative {
-  background-color: #f3e5f5;
-  color: #7b1fa2;
+  background-color: #6a1b9a;
 }
 
 .detail-section h5 {
   font-size: 16px;
   margin-bottom: 12px;
-  color: var(--primary-color);
+  color: #3f51b5;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1666,7 +1626,7 @@ body {
 .tag-option {
   padding: 6px 12px;
   border: 1px solid #cfd7e3;
-  border-radius: 20px;
+  border-radius: 999px;
   background-color: #f5f8ff;
   font-size: 13px;
   cursor: pointer;
@@ -1679,16 +1639,16 @@ body {
 }
 
 .tag-option.active {
-  background-color: var(--primary-color);
+  background-color: #16a34a;
   color: white;
-  border-color: var(--primary-color);
+  border-color: #16a34a;
 }
 
 .notes-container {
   max-height: 200px;
   overflow-y: auto;
   border: 1px solid #cfd7e3;
-  border-radius: 6px;
+  border-radius: 12px;
   padding: 10px;
   margin-bottom: 15px;
   background: linear-gradient(135deg, #f8fbff 0%, #edf3ff 100%);
@@ -1735,7 +1695,7 @@ body {
   padding: 12px;
   border: 1px solid #cfd7e3;
   background-color: #f8fbff;
-  border-radius: 6px;
+  border-radius: 12px;
   font-family: inherit;
   font-size: 14px;
   resize: vertical;
@@ -1748,7 +1708,7 @@ body {
   background: linear-gradient(135deg, #4aa8ff 0%, #1e88e5 100%);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
@@ -1778,7 +1738,7 @@ body {
 .action-btn {
   padding: 12px;
   border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
@@ -1826,7 +1786,7 @@ body {
   background: linear-gradient(135deg, #f4f7ff 0%, #dbe6ff 100%);
   color: #2f3f63;
   padding: 6px 12px;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   box-shadow: 0 6px 12px rgba(47, 63, 99, 0.12);
 }
@@ -1841,7 +1801,7 @@ body {
   color: #3a4a5e;
   background: #f0f5ff;
   padding: 6px 10px;
-  border-radius: 8px;
+  border-radius: 12px;
   border: 1px solid #cfd7e3;
 }
 
@@ -1850,159 +1810,6 @@ body {
 }
 
 /* Call modal */
-.call-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.call-modal-content {
-  background-color: var(--surface-color);
-  border: 1px solid #d7e0ec;
-  border-radius: 12px;
-  padding: 30px;
-  width: 400px;
-  max-width: 90%;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
-.call-modal-content h3 {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: var(--primary-color);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
-
-.call-info {
-  margin-bottom: 25px;
-}
-
-.call-customer-name {
-  font-size: 22px;
-  font-weight: 600;
-  margin-bottom: 5px;
-}
-
-.call-customer-phone {
-  font-size: 20px;
-  color: var(--secondary-color);
-  margin-bottom: 15px;
-}
-
-.call-timer {
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--success-color);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
-
-.call-actions {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.call-action-btn {
-  padding: 12px 25px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s;
-  box-shadow: 0 6px 12px rgba(31, 45, 61, 0.16);
-}
-
-.call-action-btn.end-call {
-  background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
-  color: white;
-}
-
-.call-action-btn.end-call:hover {
-  background-color: #d32f2f;
-}
-
-.call-action-btn.add-note-call {
-  background: linear-gradient(135deg, #ffb74d 0%, #f57c00 100%);
-  color: white;
-}
-
-.call-action-btn.add-note-call:hover {
-  background-color: #f57c00;
-}
-
-.call-note-section {
-  text-align: left;
-}
-
-.call-note-section textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #cfd7e3;
-  background-color: #f8fbff;
-  border-radius: 6px;
-  font-family: inherit;
-  font-size: 14px;
-  resize: vertical;
-  margin-bottom: 15px;
-}
-
-.call-note-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.call-note-btn {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 6px 12px rgba(31, 45, 61, 0.12);
-}
-
-.call-note-btn.save-note {
-  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
-  color: white;
-}
-
-.call-note-btn.save-note:hover {
-  background-color: #3d8b40;
-}
-
-.call-note-btn.cancel-note {
-  background: linear-gradient(135deg, #b0bec5 0%, #607d8b 100%);
-  color: white;
-}
-
-.call-note-btn.cancel-note:hover {
-  background-color: #757575;
-}
-
 /* Responsive */
 @media (max-width: 1200px) {
   .sidebar {
@@ -2023,7 +1830,7 @@ body {
     width: 100%;
     flex-direction: row;
     border-right: none;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid #d6dce5;
     overflow-x: auto;
   }
 
