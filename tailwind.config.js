@@ -4,9 +4,6 @@ export default {
         "./index.html",
         "./src/**/*.{vue,js,ts,jsx,tsx}",
     ],
-    safelist: [
-        { pattern: /(bg|text|border)-(blue|purple|emerald)-(400|500|600)/ }
-    ],
     theme: {
         extend: {
             fontFamily: {

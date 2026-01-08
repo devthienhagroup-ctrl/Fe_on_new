@@ -131,6 +131,7 @@ import PaymentQR from "../components/user/Profile/component/PaymentQR.vue";
 import productCreateUser from "../components/productUser/productCreateUser.vue"
 import productUpdate from "../components/productUser/ProductUpdate.vue"
 import RutTienAdmin from "../components/rutTienAdmin.vue";
+
 import Layout from "../components/user/NewUser/NewHome/Layout.vue";
 import MainContentHome from "../components/user/NewUser/NewHome/MainContentHome.vue";
 import GlobalCSS from "../components/cms/NewCms/homeNew/GlobalCSS.vue";
@@ -138,18 +139,34 @@ import MainContent from "../components/cms/NewCms/homeNew/MainContent.vue";
 import QuickSale30D from "../components/user/NewUser/QuickSale30D/QuickSale30D.vue";
 import QuickSale from "../components/cms/NewCms/QuickSaleNew/QuickSale.vue";
 
+
+// import DemoGiaoDien from "../components/thiet-kegiandien/marketing-cap-da-ta.vue";
+// import test from "../components/thiet-kegiandien/marketing-cap-da-ta.vue"
+// import test1 from "../components/thiet-kegiandien/telesales-lien-he-khach-hang.vue"
+
 const routes = [
     // {
     //     path: "/test/dat-lich",
     //     name: "TeamCollaboration",
-    //     component: TeamCollaborationLayout,
-    //     meta: { requiresAuth: false, enableTailwind: true },
+    //     component: test,
+    //     meta: { requiresAuth: false, enableTailwind: false},
+    // },
+    // {
+    //     path: "/test/tele-sales",
+    //     name: "TELESALES",
+    //     component: test1,
+    //     meta: { requiresAuth: false, enableTailwind: false},
     // },
     {
         path: "/-thg/dang-nhap",
         name: "LoginForm",
         component: LoginForm,
     },
+    // {
+    //     path: '/giao-dien',
+    //     component: DemoGiaoDien,
+    //     meta: {requiresAuth: false, loginFrom: "admin", enableTailwind: true},
+    // },
     {
         path: "/user/quan-ly-san-pham",
         component: MenuUser,
@@ -925,7 +942,7 @@ const routes = [
         ]
     },
     {
-        path: "/",
+        path: "/trang-chu",
         name: "Landingpage",
         component: MenuUser,
         meta: {enableTailwind: true, requiresAuth: false},
@@ -1381,7 +1398,7 @@ const routes = [
         },
         children: [
             {
-                path: 'trang-chu',
+                path: '',
                 name: "home",
                 component: MainContentHome
             },

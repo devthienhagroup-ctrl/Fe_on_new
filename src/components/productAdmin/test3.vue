@@ -798,7 +798,7 @@ const submitCollaboration = async () => {
     };
 
     const res = await api.post("/admin/api/de-nghi-hop-tac/gui-loi-moi", payload);
-
+    closeCollabModal();
     if (!res.data.success) {
       showCenterWarning(res.data.message || "Không thể gửi đề nghị hợp tác");
       return;
@@ -806,7 +806,7 @@ const submitCollaboration = async () => {
 
     showCenterSuccess(res.data.message || "Gửi đề nghị hợp tác thành công");
     selectedAsset.value.daGuiYeuCau = true;
-    closeCollabModal();
+
   } catch (e) {
     console.error(e);
     showCenterError("Có lỗi xảy ra khi gửi đề nghị hợp tác");

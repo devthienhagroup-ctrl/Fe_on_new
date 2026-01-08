@@ -802,6 +802,8 @@ onMounted(() => {
   display: flex;
   gap: 10px;
   align-items: center;
+  max-width: 100%;
+  width: 70%;
 }
 
 .color-input input[type="color"] {
@@ -825,6 +827,7 @@ onMounted(() => {
   border-radius: 6px;
   font-size: 0.9rem;
   font-family: monospace;
+  max-width: 100%;
 }
 
 .color-input input[type="text"]:focus {

@@ -620,7 +620,7 @@ onMounted(() => {
 
 
   chatScript = document.createElement('script')
-  chatScript.src = 'https://api.sale.ai.vn/static/widget.js?chatbotId=MjIz'
+  // chatScript.src = 'https://api.sale.ai.vn/static/widget.js?chatbotId=MjIz'
   chatScript.async = true
   chatScript.id = 'botchat-script'
   document.body.appendChild(chatScript)

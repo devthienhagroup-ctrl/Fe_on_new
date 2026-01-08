@@ -1376,7 +1376,7 @@ async function submitCollaboration() {
         "/admin/api/de-nghi-hop-tac/gui-loi-moi",
         payload
     );
-
+    closeCollabModal();
     // ✅ API luôn trả 200 → check success
     if (!res.data.success) {
       showCenterWarning(res.data.message || "Không thể gửi đề nghị hợp tác");
@@ -1389,7 +1389,7 @@ async function submitCollaboration() {
     // 👉 cập nhật UI để không gửi lại
     selectedAsset.value.daGuiYeuCau = true;
 
-    closeCollabModal();
+
 
   } catch (e) {
     console.error(e);
