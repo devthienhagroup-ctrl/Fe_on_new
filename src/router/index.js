@@ -138,6 +138,7 @@ import GlobalCSS from "../components/cms/components/homeNew/GlobalCSS.vue";
 import MainContent from "../components/cms/components/homeNew/MainContent.vue";
 import test from "../components/thiet-kegiandien/marketing-cap-da-ta.vue"
 import test1 from "../components/thiet-kegiandien/telesales-lien-he-khach-hang.vue"
+import QuickSale30D from "../components/user/newUser/QuickSale30D/QuickSale30D.vue";
 const routes = [
     // {
     //     path: "/test/dat-lich",
@@ -151,6 +152,7 @@ const routes = [
     //     component: test1,
     //     meta: { requiresAuth: false, enableTailwind: false},
     // },
+
     {
         path: "/-thg/dang-nhap",
         name: "LoginForm",
@@ -1378,6 +1380,12 @@ const routes = [
                 path: '',
                 name: "home",
                 component: MainContentHome
+            },
+            {
+                path: 'ban-nhanh-bds',
+                name: "quickSaleNew",
+                meta: { enableTailwind: true },
+                component: QuickSale30D
             }
         ], meta: {
             enableTailwind: true,

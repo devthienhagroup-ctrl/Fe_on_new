@@ -35,6 +35,8 @@
     "chart.js": "^4.5.1",
     "chartjs-plugin-datalabels": "^2.2.0",
     "fontkit": "^2.0.4",
+    "fuse": "^0.12.1",
+    "fuse.js": "^7.1.0",
     "gsap": "^3.13.0",
     "html2pdf.js": "^0.12.1",
     "lodash-es": "^4.17.22",
