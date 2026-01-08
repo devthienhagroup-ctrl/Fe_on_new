@@ -149,7 +149,7 @@ const routes = [
         path: "/test/tele-sales",
         name: "TELESALES",
         component: test1,
-        meta: { requiresAuth: false, enableTailwind: true},
+        meta: { requiresAuth: false, enableTailwind: false},
     },
     {
         path: "/-thg/dang-nhap",

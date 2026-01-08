@@ -57,23 +57,6 @@
       <main class="content-area">
         <!-- Thanh điều khiển -->
         <div class="control-bar">
-          <div class="view-controls">
-            <button
-                class="tab-btn"
-                :class="{ active: activeTab === 'new' }"
-                @click="activeTab = 'new'"
-            >
-              <i class="fas fa-user-plus"></i> Vừa tiếp nhận ({{ newCustomers.length }})
-            </button>
-            <button
-                class="tab-btn"
-                :class="{ active: activeTab === 'contacted' }"
-                @click="activeTab = 'contacted'"
-            >
-              <i class="fas fa-user-check"></i> Đã liên hệ ({{ contactedCustomers.length }})
-            </button>
-          </div>
-
           <div class="filter-controls">
             <div class="filter-group">
               <label for="timeRange">Thống kê:</label>
@@ -114,34 +97,68 @@
         <!-- Danh sách khách hàng -->
         <div class="customer-section">
           <div class="section-header">
-            <h3>
+            <div class="section-title">
+              <h3>
               <i class="fas fa-users"></i>
               {{ activeTab === 'new' ? 'Khách hàng vừa tiếp nhận' : 'Khách hàng đã liên hệ' }}
-            </h3>
-            <div class="search-box">
-              <input
-                  type="text"
-                  v-model="searchQuery"
-                  placeholder="Tìm kiếm theo tên, số điện thoại..."
-              />
-              <i class="fas fa-search"></i>
+              </h3>
+              <div class="view-controls">
+                <button
+                    class="tab-btn"
+                    :class="{ active: activeTab === 'new' }"
+                    @click="activeTab = 'new'"
+                >
+                  <i class="fas fa-user-plus"></i> Vừa tiếp nhận ({{ newCustomers.length }})
+                </button>
+                <button
+                    class="tab-btn"
+                    :class="{ active: activeTab === 'contacted' }"
+                    @click="activeTab = 'contacted'"
+                >
+                  <i class="fas fa-user-check"></i> Đã liên hệ ({{ contactedCustomers.length }})
+                </button>
+              </div>
+            </div>
+            <div class="section-controls">
+              <div class="filter-group status-filter" v-if="activeTab === 'contacted'">
+                <label for="statusFilter">Trạng thái:</label>
+                <select id="statusFilter" v-model="statusFilter">
+                  <option value="all">Tất cả</option>
+                  <option value="success">Thành công</option>
+                  <option value="potential_7">Tiềm năng 7 ngày</option>
+                  <option value="potential_14">Tiềm năng 14 ngày</option>
+                  <option value="unreachable">Không liên lạc</option>
+                  <option value="wrong_number">Sai số</option>
+                  <option value="care">Chăm sóc</option>
+                </select>
+              </div>
+              <div class="search-box">
+                <input
+                    type="text"
+                    v-model="searchQuery"
+                    placeholder="Tìm kiếm theo tên, số điện thoại..."
+                />
+                <i class="fas fa-search"></i>
+              </div>
             </div>
           </div>
 
           <!-- Danh sách khách hàng -->
           <div class="customer-list">
             <div
-                v-for="customer in filteredCustomers"
+                v-for="customer in pagedCustomers"
                 :key="customer.id"
                 class="customer-card"
                 :class="{ selected: selectedCustomer && selectedCustomer.id === customer.id }"
                 @click="selectCustomer(customer)"
             >
               <div class="customer-avatar">
-                <img
-                    :src="customer.avatar || 'https://via.placeholder.com/50'"
-                    :alt="customer.name"
-                />
+                <div
+                    class="avatar-initials"
+                    :style="{ backgroundColor: getAvatarColor(customer.name) }"
+                >
+                  {{ getInitials(customer.name) }}
+                </div>
                 <span :class="`customer-type ${customer.type}`">{{ getCustomerTypeLabel(customer.type) }}</span>
               </div>
 
@@ -189,6 +206,15 @@
               </div>
             </div>
           </div>
+          <div class="pagination" v-if="activeTab === 'contacted' && totalPages > 1">
+            <button class="page-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
+            <button class="page-btn" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
         </div>
       </main>
 
@@ -203,11 +229,12 @@
 
         <div class="detail-content">
           <div class="customer-detail-header">
-            <img
-                :src="selectedCustomer.avatar || 'https://via.placeholder.com/80'"
-                :alt="selectedCustomer.name"
-                class="detail-avatar"
-            />
+            <div
+                class="detail-avatar avatar-initials"
+                :style="{ backgroundColor: getAvatarColor(selectedCustomer.name) }"
+            >
+              {{ getInitials(selectedCustomer.name) }}
+            </div>
             <div class="detail-name-info">
               <h4>{{ selectedCustomer.name }}</h4>
               <p class="detail-phone">{{ selectedCustomer.phone }}</p>
@@ -365,6 +392,9 @@ export default {
       callNote: '',
       newNote: '',
       searchQuery: '',
+      statusFilter: 'all',
+      currentPage: 1,
+      pageSize: 4,
       selectedTimeRange: 'month',
       selectedYear: new Date().getFullYear(),
       selectedMonth: new Date().getMonth() + 1,
@@ -397,7 +427,6 @@ export default {
           phone: '0912345678',
           province: 'Hà Nội',
           oldProvince: 'Hải Phòng',
-          avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
           type: 'owner',
           notes: [
             { date: '2024-03-15', time: '14:30', content: 'Khách quan tâm đến chính sách ưu đãi' },
@@ -412,7 +441,6 @@ export default {
           phone: '0923456789',
           province: 'TP. Hồ Chí Minh',
           oldProvince: null,
-          avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
           type: 'relative',
           notes: [
             { date: '2024-03-17', time: '09:20', content: 'Khách hỏi về thời gian làm việc' }
@@ -426,7 +454,6 @@ export default {
           phone: '0934567890',
           province: 'Đà Nẵng',
           oldProvince: 'Quảng Nam',
-          avatar: 'https://randomuser.me/api/portraits/men/67.jpg',
           type: 'broker',
           notes: [],
           tags: ['care'],
@@ -438,7 +465,6 @@ export default {
           phone: '0945678901',
           province: 'Hải Phòng',
           oldProvince: null,
-          avatar: 'https://randomuser.me/api/portraits/women/33.jpg',
           type: 'owner',
           notes: [
             { date: '2024-03-16', time: '16:45', content: 'Khách bận, hẹn gọi lại sáng thứ 2' }
@@ -452,7 +478,6 @@ export default {
           phone: '0956789012',
           province: 'Cần Thơ',
           oldProvince: 'Vĩnh Long',
-          avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
           type: 'relative',
           notes: [],
           tags: [],
@@ -466,7 +491,6 @@ export default {
           phone: '0967890123',
           province: 'Bình Dương',
           oldProvince: 'Đồng Nai',
-          avatar: 'https://randomuser.me/api/portraits/women/55.jpg',
           type: 'owner',
           notes: [
             { date: '2024-03-10', time: '11:30', content: 'Đã đặt lịch thành công ngày 20/3' },
@@ -481,7 +505,6 @@ export default {
           phone: '0978901234',
           province: 'Hà Nội',
           oldProvince: null,
-          avatar: 'https://randomuser.me/api/portraits/men/45.jpg',
           type: 'broker',
           notes: [
             { date: '2024-03-14', time: '14:10', content: 'Số điện thoại không liên lạc được' }
@@ -495,7 +518,6 @@ export default {
           phone: '0989012345',
           province: 'TP. Hồ Chí Minh',
           oldProvince: 'Long An',
-          avatar: 'https://randomuser.me/api/portraits/women/25.jpg',
           type: 'owner',
           notes: [
             { date: '2024-03-12', time: '09:45', content: 'Sai số, không phải khách hàng' }
@@ -510,21 +532,44 @@ export default {
       }
     };
   },
+  watch: {
+    activeTab() {
+      this.currentPage = 1;
+      this.statusFilter = 'all';
+      this.searchQuery = '';
+    },
+    statusFilter() {
+      this.currentPage = 1;
+    },
+    searchQuery() {
+      this.currentPage = 1;
+    }
+  },
   computed: {
     filteredCustomers() {
       const customers = this.activeTab === 'new' ? this.newCustomers : this.contactedCustomers;
 
       if (!this.searchQuery.trim()) {
-        return customers;
+        return this.filterByStatus(customers);
       }
 
       const query = this.searchQuery.toLowerCase();
-      return customers.filter(customer =>
+      const filtered = customers.filter(customer =>
           customer.name.toLowerCase().includes(query) ||
           customer.phone.includes(query) ||
           customer.province.toLowerCase().includes(query) ||
           (customer.oldProvince && customer.oldProvince.toLowerCase().includes(query))
       );
+      return this.filterByStatus(filtered);
+    },
+    totalPages() {
+      if (this.activeTab !== 'contacted') return 1;
+      return Math.max(1, Math.ceil(this.filteredCustomers.length / this.pageSize));
+    },
+    pagedCustomers() {
+      if (this.activeTab !== 'contacted') return this.filteredCustomers;
+      const start = (this.currentPage - 1) * this.pageSize;
+      return this.filteredCustomers.slice(start, start + this.pageSize);
     }
   },
   mounted() {
@@ -837,6 +882,38 @@ export default {
       return tagObj ? tagObj.label : tag;
     },
 
+    filterByStatus(customers) {
+      if (this.activeTab !== 'contacted' || this.statusFilter === 'all') {
+        return customers;
+      }
+      return customers.filter(customer => customer.tags.includes(this.statusFilter));
+    },
+
+    changePage(page) {
+      const nextPage = Math.min(Math.max(page, 1), this.totalPages);
+      this.currentPage = nextPage;
+    },
+
+    // Lấy ký tự viết tắt từ tên khách hàng
+    getInitials(name) {
+      if (!name) return '';
+      const words = name.trim().split(/\s+/);
+      const first = words[0]?.charAt(0) || '';
+      const last = words.length > 1 ? words[words.length - 1].charAt(0) : '';
+      return `${first}${last}`.toUpperCase();
+    },
+
+    // Tạo màu avatar dựa trên tên
+    getAvatarColor(name) {
+      if (!name) return 'hsl(210, 60%, 55%)';
+      let hash = 0;
+      for (let i = 0; i < name.length; i += 1) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const hue = Math.abs(hash) % 360;
+      return `hsl(${hue}, 60%, 55%)`;
+    },
+
     // Lấy xem trước ghi chú cuối cùng
     getLastNotePreview(notes) {
       if (!notes || notes.length === 0) return 'Chưa có ghi chú';
@@ -874,9 +951,12 @@ export default {
   --light-color: #f5f5f5;
   --dark-color: #333;
   --gray-color: #9e9e9e;
-  --border-color: #e0e0e0;
+  --border-color: #d6dce5;
+  --surface-color: #fdfdfd;
+  --surface-alt: #f7f9fc;
+  --panel-gradient: linear-gradient(145deg, #ffffff 0%, #eef3ff 100%);
   --sidebar-width: 280px;
-  --detail-panel-width: 350px;
+  --detail-panel-width: 200px;
 }
 
 /* Reset và kiểu cơ bản */
@@ -954,8 +1034,8 @@ body {
 /* Sidebar */
 .sidebar {
   width: var(--sidebar-width);
-  background-color: white;
-  border-right: 1px solid var(--border-color);
+  background-color: var(--surface-alt);
+  border-right: 1px solid #cfd7e3;
   overflow-y: auto;
   padding: 20px;
   display: flex;
@@ -964,10 +1044,11 @@ body {
 }
 
 .stats-widget, .chart-widget {
-  background-color: white;
+  background: var(--panel-gradient);
+  border: 1px solid #d7e0ec;
   border-radius: 8px;
   padding: 18px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
 }
 
 .stats-widget h3, .chart-widget h3 {
@@ -1060,10 +1141,11 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: white;
+  background: linear-gradient(135deg, #ffffff 0%, #eef4ff 100%);
+  border: 1px solid #d7e0ec;
   padding: 15px 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
 }
 
 .view-controls {
@@ -1073,10 +1155,10 @@ body {
 
 .tab-btn {
   padding: 10px 20px;
-  border: none;
+  border: 1px solid #cfd7e3;
   border-radius: 6px;
-  background-color: #f0f0f0;
-  color: #666;
+  background: linear-gradient(135deg, #f4f7ff 0%, #dbe6ff 100%);
+  color: #3a4a5e;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
@@ -1084,15 +1166,18 @@ body {
   align-items: center;
   gap: 8px;
   transition: all 0.3s;
+  box-shadow: 0 6px 12px rgba(47, 63, 99, 0.12);
 }
 
 .tab-btn.active {
   background-color: var(--primary-color);
   color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 6px 12px rgba(63, 81, 181, 0.25);
 }
 
 .tab-btn:hover:not(.active) {
-  background-color: #e0e0e0;
+  background-color: #dfe7f5;
 }
 
 .filter-controls {
@@ -1115,15 +1200,16 @@ body {
 .filter-group select {
   padding: 8px 12px;
   border-radius: 4px;
-  border: 1px solid var(--border-color);
-  background-color: white;
+  border: 1px solid #cfd7e3;
+  background-color: #f8fbff;
   font-size: 14px;
+  color: #344054;
 }
 
 .refresh-btn {
   padding: 8px 15px;
-  background-color: #f0f0f0;
-  border: none;
+  background: linear-gradient(135deg, #e3ecff 0%, #c6d7ff 100%);
+  border: 1px solid #c5d5f3;
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
@@ -1131,18 +1217,20 @@ body {
   align-items: center;
   gap: 5px;
   transition: background 0.3s;
+  color: #2f3f63;
 }
 
 .refresh-btn:hover {
-  background-color: #e0e0e0;
+  background-color: #cfdefa;
 }
 
 /* Chart container */
 .chart-container-large {
-  background-color: white;
+  background: var(--panel-gradient);
+  border: 1px solid #d7e0ec;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
 }
 
 .chart-container-large h3 {
@@ -1161,10 +1249,11 @@ body {
 
 /* Customer section */
 .customer-section {
-  background-color: white;
+  background: var(--panel-gradient);
+  border: 1px solid #d7e0ec;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1175,6 +1264,30 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  gap: 15px;
+}
+
+.section-title {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-filter {
+  background: #f0f5ff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #cfd7e3;
+}
+
+.status-filter select {
+  min-width: 160px;
 }
 
 .section-header h3 {
@@ -1194,8 +1307,10 @@ body {
   width: 100%;
   padding: 10px 15px 10px 40px;
   border-radius: 6px;
-  border: 1px solid var(--border-color);
+  border: 1px solid #cfd7e3;
+  background: linear-gradient(135deg, #f8fbff 0%, #eef4ff 100%);
   font-size: 14px;
+  color: #344054;
 }
 
 .search-box i {
@@ -1220,10 +1335,10 @@ body {
   align-items: center;
   padding: 15px;
   border-radius: 8px;
-  border: 1px solid var(--border-color);
+  border: 1px solid #cfd7e3;
   cursor: pointer;
   transition: all 0.2s;
-  background-color: white;
+  background: linear-gradient(135deg, #ffffff 0%, #f4f7ff 100%);
 }
 
 .customer-card:hover {
@@ -1233,7 +1348,8 @@ body {
 
 .customer-card.selected {
   border-color: var(--primary-color);
-  background-color: #f0f4ff;
+  background-color: #f2f6ff;
+  box-shadow: inset 0 0 0 1px rgba(63, 81, 181, 0.15);
 }
 
 .customer-avatar {
@@ -1246,6 +1362,20 @@ body {
   height: 50px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.avatar-initials {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
 }
 
 .customer-type {
@@ -1314,7 +1444,8 @@ body {
 .customer-notes-preview {
   font-size: 13px;
   color: #666;
-  background-color: #f9f9f9;
+  background: linear-gradient(135deg, #f2f6fc 0%, #e8effa 100%);
+  border: 1px solid #dbe4f3;
   padding: 5px 8px;
   border-radius: 4px;
   margin-bottom: 8px;
@@ -1375,7 +1506,7 @@ body {
 
 .call-btn {
   padding: 8px 20px;
-  background-color: var(--success-color);
+  background: linear-gradient(135deg, #55c46a 0%, #2e7d32 100%);
   color: white;
   border: none;
   border-radius: 6px;
@@ -1408,8 +1539,8 @@ body {
 /* Detail panel */
 .detail-panel {
   width: var(--detail-panel-width);
-  background-color: white;
-  border-left: 1px solid var(--border-color);
+  background: linear-gradient(160deg, #ffffff 0%, #eef4ff 100%);
+  border-left: 1px solid #cfd7e3;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -1417,10 +1548,11 @@ body {
 
 .detail-header {
   padding: 15px 20px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid #cfd7e3;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: linear-gradient(135deg, #f5f8ff, #eef4ff);
 }
 
 .detail-header h3 {
@@ -1429,12 +1561,13 @@ body {
 }
 
 .close-btn {
-  background: none;
-  border: none;
+  background: #f1f5ff;
+  border: 1px solid #cfd7e3;
   font-size: 18px;
   color: #666;
   cursor: pointer;
   padding: 5px;
+  border-radius: 6px;
 }
 
 .close-btn:hover {
@@ -1454,14 +1587,15 @@ body {
   align-items: center;
   gap: 15px;
   padding-bottom: 15px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid #cfd7e3;
 }
 
 .detail-avatar {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  object-fit: cover;
+  font-size: 22px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .detail-name-info h4 {
@@ -1531,12 +1665,13 @@ body {
 
 .tag-option {
   padding: 6px 12px;
-  border: 1px solid var(--border-color);
+  border: 1px solid #cfd7e3;
   border-radius: 20px;
-  background-color: white;
+  background-color: #f5f8ff;
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
+  color: #344054;
 }
 
 .tag-option:hover {
@@ -1552,10 +1687,11 @@ body {
 .notes-container {
   max-height: 200px;
   overflow-y: auto;
-  border: 1px solid var(--border-color);
+  border: 1px solid #cfd7e3;
   border-radius: 6px;
   padding: 10px;
   margin-bottom: 15px;
+  background: linear-gradient(135deg, #f8fbff 0%, #edf3ff 100%);
 }
 
 .notes-list {
@@ -1597,7 +1733,8 @@ body {
 .add-note-form textarea {
   width: 100%;
   padding: 12px;
-  border: 1px solid var(--border-color);
+  border: 1px solid #cfd7e3;
+  background-color: #f8fbff;
   border-radius: 6px;
   font-family: inherit;
   font-size: 14px;
@@ -1608,7 +1745,7 @@ body {
 .add-note-btn {
   width: 100%;
   padding: 10px;
-  background-color: var(--secondary-color);
+  background: linear-gradient(135deg, #4aa8ff 0%, #1e88e5 100%);
   color: white;
   border: none;
   border-radius: 6px;
@@ -1650,10 +1787,11 @@ body {
   align-items: center;
   gap: 8px;
   transition: all 0.3s;
+  box-shadow: 0 6px 12px rgba(31, 45, 61, 0.12);
 }
 
 .action-btn.success {
-  background-color: var(--success-color);
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
   color: white;
 }
 
@@ -1662,7 +1800,7 @@ body {
 }
 
 .action-btn.move-btn {
-  background-color: #9c27b0;
+  background: linear-gradient(135deg, #8e24aa 0%, #5e35b1 100%);
   color: white;
 }
 
@@ -1671,8 +1809,40 @@ body {
 }
 
 .action-btn.danger {
-  background-color: var(--danger-color);
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
   color: white;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.page-btn {
+  border: 1px solid #cfd7e3;
+  background: linear-gradient(135deg, #f4f7ff 0%, #dbe6ff 100%);
+  color: #2f3f63;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 6px 12px rgba(47, 63, 99, 0.12);
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 13px;
+  color: #3a4a5e;
+  background: #f0f5ff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #cfd7e3;
 }
 
 .action-btn.danger:hover {
@@ -1694,7 +1864,8 @@ body {
 }
 
 .call-modal-content {
-  background-color: white;
+  background-color: var(--surface-color);
+  border: 1px solid #d7e0ec;
   border-radius: 12px;
   padding: 30px;
   width: 400px;
@@ -1757,10 +1928,11 @@ body {
   align-items: center;
   gap: 8px;
   transition: all 0.3s;
+  box-shadow: 0 6px 12px rgba(31, 45, 61, 0.16);
 }
 
 .call-action-btn.end-call {
-  background-color: var(--danger-color);
+  background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
   color: white;
 }
 
@@ -1769,7 +1941,7 @@ body {
 }
 
 .call-action-btn.add-note-call {
-  background-color: var(--warning-color);
+  background: linear-gradient(135deg, #ffb74d 0%, #f57c00 100%);
   color: white;
 }
 
@@ -1784,7 +1956,8 @@ body {
 .call-note-section textarea {
   width: 100%;
   padding: 12px;
-  border: 1px solid var(--border-color);
+  border: 1px solid #cfd7e3;
+  background-color: #f8fbff;
   border-radius: 6px;
   font-family: inherit;
   font-size: 14px;
@@ -1809,10 +1982,11 @@ body {
   justify-content: center;
   align-items: center;
   gap: 8px;
+  box-shadow: 0 6px 12px rgba(31, 45, 61, 0.12);
 }
 
 .call-note-btn.save-note {
-  background-color: var(--success-color);
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
   color: white;
 }
 
@@ -1821,7 +1995,7 @@ body {
 }
 
 .call-note-btn.cancel-note {
-  background-color: #9e9e9e;
+  background: linear-gradient(135deg, #b0bec5 0%, #607d8b 100%);
   color: white;
 }
 
@@ -1836,7 +2010,7 @@ body {
   }
 
   .detail-panel {
-    width: 320px;
+    width: 190px;
   }
 }
 
@@ -1882,6 +2056,12 @@ body {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
+  }
+
+  .section-controls {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
   }
 
   .search-box {

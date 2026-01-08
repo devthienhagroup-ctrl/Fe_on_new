@@ -1,169 +1,1669 @@
-diff --git a/src/components/thiet-kegiandien/marketing-cap-da-ta.vue b/src/components/thiet-kegiandien/marketing-cap-da-ta.vue
-index a7425e04725fa9f75fba563497d7ed82a81c4854..1d895a617b51bd1e955bc26c6e43d7df3127b8d4 100644
---- a/src/components/thiet-kegiandien/marketing-cap-da-ta.vue
-+++ b/src/components/thiet-kegiandien/marketing-cap-da-ta.vue
-@@ -167,55 +167,55 @@
-                 </div>
+diff --git a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
+index b64c1cc0b7342290fee2c6e864811b0e1f7df3d2..af8f6bb128c01faaa82475a4016fa04f79e1cdda 100644
+--- a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
++++ b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
+@@ -35,201 +35,228 @@
+           <div class="progress-container">
+             <div class="progress-label">Tiến độ ngày</div>
+             <div class="progress-bar">
+               <div
+                   class="progress-fill"
+                   :style="{ width: (todayStats.apiCalls / 40) * 100 + '%' }"
+               ></div>
+             </div>
+             <div class="progress-text">{{ todayStats.apiCalls }}/40 cuộc gọi</div>
+           </div>
+         </div>
+
+         <!-- Biểu đồ tổng hợp -->
+         <div class="chart-widget">
+           <h3><i class="fas fa-chart-pie"></i> Tổng hợp trạng thái</h3>
+           <div class="chart-container">
+             <canvas ref="summaryChart"></canvas>
+           </div>
+         </div>
+       </aside>
+
+       <!-- Nội dung chính -->
+       <main class="content-area">
+         <!-- Thanh điều khiển -->
+         <div class="control-bar">
+-          <div class="view-controls">
+-            <button
+-                class="tab-btn"
+-                :class="{ active: activeTab === 'new' }"
+-                @click="activeTab = 'new'"
+-            >
+-              <i class="fas fa-user-plus"></i> Vừa tiếp nhận ({{ newCustomers.length }})
+-            </button>
+-            <button
+-                class="tab-btn"
+-                :class="{ active: activeTab === 'contacted' }"
+-                @click="activeTab = 'contacted'"
+-            >
+-              <i class="fas fa-user-check"></i> Đã liên hệ ({{ contactedCustomers.length }})
+-            </button>
+-          </div>
+-
+           <div class="filter-controls">
+             <div class="filter-group">
+               <label for="timeRange">Thống kê:</label>
+               <select id="timeRange" v-model="selectedTimeRange" @change="updateChart">
+                 <option value="year">Theo năm</option>
+                 <option value="month">Theo tháng</option>
+               </select>
+             </div>
+
+             <div class="filter-group" v-if="selectedTimeRange === 'year'">
+               <label for="yearSelect">Năm:</label>
+               <select id="yearSelect" v-model="selectedYear" @change="updateChart">
+                 <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
+               </select>
+             </div>
+
+             <div class="filter-group" v-if="selectedTimeRange === 'month'">
+               <label for="monthSelect">Tháng:</label>
+               <select id="monthSelect" v-model="selectedMonth" @change="updateChart">
+                 <option v-for="(month, index) in months" :key="index" :value="index + 1">{{ month }}</option>
+               </select>
+             </div>
+
+             <button class="refresh-btn" @click="refreshData">
+               <i class="fas fa-sync-alt"></i> Làm mới
+             </button>
+           </div>
+         </div>
+
+         <!-- Biểu đồ đường -->
+         <div class="chart-container-large">
+           <h3><i class="fas fa-chart-line"></i> Biểu đồ cuộc gọi theo {{ selectedTimeRange === 'year' ? 'năm' : 'tháng' }}</h3>
+           <div class="chart-wrapper">
+             <canvas ref="lineChart"></canvas>
+           </div>
+         </div>
+
+         <!-- Danh sách khách hàng -->
+         <div class="customer-section">
+           <div class="section-header">
+-            <h3>
++            <div class="section-title">
++              <h3>
+               <i class="fas fa-users"></i>
+               {{ activeTab === 'new' ? 'Khách hàng vừa tiếp nhận' : 'Khách hàng đã liên hệ' }}
+-            </h3>
+-            <div class="search-box">
+-              <input
+-                  type="text"
+-                  v-model="searchQuery"
+-                  placeholder="Tìm kiếm theo tên, số điện thoại..."
+-              />
+-              <i class="fas fa-search"></i>
++              </h3>
++              <div class="view-controls">
++                <button
++                    class="tab-btn"
++                    :class="{ active: activeTab === 'new' }"
++                    @click="activeTab = 'new'"
++                >
++                  <i class="fas fa-user-plus"></i> Vừa tiếp nhận ({{ newCustomers.length }})
++                </button>
++                <button
++                    class="tab-btn"
++                    :class="{ active: activeTab === 'contacted' }"
++                    @click="activeTab = 'contacted'"
++                >
++                  <i class="fas fa-user-check"></i> Đã liên hệ ({{ contactedCustomers.length }})
++                </button>
++              </div>
++            </div>
++            <div class="section-controls">
++              <div class="filter-group status-filter" v-if="activeTab === 'contacted'">
++                <label for="statusFilter">Trạng thái:</label>
++                <select id="statusFilter" v-model="statusFilter">
++                  <option value="all">Tất cả</option>
++                  <option value="success">Thành công</option>
++                  <option value="potential_7">Tiềm năng 7 ngày</option>
++                  <option value="potential_14">Tiềm năng 14 ngày</option>
++                  <option value="unreachable">Không liên lạc</option>
++                  <option value="wrong_number">Sai số</option>
++                  <option value="care">Chăm sóc</option>
++                </select>
++              </div>
++              <div class="search-box">
++                <input
++                    type="text"
++                    v-model="searchQuery"
++                    placeholder="Tìm kiếm theo tên, số điện thoại..."
++                />
++                <i class="fas fa-search"></i>
++              </div>
+             </div>
+           </div>
+
+           <!-- Danh sách khách hàng -->
+           <div class="customer-list">
+             <div
+-                v-for="customer in filteredCustomers"
++                v-for="customer in pagedCustomers"
+                 :key="customer.id"
+                 class="customer-card"
+                 :class="{ selected: selectedCustomer && selectedCustomer.id === customer.id }"
+                 @click="selectCustomer(customer)"
+             >
+               <div class="customer-avatar">
+-                <img
+-                    :src="customer.avatar || 'https://via.placeholder.com/50'"
+-                    :alt="customer.name"
+-                />
++                <div
++                    class="avatar-initials"
++                    :style="{ backgroundColor: getAvatarColor(customer.name) }"
++                >
++                  {{ getInitials(customer.name) }}
++                </div>
+                 <span :class="`customer-type ${customer.type}`">{{ getCustomerTypeLabel(customer.type) }}</span>
                </div>
 
-               <div class="form-group">
-                 <label>Ghi chú</label>
-                 <div class="input-icon">
-                   <span class="icon-chip" style="background: linear-gradient(135deg, #FF9966, #FF5E62); color: white;">
-                     <i class="fas fa-note-sticky"></i>
+               <div class="customer-info">
+                 <h4 class="customer-name">{{ customer.name }}</h4>
+                 <p class="customer-phone">
+                   <i class="fas fa-phone"></i> {{ customer.phone }}
+                 </p>
+                 <div class="customer-location">
+                   <span class="location-current">
+                     <i class="fas fa-map-marker-alt"></i> {{ customer.province }}
                    </span>
-                   <textarea
-                       v-model="formData.note"
-                       class="form-control"
-                       rows="2"
-                       placeholder="Thông tin bổ sung..."
-                   ></textarea>
+                   <span v-if="customer.oldProvince" class="location-old">
+                     (Cũ: {{ customer.oldProvince }})
+                   </span>
                  </div>
-               </div>
-
-               <!-- Upload tiny -->
-               <div class="form-group">
-                 <label>Đính kèm (tuỳ chọn)</label>
-                 <div class="upload-row">
-                   <label class="upload-btn" title="Tải tệp nhỏ">
-                     <i class="fas fa-paperclip"></i>
-                     <span>Up file</span>
--                    <input id="fileInput" class="upload-input" type="file" @change="onPickFile" />
-+                    <input id="fileInput" class="upload-input" type="file" multiple @change="onPickFile" />
-                   </label>
--                  <div class="upload-meta" v-if="pickedFileName">
-+                  <div class="upload-meta" v-if="pickedFileNames.length">
-                     <i class="fas fa-file-lines"></i>
--                    <span class="text-truncate">{{ pickedFileName }}</span>
-+                    <span class="text-truncate">{{ pickedFileLabel }}</span>
-                     <button type="button" class="upload-clear" @click="clearPickedFile" title="Bỏ chọn">
-                       <i class="fas fa-xmark"></i>
-                     </button>
-                   </div>
-                   <div class="upload-meta muted" v-else>
-                     <i class="fas fa-circle-info"></i>
-                     <span>Chọn tệp (nhỏ) để lưu kèm</span>
-                   </div>
+                 <div class="customer-notes-preview" v-if="customer.notes && customer.notes.length > 0">
+                   <i class="fas fa-sticky-note"></i>
+                   {{ getLastNotePreview(customer.notes) }}
                  </div>
-               </div>
-
-               <div class="form-actions">
-                 <div>
-                   <button type="submit" class="btn btn-primary">
-                     <i class="fas fa-check"></i> Ghi nhận
-                   </button>
-                   <button
-                       type="button"
-                       @click="clearForm"
-                       class="btn ms-2"
-                       style="background-color: #fcfc60; font-weight: 600!important;"
+                 <div class="customer-tags">
+                   <span
+                       v-for="tag in customer.tags"
+                       :key="tag"
+                       class="customer-tag"
+                       :class="tag"
                    >
-                     <i class="fas fa-rotate-right me-1"></i>
-                     Làm mới
-                   </button>
-@@ -739,72 +739,101 @@ function formatCurrency(value) {
+                     {{ getTagLabel(tag) }}
+                   </span>
+                 </div>
+               </div>
+
+               <div class="customer-actions">
+                 <button
+                     class="call-btn"
+                     @click.stop="callCustomer(customer)"
+                     :disabled="isCalling"
+                 >
+                   <i class="fas fa-phone"></i> Gọi
+                 </button>
+                 <div class="call-status" v-if="customer.lastCall">
+                   <i class="fas fa-clock"></i>
+                   {{ formatTime(customer.lastCall) }}
+                 </div>
+               </div>
+             </div>
+           </div>
++          <div class="pagination" v-if="activeTab === 'contacted' && totalPages > 1">
++            <button class="page-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
++              <i class="fas fa-chevron-left"></i>
++            </button>
++            <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
++            <button class="page-btn" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
++              <i class="fas fa-chevron-right"></i>
++            </button>
++          </div>
+         </div>
+       </main>
+
+       <!-- Panel chi tiết khách hàng -->
+       <div class="detail-panel" v-if="selectedCustomer">
+         <div class="detail-header">
+           <h3>Chi tiết khách hàng</h3>
+           <button class="close-btn" @click="selectedCustomer = null">
+             <i class="fas fa-times"></i>
+           </button>
+         </div>
+
+         <div class="detail-content">
+           <div class="customer-detail-header">
+-            <img
+-                :src="selectedCustomer.avatar || 'https://via.placeholder.com/80'"
+-                :alt="selectedCustomer.name"
+-                class="detail-avatar"
+-            />
++            <div
++                class="detail-avatar avatar-initials"
++                :style="{ backgroundColor: getAvatarColor(selectedCustomer.name) }"
++            >
++              {{ getInitials(selectedCustomer.name) }}
++            </div>
+             <div class="detail-name-info">
+               <h4>{{ selectedCustomer.name }}</h4>
+               <p class="detail-phone">{{ selectedCustomer.phone }}</p>
+               <p class="detail-type">
+                 <span :class="`type-badge ${selectedCustomer.type}`">
+                   {{ getCustomerTypeLabel(selectedCustomer.type) }}
+                 </span>
+               </p>
+             </div>
+           </div>
+
+           <div class="detail-section">
+             <h5><i class="fas fa-map-marked-alt"></i> Thông tin địa chỉ</h5>
+             <div class="detail-row">
+               <span class="detail-label">Tỉnh hiện tại:</span>
+               <span class="detail-value">{{ selectedCustomer.province }}</span>
+             </div>
+             <div class="detail-row" v-if="selectedCustomer.oldProvince">
+               <span class="detail-label">Tỉnh cũ:</span>
+               <span class="detail-value">{{ selectedCustomer.oldProvince }}</span>
+             </div>
+           </div>
+
+           <div class="detail-section">
+             <h5><i class="fas fa-tags"></i> Đánh dấu khách hàng</h5>
+@@ -343,210 +370,228 @@
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
+ </template>
+
+ <script>
+ import Chart from 'chart.js/auto';
+
+ export default {
+   name: 'TelesaleApp',
+   data() {
+     return {
+       activeTab: 'new',
+       selectedCustomer: null,
+       isCalling: false,
+       callCustomerName: '',
+       callCustomerPhone: '',
+       callTimer: 0,
+       callInterval: null,
+       showNoteAfterCall: false,
+       callNote: '',
+       newNote: '',
+       searchQuery: '',
++      statusFilter: 'all',
++      currentPage: 1,
++      pageSize: 4,
+       selectedTimeRange: 'month',
+       selectedYear: new Date().getFullYear(),
+       selectedMonth: new Date().getMonth() + 1,
+       years: [2022, 2023, 2024, 2025],
+       months: [
+         'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+         'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
+       ],
+       todayStats: {
+         totalCalls: 28,
+         apiCalls: 28,
+         successfulCalls: 12,
+         unreachableCalls: 8,
+         wrongNumberCalls: 3
+       },
+       lineChartInstance: null,
+       summaryChartInstance: null,
+       availableTags: [
+         { value: 'potential_7', label: 'Khách tiềm năng 7 ngày' },
+         { value: 'potential_14', label: 'Khách tiềm năng 14 ngày' },
+         { value: 'success', label: 'Thành công (đặt lịch)' },
+         { value: 'wrong_number', label: 'Sai số' },
+         { value: 'unreachable', label: 'Không liên lạc được' },
+         { value: 'care', label: 'Chăm sóc' }
+       ],
+       newCustomers: [
+         {
+           id: 1,
+           name: 'Nguyễn Văn An',
+           phone: '0912345678',
+           province: 'Hà Nội',
+           oldProvince: 'Hải Phòng',
+-          avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+           type: 'owner',
+           notes: [
+             { date: '2024-03-15', time: '14:30', content: 'Khách quan tâm đến chính sách ưu đãi' },
+             { date: '2024-03-16', time: '10:15', content: 'Hẹn gọi lại vào chiều thứ 6' }
+           ],
+           tags: ['potential_7'],
+           lastCall: '2024-03-16T10:15:00'
+         },
+         {
+           id: 2,
+           name: 'Trần Thị Bình',
+           phone: '0923456789',
+           province: 'TP. Hồ Chí Minh',
+           oldProvince: null,
+-          avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+           type: 'relative',
+           notes: [
+             { date: '2024-03-17', time: '09:20', content: 'Khách hỏi về thời gian làm việc' }
+           ],
+           tags: [],
+           lastCall: '2024-03-17T09:20:00'
+         },
+         {
+           id: 3,
+           name: 'Lê Văn Cường',
+           phone: '0934567890',
+           province: 'Đà Nẵng',
+           oldProvince: 'Quảng Nam',
+-          avatar: 'https://randomuser.me/api/portraits/men/67.jpg',
+           type: 'broker',
+           notes: [],
+           tags: ['care'],
+           lastCall: null
+         },
+         {
+           id: 4,
+           name: 'Phạm Thị Dung',
+           phone: '0945678901',
+           province: 'Hải Phòng',
+           oldProvince: null,
+-          avatar: 'https://randomuser.me/api/portraits/women/33.jpg',
+           type: 'owner',
+           notes: [
+             { date: '2024-03-16', time: '16:45', content: 'Khách bận, hẹn gọi lại sáng thứ 2' }
+           ],
+           tags: ['potential_14'],
+           lastCall: '2024-03-16T16:45:00'
+         },
+         {
+           id: 5,
+           name: 'Hoàng Văn Em',
+           phone: '0956789012',
+           province: 'Cần Thơ',
+           oldProvince: 'Vĩnh Long',
+-          avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
+           type: 'relative',
+           notes: [],
+           tags: [],
+           lastCall: null
+         }
+       ],
+       contactedCustomers: [
+         {
+           id: 6,
+           name: 'Vũ Thị Phương',
+           phone: '0967890123',
+           province: 'Bình Dương',
+           oldProvince: 'Đồng Nai',
+-          avatar: 'https://randomuser.me/api/portraits/women/55.jpg',
+           type: 'owner',
+           notes: [
+             { date: '2024-03-10', time: '11:30', content: 'Đã đặt lịch thành công ngày 20/3' },
+             { date: '2024-03-15', time: '15:20', content: 'Xác nhận lại lịch hẹn' }
+           ],
+           tags: ['success', 'care'],
+           lastCall: '2024-03-15T15:20:00'
+         },
+         {
+           id: 7,
+           name: 'Đặng Văn Quân',
+           phone: '0978901234',
+           province: 'Hà Nội',
+           oldProvince: null,
+-          avatar: 'https://randomuser.me/api/portraits/men/45.jpg',
+           type: 'broker',
+           notes: [
+             { date: '2024-03-14', time: '14:10', content: 'Số điện thoại không liên lạc được' }
+           ],
+           tags: ['unreachable'],
+           lastCall: '2024-03-14T14:10:00'
+         },
+         {
+           id: 8,
+           name: 'Bùi Thị Hà',
+           phone: '0989012345',
+           province: 'TP. Hồ Chí Minh',
+           oldProvince: 'Long An',
+-          avatar: 'https://randomuser.me/api/portraits/women/25.jpg',
+           type: 'owner',
+           notes: [
+             { date: '2024-03-12', time: '09:45', content: 'Sai số, không phải khách hàng' }
+           ],
+           tags: ['wrong_number'],
+           lastCall: '2024-03-12T09:45:00'
+         }
+       ],
+       chartData: {
+         labels: [],
+         datasets: []
+       }
+     };
+   },
++  watch: {
++    activeTab() {
++      this.currentPage = 1;
++      this.statusFilter = 'all';
++      this.searchQuery = '';
++    },
++    statusFilter() {
++      this.currentPage = 1;
++    },
++    searchQuery() {
++      this.currentPage = 1;
++    }
++  },
+   computed: {
+     filteredCustomers() {
+       const customers = this.activeTab === 'new' ? this.newCustomers : this.contactedCustomers;
+
+       if (!this.searchQuery.trim()) {
+-        return customers;
++        return this.filterByStatus(customers);
+       }
+
+       const query = this.searchQuery.toLowerCase();
+-      return customers.filter(customer =>
++      const filtered = customers.filter(customer =>
+           customer.name.toLowerCase().includes(query) ||
+           customer.phone.includes(query) ||
+           customer.province.toLowerCase().includes(query) ||
+           (customer.oldProvince && customer.oldProvince.toLowerCase().includes(query))
+       );
++      return this.filterByStatus(filtered);
++    },
++    totalPages() {
++      if (this.activeTab !== 'contacted') return 1;
++      return Math.max(1, Math.ceil(this.filteredCustomers.length / this.pageSize));
++    },
++    pagedCustomers() {
++      if (this.activeTab !== 'contacted') return this.filteredCustomers;
++      const start = (this.currentPage - 1) * this.pageSize;
++      return this.filteredCustomers.slice(start, start + this.pageSize);
+     }
+   },
+   mounted() {
+     this.initCharts();
+   },
+   methods: {
+     // Khởi tạo biểu đồ
+     initCharts() {
+       this.initLineChart();
+       this.initSummaryChart();
+     },
+
+     // Khởi tạo biểu đồ đường
+     initLineChart() {
+       const ctx = this.$refs.lineChart;
+       if (!ctx) return;
+
+       // Xóa biểu đồ cũ nếu tồn tại
+       if (this.lineChartInstance) {
+         this.lineChartInstance.destroy();
+       }
+
+       // Tạo dữ liệu mẫu cho biểu đồ
+       const labels = this.selectedTimeRange === 'year'
+           ? this.months
+@@ -815,90 +860,125 @@ export default {
+
+       const index = this.selectedCustomer.tags.indexOf(tag);
+       if (index === -1) {
+         this.selectedCustomer.tags.push(tag);
+       } else {
+         this.selectedCustomer.tags.splice(index, 1);
+       }
+     },
+
+     // Lấy nhãn loại khách hàng
+     getCustomerTypeLabel(type) {
+       const typeLabels = {
+         'broker': 'Môi giới',
+         'owner': 'Chủ nhà',
+         'relative': 'Người thân'
+       };
+       return typeLabels[type] || type;
+     },
+
+     // Lấy nhãn tag
+     getTagLabel(tag) {
+       const tagObj = this.availableTags.find(t => t.value === tag);
+       return tagObj ? tagObj.label : tag;
+     },
+
++    filterByStatus(customers) {
++      if (this.activeTab !== 'contacted' || this.statusFilter === 'all') {
++        return customers;
++      }
++      return customers.filter(customer => customer.tags.includes(this.statusFilter));
++    },
++
++    changePage(page) {
++      const nextPage = Math.min(Math.max(page, 1), this.totalPages);
++      this.currentPage = nextPage;
++    },
++
++    // Lấy ký tự viết tắt từ tên khách hàng
++    getInitials(name) {
++      if (!name) return '';
++      const words = name.trim().split(/\s+/);
++      const first = words[0]?.charAt(0) || '';
++      const last = words.length > 1 ? words[words.length - 1].charAt(0) : '';
++      return `${first}${last}`.toUpperCase();
++    },
++
++    // Tạo màu avatar dựa trên tên
++    getAvatarColor(name) {
++      if (!name) return 'hsl(210, 60%, 55%)';
++      let hash = 0;
++      for (let i = 0; i < name.length; i += 1) {
++        hash = name.charCodeAt(i) + ((hash << 5) - hash);
++      }
++      const hue = Math.abs(hash) % 360;
++      return `hsl(${hue}, 60%, 55%)`;
++    },
++
+     // Lấy xem trước ghi chú cuối cùng
+     getLastNotePreview(notes) {
+       if (!notes || notes.length === 0) return 'Chưa có ghi chú';
+       const lastNote = notes[0];
+       const preview = lastNote.content.length > 50
+           ? lastNote.content.substring(0, 50) + '...'
+           : lastNote.content;
+       return `${lastNote.time} - ${preview}`;
+     },
+
+     // Định dạng thời gian
+     formatTime(isoString) {
+       if (!isoString) return 'Chưa gọi';
+       const date = new Date(isoString);
+       return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+     },
+
+     // Định dạng ngày ghi chú
+     formatNoteDate(isoString) {
+       const date = new Date(isoString);
+       return date.toLocaleDateString('vi-VN');
+     }
    }
+ };
+ </script>
+
+ <style scoped>
+ /* Biến màu sắc */
+ :root {
+   --primary-color: #3f51b5;
+   --secondary-color: #2196f3;
+   --success-color: #4caf50;
+   --warning-color: #ff9800;
+   --danger-color: #f44336;
+   --light-color: #f5f5f5;
+   --dark-color: #333;
+   --gray-color: #9e9e9e;
+-  --border-color: #e0e0e0;
++  --border-color: #d6dce5;
++  --surface-color: #fdfdfd;
++  --surface-alt: #f7f9fc;
++  --panel-gradient: linear-gradient(145deg, #ffffff 0%, #eef3ff 100%);
+   --sidebar-width: 280px;
+-  --detail-panel-width: 350px;
++  --detail-panel-width: 200px;
  }
 
- function normalizePriceInput(value) {
-   return value.replace(/[^\d]/g, "");
+ /* Reset và kiểu cơ bản */
+ * {
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
  }
 
- function formatPriceDisplay(value) {
-   if (!value) return "";
-   return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+ body {
+   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   background-color: #f0f2f5;
+   color: #333;
  }
 
- function handlePriceInput(event) {
-   const raw = normalizePriceInput(event.target.value);
-   priceDisplay.value = formatPriceDisplay(raw);
-   formData.price = raw ? Number(raw) : "";
+ .telesale-app {
+   display: flex;
+   flex-direction: column;
+   height: 100vh;
+   overflow: hidden;
  }
 
- function syncPriceDisplay() {
-   const raw = normalizePriceInput(priceDisplay.value);
-   priceDisplay.value = formatPriceDisplay(raw);
-   formData.price = raw ? Number(raw) : "";
+ /* Header */
+ .app-header {
+   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+@@ -932,64 +1012,65 @@ body {
+   padding: 8px 15px;
+   border-radius: 4px;
+   cursor: pointer;
+   font-size: 14px;
+   transition: background 0.3s;
  }
 
- /* ===== Upload ===== */
--const pickedFileName = ref("");
-+const pickedFileNames = ref([]);
-+const pickedFileLabel = computed(() => {
-+  if (!pickedFileNames.value.length) return "";
-+  if (pickedFileNames.value.length === 1) return pickedFileNames.value[0];
-+  return `${pickedFileNames.value.length} tệp: ${pickedFileNames.value.join(", ")}`;
-+});
- function onPickFile(e) {
--  const f = e?.target?.files?.[0];
--  pickedFileName.value = f ? f.name : "";
-+  const files = Array.from(e?.target?.files || []);
-+  pickedFileNames.value = files.map(file => file.name);
- }
- function clearPickedFile() {
--  pickedFileName.value = "";
-+  pickedFileNames.value = [];
-+  const fileInput = document.getElementById("fileInput");
-+  if (fileInput) {
-+    fileInput.value = "";
-+  }
+ .logout-btn:hover {
+   background: rgba(255, 255, 255, 0.3);
  }
 
- /* ===== Existing actions ===== */
- import api from "/src/api/api.js"
- import { showWarning, showSuccess, showError} from "../../assets/js/alertService.js";
+ .logout-btn i {
+   margin-right: 5px;
+ }
 
-+function isValidName(name) {
-+  const normalized = name.trim().replace(/\s+/g, " ");
-+  if (!normalized) return false;
-+  const words = normalized.split(" ");
-+  if (words.length < 2) return false;
-+  return /^[A-Za-zÀ-ỹ\s]+$/u.test(normalized);
+ /* Main container */
+ .main-container {
+   display: flex;
+   flex: 1;
+   overflow: hidden;
+ }
+
+ /* Sidebar */
+ .sidebar {
+   width: var(--sidebar-width);
+-  background-color: white;
+-  border-right: 1px solid var(--border-color);
++  background-color: var(--surface-alt);
++  border-right: 1px solid #cfd7e3;
+   overflow-y: auto;
+   padding: 20px;
+   display: flex;
+   flex-direction: column;
+   gap: 25px;
+ }
+
+ .stats-widget, .chart-widget {
+-  background-color: white;
++  background: var(--panel-gradient);
++  border: 1px solid #d7e0ec;
+   border-radius: 8px;
+   padding: 18px;
+-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
++  box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
+ }
+
+ .stats-widget h3, .chart-widget h3 {
+   font-size: 16px;
+   margin-bottom: 15px;
+   color: var(--primary-color);
+   display: flex;
+   align-items: center;
+   gap: 8px;
+ }
+
+ .stat-item {
+   display: flex;
+   justify-content: space-between;
+   margin-bottom: 12px;
+   padding-bottom: 8px;
+   border-bottom: 1px solid #f0f0f0;
+ }
+
+ .stat-label {
+   font-size: 14px;
+   color: #666;
+ }
+
+ .stat-value {
+@@ -1038,238 +1119,287 @@ body {
+   text-align: center;
+   margin-top: 5px;
+   color: #777;
+ }
+
+ .chart-container {
+   height: 200px;
+   position: relative;
+ }
+
+ /* Content area */
+ .content-area {
+   flex: 1;
+   padding: 20px;
+   overflow-y: auto;
+   display: flex;
+   flex-direction: column;
+   gap: 20px;
+ }
+
+ /* Control bar */
+ .control-bar {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+-  background-color: white;
++  background: linear-gradient(135deg, #ffffff 0%, #eef4ff 100%);
++  border: 1px solid #d7e0ec;
+   padding: 15px 20px;
+   border-radius: 8px;
+-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
++  box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
+ }
+
+ .view-controls {
+   display: flex;
+   gap: 10px;
+ }
+
+ .tab-btn {
+   padding: 10px 20px;
+-  border: none;
++  border: 1px solid #cfd7e3;
+   border-radius: 6px;
+-  background-color: #f0f0f0;
+-  color: #666;
++  background: linear-gradient(135deg, #f4f7ff 0%, #dbe6ff 100%);
++  color: #3a4a5e;
+   cursor: pointer;
+   font-size: 14px;
+   font-weight: 500;
+   display: flex;
+   align-items: center;
+   gap: 8px;
+   transition: all 0.3s;
++  box-shadow: 0 6px 12px rgba(47, 63, 99, 0.12);
+ }
+
+ .tab-btn.active {
+   background-color: var(--primary-color);
+   color: white;
++  border-color: var(--primary-color);
++  box-shadow: 0 6px 12px rgba(63, 81, 181, 0.25);
+ }
+
+ .tab-btn:hover:not(.active) {
+-  background-color: #e0e0e0;
++  background-color: #dfe7f5;
+ }
+
+ .filter-controls {
+   display: flex;
+   align-items: center;
+   gap: 15px;
+ }
+
+ .filter-group {
+   display: flex;
+   align-items: center;
+   gap: 8px;
+ }
+
+ .filter-group label {
+   font-size: 14px;
+   color: #666;
+ }
+
+ .filter-group select {
+   padding: 8px 12px;
+   border-radius: 4px;
+-  border: 1px solid var(--border-color);
+-  background-color: white;
++  border: 1px solid #cfd7e3;
++  background-color: #f8fbff;
+   font-size: 14px;
++  color: #344054;
+ }
+
+ .refresh-btn {
+   padding: 8px 15px;
+-  background-color: #f0f0f0;
+-  border: none;
++  background: linear-gradient(135deg, #e3ecff 0%, #c6d7ff 100%);
++  border: 1px solid #c5d5f3;
+   border-radius: 4px;
+   cursor: pointer;
+   font-size: 14px;
+   display: flex;
+   align-items: center;
+   gap: 5px;
+   transition: background 0.3s;
++  color: #2f3f63;
+ }
+
+ .refresh-btn:hover {
+-  background-color: #e0e0e0;
++  background-color: #cfdefa;
+ }
+
+ /* Chart container */
+ .chart-container-large {
+-  background-color: white;
++  background: var(--panel-gradient);
++  border: 1px solid #d7e0ec;
+   border-radius: 8px;
+   padding: 20px;
+-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
++  box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
+ }
+
+ .chart-container-large h3 {
+   font-size: 18px;
+   margin-bottom: 15px;
+   color: var(--primary-color);
+   display: flex;
+   align-items: center;
+   gap: 8px;
+ }
+
+ .chart-wrapper {
+   height: 300px;
+   position: relative;
+ }
+
+ /* Customer section */
+ .customer-section {
+-  background-color: white;
++  background: var(--panel-gradient);
++  border: 1px solid #d7e0ec;
+   border-radius: 8px;
+   padding: 20px;
+-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
++  box-shadow: 0 6px 14px rgba(31, 45, 61, 0.06);
+   flex: 1;
+   display: flex;
+   flex-direction: column;
+ }
+
+ .section-header {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   margin-bottom: 20px;
++  gap: 15px;
 +}
 +
-+function isValidPhone(phone) {
-+  return /^(0\d{9})$/.test(phone);
++.section-title {
++  display: flex;
++  flex-direction: column;
++  gap: 12px;
 +}
 +
- function validateForm() {
-   if (!formData.name?.trim()) {
-     showWarning("Vui lòng nhập họ tên.");
-     return false;
-   }
-+  if (!isValidName(formData.name)) {
-+    showWarning("Họ tên phải có ít nhất 2 từ và không chứa số hoặc ký tự đặc biệt.");
-+    return false;
-+  }
-   if (!formData.phone?.trim()) {
-     showWarning("Vui lòng nhập số điện thoại.");
-     return false;
-   }
-+  if (!isValidPhone(formData.phone)) {
-+    showWarning("Số điện thoại không đúng định dạng (ví dụ: 09xxxxxxxx).");
-+    return false;
-+  }
-   if (!formData.area?.trim()) {
-     showWarning("Vui lòng chọn tỉnh/thành.");
-     return false;
-   }
-   if (!formData.price) {
-     showWarning("Vui lòng nhập giá bán.");
-     return false;
-   }
-   if (!formData.type) {
-     showWarning("Vui lòng chọn phân loại.");
-     return false;
-   }
-   return true;
++.section-controls {
++  display: flex;
++  align-items: center;
++  gap: 12px;
++}
++
++.status-filter {
++  background: #f0f5ff;
++  padding: 6px 10px;
++  border-radius: 8px;
++  border: 1px solid #cfd7e3;
++}
++
++.status-filter select {
++  min-width: 160px;
  }
 
- async function submitData() {
-   try {
-     if (!validateForm()) return;
+ .section-header h3 {
+   font-size: 18px;
+   color: var(--primary-color);
+   display: flex;
+   align-items: center;
+   gap: 8px;
+ }
 
-     const form = new FormData();
+ .search-box {
+   position: relative;
+   width: 300px;
+ }
 
-     // DTO gửi cho backend
-     const dto = {
-       name: formData.name,
-       phone: formData.phone,
+ .search-box input {
+   width: 100%;
+   padding: 10px 15px 10px 40px;
+   border-radius: 6px;
+-  border: 1px solid var(--border-color);
++  border: 1px solid #cfd7e3;
++  background: linear-gradient(135deg, #f8fbff 0%, #eef4ff 100%);
+   font-size: 14px;
++  color: #344054;
+ }
+
+ .search-box i {
+   position: absolute;
+   left: 15px;
+   top: 50%;
+   transform: translateY(-50%);
+   color: #999;
+ }
+
+ /* Customer list */
+ .customer-list {
+   display: flex;
+   flex-direction: column;
+   gap: 12px;
+   overflow-y: auto;
+   flex: 1;
+ }
+
+ .customer-card {
+   display: flex;
+   align-items: center;
+   padding: 15px;
+   border-radius: 8px;
+-  border: 1px solid var(--border-color);
++  border: 1px solid #cfd7e3;
+   cursor: pointer;
+   transition: all 0.2s;
+-  background-color: white;
++  background: linear-gradient(135deg, #ffffff 0%, #f4f7ff 100%);
+ }
+
+ .customer-card:hover {
+   border-color: var(--secondary-color);
+   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+ }
+
+ .customer-card.selected {
+   border-color: var(--primary-color);
+-  background-color: #f0f4ff;
++  background-color: #f2f6ff;
++  box-shadow: inset 0 0 0 1px rgba(63, 81, 181, 0.15);
+ }
+
+ .customer-avatar {
+   position: relative;
+   margin-right: 15px;
+ }
+
+ .customer-avatar img {
+   width: 50px;
+   height: 50px;
+   border-radius: 50%;
+   object-fit: cover;
+ }
+
++.avatar-initials {
++  width: 50px;
++  height: 50px;
++  border-radius: 50%;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  color: white;
++  font-size: 16px;
++  font-weight: 600;
++  text-transform: uppercase;
++  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
++}
++
+ .customer-type {
+   position: absolute;
+   bottom: -5px;
+   left: 50%;
+   transform: translateX(-50%);
+   font-size: 10px;
+   padding: 2px 8px;
+   border-radius: 10px;
+   white-space: nowrap;
+ }
+
+ .customer-type.broker {
+   background-color: #e3f2fd;
+   color: #1565c0;
+ }
+
+ .customer-type.owner {
+   background-color: #e8f5e9;
+   color: #2e7d32;
+ }
+
+ .customer-type.relative {
+   background-color: #f3e5f5;
+   color: #7b1fa2;
+ }
+@@ -1292,51 +1422,52 @@ body {
+   align-items: center;
+   gap: 5px;
+ }
+
+ .customer-location {
+   font-size: 13px;
+   color: #888;
+   margin-bottom: 8px;
+   display: flex;
+   gap: 10px;
+ }
+
+ .location-current {
+   display: flex;
+   align-items: center;
+   gap: 4px;
+ }
+
+ .location-old {
+   font-style: italic;
+ }
+
+ .customer-notes-preview {
+   font-size: 13px;
+   color: #666;
+-  background-color: #f9f9f9;
++  background: linear-gradient(135deg, #f2f6fc 0%, #e8effa 100%);
++  border: 1px solid #dbe4f3;
+   padding: 5px 8px;
+   border-radius: 4px;
+   margin-bottom: 8px;
+   display: flex;
+   align-items: center;
+   gap: 5px;
+ }
+
+ .customer-tags {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 5px;
+ }
+
+ .customer-tag {
+   font-size: 11px;
+   padding: 3px 8px;
+   border-radius: 12px;
+   font-weight: 500;
+ }
+
+ .customer-tag.potential_7 {
+   background-color: #e3f2fd;
+   color: #1565c0;
+ }
+@@ -1353,137 +1484,140 @@ body {
+
+ .customer-tag.wrong_number {
+   background-color: #fff3e0;
+   color: #ef6c00;
+ }
+
+ .customer-tag.unreachable {
+   background-color: #ffebee;
+   color: #c62828;
+ }
+
+ .customer-tag.care {
+   background-color: #fff8e1;
+   color: #f9a825;
+ }
+
+ .customer-actions {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   gap: 10px;
+ }
+
+ .call-btn {
+   padding: 8px 20px;
+-  background-color: var(--success-color);
++  background: linear-gradient(135deg, #55c46a 0%, #2e7d32 100%);
+   color: white;
+   border: none;
+   border-radius: 6px;
+   cursor: pointer;
+   font-size: 14px;
+   font-weight: 500;
+   display: flex;
+   align-items: center;
+   gap: 5px;
+   transition: background 0.3s;
+ }
+
+ .call-btn:hover:not(:disabled) {
+   background-color: #3d8b40;
+ }
+
+ .call-btn:disabled {
+   background-color: #a5d6a7;
+   cursor: not-allowed;
+ }
+
+ .call-status {
+   font-size: 12px;
+   color: #888;
+   display: flex;
+   align-items: center;
+   gap: 4px;
+ }
+
+ /* Detail panel */
+ .detail-panel {
+   width: var(--detail-panel-width);
+-  background-color: white;
+-  border-left: 1px solid var(--border-color);
++  background: linear-gradient(160deg, #ffffff 0%, #eef4ff 100%);
++  border-left: 1px solid #cfd7e3;
+   display: flex;
+   flex-direction: column;
+   overflow-y: auto;
+ }
+
+ .detail-header {
+   padding: 15px 20px;
+-  border-bottom: 1px solid var(--border-color);
++  border-bottom: 1px solid #cfd7e3;
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
++  background: linear-gradient(135deg, #f5f8ff, #eef4ff);
+ }
+
+ .detail-header h3 {
+   font-size: 18px;
+   color: var(--primary-color);
+ }
+
+ .close-btn {
+-  background: none;
+-  border: none;
++  background: #f1f5ff;
++  border: 1px solid #cfd7e3;
+   font-size: 18px;
+   color: #666;
+   cursor: pointer;
+   padding: 5px;
++  border-radius: 6px;
+ }
+
+ .close-btn:hover {
+   color: var(--danger-color);
+ }
+
+ .detail-content {
+   padding: 20px;
+   flex: 1;
+   display: flex;
+   flex-direction: column;
+   gap: 20px;
+ }
+
+ .customer-detail-header {
+   display: flex;
+   align-items: center;
+   gap: 15px;
+   padding-bottom: 15px;
+-  border-bottom: 1px solid var(--border-color);
++  border-bottom: 1px solid #cfd7e3;
+ }
+
+ .detail-avatar {
+   width: 80px;
+   height: 80px;
+   border-radius: 50%;
+-  object-fit: cover;
++  font-size: 22px;
++  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+ }
+
+ .detail-name-info h4 {
+   font-size: 20px;
+   font-weight: 600;
+   margin-bottom: 5px;
+ }
+
+ .detail-phone {
+   font-size: 16px;
+   color: #666;
+   margin-bottom: 8px;
+ }
+
+ .type-badge {
+   padding: 5px 12px;
+   border-radius: 15px;
+   font-size: 13px;
+   font-weight: 500;
+ }
+
+ .type-badge.broker {
+   background-color: #e3f2fd;
+   color: #1565c0;
+ }
+@@ -1509,214 +1643,251 @@ body {
+
+ .detail-row {
+   display: flex;
+   justify-content: space-between;
+   margin-bottom: 10px;
+ }
+
+ .detail-label {
+   color: #666;
+   font-size: 14px;
+ }
+
+ .detail-value {
+   font-weight: 500;
+   font-size: 14px;
+ }
+
+ .tag-selector {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 8px;
+ }
+
+ .tag-option {
+   padding: 6px 12px;
+-  border: 1px solid var(--border-color);
++  border: 1px solid #cfd7e3;
+   border-radius: 20px;
+-  background-color: white;
++  background-color: #f5f8ff;
+   font-size: 13px;
+   cursor: pointer;
+   transition: all 0.2s;
++  color: #344054;
+ }
+
+ .tag-option:hover {
+   background-color: #f5f5f5;
+ }
+
+ .tag-option.active {
+   background-color: var(--primary-color);
+   color: white;
+   border-color: var(--primary-color);
+ }
+
+ .notes-container {
+   max-height: 200px;
+   overflow-y: auto;
+-  border: 1px solid var(--border-color);
++  border: 1px solid #cfd7e3;
+   border-radius: 6px;
+   padding: 10px;
+   margin-bottom: 15px;
++  background: linear-gradient(135deg, #f8fbff 0%, #edf3ff 100%);
+ }
+
+ .notes-list {
+   display: flex;
+   flex-direction: column;
+   gap: 10px;
+ }
+
+ .note-item {
+   padding: 10px;
+   border-bottom: 1px solid #f0f0f0;
+ }
+
+ .note-item:last-child {
+   border-bottom: none;
+ }
+
+ .note-header {
+   display: flex;
+   justify-content: space-between;
+   font-size: 12px;
+   color: #888;
+   margin-bottom: 5px;
+ }
+
+ .note-content {
+   font-size: 14px;
+   line-height: 1.5;
+ }
+
+ .no-notes {
+   text-align: center;
+   color: #999;
+   font-style: italic;
+   padding: 20px;
+   font-size: 14px;
+ }
+
+ .add-note-form textarea {
+   width: 100%;
+   padding: 12px;
+-  border: 1px solid var(--border-color);
++  border: 1px solid #cfd7e3;
++  background-color: #f8fbff;
+   border-radius: 6px;
+   font-family: inherit;
+   font-size: 14px;
+   resize: vertical;
+   margin-bottom: 10px;
+ }
+
+ .add-note-btn {
+   width: 100%;
+   padding: 10px;
+-  background-color: var(--secondary-color);
++  background: linear-gradient(135deg, #4aa8ff 0%, #1e88e5 100%);
+   color: white;
+   border: none;
+   border-radius: 6px;
+   cursor: pointer;
+   font-size: 14px;
+   font-weight: 500;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   gap: 8px;
+   transition: background 0.3s;
+ }
+
+ .add-note-btn:hover:not(:disabled) {
+   background-color: #0d8bf2;
+ }
+
+ .add-note-btn:disabled {
+   background-color: #90caf9;
+   cursor: not-allowed;
+ }
+
+ .detail-actions {
+   display: flex;
+   flex-direction: column;
+   gap: 10px;
+   margin-top: auto;
+ }
+
+ .action-btn {
+   padding: 12px;
+   border: none;
+   border-radius: 6px;
+   cursor: pointer;
+   font-size: 14px;
+   font-weight: 500;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   gap: 8px;
+   transition: all 0.3s;
++  box-shadow: 0 6px 12px rgba(31, 45, 61, 0.12);
+ }
+
+ .action-btn.success {
+-  background-color: var(--success-color);
++  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+   color: white;
+ }
+
+ .action-btn.success:hover {
+   background-color: #3d8b40;
+ }
+
+ .action-btn.move-btn {
+-  background-color: #9c27b0;
++  background: linear-gradient(135deg, #8e24aa 0%, #5e35b1 100%);
+   color: white;
+ }
+
+ .action-btn.move-btn:hover {
+   background-color: #7b1fa2;
+ }
+
+ .action-btn.danger {
+-  background-color: var(--danger-color);
++  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+   color: white;
+ }
+
++.pagination {
++  display: flex;
++  align-items: center;
++  justify-content: flex-end;
++  gap: 10px;
++  margin-top: 15px;
++}
++
++.page-btn {
++  border: 1px solid #cfd7e3;
++  background: linear-gradient(135deg, #f4f7ff 0%, #dbe6ff 100%);
++  color: #2f3f63;
++  padding: 6px 12px;
++  border-radius: 8px;
++  cursor: pointer;
++  box-shadow: 0 6px 12px rgba(47, 63, 99, 0.12);
++}
++
++.page-btn:disabled {
++  opacity: 0.5;
++  cursor: not-allowed;
++}
++
++.page-info {
++  font-size: 13px;
++  color: #3a4a5e;
++  background: #f0f5ff;
++  padding: 6px 10px;
++  border-radius: 8px;
++  border: 1px solid #cfd7e3;
++}
++
+ .action-btn.danger:hover {
+   background-color: #d32f2f;
+ }
+
+ /* Call modal */
+ .call-modal {
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background-color: rgba(0, 0, 0, 0.5);
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   z-index: 1000;
+ }
+
+ .call-modal-content {
+-  background-color: white;
++  background-color: var(--surface-color);
++  border: 1px solid #d7e0ec;
+   border-radius: 12px;
+   padding: 30px;
+   width: 400px;
+   max-width: 90%;
+   text-align: center;
+   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+ }
+
+ .call-modal-content h3 {
+   font-size: 24px;
+   margin-bottom: 20px;
+   color: var(--primary-color);
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   gap: 10px;
+ }
+
+ .call-info {
+   margin-bottom: 25px;
+ }
+
+ .call-customer-name {
+   font-size: 22px;
+   font-weight: 600;
+@@ -1735,174 +1906,183 @@ body {
+   color: var(--success-color);
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   gap: 10px;
+ }
+
+ .call-actions {
+   display: flex;
+   justify-content: center;
+   gap: 15px;
+   margin-bottom: 20px;
+ }
+
+ .call-action-btn {
+   padding: 12px 25px;
+   border: none;
+   border-radius: 8px;
+   cursor: pointer;
+   font-size: 16px;
+   font-weight: 500;
+   display: flex;
+   align-items: center;
+   gap: 8px;
+   transition: all 0.3s;
++  box-shadow: 0 6px 12px rgba(31, 45, 61, 0.16);
+ }
+
+ .call-action-btn.end-call {
+-  background-color: var(--danger-color);
++  background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+   color: white;
+ }
+
+ .call-action-btn.end-call:hover {
+   background-color: #d32f2f;
+ }
+
+ .call-action-btn.add-note-call {
+-  background-color: var(--warning-color);
++  background: linear-gradient(135deg, #ffb74d 0%, #f57c00 100%);
+   color: white;
+ }
+
+ .call-action-btn.add-note-call:hover {
+   background-color: #f57c00;
+ }
+
+ .call-note-section {
+   text-align: left;
+ }
+
+ .call-note-section textarea {
+   width: 100%;
+   padding: 12px;
+-  border: 1px solid var(--border-color);
++  border: 1px solid #cfd7e3;
++  background-color: #f8fbff;
+   border-radius: 6px;
+   font-family: inherit;
+   font-size: 14px;
+   resize: vertical;
+   margin-bottom: 15px;
+ }
+
+ .call-note-actions {
+   display: flex;
+   gap: 10px;
+ }
+
+ .call-note-btn {
+   flex: 1;
+   padding: 10px;
+   border: none;
+   border-radius: 6px;
+   cursor: pointer;
+   font-size: 14px;
+   font-weight: 500;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   gap: 8px;
++  box-shadow: 0 6px 12px rgba(31, 45, 61, 0.12);
+ }
+
+ .call-note-btn.save-note {
+-  background-color: var(--success-color);
++  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+   color: white;
+ }
+
+ .call-note-btn.save-note:hover {
+   background-color: #3d8b40;
+ }
+
+ .call-note-btn.cancel-note {
+-  background-color: #9e9e9e;
++  background: linear-gradient(135deg, #b0bec5 0%, #607d8b 100%);
+   color: white;
+ }
+
+ .call-note-btn.cancel-note:hover {
+   background-color: #757575;
+ }
+
+ /* Responsive */
+ @media (max-width: 1200px) {
+   .sidebar {
+     width: 250px;
+   }
+
+   .detail-panel {
+-    width: 320px;
++    width: 190px;
+   }
+ }
+
+ @media (max-width: 992px) {
+   .main-container {
+     flex-direction: column;
+   }
+
+   .sidebar {
+     width: 100%;
+     flex-direction: row;
+     border-right: none;
+     border-bottom: 1px solid var(--border-color);
+     overflow-x: auto;
+   }
+
+   .stats-widget, .chart-widget {
+     min-width: 250px;
+   }
+
+   .detail-panel {
+     position: fixed;
+     top: 0;
+     right: 0;
+     height: 100%;
+     z-index: 100;
+     box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+   }
+ }
+
+ @media (max-width: 768px) {
+   .control-bar {
+     flex-direction: column;
+     align-items: flex-start;
+     gap: 15px;
+   }
+
+   .filter-controls {
+     flex-wrap: wrap;
+   }
+
+   .section-header {
+     flex-direction: column;
+     align-items: flex-start;
+     gap: 15px;
+   }
+
++  .section-controls {
++    flex-direction: column;
++    align-items: stretch;
++    width: 100%;
++  }
++
+   .search-box {
+     width: 100%;
+   }
+
+   .customer-card {
+     flex-direction: column;
+     align-items: flex-start;
+   }
+
+   .customer-avatar {
+     margin-right: 0;
+     margin-bottom: 10px;
+   }
+
+   .customer-actions {
+     width: 100%;
+     flex-direction: row;
+     justify-content: space-between;
+     margin-top: 10px;
+   }
+ }
+-</style>
+\ No newline at end of file
++</style>
