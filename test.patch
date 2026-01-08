@@ -1,161 +1,8 @@
 diff --git a/src/components/thiet-kegiandien/marketing-cap-da-ta.vue b/src/components/thiet-kegiandien/marketing-cap-da-ta.vue
-index 2a7578391132ce5e36676630fbbd88f5f00fa875..ec05cae8bb74816767c6746f8d95cb47f6d61df2 100644
+index a7425e04725fa9f75fba563497d7ed82a81c4854..1d895a617b51bd1e955bc26c6e43d7df3127b8d4 100644
 --- a/src/components/thiet-kegiandien/marketing-cap-da-ta.vue
 +++ b/src/components/thiet-kegiandien/marketing-cap-da-ta.vue
-@@ -22,189 +22,196 @@
-             </button>
-           </div>
-         </div>
-       </div>
-     </div>
-
-     <!-- Main Content -->
-     <div class="container main-content">
-       <div class="row g-4">
-         <!-- Left: Compact Form -->
-         <div class="col-lg-5">
-           <div class="form-panel">
-             <div class="panel-header">
-               <h3>
-                 <span class="icon-label" style="background: linear-gradient(135deg, #FF6B6B, #FF8E53);">
-                   <i class="fas fa-user-edit"></i>
-                 </span>
-                 Nhập khách hàng
-               </h3>
-               <span class="badge">Mới</span>
-             </div>
-
-             <form @submit.prevent="submitData" class="compact-form">
-               <div class="form-row">
-                 <div class="form-group">
--                  <label>Họ tên *</label>
-+                  <label>Họ tên <span class="required">*</span></label>
-                   <div class="input-icon">
-                     <span class="icon-chip" style="background: linear-gradient(135deg, #36D1DC, #5B86E5); color: white;">
-                       <i class="fas fa-user"></i>
-                     </span>
-                     <input
-                         v-model="formData.name"
-                         type="text"
-                         class="form-control"
-                         placeholder="Nguyễn Văn A"
-                         required
-                     />
-                   </div>
-                 </div>
-
-                 <div class="form-group">
--                  <label>Số điện thoại *</label>
-+                  <label>Số điện thoại <span class="required">*</span></label>
-                   <div class="input-icon">
-                     <span class="icon-chip" style="background: linear-gradient(135deg, #FF416C, #FF4B2B); color: white;">
-                       <i class="fas fa-phone"></i>
-                     </span>
-                     <input
-                         v-model="formData.phone"
-                         type="tel"
-                         class="form-control"
-                         placeholder="09xxxxxxxx"
-                         required
-                     />
-                   </div>
-                 </div>
-               </div>
-
-               <div class="form-row">
-                 <!-- Province/City Searchable Dropdown -->
-                 <div class="form-group">
--                  <label>Tỉnh/Thành</label>
--                  <div class="input-icon" style="position: relative;">
-+                  <label>Tỉnh/Thành <span class="required">*</span></label>
-+                  <div class="input-icon select-like" :class="{ open: provinceDropdownOpen }" style="position: relative;">
-     <span class="icon-chip" style="background: linear-gradient(135deg, #8344C5, #3A7BD5); color: white;">
-       <i class="fas fa-location-dot"></i>
-     </span>
-                     <input
-                         v-model="provinceSearch"
-                         @focus="provinceDropdownOpen = true"
-                         @input="provinceDropdownOpen = true"
-                         @blur="closeProvinceDropdown"
-                         type="text"
-                         class="form-control"
-                         placeholder="Tìm tỉnh/thành"
-                         autocomplete="off"
-                         style="cursor: pointer;"
-                     />
-+                    <span class="select-caret" aria-hidden="true" @mousedown.prevent="toggleProvinceDropdown">
-+                      <i class="fas fa-chevron-down"></i>
-+                    </span>
-                     <ul
-                         v-if="provinceDropdownOpen && filteredProvinces.length"
-                         class="province-dropdown"
-                         style="position: absolute; left: 0; right: 0; top: 110%; z-index: 10; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; max-height: 180px; overflow-y: auto; margin: 0; padding: 0;"
-                     >
-                       <li
-                           v-for="province in filteredProvinces"
-                           :key="province.name"
-                           @mousedown.prevent="selectProvince(province)"
-                           style="padding: 0.5rem 1rem; cursor: pointer; list-style: none;"
-                           :style="{ background: province.name === formData.area ? '#e0e7ff' : 'transparent' }"
-                       >
-                         {{ province.name }}
-                       </li>
-                     </ul>
-                   </div>
-                 </div>
-
-                 <div class="form-group">
-                   <label>Tên tỉnh cũ</label>
-                   <div class="input-icon">
-                     <span class="icon-chip"
-                           style="background: linear-gradient(135deg, #6b7280, #707f98); color: #f9fafb;">
-                       <i class="fas fa-map-marked-alt"></i>
-                     </span>
-                     <input
-                         v-model="formData.oldArea"
-                         type="text"
-                         class="form-control"
-                         placeholder="Tên tỉnh cũ (nếu có)"
-                     />
-                   </div>
-                 </div>
-
-               </div>
-               <div class="form-group">
--                <label>Giá</label>
-+                <label>Giá <span class="required">*</span></label>
-                 <div class="input-icon">
-                     <span class="icon-chip" style="background: linear-gradient(135deg, #00b09b, #96c93d); color: white;">
-                       <i class="fas fa-coins"></i>
-                     </span>
-                   <input
--                      v-model="formData.price"
--                      type="number"
-+                      :value="priceDisplay"
-+                      type="text"
-+                      inputmode="numeric"
-                       class="form-control"
-                       placeholder="0"
-+                      @input="handlePriceInput"
-+                      @blur="syncPriceDisplay"
-+                      required
-                   />
-                 </div>
-               </div>
-               <div class="form-group">
--                <label>Phân loại</label>
-+                <label>Phân loại <span class="required">*</span></label>
-                 <div class="type-buttons">
-                   <button
-                       v-for="type in customerTypes"
-                       :key="type.id"
-                       type="button"
-                       :class="['type-btn', type.id, { active: formData.type === type.id }]"
-                       @click="formData.type = type.id"
-                   >
-                     <i :class="type.icon"></i>
-                     {{ type.label }}
-                   </button>
+@@ -167,55 +167,55 @@
                  </div>
                </div>
 
@@ -181,12 +28,14 @@ index 2a7578391132ce5e36676630fbbd88f5f00fa875..ec05cae8bb74816767c6746f8d95cb47
                    <label class="upload-btn" title="Tải tệp nhỏ">
                      <i class="fas fa-paperclip"></i>
                      <span>Up file</span>
--                    <input class="upload-input" type="file" @change="onPickFile" />
-+                    <input id="fileInput" class="upload-input" type="file" @change="onPickFile" />
+-                    <input id="fileInput" class="upload-input" type="file" @change="onPickFile" />
++                    <input id="fileInput" class="upload-input" type="file" multiple @change="onPickFile" />
                    </label>
-                   <div class="upload-meta" v-if="pickedFileName">
+-                  <div class="upload-meta" v-if="pickedFileName">
++                  <div class="upload-meta" v-if="pickedFileNames.length">
                      <i class="fas fa-file-lines"></i>
-                     <span class="text-truncate">{{ pickedFileName }}</span>
+-                    <span class="text-truncate">{{ pickedFileName }}</span>
++                    <span class="text-truncate">{{ pickedFileLabel }}</span>
                      <button type="button" class="upload-clear" @click="clearPickedFile" title="Bỏ chọn">
                        <i class="fas fa-xmark"></i>
                      </button>
@@ -199,416 +48,122 @@ index 2a7578391132ce5e36676630fbbd88f5f00fa875..ec05cae8bb74816767c6746f8d95cb47
                </div>
 
                <div class="form-actions">
-                 <button type="submit" class="btn btn-primary">
-                   <i class="fas fa-check"></i> Ghi nhận
-                 </button>
-                 <button type="button" @click="clearForm" class="btn btn-text">
-                   Xoá
-                 </button>
-                 <div class="entry-counter">
-                   <small>{{ submissionCount }} lượt</small>
-                 </div>
-@@ -408,50 +415,52 @@
-     </div>
-
-     <!-- Notification container injected by JS -->
-   </div>
- </template>
-
- <script setup>
- import { ref, reactive, computed, onMounted, watch, onBeforeUnmount, nextTick } from "vue";
- import Chart from "chart.js/auto";
- import addressData from '/src/assets/js/address.json'
-
- const provinces = ref(addressData)
- const formData = reactive({
-   name: "",
-   phone: "",
-   area: "",
-   oldArea: null,
-   type: "",
-   price: "",
-   note: "",
- });
-
- const submissionCount = ref(0);
- const totalValue = ref(2435000000); // 2.435 tỷ
-
-+const priceDisplay = ref("");
-+
- const customerTypes = [
-   { id: "CHINH_CHU", label: "Chủ nhà", icon: "fas fa-house-user" },
-   { id: "MOI_GIOI", label: "Môi giới", icon: "fas fa-handshake" },
-   { id: "NGUOI_THAN", label: "Người thân", icon: "fas fa-people-group" },
- ];
-
- const quickStats = reactive({
-   today: 24,
-   successRate: 84,
-   avgValue: 2.4,
- });
-
- /* =========================
-    DISTRIBUTION CHART (Chart.js)
- ========================= */
- const distributionCanvas = ref(null);
- let distributionChart = null;
- const distributionData = reactive([
-   { id: "hcm", name: "TP. Hồ Chí Minh", value: 850000000, count: 40, color: "#FF416C" },
-   { id: "hn",  name: "Hà Nội",         value: 650000000, count: 30, color: "#36D1DC" },
-   { id: "dn",  name: "Đà Nẵng",        value: 450000000, count: 20, color: "#5B86E5" },
-   { id: "bd",  name: "Bình Dương",     value: 285000000, count: 15, color: "#FF8A00" },
-   { id: "dna", name: "Đồng Nai",       value: 205000000, count: 10, color: "#8344C5" },
- ]);
-
-@@ -699,66 +708,113 @@ function renderActivityChart() {
-           ticks: {
-             color: "#334155",
-             font: { size: 11 },
-           },
-         },
-       },
-     },
-   });
- }
-
- function setActivityRange(r) {
-   activityRange.value = r;
- }
-
- /* ===== Helper Functions ===== */
- function formatCurrency(value) {
-   if (value >= 1000000000) {
-     return (value / 1000000000).toFixed(3).replace('.', ',') + 'B';
-   } else if (value >= 1000000) {
-     return (value / 1000000).toFixed(1).replace('.', ',') + 'M';
-   } else {
-     return value.toLocaleString('vi-VN');
+                 <div>
+                   <button type="submit" class="btn btn-primary">
+                     <i class="fas fa-check"></i> Ghi nhận
+                   </button>
+                   <button
+                       type="button"
+                       @click="clearForm"
+                       class="btn ms-2"
+                       style="background-color: #fcfc60; font-weight: 600!important;"
+                   >
+                     <i class="fas fa-rotate-right me-1"></i>
+                     Làm mới
+                   </button>
+@@ -739,72 +739,101 @@ function formatCurrency(value) {
    }
  }
 
-+function normalizePriceInput(value) {
-+  return value.replace(/[^\d]/g, "");
-+}
-+
-+function formatPriceDisplay(value) {
-+  if (!value) return "";
-+  return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-+}
-+
-+function handlePriceInput(event) {
-+  const raw = normalizePriceInput(event.target.value);
-+  priceDisplay.value = formatPriceDisplay(raw);
-+  formData.price = raw ? Number(raw) : "";
-+}
-+
-+function syncPriceDisplay() {
-+  const raw = normalizePriceInput(priceDisplay.value);
-+  priceDisplay.value = formatPriceDisplay(raw);
-+  formData.price = raw ? Number(raw) : "";
-+}
-+
+ function normalizePriceInput(value) {
+   return value.replace(/[^\d]/g, "");
+ }
+
+ function formatPriceDisplay(value) {
+   if (!value) return "";
+   return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+ }
+
+ function handlePriceInput(event) {
+   const raw = normalizePriceInput(event.target.value);
+   priceDisplay.value = formatPriceDisplay(raw);
+   formData.price = raw ? Number(raw) : "";
+ }
+
+ function syncPriceDisplay() {
+   const raw = normalizePriceInput(priceDisplay.value);
+   priceDisplay.value = formatPriceDisplay(raw);
+   formData.price = raw ? Number(raw) : "";
+ }
+
  /* ===== Upload ===== */
- const pickedFileName = ref("");
+-const pickedFileName = ref("");
++const pickedFileNames = ref([]);
++const pickedFileLabel = computed(() => {
++  if (!pickedFileNames.value.length) return "";
++  if (pickedFileNames.value.length === 1) return pickedFileNames.value[0];
++  return `${pickedFileNames.value.length} tệp: ${pickedFileNames.value.join(", ")}`;
++});
  function onPickFile(e) {
-   const f = e?.target?.files?.[0];
-   pickedFileName.value = f ? f.name : "";
+-  const f = e?.target?.files?.[0];
+-  pickedFileName.value = f ? f.name : "";
++  const files = Array.from(e?.target?.files || []);
++  pickedFileNames.value = files.map(file => file.name);
  }
  function clearPickedFile() {
-   pickedFileName.value = "";
+-  pickedFileName.value = "";
++  pickedFileNames.value = [];
++  const fileInput = document.getElementById("fileInput");
++  if (fileInput) {
++    fileInput.value = "";
++  }
  }
 
  /* ===== Existing actions ===== */
  import api from "/src/api/api.js"
  import { showWarning, showSuccess, showError} from "../../assets/js/alertService.js";
 
-+function validateForm() {
-+  if (!formData.name?.trim()) {
-+    showWarning("Vui lòng nhập họ tên.");
-+    return false;
-+  }
-+  if (!formData.phone?.trim()) {
-+    showWarning("Vui lòng nhập số điện thoại.");
-+    return false;
-+  }
-+  if (!formData.area?.trim()) {
-+    showWarning("Vui lòng chọn tỉnh/thành.");
-+    return false;
-+  }
-+  if (!formData.price) {
-+    showWarning("Vui lòng nhập giá bán.");
-+    return false;
-+  }
-+  if (!formData.type) {
-+    showWarning("Vui lòng chọn phân loại.");
-+    return false;
-+  }
-+  return true;
++function isValidName(name) {
++  const normalized = name.trim().replace(/\s+/g, " ");
++  if (!normalized) return false;
++  const words = normalized.split(" ");
++  if (words.length < 2) return false;
++  return /^[A-Za-zÀ-ỹ\s]+$/u.test(normalized);
 +}
 +
++function isValidPhone(phone) {
++  return /^(0\d{9})$/.test(phone);
++}
++
+ function validateForm() {
+   if (!formData.name?.trim()) {
+     showWarning("Vui lòng nhập họ tên.");
+     return false;
+   }
++  if (!isValidName(formData.name)) {
++    showWarning("Họ tên phải có ít nhất 2 từ và không chứa số hoặc ký tự đặc biệt.");
++    return false;
++  }
+   if (!formData.phone?.trim()) {
+     showWarning("Vui lòng nhập số điện thoại.");
+     return false;
+   }
++  if (!isValidPhone(formData.phone)) {
++    showWarning("Số điện thoại không đúng định dạng (ví dụ: 09xxxxxxxx).");
++    return false;
++  }
+   if (!formData.area?.trim()) {
+     showWarning("Vui lòng chọn tỉnh/thành.");
+     return false;
+   }
+   if (!formData.price) {
+     showWarning("Vui lòng nhập giá bán.");
+     return false;
+   }
+   if (!formData.type) {
+     showWarning("Vui lòng chọn phân loại.");
+     return false;
+   }
+   return true;
+ }
+
  async function submitData() {
    try {
-+    if (!validateForm()) return;
-+
+     if (!validateForm()) return;
+
      const form = new FormData();
 
      // DTO gửi cho backend
      const dto = {
        name: formData.name,
        phone: formData.phone,
-       area: formData.area,
-       oldArea: formData.oldArea,
-       type: formData.type,
-       price: formData.price,
-       note: formData.note,
-     };
-
-     form.append(
-         "dto",
-         new Blob([JSON.stringify(dto)], { type: "application/json" })
-     );
-
-     // File upload (nếu có)
-     const fileInput = document.getElementById("fileInput");
-     if (fileInput?.files?.length) {
-       Array.from(fileInput.files).forEach(f => {
-         form.append("files", f);
-       });
-     }
-@@ -780,66 +836,70 @@ async function submitData() {
-       showWarning(data?.message || "Gửi dữ liệu không thành công. Vui lòng thử lại!");
-       return;
-     }
-
-     // ======================
-     // API THÀNH CÔNG
-     // ======================
-     submissionCount.value++;
-
-     // Toast / notification
-     showSuccess(`Đã ghi nhận dữ liệu lượt #${submissionCount.value}`);
-
-     clearForm();
-
-   } catch (err) {
-     console.error(err);
-     showError("Gửi dữ liệu thất bại. Vui lòng thử lại!");
-   }
- }
-
-
- function clearForm() {
-   formData.name = "";
-   formData.phone = "";
-   formData.area = "";
-+  formData.oldArea = "";
-   formData.type = "";
-   formData.price = "";
-   formData.note = "";
-+  priceDisplay.value = "";
-   clearPickedFile();
- }
-
- function generateSampleData() {
-   const names = ["Lê Minh Anh", "Trần Quốc Bảo", "Phạm Thị Cẩm", "Nguyễn Đức Duy"];
-   const areaList = ["hcm", "hn", "dn", "bd", "dna"];
-   const types = ["CHINH_CHU", "MOI_GIOI", "NGUOI_THAN"];
-
-   formData.name = names[Math.floor(Math.random() * names.length)];
-   formData.phone = `09${Math.floor(Math.random() * 90000000 + 10000000)}`;
-   formData.area = areaList[Math.floor(Math.random() * areaList.length)];
-   formData.type = types[Math.floor(Math.random() * types.length)];
--  formData.price = Math.floor(Math.random() * 5000 + 500);
-+  const samplePrice = Math.floor(Math.random() * 5000 + 500) * 100000;
-+  formData.price = samplePrice;
-+  priceDisplay.value = formatPriceDisplay(String(samplePrice));
-   formData.note = "Quan tâm dịch vụ. Nhắc gọi lại tuần sau.";
-
-   quickStats.today++;
-   quickStats.avgValue = (Math.random() * 0.5 + 2.2).toFixed(1);
- }
-
- function exportData() {
-   const dataStr = JSON.stringify(
-       {
-         entries: submissionCount.value,
-         exportTime: new Date().toISOString(),
-         stats: quickStats,
-         distribution: distributionData,
-         totalValue: totalValue.value,
-       },
-       null,
-       2
-   );
-
-   const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-   const link = document.createElement("a");
-   link.setAttribute("href", dataUri);
-   link.setAttribute("download", `marketing-data-${new Date().toISOString().split("T")[0]}.json`);
-   document.body.appendChild(link);
-   link.click();
-@@ -861,50 +921,54 @@ onBeforeUnmount(() => {
-
- const provinceSearch = ref('');
- const provinceDropdownOpen = ref(false);
-
- const filteredProvinces = computed(() =>
-     provinces.value.filter(p =>
-         p.name.toLowerCase().includes(provinceSearch.value.toLowerCase())
-     )
- );
-
- function selectProvince(province) {
-   formData.area = province.name;
-   provinceSearch.value = province.name;
-   provinceDropdownOpen.value = false;
- }
-
- function closeProvinceDropdown() {
-   setTimeout(() => {
-     provinceDropdownOpen.value = false;
-     // If user didn't select, keep the last valid name
-     const selected = provinces.value.find(p => p.name === formData.area);
-     provinceSearch.value = selected ? selected.name : '';
-   }, 120);
- }
-
-+function toggleProvinceDropdown() {
-+  provinceDropdownOpen.value = !provinceDropdownOpen.value;
-+}
-+
- // Sync input when area changes (e.g. on clearForm)
- watch(() => formData.area, val => {
-   const selected = provinces.value.find(p => p.name === val);
-   provinceSearch.value = selected ? selected.name : '';
- });
-
- </script>
-
- <style scoped>
- /* ===== MODERN DASHBOARD STYLES ===== */
- .refined-dashboard {
-   min-height: 100vh;
-   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-   font-size: 14px;
-   line-height: 1.5;
-   color: #1e293b;
- }
-
- /* ===== HEADER ===== */
- .dashboard-header {
-   background: #ffffff;
-   border-bottom: 1px solid #e2e8f0;
-   padding: 1rem 0;
-   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-@@ -941,50 +1005,80 @@ watch(() => formData.area, val => {
-
- .dashboard-subtitle {
-   font-size: 0.875rem;
-   color: #64748b;
-   margin: 0;
- }
-
- .header-actions {
-   display: flex;
-   gap: 0.75rem;
- }
-
- /* ===== Icon Labels ===== */
- .icon-label {
-   display: inline-flex;
-   align-items: center;
-   justify-content: center;
-   width: 28px;
-   height: 28px;
-   border-radius: 8px;
-   margin-right: 8px;
-   color: white;
-   font-size: 14px;
- }
-
-+.required {
-+  color: #ef4444;
-+  margin-left: 4px;
-+}
-+
-+.select-like .form-control {
-+  padding-right: 2rem;
-+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-+}
-+
-+.select-like.open .form-control {
-+  border-color: #6366f1;
-+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-+}
-+
-+.select-caret {
-+  position: absolute;
-+  right: 12px;
-+  top: 50%;
-+  transform: translateY(-50%);
-+  color: #64748b;
-+  pointer-events: auto;
-+  transition: transform 0.2s ease, color 0.2s ease;
-+}
-+
-+.select-like.open .select-caret {
-+  transform: translateY(-50%) rotate(180deg);
-+  color: #4338ca;
-+}
-+
- /* ===== BUTTONS ===== */
- .btn {
-   padding: 0.5rem 1rem;
-   border-radius: 8px;
-   font-weight: 500;
-   font-size: 0.875rem;
-   border: 1px solid transparent;
-   cursor: pointer;
-   transition: all 0.2s ease;
-   display: inline-flex;
-   align-items: center;
-   gap: 0.5rem;
- }
-
- .btn-sm {
-   padding: 0.375rem 0.75rem;
-   font-size: 0.8125rem;
- }
-
- .btn-outline {
-   background: white;
-   border-color: #e2e8f0;
-   color: #64748b;
- }
-
-@@ -1609,26 +1703,26 @@ watch(() => formData.area, val => {
-     gap: 1rem;
-   }
-
-   .type-buttons {
-     grid-template-columns: 1fr;
-   }
-
-   .activity-filter {
-     width: 100%;
-     justify-content: space-between;
-   }
- }
-
- .chart-graphic canvas {
-   width: 100% !important;
-   height: 100% !important;
- }
- .province-dropdown {
-   box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-   font-size: 0.95em;
- }
- .province-dropdown li:hover {
-   background: #f1f5f9;
- }
-
--</style>
-\ No newline at end of file
-+</style>

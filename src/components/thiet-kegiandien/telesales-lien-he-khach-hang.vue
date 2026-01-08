@@ -1,0 +1,1908 @@
+<template>
+  <div id="app" class="telesale-app">
+    <!-- Header -->
+    <header class="app-header">
+      <h1><i class="fas fa-phone-alt"></i> Hệ Thống Telesale</h1>
+      <div class="user-info">
+        <span>Nhân viên: Nguyễn Văn A</span>
+        <button class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i> Đăng xuất
+        </button>
+      </div>
+    </header>
+
+    <div class="main-container">
+      <!-- Sidebar với thống kê -->
+      <aside class="sidebar">
+        <div class="stats-widget">
+          <h3><i class="fas fa-chart-bar"></i> Thống kê hôm nay</h3>
+          <div class="stat-item">
+            <span class="stat-label">Số cuộc gọi:</span>
+            <span class="stat-value">{{ todayStats.totalCalls }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Thành công:</span>
+            <span class="stat-value success">{{ todayStats.successfulCalls }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Không liên lạc:</span>
+            <span class="stat-value failed">{{ todayStats.unreachableCalls }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Sai số:</span>
+            <span class="stat-value warning">{{ todayStats.wrongNumberCalls }}</span>
+          </div>
+          <div class="progress-container">
+            <div class="progress-label">Tiến độ ngày</div>
+            <div class="progress-bar">
+              <div
+                  class="progress-fill"
+                  :style="{ width: (todayStats.apiCalls / 40) * 100 + '%' }"
+              ></div>
+            </div>
+            <div class="progress-text">{{ todayStats.apiCalls }}/40 cuộc gọi</div>
+          </div>
+        </div>
+
+        <!-- Biểu đồ tổng hợp -->
+        <div class="chart-widget">
+          <h3><i class="fas fa-chart-pie"></i> Tổng hợp trạng thái</h3>
+          <div class="chart-container">
+            <canvas ref="summaryChart"></canvas>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Nội dung chính -->
+      <main class="content-area">
+        <!-- Thanh điều khiển -->
+        <div class="control-bar">
+          <div class="view-controls">
+            <button
+                class="tab-btn"
+                :class="{ active: activeTab === 'new' }"
+                @click="activeTab = 'new'"
+            >
+              <i class="fas fa-user-plus"></i> Vừa tiếp nhận ({{ newCustomers.length }})
+            </button>
+            <button
+                class="tab-btn"
+                :class="{ active: activeTab === 'contacted' }"
+                @click="activeTab = 'contacted'"
+            >
+              <i class="fas fa-user-check"></i> Đã liên hệ ({{ contactedCustomers.length }})
+            </button>
+          </div>
+
+          <div class="filter-controls">
+            <div class="filter-group">
+              <label for="timeRange">Thống kê:</label>
+              <select id="timeRange" v-model="selectedTimeRange" @change="updateChart">
+                <option value="year">Theo năm</option>
+                <option value="month">Theo tháng</option>
+              </select>
+            </div>
+
+            <div class="filter-group" v-if="selectedTimeRange === 'year'">
+              <label for="yearSelect">Năm:</label>
+              <select id="yearSelect" v-model="selectedYear" @change="updateChart">
+                <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
+              </select>
+            </div>
+
+            <div class="filter-group" v-if="selectedTimeRange === 'month'">
+              <label for="monthSelect">Tháng:</label>
+              <select id="monthSelect" v-model="selectedMonth" @change="updateChart">
+                <option v-for="(month, index) in months" :key="index" :value="index + 1">{{ month }}</option>
+              </select>
+            </div>
+
+            <button class="refresh-btn" @click="refreshData">
+              <i class="fas fa-sync-alt"></i> Làm mới
+            </button>
+          </div>
+        </div>
+
+        <!-- Biểu đồ đường -->
+        <div class="chart-container-large">
+          <h3><i class="fas fa-chart-line"></i> Biểu đồ cuộc gọi theo {{ selectedTimeRange === 'year' ? 'năm' : 'tháng' }}</h3>
+          <div class="chart-wrapper">
+            <canvas ref="lineChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Danh sách khách hàng -->
+        <div class="customer-section">
+          <div class="section-header">
+            <h3>
+              <i class="fas fa-users"></i>
+              {{ activeTab === 'new' ? 'Khách hàng vừa tiếp nhận' : 'Khách hàng đã liên hệ' }}
+            </h3>
+            <div class="search-box">
+              <input
+                  type="text"
+                  v-model="searchQuery"
+                  placeholder="Tìm kiếm theo tên, số điện thoại..."
+              />
+              <i class="fas fa-search"></i>
+            </div>
+          </div>
+
+          <!-- Danh sách khách hàng -->
+          <div class="customer-list">
+            <div
+                v-for="customer in filteredCustomers"
+                :key="customer.id"
+                class="customer-card"
+                :class="{ selected: selectedCustomer && selectedCustomer.id === customer.id }"
+                @click="selectCustomer(customer)"
+            >
+              <div class="customer-avatar">
+                <img
+                    :src="customer.avatar || 'https://via.placeholder.com/50'"
+                    :alt="customer.name"
+                />
+                <span :class="`customer-type ${customer.type}`">{{ getCustomerTypeLabel(customer.type) }}</span>
+              </div>
+
+              <div class="customer-info">
+                <h4 class="customer-name">{{ customer.name }}</h4>
+                <p class="customer-phone">
+                  <i class="fas fa-phone"></i> {{ customer.phone }}
+                </p>
+                <div class="customer-location">
+                  <span class="location-current">
+                    <i class="fas fa-map-marker-alt"></i> {{ customer.province }}
+                  </span>
+                  <span v-if="customer.oldProvince" class="location-old">
+                    (Cũ: {{ customer.oldProvince }})
+                  </span>
+                </div>
+                <div class="customer-notes-preview" v-if="customer.notes && customer.notes.length > 0">
+                  <i class="fas fa-sticky-note"></i>
+                  {{ getLastNotePreview(customer.notes) }}
+                </div>
+                <div class="customer-tags">
+                  <span
+                      v-for="tag in customer.tags"
+                      :key="tag"
+                      class="customer-tag"
+                      :class="tag"
+                  >
+                    {{ getTagLabel(tag) }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="customer-actions">
+                <button
+                    class="call-btn"
+                    @click.stop="callCustomer(customer)"
+                    :disabled="isCalling"
+                >
+                  <i class="fas fa-phone"></i> Gọi
+                </button>
+                <div class="call-status" v-if="customer.lastCall">
+                  <i class="fas fa-clock"></i>
+                  {{ formatTime(customer.lastCall) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Panel chi tiết khách hàng -->
+      <div class="detail-panel" v-if="selectedCustomer">
+        <div class="detail-header">
+          <h3>Chi tiết khách hàng</h3>
+          <button class="close-btn" @click="selectedCustomer = null">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="detail-content">
+          <div class="customer-detail-header">
+            <img
+                :src="selectedCustomer.avatar || 'https://via.placeholder.com/80'"
+                :alt="selectedCustomer.name"
+                class="detail-avatar"
+            />
+            <div class="detail-name-info">
+              <h4>{{ selectedCustomer.name }}</h4>
+              <p class="detail-phone">{{ selectedCustomer.phone }}</p>
+              <p class="detail-type">
+                <span :class="`type-badge ${selectedCustomer.type}`">
+                  {{ getCustomerTypeLabel(selectedCustomer.type) }}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h5><i class="fas fa-map-marked-alt"></i> Thông tin địa chỉ</h5>
+            <div class="detail-row">
+              <span class="detail-label">Tỉnh hiện tại:</span>
+              <span class="detail-value">{{ selectedCustomer.province }}</span>
+            </div>
+            <div class="detail-row" v-if="selectedCustomer.oldProvince">
+              <span class="detail-label">Tỉnh cũ:</span>
+              <span class="detail-value">{{ selectedCustomer.oldProvince }}</span>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h5><i class="fas fa-tags"></i> Đánh dấu khách hàng</h5>
+            <div class="tag-selector">
+              <button
+                  v-for="tag in availableTags"
+                  :key="tag.value"
+                  class="tag-option"
+                  :class="{ active: selectedCustomer.tags.includes(tag.value) }"
+                  @click="toggleCustomerTag(tag.value)"
+              >
+                {{ tag.label }}
+              </button>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h5><i class="fas fa-sticky-note"></i> Ghi chú cuộc gọi</h5>
+            <div class="notes-container">
+              <div class="notes-list" v-if="selectedCustomer.notes && selectedCustomer.notes.length > 0">
+                <div
+                    v-for="(note, index) in selectedCustomer.notes"
+                    :key="index"
+                    class="note-item"
+                >
+                  <div class="note-header">
+                    <span class="note-date">{{ formatNoteDate(note.date) }}</span>
+                    <span class="note-time">{{ note.time }}</span>
+                  </div>
+                  <p class="note-content">{{ note.content }}</p>
+                </div>
+              </div>
+              <div class="no-notes" v-else>
+                Chưa có ghi chú nào
+              </div>
+            </div>
+
+            <div class="add-note-form">
+              <textarea
+                  v-model="newNote"
+                  placeholder="Thêm ghi chú cuộc gọi..."
+                  rows="3"
+              ></textarea>
+              <button
+                  class="add-note-btn"
+                  @click="addNote"
+                  :disabled="!newNote.trim()"
+              >
+                <i class="fas fa-plus-circle"></i> Thêm ghi chú
+              </button>
+            </div>
+          </div>
+
+          <div class="detail-actions">
+            <button
+                class="action-btn success"
+                @click="markCustomerStatus('success')"
+            >
+              <i class="fas fa-calendar-check"></i> Đặt lịch thành công
+            </button>
+            <button
+                class="action-btn move-btn"
+                @click="moveToContacted"
+            >
+              <i class="fas fa-exchange-alt"></i> Chuyển sang đã liên hệ
+            </button>
+            <button
+                class="action-btn danger"
+                @click="markCustomerStatus('wrong_number')"
+            >
+              <i class="fas fa-times-circle"></i> Đánh dấu sai số
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal cuộc gọi -->
+    <div class="call-modal" v-if="isCalling">
+      <div class="call-modal-content">
+        <h3><i class="fas fa-phone-volume"></i> Đang gọi...</h3>
+        <div class="call-info">
+          <p class="call-customer-name">{{ callCustomerName }}</p>
+          <p class="call-customer-phone">{{ callCustomerPhone }}</p>
+          <div class="call-timer">
+            <i class="fas fa-clock"></i> 00:{{ callTimer.toString().padStart(2, '0') }}
+          </div>
+        </div>
+        <div class="call-actions">
+          <button class="call-action-btn end-call" @click="endCall">
+            <i class="fas fa-phone-slash"></i> Kết thúc
+          </button>
+          <button class="call-action-btn add-note-call" @click="showNoteAfterCall = true">
+            <i class="fas fa-sticky-note"></i> Thêm ghi chú
+          </button>
+        </div>
+
+        <div class="call-note-section" v-if="showNoteAfterCall">
+          <textarea
+              v-model="callNote"
+              placeholder="Ghi chú sau cuộc gọi..."
+              rows="3"
+          ></textarea>
+          <div class="call-note-actions">
+            <button class="call-note-btn save-note" @click="saveCallNote">
+              <i class="fas fa-save"></i> Lưu ghi chú
+            </button>
+            <button class="call-note-btn cancel-note" @click="cancelCallNote">
+              <i class="fas fa-times"></i> Bỏ qua
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import Chart from 'chart.js/auto';
+
+export default {
+  name: 'TelesaleApp',
+  data() {
+    return {
+      activeTab: 'new',
+      selectedCustomer: null,
+      isCalling: false,
+      callCustomerName: '',
+      callCustomerPhone: '',
+      callTimer: 0,
+      callInterval: null,
+      showNoteAfterCall: false,
+      callNote: '',
+      newNote: '',
+      searchQuery: '',
+      selectedTimeRange: 'month',
+      selectedYear: new Date().getFullYear(),
+      selectedMonth: new Date().getMonth() + 1,
+      years: [2022, 2023, 2024, 2025],
+      months: [
+        'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+        'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
+      ],
+      todayStats: {
+        totalCalls: 28,
+        apiCalls: 28,
+        successfulCalls: 12,
+        unreachableCalls: 8,
+        wrongNumberCalls: 3
+      },
+      lineChartInstance: null,
+      summaryChartInstance: null,
+      availableTags: [
+        { value: 'potential_7', label: 'Khách tiềm năng 7 ngày' },
+        { value: 'potential_14', label: 'Khách tiềm năng 14 ngày' },
+        { value: 'success', label: 'Thành công (đặt lịch)' },
+        { value: 'wrong_number', label: 'Sai số' },
+        { value: 'unreachable', label: 'Không liên lạc được' },
+        { value: 'care', label: 'Chăm sóc' }
+      ],
+      newCustomers: [
+        {
+          id: 1,
+          name: 'Nguyễn Văn An',
+          phone: '0912345678',
+          province: 'Hà Nội',
+          oldProvince: 'Hải Phòng',
+          avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+          type: 'owner',
+          notes: [
+            { date: '2024-03-15', time: '14:30', content: 'Khách quan tâm đến chính sách ưu đãi' },
+            { date: '2024-03-16', time: '10:15', content: 'Hẹn gọi lại vào chiều thứ 6' }
+          ],
+          tags: ['potential_7'],
+          lastCall: '2024-03-16T10:15:00'
+        },
+        {
+          id: 2,
+          name: 'Trần Thị Bình',
+          phone: '0923456789',
+          province: 'TP. Hồ Chí Minh',
+          oldProvince: null,
+          avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+          type: 'relative',
+          notes: [
+            { date: '2024-03-17', time: '09:20', content: 'Khách hỏi về thời gian làm việc' }
+          ],
+          tags: [],
+          lastCall: '2024-03-17T09:20:00'
+        },
+        {
+          id: 3,
+          name: 'Lê Văn Cường',
+          phone: '0934567890',
+          province: 'Đà Nẵng',
+          oldProvince: 'Quảng Nam',
+          avatar: 'https://randomuser.me/api/portraits/men/67.jpg',
+          type: 'broker',
+          notes: [],
+          tags: ['care'],
+          lastCall: null
+        },
+        {
+          id: 4,
+          name: 'Phạm Thị Dung',
+          phone: '0945678901',
+          province: 'Hải Phòng',
+          oldProvince: null,
+          avatar: 'https://randomuser.me/api/portraits/women/33.jpg',
+          type: 'owner',
+          notes: [
+            { date: '2024-03-16', time: '16:45', content: 'Khách bận, hẹn gọi lại sáng thứ 2' }
+          ],
+          tags: ['potential_14'],
+          lastCall: '2024-03-16T16:45:00'
+        },
+        {
+          id: 5,
+          name: 'Hoàng Văn Em',
+          phone: '0956789012',
+          province: 'Cần Thơ',
+          oldProvince: 'Vĩnh Long',
+          avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
+          type: 'relative',
+          notes: [],
+          tags: [],
+          lastCall: null
+        }
+      ],
+      contactedCustomers: [
+        {
+          id: 6,
+          name: 'Vũ Thị Phương',
+          phone: '0967890123',
+          province: 'Bình Dương',
+          oldProvince: 'Đồng Nai',
+          avatar: 'https://randomuser.me/api/portraits/women/55.jpg',
+          type: 'owner',
+          notes: [
+            { date: '2024-03-10', time: '11:30', content: 'Đã đặt lịch thành công ngày 20/3' },
+            { date: '2024-03-15', time: '15:20', content: 'Xác nhận lại lịch hẹn' }
+          ],
+          tags: ['success', 'care'],
+          lastCall: '2024-03-15T15:20:00'
+        },
+        {
+          id: 7,
+          name: 'Đặng Văn Quân',
+          phone: '0978901234',
+          province: 'Hà Nội',
+          oldProvince: null,
+          avatar: 'https://randomuser.me/api/portraits/men/45.jpg',
+          type: 'broker',
+          notes: [
+            { date: '2024-03-14', time: '14:10', content: 'Số điện thoại không liên lạc được' }
+          ],
+          tags: ['unreachable'],
+          lastCall: '2024-03-14T14:10:00'
+        },
+        {
+          id: 8,
+          name: 'Bùi Thị Hà',
+          phone: '0989012345',
+          province: 'TP. Hồ Chí Minh',
+          oldProvince: 'Long An',
+          avatar: 'https://randomuser.me/api/portraits/women/25.jpg',
+          type: 'owner',
+          notes: [
+            { date: '2024-03-12', time: '09:45', content: 'Sai số, không phải khách hàng' }
+          ],
+          tags: ['wrong_number'],
+          lastCall: '2024-03-12T09:45:00'
+        }
+      ],
+      chartData: {
+        labels: [],
+        datasets: []
+      }
+    };
+  },
+  computed: {
+    filteredCustomers() {
+      const customers = this.activeTab === 'new' ? this.newCustomers : this.contactedCustomers;
+
+      if (!this.searchQuery.trim()) {
+        return customers;
+      }
+
+      const query = this.searchQuery.toLowerCase();
+      return customers.filter(customer =>
+          customer.name.toLowerCase().includes(query) ||
+          customer.phone.includes(query) ||
+          customer.province.toLowerCase().includes(query) ||
+          (customer.oldProvince && customer.oldProvince.toLowerCase().includes(query))
+      );
+    }
+  },
+  mounted() {
+    this.initCharts();
+  },
+  methods: {
+    // Khởi tạo biểu đồ
+    initCharts() {
+      this.initLineChart();
+      this.initSummaryChart();
+    },
+
+    // Khởi tạo biểu đồ đường
+    initLineChart() {
+      const ctx = this.$refs.lineChart;
+      if (!ctx) return;
+
+      // Xóa biểu đồ cũ nếu tồn tại
+      if (this.lineChartInstance) {
+        this.lineChartInstance.destroy();
+      }
+
+      // Tạo dữ liệu mẫu cho biểu đồ
+      const labels = this.selectedTimeRange === 'year'
+          ? this.months
+          : Array.from({length: 30}, (_, i) => `Ngày ${i+1}`);
+
+      const datasets = [
+        {
+          label: 'Thành công',
+          data: this.generateRandomData(labels.length, 5, 20),
+          borderColor: '#4CAF50',
+          backgroundColor: 'rgba(76, 175, 80, 0.1)',
+          tension: 0.4
+        },
+        {
+          label: 'Không liên lạc được',
+          data: this.generateRandomData(labels.length, 2, 15),
+          borderColor: '#f44336',
+          backgroundColor: 'rgba(244, 67, 54, 0.1)',
+          tension: 0.4
+        },
+        {
+          label: 'Sai số',
+          data: this.generateRandomData(labels.length, 1, 8),
+          borderColor: '#FF9800',
+          backgroundColor: 'rgba(255, 152, 0, 0.1)',
+          tension: 0.4
+        },
+        {
+          label: 'Tiềm năng 7 ngày',
+          data: this.generateRandomData(labels.length, 3, 18),
+          borderColor: '#2196F3',
+          backgroundColor: 'rgba(33, 150, 243, 0.1)',
+          tension: 0.4
+        },
+        {
+          label: 'Tiềm năng 14 ngày',
+          data: this.generateRandomData(labels.length, 2, 12),
+          borderColor: '#9C27B0',
+          backgroundColor: 'rgba(156, 39, 176, 0.1)',
+          tension: 0.4
+        }
+      ];
+
+      this.lineChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Số lượng cuộc gọi'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: this.selectedTimeRange === 'year' ? 'Tháng' : 'Ngày'
+              }
+            }
+          }
+        }
+      });
+    },
+
+    // Khởi tạo biểu đồ tổng hợp
+    initSummaryChart() {
+      const ctx = this.$refs.summaryChart;
+      if (!ctx) return;
+
+      // Xóa biểu đồ cũ nếu tồn tại
+      if (this.summaryChartInstance) {
+        this.summaryChartInstance.destroy();
+      }
+
+      this.summaryChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Thành công', 'Tiềm năng 7 ngày', 'Tiềm năng 14 ngày', 'Không liên lạc', 'Sai số', 'Chăm sóc'],
+          datasets: [{
+            data: [12, 8, 5, 10, 4, 7],
+            backgroundColor: [
+              '#4CAF50',
+              '#2196F3',
+              '#9C27B0',
+              '#f44336',
+              '#FF9800',
+              '#FFC107'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                boxWidth: 12,
+                font: {
+                  size: 10
+                }
+              }
+            }
+          }
+        }
+      });
+    },
+
+    // Tạo dữ liệu ngẫu nhiên cho biểu đồ
+    generateRandomData(count, min, max) {
+      return Array.from({length: count}, () =>
+          Math.floor(Math.random() * (max - min + 1)) + min
+      );
+    },
+
+    // Cập nhật biểu đồ khi thay đổi thời gian
+    updateChart() {
+      this.initLineChart();
+    },
+
+    // Làm mới dữ liệu
+    refreshData() {
+      // Trong thực tế, đây sẽ là nơi gọi API để lấy dữ liệu mới
+      this.todayStats.apiCalls = Math.min(40, this.todayStats.apiCalls + 5);
+      this.todayStats.totalCalls += 5;
+      this.todayStats.successfulCalls += 2;
+
+      // Khởi tạo lại biểu đồ
+      this.initCharts();
+    },
+
+    // Chọn khách hàng
+    selectCustomer(customer) {
+      this.selectedCustomer = customer;
+      this.newNote = '';
+    },
+
+    // Gọi khách hàng
+    callCustomer(customer) {
+      this.isCalling = true;
+      this.callCustomerName = customer.name;
+      this.callCustomerPhone = customer.phone;
+      this.callTimer = 0;
+      this.callNote = '';
+      this.showNoteAfterCall = false;
+
+      // Bắt đầu đếm thời gian cuộc gọi
+      this.callInterval = setInterval(() => {
+        this.callTimer++;
+      }, 1000);
+    },
+
+    // Kết thúc cuộc gọi
+    endCall() {
+      clearInterval(this.callInterval);
+      this.isCalling = false;
+      this.showNoteAfterCall = false;
+
+      // Cập nhật thời gian cuộc gọi cuối cùng
+      if (this.selectedCustomer) {
+        this.selectedCustomer.lastCall = new Date().toISOString();
+      }
+    },
+
+    // Lưu ghi chú cuộc gọi
+    saveCallNote() {
+      if (this.callNote.trim() && this.selectedCustomer) {
+        const now = new Date();
+        const note = {
+          date: now.toISOString().split('T')[0],
+          time: now.toTimeString().slice(0, 5),
+          content: this.callNote
+        };
+
+        if (!this.selectedCustomer.notes) {
+          this.selectedCustomer.notes = [];
+        }
+
+        this.selectedCustomer.notes.unshift(note);
+        this.callNote = '';
+        this.showNoteAfterCall = false;
+        this.endCall();
+      }
+    },
+
+    // Hủy ghi chú cuộc gọi
+    cancelCallNote() {
+      this.callNote = '';
+      this.showNoteAfterCall = false;
+      this.endCall();
+    },
+
+    // Thêm ghi chú mới
+    addNote() {
+      if (this.newNote.trim() && this.selectedCustomer) {
+        const now = new Date();
+        const note = {
+          date: now.toISOString().split('T')[0],
+          time: now.toTimeString().slice(0, 5),
+          content: this.newNote
+        };
+
+        if (!this.selectedCustomer.notes) {
+          this.selectedCustomer.notes = [];
+        }
+
+        this.selectedCustomer.notes.unshift(note);
+        this.newNote = '';
+      }
+    },
+
+    // Đánh dấu trạng thái khách hàng
+    markCustomerStatus(status) {
+      if (!this.selectedCustomer) return;
+
+      // Xóa các tag cũ thuộc nhóm trạng thái
+      const statusTags = ['potential_7', 'potential_14', 'success', 'wrong_number', 'unreachable'];
+      this.selectedCustomer.tags = this.selectedCustomer.tags.filter(
+          tag => !statusTags.includes(tag)
+      );
+
+      // Thêm tag mới
+      if (!this.selectedCustomer.tags.includes(status)) {
+        this.selectedCustomer.tags.push(status);
+      }
+
+      // Nếu là thành công, chuyển sang tab đã liên hệ
+      if (status === 'success') {
+        this.moveToContacted();
+      }
+    },
+
+    // Chuyển khách hàng sang tab đã liên hệ
+    moveToContacted() {
+      if (!this.selectedCustomer) return;
+
+      const index = this.newCustomers.findIndex(c => c.id === this.selectedCustomer.id);
+      if (index !== -1) {
+        const customer = this.newCustomers.splice(index, 1)[0];
+        this.contactedCustomers.unshift(customer);
+        this.selectedCustomer = null;
+        this.activeTab = 'contacted';
+      }
+    },
+
+    // Chuyển đổi tag khách hàng
+    toggleCustomerTag(tag) {
+      if (!this.selectedCustomer) return;
+
+      const index = this.selectedCustomer.tags.indexOf(tag);
+      if (index === -1) {
+        this.selectedCustomer.tags.push(tag);
+      } else {
+        this.selectedCustomer.tags.splice(index, 1);
+      }
+    },
+
+    // Lấy nhãn loại khách hàng
+    getCustomerTypeLabel(type) {
+      const typeLabels = {
+        'broker': 'Môi giới',
+        'owner': 'Chủ nhà',
+        'relative': 'Người thân'
+      };
+      return typeLabels[type] || type;
+    },
+
+    // Lấy nhãn tag
+    getTagLabel(tag) {
+      const tagObj = this.availableTags.find(t => t.value === tag);
+      return tagObj ? tagObj.label : tag;
+    },
+
+    // Lấy xem trước ghi chú cuối cùng
+    getLastNotePreview(notes) {
+      if (!notes || notes.length === 0) return 'Chưa có ghi chú';
+      const lastNote = notes[0];
+      const preview = lastNote.content.length > 50
+          ? lastNote.content.substring(0, 50) + '...'
+          : lastNote.content;
+      return `${lastNote.time} - ${preview}`;
+    },
+
+    // Định dạng thời gian
+    formatTime(isoString) {
+      if (!isoString) return 'Chưa gọi';
+      const date = new Date(isoString);
+      return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    },
+
+    // Định dạng ngày ghi chú
+    formatNoteDate(isoString) {
+      const date = new Date(isoString);
+      return date.toLocaleDateString('vi-VN');
+    }
+  }
+};
+</script>
+
+<style scoped>
+/* Biến màu sắc */
+:root {
+  --primary-color: #3f51b5;
+  --secondary-color: #2196f3;
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --danger-color: #f44336;
+  --light-color: #f5f5f5;
+  --dark-color: #333;
+  --gray-color: #9e9e9e;
+  --border-color: #e0e0e0;
+  --sidebar-width: 280px;
+  --detail-panel-width: 350px;
+}
+
+/* Reset và kiểu cơ bản */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f2f5;
+  color: #333;
+}
+
+.telesale-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Header */
+.app-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  padding: 15px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.app-header h1 {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.app-header h1 i {
+  margin-right: 10px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logout-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.logout-btn i {
+  margin-right: 5px;
+}
+
+/* Main container */
+.main-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: white;
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.stats-widget, .chart-widget {
+  background-color: white;
+  border-radius: 8px;
+  padding: 18px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.stats-widget h3, .chart-widget h3 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.stat-value {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.stat-value.success {
+  color: var(--success-color);
+}
+
+.stat-value.failed {
+  color: var(--danger-color);
+}
+
+.stat-value.warning {
+  color: var(--warning-color);
+}
+
+.progress-container {
+  margin-top: 20px;
+}
+
+.progress-label {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.progress-bar {
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 12px;
+  text-align: center;
+  margin-top: 5px;
+  color: #777;
+}
+
+.chart-container {
+  height: 200px;
+  position: relative;
+}
+
+/* Content area */
+.content-area {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Control bar */
+.control-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.view-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  background-color: #f0f0f0;
+  color: #666;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.tab-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.tab-btn:hover:not(.active) {
+  background-color: #e0e0e0;
+}
+
+.filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-group label {
+  font-size: 14px;
+  color: #666;
+}
+
+.filter-group select {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: white;
+  font-size: 14px;
+}
+
+.refresh-btn {
+  padding: 8px 15px;
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.3s;
+}
+
+.refresh-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* Chart container */
+.chart-container-large {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.chart-container-large h3 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-wrapper {
+  height: 300px;
+  position: relative;
+}
+
+/* Customer section */
+.customer-section {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-header h3 {
+  font-size: 18px;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-box {
+  position: relative;
+  width: 300px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 10px 15px 10px 40px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  font-size: 14px;
+}
+
+.search-box i {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+}
+
+/* Customer list */
+.customer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.customer-card {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: white;
+}
+
+.customer-card:hover {
+  border-color: var(--secondary-color);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+.customer-card.selected {
+  border-color: var(--primary-color);
+  background-color: #f0f4ff;
+}
+
+.customer-avatar {
+  position: relative;
+  margin-right: 15px;
+}
+
+.customer-avatar img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.customer-type {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.customer-type.broker {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.customer-type.owner {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.customer-type.relative {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.customer-info {
+  flex: 1;
+}
+
+.customer-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.customer-phone {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.customer-location {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 8px;
+  display: flex;
+  gap: 10px;
+}
+
+.location-current {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.location-old {
+  font-style: italic;
+}
+
+.customer-notes-preview {
+  font-size: 13px;
+  color: #666;
+  background-color: #f9f9f9;
+  padding: 5px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.customer-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.customer-tag {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.customer-tag.potential_7 {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.customer-tag.potential_14 {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.customer-tag.success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.customer-tag.wrong_number {
+  background-color: #fff3e0;
+  color: #ef6c00;
+}
+
+.customer-tag.unreachable {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.customer-tag.care {
+  background-color: #fff8e1;
+  color: #f9a825;
+}
+
+.customer-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.call-btn {
+  padding: 8px 20px;
+  background-color: var(--success-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.3s;
+}
+
+.call-btn:hover:not(:disabled) {
+  background-color: #3d8b40;
+}
+
+.call-btn:disabled {
+  background-color: #a5d6a7;
+  cursor: not-allowed;
+}
+
+.call-status {
+  font-size: 12px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Detail panel */
+.detail-panel {
+  width: var(--detail-panel-width);
+  background-color: white;
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.detail-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-header h3 {
+  font-size: 18px;
+  color: var(--primary-color);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.close-btn:hover {
+  color: var(--danger-color);
+}
+
+.detail-content {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.customer-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.detail-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.detail-name-info h4 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.detail-phone {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.type-badge {
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.type-badge.broker {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.type-badge.owner {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.type-badge.relative {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.detail-section h5 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.detail-label {
+  color: #666;
+  font-size: 14px;
+}
+
+.detail-value {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.tag-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-option {
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  background-color: white;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tag-option:hover {
+  background-color: #f5f5f5;
+}
+
+.tag-option.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.notes-container {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.note-item {
+  padding: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.note-item:last-child {
+  border-bottom: none;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 5px;
+}
+
+.note-content {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.no-notes {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  padding: 20px;
+  font-size: 14px;
+}
+
+.add-note-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  margin-bottom: 10px;
+}
+
+.add-note-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.3s;
+}
+
+.add-note-btn:hover:not(:disabled) {
+  background-color: #0d8bf2;
+}
+
+.add-note-btn:disabled {
+  background-color: #90caf9;
+  cursor: not-allowed;
+}
+
+.detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.action-btn {
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.action-btn.success {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.action-btn.success:hover {
+  background-color: #3d8b40;
+}
+
+.action-btn.move-btn {
+  background-color: #9c27b0;
+  color: white;
+}
+
+.action-btn.move-btn:hover {
+  background-color: #7b1fa2;
+}
+
+.action-btn.danger {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.action-btn.danger:hover {
+  background-color: #d32f2f;
+}
+
+/* Call modal */
+.call-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.call-modal-content {
+  background-color: white;
+  border-radius: 12px;
+  padding: 30px;
+  width: 400px;
+  max-width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.call-modal-content h3 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: var(--primary-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.call-info {
+  margin-bottom: 25px;
+}
+
+.call-customer-name {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.call-customer-phone {
+  font-size: 20px;
+  color: var(--secondary-color);
+  margin-bottom: 15px;
+}
+
+.call-timer {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--success-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.call-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.call-action-btn {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.call-action-btn.end-call {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.call-action-btn.end-call:hover {
+  background-color: #d32f2f;
+}
+
+.call-action-btn.add-note-call {
+  background-color: var(--warning-color);
+  color: white;
+}
+
+.call-action-btn.add-note-call:hover {
+  background-color: #f57c00;
+}
+
+.call-note-section {
+  text-align: left;
+}
+
+.call-note-section textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  margin-bottom: 15px;
+}
+
+.call-note-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.call-note-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.call-note-btn.save-note {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.call-note-btn.save-note:hover {
+  background-color: #3d8b40;
+}
+
+.call-note-btn.cancel-note {
+  background-color: #9e9e9e;
+  color: white;
+}
+
+.call-note-btn.cancel-note:hover {
+  background-color: #757575;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .sidebar {
+    width: 250px;
+  }
+
+  .detail-panel {
+    width: 320px;
+  }
+}
+
+@media (max-width: 992px) {
+  .main-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+  }
+
+  .stats-widget, .chart-widget {
+    min-width: 250px;
+  }
+
+  .detail-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    z-index: 100;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (max-width: 768px) {
+  .control-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .filter-controls {
+    flex-wrap: wrap;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .customer-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .customer-avatar {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .customer-actions {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+}
+</style>
