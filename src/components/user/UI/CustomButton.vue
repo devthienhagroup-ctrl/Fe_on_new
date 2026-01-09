@@ -66,21 +66,21 @@ const emit = defineEmits(['click'])
 
 const variantClasses = {
   gradient: {
-    blue: 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white',
-    purple: 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white',
-    teal: 'bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white',
+    blue: 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-slate-50',
+    purple: 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-slate-50',
+    teal: 'bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-slate-50',
     white: 'bg-gradient-to-r from-white to-slate-200 hover:from-slate-100 hover:to-slate-300 text-slate-900'
   },
   outline: {
-    blue: 'border border-blue-500 text-blue-400 hover:bg-blue-600 hover:text-white',
-    purple: 'border border-purple-500 text-purple-400 hover:bg-purple-600 hover:text-white',
-    teal: 'border border-teal-500 text-teal-400 hover:bg-teal-600 hover:text-white',
-    white: 'border border-white text-white hover:bg-white hover:text-slate-900'
+    blue: 'border border-blue-500 text-blue-400 hover:bg-blue-600 hover:text-slate-50',
+    purple: 'border border-purple-500 text-purple-400 hover:bg-purple-600 hover:text-slate-50',
+    teal: 'border border-teal-500 text-teal-400 hover:bg-teal-600 hover:text-slate-50',
+    white: 'border border-white text-slate-50 hover:bg-white hover:text-slate-900'
   },
   fill: {
-    blue: 'bg-blue-600 hover:bg-blue-500 text-white',
-    purple: 'bg-purple-600 hover:bg-purple-500 text-white',
-    teal: 'bg-teal-600 hover:bg-teal-500 text-white',
+    blue: 'bg-blue-600 hover:bg-blue-500 text-slate-50',
+    purple: 'bg-purple-600 hover:bg-purple-500 text-slate-50',
+    teal: 'bg-teal-600 hover:bg-teal-500 text-slate-50',
     white: 'bg-white hover:bg-slate-100 text-slate-900'
   }
 }
@@ -112,3 +112,12 @@ const handleClick = (event) => {
   emit('click', event)
 }
 </script>
+
+<style scoped>
+
+.py-4 {
+  padding-top: 1rem!important;
+  padding-bottom: 1rem!important;
+}
+
+</style>

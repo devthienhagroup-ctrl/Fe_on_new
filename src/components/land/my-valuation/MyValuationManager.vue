@@ -25,7 +25,7 @@
           <div v-if="viewMode === 'list'" key="list">
             <nav class="border-bottom px-3 px-md-4 bg-white">
               <ul class="nav nav-underline valuation-tabs gap-1 gap-md-2 flex-nowrap overflow-auto py-2 py-md-3">
-                <li v-for="tab in tabs" :key="tab.key" class="nav-item">
+                <li v-for="tab in filteredTabs" :key="tab.key" class="nav-item">
                   <button
                       type="button"
                       class="nav-link d-flex align-items-center gap-1 gap-md-2 px-2 px-md-3 py-2 rounded-pill fw-semibold small"
@@ -1677,6 +1677,34 @@ import {useRouter} from "vue-router";
 
 
 import AppointmentModal from "./components/AppointmentModal.vue"
+
+// Thêm import useRoute
+import {useRoute} from "vue-router";
+
+// Trong script setup, thêm route
+const route = useRoute();
+
+// Thêm các biến và computed
+const hasOpenTabParam = computed(() => {
+  return route.query.openTab && ['yeu-cau', 'lich-su', 'tai-san'].includes(route.query.openTab);
+});
+
+const openTabValue = computed(() => {
+  return route.query.openTab || '';
+});
+
+// Mapping từ query param sang tab key
+const tabMapping = {
+  'yeu-cau': 'request',
+  'lich-su': 'results',
+  'tai-san': 'assets'
+};
+
+const mappedTabKey = computed(() => {
+  return tabMapping[openTabValue.value] || '';
+});
+
+
 
 const showModal = ref(false);
 const currentLandAssetId = ref(null);
@@ -3504,20 +3532,43 @@ function formatNumberWithSeparator(value) {
   return num.toLocaleString('vi-VN');
 }
 
+// Cập nhật onMounted để xử lý khi mới vào trang
 onMounted(async () => {
   const flag = localStorage.getItem("flag");
-  localStorage.removeItem("flag")
-  if( flag != null && flag ){
+  localStorage.removeItem("flag");
+  if (flag != null && flag) {
     const idR = localStorage.getItem("valuationReportId");
-    localStorage.removeItem("valuationReportId")
+    localStorage.removeItem("valuationReportId");
     viewMode.value = 'valuationDetail';
-    const valuation = { id: idR };
+    const valuation = {id: idR};
     await openValuationDetail(valuation);
   }
 
   await getViewLandAsset();
-})
 
+  // Xử lý openTab nếu có
+  if (route.query.openTab && tabMapping[route.query.openTab]) {
+    activeTab.value = tabMapping[route.query.openTab];
+  }
+});
+
+
+// Thêm watch để theo dõi thay đổi của query param
+watch(() => route.query.openTab, (newTab) => {
+  if (newTab && tabMapping[newTab]) {
+    activeTab.value = tabMapping[newTab];
+  }
+}, { immediate: true });
+
+// Thêm computed property cho tabs
+const filteredTabs = computed(() => {
+  if (hasOpenTabParam.value && mappedTabKey.value) {
+    // Chỉ hiển thị tab được chỉ định
+    return tabs.filter(tab => tab.key === mappedTabKey.value);
+  }
+  // Hiển thị tất cả các tab
+  return tabs;
+});
 
 </script>
 

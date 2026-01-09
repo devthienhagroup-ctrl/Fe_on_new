@@ -276,9 +276,10 @@
                 <label class="block text-sm font-medium text-slate-300 mb-1.5">Quyền sử dụng đất <span class="text-rose-500">*</span></label>
                 <select required v-model="searchForm.quyenSuDungDat"
                         class="w-full rounded-xl bg-slate-900/70 border border-white/10 px-4 py-3
-                     text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50">
-                  <option value="">{{ searchFormPlaceholders.quyenSuDungDat }}</option>
-                  <option v-for="option in landUseOptions" :key="option.value" :value="option.value">
+                 text-sm text-slate-50 focus:outline-none focus:ring-2 focus:ring-purple-500/50
+                 appearance-none">
+                  <option value="" disabled selected class="text-slate-500">Chọn loại quyền sử dụng</option>
+                  <option v-for="option in landUseOptions" :key="option.value" :value="option.value" class="text-white bg-slate-900">
                     {{ option.label }}
                   </option>
                 </select>
@@ -403,7 +404,7 @@
                     <p class="text-3xl font-bold text-white mt-1">
                       {{ searchResult.giaDeXuat }} tỷ VNĐ
                     </p>
-                    <p class="text-sm text-slate-300 mt-1">{{ searchResultSuggestedPrice.subtitle }}</p>
+                    <p class="text-sm text-slate-300 mt-1">{{ formattedSuggestedPriceSubtitle }}</p>
                   </div>
                   <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
                     <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -572,7 +573,7 @@
               <div class="flex items-center justify-center">
                 <img src="/imgs/logoTHG.png" alt="logo Thiên Hà Group" class="w-32 md:w-40 lg:w-48 mb-4"/>
               </div>
-              <h2 class="text-xl md:text-2xl lg:text-3xl font-extrabold text-white text-center lg:text-left">
+              <h2 class="text-xl md:text-2xl lg:text-2xl font-extrabold text-white text-center lg:text-left">
                 {{ contactTitle }}
               </h2>
               <p class="mt-3 text-slate-300/90 text-sm md:text-base text-center lg:text-left">
@@ -1241,7 +1242,9 @@ const searchResult = reactive({
   ngayBan: 0,
   giaDeXuat: 0,
   chenhLech: 0,
-  phanTram: 0
+  phanTram: 0,
+  minPrice: 0, // Thêm trường min
+  maxPrice: 0  // Thêm trường max
 });
 
 // Computed property cho chênh lệch giá
@@ -1262,7 +1265,14 @@ const progressWidth = computed(() => {
   return `${100 - searchResult.phanTram}%`;
 });
 
-// Hàm xử lý submit form - giữ nguyên logic cũ
+// Computed property để format subtitle với min-max
+const formattedSuggestedPriceSubtitle = computed(() => {
+  return searchResultSuggestedPrice.subtitle
+      .replace('{min}', searchResult.minPrice)
+      .replace('{max}', searchResult.maxPrice);
+});
+
+// Hàm xử lý submit form - đã thêm tính toán min-max
 const handleSearchSubmit = (e) => {
   e.preventDefault();
 
@@ -1274,7 +1284,11 @@ const handleSearchSubmit = (e) => {
   else heSoKhuVuc = 0.95;
 
   const giaMongMuon = parseFloat(searchForm.giaMongMuon) || 15;
-  const giaDeXuat = (giaMongMuon * heSoKhuVuc).toFixed(1);
+  const giaDeXuat = parseFloat((giaMongMuon * heSoKhuVuc).toFixed(1));
+
+  // Tính toán min-max dựa trên giaDeXuat (theo logic từ HTML template)
+  const minPrice = parseFloat((giaDeXuat * 0.92).toFixed(1));  // -8%
+  const maxPrice = parseFloat((giaDeXuat * 1.03).toFixed(1));  // +3%
 
   // Tính ngày bán dự kiến
   let ngayBan = 28;
@@ -1285,7 +1299,7 @@ const handleSearchSubmit = (e) => {
   ngayBan = Math.min(ngayBan, 30);
 
   const phanTram = Math.floor((ngayBan / 30) * 100);
-  const chenhLech = ((giaDeXuat / giaMongMuon - 1) * 100).toFixed(1);
+  const chenhLech = parseFloat(((giaDeXuat / giaMongMuon - 1) * 100).toFixed(1));
 
   // Cập nhật kết quả
   searchResult.show = true;
@@ -1293,8 +1307,10 @@ const handleSearchSubmit = (e) => {
   searchResult.quanHuyen = searchForm.quanHuyen || 'Phường Tân Phú';
   searchResult.ngayBan = ngayBan;
   searchResult.giaDeXuat = giaDeXuat;
-  searchResult.chenhLech = parseFloat(chenhLech);
+  searchResult.chenhLech = chenhLech;
   searchResult.phanTram = phanTram;
+  searchResult.minPrice = minPrice; // Lưu min
+  searchResult.maxPrice = maxPrice; // Lưu max
 
   // Scroll đến kết quả
   setTimeout(() => {
@@ -1352,10 +1368,14 @@ const loadConfig = async () => {
     // Cập nhật config
     config.value = processedConfig;
 
-    // console.log('Config đã được xử lý:', processedConfig);
+    console.log('Config đã được xử lý:', processedConfig);
   }
 };
 
+function hexToRgb(hex) {
+  const bigint = parseInt(hex.replace('#', ''), 16)
+  return `${(bigint >> 16) & 255} ${(bigint >> 8) & 255} ${bigint & 255}`
+}
 
 onMounted(async () => {
   console.log("Chuẩn bị load config ban nhanh")
@@ -1374,6 +1394,8 @@ onMounted(async () => {
 
   // Scroll event listener
   window.addEventListener('scroll', handleScroll);
+
+  console.log("màu purple",config.value.styles.colors.purple500)
 });
 
 onUnmounted(() => {
@@ -1396,12 +1418,9 @@ onUnmounted(() => {
 }
 
 .bg-blue-500\/10 {
-  background-color: rgba(v-bind('config.styles.colors.blue500'), 0.1);
 }
 
-.bg-purple-500\/10 {
-  background-color: rgba(v-bind('config.styles.colors.purple500'), 0.1);
-}
+.bg-purple-500\/10 {}
 
 .text-slate-300\/90 {
   color: rgba(v-bind('config.styles.colors.slate300'), 0.9);
@@ -1552,5 +1571,11 @@ onUnmounted(() => {
 
 .scrollbar-custom::-webkit-scrollbar-thumb:hover {
   background: rgba(139, 92, 246, 0.7);
+}
+
+.shadow-glow{
+  --tw-shadow: 0 8px 28px rgb(71, 54, 99), 0 2px 6px rgba(0,0,0,.25) !important;
+  --tw-shadow-colored: 0 8px 28px var(--tw-shadow-color), 0 2px 6px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 </style>

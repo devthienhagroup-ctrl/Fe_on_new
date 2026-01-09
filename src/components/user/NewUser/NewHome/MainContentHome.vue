@@ -190,33 +190,34 @@
           <!-- Các điểm Hotspot -->
           <div v-for="location in config.map.locations"
                :key="location.id"
-               class="absolute group cursor-pointer"
+               class="absolute cursor-pointer hotspot-wrapper"
                :style="`top: ${location.position.top}; left: ${location.position.left};`">
 
             <!-- Bóng (ping/ripple effect) - ĐÃ SỬA -->
             <div class="absolute inset-0 flex items-center justify-center">
-    <span
-        :class="`absolute inline-flex h-${location.size} w-${location.size} rounded-full ${location.animationDelay}`"
-        :style="`background-color: ${location.color}; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;`">
-    </span>
+            <span
+                class="hotspot-ping"
+                :style="`background-color: ${location.color};`">
+            </span>
             </div>
 
             <!-- Điểm chính (hotspot dot) -->
             <div class="relative flex items-center justify-center">
-    <span
-        :class="`inline-flex rounded-full h-${location.size} w-${location.size} border-2 border-[#0b1120] items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.8)] z-10`"
-        :style="`background-color: ${location.color};`">
-      <i :class="location.iconClass"></i>
-    </span>
+            <span
+                :class="`inline-flex rounded-full h-6 w-6 border-2 border-[#0b1120] items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.8)] z-10`"
+                :style="`background-color: ${location.color}; width: ${location.size}; height: ${location.size}; animation-delay: ${location.animationDelay};`">
+              <i :class="location.iconClass"></i>
+            </span>
             </div>
 
-            <!-- Tooltip - ĐÃ SỬA -->
-            <div
-                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-white rounded-lg text-xs font-bold text-blue-900 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-y-2 group-hover:translate-y-0 z-20 whitespace-nowrap shadow-lg">
+            <!-- Tooltip -->
+            <!-- CSS Tooltip -->
+            <div class="css-tooltip">
               {{ location.name }}
-              <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-white"></div>
             </div>
           </div>
+
+
 
           <!-- Đường nối ảo (Tech lines - Trang trí) -->
           <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-30" xmlns="http://www.w3.org/2000/svg">
@@ -571,7 +572,7 @@ const config = ref({
         id: 1,
         name: 'Hồ Chí Minh (HQ)',
         position: {top: '55%', left: '78%'},
-        color: 'blue-500',
+        color: '#60a5fa',
         size: '6',
         iconClass: 'fas fa-location-arrow text-white text-xs',
         animationDelay: ''
@@ -580,7 +581,7 @@ const config = ref({
         id: 2,
         name: 'Bình Dương',
         position: {top: '60%', left: '76%'},
-        color: 'purple-500',
+        color: '#8b5cf6',
         size: '3',
         iconClass: '',
         animationDelay: 'delay-75'
@@ -589,7 +590,7 @@ const config = ref({
         id: 3,
         name: 'Đồng Nai',
         position: {top: '40%', left: '85%'},
-        color: 'purple-500',
+        color: '#8b5cf6',
         size: '3',
         iconClass: '',
         animationDelay: 'delay-150'
@@ -598,7 +599,7 @@ const config = ref({
         id: 4,
         name: 'Vĩnh Long',
         position: {top: '35%', left: '20%'},
-        color: 'blue-400',
+        color: '#60a5fa',
         size: '4',
         iconClass: '',
         animationDelay: 'delay-300'
@@ -607,7 +608,7 @@ const config = ref({
         id: 5,
         name: 'Bạc Liêu',
         position: {top: '32%', left: '52%'},
-        color: 'emerald-500',
+        color: '#10b981',
         size: '3',
         iconClass: '',
         animationDelay: 'delay-500'
@@ -776,6 +777,17 @@ const handleFormSubmit = (email) => {
 </script>
 
 <style scoped>
+/* Tắt mũi tên tăng giảm cho input number */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 /* Sử dụng biến CSS từ config object */
 #home .text-blue-400 {
   color: v-bind('config.styles.colors.blue400');
@@ -880,5 +892,122 @@ const handleFormSubmit = (email) => {
 
 #testimonials .text-slate-300 {
   color: v-bind('config.styles.colors.slate300');
+}
+/* Hiệu ứng ping cho hotspot */
+@keyframes hotspotPing {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  70%, 100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+.hotspot-ping {
+  position: absolute;
+  display: inline-block;
+  border-radius: 9999px;
+  animation: hotspotPing 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  width: 1.5rem; /* 6 * 0.25rem */
+  height: 1.5rem; /* 6 * 0.25rem */
+  pointer-events: none;
+}
+
+/* Tùy chỉnh delay cho từng hotspot */
+.hotspot-ping.delay-75 {
+  animation-delay: 75ms;
+}
+
+.hotspot-ping.delay-150 {
+  animation-delay: 150ms;
+}
+
+.hotspot-ping.delay-300 {
+  animation-delay: 300ms;
+}
+
+.hotspot-ping.delay-500 {
+  animation-delay: 500ms;
+}
+
+/* CSS Tooltip - SỬA ĐỔI */
+.css-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  padding: 6px 12px;
+  background-color: white;
+  color: #1e3a8a;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-radius: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  /* Thêm animation */
+  animation: tooltipFadeIn 0.2s ease-out;
+
+  /* Đảm bảo tooltip không bị cắt */
+  z-index: 1000;
+
+  /* Tạo mũi tên cho tooltip */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: white;
+  }
+}
+
+/* Hiển thị tooltip khi hover vào wrapper - SỬA SELECTOR */
+.hotspot-wrapper:hover .css-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Hoặc nếu muốn tooltip hiển thị khi hover cả vào dot */
+.hotspot-wrapper:hover .css-tooltip,
+.hotspot-wrapper span:hover ~ .css-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Thêm hiệu ứng cho hotspot dot khi hover */
+.hotspot-wrapper:hover span:last-child {
+  transform: scale(1.2);
+  transition: transform 0.2s ease;
+}
+
+/* Nếu muốn tooltip có gradient background */
+.css-tooltip.gradient {
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  border: 1px solid #e2e8f0;
+}
+
+/* Nếu muốn tooltip có shadow đẹp hơn */
+.css-tooltip {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 </style>

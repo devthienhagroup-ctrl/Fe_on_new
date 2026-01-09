@@ -840,7 +840,12 @@ const routes = [
     {
         path: '/bao-cao-dinh-gia',
         component: MenuUser,
-        meta: {requiresAuth: true, loginFrom: "user", hideFooterMap: false},
+        meta: {
+            requiresAuth: true,
+            loginFrom: "user",
+            hideFooterMap: false,
+
+        },
         children: [
             {
                 path: '',

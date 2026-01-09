@@ -8,9 +8,9 @@
     <!-- Modal Container -->
     <div class="relative w-full max-w-4xl mx-auto z-10">
       <!-- Modal Content -->
-      <div class="bg-gradient-to-br from-gray-900 to-slate-950 rounded-2xl overflow-hidden shadow-2xl border border-slate-700/50">
+      <div class="  my-4 bg-gradient-to-br from-gray-900 to-slate-950 rounded-2xl overflow-hidden shadow-2xl border border-slate-700/50">
         <!-- Header -->
-        <div class="flex items-center justify-between p-5 border-b border-slate-700/50">
+        <div class="flex items-center justify-between p-3 border-b border-slate-700/50">
           <div class="flex items-center gap-3">
             <div class="p-2 bg-red-500/10 rounded-lg">
               <i class="fas fa-play text-red-500 text-lg"></i>
@@ -56,7 +56,7 @@
         </div>
 
         <!-- Footer -->
-        <div class="p-5 bg-slate-900/50 border-t border-slate-700/50">
+        <div class="p-3 bg-slate-900/50 border-t border-slate-700/50">
           <div class="flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">

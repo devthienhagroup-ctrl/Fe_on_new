@@ -30,3 +30,6 @@ dist-ssr/
 /public/imgs/
 asset/imgs/
 dist.zip
+
+# Build tailwin
+/public/tailwind-admin-compiled.css
