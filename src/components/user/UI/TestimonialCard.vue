@@ -105,7 +105,7 @@ const initials = computed(() => {
 })
 
 const cardClasses = computed(() => {
-  const baseClasses = 'bg-slate-800/60 backdrop-blur-sm p-5 rounded-xl shadow border border-slate-700 transition-colors duration-300'
+  const baseClasses = 'bg-slate-800/60 backdrop-blur-sm p-4 rounded-xl shadow border border-slate-700 transition-colors duration-300'
 
   if (isCustomColor.value) {
     return `${baseClasses} hover:border-opacity-70`

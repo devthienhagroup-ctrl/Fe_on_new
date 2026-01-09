@@ -9,7 +9,7 @@
         THIÊN HÀ<span class="text-blue-400">GROUP</span>
       </a>
       <div class="hidden md:flex space-x-8 items-center" data-aos="fade-down" data-aos-delay="100">
-        <router-link to="/trang-chu" class="hover:text-blue-400 transition text-sm font-semibold uppercase tracking-widest">Trang chủ</router-link>
+        <router-link to="/" class="hover:text-blue-400 transition text-sm font-semibold uppercase tracking-widest">Trang chủ</router-link>
         <a href="#about" class="hover:text-blue-400 transition text-sm font-semibold uppercase tracking-widest">Về chúng tôi</a>
         <a href="#services" class="hover:text-blue-400 transition text-sm font-semibold uppercase tracking-widest">Lĩnh vực</a>
         <a href="#contact" class="hover:text-blue-400 transition text-sm font-semibold uppercase tracking-widest">Liên hệ</a>

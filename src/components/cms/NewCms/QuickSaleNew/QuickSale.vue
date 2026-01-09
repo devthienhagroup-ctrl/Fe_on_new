@@ -431,9 +431,52 @@
                 </div>
               </div>
 
+              <!-- Ảnh dự án - Updated to match MainContent -->
               <div class="form-group">
-                <label>URL ảnh</label>
-                <input type="text" v-model="project.imageUrl" placeholder="/imgs/projects/..." />
+                <div class="label" style="display: flex; justify-content: space-between">
+                  <label>Ảnh dự án</label>
+                  <button class="btn-icon btn-preview-action" @click="previewProjectImage(index)" title="Xem trước"
+                          v-if="project.imageUrl">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+                <div class="file-upload">
+                  <div class="file-upload-area" @click="triggerProjectImageInput(index)" @dragover.prevent
+                       @drop.prevent="(event) => handleProjectImageDrop(event, index)">
+                    <input
+                        type="file"
+                        :ref="el => projectImageInputs[index] = el"
+                        @change="(event) => handleProjectImageUpload(event, index)"
+                        accept="image/*"
+                        style="display: none"
+                    />
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Kéo thả ảnh vào đây hoặc <span>chọn từ máy</span></p>
+                    <p class="file-hint">Kích thước đề xuất: 800x600px</p>
+                  </div>
+
+                  <div v-if="projectImagePreviews[index] || project.imageUrl" class="upload-preview">
+                    <img :src="getImageUrl(project.imageUrl)" alt="Project Image Preview"/>
+                    <div class="preview-actions">
+                      <button class="btn-preview-action" @click="previewProjectImage(index)" title="Xem trước">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button class="btn-preview-action" @click="removeProjectImage(index)" title="Xóa ảnh">
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+<!--                <div v-if="!projectImagePreviews[index] && !project.imageUrl" class="form-group">-->
+<!--                  <label :for="`project-image-url-${index}`">Hoặc nhập URL ảnh</label>-->
+<!--                  <input-->
+<!--                      type="text"-->
+<!--                      :id="`project-image-url-${index}`"-->
+<!--                      v-model="project.imageUrl"-->
+<!--                      placeholder="https://example.com/image.jpg"-->
+<!--                  />-->
+<!--                </div>-->
               </div>
 
               <div class="form-group">
@@ -574,6 +617,30 @@
               <i class="fas fa-inbox"></i>
               <p>Chưa có đánh giá nào. Hãy thêm đánh giá đầu tiên!</p>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div v-if="showPreviewModal" class="modal-overlay" @click="closePreviewModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Xem trước ảnh</h3>
+          <button class="btn-icon btn-close-modal" @click="closePreviewModal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="image-preview-container">
+            <img :src="previewImageUrl" alt="Xem trước" v-if="previewImageUrl"/>
+            <div v-else class="preview-placeholder">
+              <i class="fas fa-image"></i>
+              <p>Chưa có ảnh để xem trước</p>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" @click="closePreviewModal">Đóng</button>
           </div>
         </div>
       </div>
@@ -820,7 +887,7 @@ const content = reactive({
         price: 9.2,
         saleTime: "22 ngày",
         priceDifference: 12,
-        imageUrl: "/imgs/projects/nha-mat-tien-q7.jpg",
+        imageUrl: "",
         imageClass: "bg-gradient-to-br from-blue-500/20 to-purple-500/10"
       },
       {
@@ -842,7 +909,7 @@ const content = reactive({
         price: 18.7,
         saleTime: "25 ngày",
         priceDifference: 10,
-        imageUrl: "/imgs/projects/nha-pho-thu-duc.jpg",
+        imageUrl: "",
         imageClass: "bg-gradient-to-br from-amber-500/20 to-orange-500/10"
       }
     ]
@@ -912,6 +979,16 @@ const content = reactive({
   }
 })
 
+// UI State for image previews - THÊM CHO PROJECTS
+const projectImageInputs = ref([])
+const projectImagePreviews = ref([])
+const showPreviewModal = ref(false)
+const previewImageUrl = ref('')
+
+// Files management (giống component MainContent)
+const files = ref([])
+const uploadedFiles = ref([])
+
 // Toast notification
 const toast = reactive({
   show: false,
@@ -921,9 +998,33 @@ const toast = reactive({
 })
 
 // ========== CONSTANTS ==========
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
+
+const BASE_IMAGE_URL = baseImgaeUrl;
+const TEMP_PREFIX = 'temp/'
 const SECTION_ID = 58
 
 // ========== HELPER FUNCTIONS ==========
+const getImageUrl = (filename) => {
+  if (!filename) return ''
+
+  if (filename.startsWith(TEMP_PREFIX)) {
+    const tempName = filename.replace(TEMP_PREFIX, '')
+    const uploadedFile = uploadedFiles.value.find(f => f.tempName === tempName)
+    if (uploadedFile && uploadedFile.previewUrl) {
+      return uploadedFile.previewUrl
+    }
+    return ''
+  }
+
+  // Check if it's already a full URL
+  if (filename.startsWith('http://') || filename.startsWith('https://') || filename.startsWith('data:')) {
+    return filename
+  }
+
+  return BASE_IMAGE_URL + filename
+}
+
 const showToast = (message, type = 'info') => {
   toast.message = message
   toast.type = type
@@ -948,6 +1049,112 @@ const showToast = (message, type = 'info') => {
   }, 3000)
 }
 
+const generateTempName = (originalFilename) => {
+  if (!originalFilename) return `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.jpg`;
+
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 9);
+  const extension = originalFilename.split('.').pop() || 'jpg';
+  return `temp_${timestamp}_${random}.${extension}`;
+}
+
+const handleFileUpload = (file, type, projectIndex) => {
+  const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
+  const maxSize = 5 * 1024 * 1024
+
+  if (!validTypes.includes(file.type)) {
+    showToast('Chỉ chấp nhận file ảnh JPG, PNG, GIF, WebP, SVG', 'error')
+    return false
+  }
+
+  if (file.size > maxSize) {
+    showToast('Kích thước file không được vượt quá 5MB', 'error')
+    return false
+  }
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const previewUrl = e.target.result
+    const tempName = generateTempName(file.name)
+    const tempUrl = TEMP_PREFIX + tempName
+
+    // Update project image URL
+    content.soldProjects.items[projectIndex].imageUrl = tempUrl
+
+    // Update preview
+    projectImagePreviews.value[projectIndex] = previewUrl
+
+    // Create file DTO
+    const fileDTO = {
+      id: null,
+      filename: `${type}_${Date.now()}_${file.name}`,
+      status: 'NEW',
+      tempName: tempName,
+      mappingTempUrl: tempUrl,
+      mappingRealUrl: null,
+      effectiveTempUrl: previewUrl,
+      realFilenameForSearch: file.name,
+      metadata: {
+        type: 'project',
+        projectIndex: projectIndex,
+        projectId: content.soldProjects.items[projectIndex].id
+      }
+    }
+
+    // Store in uploadedFiles
+    uploadedFiles.value.push({
+      tempName: tempName,
+      file: file,
+      previewUrl: previewUrl,
+      metadata: { projectIndex }
+    })
+
+    // Add to files array
+    files.value.push(fileDTO)
+
+    showToast(`Ảnh dự án đã được tải lên thành công`, 'success')
+  }
+
+  reader.onerror = (error) => {
+    console.error('Error reading file:', error)
+    showToast('Lỗi khi đọc file', 'error')
+  }
+
+  reader.readAsDataURL(file)
+  return true
+}
+
+const handleRemoveFile = (imageUrl, projectIndex) => {
+  if (imageUrl) {
+    if (imageUrl.startsWith(TEMP_PREFIX)) {
+      const tempName = imageUrl.replace(TEMP_PREFIX, '')
+
+      const fileIndex = files.value.findIndex(f => f.tempName === tempName)
+      if (fileIndex !== -1) {
+        files.value.splice(fileIndex, 1)
+      }
+
+      const uploadedIndex = uploadedFiles.value.findIndex(f => f.tempName === tempName)
+      if (uploadedIndex !== -1) {
+        uploadedFiles.value.splice(uploadedIndex, 1)
+      }
+    } else {
+      const fileIndex = files.value.findIndex(f => f.mappingRealUrl === imageUrl || f.filename === imageUrl)
+      if (fileIndex !== -1) {
+        files.value[fileIndex].status = 'REMOVE'
+      }
+    }
+
+    // Update project image URL
+    content.soldProjects.items[projectIndex].imageUrl = ''
+
+    // Clear preview
+    projectImagePreviews.value[projectIndex] = null
+
+    showToast('Đã xóa ảnh dự án', 'success')
+  }
+}
+
 const generateId = () => {
   return Date.now() + Math.floor(Math.random() * 1000)
 }
@@ -965,6 +1172,42 @@ const loadData = async () => {
 
       // Update content with loaded data
       Object.assign(content, data)
+
+      // Initialize project image previews array
+      projectImagePreviews.value = new Array(content.soldProjects.items.length).fill(null)
+
+      // Handle files from API response
+      if (response.data.files && response.data.files.length > 0) {
+        files.value = response.data.files.map(file => ({
+          id: file.id,
+          filename: file.filename || file.realFilenameForSearch || '',
+          status: 'EXISTING',
+          tempName: file.tempName || generateTempName(file.filename),
+          mappingTempUrl: file.mappingTempUrl || `temp/${file.tempName || generateTempName(file.filename)}`,
+          mappingRealUrl: file.mappingRealUrl || file.filename,
+          effectiveTempUrl: file.effectiveTempUrl || BASE_IMAGE_URL + (file.mappingRealUrl || file.filename),
+          realFilenameForSearch: file.realFilenameForSearch || file.filename,
+          metadata: file.metadata || {}
+        }))
+
+        // Set previews for existing project images
+        content.soldProjects.items.forEach((project, index) => {
+          if (project.imageUrl) {
+            const file = files.value.find(f =>
+                f.mappingRealUrl === project.imageUrl ||
+                f.mappingTempUrl === project.imageUrl ||
+                f.filename === project.imageUrl
+            )
+            if (file && file.effectiveTempUrl) {
+              projectImagePreviews.value[index] = file.effectiveTempUrl
+            }
+          }
+        })
+      } else {
+        files.value = []
+      }
+
+      uploadedFiles.value = []
 
       showToast('Dữ liệu đã được tải thành công', 'success')
     }
@@ -986,19 +1229,34 @@ const saveChanges = async () => {
     // Prepare FormData
     const formData = new FormData()
 
+    // Filter files to send only changed ones
+    const filesToSend = files.value.filter(file => file.status !== 'EXISTING')
+
     // Prepare section data
     const sectionData = {
       id: SECTION_ID,
       name: 'Nội dung chính',
       contentJson: JSON.stringify(contentData, null, 2),
       sortOrder: 0,
-      files: []
+      files: filesToSend
     }
 
     // Add section data
     formData.append('section', new Blob([JSON.stringify(sectionData)], {
       type: 'application/json'
     }))
+
+    // Add actual file binaries for NEW files
+    const newFiles = filesToSend.filter(file => file.status === 'NEW')
+
+    newFiles.forEach((fileDTO, index) => {
+      const tempName = fileDTO.mappingTempUrl?.replace(TEMP_PREFIX, '') || fileDTO.tempName
+      const uploadedFile = uploadedFiles.value.find(f => f.tempName === tempName)
+
+      if (uploadedFile && uploadedFile.file) {
+        formData.append('files', uploadedFile.file)
+      }
+    })
 
     // Send to API
     const response = await api.post('/cms/saveChange', formData, {
@@ -1009,6 +1267,34 @@ const saveChanges = async () => {
 
     if (response.data) {
       showToast('Thay đổi đã được lưu thành công', 'success')
+
+      // Update file statuses (giống component MainContent)
+      files.value.forEach(file => {
+        if (file.status === 'NEW') {
+          file.status = 'EXISTING'
+          if (response.data.files) {
+            const savedFile = response.data.files.find(f => f.filename === file.filename)
+            if (savedFile) {
+              file.id = savedFile.id
+              file.mappingRealUrl = savedFile.mappingRealUrl
+
+              // Update content image URLs from temp to real
+              updateContentUrls(file)
+            }
+          }
+        } else if (file.status === 'REMOVE') {
+          const index = files.value.findIndex(f => f.id === file.id)
+          if (index !== -1) {
+            files.value.splice(index, 1)
+          }
+        }
+      })
+
+      // Clear uploaded files
+      uploadedFiles.value = []
+      projectImagePreviews.value = new Array(content.soldProjects.items.length).fill(null)
+
+      // Reload data
       await loadData()
     }
   } catch (error) {
@@ -1017,6 +1303,63 @@ const saveChanges = async () => {
   } finally {
     isLoading.value = false
   }
+}
+
+const updateContentUrls = (file) => {
+  const tempUrl = TEMP_PREFIX + file.tempName
+  const realUrl = file.mappingRealUrl
+
+  // Check all project image URLs
+  content.soldProjects.items.forEach((project, index) => {
+    if (project.imageUrl === tempUrl) {
+      project.imageUrl = realUrl
+    }
+  })
+}
+
+// ========== PROJECT IMAGE UPLOAD HANDLERS ==========
+const triggerProjectImageInput = (index) => {
+  if (projectImageInputs.value[index]) {
+    projectImageInputs.value[index].click()
+  }
+}
+
+const handleProjectImageUpload = (event, index) => {
+  const file = event.target.files[0]
+  if (file) {
+    handleFileUpload(file, `ProjectImage_${index}`, index)
+  }
+  event.target.value = ''
+}
+
+const handleProjectImageDrop = (event, index) => {
+  event.preventDefault()
+  const file = event.dataTransfer.files[0]
+  if (file) {
+    handleFileUpload(file, `ProjectImage_${index}`, index)
+  }
+}
+
+const removeProjectImage = (index) => {
+  const project = content.soldProjects.items[index]
+  if (project && project.imageUrl) {
+    handleRemoveFile(project.imageUrl, index)
+  }
+}
+
+const previewProjectImage = (index) => {
+  const project = content.soldProjects.items[index]
+  if (project && project.imageUrl) {
+    previewImageUrl.value = getImageUrl(project.imageUrl)
+    showPreviewModal.value = true
+  } else {
+    showToast('Không có ảnh để xem trước', 'warning')
+  }
+}
+
+const closePreviewModal = () => {
+  showPreviewModal.value = false
+  previewImageUrl.value = ''
 }
 
 const globalColors = ref({});
@@ -1118,12 +1461,24 @@ const addProject = () => {
     imageUrl: "",
     imageClass: ""
   })
+
+  // Initialize preview for new project
+  projectImagePreviews.value.push(null)
+
   showToast('Đã thêm dự án mới', 'success')
 }
 
 const removeProject = (index) => {
   if (confirm('Bạn có chắc muốn xóa dự án này?')) {
+    // Remove associated image file if exists
+    const project = content.soldProjects.items[index]
+    if (project.imageUrl) {
+      handleRemoveFile(project.imageUrl, index)
+    }
+
     content.soldProjects.items.splice(index, 1)
+    projectImagePreviews.value.splice(index, 1)
+
     showToast('Đã xóa dự án', 'success')
   }
 }
@@ -1131,16 +1486,26 @@ const removeProject = (index) => {
 const moveProjectUp = (index) => {
   if (index > 0) {
     const temp = content.soldProjects.items[index]
+    const tempPreview = projectImagePreviews.value[index]
+
     content.soldProjects.items[index] = content.soldProjects.items[index - 1]
     content.soldProjects.items[index - 1] = temp
+
+    projectImagePreviews.value[index] = projectImagePreviews.value[index - 1]
+    projectImagePreviews.value[index - 1] = tempPreview
   }
 }
 
 const moveProjectDown = (index) => {
   if (index < content.soldProjects.items.length - 1) {
     const temp = content.soldProjects.items[index]
+    const tempPreview = projectImagePreviews.value[index]
+
     content.soldProjects.items[index] = content.soldProjects.items[index + 1]
     content.soldProjects.items[index + 1] = temp
+
+    projectImagePreviews.value[index] = projectImagePreviews.value[index + 1]
+    projectImagePreviews.value[index + 1] = tempPreview
   }
 }
 
@@ -1509,6 +1874,180 @@ onMounted(async () => {
   gap: 10px;
 }
 
+/* File Upload - THÊM VÀO */
+.file-upload {
+  margin-bottom: 20px;
+}
+
+.file-upload-area {
+  border: 2px dashed #ced4da;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: white;
+  margin-bottom: 15px;
+}
+
+.file-upload-area:hover {
+  border-color: #4a6cf7;
+  background-color: #f8f9ff;
+}
+
+.file-upload-area i {
+  font-size: 2rem;
+  color: #6c757d;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.file-upload-area p {
+  margin: 0;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.file-upload-area span {
+  color: #4a6cf7;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.file-hint {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 5px;
+}
+
+.upload-preview {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e9ecef;
+  margin-top: 10px;
+}
+
+.upload-preview img {
+  width: 100%;
+  height: 150px;
+  object-fit: contain;
+  background-color: #f8f9fa;
+}
+
+.preview-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.upload-preview:hover .preview-actions {
+  opacity: 1;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  padding: 20px 25px;
+  background: linear-gradient(135deg, #031358 0%, #0629BE 100%);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.btn-close-modal {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  width: 36px;
+  height: 36px;
+}
+
+.btn-close-modal:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.modal-body {
+  padding: 25px;
+  overflow: auto;
+  flex: 1;
+}
+
+.image-preview-container {
+  width: 100%;
+  min-height: 400px;
+  border: 2px dashed #dee2e6;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #f8f9fa;
+  margin-bottom: 20px;
+}
+
+.image-preview-container img {
+  max-width: 100%;
+  max-height: 500px;
+  object-fit: contain;
+}
+
+.preview-placeholder {
+  text-align: center;
+  color: #6c757d;
+}
+
+.preview-placeholder i {
+  font-size: 4rem;
+  margin-bottom: 15px;
+  display: block;
+  color: #adb5bd;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;
@@ -1591,6 +2130,16 @@ onMounted(async () => {
   transform: scale(1.1);
 }
 
+.btn-preview-action {
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-preview-action:hover {
+  background-color: white;
+  color: #4a6cf7;
+}
+
 /* Toast Notification */
 .toast-notification {
   position: fixed;
@@ -1658,6 +2207,17 @@ onMounted(async () => {
 }
 
 /* Animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes slideInRight {
   from {
     opacity: 0;

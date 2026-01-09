@@ -16,7 +16,7 @@
       <!-- Nếu có ảnh thật -->
       <img
           v-if="project.imageUrl"
-          :src="project.imageUrl"
+          :src="baseImgaeUrl+project.imageUrl"
           :alt="project.type + ' - ' + project.location"
           class="w-full h-full object-cover"
       />
@@ -75,6 +75,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue';
+import {baseImgaeUrl} from "../../../assets/js/global.js";
 
 const props = defineProps({
   project: {
