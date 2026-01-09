@@ -19,7 +19,9 @@
 
     <!-- FOOTER -->
     <FooterHome @scrollToTop="scrollToTop" />
-    <FloatingContact></FloatingContact>
+    <FloatingContact
+      align="left"
+    ></FloatingContact>
   </div>
 
   <!-- Modal đăng nhập/đăng ký -->
@@ -43,7 +45,7 @@ import AuthModal from "../../Login/Modal/AuthModal.vue";
 import ForgotPassword from "../../Login/Modal/ForgotPassword.vue";
 import MenuNavBar from "./MenuNavBar.vue";
 import FooterHome from "./FooterHome.vue";
-import FloatingContact from "../FloatingContact.vue";
+import FloatingContact from "../../Home/FloatingContact.vue";
 
 import api from "../../../../api/api.js";
 
@@ -152,6 +154,7 @@ const applyFallbackCSS = () => {
 
   applyCSSVariables(fallbackCSS);
 }
+let chatScript= null;
 
 onMounted(async () => {
   console.log('🚀 Layout mounted, loading CSS...');
@@ -189,6 +192,13 @@ onMounted(async () => {
   window.addEventListener('open-login-modal', () => {
     showAuthModal.value = true
   })
+
+  chatScript = document.createElement('script')
+  // chatScript.src = 'https://api.sale.ai.vn/static/widget.js?chatbotId=MjIz'
+  chatScript.async = true
+  chatScript.id = 'botchat-script'
+  document.body.appendChild(chatScript)
+
 })
 
 // Cleanup

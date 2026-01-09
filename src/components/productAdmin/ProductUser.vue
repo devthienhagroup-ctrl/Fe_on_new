@@ -2091,7 +2091,7 @@ onBeforeUnmount(() => {
 
 // 'table' hoặc 'card'
 const showCollabModal = ref(false);
-const selectedAsset = ref(null);
+const selectedAsset = ref({ daGuiYeuCau: false });
 const collabReason = ref("");
 async function submitCollaboration() {
   // ❌ chưa đăng nhập
@@ -2127,9 +2127,6 @@ async function submitCollaboration() {
 
     // ✅ Thành công
     showCenterSuccess(res.data.message || "Gửi đề nghị hợp tác thành công");
-
-    // 👉 cập nhật UI để không gửi lại
-    selectedAsset.value.daGuiYeuCau = true;
 
 
 

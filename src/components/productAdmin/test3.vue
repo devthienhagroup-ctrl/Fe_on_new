@@ -805,7 +805,7 @@ const submitCollaboration = async () => {
     }
 
     showCenterSuccess(res.data.message || "Gửi đề nghị hợp tác thành công");
-    selectedAsset.value.daGuiYeuCau = true;
+
 
   } catch (e) {
     console.error(e);

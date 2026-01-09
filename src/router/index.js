@@ -131,38 +131,43 @@ import PaymentQR from "../components/user/Profile/component/PaymentQR.vue";
 import productCreateUser from "../components/productUser/productCreateUser.vue"
 import productUpdate from "../components/productUser/ProductUpdate.vue"
 import RutTienAdmin from "../components/rutTienAdmin.vue";
+
+
+import Layout from "../components/user/NewUser/NewHome/Layout.vue";
+import MainContentHome from "../components/user/NewUser/NewHome/MainContentHome.vue";
+import GlobalCSS from "../components/cms/NewCms/homeNew/GlobalCSS.vue";
+import MainContent from "../components/cms/NewCms/homeNew/MainContent.vue";
+import QuickSale30D from "../components/user/NewUser/QuickSale30D/QuickSale30D.vue";
+import QuickSale from "../components/cms/NewCms/QuickSaleNew/QuickSale.vue";
+
+
 import DemoGiaoDien from "../components/thiet-kegiandien/marketing-cap-da-ta.vue";
-import Layout from "../components/user/Home/NewHome/Layout.vue";
-import MainContentHome from "../components/user/Home/NewHome/MainContentHome.vue";
-import GlobalCSS from "../components/cms/components/homeNew/GlobalCSS.vue";
-import MainContent from "../components/cms/components/homeNew/MainContent.vue";
 import test from "../components/thiet-kegiandien/marketing-cap-da-ta.vue"
 import test1 from "../components/thiet-kegiandien/telesales-lien-he-khach-hang.vue"
-import QuickSale30D from "../components/user/newUser/QuickSale30D/QuickSale30D.vue";
 const routes = [
-    // {
-    //     path: "/test/dat-lich",
-    //     name: "TeamCollaboration",
-    //     component: test,
-    //     meta: { requiresAuth: false, enableTailwind: false},
-    // },
-    // {
-    //     path: "/test/tele-sales",
-    //     name: "TELESALES",
-    //     component: test1,
-    //     meta: { requiresAuth: false, enableTailwind: false},
-    // },
+    {
+        path: "/test/dat-lich",
+        name: "TeamCollaboration",
+        component: test,
+        meta: { requiresAuth: false, enableTailwind: false},
+    },
+    {
+        path: "/test/tele-sales",
+        name: "TELESALES",
+        component: test1,
+        meta: { requiresAuth: false, enableTailwind: false},
+    },
 
     {
         path: "/-thg/dang-nhap",
         name: "LoginForm",
         component: LoginForm,
     },
-    {
-        path: '/giao-dien',
-        component: DemoGiaoDien,
-        meta: {requiresAuth: false, loginFrom: "admin", enableTailwind: true},
-    },
+    // {
+    //     path: '/giao-dien',
+    //     component: DemoGiaoDien,
+    //     meta: {requiresAuth: false, loginFrom: "admin", enableTailwind: true},
+    // },
     {
         path: "/user/quan-ly-san-pham",
         component: MenuUser,
@@ -188,7 +193,7 @@ const routes = [
         path: "/moi-gioi",
         name: "MoiGioiShow",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -201,7 +206,7 @@ const routes = [
         path: "/tin-tuc",
         name: "News",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -386,6 +391,18 @@ const routes = [
                         component: QSImageBackground3
                     }
 
+                ]
+            },
+            {
+                path: 'ban-nhanh-moi',
+                name: 'QuickSaleNew',
+                component: cms,
+                children: [
+                    {
+                        path: 'noi-dung-chinh',
+                        name: 'NewQuickSale',
+                        component: QuickSale
+                    }
                 ]
             },
             {
@@ -929,7 +946,7 @@ const routes = [
         path: "/trang-chu",
         name: "Landingpage",
         component: MenuUser,
-        meta: { enableTailwind: true, requiresAuth: false },
+        meta: {enableTailwind: true, requiresAuth: false},
         children: [
             {
                 path: '',
@@ -958,7 +975,7 @@ const routes = [
     {
         path: "/dinh-gia-bds",
         name: "EstimateProperty",
-        meta:{ enableTailwind: true, requiresAuth: false },
+        meta: {enableTailwind: true, requiresAuth: false},
         component: MenuUser,
         children: [
             {
@@ -985,7 +1002,7 @@ const routes = [
         path: "/dang-nhap",
         name: "LoginUser",
         component: MenuUser,
-        meta: { loginFrom: "user", requiresAuth: false},
+        meta: {loginFrom: "user", requiresAuth: false},
         children: [
             {
                 path: '',
@@ -998,7 +1015,7 @@ const routes = [
         path: "/tuyen-dung",
         name: "Recruitment",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -1011,7 +1028,7 @@ const routes = [
         path: "/goi-dich-vu",
         name: "ServicePackage",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -1024,7 +1041,7 @@ const routes = [
         path: "/lien-he",
         name: "Contact",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -1038,7 +1055,7 @@ const routes = [
         path: "/thanh-toan",
         name: "Checkout",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -1052,7 +1069,7 @@ const routes = [
         path: "/thanh-toan-san-pham",
         name: "Checkout1",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -1066,7 +1083,7 @@ const routes = [
         path: "/nap-tien-ca-nhan",
         name: "Checkout114",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -1086,7 +1103,7 @@ const routes = [
         path: "/cong-viec-cong-tac-vien",
         name: "CollaboratorJobs",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',
@@ -1327,7 +1344,7 @@ const routes = [
         path: "/hop-tac",
         name: "Investments",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: "",
@@ -1375,6 +1392,11 @@ const routes = [
         path: "/",
         name: "Home",
         component: Layout,
+        meta: {
+            enableTailwind: true,
+            newCustomScroll: true,
+            useAOS: true
+        },
         children: [
             {
                 path: '',
@@ -1384,20 +1406,15 @@ const routes = [
             {
                 path: 'ban-nhanh-bds',
                 name: "quickSaleNew",
-                meta: { enableTailwind: true },
                 component: QuickSale30D
             }
-        ], meta: {
-            enableTailwind: true,
-            newCustomScroll: true,
-            useAOS: true
-        }
+        ]
     },
     {
         path: "/ga4-demo",
         name: "GA4Demo",
         component: MenuUser,
-        meta: { requiresAuth: false },
+        meta: {requiresAuth: false},
         children: [
             {
                 path: '',

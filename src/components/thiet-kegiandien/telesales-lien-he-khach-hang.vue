@@ -1,3 +1,4 @@
+<!-- Save as: TeleSaleApp.vue -->
 <template>
   <div id="app" class="telesale-app">
     <!-- Header -->
@@ -16,31 +17,53 @@
       <aside class="sidebar">
         <div class="stats-widget">
           <h3><i class="fas fa-chart-bar"></i> Thống kê hôm nay</h3>
+
           <div class="stat-item">
-            <span class="stat-label">Số khách lên VP:</span>
-            <span class="stat-value">{{ todayStats.totalCalls }}</span>
+            <span class="stat-label">Khách lên VP:</span>
+            <span class="stat-value">{{ todayStats.soKhachLenVP }}</span>
           </div>
+
           <div class="stat-item">
-            <span class="stat-label">Liên lạc được:</span>
-            <span class="stat-value success">{{ todayStats.successfulCalls }}</span>
+            <span class="stat-label">Liên hệ được:</span>
+            <span class="stat-value success">{{ todayStats.soCuocGoiThanhCongHomNay }}</span>
           </div>
+
           <div class="stat-item">
             <span class="stat-label">Không liên lạc:</span>
-            <span class="stat-value failed">{{ todayStats.unreachableCalls }}</span>
+            <span class="stat-value failed">{{ todayStats.khongLienLacDuoc }}</span>
           </div>
+
           <div class="stat-item">
             <span class="stat-label">Sai số:</span>
-            <span class="stat-value warning">{{ todayStats.wrongNumberCalls }}</span>
+            <span class="stat-value warning">{{ todayStats.saiSo }}</span>
           </div>
+
+          <!-- Progress: Liên hệ mới -->
           <div class="progress-container">
-            <div class="progress-label">Tiến độ ngày</div>
+            <div class="progress-label">Liên hệ mới</div>
             <div class="progress-bar">
               <div
-                  class="progress-fill"
-                  :style="{ width: (todayStats.apiCalls / 40) * 100 + '%' }"
+                  class="progress-fill progress-new"
+                  :style="{
+                  width: Math.min((todayStats.soCuocGoiMoiHN / 30) * 100, 100) + '%'
+                }"
               ></div>
             </div>
-            <div class="progress-text">{{ todayStats.apiCalls }}/40 cuộc gọi</div>
+            <div class="progress-text">{{ todayStats.soCuocGoiMoiHN }}/30 cuộc</div>
+          </div>
+
+          <!-- Progress: Chăm sóc -->
+          <div class="progress-container mt-2">
+            <div class="progress-label">Chăm sóc</div>
+            <div class="progress-bar">
+              <div
+                  class="progress-fill progress-care"
+                  :style="{
+                  width: Math.min((todayStats.soCuocGoiChamSocHN / 20) * 100, 100) + '%'
+                }"
+              ></div>
+            </div>
+            <div class="progress-text">{{ todayStats.soCuocGoiChamSocHN }}/20 cuộc</div>
           </div>
         </div>
 
@@ -48,7 +71,7 @@
         <div class="chart-widget">
           <h3><i class="fas fa-chart-pie"></i> Tổng hợp trạng thái</h3>
           <div class="chart-container">
-            <canvas ref="summaryChart"></canvas>
+            <canvas id="summaryChart"></canvas>
           </div>
         </div>
       </aside>
@@ -60,7 +83,7 @@
           <div class="filter-controls">
             <div class="filter-group">
               <label for="timeRange">Thống kê:</label>
-              <select id="timeRange" v-model="selectedTimeRange" @change="updateChart">
+              <select id="timeRange" v-model="selectedTimeRange">
                 <option value="year">Theo năm</option>
                 <option value="month">Theo tháng</option>
               </select>
@@ -68,15 +91,17 @@
 
             <div class="filter-group" v-if="selectedTimeRange === 'year'">
               <label for="yearSelect">Năm:</label>
-              <select id="yearSelect" v-model="selectedYear" @change="updateChart">
+              <select id="yearSelect" v-model="selectedYear">
                 <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
               </select>
             </div>
 
             <div class="filter-group" v-if="selectedTimeRange === 'month'">
               <label for="monthSelect">Tháng:</label>
-              <select id="monthSelect" v-model="selectedMonth" @change="updateChart">
-                <option v-for="(month, index) in months" :key="index" :value="index + 1">{{ month }}</option>
+              <select id="monthSelect" v-model="selectedMonth">
+                <option v-for="(month, index) in months" :key="index" :value="index + 1">
+                  {{ month }}
+                </option>
               </select>
             </div>
 
@@ -88,7 +113,10 @@
 
         <!-- Biểu đồ đường -->
         <div class="chart-container-large">
-          <h3><i class="fas fa-chart-line"></i> Biểu đồ cuộc gọi theo {{ selectedTimeRange === 'year' ? 'năm' : 'tháng' }}</h3>
+          <h3>
+            <i class="fas fa-chart-line"></i>
+            Biểu đồ cuộc gọi theo {{ selectedTimeRange === 'year' ? 'năm' : 'tháng' }}
+          </h3>
           <div class="chart-wrapper">
             <canvas ref="lineChart"></canvas>
           </div>
@@ -99,15 +127,12 @@
           <div class="section-header">
             <div class="section-title">
               <h3>
-              <i class="fas fa-users"></i>
-              {{ activeTab === 'new' ? 'Khách hàng vừa tiếp nhận' : 'Khách hàng đã liên hệ' }}
+                <i class="fas fa-users"></i>
+                {{ activeTab === 'new' ? 'Khách hàng vừa tiếp nhận' : 'Khách hàng đã liên hệ' }}
               </h3>
+
               <div class="view-controls">
-                <button
-                    class="tab-btn"
-                    :class="{ active: activeTab === 'new' }"
-                    @click="activeTab = 'new'"
-                >
+                <button class="tab-btn" :class="{ active: activeTab === 'new' }" @click="activeTab = 'new'">
                   <i class="fas fa-user-plus"></i> Vừa tiếp nhận ({{ newCustomers.length }})
                 </button>
                 <button
@@ -119,34 +144,34 @@
                 </button>
               </div>
             </div>
+
             <div class="section-controls">
               <div class="filter-group status-filter" v-if="activeTab === 'contacted'">
                 <label for="statusFilter">Trạng thái:</label>
                 <select id="statusFilter" v-model="statusFilter">
-                  <option value="all">Tất cả</option>
-                  <option value="success">Thành công</option>
-                  <option value="potential_7">Tiềm năng 7 ngày</option>
-                  <option value="potential_14">Tiềm năng 14 ngày</option>
-                  <option value="unreachable">Không liên lạc</option>
-                  <option value="wrong_number">Sai số</option>
-                  <option value="care">Chăm sóc</option>
+                  <option :value="null">Tất cả</option>
+                  <option value="THANH_CONG">Thành công</option>
+                  <option value="TN_7NGAY">Tiềm năng 7 ngày</option>
+                  <option value="TN_14NGAY">Tiềm năng 14 ngày</option>
+                  <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc</option>
+                  <option value="SAI_SO_LIEU">Sai số</option>
+                  <option value="CHAM_SOC">Chăm sóc</option>
+                  <option value="THAT_BAI">Thất bại</option>
                 </select>
               </div>
+
               <div class="filter-group type-filter">
                 <label for="typeFilter">Phân loại:</label>
                 <select id="typeFilter" v-model="typeFilter">
-                  <option value="all">Tất cả</option>
-                  <option value="owner">Chủ nhà</option>
-                  <option value="broker">Môi giới</option>
-                  <option value="relative">Người thân</option>
+                  <option :value="null">Tất cả</option>
+                  <option value="CHINH_CHU">Chủ nhà</option>
+                  <option value="MOI_GIOI">Môi giới</option>
+                  <option value="NGUOI_THAN">Người thân</option>
                 </select>
               </div>
+
               <div class="search-box">
-                <input
-                    type="text"
-                    v-model="searchQuery"
-                    placeholder="Tìm kiếm theo tên, số điện thoại..."
-                />
+                <input v-model="searchQuery" type="text" placeholder="Tìm kiếm theo tên, số điện thoại..." />
                 <i class="fas fa-search"></i>
               </div>
             </div>
@@ -162,10 +187,7 @@
                 @click="selectCustomer(customer)"
             >
               <div class="customer-avatar">
-                <div
-                    class="avatar-initials"
-                    :style="{ backgroundColor: getAvatarColor(customer.name) }"
-                >
+                <div class="avatar-initials" :style="{ backgroundColor: getAvatarColor(customer.name) }">
                   {{ getInitials(customer.name) }}
                 </div>
                 <span :class="`customer-type ${customer.type}`">{{ getCustomerTypeLabel(customer.type) }}</span>
@@ -173,31 +195,28 @@
 
               <div class="customer-info">
                 <h4 class="customer-name">{{ customer.name }}</h4>
+
                 <p class="customer-phone">
                   <i class="fas fa-phone"></i> {{ customer.phone }}
                 </p>
+
                 <p class="customer-received">
                   <i class="fas fa-clock"></i> Tiếp nhận: {{ formatReceivedAt(customer.receivedAt) }}
                 </p>
+
                 <div class="customer-location">
                   <span class="location-current">
                     <i class="fas fa-map-marker-alt"></i> {{ customer.province }}
                   </span>
-                  <span v-if="customer.oldProvince" class="location-old">
-                    (Cũ: {{ customer.oldProvince }})
-                  </span>
+                  <span v-if="customer.oldProvince" class="location-old">(Cũ: {{ customer.oldProvince }})</span>
                 </div>
-                <div class="customer-notes-preview" v-if="customer.notes && customer.notes.length > 0">
-                  <i class="fas fa-sticky-note"></i>
-                  {{ getLastNotePreview(customer.notes) }}
+
+                <div class="customer-notes-preview" v-if="customer.note !== null && customer.note !== ''">
+                  <i class="fas fa-sticky-note"></i> {{ customer.note }}
                 </div>
-                <div class="customer-tags">
-                  <span
-                      v-for="tag in customer.tags"
-                      :key="tag"
-                      class="customer-tag"
-                      :class="tag"
-                  >
+
+                <div class="customer-tags" v-if="Array.isArray(customer.tags) && customer.tags.length">
+                  <span v-for="tag in customer.tags" :key="tag" class="customer-tag" :class="tag">
                     {{ getTagLabel(tag) }}
                   </span>
                 </div>
@@ -205,34 +224,25 @@
 
               <div class="customer-actions">
                 <div class="contact-icons">
-                  <a
-                      class="contact-icon zalo"
-                      :href="`zalo:${customer.phone}`"
-                      title="Zalo"
-                      @click.stop
-                  >
+                  <a class="contact-icon zalo" :href="`zalo:${customer.phone}`" title="Zalo" @click.stop>
                     <i class="fas fa-comment-dots"></i> zalo: {{ customer.phone }}
                   </a>
-                  <a
-                      class="contact-icon tel"
-                      :href="`tel:${customer.phone}`"
-                      title="Điện thoại"
-                      @click.stop
-                  >
+                  <a class="contact-icon tel" :href="`tel:${customer.phone}`" title="Điện thoại" @click.stop>
                     <i class="fas fa-phone"></i> tel: {{ customer.phone }}
                   </a>
                 </div>
                 <div class="call-status" v-if="customer.lastCall">
-                  <i class="fas fa-clock"></i>
-                  {{ formatTime(customer.lastCall) }}
+                  <i class="fas fa-clock"></i> {{ formatTime(customer.lastCall) }}
                 </div>
               </div>
             </div>
           </div>
+
           <div class="pagination" v-if="activeTab === 'contacted' && totalPages > 1">
             <button class="page-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
               <i class="fas fa-chevron-left"></i>
             </button>
+
             <button
                 v-for="page in pageNumbers"
                 :key="`page-${page}`"
@@ -242,7 +252,9 @@
             >
               {{ page }}
             </button>
+
             <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
+
             <button class="page-btn" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
               <i class="fas fa-chevron-right"></i>
             </button>
@@ -267,10 +279,13 @@
             >
               {{ selectedCustomer ? getInitials(selectedCustomer.name) : '' }}
             </div>
+
             <div class="detail-name-info">
               <h4>{{ selectedCustomer ? selectedCustomer.name : '' }}</h4>
               <p class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</p>
-              <p class="detail-received">Tiếp nhận: {{ selectedCustomer ? formatReceivedAt(selectedCustomer.receivedAt) : '' }}</p>
+              <p class="detail-received">
+                Tiếp nhận: {{ selectedCustomer ? formatReceivedAt(selectedCustomer.receivedAt) : '' }}
+              </p>
               <p class="detail-type">
                 <span :class="selectedCustomer ? `type-badge ${selectedCustomer.type}` : 'type-badge'">
                   {{ selectedCustomer ? getCustomerTypeLabel(selectedCustomer.type) : '' }}
@@ -298,8 +313,9 @@
                   v-for="tag in availableTags"
                   :key="tag.value"
                   class="tag-option"
-                  :class="{ active: selectedCustomer.tags.includes(tag.value) }"
-                  @click="toggleCustomerTag(tag.value)"
+                  :class="{ active: isTagActive(tag.value) }"
+                  :style="isTagActive(tag.value) ? { backgroundColor: tag.color, borderColor: tag.color, color: '#fff' } : {}"
+                  @click="toggleCustomerStatus(tag.value)"
               >
                 {{ tag.label }}
               </button>
@@ -307,571 +323,537 @@
           </div>
 
           <div class="detail-section">
-            <h5><i class="fas fa-sticky-note"></i> Ghi chú cuộc gọi</h5>
-            <div class="notes-container">
-              <div class="notes-list" v-if="selectedCustomer.notes && selectedCustomer.notes.length > 0">
-                <div
-                    v-for="(note, index) in selectedCustomer.notes"
-                    :key="index"
-                    class="note-item"
-                >
-                  <div class="note-header">
-                    <span class="note-date">{{ formatNoteDate(note.date) }}</span>
-                    <span class="note-time">{{ note.time }}</span>
-                  </div>
-                  <p class="note-content">{{ note.content }}</p>
-                </div>
-              </div>
-              <div class="no-notes" v-else>
-                Chưa có ghi chú nào
-              </div>
-            </div>
+            <h5>
+              <i class="fas fa-sticky-note"></i>Mô tả:
+              <span style="font-size: 14px; color: #4A4A4A; font-weight: 400">
+                {{ selectedCustomer.note !== '' ? selectedCustomer.note : 'Không có' }}
+              </span>
+            </h5>
+          </div>
 
-            <div class="add-note-form">
-              <textarea
-                  v-model="newNote"
-                  placeholder="Thêm ghi chú cuộc gọi..."
-                  rows="3"
-              ></textarea>
-              <button
-                  class="add-note-btn"
-                  @click="addNote"
-                  :disabled="!newNote.trim()"
-              >
-                <i class="fas fa-plus-circle"></i> Thêm ghi chú
-              </button>
-            </div>
+          <FileNew
+              v-if="selectedCustomer && selectedCustomer.files"
+              :key="'request-new-asset'"
+              :fileList="selectedCustomer.files"
+              :entityId="null"
+              :allow-download-all="false"
+              entityType="land"
+              :canEdit="true"
+              class="mt-2"
+          />
+
+          <div class="add-note-form">
+            <textarea v-model="newNote" placeholder="Thêm ghi chú cuộc gọi..." rows="3"></textarea>
           </div>
 
           <div class="detail-actions">
-            <button
-                class="action-btn move-btn"
-                @click="moveToContacted"
-            >
+            <button class="action-btn move-btn" @click="moveToContacted">
               <i class="fas fa-save"></i> Lưu thông tin
             </button>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
-<script>
-import Chart from 'chart.js/auto';
+<script setup>
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import Chart from 'chart.js/auto'
+import api from '/src/api/api.js'
+import FileNew from '../productAdmin/FileNew.vue'
 
-export default {
-  name: 'TelesaleApp',
-  data() {
-    return {
-      activeTab: 'new',
-      selectedCustomer: null,
-      newNote: '',
-      searchQuery: '',
-      statusFilter: 'all',
-      typeFilter: 'all',
-      currentPage: 1,
-      pageSize: 4,
-      selectedTimeRange: 'month',
-      selectedYear: new Date().getFullYear(),
-      selectedMonth: new Date().getMonth() + 1,
-      years: [2022, 2023, 2024, 2025],
-      months: [
-        'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-        'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
-      ],
-      todayStats: {
-        totalCalls: 28,
-        apiCalls: 28,
-        successfulCalls: 12,
-        unreachableCalls: 8,
-        wrongNumberCalls: 3
-      },
-      lineChartInstance: null,
-      summaryChartInstance: null,
-      availableTags: [
-        { value: 'potential_7', label: 'Khách tiềm năng 7 ngày' },
-        { value: 'potential_14', label: 'Khách tiềm năng 14 ngày' },
-        { value: 'success', label: 'Thành công (đặt lịch)' },
-        { value: 'wrong_number', label: 'Sai số' },
-        { value: 'unreachable', label: 'Không liên lạc được' },
-        { value: 'care', label: 'Chăm sóc' }
-      ],
-      newCustomers: [], // Sẽ gán từ API
-      contactedCustomers: [
-        {
-          id: 6,
-          name: 'Vũ Thị Phương',
-          phone: '0967890123',
-          receivedAt: '2024-03-10T09:05:00',
-          province: 'Bình Dương',
-          oldProvince: 'Đồng Nai',
-          type: 'owner',
-          notes: [
-            { date: '2024-03-10', time: '11:30', content: 'Đã đặt lịch thành công ngày 20/3' },
-            { date: '2024-03-15', time: '15:20', content: 'Xác nhận lại lịch hẹn' }
-          ],
-          tags: ['success'],
-          lastCall: '2024-03-15T15:20:00'
-        },
-        {
-          id: 7,
-          name: 'Đặng Văn Quân',
-          phone: '0978901234',
-          receivedAt: '2024-03-11T13:15:00',
-          province: 'Hà Nội',
-          oldProvince: null,
-          type: 'broker',
-          notes: [
-            { date: '2024-03-14', time: '14:10', content: 'Số điện thoại không liên lạc được' }
-          ],
-          tags: ['unreachable'],
-          lastCall: '2024-03-14T14:10:00'
-        },
-        {
-          id: 8,
-          name: 'Bùi Thị Hà',
-          phone: '0989012345',
-          receivedAt: '2024-03-12T10:25:00',
-          province: 'TP. Hồ Chí Minh',
-          oldProvince: 'Long An',
-          type: 'owner',
-          notes: [
-            { date: '2024-03-12', time: '09:45', content: 'Sai số, không phải khách hàng' }
-          ],
-          tags: ['wrong_number'],
-          lastCall: '2024-03-12T09:45:00'
-        }
-      ],
-      chartData: {
-        labels: [],
-        datasets: []
-      }
-    };
+// ====== META ======
+const STATUS_META = {
+  NEW: { label: 'Mới', color: '#94a3b8' },
+  DC_TELESALES: { label: 'Mới tiếp nhận', color: '#6366f1' },
+  CHAM_SOC: { label: 'Đang chăm sóc', color: '#38bdf8' },
+  TN_7NGAY: { label: 'Tiềm năng 7 ngày', color: '#0ea5e9' },
+  TN_14NGAY: { label: 'Tiềm năng 14 ngày', color: '#0284c7' },
+  THAT_BAI: { label: 'Thất bại', color: '#f43f5e' },
+  KHONG_LIEN_LAC_DUOC: { label: 'Không liên lạc được', color: '#f97316' },
+  SAI_SO_LIEU: { label: 'Sai số liệu', color: '#a855f7' },
+  THANH_CONG: { label: 'Thành công (Lên VP)', color: '#22c55e' }
+}
+
+// ====== Reactive state ======
+const activeTab = ref('new')
+const selectedCustomer = ref(null)
+const newNote = ref('')
+const searchQuery = ref('')
+
+// ✅ FIX all -> null
+const statusFilter = ref(null)
+const typeFilter = ref(null)
+
+const currentPage = ref(1)
+const pageSize = ref(4)
+
+const selectedTimeRange = ref('month')
+const selectedYear = ref(new Date().getFullYear())
+const selectedMonth = ref(new Date().getMonth() + 1)
+
+const lineChart = ref(null)
+const lineChartInstance = ref(null)
+const summaryChartInstance = ref(null)
+
+// ✅ years = 5 năm gần nhất
+const currentYear = new Date().getFullYear()
+const years = Array.from({ length: 5 }, (_, i) => currentYear - i)
+
+const months = [
+  'Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
+  'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'
+]
+
+const isTagActive = (value) => selectedCustomer.value?.status === value
+
+// ====== Sidebar stats ======
+const todayStats = ref({
+  soCuocGoiMoiHN: 0,
+  soCuocGoiThanhCongHomNay: 0,
+  soKhachLenVP: 0,
+  khongLienLacDuoc: 0,
+  saiSo: 0,
+  soCuocGoiChamSocHN: 0
+})
+
+// ====== Tags ======
+const availableTags = [
+  { value: 'CHAM_SOC', label: 'Đang chăm sóc', color: '#38bdf8' },
+  { value: 'TN_7NGAY', label: 'Tiềm năng 7 ngày', color: '#0ea5e9' },
+  { value: 'TN_14NGAY', label: 'Tiềm năng 14 ngày', color: '#0284c7' },
+  { value: 'THAT_BAI', label: 'Thất bại', color: '#f43f5e' },
+  { value: 'KHONG_LIEN_LAC_DUOC', label: 'Không liên lạc được', color: '#f97316' },
+  { value: 'SAI_SO_LIEU', label: 'Sai số liệu', color: '#a855f7' },
+  { value: 'THANH_CONG', label: 'Thành công (Lên VP)', color: '#22c55e' }
+]
+
+// ====== Data from API ======
+const newCustomers = ref([])
+const contactedCustomers = ref([
+  // Mock (để UI có dữ liệu)
+  {
+    id: 6,
+    name: 'Vũ Thị Phương',
+    phone: '0967890123',
+    receivedAt: '2024-03-10T09:05:00',
+    province: 'Bình Dương',
+    oldProvince: 'Đồng Nai',
+    type: 'CHINH_CHU',
+    note: 'Đã đặt lịch thành công ngày 20/3',
+    status: 'THANH_CONG',
+    tags: ['THANH_CONG'],
+    lastCall: '2024-03-15T15:20:00'
   },
-  watch: {
-    activeTab(newVal) {
-      this.currentPage = 1;
-      this.statusFilter = 'all';
-      this.searchQuery = '';
-      if (newVal === 'new') {
-        this.loadKhachMoiTiepNhan();
-      }
-    },
-    statusFilter() {
-      this.currentPage = 1;
-    },
-    typeFilter() {
-      this.currentPage = 1;
-    },
-    searchQuery() {
-      this.currentPage = 1;
-    }
+  {
+    id: 7,
+    name: 'Đặng Văn Quân',
+    phone: '0978901234',
+    receivedAt: '2024-03-11T13:15:00',
+    province: 'Hà Nội',
+    oldProvince: null,
+    type: 'MOI_GIOI',
+    note: 'Số điện thoại không liên lạc được',
+    status: 'KHONG_LIEN_LAC_DUOC',
+    tags: ['KHONG_LIEN_LAC_DUOC'],
+    lastCall: '2024-03-14T14:10:00'
   },
-  computed: {
-    filteredCustomers() {
-      const customers = this.activeTab === 'new' ? this.newCustomers : this.contactedCustomers;
-
-      if (!this.searchQuery.trim()) {
-        return this.filterByType(this.filterByStatus(customers));
-      }
-
-      const query = this.searchQuery.toLowerCase();
-      const filtered = customers.filter(customer =>
-          customer.name.toLowerCase().includes(query) ||
-          customer.phone.includes(query) ||
-          customer.province.toLowerCase().includes(query) ||
-          (customer.oldProvince && customer.oldProvince.toLowerCase().includes(query))
-      );
-      return this.filterByType(this.filterByStatus(filtered));
-    },
-    totalPages() {
-      if (this.activeTab !== 'contacted') return 1;
-      return Math.max(1, Math.ceil(this.filteredCustomers.length / this.pageSize));
-    },
-    pageNumbers() {
-      if (this.activeTab !== 'contacted') return [];
-      return Array.from({ length: this.totalPages }, (_, index) => index + 1);
-    },
-    pagedCustomers() {
-      if (this.activeTab !== 'contacted') return this.filteredCustomers;
-      const start = (this.currentPage - 1) * this.pageSize;
-      return this.filteredCustomers.slice(start, start + this.pageSize);
-    }
-  },
-  mounted() {
-    this.initCharts();
-  },
-  methods: {
-    // Khởi tạo biểu đồ
-    initCharts() {
-      this.initLineChart();
-      this.initSummaryChart();
-    },
-
-    // Khởi tạo biểu đồ đường
-    initLineChart() {
-      const ctx = this.$refs.lineChart;
-      if (!ctx) return;
-
-      // Xóa biểu đồ cũ nếu tồn tại
-      if (this.lineChartInstance) {
-        this.lineChartInstance.destroy();
-      }
-
-      // Tạo dữ liệu mẫu cho biểu đồ
-      const labels = this.selectedTimeRange === 'year'
-          ? this.months
-          : Array.from({length: 30}, (_, i) => `Ngày ${i+1}`);
-
-      const datasets = [
-        {
-          label: 'Thành công',
-          data: this.generateRandomData(labels.length, 5, 20),
-          borderColor: '#4CAF50',
-          backgroundColor: 'rgba(76, 175, 80, 0.1)',
-          tension: 0.4
-        },
-        {
-          label: 'Không liên lạc được',
-          data: this.generateRandomData(labels.length, 2, 15),
-          borderColor: '#f44336',
-          backgroundColor: 'rgba(244, 67, 54, 0.1)',
-          tension: 0.4
-        },
-        {
-          label: 'Sai số',
-          data: this.generateRandomData(labels.length, 1, 8),
-          borderColor: '#FF9800',
-          backgroundColor: 'rgba(255, 152, 0, 0.1)',
-          tension: 0.4
-        },
-        {
-          label: 'Tiềm năng 7 ngày',
-          data: this.generateRandomData(labels.length, 3, 18),
-          borderColor: '#2196F3',
-          backgroundColor: 'rgba(33, 150, 243, 0.1)',
-          tension: 0.4
-        },
-        {
-          label: 'Tiềm năng 14 ngày',
-          data: this.generateRandomData(labels.length, 2, 12),
-          borderColor: '#9C27B0',
-          backgroundColor: 'rgba(156, 39, 176, 0.1)',
-          tension: 0.4
-        }
-      ];
-
-      this.lineChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'top',
-            },
-            tooltip: {
-              mode: 'index',
-              intersect: false
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Số lượng cuộc gọi'
-              }
-            },
-            x: {
-              title: {
-                display: true,
-                text: this.selectedTimeRange === 'year' ? 'Tháng' : 'Ngày'
-              }
-            }
-          }
-        }
-      });
-    },
-
-    // Khởi tạo biểu đồ tổng hợp
-    initSummaryChart() {
-      const ctx = this.$refs.summaryChart;
-      if (!ctx) return;
-
-      // Xóa biểu đồ cũ nếu tồn tại
-      if (this.summaryChartInstance) {
-        this.summaryChartInstance.destroy();
-      }
-
-      this.summaryChartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Thành công', 'Tiềm năng 7 ngày', 'Tiềm năng 14 ngày', 'Không liên lạc', 'Sai số', 'Chăm sóc'],
-          datasets: [{
-            data: [12, 8, 5, 10, 4, 7],
-            backgroundColor: [
-              '#4CAF50',
-              '#2196F3',
-              '#9C27B0',
-              '#f44336',
-              '#FF9800',
-              '#FFC107'
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                boxWidth: 12,
-                font: {
-                  size: 10
-                }
-              }
-            }
-          }
-        }
-      });
-    },
-
-    // Tạo dữ liệu ngẫu nhiên cho biểu đồ
-    generateRandomData(count, min, max) {
-      return Array.from({length: count}, () =>
-          Math.floor(Math.random() * (max - min + 1)) + min
-      );
-    },
-
-    // Cập nhật biểu đồ khi thay đổi thời gian
-    updateChart() {
-      this.initLineChart();
-    },
-
-    // Làm mới dữ liệu
-    refreshData() {
-      // Trong thực tế, đây sẽ là nơi gọi API để lấy dữ liệu mới
-      this.todayStats.apiCalls = Math.min(40, this.todayStats.apiCalls + 5);
-      this.todayStats.totalCalls += 5;
-      this.todayStats.successfulCalls += 2;
-
-      // Khởi tạo lại biểu đồ
-      this.initCharts();
-    },
-
-    // Chọn khách hàng
-    selectCustomer(customer) {
-      this.selectedCustomer = customer;
-      this.newNote = '';
-    },
-
-    // Thêm ghi chú mới
-    addNote() {
-      if (this.newNote.trim() && this.selectedCustomer) {
-        const now = new Date();
-        const note = {
-          date: now.toISOString().split('T')[0],
-          time: now.toTimeString().slice(0, 5),
-          content: this.newNote
-        };
-
-        if (!this.selectedCustomer.notes) {
-          this.selectedCustomer.notes = [];
-        }
-
-        this.selectedCustomer.notes.unshift(note);
-        this.newNote = '';
-      }
-    },
-
-    // Đánh dấu trạng thái khách hàng
-    markCustomerStatus(status) {
-      if (!this.selectedCustomer) return;
-
-      // Xóa các tag cũ thuộc nhóm trạng thái
-      const statusTags = ['potential_7', 'potential_14', 'success', 'wrong_number', 'unreachable'];
-      this.selectedCustomer.tags = this.selectedCustomer.tags.filter(
-          tag => !statusTags.includes(tag)
-      );
-
-      // Thêm tag mới
-      if (!this.selectedCustomer.tags.includes(status)) {
-        this.selectedCustomer.tags.push(status);
-      }
-
-      // Nếu là thành công, chuyển sang tab đã liên hệ
-      if (status === 'success') {
-        this.moveToContacted();
-      }
-    },
-
-    // Chuyển khách hàng sang tab đã liên hệ
-    moveToContacted() {
-      if (!this.selectedCustomer) return;
-
-      const index = this.newCustomers.findIndex(c => c.id === this.selectedCustomer.id);
-      if (index !== -1) {
-        const customer = this.newCustomers.splice(index, 1)[0];
-        this.contactedCustomers.unshift(customer);
-        this.selectedCustomer = null;
-        this.activeTab = 'contacted';
-      }
-    },
-
-    // Chuyển đổi tag khách hàng
-    toggleCustomerTag(tag) {
-      if (!this.selectedCustomer) return;
-
-      if (this.selectedCustomer.tags.includes(tag)) {
-        this.selectedCustomer.tags = [];
-        return;
-      }
-
-      this.selectedCustomer.tags = [tag];
-    },
-
-    // Lấy nhãn loại khách hàng
-    getCustomerTypeLabel(type) {
-      const typeLabels = {
-        'MOI_GIOI': 'Môi giới',
-        'CHINH_CHU': 'Chủ nhà',
-        'NGUOI_THAN': 'Người thân'
-      };
-      return typeLabels[type] || type;
-    },
-
-    // Lấy nhãn tag
-    getTagLabel(tag) {
-      const tagObj = this.availableTags.find(t => t.value === tag);
-      return tagObj ? tagObj.label : tag;
-    },
-
-    filterByStatus(customers) {
-      if (this.activeTab !== 'contacted' || this.statusFilter === 'all') {
-        return customers;
-      }
-      return customers.filter(customer => customer.tags.includes(this.statusFilter));
-    },
-
-    filterByType(customers) {
-      if (this.typeFilter === 'all') {
-        return customers;
-      }
-      return customers.filter(customer => customer.type === this.typeFilter);
-    },
-
-    changePage(page) {
-      this.currentPage = Math.min(Math.max(page, 1), this.totalPages);
-    },
-
-    // Lấy ký tự viết tắt từ tên khách hàng
-    getInitials(name) {
-      if (!name) return '';
-      const words = name.trim().split(/\s+/);
-      const first = words[0]?.charAt(0) || '';
-      const last = words.length > 1 ? words[words.length - 1].charAt(0) : '';
-      return `${first}${last}`.toUpperCase();
-    },
-
-    // Tạo màu avatar dựa trên tên
-    getAvatarColor(name) {
-      if (!name) return 'hsl(210, 60%, 55%)';
-      let hash = 0;
-      for (let i = 0; i < name.length; i += 1) {
-        hash = name.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      const hue = Math.abs(hash) % 360;
-      return `hsl(${hue}, 60%, 55%)`;
-    },
-
-    // Lấy xem trước ghi chú cuối cùng
-    getLastNotePreview(notes) {
-      if (!notes || notes.length === 0) return 'Chưa có ghi chú';
-      const lastNote = notes[0];
-      const preview = lastNote.content.length > 50
-          ? lastNote.content.substring(0, 50) + '...'
-          : lastNote.content;
-      return `${lastNote.time} - ${preview}`;
-    },
-
-    // Định dạng thời gian
-    formatTime(isoString) {
-      if (!isoString) return 'Chưa gọi';
-      const date = new Date(isoString);
-      return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-    },
-
-    formatReceivedAt(isoString) {
-      if (!isoString) return '-';
-      const date = new Date(isoString);
-      return date.toLocaleString('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-    },
-
-    // Định dạng ngày ghi chú
-    formatNoteDate(isoString) {
-      const date = new Date(isoString);
-      return date.toLocaleDateString('vi-VN');
-    },
-
-    async loadKhachMoiTiepNhan() {
-      try {
-        const data = await fetchKhachMoiTiepNhan();
-        // Chuyển đổi dữ liệu API về đúng định dạng newCustomers
-        this.newCustomers = (data || []).map((item, idx) => ({
-          id: idx + 1, // hoặc item.id nếu backend trả về
-          name: item.hoTen,
-          phone: item.soDienThoai,
-          receivedAt: item.thoiGianTiepNhan,
-          province: item.tinhMoi,
-          oldProvince: item.tinhCu || null,
-          type: item.type, // hoặc xác định từ dữ liệu nếu có
-          notes: item.ghiChu ? [{ date: item.thoiGianTiepNhan.split('T')[0], time: item.thoiGianTiepNhan.split('T')[1]?.slice(0,5) || '', content: item.ghiChu }] : [],
-          tags: [],
-          lastCall: null,
-          files: item.files || null
-        }));
-      } catch (err) {
-        this.newCustomers = [];
-      }
-    },
+  {
+    id: 8,
+    name: 'Bùi Thị Hà',
+    phone: '0989012345',
+    receivedAt: '2024-03-12T10:25:00',
+    province: 'TP. Hồ Chí Minh',
+    oldProvince: 'Long An',
+    type: 'CHINH_CHU',
+    note: 'Sai số, không phải khách hàng',
+    status: 'SAI_SO_LIEU',
+    tags: ['SAI_SO_LIEU'],
+    lastCall: '2024-03-12T09:45:00'
   }
-};
+])
 
-// Gọi api lấy dữ liệu thực tế ở đây
-import api from "/src/api/api.js"
-export async function fetchKhachMoiTiepNhan() {
+const thongKeTrangThai = ref([])
+
+// ✅ dữ liệu cho line chart từ BE
+// Kỳ vọng BE trả: [{ status: 'TN_14NGAY', time: 9, total: 3 }, ...]
+// - time: nếu theo năm => 1..12 (tháng)
+// - time: nếu theo tháng => 1..31 (ngày)
+const thongKeThoiGian = ref([])
+
+// ====== Computed ======
+const filteredCustomers = computed(() => {
+  const customers = activeTab.value === 'new' ? newCustomers.value : contactedCustomers.value
+
+  const filteredBySearch = !searchQuery.value.trim()
+      ? customers
+      : customers.filter((c) => {
+        const q = searchQuery.value.toLowerCase()
+        return (
+            (c.name || '').toLowerCase().includes(q) ||
+            (c.phone || '').includes(q) ||
+            (c.province || '').toLowerCase().includes(q) ||
+            ((c.oldProvince || '').toLowerCase().includes(q))
+        )
+      })
+
+  return filterByType(filterByStatus(filteredBySearch))
+})
+
+const totalPages = computed(() => {
+  if (activeTab.value !== 'contacted') return 1
+  return Math.max(1, Math.ceil(filteredCustomers.value.length / pageSize.value))
+})
+
+const pageNumbers = computed(() => {
+  if (activeTab.value !== 'contacted') return []
+  return Array.from({ length: totalPages.value }, (_, idx) => idx + 1)
+})
+
+const pagedCustomers = computed(() => {
+  if (activeTab.value !== 'contacted') return filteredCustomers.value
+  const start = (currentPage.value - 1) * pageSize.value
+  return filteredCustomers.value.slice(start, start + pageSize.value)
+})
+
+// ====== Watchers ======
+watch(activeTab, (newVal) => {
+  currentPage.value = 1
+  statusFilter.value = null
+  searchQuery.value = ''
+
+  if (newVal === 'new') {
+    loadKhachMoiTiepNhan()
+  }
+})
+
+watch([statusFilter, typeFilter, searchQuery], () => {
+  currentPage.value = 1
+})
+
+watch([typeFilter, searchQuery], () => {
+  if (activeTab.value === 'new') loadKhachMoiTiepNhan()
+})
+
+// ✅ đổi thời gian => reload line chart data từ BE
+watch([selectedTimeRange, selectedYear, selectedMonth], async () => {
+  await fetchThongKeBieuDo()
+})
+
+// ====== Methods: filter ======
+const filterByStatus = (customers) => {
+  if (activeTab.value !== 'contacted' || !statusFilter.value) return customers
+  return customers.filter((c) => c.status === statusFilter.value)
+}
+
+const filterByType = (customers) => {
+  if (!typeFilter.value) return customers
+  return customers.filter((c) => c.type === typeFilter.value)
+}
+
+const changePage = (page) => {
+  currentPage.value = Math.min(Math.max(page, 1), totalPages.value)
+}
+
+// ====== Helpers ======
+const getCustomerTypeLabel = (type) => {
+  const typeLabels = {
+    MOI_GIOI: 'Môi giới',
+    CHINH_CHU: 'Chủ nhà',
+    NGUOI_THAN: 'Người thân'
+  }
+  return typeLabels[type] || type
+}
+
+const getTagLabel = (tag) => {
+  return STATUS_META[tag]?.label || tag
+}
+
+const getInitials = (name) => {
+  if (!name) return ''
+  const words = name.trim().split(/\s+/)
+  const first = words[0]?.charAt(0) || ''
+  const last = words.length > 1 ? words[words.length - 1].charAt(0) : ''
+  return `${first}${last}`.toUpperCase()
+}
+
+const getAvatarColor = (name) => {
+  if (!name) return 'hsl(210, 60%, 55%)'
+  let hash = 0
+  for (let i = 0; i < name.length; i += 1) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  const hue = Math.abs(hash) % 360
+  return `hsl(${hue}, 60%, 55%)`
+}
+
+const formatTime = (isoString) => {
+  if (!isoString) return 'Chưa gọi'
+  const date = new Date(isoString)
+  return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+}
+
+const formatReceivedAt = (isoString) => {
+  if (!isoString) return '-'
+  const date = new Date(isoString)
+  return date.toLocaleString('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+}
+
+// ====== Detail actions ======
+const selectCustomer = (customer) => {
+  selectedCustomer.value = customer
+  newNote.value = ''
+}
+
+const toggleCustomerStatus = (status) => {
+  if (!selectedCustomer.value) return
+  selectedCustomer.value.status = selectedCustomer.value.status === status ? null : status
+}
+
+const moveToContacted = async () => {
+  if (!selectedCustomer.value) return
+
   try {
-    const res = await api.get(
-        "/customer-crm/telesales/khach-moi-tiep-nhan",
-        {
-          withCredentials: true // nếu bạn dùng cookie/session
-        }
-    );
+    await api.post('/customer-crm/telesales/journey-history/create', {
+      customerId: selectedCustomer.value.id,
+      status: selectedCustomer.value.status,
+      description: newNote.value
+    })
 
-    console.log("👉 Khách mới tiếp nhận:", res.data);
+    const index = newCustomers.value.findIndex((c) => c.id === selectedCustomer.value.id)
+    if (index !== -1) {
+      const customer = newCustomers.value.splice(index, 1)[0]
+      customer.tags = customer.status ? [customer.status] : []
+      contactedCustomers.value.unshift(customer)
+    }
 
-    return res.data;
+    selectedCustomer.value = null
+    newNote.value = ''
+    activeTab.value = 'contacted'
+
+    // reload thống kê
+    await refreshData()
   } catch (err) {
-    console.error("❌ Lỗi lấy khách mới tiếp nhận:", err);
-    throw err;
+    console.error(err)
   }
 }
-fetchKhachMoiTiepNhan();
+
+// ====== API ======
+const fetchThongKeHomNay = async () => {
+  try {
+    const { data } = await api.get('/customer-crm/telesales/thong-ke/hom-nay')
+    todayStats.value = data
+  } catch (e) {
+    console.error('❌ Lỗi thống kê hôm nay', e)
+  }
+}
+
+const fetchThongKeTrangThaiTeleSales = async () => {
+  try {
+    const { data } = await api.get('/customer-crm/telesales/thong-ke-trang-thai')
+    thongKeTrangThai.value = Array.isArray(data)
+        ? data.map((item) => ({
+          label: item.label,
+          value: Number(item.value)
+        }))
+        : []
+  } catch (e) {
+    thongKeTrangThai.value = []
+  }
+}
+
+const fetchKhachMoiTiepNhan = async () => {
+  const res = await api.get('/customer-crm/telesales/khach-moi-tiep-nhan', {
+    params: {
+      type: typeFilter.value || null,
+      search: searchQuery.value || null
+    }
+  })
+  return res.data
+}
+
+const loadKhachMoiTiepNhan = async () => {
+  try {
+    const data = await fetchKhachMoiTiepNhan()
+    newCustomers.value = (data || []).map((item) => ({
+      id: item.id,
+      name: item.hoTen,
+      phone: item.soDienThoai,
+      receivedAt: item.thoiGianTiepNhan,
+      province: item.tinhMoi,
+      oldProvince: item.tinhCu || null,
+      type: item.type || null, // CHINH_CHU / MOI_GIOI / NGUOI_THAN
+      note: item.ghiChu || '',
+      status: null,
+      tags: [],
+      lastCall: null,
+      files: item.files || null
+    }))
+  } catch (err) {
+    newCustomers.value = []
+  }
+}
+
+// ====== LINE CHART (theo năm / tháng) ======
+const fetchThongKeBieuDo = async () => {
+  try {
+    let res
+
+    if (selectedTimeRange.value === 'month') {
+      res = await api.get('/customer-crm/telesales/thong-ke/thang', {
+        params: { year: selectedYear.value, month: selectedMonth.value }
+      })
+    } else {
+      res = await api.get('/customer-crm/telesales/thong-ke/nam', {
+        params: { year: selectedYear.value }
+      })
+    }
+
+    thongKeThoiGian.value = Array.isArray(res.data) ? res.data : []
+    await nextTick()
+    initLineChart()
+  } catch (e) {
+    console.error('❌ Lỗi load biểu đồ', e)
+    thongKeThoiGian.value = []
+    await nextTick()
+    initLineChart()
+  }
+}
+
+const buildLineChartData = () => {
+  const isYear = selectedTimeRange.value === 'year'
+
+  const labels = isYear
+      ? Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}`)
+      : Array.from({ length: 31 }, (_, i) => `Ngày ${i + 1}`)
+
+  // status -> [..data..]
+  const statusMap = {}
+
+  for (const item of thongKeThoiGian.value) {
+    // expected: {status, time, total}
+    const status = item.status ?? item.label // fallback
+    const t = Number(item.time ?? item.bucket ?? item.day ?? item.month) // fallback
+    const total = Number(item.total ?? item.value ?? 0)
+
+    if (!status || !t || t < 1 || t > labels.length) continue
+
+    if (!statusMap[status]) statusMap[status] = Array(labels.length).fill(0)
+    statusMap[status][t - 1] = total
+  }
+
+  const datasets = Object.keys(statusMap).map((status) => ({
+    label: STATUS_META[status]?.label || status,
+    data: statusMap[status],
+    borderColor: STATUS_META[status]?.color || '#94a3b8',
+    backgroundColor: 'transparent',
+    tension: 0.35,
+    pointRadius: 2
+  }))
+
+  return { labels, datasets }
+}
+
+const initLineChart = () => {
+  const canvas = lineChart.value
+  if (!canvas) return
+
+  if (lineChartInstance.value) {
+    lineChartInstance.value.destroy()
+  }
+
+  const { labels, datasets } = buildLineChartData()
+
+  lineChartInstance.value = new Chart(canvas, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: { mode: 'index', intersect: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Số lượng cuộc gọi' }
+        },
+        x: {
+          title: { display: true, text: selectedTimeRange.value === 'year' ? 'Tháng' : 'Ngày' }
+        }
+      }
+    }
+  })
+}
+
+// ====== SUMMARY CHART ======
+const initSummaryChart = () => {
+  const ctx = document.getElementById('summaryChart')
+  if (!ctx) return
+
+  if (summaryChartInstance.value) {
+    summaryChartInstance.value.destroy()
+  }
+
+  const labels = thongKeTrangThai.value.map((item) => STATUS_META[item.label]?.label || item.label)
+  const data = thongKeTrangThai.value.map((item) => item.value)
+  const backgroundColor = thongKeTrangThai.value.map((item) => STATUS_META[item.label]?.color || '#94a3b8')
+
+  summaryChartInstance.value = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor, borderWidth: 1 }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '70%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { boxWidth: 12, font: { size: 12 } }
+        }
+      }
+    }
+  })
+}
+
+// ====== Refresh all ======
+const refreshData = async () => {
+  await Promise.all([
+    fetchThongKeHomNay(),
+    fetchThongKeTrangThaiTeleSales(),
+    fetchThongKeBieuDo()
+  ])
+  await nextTick()
+  initSummaryChart()
+}
+
+// ====== Lifecycle ======
+onMounted(async () => {
+  await Promise.all([
+    fetchThongKeHomNay(),
+    fetchThongKeTrangThaiTeleSales(),
+    loadKhachMoiTiepNhan(),
+    fetchThongKeBieuDo()
+  ])
+  await nextTick()
+  initSummaryChart()
+})
+
+onUnmounted(() => {
+  if (lineChartInstance.value) lineChartInstance.value.destroy()
+  if (summaryChartInstance.value) summaryChartInstance.value.destroy()
+})
 </script>
 
 <style scoped>
@@ -1636,24 +1618,27 @@ body {
 
 .tag-option {
   padding: 6px 12px;
-  border: 1px solid #cfd7e3;
   border-radius: 999px;
-  background-color: #f5f8ff;
+  border: 1px solid #e5e7eb;
+  background: #fff;
   font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: #344054;
+  transition: all 0.2s ease;
 }
+
+.tag-option.active {
+  font-weight: 500;
+}
+
 
 .tag-option:hover {
   background-color: #f5f5f5;
 }
 
-.tag-option.active {
-  background-color: #16a34a;
-  color: white;
-  border-color: #16a34a;
+.tag-option:not(.active):hover {
+  border-color: #c7d2fe;
+  background: #eef2ff;
 }
+
 
 .notes-container {
   max-height: 200px;
@@ -1909,4 +1894,12 @@ body {
     margin-top: 10px;
   }
 }
+.progress-fill.progress-new {
+  background: linear-gradient(to right, #6366f1, #818cf8);
+}
+
+.progress-fill.progress-care {
+  background: linear-gradient(to right, #0ea5e9, #38bdf8);
+}
+
 </style>

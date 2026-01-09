@@ -38,8 +38,7 @@
         </CustomButton>
 
         <CustomButton
-            :href="config.buttons.profile.href"
-            :target="config.buttons.profile.target"
+            @click="openYoutubeModal"
             :variant="config.buttons.profile.variant"
             :color="config.buttons.profile.color"
             :size="config.buttons.profile.size"
@@ -58,7 +57,7 @@
 
   <!-- ABOUT SECTION -->
   <section id="about" class="py-24 bg-brand-dark relative overflow-hidden">
-    <div class="container mx-auto px-6 text-center relative z-10 pt-16 pb-16">
+    <div class="container mx-auto px-6 relative z-10 pt-16 pb-16">
       <div class="flex flex-col md:flex-row items-center gap-16">
         <!-- Image Side với carousel-->
         <div class="w-full md:w-1/2 relative" data-aos="fade-right" data-aos-duration="1200">
@@ -82,7 +81,7 @@
 
         <!-- Text Side -->
         <div class="w-full md:w-1/2" data-aos="fade-left" data-aos-duration="1200">
-          <h2 class="text-sm font-bold text-blue-500 uppercase tracking-widest mb-2">{{ config.about.subtitle }}</h2>
+          <h2 class="text-sm font-bold text-blue-500 uppercase tracking-widest mb-2 text-left">{{ config.about.subtitle }}</h2>
           <h3 class="text-4xl font-display font-bold text-white mb-6">{{ config.about.title }} <span
               class="text-gradient">{{ config.about.highlightedText }}</span></h3>
           <p class="text-slate-400 mb-6 leading-relaxed">
@@ -194,22 +193,26 @@
                class="absolute group cursor-pointer"
                :style="`top: ${location.position.top}; left: ${location.position.left};`">
 
-            <!-- Bóng (ping/ripple effect) -->
-            <span
-                :class="`absolute inline-flex h-${location.size} w-${location.size} rounded-full opacity-75 animate-ping ${location.animationDelay}`"
-                :style="`background-color: ${location.color};`">
-  </span>
+            <!-- Bóng (ping/ripple effect) - ĐÃ SỬA -->
+            <div class="absolute inset-0 flex items-center justify-center">
+    <span
+        :class="`absolute inline-flex h-${location.size} w-${location.size} rounded-full ${location.animationDelay}`"
+        :style="`background-color: ${location.color}; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;`">
+    </span>
+            </div>
 
             <!-- Điểm chính (hotspot dot) -->
-            <span
-                :class="`relative inline-flex rounded-full h-${location.size} w-${location.size} border-2 border-[#0b1120] items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.8)]`"
-                :style="`background-color: ${location.color};`">
-    <i :class="location.iconClass"></i>
-  </span>
+            <div class="relative flex items-center justify-center">
+    <span
+        :class="`inline-flex rounded-full h-${location.size} w-${location.size} border-2 border-[#0b1120] items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.8)] z-10`"
+        :style="`background-color: ${location.color};`">
+      <i :class="location.iconClass"></i>
+    </span>
+            </div>
 
-            <!-- Tooltip -->
+            <!-- Tooltip - ĐÃ SỬA -->
             <div
-                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-max px-3 py-1 bg-white rounded text-xs font-bold text-blue-900 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none transform translate-y-2 group-hover:translate-y-0">
+                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-white rounded-lg text-xs font-bold text-blue-900 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-y-2 group-hover:translate-y-0 z-20 whitespace-nowrap shadow-lg">
               {{ location.name }}
               <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-white"></div>
             </div>
@@ -277,6 +280,13 @@
       </div>
     </div>
   </section>
+
+  <ModalYoutube
+      v-if="showYoutubeModal"
+      :is-open="showYoutubeModal"
+      :youtube-url="youtubeEmbedUrl"
+      @close="closeYoutubeModal"
+  />
 </template>
 
 <script setup>
@@ -289,6 +299,34 @@ import {onBeforeUnmount, onMounted, ref, computed} from "vue";
 import MiniCardIcon from "../../UI/MiniCardIcon.vue";
 import {baseImgaeUrl} from "../../../../assets/js/global.js";
 import api from "../../../../api/api.js";
+
+import ModalYoutube from "./ModalYoutube.vue";
+
+// Thêm các ref và methods
+const showYoutubeModal = ref(false)
+const youtubeEmbedUrl = ref('')
+
+// Thêm methods mới
+const openYoutubeModal = () => {
+  // Chuyển đổi URL YouTube thành embed URL
+  console.log("Chuẩn bị chuyển đổi link YTB",config.value.buttons.profile.href)
+  const youtubeId = extractYoutubeId(config.value.buttons.profile.href)
+  youtubeEmbedUrl.value = `https://www.youtube.com/embed/${youtubeId}`
+  showYoutubeModal.value = true
+  console.log("link YTB",youtubeEmbedUrl.value)
+}
+
+const closeYoutubeModal = () => {
+  showYoutubeModal.value = false
+}
+
+// Hàm helper để lấy ID từ URL YouTube
+const extractYoutubeId = (url) => {
+  const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/
+  const match = url.match(regExp)
+  return (match && match[7].length === 11) ? match[7] : 'JZ1YvvYo2hA&t'
+}
+
 
 // CONFIG OBJECT - Tất cả dữ liệu và style được quản lý qua CMS
 const config = ref({
@@ -339,7 +377,7 @@ const config = ref({
     },
     profile: {
       text: 'Xem hồ sơ',
-      href: 'https://www.youtube.com/watch?v=JPedlPJSBkg',
+      href: 'https://www.youtube.com/watch?v=JZ1YvvYo2hA&t',
       target: '_blank',
       variant: 'outline',
       color: 'white',

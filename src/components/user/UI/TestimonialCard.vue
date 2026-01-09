@@ -28,7 +28,7 @@
     </div>
 
     <!-- Quote (exact like original) -->
-    <p class="text-slate-200 text-sm">
+    <p class="mt-3 text-slate-300/90 italic ">
       "{{ quote }}"
     </p>
   </div>

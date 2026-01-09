@@ -1437,7 +1437,7 @@ async function submitCollaboration() {
     showCenterSuccess(res.data.message || "Gửi đề nghị hợp tác thành công");
 
     // 👉 cập nhật UI để không gửi lại
-    selectedAsset.value.daGuiYeuCau = true;
+
 
 
 

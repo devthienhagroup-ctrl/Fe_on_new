@@ -121,9 +121,9 @@
     <button
         id="backToTop"
         @click="emit('scrollToTop')"
-        style="right: 85px;"
+        style=""
         :class="[
-        'fixed bottom-8 z-50 bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-full shadow-lg transition-all duration-300 transform group',
+        'fixed bottom-8 z-50 bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-full shadow-lg transition-all duration-300 transform group right-2',
         showBackToTop ? 'translate-y-0 opacity-100 visible' : 'translate-y-10 opacity-0 invisible'
       ]">
       <i class="fas fa-chevron-up w-6 h-6 group-hover:-translate-y-1 transition-transform"></i>
