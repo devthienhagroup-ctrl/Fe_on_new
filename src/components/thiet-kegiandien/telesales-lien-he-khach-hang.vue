@@ -211,10 +211,6 @@
                   <span v-if="customer.oldProvince" class="location-old">(Cũ: {{ customer.oldProvince }})</span>
                 </div>
 
-                <div class="customer-notes-preview" v-if="customer.note !== null && customer.note !== ''">
-                  <i class="fas fa-sticky-note"></i> {{ customer.note }}
-                </div>
-
                 <div class="customer-tags" v-if="Array.isArray(customer.tags) && customer.tags.length">
                   <span v-for="tag in customer.tags" :key="tag" class="customer-tag" :class="tag">
                     {{ getTagLabel(tag) }}
@@ -332,14 +328,16 @@
           </div>
 
           <FileNew
-              v-if="selectedCustomer && selectedCustomer.files"
+              v-if="selectedCustomer"
               :key="'request-new-asset'"
-              :fileList="selectedCustomer.files"
-              :entityId="null"
-              :allow-download-all="false"
-              entityType="land"
-              :canEdit="true"
+              :file-list="fileForm.files"
+              :entity-id="selectedCustomer.id"
+              :allow-download-all="true"
+              entity-type="host"
+              :can-edit="true"
+              :on-upload="true"
               class="mt-2"
+              @update:files="handleFileUpdate"
           />
 
           <div class="add-note-form">
@@ -361,7 +359,7 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 import api from '/src/api/api.js'
-import FileNew from '../productAdmin/FileNew.vue'
+import FileNew from './File.vue'
 
 // ====== META ======
 const STATUS_META = {
@@ -381,13 +379,22 @@ const activeTab = ref('new')
 const selectedCustomer = ref(null)
 const newNote = ref('')
 const searchQuery = ref('')
+const originalFiles = ref([])
+
+const fileForm = ref({
+  files: [],
+  newFiles: [],
+  newLandBookFiles: [],
+  deletedFileIds: [],
+  deletedLandBookFileIds: []
+})
 
 // ✅ FIX all -> null
 const statusFilter = ref(null)
 const typeFilter = ref(null)
 
 const currentPage = ref(1)
-const pageSize = ref(4)
+const pageSize = ref(1)
 
 const selectedTimeRange = ref('month')
 const selectedYear = ref(new Date().getFullYear())
@@ -610,6 +617,7 @@ const formatReceivedAt = (isoString) => {
 const selectCustomer = (customer) => {
   selectedCustomer.value = customer
   newNote.value = ''
+  resetFileForm(customer?.files)
 }
 
 const toggleCustomerStatus = (status) => {
@@ -617,14 +625,95 @@ const toggleCustomerStatus = (status) => {
   selectedCustomer.value.status = selectedCustomer.value.status === status ? null : status
 }
 
+const resetFileForm = (files) => {
+  const safeFiles = Array.isArray(files) ? JSON.parse(JSON.stringify(files)) : []
+  fileForm.value = {
+    files: safeFiles,
+    newFiles: [],
+    newLandBookFiles: [],
+    deletedFileIds: [],
+    deletedLandBookFileIds: []
+  }
+  originalFiles.value = JSON.parse(JSON.stringify(safeFiles))
+}
+
+const handleFileUpdate = (files) => {
+  fileForm.value.files = Array.isArray(files) ? files : []
+
+  const existingFiles = fileForm.value.files.filter((file) => !file.file && file.id)
+  const newFiles = fileForm.value.files.filter((file) => file.file instanceof File)
+
+  fileForm.value.newFiles = newFiles
+      .filter((file) => !file.isIG)
+      .map((file) => ({ file: file.file, isOnTop: file.isOnTop }))
+
+  fileForm.value.newLandBookFiles = newFiles
+      .filter((file) => file.isIG)
+      .map((file) => ({ file: file.file, isOnTop: file.isOnTop }))
+
+  const originalIds = (originalFiles.value || []).map((file) => file.id)
+  const currentIds = existingFiles.map((file) => file.id)
+
+  fileForm.value.deletedFileIds = originalIds.filter((id) => {
+    const file = (originalFiles.value || []).find((item) => item.id === id)
+    return !currentIds.includes(id) && file && !file.isIG
+  })
+
+  fileForm.value.deletedLandBookFileIds = originalIds.filter((id) => {
+    const file = (originalFiles.value || []).find((item) => item.id === id)
+    return !currentIds.includes(id) && file && file.isIG
+  })
+}
+
+const buildFilePayload = () => {
+  const dto = {
+    customerId: selectedCustomer.value.id,
+    status: selectedCustomer.value.status,
+    description: newNote.value,
+    files: fileForm.value.files
+        .filter((file) => !file.file && file.id)
+        .map((file) => ({
+          id: file.id,
+          fileName: file.fileName,
+          isIG: file.isIG,
+          isOnTop: file.isOnTop
+        })),
+    deletedFileIds: fileForm.value.deletedFileIds,
+    deletedLandBookFileIds: fileForm.value.deletedLandBookFileIds
+  }
+
+  const fd = new FormData()
+  fd.append('dto', new Blob([JSON.stringify(dto)], { type: 'application/json' }))
+
+  const mainFile = fileForm.value.newFiles.find((file) => file?.isOnTop && file.file instanceof File)
+      || fileForm.value.newLandBookFiles.find((file) => file?.isOnTop && file.file instanceof File)
+
+  if (mainFile) {
+    fd.append('newFileOntop', mainFile.file)
+  }
+
+  fileForm.value.newFiles.forEach((file) => {
+    if (file?.file instanceof File) {
+      fd.append('newFiles', file.file)
+    }
+  })
+
+  fileForm.value.newLandBookFiles.forEach((file) => {
+    if (file?.file instanceof File) {
+      fd.append('newLandBookFiles', file.file)
+    }
+  })
+
+  return fd
+}
+
 const moveToContacted = async () => {
   if (!selectedCustomer.value) return
 
   try {
-    await api.post('/customer-crm/telesales/journey-history/create', {
-      customerId: selectedCustomer.value.id,
-      status: selectedCustomer.value.status,
-      description: newNote.value
+    const payload = buildFilePayload()
+    await api.post('/customer-crm/telesales/journey-history/create', payload, {
+      headers: { 'Content-Type': 'multipart/form-data' }
     })
 
     const index = newCustomers.value.findIndex((c) => c.id === selectedCustomer.value.id)
@@ -636,6 +725,7 @@ const moveToContacted = async () => {
 
     selectedCustomer.value = null
     newNote.value = ''
+    resetFileForm([])
     activeTab.value = 'contacted'
 
     // reload thống kê
@@ -694,7 +784,7 @@ const loadKhachMoiTiepNhan = async () => {
       status: null,
       tags: [],
       lastCall: null,
-      files: item.files || null
+      files: Array.isArray(item.files) ? item.files : []
     }))
   } catch (err) {
     newCustomers.value = []
@@ -854,6 +944,33 @@ onUnmounted(() => {
   if (lineChartInstance.value) lineChartInstance.value.destroy()
   if (summaryChartInstance.value) summaryChartInstance.value.destroy()
 })
+
+const getKhachDaLienHe = async () => {
+  try {
+    const res = await api.get(
+        '/customer-crm/telesales/khach-da-lien-he',
+        {
+          params: {
+            page: 0,
+            size: 10,
+            status: 'TN_14NGAY', // hoặc null
+            type: null,             // VD: 'NONG', 'AM'
+            search: ''              // hoặc null
+          }
+        }
+    )
+
+    console.log('✅ Response full:', res)
+    console.log('📦 Page data:', res.data)
+    console.log('📋 Content:', res.data.content)
+    console.log('📄 Total elements:', res.data.page.totalElements)
+    console.log('📑 Total pages:', res.data.page.totalPages)
+
+  } catch (err) {
+    console.error('❌ Lỗi gọi API khach-da-lien-he:', err)
+  }
+}
+getKhachDaLienHe();
 </script>
 
 <style scoped>
