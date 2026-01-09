@@ -327,6 +327,44 @@
             </h5>
           </div>
 
+          <div class="detail-section" v-if="Array.isArray(selectedCustomer.lichSu) && selectedCustomer.lichSu.length">
+            <h5>
+              <i class="fas fa-history"></i>
+              Lịch sử trạng thái
+            </h5>
+
+            <div class="history-list">
+              <div
+                  v-for="(item, idx) in selectedCustomer.lichSu"
+                  :key="idx"
+                  class="history-item"
+              >
+                <div
+                    class="history-status"
+                    :style="{
+            backgroundColor: STATUS_META[item.trangThai]?.color || '#94a3b8'
+          }"
+                >
+                  {{ STATUS_META[item.trangThai]?.label || item.trangThai }}
+                </div>
+
+                <div class="history-content">
+                  <div class="history-time">
+                    <i class="fas fa-clock"></i>
+                    {{ formatReceivedAt(item.thoiGianCapNhat) }}
+                  </div>
+
+                  <div class="history-note" v-if="item.ghiChu">
+                    {{ item.ghiChu }}
+                  </div>
+                  <div class="history-note muted" v-else>
+                    Không có mô tả
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <FileNew
               v-if="selectedCustomer"
               :key="'request-new-asset'"
@@ -394,7 +432,7 @@ const statusFilter = ref(null)
 const typeFilter = ref(null)
 
 const currentPage = ref(1)
-const pageSize = ref(1)
+const pageSize = ref(10)
 
 const selectedTimeRange = ref('month')
 const selectedYear = ref(new Date().getFullYear())
@@ -438,48 +476,13 @@ const availableTags = [
 
 // ====== Data from API ======
 const newCustomers = ref([])
-const contactedCustomers = ref([
-  // Mock (để UI có dữ liệu)
-  {
-    id: 6,
-    name: 'Vũ Thị Phương',
-    phone: '0967890123',
-    receivedAt: '2024-03-10T09:05:00',
-    province: 'Bình Dương',
-    oldProvince: 'Đồng Nai',
-    type: 'CHINH_CHU',
-    note: 'Đã đặt lịch thành công ngày 20/3',
-    status: 'THANH_CONG',
-    tags: ['THANH_CONG'],
-    lastCall: '2024-03-15T15:20:00'
-  },
-  {
-    id: 7,
-    name: 'Đặng Văn Quân',
-    phone: '0978901234',
-    receivedAt: '2024-03-11T13:15:00',
-    province: 'Hà Nội',
-    oldProvince: null,
-    type: 'MOI_GIOI',
-    note: 'Số điện thoại không liên lạc được',
-    status: 'KHONG_LIEN_LAC_DUOC',
-    tags: ['KHONG_LIEN_LAC_DUOC'],
-    lastCall: '2024-03-14T14:10:00'
-  },
-  {
-    id: 8,
-    name: 'Bùi Thị Hà',
-    phone: '0989012345',
-    receivedAt: '2024-03-12T10:25:00',
-    province: 'TP. Hồ Chí Minh',
-    oldProvince: 'Long An',
-    type: 'CHINH_CHU',
-    note: 'Sai số, không phải khách hàng',
-    status: 'SAI_SO_LIEU',
-    tags: ['SAI_SO_LIEU'],
-    lastCall: '2024-03-12T09:45:00'
-  }
-])
+const contactedCustomers = ref([])
+const contactedPagination = ref({
+  size: 10,
+  number: 0,
+  totalElements: 0,
+  totalPages: 1
+})
 
 const thongKeTrangThai = ref([])
 
@@ -491,26 +494,12 @@ const thongKeThoiGian = ref([])
 
 // ====== Computed ======
 const filteredCustomers = computed(() => {
-  const customers = activeTab.value === 'new' ? newCustomers.value : contactedCustomers.value
-
-  const filteredBySearch = !searchQuery.value.trim()
-      ? customers
-      : customers.filter((c) => {
-        const q = searchQuery.value.toLowerCase()
-        return (
-            (c.name || '').toLowerCase().includes(q) ||
-            (c.phone || '').includes(q) ||
-            (c.province || '').toLowerCase().includes(q) ||
-            ((c.oldProvince || '').toLowerCase().includes(q))
-        )
-      })
-
-  return filterByType(filterByStatus(filteredBySearch))
+  return activeTab.value === 'new' ? newCustomers.value : contactedCustomers.value
 })
 
 const totalPages = computed(() => {
   if (activeTab.value !== 'contacted') return 1
-  return Math.max(1, Math.ceil(filteredCustomers.value.length / pageSize.value))
+  return Math.max(1, Number(contactedPagination.value.totalPages || 1))
 })
 
 const pageNumbers = computed(() => {
@@ -519,9 +508,7 @@ const pageNumbers = computed(() => {
 })
 
 const pagedCustomers = computed(() => {
-  if (activeTab.value !== 'contacted') return filteredCustomers.value
-  const start = (currentPage.value - 1) * pageSize.value
-  return filteredCustomers.value.slice(start, start + pageSize.value)
+  return filteredCustomers.value
 })
 
 // ====== Watchers ======
@@ -532,15 +519,18 @@ watch(activeTab, (newVal) => {
 
   if (newVal === 'new') {
     loadKhachMoiTiepNhan()
+  } else {
+    loadKhachDaLienHe()
   }
 })
 
 watch([statusFilter, typeFilter, searchQuery], () => {
   currentPage.value = 1
-})
-
-watch([typeFilter, searchQuery], () => {
-  if (activeTab.value === 'new') loadKhachMoiTiepNhan()
+  if (activeTab.value === 'new') {
+    loadKhachMoiTiepNhan()
+  } else {
+    loadKhachDaLienHe()
+  }
 })
 
 // ✅ đổi thời gian => reload line chart data từ BE
@@ -548,19 +538,11 @@ watch([selectedTimeRange, selectedYear, selectedMonth], async () => {
   await fetchThongKeBieuDo()
 })
 
-// ====== Methods: filter ======
-const filterByStatus = (customers) => {
-  if (activeTab.value !== 'contacted' || !statusFilter.value) return customers
-  return customers.filter((c) => c.status === statusFilter.value)
-}
-
-const filterByType = (customers) => {
-  if (!typeFilter.value) return customers
-  return customers.filter((c) => c.type === typeFilter.value)
-}
-
 const changePage = (page) => {
   currentPage.value = Math.min(Math.max(page, 1), totalPages.value)
+  if (activeTab.value === 'contacted') {
+    loadKhachDaLienHe()
+  }
 }
 
 // ====== Helpers ======
@@ -727,6 +709,7 @@ const moveToContacted = async () => {
     newNote.value = ''
     resetFileForm([])
     activeTab.value = 'contacted'
+    await loadKhachDaLienHe()
 
     // reload thống kê
     await refreshData()
@@ -784,10 +767,66 @@ const loadKhachMoiTiepNhan = async () => {
       status: null,
       tags: [],
       lastCall: null,
-      files: Array.isArray(item.files) ? item.files : []
+      files: Array.isArray(item.files) ? item.files : [],
+      lichSu: Array.isArray(item.lichSu) ? item.lichSu : [] // ✅ THÊM
     }))
   } catch (err) {
     newCustomers.value = []
+  }
+}
+
+const loadKhachDaLienHe = async () => {
+  try {
+    const res = await api.get('/customer-crm/telesales/khach-da-lien-he', {
+      params: {
+        page: Math.max(currentPage.value - 1, 0),
+        size: pageSize.value,
+        status: statusFilter.value || null,
+        type: typeFilter.value || null,
+        search: searchQuery.value?.trim() || null
+      }
+    })
+
+    const payload = res.data || {}
+    const content = Array.isArray(payload.content) ? payload.content : []
+    const page = payload.page || {}
+
+    contactedCustomers.value = content.map((item) => {
+      const status = item.status ?? statusFilter.value ?? null
+      return {
+        id: item.id,
+        name: item.hoTen,
+        phone: item.soDienThoai,
+        receivedAt: item.thoiGianTiepNhan,
+        province: item.tinhMoi,
+        oldProvince: item.tinhCu || null,
+        type: item.type || null,
+        note: item.ghiChu || '',
+        status,
+        tags: status ? [status] : [],
+        lastCall: item.thoiGianLienHe || null,
+        files: Array.isArray(item.files) ? item.files : [],
+        lichSu: Array.isArray(item.lichSu) ? item.lichSu : []
+      }
+    })
+
+    contactedPagination.value = {
+      size: page.size ?? pageSize.value,
+      number: page.number ?? Math.max(currentPage.value - 1, 0),
+      totalElements: page.totalElements ?? content.length,
+      totalPages: page.totalPages ?? 1
+    }
+
+    pageSize.value = contactedPagination.value.size
+    currentPage.value = contactedPagination.value.number + 1
+  } catch (err) {
+    contactedCustomers.value = []
+    contactedPagination.value = {
+      size: pageSize.value,
+      number: 0,
+      totalElements: 0,
+      totalPages: 1
+    }
   }
 }
 
@@ -932,6 +971,7 @@ const refreshData = async () => {
 onMounted(async () => {
   await Promise.all([
     fetchThongKeHomNay(),
+    loadKhachDaLienHe(),
     fetchThongKeTrangThaiTeleSales(),
     loadKhachMoiTiepNhan(),
     fetchThongKeBieuDo()
@@ -944,33 +984,6 @@ onUnmounted(() => {
   if (lineChartInstance.value) lineChartInstance.value.destroy()
   if (summaryChartInstance.value) summaryChartInstance.value.destroy()
 })
-
-const getKhachDaLienHe = async () => {
-  try {
-    const res = await api.get(
-        '/customer-crm/telesales/khach-da-lien-he',
-        {
-          params: {
-            page: 0,
-            size: 10,
-            status: 'TN_14NGAY', // hoặc null
-            type: null,             // VD: 'NONG', 'AM'
-            search: ''              // hoặc null
-          }
-        }
-    )
-
-    console.log('✅ Response full:', res)
-    console.log('📦 Page data:', res.data)
-    console.log('📋 Content:', res.data.content)
-    console.log('📄 Total elements:', res.data.page.totalElements)
-    console.log('📑 Total pages:', res.data.page.totalPages)
-
-  } catch (err) {
-    console.error('❌ Lỗi gọi API khach-da-lien-he:', err)
-  }
-}
-getKhachDaLienHe();
 </script>
 
 <style scoped>
@@ -2017,6 +2030,52 @@ body {
 
 .progress-fill.progress-care {
   background: linear-gradient(to right, #0ea5e9, #38bdf8);
+}
+/* ===== HISTORY ===== */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.history-status {
+  min-width: 120px;
+  height: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.history-content {
+  flex: 1;
+}
+
+.history-time {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.history-note {
+  font-size: 14px;
+  color: #334155;
+}
+
+.history-note.muted {
+  font-style: italic;
+  color: #94a3b8;
 }
 
 </style>

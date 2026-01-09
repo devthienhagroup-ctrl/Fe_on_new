@@ -149,7 +149,7 @@ const routes = [
         path: "/test/dat-lich",
         name: "TeamCollaboration",
         component: test,
-        meta: { requiresAuth: false, enableTailwind: false},
+        meta: { requiresAuth: false,     enableTailwind: false},
     },
     {
         path: "/test/tele-sales",
