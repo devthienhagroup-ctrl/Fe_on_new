@@ -1,45 +1,352 @@
 diff --git a/src/components/thiet-kegiandien/admin-saleadmin.vue b/src/components/thiet-kegiandien/admin-saleadmin.vue
-index 362422df719f749f0bc755514a305da28a6c3bce..9a077ea123f4815c80fa95eb452000e96ddf11de 100644
+index 3ce564c63069304363527dd4c4f457324e2ad662..6166f007bd87395c80c93e60f228a9a324b67d7f 100644
 --- a/src/components/thiet-kegiandien/admin-saleadmin.vue
 +++ b/src/components/thiet-kegiandien/admin-saleadmin.vue
-@@ -1,27 +1,28 @@
- <template>
--  <div class="app-root">
-+  <div class="app-scale">
-+    <div class="app-root">
-     <!-- Navigation -->
-     <nav class="navbar navbar-expand-lg navbar-custom">
-       <div class="container-fluid">
-         <a class="navbar-brand" href="#">
-           <i class="fas fa-phone-alt"></i>
-           <span>Telesale Pro</span>
-         </a>
-
-         <button class="navbar-toggler" type="button" @click="toggleMobileMenu">
-           <span class="navbar-toggler-icon"><i class="fas fa-bars text-white"></i></span>
-         </button>
-
-         <div class="collapse navbar-collapse" :class="{ show: mobileMenuOpen }" id="navbarNav">
-           <ul class="navbar-nav mx-auto">
-             <li class="nav-item">
-               <a class="nav-link-custom active" href="#">
-                 <i class="fas fa-home me-2"></i> Dashboard
-               </a>
-             </li>
-             <li class="nav-item">
-               <a class="nav-link-custom" href="#">
-                 <i class="fas fa-users me-2"></i> Khách hàng
-               </a>
-             </li>
-             <li class="nav-item">
-@@ -644,50 +645,51 @@
-             <div class="text-center mb-4">
-               <div class="mb-3">
-                 <i class="fas fa-trash-alt fa-3x text-danger"></i>
-               </div>
-               <h4 class="fw-bold">Bạn có chắc chắn muốn xóa khách hàng "{{ deletingCustomer?.name }}" ?</h4>
-               <p class="text-muted">Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn.</p>
+@@ -82,72 +82,85 @@
+               Bộ lọc nâng cao
+             </h6>
+             <div class="filter-tabs">
+               <button
+                   v-for="tab in filterTabs"
+                   :key="tab.value"
+                   class="filter-tab"
+                   :class="{ active: activeTab === tab.value }"
+                   @click="setActiveTab(tab.value)"
+               >
+                 {{ tab.label }}
+               </button>
              </div>
+
+             <div class="mb-3">
+               <label class="form-label mb-2 fw-medium">Phân loại</label>
+               <select class="form-select form-select-custom" v-model="filters.type">
+                 <option value="all">Tất cả phân loại</option>
+                 <option value="broker">Môi giới</option>
+                 <option value="owner">Chủ nhà</option>
+                 <option value="relative">Người thân</option>
+               </select>
+             </div>
+
+             <div class="mb-3">
++              <label class="form-label mb-2 fw-medium">Người tạo</label>
++              <select class="form-select form-select-custom" v-model="filters.creator">
++                <option value="all">Tất cả người tạo</option>
++                <option v-for="creator in creatorOptions" :key="creator.id" :value="creator.id">
++                  {{ creator.name }}
++                </option>
++              </select>
++            </div>
++
++            <div class="mb-3" v-if="activeTab === 'contacted'">
+               <label class="form-label mb-2 fw-medium">Trạng thái</label>
+               <select class="form-select form-select-custom" v-model="filters.status">
+                 <option value="all">Tất cả trạng thái</option>
+                 <option value="potential_7">Tiềm năng 7 ngày</option>
+                 <option value="potential_14">Tiềm năng 14 ngày</option>
+                 <option value="success">Thành công</option>
+                 <option value="wrong_number">Sai số</option>
+                 <option value="unreachable">Không liên lạc</option>
+                 <option value="care">Chăm sóc</option>
+               </select>
+             </div>
+
+             <div class="mb-4">
+               <label class="form-label mb-2 fw-medium">Tỉnh/Thành phố</label>
+-              <select class="form-select form-select-custom" v-model="filters.province">
++              <input
++                class="form-control form-control-custom"
++                list="province-filter-options"
++                v-model="filters.province"
++                placeholder="Tất cả tỉnh thành"
++                @input="applyFilters"
++              >
++              <datalist id="province-filter-options">
+                 <option value="all">Tất cả tỉnh thành</option>
+-                <option value="hanoi">Hà Nội</option>
+-                <option value="hcm">TP.HCM</option>
+-                <option value="danang">Đà Nẵng</option>
+-                <option value="haiphong">Hải Phòng</option>
+-                <option value="cantho">Cần Thơ</option>
+-              </select>
++                <option v-for="province in provinceOptions" :key="province" :value="province"></option>
++              </datalist>
+             </div>
+
+             <div class="d-grid gap-2">
+               <button class="btn-outline-custom btn-custom" @click="resetFilters">
+                 <i class="fas fa-redo me-1"></i> Đặt lại
+               </button>
+             </div>
+           </div>
+
+           <div class="sidebar-section">
+             <h6 class="sidebar-title">
+               <i class="fas fa-tachometer-alt sidebar-icon-yellow"></i>
+               Tiến độ hôm nay
+             </h6>
+             <div class="mb-3">
+               <div class="d-flex justify-content-between mb-2">
+                 <span class="fw-medium">Cuộc gọi: <span class="text-primary">28/40</span></span>
+                 <span class="fw-bold gradient-text">70%</span>
+               </div>
+               <div class="progress progress-custom">
+                 <div class="progress-bar" style="width: 70%; background: var(--primary-gradient);"></div>
+               </div>
+             </div>
+
+             <div class="mb-3">
+@@ -320,105 +333,114 @@
+                     >
+                   </div>
+
+                   <div class="d-flex flex-wrap gap-2">
+                     <button class="btn-primary-custom btn-custom" @click="openAddCustomerModal">
+                       <i class="fas fa-plus me-2"></i> Thêm khách hàng
+                     </button>
+                   </div>
+                 </div>
+
+                 <!-- Table -->
+                 <div class="table-container">
+                   <table class="table table-hover table-custom">
+                     <thead>
+                     <tr>
+                       <th width="50">
+                         <input
+                             type="checkbox"
+                             class="form-check-input checkbox-all"
+                             :checked="isAllSelected"
+                             @change="toggleSelectAll"
+                         >
+                       </th>
+                       <th width="60">#</th>
+                       <th>Khách hàng</th>
++                      <th>Người tạo</th>
++                      <th>NV phụ trách</th>
+                       <th>Số điện thoại</th>
+                       <th>Tỉnh/TP</th>
+                       <th>Tỉnh cũ</th>
+                       <th>Phân loại</th>
+                       <th>Trạng thái</th>
+-                      <th>Ghi chú</th>
+                       <th>Ngày cập nhật</th>
+                       <th>Thao tác</th>
+                     </tr>
+                     </thead>
+                     <tbody>
+                     <tr v-for="(customer, index) in filteredCustomers" :key="customer.id">
+                       <td>
+                         <input
+                             type="checkbox"
+                             class="form-check-input customer-checkbox"
+                             :checked="customer.selected"
+                             @change="toggleCustomerSelection(customer.id)"
+                         >
+                       </td>
+                       <td><span class="badge bg-light text-dark">{{ customer.id }}</span></td>
+                       <td>
+                         <div class="d-flex align-items-center">
+                           <img :src="customer.avatar" :alt="customer.name" class="customer-avatar me-3">
+                           <div>
+                             <div class="fw-semibold">{{ customer.name }}</div>
+                             <small class="text-muted">ID: {{ String(customer.id).padStart(4, '0') }}</small>
+                           </div>
+                         </div>
+                       </td>
++                      <td>
++                        <div class="d-flex align-items-center gap-2" v-if="getCreatorInfo(customer.creatorId)">
++                          <img :src="getCreatorInfo(customer.creatorId).avatar" :alt="getCreatorInfo(customer.creatorId).name" class="member-avatar">
++                          <span class="fw-medium">{{ getCreatorInfo(customer.creatorId).name }}</span>
++                        </div>
++                        <span v-else class="text-muted">-</span>
++                      </td>
++                      <td>
++                        <div class="d-flex align-items-center gap-2" v-if="getAssigneeInfo(customer.assigneeId)">
++                          <img :src="getAssigneeInfo(customer.assigneeId).avatar" :alt="getAssigneeInfo(customer.assigneeId).name" class="member-avatar">
++                          <span class="fw-medium">{{ getAssigneeInfo(customer.assigneeId).name }}</span>
++                        </div>
++                        <span v-else class="text-muted">-</span>
++                      </td>
+                       <td class="fw-medium">{{ formatPhoneNumber(customer.phone) }}</td>
+                       <td>{{ getProvinceLabel(customer.province) }}</td>
+                       <td>{{ customer.oldProvince ? getProvinceLabel(customer.oldProvince) : '-' }}</td>
+                       <td><span :class="`type-badge type-${customer.type}`">{{ getTypeLabel(customer.type) }}</span></td>
+                       <td><span :class="`status-badge status-${customer.status}`">{{ getStatusLabel(customer.status) }}</span></td>
+-                      <td>
+-                        <div class="text-truncate" style="max-width: 200px;" :title="customer.notes">
+-                          <i class="fas fa-sticky-note text-warning me-1"></i>
+-                          {{ customer.notes || 'Không có ghi chú' }}
+-                        </div>
+-                      </td>
+                       <td><span class="badge bg-light text-dark">{{ customer.lastUpdated }}</span></td>
+                       <td>
+                         <div class="action-buttons">
+                           <button class="action-btn call-btn" @click="editCustomer(customer)" title="Sửa" style="background: var(--success-gradient);">
+                             <i class="fas fa-edit"></i>
+                           </button>
+                           <button class="action-btn delete-btn" @click="showDeleteConfirm(customer)" title="Xóa" style="background: var(--danger-gradient);">
+                             <i class="fas fa-trash"></i>
+                           </button>
+                         </div>
+                       </td>
+                     </tr>
+                     <tr v-if="filteredCustomers.length === 0">
+-                      <td colspan="11" class="text-center py-5">
++                      <td colspan="12" class="text-center py-5">
+                         <div class="mb-3"><i class="fas fa-users fa-3x gradient-text"></i></div>
+                         <h5 class="text-muted mb-2">Không tìm thấy khách hàng nào</h5>
+                         <p class="text-muted mb-0">Hãy thử thay đổi bộ lọc hoặc thêm khách hàng mới</p>
+                       </td>
+                     </tr>
+                     </tbody>
+                   </table>
+                 </div>
+
+                 <!-- Pagination -->
+                 <nav class="mt-4">
+                   <ul class="pagination pagination-custom justify-content-center">
+                     <li class="page-item disabled">
+                       <a class="page-link" href="#" tabindex="-1"><i class="fas fa-chevron-left"></i></a>
+                     </li>
+                     <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                     <li class="page-item"><a class="page-link" href="#">2</a></li>
+                     <li class="page-item"><a class="page-link" href="#">3</a></li>
+                     <li class="page-item">
+                       <a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>
+                     </li>
+                   </ul>
+                 </nav>
+               </div>
+             </div>
+@@ -433,109 +455,104 @@
+       <div class="modal-dialog modal-lg">
+         <div class="modal-content">
+           <div class="modal-header">
+             <h5 class="modal-title">
+               <i class="fas fa-user-plus me-2"></i>
+               {{ isEditing ? 'Chỉnh sửa khách hàng' : 'Thêm khách hàng mới' }}
+             </h5>
+             <button type="button" class="btn-close btn-close-white" @click="closeAddCustomerModal"></button>
+           </div>
+           <div class="modal-body">
+             <form @submit.prevent="saveCustomer">
+               <div class="row">
+                 <div class="col-md-6 mb-3">
+                   <label for="customerName" class="form-label fw-medium">Họ và tên <span class="text-danger">*</span></label>
+                   <input type="text" class="form-control form-control-custom" v-model="customerForm.name" required>
+                 </div>
+                 <div class="col-md-6 mb-3">
+                   <label for="customerPhone" class="form-label fw-medium">Số điện thoại <span class="text-danger">*</span></label>
+                   <input type="tel" class="form-control form-control-custom" v-model="customerForm.phone" required>
+                 </div>
+               </div>
+
+               <div class="row">
+                 <div class="col-md-6 mb-3">
+                   <label for="customerProvince" class="form-label fw-medium">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+-                  <select class="form-select form-select-custom" v-model="customerForm.province" required>
+-                    <option value="">Chọn tỉnh/thành phố</option>
+-                    <option value="hanoi">Hà Nội</option>
+-                    <option value="hcm">TP. Hồ Chí Minh</option>
+-                    <option value="danang">Đà Nẵng</option>
+-                    <option value="haiphong">Hải Phòng</option>
+-                    <option value="cantho">Cần Thơ</option>
+-                    <option value="other">Khác</option>
+-                  </select>
++                  <input
++                    type="text"
++                    class="form-control form-control-custom"
++                    list="province-options"
++                    v-model="customerForm.province"
++                    placeholder="Chọn tỉnh/thành phố"
++                    required
++                  >
+                 </div>
+                 <div class="col-md-6 mb-3">
+                   <label for="customerOldProvince" class="form-label fw-medium">Tỉnh cũ (nếu có)</label>
+-                  <select class="form-select form-select-custom" v-model="customerForm.oldProvince">
+-                    <option value="">Không có</option>
+-                    <option value="hanoi">Hà Nội</option>
+-                    <option value="hcm">TP. Hồ Chí Minh</option>
+-                    <option value="danang">Đà Nẵng</option>
+-                    <option value="haiphong">Hải Phòng</option>
+-                    <option value="cantho">Cần Thơ</option>
+-                    <option value="other">Khác</option>
+-                  </select>
++                  <input
++                    type="text"
++                    class="form-control form-control-custom"
++                    list="province-options"
++                    v-model="customerForm.oldProvince"
++                    placeholder="Chọn tỉnh/thành phố"
++                  >
++                  <datalist id="province-options">
++                    <option v-for="province in provinceOptions" :key="province" :value="province"></option>
++                  </datalist>
+                 </div>
+               </div>
+
+               <div class="row">
+                 <div class="col-md-6 mb-3">
+                   <label for="customerType" class="form-label fw-medium">Phân loại khách hàng <span class="text-danger">*</span></label>
+                   <select class="form-select form-select-custom" v-model="customerForm.type" required>
+                     <option value="">Chọn phân loại</option>
+                     <option value="broker">Môi giới</option>
+                     <option value="owner">Chủ nhà</option>
+                     <option value="relative">Người thân</option>
+                   </select>
+                 </div>
+                 <div class="col-md-6 mb-3">
+                   <label for="customerStatus" class="form-label fw-medium">Trạng thái <span class="text-danger">*</span></label>
+                   <select class="form-select form-select-custom" v-model="customerForm.status" required>
+                     <option value="new">Mới tiếp nhận</option>
+                     <option value="potential_7">Tiềm năng 7 ngày</option>
+                     <option value="potential_14">Tiềm năng 14 ngày</option>
+                     <option value="success">Thành công (đặt lịch)</option>
+                     <option value="wrong_number">Sai số</option>
+                     <option value="unreachable">Không liên lạc được</option>
+                     <option value="care">Chăm sóc</option>
+                   </select>
+                 </div>
+               </div>
+
+               <div class="mb-3">
+                 <label for="customerAvatar" class="form-label fw-medium">Ảnh đại diện (URL)</label>
+                 <input type="text" class="form-control form-control-custom" v-model="customerForm.avatar" placeholder="https://example.com/avatar.jpg">
+                 <small class="text-muted">Để trống để sử dụng ảnh mặc định</small>
+               </div>
+
+-              <div class="mb-3">
+-                <label for="customerNotes" class="form-label fw-medium">Ghi chú</label>
+-                <textarea class="form-control form-control-custom" v-model="customerForm.notes" rows="3" placeholder="Thêm ghi chú về khách hàng..."></textarea>
+-              </div>
+-
+               <input type="hidden" v-model="customerForm.id" />
+             </form>
+           </div>
+           <div class="modal-footer">
+             <button type="button" class="btn btn-outline-custom btn-custom" @click="closeAddCustomerModal">Hủy</button>
+             <button type="button" class="btn btn-primary-custom btn-custom" @click="saveCustomer">
+               <i class="fas fa-save me-2"></i> {{ isEditing ? 'Cập nhật' : 'Lưu khách hàng' }}
+             </button>
+           </div>
+         </div>
+       </div>
+     </div>
+
+     <!-- Assign Data Modal -->
+     <div class="modal fade modal-custom assign-data-modal" :class="{ show: showAssignDataModal }" tabindex="-1">
+       <div class="modal-dialog modal-lg">
+         <div class="modal-content">
+           <div class="modal-header">
+             <h5 class="modal-title"><i class="fas fa-user-tag me-2"></i> Cấp dữ liệu cho Telesale</h5>
+             <button type="button" class="btn-close btn-close-white" @click="closeAssignDataModal"></button>
+           </div>
+           <div class="modal-body">
+             <div class="mb-4">
+               <h6 class="fw-medium mb-3">Chọn nhân viên Telesale</h6>
+               <div class="staff-grid">
+@@ -609,98 +626,107 @@
            </div>
            <div class="modal-footer justify-content-center">
              <button type="button" class="btn btn-outline-custom btn-custom" @click="closeConfirmDeleteModal">Hủy</button>
@@ -58,33 +365,469 @@ index 362422df719f749f0bc755514a305da28a6c3bce..9a077ea123f4815c80fa95eb452000e9
          <span>{{ notification.message }}</span>
        </div>
      </div>
-+    </div>
+     </div>
    </div>
  </template>
 
  <script>
  import { ref, computed, reactive, onMounted, nextTick, watch } from 'vue'
  import Chart from 'chart.js/auto'
++import addressData from '/src/assets/js/address.json'
 
  export default {
    name: 'DashboardView',
    setup() {
      // State management
      const customers = ref([
-       { id: 1, name: "Nguyễn Văn An", phone: "0912345678", province: "hanoi", oldProvince: "haiphong", avatar: "https://randomuser.me/api/portraits/men/32.jpg", type: "owner", status: "potential_7", notes: "Khách hàng quan tâm đến chính sách ưu đãi, đã gửi báo giá qua email. Hẹn gọi lại vào chiều thứ 6 tuần sau.", lastUpdated: "2024-03-16", selected: false },
-       { id: 2, name: "Trần Thị Bình", phone: "0923456789", province: "hcm", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/44.jpg", type: "relative", status: "new", notes: "Khách hỏi về thời gian làm việc và chính sách thanh toán. Cần gọi lại vào sáng thứ 2 để tư vấn thêm.", lastUpdated: "2024-03-17", selected: false },
-       { id: 3, name: "Lê Văn Cường", phone: "0934567890", province: "danang", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/men/67.jpg", type: "broker", status: "care", notes: "Đã trao đổi về hợp đồng hợp tác dài hạn. Gửi email chi tiết các điều khoản và chính sách ưu đãi đặc biệt.", lastUpdated: "2024-03-15", selected: false },
-       { id: 4, name: "Phạm Thị Dung", phone: "0945678901", province: "haiphong", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/33.jpg", type: "owner", status: "potential_14", notes: "Khách hàng đang bận công việc gia đình, hẹn gọi lại sáng thứ 2 tuần sau. Để lại thông tin chi tiết về dự án.", lastUpdated: "2024-03-16", selected: false },
-       { id: 5, name: "Hoàng Văn Em", phone: "0956789012", province: "cantho", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/men/22.jpg", type: "relative", status: "success", notes: "Đã đặt lịch thành công ngày 25/3/2024 lúc 14:30. Gửi xác nhận qua SMS và email. Chuẩn bị tài liệu ký kết.", lastUpdated: "2024-03-14", selected: false },
-       { id: 6, name: "Vũ Thị Phương", phone: "0967890123", province: "hcm", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/women/55.jpg", type: "owner", status: "success", notes: "Đã đặt lịch thành công ngày 20/3, xác nhận lại lịch hẹn qua điện thoại. Khách hàng rất hài lòng với dịch vụ.", lastUpdated: "2024-03-15", selected: false },
-       { id: 7, name: "Đặng Văn Quân", phone: "0978901234", province: "hanoi", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/45.jpg", type: "broker", status: "unreachable", notes: "Số điện thoại không liên lạc được, đã thử 3 lần vào các khung giờ khác nhau. Để lại tin nhắn thoại.", lastUpdated: "2024-03-14", selected: false },
-       { id: 8, name: "Bùi Thị Hà", phone: "0989012345", province: "hcm", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/women/25.jpg", type: "owner", status: "wrong_number", notes: "Sai số, không phải khách hàng. Đã xác minh thông tin và cập nhật lại cơ sở dữ liệu.", lastUpdated: "2024-03-12", selected: false },
-       { id: 9, name: "Ngô Minh Trí", phone: "0990123456", province: "danang", oldProvince: "hanoi", avatar: "https://randomuser.me/api/portraits/men/28.jpg", type: "broker", status: "potential_7", notes: "Khách hàng quan tâm đến gói đầu tư cao cấp. Hẹn gặp trực tiếp tuần sau để trình bày chi tiết.", lastUpdated: "2024-03-13", selected: false },
-       { id: 10, name: "Lý Thanh Tùng", phone: "0901234567", province: "haiphong", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/35.jpg", type: "owner", status: "care", notes: "Khách hàng cũ, cần chăm sóc định kỳ. Đã gửi quà tặng tri ân và thông tin ưu đãi mới.", lastUpdated: "2024-03-10", selected: false }
+-      { id: 1, name: "Nguyễn Văn An", phone: "0912345678", province: "hanoi", oldProvince: "haiphong", avatar: "https://randomuser.me/api/portraits/men/32.jpg", type: "owner", status: "potential_7", notes: "Khách hàng quan tâm đến chính sách ưu đãi, đã gửi báo giá qua email. Hẹn gọi lại vào chiều thứ 6 tuần sau.", lastUpdated: "2024-03-16", selected: false },
+-      { id: 2, name: "Trần Thị Bình", phone: "0923456789", province: "hcm", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/44.jpg", type: "relative", status: "new", notes: "Khách hỏi về thời gian làm việc và chính sách thanh toán. Cần gọi lại vào sáng thứ 2 để tư vấn thêm.", lastUpdated: "2024-03-17", selected: false },
+-      { id: 3, name: "Lê Văn Cường", phone: "0934567890", province: "danang", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/men/67.jpg", type: "broker", status: "care", notes: "Đã trao đổi về hợp đồng hợp tác dài hạn. Gửi email chi tiết các điều khoản và chính sách ưu đãi đặc biệt.", lastUpdated: "2024-03-15", selected: false },
+-      { id: 4, name: "Phạm Thị Dung", phone: "0945678901", province: "haiphong", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/33.jpg", type: "owner", status: "potential_14", notes: "Khách hàng đang bận công việc gia đình, hẹn gọi lại sáng thứ 2 tuần sau. Để lại thông tin chi tiết về dự án.", lastUpdated: "2024-03-16", selected: false },
+-      { id: 5, name: "Hoàng Văn Em", phone: "0956789012", province: "cantho", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/men/22.jpg", type: "relative", status: "success", notes: "Đã đặt lịch thành công ngày 25/3/2024 lúc 14:30. Gửi xác nhận qua SMS và email. Chuẩn bị tài liệu ký kết.", lastUpdated: "2024-03-14", selected: false },
+-      { id: 6, name: "Vũ Thị Phương", phone: "0967890123", province: "hcm", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/women/55.jpg", type: "owner", status: "success", notes: "Đã đặt lịch thành công ngày 20/3, xác nhận lại lịch hẹn qua điện thoại. Khách hàng rất hài lòng với dịch vụ.", lastUpdated: "2024-03-15", selected: false },
+-      { id: 7, name: "Đặng Văn Quân", phone: "0978901234", province: "hanoi", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/45.jpg", type: "broker", status: "unreachable", notes: "Số điện thoại không liên lạc được, đã thử 3 lần vào các khung giờ khác nhau. Để lại tin nhắn thoại.", lastUpdated: "2024-03-14", selected: false },
+-      { id: 8, name: "Bùi Thị Hà", phone: "0989012345", province: "hcm", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/women/25.jpg", type: "owner", status: "wrong_number", notes: "Sai số, không phải khách hàng. Đã xác minh thông tin và cập nhật lại cơ sở dữ liệu.", lastUpdated: "2024-03-12", selected: false },
+-      { id: 9, name: "Ngô Minh Trí", phone: "0990123456", province: "danang", oldProvince: "hanoi", avatar: "https://randomuser.me/api/portraits/men/28.jpg", type: "broker", status: "potential_7", notes: "Khách hàng quan tâm đến gói đầu tư cao cấp. Hẹn gặp trực tiếp tuần sau để trình bày chi tiết.", lastUpdated: "2024-03-13", selected: false },
+-      { id: 10, name: "Lý Thanh Tùng", phone: "0901234567", province: "haiphong", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/35.jpg", type: "owner", status: "care", notes: "Khách hàng cũ, cần chăm sóc định kỳ. Đã gửi quà tặng tri ân và thông tin ưu đãi mới.", lastUpdated: "2024-03-10", selected: false }
++      { id: 1, name: "Nguyễn Văn An", phone: "0912345678", province: "Thành phố Hà Nội", oldProvince: "Thành phố Hải Phòng", avatar: "https://randomuser.me/api/portraits/men/32.jpg", type: "owner", status: "potential_7", notes: "Khách hàng quan tâm đến chính sách ưu đãi, đã gửi báo giá qua email. Hẹn gọi lại vào chiều thứ 6 tuần sau.", lastUpdated: "2024-03-16", selected: false, creatorId: 1, assigneeId: 2 },
++      { id: 2, name: "Trần Thị Bình", phone: "0923456789", province: "Thành phố Hồ Chí Minh", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/44.jpg", type: "relative", status: "new", notes: "Khách hỏi về thời gian làm việc và chính sách thanh toán. Cần gọi lại vào sáng thứ 2 để tư vấn thêm.", lastUpdated: "2024-03-17", selected: false, creatorId: 2, assigneeId: 3 },
++      { id: 3, name: "Lê Văn Cường", phone: "0934567890", province: "Thành phố Đà Nẵng", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/men/67.jpg", type: "broker", status: "care", notes: "Đã trao đổi về hợp đồng hợp tác dài hạn. Gửi email chi tiết các điều khoản và chính sách ưu đãi đặc biệt.", lastUpdated: "2024-03-15", selected: false, creatorId: 3, assigneeId: 4 },
++      { id: 4, name: "Phạm Thị Dung", phone: "0945678901", province: "Thành phố Hải Phòng", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/33.jpg", type: "owner", status: "potential_14", notes: "Khách hàng đang bận công việc gia đình, hẹn gọi lại sáng thứ 2 tuần sau. Để lại thông tin chi tiết về dự án.", lastUpdated: "2024-03-16", selected: false, creatorId: 4, assigneeId: 5 },
++      { id: 5, name: "Hoàng Văn Em", phone: "0956789012", province: "Thành phố Cần Thơ", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/men/22.jpg", type: "relative", status: "success", notes: "Đã đặt lịch thành công ngày 25/3/2024 lúc 14:30. Gửi xác nhận qua SMS và email. Chuẩn bị tài liệu ký kết.", lastUpdated: "2024-03-14", selected: false, creatorId: 1, assigneeId: 6 },
++      { id: 6, name: "Vũ Thị Phương", phone: "0967890123", province: "Thành phố Hồ Chí Minh", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/women/55.jpg", type: "owner", status: "success", notes: "Đã đặt lịch thành công ngày 20/3, xác nhận lại lịch hẹn qua điện thoại. Khách hàng rất hài lòng với dịch vụ.", lastUpdated: "2024-03-15", selected: false, creatorId: 2, assigneeId: 7 },
++      { id: 7, name: "Đặng Văn Quân", phone: "0978901234", province: "Thành phố Hà Nội", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/45.jpg", type: "broker", status: "unreachable", notes: "Số điện thoại không liên lạc được, đã thử 3 lần vào các khung giờ khác nhau. Để lại tin nhắn thoại.", lastUpdated: "2024-03-14", selected: false, creatorId: 3, assigneeId: 8 },
++      { id: 8, name: "Bùi Thị Hà", phone: "0989012345", province: "Thành phố Hồ Chí Minh", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/women/25.jpg", type: "owner", status: "wrong_number", notes: "Sai số, không phải khách hàng. Đã xác minh thông tin và cập nhật lại cơ sở dữ liệu.", lastUpdated: "2024-03-12", selected: false, creatorId: 4, assigneeId: 1 },
++      { id: 9, name: "Ngô Minh Trí", phone: "0990123456", province: "Thành phố Đà Nẵng", oldProvince: "Thành phố Hà Nội", avatar: "https://randomuser.me/api/portraits/men/28.jpg", type: "broker", status: "potential_7", notes: "Khách hàng quan tâm đến gói đầu tư cao cấp. Hẹn gặp trực tiếp tuần sau để trình bày chi tiết.", lastUpdated: "2024-03-13", selected: false, creatorId: 1, assigneeId: 4 },
++      { id: 10, name: "Lý Thanh Tùng", phone: "0901234567", province: "Thành phố Hải Phòng", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/35.jpg", type: "owner", status: "care", notes: "Khách hàng cũ, cần chăm sóc định kỳ. Đã gửi quà tặng tri ân và thông tin ưu đãi mới.", lastUpdated: "2024-03-10", selected: false, creatorId: 2, assigneeId: 5 }
      ])
 
      const staffMembers = ref([
-@@ -1269,124 +1271,123 @@ export default {
+       { id: 1, name: "Nguyễn Văn A", role: "Telesale Manager", avatar: "https://randomuser.me/api/portraits/men/1.jpg", selected: false },
+       { id: 2, name: "Trần Thị B", role: "Senior Telesale", avatar: "https://randomuser.me/api/portraits/women/2.jpg", selected: false },
+       { id: 3, name: "Lê Văn C", role: "Telesale Executive", avatar: "https://randomuser.me/api/portraits/men/3.jpg", selected: false },
+       { id: 4, name: "Phạm Thị D", role: "Junior Telesale", avatar: "https://randomuser.me/api/portraits/women/4.jpg", selected: false },
+       { id: 5, name: "Hoàng Văn E", role: "Telesale Team Lead", avatar: "https://randomuser.me/api/portraits/men/5.jpg", selected: false },
+       { id: 6, name: "Vũ Thị F", role: "Telesale Specialist", avatar: "https://randomuser.me/api/portraits/women/6.jpg", selected: false },
+       { id: 7, name: "Đặng Văn G", role: "Senior Telesale", avatar: "https://randomuser.me/api/portraits/men/7.jpg", selected: false },
+       { id: 8, name: "Bùi Thị H", role: "Telesale Executive", avatar: "https://randomuser.me/api/portraits/women/8.jpg", selected: false }
+     ])
+
++    const creatorOptions = ref([
++      { id: 1, name: "Trần Minh Anh", avatar: "https://randomuser.me/api/portraits/women/11.jpg" },
++      { id: 2, name: "Phạm Quốc Huy", avatar: "https://randomuser.me/api/portraits/men/12.jpg" },
++      { id: 3, name: "Nguyễn Thảo My", avatar: "https://randomuser.me/api/portraits/women/13.jpg" },
++      { id: 4, name: "Lê Hoàng Nam", avatar: "https://randomuser.me/api/portraits/men/14.jpg" }
++    ])
++
+     // UI state
+     const mobileMenuOpen = ref(false)
+     const notificationsOpen = ref(false)
+     const userMenuOpen = ref(false)
+     const activeTab = ref('all')
+     const chartYear = ref('2024')
+     const searchText = ref('')
+
+     // Modal states
+     const showAddCustomerModal = ref(false)
+     const showAssignDataModal = ref(false)
+     const showCallModal = ref(false)
+     const showConfirmDeleteModal = ref(false)
+
+     // Data state
+     const filters = reactive({
+       type: 'all',
+       status: 'all',
+-      province: 'all'
++      province: '',
++      creator: 'all'
+     })
+
+     const customerForm = reactive({
+       id: null,
+       name: '',
+       phone: '',
+       province: '',
+       oldProvince: '',
+       type: '',
+       status: 'new',
+       avatar: '',
+       notes: ''
+     })
+
+     const assignData = reactive({
+       quantity: 50,
+       type: 'new',
+       notes: ''
+     })
+
+     const callingCustomer = ref(null)
+     const deletingCustomer = ref(null)
+     const callSeconds = ref(0)
+     const callNotes = ref('')
+     const isEditing = ref(false)
+@@ -711,131 +737,157 @@ export default {
+       type: 'info',
+       icon: 'info-circle'
+     })
+
+     // Refs
+     const monthlyChart = ref(null)
+     const statusChart = ref(null)
+
+     // Computed properties
+     const filterTabs = computed(() => [
+       { value: 'all', label: 'Tất cả' },
+       { value: 'new', label: 'Mới' },
+       { value: 'contacted', label: 'Đã dùng' }
+     ])
+
+     const filteredCustomers = computed(() => {
+       return customers.value.filter(customer => {
+         // Filter by tab
+         if (activeTab.value === 'new' && customer.status !== 'new') return false
+         if (activeTab.value === 'contacted' && customer.status === 'new') return false
+
+         // Filter by type
+         if (filters.type !== 'all' && customer.type !== filters.type) return false
+
+         // Filter by status
+-        if (filters.status !== 'all' && customer.status !== filters.status) return false
++        if (activeTab.value === 'contacted' && filters.status !== 'all' && customer.status !== filters.status) return false
++
++        // Filter by creator
++        if (filters.creator !== 'all' && customer.creatorId !== filters.creator) return false
+
+         // Filter by province
+-        if (filters.province !== 'all' && customer.province !== filters.province) return false
++        if (filters.province && filters.province !== 'all') {
++          const provinceFilter = filters.province.toLowerCase()
++          const provinceLabel = getProvinceLabel(customer.province).toLowerCase()
++          if (!provinceLabel.includes(provinceFilter)) return false
++        }
+
+         // Search
+         if (searchText.value) {
+           const searchTextLower = searchText.value.toLowerCase()
+           const searchFields = [
+             customer.name,
+             customer.phone,
+-            getProvinceLabel(customer.province),
+-            customer.notes
++            getProvinceLabel(customer.province)
+           ].map(field => field ? field.toString().toLowerCase() : '')
+
+           return searchFields.some(field => field.includes(searchTextLower))
+         }
+
+         return true
+       })
+     })
+
+     const selectedCount = computed(() => {
+       return customers.value.filter(c => c.selected).length
+     })
+
+     const isAllSelected = computed(() => {
+       return selectedCount.value === customers.value.length && customers.value.length > 0
+     })
+
+     const callTimer = computed(() => {
+       const minutes = Math.floor(callSeconds.value / 60).toString().padStart(2, '0')
+       const seconds = (callSeconds.value % 60).toString().padStart(2, '0')
+       return `${minutes}:${seconds}`
+     })
+
+     const assignSummary = computed(() => {
+       const selectedStaff = staffMembers.value.filter(s => s.selected)
+       if (selectedStaff.length === 0) return 'Chưa có nhân viên nào được chọn'
+
+       let typeText = ''
+       switch (assignData.type) {
+         case 'new': typeText = 'khách hàng mới'; break
+         case 'potential': typeText = 'khách tiềm năng'; break
+         case 'all': typeText = 'tất cả loại khách'; break
+         case 'by_province': typeText = 'theo tỉnh thành'; break
+       }
+
+       const staffNames = selectedStaff.map(s => s.name).join(', ')
+       return `Sẽ cấp ${assignData.quantity} ${typeText} cho ${selectedStaff.length} nhân viên: ${staffNames}`
+     })
+
++    const provinceOptions = computed(() => {
++      const provinceNames = addressData.map(province => province.name)
++      return [...provinceNames, 'Khác']
++    })
++
++    const creatorsById = computed(() => {
++      return creatorOptions.value.reduce((acc, creator) => {
++        acc[creator.id] = creator
++        return acc
++      }, {})
++    })
++
++    const staffById = computed(() => {
++      return staffMembers.value.reduce((acc, staff) => {
++        acc[staff.id] = staff
++        return acc
++      }, {})
++    })
++
+     // Methods
+     const toggleMobileMenu = () => {
+       mobileMenuOpen.value = !mobileMenuOpen.value
+     }
+
+     const toggleNotifications = () => {
+       notificationsOpen.value = !notificationsOpen.value
+       userMenuOpen.value = false
+     }
+
+     const toggleUserMenu = () => {
+       userMenuOpen.value = !userMenuOpen.value
+       notificationsOpen.value = false
+     }
+
+     const setActiveTab = (tab) => {
+       activeTab.value = tab
+       applyFilters()
+     }
+
+     const applyFilters = () => {
+       // Filters are automatically applied through computed property
+     }
+
+     const resetFilters = () => {
+       activeTab.value = 'all'
+       filters.type = 'all'
+       filters.status = 'all'
+-      filters.province = 'all'
++      filters.province = ''
++      filters.creator = 'all'
+       searchText.value = ''
+       showNotification('Đã đặt lại tất cả bộ lọc', 'info')
+     }
+
+     const openAddCustomerModal = () => {
+       resetCustomerForm()
+       isEditing.value = false
+       showAddCustomerModal.value = true
+     }
+
+     const closeAddCustomerModal = () => {
+       showAddCustomerModal.value = false
+     }
+
+     const editCustomer = (customer) => {
+       Object.assign(customerForm, {
+         id: customer.id,
+         name: customer.name,
+         phone: customer.phone,
+         province: customer.province,
+         oldProvince: customer.oldProvince || '',
+         type: customer.type,
+         status: customer.status,
+         avatar: customer.avatar || '',
+         notes: customer.notes || ''
+@@ -868,50 +920,52 @@ export default {
+         const index = customers.value.findIndex(c => c.id === customerForm.id)
+         if (index !== -1) {
+           customers.value[index] = {
+             ...customers.value[index],
+             ...customerForm,
+             lastUpdated: new Date().toISOString().split('T')[0]
+           }
+           showNotification('Cập nhật khách hàng thành công!', 'success')
+         }
+       } else {
+         const newId = customers.value.length > 0
+             ? Math.max(...customers.value.map(c => c.id)) + 1
+             : 1
+
+         customers.value.push({
+           id: newId,
+           name: customerForm.name,
+           phone: customerForm.phone,
+           province: customerForm.province,
+           oldProvince: customerForm.oldProvince || null,
+           avatar: customerForm.avatar || `https://randomuser.me/api/portraits/${customerForm.type === 'owner' || customerForm.type === 'broker' ? 'men' : 'women'}/${Math.floor(Math.random() * 70) + 1}.jpg`,
+           type: customerForm.type,
+           status: customerForm.status,
+           notes: customerForm.notes || '',
+           lastUpdated: new Date().toISOString().split('T')[0],
++          creatorId: creatorOptions.value[0]?.id ?? null,
++          assigneeId: staffMembers.value[0]?.id ?? null,
+           selected: false
+         })
+         showNotification('Thêm khách hàng mới thành công!', 'success')
+       }
+
+       showAddCustomerModal.value = false
+       resetCustomerForm()
+     }
+
+     const startCall = (customer) => {
+       callingCustomer.value = customer
+       callSeconds.value = 0
+       callNotes.value = ''
+       showCallModal.value = true
+
+       // Start timer
+       const timer = setInterval(() => {
+         if (showCallModal.value) {
+           callSeconds.value++
+         } else {
+           clearInterval(timer)
+         }
+       }, 1000)
+     }
+
+@@ -1060,65 +1114,82 @@ export default {
+       setTimeout(() => {
+         notification.show = false
+       }, 5000)
+     }
+
+     // Helper functions
+     const getStatusLabel = (status) => {
+       const statusMap = {
+         'new': 'Mới',
+         'potential_7': 'Tiềm năng 7 ngày',
+         'potential_14': 'Tiềm năng 14 ngày',
+         'success': 'Thành công',
+         'wrong_number': 'Sai số',
+         'unreachable': 'Không liên lạc',
+         'care': 'Chăm sóc'
+       }
+       return statusMap[status] || status
+     }
+
+     const getTypeLabel = (type) => {
+       const typeMap = { 'broker': 'Môi giới', 'owner': 'Chủ nhà', 'relative': 'Người thân' }
+       return typeMap[type] || type
+     }
+
+     const getProvinceLabel = (province) => {
+-      const provinceMap = {
+-        'hanoi': 'Hà Nội',
+-        'hcm': 'TP.HCM',
+-        'danang': 'Đà Nẵng',
+-        'haiphong': 'Hải Phòng',
+-        'cantho': 'Cần Thơ',
+-        'other': 'Khác'
++      if (!province) return '-'
++      if (province === 'Khác' || province === 'other') return 'Khác'
++      const provinceMatch = addressData.find(item => item.name === province)
++      if (provinceMatch) return provinceMatch.name
++      const legacyMap = {
++        'hanoi': 'Thành phố Hà Nội',
++        'hcm': 'Thành phố Hồ Chí Minh',
++        'danang': 'Thành phố Đà Nẵng',
++        'haiphong': 'Thành phố Hải Phòng',
++        'cantho': 'Thành phố Cần Thơ'
+       }
+-      return provinceMap[province] || province
++      return legacyMap[province] || province
+     }
+
+     const formatPhoneNumber = (phone) => {
+       return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
+     }
+
++    const getCreatorInfo = (creatorId) => {
++      return creatorsById.value[creatorId] || null
++    }
++
++    const getAssigneeInfo = (assigneeId) => {
++      return staffById.value[assigneeId] || null
++    }
++
++    watch(activeTab, (tab) => {
++      if (tab !== 'contacted') {
++        filters.status = 'all'
++      }
++    })
++
+     // Initialize charts
+     onMounted(() => {
+       nextTick(() => {
+         initCharts()
+       })
+     })
+
+     const initCharts = () => {
+       // Monthly Chart
+       const monthlyCtx = monthlyChart.value?.getContext('2d')
+       if (monthlyCtx) {
+         new Chart(monthlyCtx, {
+           type: 'line',
+           data: {
+             labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+             datasets: [
+               { label: 'Thành công', data: [65, 59, 80, 81, 56, 55, 70, 75, 82, 78, 85, 90], borderColor: '#43e97b', backgroundColor: 'rgba(67, 233, 123, 0.1)', tension: 0.2, fill: true, borderWidth: 3 },
+               { label: 'Tiềm năng', data: [28, 48, 40, 19, 86, 27, 35, 42, 50, 45, 60, 55], borderColor: '#fa709a', backgroundColor: 'rgba(250, 112, 154, 0.1)', tension: 0.2, fill: true, borderWidth: 3 },
+               { label: 'Không liên lạc', data: [18, 25, 22, 15, 30, 20, 18, 22, 25, 20, 28, 30], borderColor: '#ff5858', backgroundColor: 'rgba(255, 88, 88, 0.1)', tension: 0.2, fill: true, borderWidth: 3 },
+               { label: 'Tổng cuộc gọi', data: [120, 140, 150, 130, 180, 110, 130, 145, 165, 150, 185, 190], borderColor: '#667eea', backgroundColor: 'rgba(102, 126, 234, 0.1)', tension: 0.2, fill: true, borderWidth: 3 }
+             ]
+           },
+           options: {
+             responsive: true,
+             maintainAspectRatio: false,
+@@ -1175,97 +1246,101 @@ export default {
+     return {
+       // State
+       mobileMenuOpen,
+       notificationsOpen,
+       userMenuOpen,
+       activeTab,
+       chartYear,
+       searchText,
+       showAddCustomerModal,
+       showAssignDataModal,
+       showCallModal,
+       showConfirmDeleteModal,
+       filters,
+       customerForm,
+       assignData,
+       callingCustomer,
+       deletingCustomer,
+       callSeconds,
+       callNotes,
+       isEditing,
+       notification,
+
+       // Data
+       customers,
+       staffMembers,
++      creatorOptions,
+
+       // Refs
+       monthlyChart,
+       statusChart,
+
+       // Computed
+       filterTabs,
+       filteredCustomers,
+       selectedCount,
+       isAllSelected,
+       callTimer,
+       assignSummary,
++      provinceOptions,
+
+       // Methods
+       toggleMobileMenu,
+       toggleNotifications,
+       toggleUserMenu,
+       setActiveTab,
+       applyFilters,
+       resetFilters,
+       openAddCustomerModal,
+       closeAddCustomerModal,
+       editCustomer,
+       saveCustomer,
+       startCall,
+       endCall,
+       saveCallResult,
+       showDeleteConfirm,
        closeConfirmDeleteModal,
        confirmDelete,
        toggleCustomerSelection,
@@ -103,17 +846,17 @@ index 362422df719f749f0bc755514a305da28a6c3bce..9a077ea123f4815c80fa95eb452000e9
        getStatusLabel,
        getTypeLabel,
        getProvinceLabel,
-       formatPhoneNumber
+-      formatPhoneNumber
++      formatPhoneNumber,
++      getCreatorInfo,
++      getAssigneeInfo
      }
    }
  }
  </script>
 
  <style>
--/* Toàn bộ CSS từ file HTML cũ đặt ở đây */
--
--:root {
-+body {
+ body {
    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
    --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
@@ -132,381 +875,63 @@ index 362422df719f749f0bc755514a305da28a6c3bce..9a077ea123f4815c80fa95eb452000e9
    --dark-color: #141e30;
    --light-color: #f8f9fa;
 
-   --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
-   --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.12);
-   --shadow-hard: 0 15px 50px rgba(0, 0, 0, 0.2);
-
-   --border-radius-sm: 12px;
-   --border-radius-md: 16px;
-   --border-radius-lg: 20px;
-
-   --transition-fast: 0.2s ease;
-   --transition-normal: 0.3s ease;
-   --transition-slow: 0.5s ease;
-
-   --nav-h: 85px;
-   --shell-pad: 18px;
-   --sidebar-w: 340px;
--}
--
--* { margin: 0; padding: 0; box-sizing: border-box; }
--
--/* ✅ BODY KHÔNG SCROLL */
--html, body, #app { height: 100%; }
--
--body {
-   font-family: 'Inter', sans-serif;
-   background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
-   color: #333;
-   overflow: hidden;
+@@ -1676,50 +1751,59 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
  }
 
-+* { margin: 0; padding: 0; box-sizing: border-box; }
-+
-+/* ✅ BODY KHÔNG SCROLL */
-+html, body { height: 100%; }
-+
- h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
+ .table-custom td {
+   padding: 15px !important ;
+   vertical-align: middle !important;
+   border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+   font-size: 16px !important;
+ }
 
- /* Custom Scrollbar */
- ::-webkit-scrollbar { width: 8px; height: 8px; }
- ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 10px; }
- ::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 10px; }
- ::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); }
+ .table-custom tbody tr { transition: var(--transition-fast); }
+ .table-custom tbody tr:hover { background: rgba(102, 126, 234, 0.03)!important;  }
+ .table-custom tbody tr:hover td {
+   background: rgba(102, 126, 234, 0.06) !important;
+   border: none !important;
+ }
 
- /* ✅ SCALE 0.8 GIỮ NGUYÊN (KHÔNG SCALE HTML) */
--.app-root {
-+.app-scale {
-   transform: scale(0.8);
-   transform-origin: 0 0;
-   width: 125%;
-+  height: 125%;
+ .customer-avatar {
+   width: 42px; height: 42px;
+   border-radius: 50%;
+   object-fit: cover;
+   border: 3px solid white;
+   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+   transition: var(--transition-normal);
+ }
+
++.member-avatar {
++  width: 32px;
++  height: 32px;
++  border-radius: 50%;
++  object-fit: cover;
++  border: 2px solid white;
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 +}
 +
-+/* ✅ App layout full height, chỉ main cuộn */
-+.app-root {
-   height: 125vh;
-   display: flex;
-   flex-direction: column;
+ .table-custom tbody tr:hover .customer-avatar {
+   transform: scale(1.1) !important;
+   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
  }
 
- .app-shell {
-   display: flex;
-   gap: var(--shell-pad);
-   padding: var(--shell-pad);
-   overflow: hidden;
--  flex: 1;
- }
-
- /* Navbar */
- .navbar-custom {
-   background: var(--dark-gradient);
-   backdrop-filter: blur(10px);
-   padding: 15px 0;
-   box-shadow: var(--shadow-medium);
-   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-   position: sticky;
-   top: 0;
-   z-index: 1030;
-   height: var(--nav-h);
- }
-
- .navbar-custom .navbar-brand {
-   font-weight: 700;
-   font-size: 1.5rem;
-   background: var(--primary-gradient);
-   -webkit-background-clip: text;
-   -webkit-text-fill-color: transparent;
-   background-clip: text;
-   display: flex;
-   align-items: center;
-   gap: 10px;
-@@ -1502,63 +1503,62 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
- .filter-tab:not(.active):hover {
-   color: var(--primary-color);
-   background: rgba(102, 126, 234, 0.1);
- }
-
- /* Form Controls */
- .form-control-custom, .form-select-custom {
-   border: 2px solid rgba(0, 0, 0, 0.08);
-   border-radius: var(--border-radius-sm);
-   padding: 12px 15px;
-   font-size: 14px;
-   transition: var(--transition-fast);
-   background: rgba(255, 255, 255, 0.9);
- }
-
- .form-control-custom:focus, .form-select-custom:focus {
-   border-color: var(--primary-color);
-   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
-   background: white;
- }
-
- /* ✅ MAIN WRAP đứng yên, chỉ MAIN-SCROLL cuộn */
- .main-wrap {
-   flex: 1 1 auto;
-   overflow: hidden;
-+  border-radius: var(--border-radius-lg);
- }
-
- .main-scroll {
-   height: 100%;
-   overflow-y: auto;
-   overflow-x: hidden;
-   padding: 0;
- }
-
- /* Main Content inner padding giữ nguyên kiểu cũ */
- .main-content {
--  padding-right: 25px;
--  padding-left: 10px;
-   min-height: 100%;
- }
-
- /* Stat Cards */
- .stat-card {
-   border-radius: var(--border-radius-md);
-   padding: 25px;
-   color: white;
-   margin-bottom: 25px;
-   transition: all var(--transition-normal);
-   position: relative;
-   overflow: hidden;
-   box-shadow: var(--shadow-soft);
-   height: 100%;
-   display: flex;
-   flex-direction: column;
-   justify-content: space-between;
- }
-
- .stat-card::before {
-   content: '';
-   position: absolute;
-   inset: 0;
-   background: inherit;
-   opacity: 0.9;
-@@ -1771,79 +1771,80 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
-   text-transform: uppercase;
-   letter-spacing: 0.5px;
+ /* Status Badges */
+ .status-badge {
+   padding: 6px 12px;
+   border-radius: 20px;
+   font-size: 12px;
+   font-weight: 600;
    display: inline-block;
- }
- .type-broker { background: linear-gradient(135deg, rgba(67, 233, 123, 0.15) 0%, rgba(56, 249, 215, 0.15) 100%); color: #27ae60; border: 1px solid rgba(67, 233, 123, 0.3); }
- .type-owner { background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); color: #667eea; border: 1px solid rgba(102, 126, 234, 0.3); }
- .type-relative { background: linear-gradient(135deg, rgba(250, 112, 154, 0.15) 0%, rgba(254, 225, 64, 0.15) 100%); color: #fa709a; border: 1px solid rgba(250, 112, 154, 0.3); }
-
- /* Action Buttons */
- .action-buttons { display: flex; gap: 6px; }
- .action-btn {
-   width: 34px; height: 34px;
-   border-radius: 10px;
-   display: flex; align-items: center; justify-content: center;
-   border: none;
-   transition: all var(--transition-fast);
-   color: white;
-   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
- }
- .action-btn:hover { transform: translateY(-2px) scale(1.1); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
-
- /* Charts */
- .chart-container { position: relative; height: 320px; width: 100%; padding: 15px; }
- .chart-center-text {
-   position: absolute;
--  top: 40%;
-+  top: 50%;
-   left: 50%;
-   transform: translate(-50%, -50%);
    text-align: center;
-   z-index: 10;
- }
- .chart-center-text .total-number {
-   font-size: 28px;
-   font-weight: 700;
-   background: var(--primary-gradient);
-   -webkit-background-clip: text;
-   -webkit-text-fill-color: transparent;
-   background-clip: text;
-   margin-bottom: 5px;
- }
- .chart-center-text .total-label { font-size: 12px; color: #6c757d; font-weight: 500; }
-
- /* Bulk Actions */
- .bulk-actions {
-   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
-   backdrop-filter: blur(10px);
-   padding: 20px;
-   border-radius: var(--border-radius-md);
-   margin-bottom: 25px;
-   box-shadow: var(--shadow-soft);
-   border: 1px solid rgba(255, 255, 255, 0.2);
-   display: none;
-   align-items: center;
-   gap: 15px;
-+  animation: slideInDown 0.5s ease;
- }
- .bulk-actions.show { display: flex; }
-
- /* Progress */
- .progress-custom {
-   height: 10px;
-   border-radius: 10px;
-   background: rgba(0, 0, 0, 0.05);
-   overflow: hidden;
-   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
- }
- .progress-custom .progress-bar {
-   border-radius: 10px;
-   transition: width 1s ease-in-out;
+   min-width: 100px;
+   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
    position: relative;
    overflow: hidden;
  }
- .progress-custom .progress-bar::after {
-   content: '';
-   position: absolute;
-   top: 0; left: 0;
-   width: 100%; height: 100%;
-   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-   animation: shimmer 2s infinite;
- }
-@@ -1853,51 +1854,51 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
- .search-box { position: relative; }
- .search-box input {
-   padding-left: 45px;
-   border-radius: var(--border-radius-sm);
-   border: 2px solid rgba(0, 0, 0, 0.08);
-   background: rgba(255, 255, 255, 0.9);
-   transition: var(--transition-fast);
- }
- .search-box input:focus {
-   border-color: var(--primary-color);
-   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
-   background: white;
- }
- .search-box i {
-   position: absolute;
-   left: 15px;
-   top: 50%;
-   transform: translateY(-50%);
-   color: #6c757d;
-   z-index: 10;
- }
 
- /* Pagination */
- .pagination-custom .page-link {
-   border: none;
--  margin: 0 10px;
-+  margin: 0 2px;
-   border-radius: 10px;
-   color: #6c757d;
-   font-weight: 500;
-   transition: var(--transition-fast);
-   padding: 8px 15px;
- }
- .pagination-custom .page-item.active .page-link {
-   background: var(--primary-gradient);
-   color: white;
-   box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
- }
- .pagination-custom .page-link:hover:not(.active) { background: rgba(102, 126, 234, 0.1); color: var(--primary-color); }
-
- /* Modals */
- .modal-custom .modal-content {
-   border-radius: var(--border-radius-lg);
-   border: none;
-   overflow: hidden;
-   box-shadow: var(--shadow-hard);
-   background: rgba(255, 255, 255, 0.95);
-   backdrop-filter: blur(10px);
- }
- .modal-custom .modal-header {
-   background: var(--primary-gradient);
-   color: white;
-@@ -1961,86 +1962,32 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
- }
- .call-timer {
-   font-size: 3.5rem;
-   font-weight: 700;
-   background: var(--primary-gradient);
-   -webkit-background-clip: text;
-   -webkit-text-fill-color: transparent;
-   background-clip: text;
-   margin: 20px 0;
-   text-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
- }
-
- /* Glow + gradient text */
- .glow { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
- .gradient-text {
-   background: var(--primary-gradient);
-   -webkit-background-clip: text;
-   -webkit-text-fill-color: transparent;
-   background-clip: text;
- }
-
- /* Equal height row */
- .equal-height-row { display: flex; flex-wrap: wrap; }
- .equal-height-row > [class*='col-'] { display: flex; flex-direction: column; }
-
--/* Notification */
--.notification {
--  position: fixed;
--  top: 20px;
--  right: 20px;
--  z-index: 9999;
--  min-width: 300px;
--  max-width: 500px;
--  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
--  border-radius: 12px;
--  border: none;
--  padding: 15px 20px;
--  color: white;
--  animation: slideInRight 0.3s ease;
--  white-space: pre-line;
--}
--
--.notification.success { background: var(--success-gradient); }
--.notification.warning { background: var(--warning-gradient); }
--.notification.info { background: var(--info-gradient); }
--.notification.danger { background: var(--danger-gradient); }
--
--@keyframes slideInRight {
--  from { transform: translateX(100%); opacity: 0; }
--  to { transform: translateX(0); opacity: 1; }
--}
--
--@keyframes slideOutRight {
--  from { transform: translateX(0); opacity: 1; }
--  to { transform: translateX(100%); opacity: 0; }
--}
--
--/* Dropdown */
--.dropdown-menu {
--  display: none;
--  position: absolute;
--  z-index: 1000;
--  background: white;
--  border-radius: var(--border-radius-md);
--  box-shadow: var(--shadow-hard);
--  border: none;
--  padding: 10px 0;
--}
--
--.dropdown-menu.show {
--  display: block;
--}
--
--/* Modal show state */
--.modal.show {
--  display: block;
--  background-color: rgba(0, 0, 0, 0.5);
--}
--
- /* ✅ Responsive */
- @media (max-width: 992px) {
-   .app-shell { flex-direction: column; }
-   .sidebar-wrap { width: 100%; flex: 0 0 auto; height: 320px; }
-   .main-wrap { flex: 1 1 auto; }
- }
--</style>
-\ No newline at end of file
-+</style>
+ .status-new { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
+ .status-contacted { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; }
+ .status-potential { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; }
+ .status-success { background: linear-gradient(135deg, #3CD3AD 0%, #4CB8C4 100%); color: white; }
+ .status-unreachable { background: linear-gradient(135deg, #FF5858 0%, #F09819 100%); color: white; }
+ .status-wrong_number { background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%); color: white; }

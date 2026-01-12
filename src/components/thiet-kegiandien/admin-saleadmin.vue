@@ -104,6 +104,16 @@
             </div>
 
             <div class="mb-3">
+              <label class="form-label mb-2 fw-medium">Người tạo</label>
+              <select class="form-select form-select-custom" v-model="filters.creator">
+                <option value="all">Tất cả người tạo</option>
+                <option v-for="creator in creatorOptions" :key="creator.id" :value="creator.id">
+                  {{ creator.name }}
+                </option>
+              </select>
+            </div>
+
+            <div class="mb-3" v-if="activeTab === 'contacted'">
               <label class="form-label mb-2 fw-medium">Trạng thái</label>
               <select class="form-select form-select-custom" v-model="filters.status">
                 <option value="all">Tất cả trạng thái</option>
@@ -118,14 +128,17 @@
 
             <div class="mb-4">
               <label class="form-label mb-2 fw-medium">Tỉnh/Thành phố</label>
-              <select class="form-select form-select-custom" v-model="filters.province">
+              <input
+                class="form-control form-control-custom"
+                list="province-filter-options"
+                v-model="filters.province"
+                placeholder="Tất cả tỉnh thành"
+                @input="applyFilters"
+              >
+              <datalist id="province-filter-options">
                 <option value="all">Tất cả tỉnh thành</option>
-                <option value="hanoi">Hà Nội</option>
-                <option value="hcm">TP.HCM</option>
-                <option value="danang">Đà Nẵng</option>
-                <option value="haiphong">Hải Phòng</option>
-                <option value="cantho">Cần Thơ</option>
-              </select>
+                <option v-for="province in provinceOptions" :key="province" :value="province"></option>
+              </datalist>
             </div>
 
             <div class="d-grid gap-2">
@@ -332,7 +345,7 @@
                   <table class="table table-hover table-custom">
                     <thead>
                     <tr>
-                      <th width="50">
+                      <th style="width: 20px !important;">
                         <input
                             type="checkbox"
                             class="form-check-input checkbox-all"
@@ -340,21 +353,21 @@
                             @change="toggleSelectAll"
                         >
                       </th>
-                      <th width="60">#</th>
+                      <th class="col-index">#</th>
                       <th>Khách hàng</th>
+                      <th>Người tạo</th>
+                      <th>NV phụ trách</th>
                       <th>Số điện thoại</th>
                       <th>Tỉnh/TP</th>
-                      <th>Tỉnh cũ</th>
                       <th>Phân loại</th>
                       <th>Trạng thái</th>
-                      <th>Ghi chú</th>
                       <th>Ngày cập nhật</th>
                       <th>Thao tác</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr v-for="(customer, index) in filteredCustomers" :key="customer.id">
-                      <td>
+                      <td style="width: 20px !important;">
                         <input
                             type="checkbox"
                             class="form-check-input customer-checkbox"
@@ -362,7 +375,7 @@
                             @change="toggleCustomerSelection(customer.id)"
                         >
                       </td>
-                      <td><span class="badge bg-light text-dark">{{ customer.id }}</span></td>
+                      <td style="width: 20px !important;"><span class="badge bg-light text-dark">{{ customer.id }}</span></td>
                       <td>
                         <div class="d-flex align-items-center">
                           <img :src="customer.avatar" :alt="customer.name" class="customer-avatar me-3">
@@ -372,17 +385,24 @@
                           </div>
                         </div>
                       </td>
+                      <td>
+                        <div class="d-flex align-items-center gap-2" v-if="getCreatorInfo(customer.creatorId)">
+                          <img :src="getCreatorInfo(customer.creatorId).avatar" :alt="getCreatorInfo(customer.creatorId).name" class="member-avatar">
+                          <span class="fw-medium">{{ getCreatorInfo(customer.creatorId).name }}</span>
+                        </div>
+                        <span v-else class="text-muted">-</span>
+                      </td>
+                      <td>
+                        <div class="d-flex align-items-center gap-2" v-if="getAssigneeInfo(customer.assigneeId)">
+                          <img :src="getAssigneeInfo(customer.assigneeId).avatar" :alt="getAssigneeInfo(customer.assigneeId).name" class="member-avatar">
+                          <span class="fw-medium">{{ getAssigneeInfo(customer.assigneeId).name }}</span>
+                        </div>
+                        <span v-else class="text-muted">-</span>
+                      </td>
                       <td class="fw-medium">{{ formatPhoneNumber(customer.phone) }}</td>
                       <td>{{ getProvinceLabel(customer.province) }}</td>
-                      <td>{{ customer.oldProvince ? getProvinceLabel(customer.oldProvince) : '-' }}</td>
                       <td><span :class="`type-badge type-${customer.type}`">{{ getTypeLabel(customer.type) }}</span></td>
                       <td><span :class="`status-badge status-${customer.status}`">{{ getStatusLabel(customer.status) }}</span></td>
-                      <td>
-                        <div class="text-truncate" style="max-width: 200px;" :title="customer.notes">
-                          <i class="fas fa-sticky-note text-warning me-1"></i>
-                          {{ customer.notes || 'Không có ghi chú' }}
-                        </div>
-                      </td>
                       <td><span class="badge bg-light text-dark">{{ customer.lastUpdated }}</span></td>
                       <td>
                         <div class="action-buttons">
@@ -396,7 +416,7 @@
                       </td>
                     </tr>
                     <tr v-if="filteredCustomers.length === 0">
-                      <td colspan="11" class="text-center py-5">
+                      <td colspan="12" class="text-center py-5">
                         <div class="mb-3"><i class="fas fa-users fa-3x gradient-text"></i></div>
                         <h5 class="text-muted mb-2">Không tìm thấy khách hàng nào</h5>
                         <p class="text-muted mb-0">Hãy thử thay đổi bộ lọc hoặc thêm khách hàng mới</p>
@@ -455,27 +475,27 @@
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label for="customerProvince" class="form-label fw-medium">Tỉnh/Thành phố <span class="text-danger">*</span></label>
-                  <select class="form-select form-select-custom" v-model="customerForm.province" required>
-                    <option value="">Chọn tỉnh/thành phố</option>
-                    <option value="hanoi">Hà Nội</option>
-                    <option value="hcm">TP. Hồ Chí Minh</option>
-                    <option value="danang">Đà Nẵng</option>
-                    <option value="haiphong">Hải Phòng</option>
-                    <option value="cantho">Cần Thơ</option>
-                    <option value="other">Khác</option>
-                  </select>
+                  <input
+                    type="text"
+                    class="form-control form-control-custom"
+                    list="province-options"
+                    v-model="customerForm.province"
+                    placeholder="Chọn tỉnh/thành phố"
+                    required
+                  >
                 </div>
                 <div class="col-md-6 mb-3">
                   <label for="customerOldProvince" class="form-label fw-medium">Tỉnh cũ (nếu có)</label>
-                  <select class="form-select form-select-custom" v-model="customerForm.oldProvince">
-                    <option value="">Không có</option>
-                    <option value="hanoi">Hà Nội</option>
-                    <option value="hcm">TP. Hồ Chí Minh</option>
-                    <option value="danang">Đà Nẵng</option>
-                    <option value="haiphong">Hải Phòng</option>
-                    <option value="cantho">Cần Thơ</option>
-                    <option value="other">Khác</option>
-                  </select>
+                  <input
+                    type="text"
+                    class="form-control form-control-custom"
+                    list="province-options"
+                    v-model="customerForm.oldProvince"
+                    placeholder="Chọn tỉnh/thành phố"
+                  >
+                  <datalist id="province-options">
+                    <option v-for="province in provinceOptions" :key="province" :value="province"></option>
+                  </datalist>
                 </div>
               </div>
 
@@ -507,11 +527,6 @@
                 <label for="customerAvatar" class="form-label fw-medium">Ảnh đại diện (URL)</label>
                 <input type="text" class="form-control form-control-custom" v-model="customerForm.avatar" placeholder="https://example.com/avatar.jpg">
                 <small class="text-muted">Để trống để sử dụng ảnh mặc định</small>
-              </div>
-
-              <div class="mb-3">
-                <label for="customerNotes" class="form-label fw-medium">Ghi chú</label>
-                <textarea class="form-control form-control-custom" v-model="customerForm.notes" rows="3" placeholder="Thêm ghi chú về khách hàng..."></textarea>
               </div>
 
               <input type="hidden" v-model="customerForm.id" />
@@ -631,22 +646,23 @@
 <script>
 import { ref, computed, reactive, onMounted, nextTick, watch } from 'vue'
 import Chart from 'chart.js/auto'
+import addressData from '/src/assets/js/address.json'
 
 export default {
   name: 'DashboardView',
   setup() {
     // State management
     const customers = ref([
-      { id: 1, name: "Nguyễn Văn An", phone: "0912345678", province: "hanoi", oldProvince: "haiphong", avatar: "https://randomuser.me/api/portraits/men/32.jpg", type: "owner", status: "potential_7", notes: "Khách hàng quan tâm đến chính sách ưu đãi, đã gửi báo giá qua email. Hẹn gọi lại vào chiều thứ 6 tuần sau.", lastUpdated: "2024-03-16", selected: false },
-      { id: 2, name: "Trần Thị Bình", phone: "0923456789", province: "hcm", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/44.jpg", type: "relative", status: "new", notes: "Khách hỏi về thời gian làm việc và chính sách thanh toán. Cần gọi lại vào sáng thứ 2 để tư vấn thêm.", lastUpdated: "2024-03-17", selected: false },
-      { id: 3, name: "Lê Văn Cường", phone: "0934567890", province: "danang", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/men/67.jpg", type: "broker", status: "care", notes: "Đã trao đổi về hợp đồng hợp tác dài hạn. Gửi email chi tiết các điều khoản và chính sách ưu đãi đặc biệt.", lastUpdated: "2024-03-15", selected: false },
-      { id: 4, name: "Phạm Thị Dung", phone: "0945678901", province: "haiphong", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/33.jpg", type: "owner", status: "potential_14", notes: "Khách hàng đang bận công việc gia đình, hẹn gọi lại sáng thứ 2 tuần sau. Để lại thông tin chi tiết về dự án.", lastUpdated: "2024-03-16", selected: false },
-      { id: 5, name: "Hoàng Văn Em", phone: "0956789012", province: "cantho", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/men/22.jpg", type: "relative", status: "success", notes: "Đã đặt lịch thành công ngày 25/3/2024 lúc 14:30. Gửi xác nhận qua SMS và email. Chuẩn bị tài liệu ký kết.", lastUpdated: "2024-03-14", selected: false },
-      { id: 6, name: "Vũ Thị Phương", phone: "0967890123", province: "hcm", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/women/55.jpg", type: "owner", status: "success", notes: "Đã đặt lịch thành công ngày 20/3, xác nhận lại lịch hẹn qua điện thoại. Khách hàng rất hài lòng với dịch vụ.", lastUpdated: "2024-03-15", selected: false },
-      { id: 7, name: "Đặng Văn Quân", phone: "0978901234", province: "hanoi", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/45.jpg", type: "broker", status: "unreachable", notes: "Số điện thoại không liên lạc được, đã thử 3 lần vào các khung giờ khác nhau. Để lại tin nhắn thoại.", lastUpdated: "2024-03-14", selected: false },
-      { id: 8, name: "Bùi Thị Hà", phone: "0989012345", province: "hcm", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/women/25.jpg", type: "owner", status: "wrong_number", notes: "Sai số, không phải khách hàng. Đã xác minh thông tin và cập nhật lại cơ sở dữ liệu.", lastUpdated: "2024-03-12", selected: false },
-      { id: 9, name: "Ngô Minh Trí", phone: "0990123456", province: "danang", oldProvince: "hanoi", avatar: "https://randomuser.me/api/portraits/men/28.jpg", type: "broker", status: "potential_7", notes: "Khách hàng quan tâm đến gói đầu tư cao cấp. Hẹn gặp trực tiếp tuần sau để trình bày chi tiết.", lastUpdated: "2024-03-13", selected: false },
-      { id: 10, name: "Lý Thanh Tùng", phone: "0901234567", province: "haiphong", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/35.jpg", type: "owner", status: "care", notes: "Khách hàng cũ, cần chăm sóc định kỳ. Đã gửi quà tặng tri ân và thông tin ưu đãi mới.", lastUpdated: "2024-03-10", selected: false }
+      { id: 1, name: "Nguyễn Văn An", phone: "0912345678", province: "Thành phố Hà Nội", oldProvince: "Thành phố Hải Phòng", avatar: "https://randomuser.me/api/portraits/men/32.jpg", type: "owner", status: "potential_7", notes: "Khách hàng quan tâm đến chính sách ưu đãi, đã gửi báo giá qua email. Hẹn gọi lại vào chiều thứ 6 tuần sau.", lastUpdated: "2024-03-16", selected: false, creatorId: 1, assigneeId: 2 },
+      { id: 2, name: "Trần Thị Bình", phone: "0923456789", province: "Thành phố Hồ Chí Minh", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/44.jpg", type: "relative", status: "new", notes: "Khách hỏi về thời gian làm việc và chính sách thanh toán. Cần gọi lại vào sáng thứ 2 để tư vấn thêm.", lastUpdated: "2024-03-17", selected: false, creatorId: 2, assigneeId: 3 },
+      { id: 3, name: "Lê Văn Cường", phone: "0934567890", province: "Thành phố Đà Nẵng", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/men/67.jpg", type: "broker", status: "care", notes: "Đã trao đổi về hợp đồng hợp tác dài hạn. Gửi email chi tiết các điều khoản và chính sách ưu đãi đặc biệt.", lastUpdated: "2024-03-15", selected: false, creatorId: 3, assigneeId: 4 },
+      { id: 4, name: "Phạm Thị Dung", phone: "0945678901", province: "Thành phố Hải Phòng", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/33.jpg", type: "owner", status: "potential_14", notes: "Khách hàng đang bận công việc gia đình, hẹn gọi lại sáng thứ 2 tuần sau. Để lại thông tin chi tiết về dự án.", lastUpdated: "2024-03-16", selected: false, creatorId: 4, assigneeId: 5 },
+      { id: 5, name: "Hoàng Văn Em", phone: "0956789012", province: "Thành phố Cần Thơ", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/men/22.jpg", type: "relative", status: "success", notes: "Đã đặt lịch thành công ngày 25/3/2024 lúc 14:30. Gửi xác nhận qua SMS và email. Chuẩn bị tài liệu ký kết.", lastUpdated: "2024-03-14", selected: false, creatorId: 1, assigneeId: 6 },
+      { id: 6, name: "Vũ Thị Phương", phone: "0967890123", province: "Thành phố Hồ Chí Minh", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/women/55.jpg", type: "owner", status: "success", notes: "Đã đặt lịch thành công ngày 20/3, xác nhận lại lịch hẹn qua điện thoại. Khách hàng rất hài lòng với dịch vụ.", lastUpdated: "2024-03-15", selected: false, creatorId: 2, assigneeId: 7 },
+      { id: 7, name: "Đặng Văn Quân", phone: "0978901234", province: "Thành phố Hà Nội", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/45.jpg", type: "broker", status: "unreachable", notes: "Số điện thoại không liên lạc được, đã thử 3 lần vào các khung giờ khác nhau. Để lại tin nhắn thoại.", lastUpdated: "2024-03-14", selected: false, creatorId: 3, assigneeId: 8 },
+      { id: 8, name: "Bùi Thị Hà", phone: "0989012345", province: "Thành phố Hồ Chí Minh", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/women/25.jpg", type: "owner", status: "wrong_number", notes: "Sai số, không phải khách hàng. Đã xác minh thông tin và cập nhật lại cơ sở dữ liệu.", lastUpdated: "2024-03-12", selected: false, creatorId: 4, assigneeId: 1 },
+      { id: 9, name: "Ngô Minh Trí", phone: "0990123456", province: "Thành phố Đà Nẵng", oldProvince: "Thành phố Hà Nội", avatar: "https://randomuser.me/api/portraits/men/28.jpg", type: "broker", status: "potential_7", notes: "Khách hàng quan tâm đến gói đầu tư cao cấp. Hẹn gặp trực tiếp tuần sau để trình bày chi tiết.", lastUpdated: "2024-03-13", selected: false, creatorId: 1, assigneeId: 4 },
+      { id: 10, name: "Lý Thanh Tùng", phone: "0901234567", province: "Thành phố Hải Phòng", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/35.jpg", type: "owner", status: "care", notes: "Khách hàng cũ, cần chăm sóc định kỳ. Đã gửi quà tặng tri ân và thông tin ưu đãi mới.", lastUpdated: "2024-03-10", selected: false, creatorId: 2, assigneeId: 5 }
     ])
 
     const staffMembers = ref([
@@ -658,6 +674,13 @@ export default {
       { id: 6, name: "Vũ Thị F", role: "Telesale Specialist", avatar: "https://randomuser.me/api/portraits/women/6.jpg", selected: false },
       { id: 7, name: "Đặng Văn G", role: "Senior Telesale", avatar: "https://randomuser.me/api/portraits/men/7.jpg", selected: false },
       { id: 8, name: "Bùi Thị H", role: "Telesale Executive", avatar: "https://randomuser.me/api/portraits/women/8.jpg", selected: false }
+    ])
+
+    const creatorOptions = ref([
+      { id: 1, name: "Trần Minh Anh", avatar: "https://randomuser.me/api/portraits/women/11.jpg" },
+      { id: 2, name: "Phạm Quốc Huy", avatar: "https://randomuser.me/api/portraits/men/12.jpg" },
+      { id: 3, name: "Nguyễn Thảo My", avatar: "https://randomuser.me/api/portraits/women/13.jpg" },
+      { id: 4, name: "Lê Hoàng Nam", avatar: "https://randomuser.me/api/portraits/men/14.jpg" }
     ])
 
     // UI state
@@ -678,7 +701,8 @@ export default {
     const filters = reactive({
       type: 'all',
       status: 'all',
-      province: 'all'
+      province: '',
+      creator: 'all'
     })
 
     const customerForm = reactive({
@@ -733,10 +757,17 @@ export default {
         if (filters.type !== 'all' && customer.type !== filters.type) return false
 
         // Filter by status
-        if (filters.status !== 'all' && customer.status !== filters.status) return false
+        if (activeTab.value === 'contacted' && filters.status !== 'all' && customer.status !== filters.status) return false
+
+        // Filter by creator
+        if (filters.creator !== 'all' && customer.creatorId !== filters.creator) return false
 
         // Filter by province
-        if (filters.province !== 'all' && customer.province !== filters.province) return false
+        if (filters.province && filters.province !== 'all') {
+          const provinceFilter = filters.province.toLowerCase()
+          const provinceLabel = getProvinceLabel(customer.province).toLowerCase()
+          if (!provinceLabel.includes(provinceFilter)) return false
+        }
 
         // Search
         if (searchText.value) {
@@ -744,8 +775,7 @@ export default {
           const searchFields = [
             customer.name,
             customer.phone,
-            getProvinceLabel(customer.province),
-            customer.notes
+            getProvinceLabel(customer.province)
           ].map(field => field ? field.toString().toLowerCase() : '')
 
           return searchFields.some(field => field.includes(searchTextLower))
@@ -785,6 +815,25 @@ export default {
       return `Sẽ cấp ${assignData.quantity} ${typeText} cho ${selectedStaff.length} nhân viên: ${staffNames}`
     })
 
+    const provinceOptions = computed(() => {
+      const provinceNames = addressData.map(province => province.name)
+      return [...provinceNames, 'Khác']
+    })
+
+    const creatorsById = computed(() => {
+      return creatorOptions.value.reduce((acc, creator) => {
+        acc[creator.id] = creator
+        return acc
+      }, {})
+    })
+
+    const staffById = computed(() => {
+      return staffMembers.value.reduce((acc, staff) => {
+        acc[staff.id] = staff
+        return acc
+      }, {})
+    })
+
     // Methods
     const toggleMobileMenu = () => {
       mobileMenuOpen.value = !mobileMenuOpen.value
@@ -813,7 +862,8 @@ export default {
       activeTab.value = 'all'
       filters.type = 'all'
       filters.status = 'all'
-      filters.province = 'all'
+      filters.province = ''
+      filters.creator = 'all'
       searchText.value = ''
       showNotification('Đã đặt lại tất cả bộ lọc', 'info')
     }
@@ -890,6 +940,8 @@ export default {
           status: customerForm.status,
           notes: customerForm.notes || '',
           lastUpdated: new Date().toISOString().split('T')[0],
+          creatorId: creatorOptions.value[0]?.id ?? null,
+          assigneeId: staffMembers.value[0]?.id ?? null,
           selected: false
         })
         showNotification('Thêm khách hàng mới thành công!', 'success')
@@ -1082,20 +1134,37 @@ export default {
     }
 
     const getProvinceLabel = (province) => {
-      const provinceMap = {
-        'hanoi': 'Hà Nội',
-        'hcm': 'TP.HCM',
-        'danang': 'Đà Nẵng',
-        'haiphong': 'Hải Phòng',
-        'cantho': 'Cần Thơ',
-        'other': 'Khác'
+      if (!province) return '-'
+      if (province === 'Khác' || province === 'other') return 'Khác'
+      const provinceMatch = addressData.find(item => item.name === province)
+      if (provinceMatch) return provinceMatch.name
+      const legacyMap = {
+        'hanoi': 'Thành phố Hà Nội',
+        'hcm': 'Thành phố Hồ Chí Minh',
+        'danang': 'Thành phố Đà Nẵng',
+        'haiphong': 'Thành phố Hải Phòng',
+        'cantho': 'Thành phố Cần Thơ'
       }
-      return provinceMap[province] || province
+      return legacyMap[province] || province
     }
 
     const formatPhoneNumber = (phone) => {
       return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
     }
+
+    const getCreatorInfo = (creatorId) => {
+      return creatorsById.value[creatorId] || null
+    }
+
+    const getAssigneeInfo = (assigneeId) => {
+      return staffById.value[assigneeId] || null
+    }
+
+    watch(activeTab, (tab) => {
+      if (tab !== 'contacted') {
+        filters.status = 'all'
+      }
+    })
 
     // Initialize charts
     onMounted(() => {
@@ -1197,6 +1266,7 @@ export default {
       // Data
       customers,
       staffMembers,
+      creatorOptions,
 
       // Refs
       monthlyChart,
@@ -1209,6 +1279,7 @@ export default {
       isAllSelected,
       callTimer,
       assignSummary,
+      provinceOptions,
 
       // Methods
       toggleMobileMenu,
@@ -1243,7 +1314,9 @@ export default {
       getStatusLabel,
       getTypeLabel,
       getProvinceLabel,
-      formatPhoneNumber
+      formatPhoneNumber,
+      getCreatorInfo,
+      getAssigneeInfo
     }
   }
 }
@@ -1283,7 +1356,7 @@ body {
 
   --nav-h: 85px;
   --shell-pad: 18px;
-  --sidebar-w: 340px;
+  --sidebar-w: 350px;
   font-family: 'Inter', sans-serif;
   background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
   color: #333;
@@ -1698,6 +1771,15 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   transition: var(--transition-normal);
 }
 
+.member-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 .table-custom tbody tr:hover .customer-avatar {
   transform: scale(1.1) !important;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
@@ -2020,6 +2102,22 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   justify-content: center;
 
   border-radius: 6px;
+}
+.table-custom {
+  table-layout: fixed;
+  width: 100%;
+}
+.col-checkbox,
+.col-index {
+  width: 36px;
+  max-width: 36px;
+  min-width: 36px;
+  padding: 0 !important;
+  text-align: center;
+}
+.col-checkbox .form-check-input {
+  margin: 0;
+  transform: scale(0.85);
 }
 
 
