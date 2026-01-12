@@ -130,12 +130,13 @@
               <label class="form-label mb-2 fw-medium">Tỉnh/Thành phố</label>
               <input
                 class="form-control form-control-custom"
+                style="font-size: 16px !important;"
                 list="province-filter-options"
                 v-model="filters.province"
                 placeholder="Tất cả tỉnh thành"
                 @input="applyFilters"
               >
-              <datalist id="province-filter-options">
+              <datalist id="province-filter-options" max-size="5">
                 <option value="all">Tất cả tỉnh thành</option>
                 <option v-for="province in provinceOptions" :key="province" :value="province"></option>
               </datalist>
@@ -345,7 +346,7 @@
                   <table class="table table-hover table-custom">
                     <thead>
                     <tr>
-                      <th style="width: 20px !important;">
+                      <th style="width: 10px !important; padding-left: 15px !important;">
                         <input
                             type="checkbox"
                             class="form-check-input checkbox-all"
@@ -353,16 +354,16 @@
                             @change="toggleSelectAll"
                         >
                       </th>
-                      <th class="col-index">#</th>
-                      <th>Khách hàng</th>
-                      <th>Người tạo</th>
-                      <th>NV phụ trách</th>
-                      <th>Số điện thoại</th>
+                      <th style="width: 10px !important;">#</th>
+                      <th style="width: 220px!important;">Khách hàng</th>
+                      <th>SĐT</th>
                       <th>Tỉnh/TP</th>
                       <th>Phân loại</th>
                       <th>Trạng thái</th>
-                      <th>Ngày cập nhật</th>
-                      <th>Thao tác</th>
+                      <th style="width: 120px!important;">Ngày CN</th>
+                      <th style="width: 170px!important;">Người tạo</th>
+                      <th style="width: 170px!important;">NVPT</th>
+                      <th style="width: 120px!important;">Thao tác</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -376,7 +377,7 @@
                         >
                       </td>
                       <td style="width: 20px !important;"><span class="badge bg-light text-dark">{{ customer.id }}</span></td>
-                      <td>
+                      <td  style="width: 220px!important;">
                         <div class="d-flex align-items-center">
                           <img :src="customer.avatar" :alt="customer.name" class="customer-avatar me-3">
                           <div>
@@ -385,25 +386,26 @@
                           </div>
                         </div>
                       </td>
-                      <td>
+                      <td class="fw-medium">{{ formatPhoneNumber(customer.phone) }}</td>
+                      <td>{{  getProvinceShortLabel(getProvinceLabel(customer.province)) }}</td>
+                      <td><span :class="`type-badge type-${customer.type}`">{{ getTypeLabel(customer.type) }}</span></td>
+                      <td><span :class="`status-badge status-${customer.status}`">{{ getStatusLabel(customer.status) }}</span></td>
+                      <td  style="width: 120px!important;"><span class="badge bg-light text-dark"
+                               style="font-size: 14px !important; font-weight: 500 !important;">{{ customer.lastUpdated }}</span></td>
+                      <td style="width: 170px!important;">
                         <div class="d-flex align-items-center gap-2" v-if="getCreatorInfo(customer.creatorId)">
                           <img :src="getCreatorInfo(customer.creatorId).avatar" :alt="getCreatorInfo(customer.creatorId).name" class="member-avatar">
                           <span class="fw-medium">{{ getCreatorInfo(customer.creatorId).name }}</span>
                         </div>
                         <span v-else class="text-muted">-</span>
                       </td>
-                      <td>
+                      <td style="width: 170px!important;">
                         <div class="d-flex align-items-center gap-2" v-if="getAssigneeInfo(customer.assigneeId)">
                           <img :src="getAssigneeInfo(customer.assigneeId).avatar" :alt="getAssigneeInfo(customer.assigneeId).name" class="member-avatar">
                           <span class="fw-medium">{{ getAssigneeInfo(customer.assigneeId).name }}</span>
                         </div>
                         <span v-else class="text-muted">-</span>
                       </td>
-                      <td class="fw-medium">{{ formatPhoneNumber(customer.phone) }}</td>
-                      <td>{{ getProvinceLabel(customer.province) }}</td>
-                      <td><span :class="`type-badge type-${customer.type}`">{{ getTypeLabel(customer.type) }}</span></td>
-                      <td><span :class="`status-badge status-${customer.status}`">{{ getStatusLabel(customer.status) }}</span></td>
-                      <td><span class="badge bg-light text-dark">{{ customer.lastUpdated }}</span></td>
                       <td>
                         <div class="action-buttons">
                           <button class="action-btn call-btn" @click="editCustomer(customer)" title="Sửa" style="background: var(--success-gradient);">
@@ -643,683 +645,610 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, computed, reactive, onMounted, nextTick, watch } from 'vue'
 import Chart from 'chart.js/auto'
 import addressData from '/src/assets/js/address.json'
 
-export default {
-  name: 'DashboardView',
-  setup() {
-    // State management
-    const customers = ref([
-      { id: 1, name: "Nguyễn Văn An", phone: "0912345678", province: "Thành phố Hà Nội", oldProvince: "Thành phố Hải Phòng", avatar: "https://randomuser.me/api/portraits/men/32.jpg", type: "owner", status: "potential_7", notes: "Khách hàng quan tâm đến chính sách ưu đãi, đã gửi báo giá qua email. Hẹn gọi lại vào chiều thứ 6 tuần sau.", lastUpdated: "2024-03-16", selected: false, creatorId: 1, assigneeId: 2 },
-      { id: 2, name: "Trần Thị Bình", phone: "0923456789", province: "Thành phố Hồ Chí Minh", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/44.jpg", type: "relative", status: "new", notes: "Khách hỏi về thời gian làm việc và chính sách thanh toán. Cần gọi lại vào sáng thứ 2 để tư vấn thêm.", lastUpdated: "2024-03-17", selected: false, creatorId: 2, assigneeId: 3 },
-      { id: 3, name: "Lê Văn Cường", phone: "0934567890", province: "Thành phố Đà Nẵng", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/men/67.jpg", type: "broker", status: "care", notes: "Đã trao đổi về hợp đồng hợp tác dài hạn. Gửi email chi tiết các điều khoản và chính sách ưu đãi đặc biệt.", lastUpdated: "2024-03-15", selected: false, creatorId: 3, assigneeId: 4 },
-      { id: 4, name: "Phạm Thị Dung", phone: "0945678901", province: "Thành phố Hải Phòng", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/33.jpg", type: "owner", status: "potential_14", notes: "Khách hàng đang bận công việc gia đình, hẹn gọi lại sáng thứ 2 tuần sau. Để lại thông tin chi tiết về dự án.", lastUpdated: "2024-03-16", selected: false, creatorId: 4, assigneeId: 5 },
-      { id: 5, name: "Hoàng Văn Em", phone: "0956789012", province: "Thành phố Cần Thơ", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/men/22.jpg", type: "relative", status: "success", notes: "Đã đặt lịch thành công ngày 25/3/2024 lúc 14:30. Gửi xác nhận qua SMS và email. Chuẩn bị tài liệu ký kết.", lastUpdated: "2024-03-14", selected: false, creatorId: 1, assigneeId: 6 },
-      { id: 6, name: "Vũ Thị Phương", phone: "0967890123", province: "Thành phố Hồ Chí Minh", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/women/55.jpg", type: "owner", status: "success", notes: "Đã đặt lịch thành công ngày 20/3, xác nhận lại lịch hẹn qua điện thoại. Khách hàng rất hài lòng với dịch vụ.", lastUpdated: "2024-03-15", selected: false, creatorId: 2, assigneeId: 7 },
-      { id: 7, name: "Đặng Văn Quân", phone: "0978901234", province: "Thành phố Hà Nội", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/45.jpg", type: "broker", status: "unreachable", notes: "Số điện thoại không liên lạc được, đã thử 3 lần vào các khung giờ khác nhau. Để lại tin nhắn thoại.", lastUpdated: "2024-03-14", selected: false, creatorId: 3, assigneeId: 8 },
-      { id: 8, name: "Bùi Thị Hà", phone: "0989012345", province: "Thành phố Hồ Chí Minh", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/women/25.jpg", type: "owner", status: "wrong_number", notes: "Sai số, không phải khách hàng. Đã xác minh thông tin và cập nhật lại cơ sở dữ liệu.", lastUpdated: "2024-03-12", selected: false, creatorId: 4, assigneeId: 1 },
-      { id: 9, name: "Ngô Minh Trí", phone: "0990123456", province: "Thành phố Đà Nẵng", oldProvince: "Thành phố Hà Nội", avatar: "https://randomuser.me/api/portraits/men/28.jpg", type: "broker", status: "potential_7", notes: "Khách hàng quan tâm đến gói đầu tư cao cấp. Hẹn gặp trực tiếp tuần sau để trình bày chi tiết.", lastUpdated: "2024-03-13", selected: false, creatorId: 1, assigneeId: 4 },
-      { id: 10, name: "Lý Thanh Tùng", phone: "0901234567", province: "Thành phố Hải Phòng", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/35.jpg", type: "owner", status: "care", notes: "Khách hàng cũ, cần chăm sóc định kỳ. Đã gửi quà tặng tri ân và thông tin ưu đãi mới.", lastUpdated: "2024-03-10", selected: false, creatorId: 2, assigneeId: 5 }
-    ])
+// State management
+const customers = ref([
+  { id: 1, name: "Nguyễn Văn An", phone: "0912345678", province: "Thành phố Hà Nội", oldProvince: "Thành phố Hải Phòng", avatar: "https://randomuser.me/api/portraits/men/32.jpg", type: "owner", status: "potential_7", notes: "Khách hàng quan tâm đến chính sách ưu đãi, đã gửi báo giá qua email. Hẹn gọi lại vào chiều thứ 6 tuần sau.", lastUpdated: "2024-03-16", selected: false, creatorId: 1, assigneeId: 2 },
+  { id: 2, name: "Trần Thị Bình", phone: "0923456789", province: "Thành phố Hồ Chí Minh", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/44.jpg", type: "relative", status: "new", notes: "Khách hỏi về thời gian làm việc và chính sách thanh toán. Cần gọi lại vào sáng thứ 2 để tư vấn thêm.", lastUpdated: "2024-03-17", selected: false, creatorId: 2, assigneeId: 3 },
+  { id: 3, name: "Lê Văn Cường", phone: "0934567890", province: "Thành phố Đà Nẵng", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/men/67.jpg", type: "broker", status: "care", notes: "Đã trao đổi về hợp đồng hợp tác dài hạn. Gửi email chi tiết các điều khoản và chính sách ưu đãi đặc biệt.", lastUpdated: "2024-03-15", selected: false, creatorId: 3, assigneeId: 4 },
+  { id: 4, name: "Phạm Thị Dung", phone: "0945678901", province: "Thành phố Hải Phòng", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/33.jpg", type: "owner", status: "potential_14", notes: "Khách hàng đang bận công việc gia đình, hẹn gọi lại sáng thứ 2 tuần sau. Để lại thông tin chi tiết về dự án.", lastUpdated: "2024-03-16", selected: false, creatorId: 4, assigneeId: 5 },
+  { id: 5, name: "Hoàng Văn Em", phone: "0956789012", province: "Thành phố Cần Thơ", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/men/22.jpg", type: "relative", status: "success", notes: "Đã đặt lịch thành công ngày 25/3/2024 lúc 14:30. Gửi xác nhận qua SMS và email. Chuẩn bị tài liệu ký kết.", lastUpdated: "2024-03-14", selected: false, creatorId: 1, assigneeId: 6 },
+  { id: 6, name: "Vũ Thị Phương", phone: "0967890123", province: "Thành phố Hồ Chí Minh", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/women/55.jpg", type: "owner", status: "success", notes: "Đã đặt lịch thành công ngày 20/3, xác nhận lại lịch hẹn qua điện thoại. Khách hàng rất hài lòng với dịch vụ.", lastUpdated: "2024-03-15", selected: false, creatorId: 2, assigneeId: 7 },
+  { id: 7, name: "Đặng Văn Quân", phone: "0978901234", province: "Thành phố Hà Nội", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/45.jpg", type: "broker", status: "unreachable", notes: "Số điện thoại không liên lạc được, đã thử 3 lần vào các khung giờ khác nhau. Để lại tin nhắn thoại.", lastUpdated: "2024-03-14", selected: false, creatorId: 3, assigneeId: 8 },
+  { id: 8, name: "Bùi Thị Hà", phone: "0989012345", province: "Thành phố Hồ Chí Minh", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/women/25.jpg", type: "owner", status: "wrong_number", notes: "Sai số, không phải khách hàng. Đã xác minh thông tin và cập nhật lại cơ sở dữ liệu.", lastUpdated: "2024-03-12", selected: false, creatorId: 4, assigneeId: 1 },
+  { id: 9, name: "Ngô Minh Trí", phone: "0990123456", province: "Thành phố Đà Nẵng", oldProvince: "Thành phố Hà Nội", avatar: "https://randomuser.me/api/portraits/men/28.jpg", type: "broker", status: "potential_7", notes: "Khách hàng quan tâm đến gói đầu tư cao cấp. Hẹn gặp trực tiếp tuần sau để trình bày chi tiết.", lastUpdated: "2024-03-13", selected: false, creatorId: 1, assigneeId: 4 },
+  { id: 10, name: "Lý Thanh Tùng", phone: "0901234567", province: "Thành phố Hải Phòng", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/35.jpg", type: "owner", status: "care", notes: "Khách hàng cũ, cần chăm sóc định kỳ. Đã gửi quà tặng tri ân và thông tin ưu đãi mới.", lastUpdated: "2024-03-10", selected: false, creatorId: 2, assigneeId: 5 }
+])
 
-    const staffMembers = ref([
-      { id: 1, name: "Nguyễn Văn A", role: "Telesale Manager", avatar: "https://randomuser.me/api/portraits/men/1.jpg", selected: false },
-      { id: 2, name: "Trần Thị B", role: "Senior Telesale", avatar: "https://randomuser.me/api/portraits/women/2.jpg", selected: false },
-      { id: 3, name: "Lê Văn C", role: "Telesale Executive", avatar: "https://randomuser.me/api/portraits/men/3.jpg", selected: false },
-      { id: 4, name: "Phạm Thị D", role: "Junior Telesale", avatar: "https://randomuser.me/api/portraits/women/4.jpg", selected: false },
-      { id: 5, name: "Hoàng Văn E", role: "Telesale Team Lead", avatar: "https://randomuser.me/api/portraits/men/5.jpg", selected: false },
-      { id: 6, name: "Vũ Thị F", role: "Telesale Specialist", avatar: "https://randomuser.me/api/portraits/women/6.jpg", selected: false },
-      { id: 7, name: "Đặng Văn G", role: "Senior Telesale", avatar: "https://randomuser.me/api/portraits/men/7.jpg", selected: false },
-      { id: 8, name: "Bùi Thị H", role: "Telesale Executive", avatar: "https://randomuser.me/api/portraits/women/8.jpg", selected: false }
-    ])
+const staffMembers = ref([
+  { id: 1, name: "Nguyễn Văn A", role: "Telesale Manager", avatar: "https://randomuser.me/api/portraits/men/1.jpg", selected: false },
+  { id: 2, name: "Trần Thị B", role: "Senior Telesale", avatar: "https://randomuser.me/api/portraits/women/2.jpg", selected: false },
+  { id: 3, name: "Lê Văn C", role: "Telesale Executive", avatar: "https://randomuser.me/api/portraits/men/3.jpg", selected: false },
+  { id: 4, name: "Phạm Thị D", role: "Junior Telesale", avatar: "https://randomuser.me/api/portraits/women/4.jpg", selected: false },
+  { id: 5, name: "Hoàng Văn E", role: "Telesale Team Lead", avatar: "https://randomuser.me/api/portraits/men/5.jpg", selected: false },
+  { id: 6, name: "Vũ Thị F", role: "Telesale Specialist", avatar: "https://randomuser.me/api/portraits/women/6.jpg", selected: false },
+  { id: 7, name: "Đặng Văn G", role: "Senior Telesale", avatar: "https://randomuser.me/api/portraits/men/7.jpg", selected: false },
+  { id: 8, name: "Bùi Thị H", role: "Telesale Executive", avatar: "https://randomuser.me/api/portraits/women/8.jpg", selected: false }
+])
 
-    const creatorOptions = ref([
-      { id: 1, name: "Trần Minh Anh", avatar: "https://randomuser.me/api/portraits/women/11.jpg" },
-      { id: 2, name: "Phạm Quốc Huy", avatar: "https://randomuser.me/api/portraits/men/12.jpg" },
-      { id: 3, name: "Nguyễn Thảo My", avatar: "https://randomuser.me/api/portraits/women/13.jpg" },
-      { id: 4, name: "Lê Hoàng Nam", avatar: "https://randomuser.me/api/portraits/men/14.jpg" }
-    ])
+const creatorOptions = ref([
+  { id: 1, name: "Trần Minh Anh", avatar: "https://randomuser.me/api/portraits/women/11.jpg" },
+  { id: 2, name: "Phạm Quốc Huy", avatar: "https://randomuser.me/api/portraits/men/12.jpg" },
+  { id: 3, name: "Nguyễn Thảo My", avatar: "https://randomuser.me/api/portraits/women/13.jpg" },
+  { id: 4, name: "Lê Hoàng Nam", avatar: "https://randomuser.me/api/portraits/men/14.jpg" }
+])
 
-    // UI state
-    const mobileMenuOpen = ref(false)
-    const notificationsOpen = ref(false)
-    const userMenuOpen = ref(false)
-    const activeTab = ref('all')
-    const chartYear = ref('2024')
-    const searchText = ref('')
+// UI state
+const mobileMenuOpen = ref(false)
+const notificationsOpen = ref(false)
+const userMenuOpen = ref(false)
+const activeTab = ref('all')
+const chartYear = ref('2024')
+const searchText = ref('')
 
-    // Modal states
-    const showAddCustomerModal = ref(false)
-    const showAssignDataModal = ref(false)
-    const showCallModal = ref(false)
-    const showConfirmDeleteModal = ref(false)
+// Modal states
+const showAddCustomerModal = ref(false)
+const showAssignDataModal = ref(false)
+const showCallModal = ref(false)
+const showConfirmDeleteModal = ref(false)
 
-    // Data state
-    const filters = reactive({
-      type: 'all',
-      status: 'all',
-      province: '',
-      creator: 'all'
+// Data state
+const filters = reactive({
+  type: 'all',
+  status: 'all',
+  province: '',
+  creator: 'all'
+})
+
+const customerForm = reactive({
+  id: null,
+  name: '',
+  phone: '',
+  province: '',
+  oldProvince: '',
+  type: '',
+  status: 'new',
+  avatar: '',
+  notes: ''
+})
+
+const assignData = reactive({
+  quantity: 50,
+  type: 'new',
+  notes: ''
+})
+
+const callingCustomer = ref(null)
+const deletingCustomer = ref(null)
+const callSeconds = ref(0)
+const callNotes = ref('')
+const isEditing = ref(false)
+
+const notification = reactive({
+  show: false,
+  message: '',
+  type: 'info',
+  icon: 'info-circle'
+})
+
+// Refs
+const monthlyChart = ref(null)
+const statusChart = ref(null)
+
+// Computed properties
+const filterTabs = computed(() => [
+  { value: 'all', label: 'Tất cả' },
+  { value: 'new', label: 'Mới' },
+  { value: 'contacted', label: 'Đã dùng' }
+])
+
+const filteredCustomers = computed(() => {
+  return customers.value.filter(customer => {
+    // Filter by tab
+    if (activeTab.value === 'new' && customer.status !== 'new') return false
+    if (activeTab.value === 'contacted' && customer.status === 'new') return false
+
+    // Filter by type
+    if (filters.type !== 'all' && customer.type !== filters.type) return false
+
+    // Filter by status
+    if (activeTab.value === 'contacted' && filters.status !== 'all' && customer.status !== filters.status) return false
+
+    // Filter by creator
+    if (filters.creator !== 'all' && customer.creatorId !== filters.creator) return false
+
+    // Filter by province
+    if (filters.province && filters.province !== 'all') {
+      const provinceFilter = filters.province.toLowerCase()
+      const provinceLabel = getProvinceLabel(customer.province).toLowerCase()
+      if (!provinceLabel.includes(provinceFilter)) return false
+    }
+
+    // Search
+    if (searchText.value) {
+      const searchTextLower = searchText.value.toLowerCase()
+      const searchFields = [
+        customer.name,
+        customer.phone,
+        getProvinceLabel(customer.province)
+      ].map(field => field ? field.toString().toLowerCase() : '')
+
+      return searchFields.some(field => field.includes(searchTextLower))
+    }
+
+    return true
+  })
+})
+
+const selectedCount = computed(() => {
+  return customers.value.filter(c => c.selected).length
+})
+
+const isAllSelected = computed(() => {
+  return selectedCount.value === customers.value.length && customers.value.length > 0
+})
+
+const callTimer = computed(() => {
+  const minutes = Math.floor(callSeconds.value / 60).toString().padStart(2, '0')
+  const seconds = (callSeconds.value % 60).toString().padStart(2, '0')
+  return `${minutes}:${seconds}`
+})
+
+const assignSummary = computed(() => {
+  const selectedStaff = staffMembers.value.filter(s => s.selected)
+  if (selectedStaff.length === 0) return 'Chưa có nhân viên nào được chọn'
+
+  let typeText = ''
+  switch (assignData.type) {
+    case 'new': typeText = 'khách hàng mới'; break
+    case 'potential': typeText = 'khách tiềm năng'; break
+    case 'all': typeText = 'tất cả loại khách'; break
+    case 'by_province': typeText = 'theo tỉnh thành'; break
+  }
+
+  const staffNames = selectedStaff.map(s => s.name).join(', ')
+  return `Sẽ cấp ${assignData.quantity} ${typeText} cho ${selectedStaff.length} nhân viên: ${staffNames}`
+})
+
+const provinceOptions = computed(() => {
+  const provinceNames = addressData.map(province => province.name)
+  return [...provinceNames, 'Khác']
+})
+
+const creatorsById = computed(() => {
+  return creatorOptions.value.reduce((acc, creator) => {
+    acc[creator.id] = creator
+    return acc
+  }, {})
+})
+
+const staffById = computed(() => {
+  return staffMembers.value.reduce((acc, staff) => {
+    acc[staff.id] = staff
+    return acc
+  }, {})
+})
+
+// Methods
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value
+}
+
+const toggleNotifications = () => {
+  notificationsOpen.value = !notificationsOpen.value
+  userMenuOpen.value = false
+}
+
+const toggleUserMenu = () => {
+  userMenuOpen.value = !userMenuOpen.value
+  notificationsOpen.value = false
+}
+
+const setActiveTab = (tab) => {
+  activeTab.value = tab
+  applyFilters()
+}
+
+const applyFilters = () => {
+  // Filters are automatically applied through computed property
+}
+
+const resetFilters = () => {
+  activeTab.value = 'all'
+  filters.type = 'all'
+  filters.status = 'all'
+  filters.province = ''
+  filters.creator = 'all'
+  searchText.value = ''
+  showNotification('Đã đặt lại tất cả bộ lọc', 'info')
+}
+
+const openAddCustomerModal = () => {
+  resetCustomerForm()
+  isEditing.value = false
+  showAddCustomerModal.value = true
+}
+
+const closeAddCustomerModal = () => {
+  showAddCustomerModal.value = false
+}
+
+const editCustomer = (customer) => {
+  Object.assign(customerForm, {
+    id: customer.id,
+    name: customer.name,
+    phone: customer.phone,
+    province: customer.province,
+    oldProvince: customer.oldProvince || '',
+    type: customer.type,
+    status: customer.status,
+    avatar: customer.avatar || '',
+    notes: customer.notes || ''
+  })
+  isEditing.value = true
+  showAddCustomerModal.value = true
+}
+
+const resetCustomerForm = () => {
+  Object.assign(customerForm, {
+    id: null,
+    name: '',
+    phone: '',
+    province: '',
+    oldProvince: '',
+    type: '',
+    status: 'new',
+    avatar: '',
+    notes: ''
+  })
+}
+
+const saveCustomer = () => {
+  if (!customerForm.name || !customerForm.phone || !customerForm.province || !customerForm.type || !customerForm.status) {
+    showNotification('Vui lòng điền đầy đủ các trường bắt buộc!', 'warning')
+    return
+  }
+
+  if (isEditing.value && customerForm.id) {
+    const index = customers.value.findIndex(c => c.id === customerForm.id)
+    if (index !== -1) {
+      customers.value[index] = {
+        ...customers.value[index],
+        ...customerForm,
+        lastUpdated: new Date().toISOString().split('T')[0]
+      }
+      showNotification('Cập nhật khách hàng thành công!', 'success')
+    }
+  } else {
+    const newId = customers.value.length > 0
+        ? Math.max(...customers.value.map(c => c.id)) + 1
+        : 1
+
+    customers.value.push({
+      id: newId,
+      name: customerForm.name,
+      phone: customerForm.phone,
+      province: customerForm.province,
+      oldProvince: customerForm.oldProvince || null,
+      avatar: customerForm.avatar || `https://randomuser.me/api/portraits/${customerForm.type === 'owner' || customerForm.type === 'broker' ? 'men' : 'women'}/${Math.floor(Math.random() * 70) + 1}.jpg`,
+      type: customerForm.type,
+      status: customerForm.status,
+      notes: customerForm.notes || '',
+      lastUpdated: new Date().toISOString().split('T')[0],
+      creatorId: creatorOptions.value[0]?.id ?? null,
+      assigneeId: staffMembers.value[0]?.id ?? null,
+      selected: false
     })
+    showNotification('Thêm khách hàng mới thành công!', 'success')
+  }
 
-    const customerForm = reactive({
-      id: null,
-      name: '',
-      phone: '',
-      province: '',
-      oldProvince: '',
-      type: '',
-      status: 'new',
-      avatar: '',
-      notes: ''
-    })
+  showAddCustomerModal.value = false
+  resetCustomerForm()
+}
 
-    const assignData = reactive({
-      quantity: 50,
-      type: 'new',
-      notes: ''
-    })
+const startCall = (customer) => {
+  callingCustomer.value = customer
+  callSeconds.value = 0
+  callNotes.value = ''
+  showCallModal.value = true
 
-    const callingCustomer = ref(null)
-    const deletingCustomer = ref(null)
-    const callSeconds = ref(0)
-    const callNotes = ref('')
-    const isEditing = ref(false)
-
-    const notification = reactive({
-      show: false,
-      message: '',
-      type: 'info',
-      icon: 'info-circle'
-    })
-
-    // Refs
-    const monthlyChart = ref(null)
-    const statusChart = ref(null)
-
-    // Computed properties
-    const filterTabs = computed(() => [
-      { value: 'all', label: 'Tất cả' },
-      { value: 'new', label: 'Mới' },
-      { value: 'contacted', label: 'Đã dùng' }
-    ])
-
-    const filteredCustomers = computed(() => {
-      return customers.value.filter(customer => {
-        // Filter by tab
-        if (activeTab.value === 'new' && customer.status !== 'new') return false
-        if (activeTab.value === 'contacted' && customer.status === 'new') return false
-
-        // Filter by type
-        if (filters.type !== 'all' && customer.type !== filters.type) return false
-
-        // Filter by status
-        if (activeTab.value === 'contacted' && filters.status !== 'all' && customer.status !== filters.status) return false
-
-        // Filter by creator
-        if (filters.creator !== 'all' && customer.creatorId !== filters.creator) return false
-
-        // Filter by province
-        if (filters.province && filters.province !== 'all') {
-          const provinceFilter = filters.province.toLowerCase()
-          const provinceLabel = getProvinceLabel(customer.province).toLowerCase()
-          if (!provinceLabel.includes(provinceFilter)) return false
-        }
-
-        // Search
-        if (searchText.value) {
-          const searchTextLower = searchText.value.toLowerCase()
-          const searchFields = [
-            customer.name,
-            customer.phone,
-            getProvinceLabel(customer.province)
-          ].map(field => field ? field.toString().toLowerCase() : '')
-
-          return searchFields.some(field => field.includes(searchTextLower))
-        }
-
-        return true
-      })
-    })
-
-    const selectedCount = computed(() => {
-      return customers.value.filter(c => c.selected).length
-    })
-
-    const isAllSelected = computed(() => {
-      return selectedCount.value === customers.value.length && customers.value.length > 0
-    })
-
-    const callTimer = computed(() => {
-      const minutes = Math.floor(callSeconds.value / 60).toString().padStart(2, '0')
-      const seconds = (callSeconds.value % 60).toString().padStart(2, '0')
-      return `${minutes}:${seconds}`
-    })
-
-    const assignSummary = computed(() => {
-      const selectedStaff = staffMembers.value.filter(s => s.selected)
-      if (selectedStaff.length === 0) return 'Chưa có nhân viên nào được chọn'
-
-      let typeText = ''
-      switch (assignData.type) {
-        case 'new': typeText = 'khách hàng mới'; break
-        case 'potential': typeText = 'khách tiềm năng'; break
-        case 'all': typeText = 'tất cả loại khách'; break
-        case 'by_province': typeText = 'theo tỉnh thành'; break
-      }
-
-      const staffNames = selectedStaff.map(s => s.name).join(', ')
-      return `Sẽ cấp ${assignData.quantity} ${typeText} cho ${selectedStaff.length} nhân viên: ${staffNames}`
-    })
-
-    const provinceOptions = computed(() => {
-      const provinceNames = addressData.map(province => province.name)
-      return [...provinceNames, 'Khác']
-    })
-
-    const creatorsById = computed(() => {
-      return creatorOptions.value.reduce((acc, creator) => {
-        acc[creator.id] = creator
-        return acc
-      }, {})
-    })
-
-    const staffById = computed(() => {
-      return staffMembers.value.reduce((acc, staff) => {
-        acc[staff.id] = staff
-        return acc
-      }, {})
-    })
-
-    // Methods
-    const toggleMobileMenu = () => {
-      mobileMenuOpen.value = !mobileMenuOpen.value
+  // Start timer
+  const timer = setInterval(() => {
+    if (showCallModal.value) {
+      callSeconds.value++
+    } else {
+      clearInterval(timer)
     }
+  }, 1000)
+}
 
-    const toggleNotifications = () => {
-      notificationsOpen.value = !notificationsOpen.value
-      userMenuOpen.value = false
-    }
+const endCall = () => {
+  showCallModal.value = false
+  callingCustomer.value = null
+  callSeconds.value = 0
 
-    const toggleUserMenu = () => {
-      userMenuOpen.value = !userMenuOpen.value
-      notificationsOpen.value = false
-    }
+  if (callNotes.value.trim()) {
+    showNotification('Cuộc gọi đã kết thúc. Ghi chú đã được lưu.', 'success')
+  }
+}
 
-    const setActiveTab = (tab) => {
-      activeTab.value = tab
-      applyFilters()
-    }
+const saveCallResult = (result) => {
+  if (!callingCustomer.value) return
 
-    const applyFilters = () => {
-      // Filters are automatically applied through computed property
-    }
+  const customer = customers.value.find(c => c.id === callingCustomer.value.id)
+  if (!customer) return
 
-    const resetFilters = () => {
-      activeTab.value = 'all'
-      filters.type = 'all'
-      filters.status = 'all'
-      filters.province = ''
-      filters.creator = 'all'
-      searchText.value = ''
-      showNotification('Đã đặt lại tất cả bộ lọc', 'info')
-    }
+  let newStatus = customer.status
+  let resultText = ''
 
-    const openAddCustomerModal = () => {
-      resetCustomerForm()
-      isEditing.value = false
-      showAddCustomerModal.value = true
-    }
+  switch (result) {
+    case 'success': newStatus = 'success'; resultText = 'Đã đặt lịch thành công'; break
+    case 'potential': newStatus = 'potential_7'; resultText = 'Khách hàng tiềm năng'; break
+    case 'failed': newStatus = 'unreachable'; resultText = 'Không liên lạc được'; break
+    case 'callback': newStatus = 'care'; resultText = 'Cần gọi lại'; break
+  }
 
-    const closeAddCustomerModal = () => {
-      showAddCustomerModal.value = false
-    }
+  customer.status = newStatus
+  customer.lastUpdated = new Date().toISOString().split('T')[0]
 
-    const editCustomer = (customer) => {
-      Object.assign(customerForm, {
-        id: customer.id,
-        name: customer.name,
-        phone: customer.phone,
-        province: customer.province,
-        oldProvince: customer.oldProvince || '',
-        type: customer.type,
-        status: customer.status,
-        avatar: customer.avatar || '',
-        notes: customer.notes || ''
-      })
-      isEditing.value = true
-      showAddCustomerModal.value = true
-    }
+  const autoNote = `[${new Date().toLocaleDateString('vi-VN')}] Kết quả: ${resultText}`
+  customer.notes = customer.notes
+      ? `${customer.notes}\n${autoNote}\n${callNotes.value}`
+      : `${autoNote}\n${callNotes.value}`
 
-    const resetCustomerForm = () => {
-      Object.assign(customerForm, {
-        id: null,
-        name: '',
-        phone: '',
-        province: '',
-        oldProvince: '',
-        type: '',
-        status: 'new',
-        avatar: '',
-        notes: ''
-      })
-    }
+  showNotification(`Đã cập nhật trạng thái khách hàng thành: ${getStatusLabel(newStatus)}`, 'success')
+  showCallModal.value = false
+}
 
-    const saveCustomer = () => {
-      if (!customerForm.name || !customerForm.phone || !customerForm.province || !customerForm.type || !customerForm.status) {
-        showNotification('Vui lòng điền đầy đủ các trường bắt buộc!', 'warning')
-        return
-      }
+const showDeleteConfirm = (customer) => {
+  deletingCustomer.value = customer
+  showConfirmDeleteModal.value = true
+}
 
-      if (isEditing.value && customerForm.id) {
-        const index = customers.value.findIndex(c => c.id === customerForm.id)
-        if (index !== -1) {
-          customers.value[index] = {
-            ...customers.value[index],
-            ...customerForm,
-            lastUpdated: new Date().toISOString().split('T')[0]
-          }
-          showNotification('Cập nhật khách hàng thành công!', 'success')
-        }
-      } else {
-        const newId = customers.value.length > 0
-            ? Math.max(...customers.value.map(c => c.id)) + 1
-            : 1
+const closeConfirmDeleteModal = () => {
+  showConfirmDeleteModal.value = false
+}
 
-        customers.value.push({
-          id: newId,
-          name: customerForm.name,
-          phone: customerForm.phone,
-          province: customerForm.province,
-          oldProvince: customerForm.oldProvince || null,
-          avatar: customerForm.avatar || `https://randomuser.me/api/portraits/${customerForm.type === 'owner' || customerForm.type === 'broker' ? 'men' : 'women'}/${Math.floor(Math.random() * 70) + 1}.jpg`,
-          type: customerForm.type,
-          status: customerForm.status,
-          notes: customerForm.notes || '',
-          lastUpdated: new Date().toISOString().split('T')[0],
-          creatorId: creatorOptions.value[0]?.id ?? null,
-          assigneeId: staffMembers.value[0]?.id ?? null,
-          selected: false
-        })
-        showNotification('Thêm khách hàng mới thành công!', 'success')
-      }
+const confirmDelete = () => {
+  if (deletingCustomer.value) {
+    customers.value = customers.value.filter(c => c.id !== deletingCustomer.value.id)
+    showNotification(`Đã xóa khách hàng "${deletingCustomer.value.name}" thành công!`, 'success')
+    showConfirmDeleteModal.value = false
+  }
+}
 
-      showAddCustomerModal.value = false
-      resetCustomerForm()
-    }
+const toggleCustomerSelection = (id) => {
+  const customer = customers.value.find(c => c.id === id)
+  if (customer) {
+    customer.selected = !customer.selected
+  }
+}
 
-    const startCall = (customer) => {
-      callingCustomer.value = customer
-      callSeconds.value = 0
-      callNotes.value = ''
-      showCallModal.value = true
+const toggleSelectAll = (event) => {
+  const checked = event.target.checked
+  customers.value.forEach(customer => {
+    customer.selected = checked
+  })
+}
 
-      // Start timer
-      const timer = setInterval(() => {
-        if (showCallModal.value) {
-          callSeconds.value++
-        } else {
-          clearInterval(timer)
-        }
-      }, 1000)
-    }
+const clearSelection = () => {
+  customers.value.forEach(c => c.selected = false)
+}
 
-    const endCall = () => {
-      showCallModal.value = false
-      callingCustomer.value = null
-      callSeconds.value = 0
-
-      if (callNotes.value.trim()) {
-        showNotification('Cuộc gọi đã kết thúc. Ghi chú đã được lưu.', 'success')
-      }
-    }
-
-    const saveCallResult = (result) => {
-      if (!callingCustomer.value) return
-
-      const customer = customers.value.find(c => c.id === callingCustomer.value.id)
-      if (!customer) return
-
-      let newStatus = customer.status
-      let resultText = ''
-
-      switch (result) {
-        case 'success': newStatus = 'success'; resultText = 'Đã đặt lịch thành công'; break
-        case 'potential': newStatus = 'potential_7'; resultText = 'Khách hàng tiềm năng'; break
-        case 'failed': newStatus = 'unreachable'; resultText = 'Không liên lạc được'; break
-        case 'callback': newStatus = 'care'; resultText = 'Cần gọi lại'; break
-      }
-
-      customer.status = newStatus
-      customer.lastUpdated = new Date().toISOString().split('T')[0]
-
-      const autoNote = `[${new Date().toLocaleDateString('vi-VN')}] Kết quả: ${resultText}`
-      customer.notes = customer.notes
-          ? `${customer.notes}\n${autoNote}\n${callNotes.value}`
-          : `${autoNote}\n${callNotes.value}`
-
-      showNotification(`Đã cập nhật trạng thái khách hàng thành: ${getStatusLabel(newStatus)}`, 'success')
-      showCallModal.value = false
-    }
-
-    const showDeleteConfirm = (customer) => {
-      deletingCustomer.value = customer
-      showConfirmDeleteModal.value = true
-    }
-
-    const closeConfirmDeleteModal = () => {
-      showConfirmDeleteModal.value = false
-    }
-
-    const confirmDelete = () => {
-      if (deletingCustomer.value) {
-        customers.value = customers.value.filter(c => c.id !== deletingCustomer.value.id)
-        showNotification(`Đã xóa khách hàng "${deletingCustomer.value.name}" thành công!`, 'success')
-        showConfirmDeleteModal.value = false
-      }
-    }
-
-    const toggleCustomerSelection = (id) => {
-      const customer = customers.value.find(c => c.id === id)
-      if (customer) {
-        customer.selected = !customer.selected
-      }
-    }
-
-    const toggleSelectAll = (event) => {
-      const checked = event.target.checked
-      customers.value.forEach(customer => {
-        customer.selected = checked
-      })
-    }
-
-    const clearSelection = () => {
-      customers.value.forEach(c => c.selected = false)
-    }
-
-    const bulkDelete = () => {
-      const selectedCustomers = customers.value.filter(c => c.selected)
-      if (selectedCustomers.length > 0) {
-        if (confirm(`Bạn có chắc chắn muốn xóa ${selectedCustomers.length} khách hàng đã chọn?`)) {
-          customers.value = customers.value.filter(c => !c.selected)
-          showNotification(`Đã xóa ${selectedCustomers.length} khách hàng thành công!`, 'success')
-        }
-      }
-    }
-
-    const openAssignDataModal = () => {
-      showAssignDataModal.value = true
-    }
-
-    const closeAssignDataModal = () => {
-      showAssignDataModal.value = false
-    }
-
-    const toggleStaffSelection = (staff) => {
-      staff.selected = !staff.selected
-    }
-
-    const confirmAssignData = () => {
-      const selectedStaff = staffMembers.value.filter(s => s.selected)
-      if (selectedStaff.length === 0) {
-        showNotification('Vui lòng chọn ít nhất một nhân viên!', 'warning')
-        return
-      }
-      if (assignData.quantity < 1 || assignData.quantity > 1000) {
-        showNotification('Số lượng dữ liệu phải từ 1 đến 1000!', 'warning')
-        return
-      }
-
-      const dataPerStaff = Math.floor(assignData.quantity / selectedStaff.length)
-      const remainder = assignData.quantity % selectedStaff.length
-
-      let resultMessage = `Đã cấp ${assignData.quantity} dữ liệu ${assignData.type} cho ${selectedStaff.length} nhân viên:\n`
-      selectedStaff.forEach((staff, index) => {
-        let staffQuantity = dataPerStaff
-        if (index < remainder) staffQuantity++
-        resultMessage += `- ${staff.name}: ${staffQuantity} khách\n`
-      })
-      if (assignData.notes) resultMessage += `\nGhi chú: ${assignData.notes}`
-
-      showNotification(resultMessage, 'success')
-
-      // Reset staff selection
-      staffMembers.value.forEach(s => s.selected = false)
-      assignData.quantity = 50
-      assignData.type = 'new'
-      assignData.notes = ''
-      showAssignDataModal.value = false
-    }
-
-    const exportExcel = () => {
-      showNotification('Xuất dữ liệu ra Excel thành công!', 'success')
-    }
-
-    const exportPDF = () => {
-      showNotification('Xuất dữ liệu ra PDF thành công!', 'success')
-    }
-
-    const showNotification = (message, type = 'info') => {
-      notification.message = message
-      notification.type = type
-      notification.icon = type === 'success' ? 'check-circle' :
-          type === 'warning' ? 'exclamation-triangle' : 'info-circle'
-      notification.show = true
-
-      setTimeout(() => {
-        notification.show = false
-      }, 5000)
-    }
-
-    // Helper functions
-    const getStatusLabel = (status) => {
-      const statusMap = {
-        'new': 'Mới',
-        'potential_7': 'Tiềm năng 7 ngày',
-        'potential_14': 'Tiềm năng 14 ngày',
-        'success': 'Thành công',
-        'wrong_number': 'Sai số',
-        'unreachable': 'Không liên lạc',
-        'care': 'Chăm sóc'
-      }
-      return statusMap[status] || status
-    }
-
-    const getTypeLabel = (type) => {
-      const typeMap = { 'broker': 'Môi giới', 'owner': 'Chủ nhà', 'relative': 'Người thân' }
-      return typeMap[type] || type
-    }
-
-    const getProvinceLabel = (province) => {
-      if (!province) return '-'
-      if (province === 'Khác' || province === 'other') return 'Khác'
-      const provinceMatch = addressData.find(item => item.name === province)
-      if (provinceMatch) return provinceMatch.name
-      const legacyMap = {
-        'hanoi': 'Thành phố Hà Nội',
-        'hcm': 'Thành phố Hồ Chí Minh',
-        'danang': 'Thành phố Đà Nẵng',
-        'haiphong': 'Thành phố Hải Phòng',
-        'cantho': 'Thành phố Cần Thơ'
-      }
-      return legacyMap[province] || province
-    }
-
-    const formatPhoneNumber = (phone) => {
-      return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
-    }
-
-    const getCreatorInfo = (creatorId) => {
-      return creatorsById.value[creatorId] || null
-    }
-
-    const getAssigneeInfo = (assigneeId) => {
-      return staffById.value[assigneeId] || null
-    }
-
-    watch(activeTab, (tab) => {
-      if (tab !== 'contacted') {
-        filters.status = 'all'
-      }
-    })
-
-    // Initialize charts
-    onMounted(() => {
-      nextTick(() => {
-        initCharts()
-      })
-    })
-
-    const initCharts = () => {
-      // Monthly Chart
-      const monthlyCtx = monthlyChart.value?.getContext('2d')
-      if (monthlyCtx) {
-        new Chart(monthlyCtx, {
-          type: 'line',
-          data: {
-            labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
-            datasets: [
-              { label: 'Thành công', data: [65, 59, 80, 81, 56, 55, 70, 75, 82, 78, 85, 90], borderColor: '#43e97b', backgroundColor: 'rgba(67, 233, 123, 0.1)', tension: 0.2, fill: true, borderWidth: 3 },
-              { label: 'Tiềm năng', data: [28, 48, 40, 19, 86, 27, 35, 42, 50, 45, 60, 55], borderColor: '#fa709a', backgroundColor: 'rgba(250, 112, 154, 0.1)', tension: 0.2, fill: true, borderWidth: 3 },
-              { label: 'Không liên lạc', data: [18, 25, 22, 15, 30, 20, 18, 22, 25, 20, 28, 30], borderColor: '#ff5858', backgroundColor: 'rgba(255, 88, 88, 0.1)', tension: 0.2, fill: true, borderWidth: 3 },
-              { label: 'Tổng cuộc gọi', data: [120, 140, 150, 130, 180, 110, 130, 145, 165, 150, 185, 190], borderColor: '#667eea', backgroundColor: 'rgba(102, 126, 234, 0.1)', tension: 0.2, fill: true, borderWidth: 3 }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { position: 'top', labels: { font: { family: 'Poppins', size: 14  }, padding: 20, usePointStyle: true } },
-              tooltip: { backgroundColor: 'rgba(255, 255, 255, 0.9)', titleColor: '#333', bodyColor: '#666', borderColor: '#667eea', borderWidth: 1, cornerRadius: 10, padding: 12 }
-            },
-            scales: {
-              y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { font: { family: 'Inter' } } },
-              x: { grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { font: { family: 'Inter' } } }
-            }
-          }
-        })
-      }
-
-      // Status Chart
-      const statusCtx = statusChart.value?.getContext('2d')
-      if (statusCtx) {
-        const statusData = [156, 85, 42, 78, 24, 65, 120]
-        new Chart(statusCtx, {
-          type: 'doughnut',
-          data: {
-            labels: ['Thành công', 'Tiềm năng 7 ngày', 'Tiềm năng 14 ngày', 'Không liên lạc', 'Sai số', 'Chăm sóc', 'Mới'],
-            datasets: [{
-              data: statusData,
-              backgroundColor: ['#43e97b', '#fa709a', '#f09819', '#ff5858', '#8E2DE2', '#FF5ACD', '#4facfe'],
-              borderWidth: 0,
-              hoverOffset: 15
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Inter', size: 14 }, padding: 15 } },
-              tooltip: {
-                callbacks: {
-                  label: function (context) {
-                    const label = context.label || ''
-                    const value = context.raw || 0
-                    const total = context.dataset.data.reduce((a, b) => a + b, 0)
-                    const percentage = Math.round((value / total) * 100)
-                    return `${label}: ${value} (${percentage}%)`
-                  }
-                }
-              }
-            },
-            cutout: '75%'
-          }
-        })
-      }
-    }
-
-    return {
-      // State
-      mobileMenuOpen,
-      notificationsOpen,
-      userMenuOpen,
-      activeTab,
-      chartYear,
-      searchText,
-      showAddCustomerModal,
-      showAssignDataModal,
-      showCallModal,
-      showConfirmDeleteModal,
-      filters,
-      customerForm,
-      assignData,
-      callingCustomer,
-      deletingCustomer,
-      callSeconds,
-      callNotes,
-      isEditing,
-      notification,
-
-      // Data
-      customers,
-      staffMembers,
-      creatorOptions,
-
-      // Refs
-      monthlyChart,
-      statusChart,
-
-      // Computed
-      filterTabs,
-      filteredCustomers,
-      selectedCount,
-      isAllSelected,
-      callTimer,
-      assignSummary,
-      provinceOptions,
-
-      // Methods
-      toggleMobileMenu,
-      toggleNotifications,
-      toggleUserMenu,
-      setActiveTab,
-      applyFilters,
-      resetFilters,
-      openAddCustomerModal,
-      closeAddCustomerModal,
-      editCustomer,
-      saveCustomer,
-      startCall,
-      endCall,
-      saveCallResult,
-      showDeleteConfirm,
-      closeConfirmDeleteModal,
-      confirmDelete,
-      toggleCustomerSelection,
-      toggleSelectAll,
-      clearSelection,
-      bulkDelete,
-      openAssignDataModal,
-      closeAssignDataModal,
-      toggleStaffSelection,
-      confirmAssignData,
-      exportExcel,
-      exportPDF,
-      showNotification,
-
-      // Helper functions
-      getStatusLabel,
-      getTypeLabel,
-      getProvinceLabel,
-      formatPhoneNumber,
-      getCreatorInfo,
-      getAssigneeInfo
+const bulkDelete = () => {
+  const selectedCustomers = customers.value.filter(c => c.selected)
+  if (selectedCustomers.length > 0) {
+    if (confirm(`Bạn có chắc chắn muốn xóa ${selectedCustomers.length} khách hàng đã chọn?`)) {
+      customers.value = customers.value.filter(c => !c.selected)
+      showNotification(`Đã xóa ${selectedCustomers.length} khách hàng thành công!`, 'success')
     }
   }
 }
+
+const openAssignDataModal = () => {
+  showAssignDataModal.value = true
+}
+
+const closeAssignDataModal = () => {
+  showAssignDataModal.value = false
+}
+
+const toggleStaffSelection = (staff) => {
+  staff.selected = !staff.selected
+}
+
+const confirmAssignData = () => {
+  const selectedStaff = staffMembers.value.filter(s => s.selected)
+  if (selectedStaff.length === 0) {
+    showNotification('Vui lòng chọn ít nhất một nhân viên!', 'warning')
+    return
+  }
+  if (assignData.quantity < 1 || assignData.quantity > 1000) {
+    showNotification('Số lượng dữ liệu phải từ 1 đến 1000!', 'warning')
+    return
+  }
+
+  const dataPerStaff = Math.floor(assignData.quantity / selectedStaff.length)
+  const remainder = assignData.quantity % selectedStaff.length
+
+  let resultMessage = `Đã cấp ${assignData.quantity} dữ liệu ${assignData.type} cho ${selectedStaff.length} nhân viên:\n`
+  selectedStaff.forEach((staff, index) => {
+    let staffQuantity = dataPerStaff
+    if (index < remainder) staffQuantity++
+    resultMessage += `- ${staff.name}: ${staffQuantity} khách\n`
+  })
+  if (assignData.notes) resultMessage += `\nGhi chú: ${assignData.notes}`
+
+  showNotification(resultMessage, 'success')
+
+  // Reset staff selection
+  staffMembers.value.forEach(s => s.selected = false)
+  assignData.quantity = 50
+  assignData.type = 'new'
+  assignData.notes = ''
+  showAssignDataModal.value = false
+}
+
+const exportExcel = () => {
+  showNotification('Xuất dữ liệu ra Excel thành công!', 'success')
+}
+
+const exportPDF = () => {
+  showNotification('Xuất dữ liệu ra PDF thành công!', 'success')
+}
+
+const showNotification = (message, type = 'info') => {
+  notification.message = message
+  notification.type = type
+  notification.icon = type === 'success' ? 'check-circle' :
+      type === 'warning' ? 'exclamation-triangle' : 'info-circle'
+  notification.show = true
+
+  setTimeout(() => {
+    notification.show = false
+  }, 5000)
+}
+
+// Helper functions
+const getStatusLabel = (status) => {
+  const statusMap = {
+    'new': 'Mới',
+    'potential_7': 'TN 7 ngày',
+    'potential_14': 'TN 14 ngày',
+    'success': 'Thành công',
+    'wrong_number': 'Sai số',
+    'unreachable': 'KLLD',
+    'care': 'Chăm sóc'
+  }
+  return statusMap[status] || status
+}
+
+const getTypeLabel = (type) => {
+  const typeMap = { 'broker': 'Môi giới', 'owner': 'Chủ nhà', 'relative': 'Người thân' }
+  return typeMap[type] || type
+}
+
+const getProvinceLabel = (province) => {
+  if (!province) return '-'
+  if (province === 'Khác' || province === 'other') return 'Khác'
+  const provinceMatch = addressData.find(item => item.name === province)
+  if (provinceMatch) return provinceMatch.name
+  const legacyMap = {
+    'hanoi': 'Thành phố Hà Nội',
+    'hcm': 'Thành phố Hồ Chí Minh',
+    'danang': 'Thành phố Đà Nẵng',
+    'haiphong': 'Thành phố Hải Phòng',
+    'cantho': 'Thành phố Cần Thơ'
+  }
+  return legacyMap[province] || province
+}
+
+const formatPhoneNumber = (phone) => {
+  return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
+}
+
+const getCreatorInfo = (creatorId) => {
+  return creatorsById.value[creatorId] || null
+}
+
+const getAssigneeInfo = (assigneeId) => {
+  return staffById.value[assigneeId] || null
+}
+
+const getProvinceShortLabel = (province) => {
+  const label = getProvinceLabel(province)
+
+  if (!label || label === '-' || label === 'Khác') return label
+
+  return label
+      .replace(/^Thành phố\s+/i, 'TP. ')
+      .replace(/^Tỉnh\s+/i, 'T. ')
+}
+
+// Initialize charts
+const initCharts = () => {
+  // Monthly Chart
+  const monthlyCtx = monthlyChart.value?.getContext('2d')
+  if (monthlyCtx) {
+    new Chart(monthlyCtx, {
+      type: 'line',
+      data: {
+        labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+        datasets: [
+          { label: 'Thành công', data: [65, 59, 80, 81, 56, 55, 70, 75, 82, 78, 85, 90], borderColor: '#43e97b', backgroundColor: 'rgba(67, 233, 123, 0.1)', tension: 0.2, fill: true, borderWidth: 3 },
+          { label: 'Tiềm năng', data: [28, 48, 40, 19, 86, 27, 35, 42, 50, 45, 60, 55], borderColor: '#fa709a', backgroundColor: 'rgba(250, 112, 154, 0.1)', tension: 0.2, fill: true, borderWidth: 3 },
+          { label: 'Không liên lạc', data: [18, 25, 22, 15, 30, 20, 18, 22, 25, 20, 28, 30], borderColor: '#ff5858', backgroundColor: 'rgba(255, 88, 88, 0.1)', tension: 0.2, fill: true, borderWidth: 3 },
+          { label: 'Tổng cuộc gọi', data: [120, 140, 150, 130, 180, 110, 130, 145, 165, 150, 185, 190], borderColor: '#667eea', backgroundColor: 'rgba(102, 126, 234, 0.1)', tension: 0.2, fill: true, borderWidth: 3 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top', labels: { font: { family: 'Poppins', size: 14  }, padding: 20, usePointStyle: true } },
+          tooltip: { backgroundColor: 'rgba(255, 255, 255, 0.9)', titleColor: '#333', bodyColor: '#666', borderColor: '#667eea', borderWidth: 1, cornerRadius: 10, padding: 12 }
+        },
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { font: { family: 'Inter' } } },
+          x: { grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { font: { family: 'Inter' } } }
+        }
+      }
+    })
+  }
+
+  // Status Chart
+  const statusCtx = statusChart.value?.getContext('2d')
+  if (statusCtx) {
+    const statusData = [156, 85, 42, 78, 24, 65, 120]
+    new Chart(statusCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Thành công', 'Tiềm năng 7 ngày', 'Tiềm năng 14 ngày', 'Không liên lạc', 'Sai số', 'Chăm sóc', 'Mới'],
+        datasets: [{
+          data: statusData,
+          backgroundColor: ['#43e97b', '#fa709a', '#f09819', '#ff5858', '#8E2DE2', '#FF5ACD', '#4facfe'],
+          borderWidth: 0,
+          hoverOffset: 15
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Inter', size: 14 }, padding: 15 } },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const label = context.label || ''
+                const value = context.raw || 0
+                const total = context.dataset.data.reduce((a, b) => a + b, 0)
+                const percentage = Math.round((value / total) * 100)
+                return `${label}: ${value} (${percentage}%)`
+              }
+            }
+          }
+        },
+        cutout: '75%'
+      }
+    })
+  }
+}
+
+onMounted(() => {
+  nextTick(() => {
+    initCharts()
+  })
+})
+
+watch(activeTab, (tab) => {
+  if (tab !== 'contacted') {
+    filters.status = 'all'
+  }
+})
 </script>
 
 <style>
