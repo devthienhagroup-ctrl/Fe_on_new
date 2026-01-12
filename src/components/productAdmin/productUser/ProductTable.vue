@@ -60,7 +60,7 @@
           </td>
           <td class="font-bold">
             <img v-if="item.status === 'Đã kiểm duyệt'"
-                 src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png"
+                 src="https://s3.cloudfly.vn/thg-storage/uploads-public/icon-kiem-duỵet.png"
                  style="width: 27px"
                  alt="checked"
             />

@@ -21,7 +21,7 @@
 
       <img
           v-if="info.avatarUrl"
-          :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+          :src="' https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
           alt="avatar"
           class="rounded-circle border"
           style="width: 36px; height: 36px; object-fit: cover;"
@@ -425,14 +425,14 @@
 <!--              <div class="avatar-wrapper mx-auto">-->
 <!--                <img-->
 <!--                    :src="item.avatar-->
-<!--                ? 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + item.avatar-->
-<!--                :  'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + 'vat-default.jpg'"-->
+<!--                ? 'https://s3.cloudfly.vn/thg-storage/uploads-public/' + item.avatar-->
+<!--                :  'https://s3.cloudfly.vn/thg-storage/uploads-public/' + 'vat-default.jpg'"-->
 <!--                    class="avatar-img"-->
 <!--                />-->
 
 <!--                &lt;!&ndash; BADGE &ndash;&gt;-->
 <!--                <img-->
-<!--                    src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/huy-hieu.png"-->
+<!--                    src="https://s3.cloudfly.vn/thg-storage/uploads-public/huy-hieu.png"-->
 <!--                    class="badge-icon"-->
 <!--                    style="width: 45px; height: 45px"-->
 <!--                />-->
@@ -472,14 +472,14 @@
             <div class="avatar-wrapper mx-auto">
               <img
                   :src="item.avatar
-              ? 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + item.avatar
-              :  'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + 'vat-default.jpg'"
+              ? 'https://s3.cloudfly.vn/thg-storage/uploads-public/' + item.avatar
+              :  'https://s3.cloudfly.vn/thg-storage/uploads-public/' + 'vat-default.jpg'"
                   class="avatar-img"
               />
 
               <!-- BADGE -->
               <img
-                  src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/huy-hieu.png"
+                  src="https://s3.cloudfly.vn/thg-storage/uploads-public/huy-hieu.png"
                   class="badge-icon"
                   style="width: 45px; height: 45px"
               />

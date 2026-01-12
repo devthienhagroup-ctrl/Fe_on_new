@@ -40,13 +40,13 @@
       >
         <i class="fas fa-cog"></i> Dịch vụ
       </button>
-      <button
-          class="tab-button"
-          :class="{ active: activeTab === 'projects' }"
-          @click="activeTab = 'projects'"
-      >
-        <i class="fas fa-building"></i> Dự án đã bán
-      </button>
+<!--      <button-->
+<!--          class="tab-button"-->
+<!--          :class="{ active: activeTab === 'projects' }"-->
+<!--          @click="activeTab = 'projects'"-->
+<!--      >-->
+<!--        <i class="fas fa-building"></i> Dự án đã bán-->
+<!--      </button>-->
       <button
           class="tab-button"
           :class="{ active: activeTab === 'process' }"

@@ -141,22 +141,22 @@ import QuickSale30D from "../components/user/NewUser/QuickSale30D/QuickSale30D.v
 import QuickSale from "../components/cms/NewCms/QuickSaleNew/QuickSale.vue";
 
 
-import DemoGiaoDien from "../components/thiet-kegiandien/marketing-cap-da-ta.vue";
-import test from "../components/thiet-kegiandien/marketing-cap-da-ta.vue"
-import test1 from "../components/thiet-kegiandien/telesales-lien-he-khach-hang.vue"
+// import DemoGiaoDien from "../components/thiet-kegiandien/marketing-cap-da-ta.vue";
+// import test from "../components/thiet-kegiandien/marketing-cap-da-ta.vue"
+// import test1 from "../components/thiet-kegiandien/telesales-lien-he-khach-hang.vue"
 const routes = [
-    {
-        path: "/test/dat-lich",
-        name: "TeamCollaboration",
-        component: test,
-        meta: { requiresAuth: false,     enableTailwind: false},
-    },
-    {
-        path: "/test/tele-sales",
-        name: "TELESALES",
-        component: test1,
-        meta: { requiresAuth: false, enableTailwind: false},
-    },
+    // {
+    //     path: "/test/dat-lich",
+    //     name: "TeamCollaboration",
+    //     component: test,
+    //     meta: { requiresAuth: false,     enableTailwind: false},
+    // },
+    // {
+    //     path: "/test/tele-sales",
+    //     name: "TELESALES",
+    //     component: test1,
+    //     meta: { requiresAuth: false, enableTailwind: false},
+    // },
 
     {
         path: "/-thg/dang-nhap",
@@ -1400,7 +1400,8 @@ const routes = [
         meta: {
             enableTailwind: true,
             newCustomScroll: true,
-            useAOS: true
+            useAOS: true,
+            requiresAuth: false
         },
         children: [
             {

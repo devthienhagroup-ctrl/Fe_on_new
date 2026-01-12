@@ -5,15 +5,27 @@
     <div class="file-buttons-row">
       <!-- View buttons (icon only) -->
       <div class="view-buttons">
-        <button class="file-btn view-btn image-btn" @click="openLightbox(0,'normal')" title="Xem ảnh thường">
+        <button class="file-btn view-btn image-btn"
+                :disabled="!normalImages.length"
+                :class="{ 'opacity-50 pointer-events-none': !normalImages.length }"
+                @click="normalImages.length && openLightbox(0,'normal')"
+                title="Xem ảnh thường">
           <i class="fa-solid fa-image"></i>
         </button>
 
-        <button class="file-btn view-btn landbook-btn" @click="openLightbox(0,'landBook')" title="Xem ảnh sổ đỏ">
+        <button class="file-btn view-btn landbook-btn"
+                :disabled="!landBookImages.length"
+                :class="{ 'opacity-50 pointer-events-none': !landBookImages.length }"
+                @click="landBookImages.length && openLightbox(0,'landBook')"
+                title="Xem ảnh sổ đỏ">
           <i class="fa-solid fa-landmark-dome"></i>
         </button>
 
-        <button class="file-btn view-btn file-gtn-btn " @click="openFileModal" title="Xem tài liệu">
+        <button class="file-btn view-btn file-gtn-btn "
+                :disabled="!files.length"
+                :class="{ 'opacity-50 pointer-events-none': !files.length }"
+                @click="files.length && openFileModal()"
+                title="Xem tài liệu">
           <i class="fa-solid fa-file-lines"></i>
         </button>
       </div>
@@ -49,7 +61,7 @@
 
   <!-- ================= FILE MODAL ================= -->
   <teleport to="body">
-    <div v-if="showFileModal" class="file-modal" @click.self="closeFileModal">
+    <div v-if="showFileModal && files.length" class="file-modal" @click.self="closeFileModal">
       <div class="file-modal-container">
         <div class="file-modal-header">
           <div class="modal-header-left">
@@ -108,7 +120,7 @@
 
   <!-- ================= LIGHTBOX MODAL ================= -->
   <teleport to="body">
-    <div v-if="previewIndex !== null" class="lightbox-modal" @click.self="closeLightbox">
+    <div v-if="previewIndex !== null && ((currentImageType === 'normal' && normalImages.length) || (currentImageType === 'landBook' && landBookImages.length))" class="lightbox-modal" @click.self="closeLightbox">
       <div class="lightbox-container">
         <!-- Header -->
         <div class="lightbox-header">

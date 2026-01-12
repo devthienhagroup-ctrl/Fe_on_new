@@ -16,8 +16,10 @@
       <!-- Sidebar với thống kê -->
       <aside class="sidebar">
         <div class="stats-widget">
-          <h3><i class="fas fa-chart-bar"></i> Thống kê hôm nay</h3>
-
+          <h3 class="stat-title">
+            <i class="fas fa-chart-bar stat-icon"></i>
+            Thống kê hôm nay
+          </h3>
           <div class="stat-item">
             <span class="stat-label">Khách lên VP:</span>
             <span class="stat-value">{{ todayStats.soKhachLenVP }}</span>
@@ -69,7 +71,10 @@
 
         <!-- Biểu đồ tổng hợp -->
         <div class="chart-widget">
-          <h3><i class="fas fa-chart-pie"></i> Tổng hợp trạng thái</h3>
+          <h3 class="stat-title">
+            <i class="fas fa-chart-pie stat-icon-status"></i>
+            Tổng hợp trạng thái
+          </h3>
           <div class="chart-container">
             <canvas id="summaryChart"></canvas>
           </div>
@@ -113,8 +118,8 @@
 
         <!-- Biểu đồ đường -->
         <div class="chart-container-large">
-          <h3>
-            <i class="fas fa-chart-line"></i>
+          <h3 class="stat-title">
+            <i class="fas fa-chart-line stat-icon-trend"></i>
             Biểu đồ cuộc gọi theo {{ selectedTimeRange === 'year' ? 'năm' : 'tháng' }}
           </h3>
           <div class="chart-wrapper">
@@ -126,9 +131,11 @@
         <div class="customer-section">
           <div class="section-header">
             <div class="section-title">
-              <h3>
-                <i class="fas fa-users"></i>
-                {{ activeTab === 'new' ? 'Khách hàng vừa tiếp nhận' : 'Khách hàng đã liên hệ' }}
+              <h3 class="stat-title">
+                <i class="fas fa-users stat-icon-users"></i>
+                {{ activeTab === 'new'
+                  ? 'Khách hàng vừa tiếp nhận'
+                  : 'Khách hàng đã liên hệ' }}
               </h3>
 
               <div class="view-controls">
@@ -194,7 +201,17 @@
               </div>
 
               <div class="customer-info">
-                <h4 class="customer-name">{{ customer.name }}</h4>
+                <h4 class="customer-name">
+                  {{ customer.name }}
+
+                  <span
+                      v-if="getLatestHistoryLabel(customer)"
+                      class="customer-history-status"
+                      :style="getLatestHistoryStyle(customer)"
+                  >
+                    {{ getLatestHistoryLabel(customer) }}
+                  </span>
+                </h4>
 
                 <p class="customer-phone">
                   <i class="fas fa-phone"></i> {{ customer.phone }}
@@ -261,97 +278,152 @@
       <!-- Panel chi tiết khách hàng -->
       <div class="detail-panel" v-if="selectedCustomer">
         <div class="detail-header">
-          <h3>Chi tiết khách hàng</h3>
+          <h3 class="stat-title">
+            <i class="fas fa-user-circle stat-icon-detail"></i>
+            Chi tiết khách hàng
+          </h3>
           <button class="close-btn" @click="selectedCustomer = null">
             <i class="fas fa-times"></i>
           </button>
         </div>
 
+        <div class="detail-tabs">
+          <button
+              class="detail-tab"
+              :class="{ active: activeDetailTab === 'detail' }"
+              @click="activeDetailTab = 'detail'"
+          >
+            <i class="fas fa-id-card"></i> Chi tiết
+          </button>
+          <button
+              class="detail-tab"
+              :class="{ active: activeDetailTab === 'history' }"
+              @click="activeDetailTab = 'history'"
+          >
+            <i class="fas fa-history"></i> Lịch sử
+          </button>
+        </div>
+
         <div class="detail-content" v-if="selectedCustomer">
-          <div class="customer-detail-header">
-            <div
-                class="detail-avatar avatar-initials"
-                :style="selectedCustomer ? { backgroundColor: getAvatarColor(selectedCustomer.name) } : {}"
-            >
-              {{ selectedCustomer ? getInitials(selectedCustomer.name) : '' }}
-            </div>
-
-            <div class="detail-name-info">
-              <h4>{{ selectedCustomer ? selectedCustomer.name : '' }}</h4>
-              <p class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</p>
-              <p class="detail-received">
-                Tiếp nhận: {{ selectedCustomer ? formatReceivedAt(selectedCustomer.receivedAt) : '' }}
-              </p>
-              <p class="detail-type">
-                <span :class="selectedCustomer ? `type-badge ${selectedCustomer.type}` : 'type-badge'">
-                  {{ selectedCustomer ? getCustomerTypeLabel(selectedCustomer.type) : '' }}
-                </span>
-              </p>
-            </div>
-          </div>
-
-          <div class="detail-section">
-            <h5><i class="fas fa-map-marked-alt"></i> Thông tin địa chỉ</h5>
-            <div class="detail-row">
-              <span class="detail-label">Tỉnh hiện tại:</span>
-              <span class="detail-value">{{ selectedCustomer.province }}</span>
-            </div>
-            <div class="detail-row" v-if="selectedCustomer.oldProvince">
-              <span class="detail-label">Tỉnh cũ:</span>
-              <span class="detail-value">{{ selectedCustomer.oldProvince }}</span>
-            </div>
-          </div>
-
-          <div class="detail-section">
-            <h5><i class="fas fa-tags"></i> Đánh dấu khách hàng</h5>
-            <div class="tag-selector">
-              <button
-                  v-for="tag in availableTags"
-                  :key="tag.value"
-                  class="tag-option"
-                  :class="{ active: isTagActive(tag.value) }"
-                  :style="isTagActive(tag.value) ? { backgroundColor: tag.color, borderColor: tag.color, color: '#fff' } : {}"
-                  @click="toggleCustomerStatus(tag.value)"
+          <div v-if="activeDetailTab === 'detail'">
+            <div class="customer-detail-header">
+              <div
+                  class="detail-avatar avatar-initials"
+                  :style="selectedCustomer ? { backgroundColor: getAvatarColor(selectedCustomer.name) } : {}"
               >
-                {{ tag.label }}
+                {{ selectedCustomer ? getInitials(selectedCustomer.name) : '' }}
+              </div>
+
+              <div class="detail-name-info">
+                <h4>{{ selectedCustomer ? selectedCustomer.name : '' }}</h4>
+                <p class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</p>
+                <p class="detail-received">
+                  Tiếp nhận: {{ selectedCustomer ? formatReceivedAt(selectedCustomer.receivedAt) : '' }}
+                </p>
+                <p class="detail-type">
+                  <span :class="selectedCustomer ? `type-badge ${selectedCustomer.type}` : 'type-badge'">
+                    {{ selectedCustomer ? getCustomerTypeLabel(selectedCustomer.type) : '' }}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div class="detail-section  mt-3">
+              <h5><i class="fas fa-map-marked-alt"></i> Thông tin địa chỉ</h5>
+              <div class="detail-row">
+                <span class="detail-label">Tỉnh hiện tại:</span>
+                <span class="detail-value">{{ selectedCustomer.province }}</span>
+              </div>
+              <div class="detail-row" v-if="selectedCustomer.oldProvince">
+                <span class="detail-label">Tỉnh cũ:</span>
+                <span class="detail-value">{{ selectedCustomer.oldProvince }}</span>
+              </div>
+            </div>
+
+            <div class="detail-section">
+              <h5><i class="fas fa-layer-group"></i> Phân loại khách</h5>
+              <div class="detail-row">
+                <span class="detail-label">Loại khách:</span>
+                <span class="detail-value">{{ getCustomerTypeLabel(selectedCustomer.type) || 'Chưa phân loại' }}</span>
+              </div>
+            </div>
+
+            <div class="detail-section">
+              <h5><i class="fas fa-tags"></i> Đánh dấu khách hàng</h5>
+              <div class="tag-selector">
+                <button
+                    v-for="tag in availableTags"
+                    :key="tag.value"
+                    class="tag-option"
+                    :class="{ active: isTagActive(tag.value) }"
+                    :style="isTagActive(tag.value) ? { backgroundColor: tag.color, borderColor: tag.color, color: '#fff' } : {}"
+                    @click="toggleCustomerStatus(tag.value)"
+                >
+                  {{ tag.label }}
+                </button>
+              </div>
+            </div>
+
+            <div class="detail-section mt-3">
+              <h5>
+                <i class="fas fa-sticky-note"></i>Mô tả:
+                <span style="font-size: 14px; color: #4A4A4A; font-weight: 400">
+                  {{ selectedCustomer.note !== '' ? selectedCustomer.note : 'Không có' }}
+                </span>
+              </h5>
+            </div>
+
+            <FileNew
+                v-if="selectedCustomer"
+                :key="'request-new-asset'"
+                :file-list="fileForm.files"
+                :entity-id="selectedCustomer.id"
+                :allow-download-all="true"
+                entity-type="host"
+                :can-edit="true"
+                :on-upload="true"
+                class="mt-2"
+                @update:files="handleFileUpdate"
+            />
+
+            <div class="add-note-form">
+              <textarea v-model="newNote" placeholder="Thêm ghi chú cuộc gọi..." rows="3"></textarea>
+            </div>
+
+            <div class="detail-actions">
+              <button class="action-btn move-btn" @click="moveToContacted">
+                <i class="fas fa-save"></i> Lưu thông tin
               </button>
             </div>
           </div>
 
-          <div class="detail-section">
-            <h5>
-              <i class="fas fa-sticky-note"></i>Mô tả:
-              <span style="font-size: 14px; color: #4A4A4A; font-weight: 400">
-                {{ selectedCustomer.note !== '' ? selectedCustomer.note : 'Không có' }}
-              </span>
-            </h5>
-          </div>
+          <div v-else class="detail-history">
+            <div class="detail-section">
+              <h5>
+                <i class="fas fa-history"></i>
+                Lịch sử trạng thái
+              </h5>
 
-          <div class="detail-section" v-if="Array.isArray(selectedCustomer.lichSu) && selectedCustomer.lichSu.length">
-            <h5>
-              <i class="fas fa-history"></i>
-              Lịch sử trạng thái
-            </h5>
-
-            <div class="history-list">
-              <div
-                  v-for="(item, idx) in selectedCustomer.lichSu"
-                  :key="idx"
-                  class="history-item"
-              >
+              <div v-if="Array.isArray(selectedCustomer.lichSu) && selectedCustomer.lichSu.length" class="history-list">
                 <div
-                    class="history-status"
-                    :style="{
-            backgroundColor: STATUS_META[item.trangThai]?.color || '#94a3b8'
-          }"
+                    v-for="(item, idx) in selectedCustomer.lichSu"
+                    :key="idx"
+                    class="history-item"
                 >
-                  {{ STATUS_META[item.trangThai]?.label || item.trangThai }}
-                </div>
+                  <div class="history-header">
+                    <div
+                        class="history-status"
+                        :style="{
+                      backgroundColor: STATUS_META[item.trangThai]?.color || '#94a3b8'
+                    }"
+                    >
+                      {{ STATUS_META[item.trangThai]?.label || item.trangThai }}
+                    </div>
 
-                <div class="history-content">
-                  <div class="history-time">
-                    <i class="fas fa-clock"></i>
-                    {{ formatReceivedAt(item.thoiGianCapNhat) }}
+                    <div class="history-time">
+                      <i class="fas fa-clock"></i>
+                      {{ formatReceivedAt(item.thoiGianCapNhat) }}
+                    </div>
                   </div>
 
                   <div class="history-note" v-if="item.ghiChu">
@@ -362,30 +434,9 @@
                   </div>
                 </div>
               </div>
+
+              <div v-else class="empty-history">Chưa có lịch sử.</div>
             </div>
-          </div>
-
-          <FileNew
-              v-if="selectedCustomer"
-              :key="'request-new-asset'"
-              :file-list="fileForm.files"
-              :entity-id="selectedCustomer.id"
-              :allow-download-all="true"
-              entity-type="host"
-              :can-edit="true"
-              :on-upload="true"
-              class="mt-2"
-              @update:files="handleFileUpdate"
-          />
-
-          <div class="add-note-form">
-            <textarea v-model="newNote" placeholder="Thêm ghi chú cuộc gọi..." rows="3"></textarea>
-          </div>
-
-          <div class="detail-actions">
-            <button class="action-btn move-btn" @click="moveToContacted">
-              <i class="fas fa-save"></i> Lưu thông tin
-            </button>
           </div>
         </div>
       </div>
@@ -414,10 +465,12 @@ const STATUS_META = {
 
 // ====== Reactive state ======
 const activeTab = ref('new')
+const activeDetailTab = ref('detail')
 const selectedCustomer = ref(null)
 const newNote = ref('')
 const searchQuery = ref('')
 const originalFiles = ref([])
+const skipTabReload = ref(false)
 
 const fileForm = ref({
   files: [],
@@ -513,6 +566,10 @@ const pagedCustomers = computed(() => {
 
 // ====== Watchers ======
 watch(activeTab, (newVal) => {
+  if (skipTabReload.value) {
+    skipTabReload.value = false
+    return
+  }
   currentPage.value = 1
   statusFilter.value = null
   searchQuery.value = ''
@@ -559,6 +616,28 @@ const getTagLabel = (tag) => {
   return STATUS_META[tag]?.label || tag
 }
 
+const getLatestHistory = (customer) => {
+  if (!customer?.lichSu || !customer.lichSu.length) return null
+
+  // đảm bảo lấy bản ghi mới nhất theo thời gian
+  return [...customer.lichSu]
+      .sort((a, b) => new Date(b.thoiGianCapNhat) - new Date(a.thoiGianCapNhat))[0]
+}
+
+const getLatestHistoryLabel = (customer) => {
+  const latest = getLatestHistory(customer)
+  if (!latest) return null
+  return STATUS_META[latest.trangThai]?.label || latest.trangThai
+}
+
+const getLatestHistoryStyle = (customer) => {
+  const latest = getLatestHistory(customer)
+  if (!latest) return {}
+  return {
+    backgroundColor: STATUS_META[latest.trangThai]?.color || '#94a3b8'
+  }
+}
+
 const getInitials = (name) => {
   if (!name) return ''
   const words = name.trim().split(/\s+/)
@@ -598,6 +677,7 @@ const formatReceivedAt = (isoString) => {
 // ====== Detail actions ======
 const selectCustomer = (customer) => {
   selectedCustomer.value = customer
+  activeDetailTab.value = 'detail'
   newNote.value = ''
   resetFileForm(customer?.files)
 }
@@ -693,23 +773,27 @@ const moveToContacted = async () => {
   if (!selectedCustomer.value) return
 
   try {
+    const targetId = selectedCustomer.value.id
     const payload = buildFilePayload()
     await api.post('/customer-crm/telesales/journey-history/create', payload, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
 
-    const index = newCustomers.value.findIndex((c) => c.id === selectedCustomer.value.id)
-    if (index !== -1) {
-      const customer = newCustomers.value.splice(index, 1)[0]
-      customer.tags = customer.status ? [customer.status] : []
-      contactedCustomers.value.unshift(customer)
-    }
-
-    selectedCustomer.value = null
-    newNote.value = ''
-    resetFileForm([])
+    skipTabReload.value = activeTab.value !== 'contacted'
     activeTab.value = 'contacted'
-    await loadKhachDaLienHe()
+    await Promise.all([loadKhachDaLienHe(), loadKhachMoiTiepNhan()])
+
+    const updatedCustomer = contactedCustomers.value.find((c) => c.id === targetId)
+        || newCustomers.value.find((c) => c.id === targetId)
+
+    selectedCustomer.value = updatedCustomer || null
+    activeDetailTab.value = 'detail'
+    newNote.value = ''
+    if (selectedCustomer.value) {
+      resetFileForm(selectedCustomer.value.files)
+    } else {
+      resetFileForm([])
+    }
 
     // reload thống kê
     await refreshData()
@@ -959,6 +1043,8 @@ const initSummaryChart = () => {
 // ====== Refresh all ======
 const refreshData = async () => {
   await Promise.all([
+    loadKhachMoiTiepNhan,
+    loadKhachDaLienHe(),
     fetchThongKeHomNay(),
     fetchThongKeTrangThaiTeleSales(),
     fetchThongKeBieuDo()
@@ -1068,7 +1154,7 @@ body {
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 20px;
 }
 
 .stats-widget,
@@ -1079,7 +1165,13 @@ body {
 }
 
 .stats-widget {
-  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 55%, #f1f5f9 100%);
+  background: linear-gradient(
+      135deg,
+      #f0f9ff 0%,
+      #e0f2fe 50%,
+      #eef2ff 100%
+  );
+
   border: 1px solid #e2e8f0;
 }
 
@@ -1108,14 +1200,14 @@ body {
 .stat-item {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
   padding-bottom: 8px;
   border-bottom: 1px solid #f0f0f0;
 }
 
 .stat-label {
   font-size: 14px;
-  color: #666;
+  color: #374151;
 }
 
 .stat-value {
@@ -1136,7 +1228,7 @@ body {
 }
 
 .progress-container {
-  margin-top: 20px;
+  margin-top: 5px;
 }
 
 .progress-label {
@@ -1478,7 +1570,23 @@ body {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
 }
+
+.customer-history-status {
+  margin-left: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
 
 .customer-phone {
   font-size: 14px;
@@ -1637,6 +1745,35 @@ body {
 .detail-header h3 {
   font-size: 18px;
   color: #1e293b;
+}
+
+.detail-tabs {
+  display: flex;
+  gap: 10px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.detail-tab {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.detail-tab.active {
+  background: #6366f1;
+  color: #ffffff;
+  border-color: #6366f1;
 }
 
 .close-btn {
@@ -2040,17 +2177,23 @@ body {
 
 .history-item {
   display: flex;
-  gap: 12px;
+  flex-direction: column;
+  gap: 8px;
   padding: 12px;
   border-radius: 10px;
   background: #f8fafc;
   border: 1px solid #e5e7eb;
 }
 
+.history-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .history-status {
-  min-width: 120px;
-  height: fit-content;
-  padding: 6px 10px;
+  padding: 4px 10px;
   border-radius: 999px;
   color: #fff;
   font-size: 12px;
@@ -2058,14 +2201,12 @@ body {
   text-align: center;
 }
 
-.history-content {
-  flex: 1;
-}
-
 .history-time {
   font-size: 12px;
   color: #64748b;
-  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .history-note {
@@ -2076,6 +2217,85 @@ body {
 .history-note.muted {
   font-style: italic;
   color: #94a3b8;
+}
+
+.empty-history {
+  font-size: 14px;
+  color: #64748b;
+  font-style: italic;
+}
+.stat-title {
+  display: flex;
+  align-items: center;
+
+  font-size: 1rem !Important;
+  font-weight: 600!important;
+
+  /* chữ xanh đen */
+  color: #0b1e54 !important; /* slate-900 */
+}
+
+.stat-icon {
+  font-size: 1.2rem;
+
+  /* icon màu riêng */
+  color: #eb9525; /* xanh dương nổi */
+
+  background: linear-gradient(135deg, #dbeafe, #fef6bf);
+  padding: 6px;
+  border-radius: 8px;
+
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+}
+/* ===== CHỮ DÙNG CHUNG ===== */
+
+/* ===== ICON: TỔNG HỢP TRẠNG THÁI ===== */
+.stat-icon-status {
+  font-size: 1.2rem;
+
+  color: #7c3aed; /* tím đậm – biểu trưng phân loại */
+  background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+
+  padding: 6px;
+  border-radius: 8px;
+
+  box-shadow: 0 4px 10px rgba(124, 58, 237, 0.25);
+}
+/* ===== ICON: BIỂU ĐỒ XU HƯỚNG ===== */
+.stat-icon-trend {
+  font-size: 1.2rem;
+
+  color: #0891b2; /* xanh ngọc – xu hướng */
+  background: linear-gradient(135deg, #cffafe, #a5f3fc);
+
+  padding: 6px;
+  border-radius: 8px;
+
+  box-shadow: 0 4px 10px rgba(8, 145, 178, 0.25);
+}
+/* ===== ICON: KHÁCH HÀNG ===== */
+.stat-icon-users {
+  font-size: 1.2rem;
+
+  color: #16a34a; /* xanh lá – khách hàng / tương tác */
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+
+  padding: 6px;
+  border-radius: 8px;
+
+  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.25);
+}
+/* ===== ICON: CHI TIẾT KHÁCH HÀNG ===== */
+.stat-icon-detail {
+  font-size: 1.2rem;
+
+  color: #0f766e; /* xanh teal đậm – chi tiết / hồ sơ */
+  background: linear-gradient(135deg, #ccfbf1, #99f6e4);
+
+  padding: 6px;
+  border-radius: 8px;
+
+  box-shadow: 0 4px 10px rgba(15, 118, 110, 0.25);
 }
 
 </style>

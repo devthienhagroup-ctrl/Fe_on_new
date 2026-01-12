@@ -1,8 +1,355 @@
 diff --git a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-index 0417689e5e0036ef9164c683b9c1a78c86ef622c..2cb7c1719a9568f1e439954a831c6b5c73686f4a 100644
+index 96c9920f42c677ea47a7ee4ff68a911fdbb0ea93..9b0131fe5a78713e6cd59ca6fa669f6d2da6e727 100644
 --- a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
 +++ b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-@@ -372,217 +372,161 @@ const STATUS_META = {
+@@ -172,51 +172,56 @@
+
+               <div class="search-box">
+                 <input v-model="searchQuery" type="text" placeholder="Tìm kiếm theo tên, số điện thoại..." />
+                 <i class="fas fa-search"></i>
+               </div>
+             </div>
+           </div>
+
+           <!-- Danh sách khách hàng -->
+           <div class="customer-list">
+             <div
+                 v-for="customer in pagedCustomers"
+                 :key="customer.id"
+                 class="customer-card"
+                 :class="{ selected: selectedCustomer && selectedCustomer.id === customer.id }"
+                 @click="selectCustomer(customer)"
+             >
+               <div class="customer-avatar">
+                 <div class="avatar-initials" :style="{ backgroundColor: getAvatarColor(customer.name) }">
+                   {{ getInitials(customer.name) }}
+                 </div>
+                 <span :class="`customer-type ${customer.type}`">{{ getCustomerTypeLabel(customer.type) }}</span>
+               </div>
+
+               <div class="customer-info">
+-                <h4 class="customer-name">{{ customer.name }}</h4>
++                <h4 class="customer-name">
++                  {{ customer.name }}
++                  <span v-if="getLatestHistoryLabel(customer)" class="customer-history-status">
++                    {{ getLatestHistoryLabel(customer) }}
++                  </span>
++                </h4>
+
+                 <p class="customer-phone">
+                   <i class="fas fa-phone"></i> {{ customer.phone }}
+                 </p>
+
+                 <p class="customer-received">
+                   <i class="fas fa-clock"></i> Tiếp nhận: {{ formatReceivedAt(customer.receivedAt) }}
+                 </p>
+
+                 <div class="customer-location">
+                   <span class="location-current">
+                     <i class="fas fa-map-marker-alt"></i> {{ customer.province }}
+                   </span>
+                   <span v-if="customer.oldProvince" class="location-old">(Cũ: {{ customer.oldProvince }})</span>
+                 </div>
+
+                 <div class="customer-tags" v-if="Array.isArray(customer.tags) && customer.tags.length">
+                   <span v-for="tag in customer.tags" :key="tag" class="customer-tag" :class="tag">
+                     {{ getTagLabel(tag) }}
+                   </span>
+                 </div>
+               </div>
+
+               <div class="customer-actions">
+                 <div class="contact-icons">
+@@ -245,201 +250,234 @@
+                 class="page-btn"
+                 :class="{ active: currentPage === page }"
+                 @click="changePage(page)"
+             >
+               {{ page }}
+             </button>
+
+             <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
+
+             <button class="page-btn" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
+               <i class="fas fa-chevron-right"></i>
+             </button>
+           </div>
+         </div>
+       </main>
+
+       <!-- Panel chi tiết khách hàng -->
+       <div class="detail-panel" v-if="selectedCustomer">
+         <div class="detail-header">
+           <h3>Chi tiết khách hàng</h3>
+           <button class="close-btn" @click="selectedCustomer = null">
+             <i class="fas fa-times"></i>
+           </button>
+         </div>
+
++        <div class="detail-tabs">
++          <button
++              class="detail-tab"
++              :class="{ active: activeDetailTab === 'detail' }"
++              @click="activeDetailTab = 'detail'"
++          >
++            <i class="fas fa-id-card"></i> Chi tiết
++          </button>
++          <button
++              class="detail-tab"
++              :class="{ active: activeDetailTab === 'history' }"
++              @click="activeDetailTab = 'history'"
++          >
++            <i class="fas fa-history"></i> Lịch sử
++          </button>
++        </div>
++
+         <div class="detail-content" v-if="selectedCustomer">
+-          <div class="customer-detail-header">
+-            <div
+-                class="detail-avatar avatar-initials"
+-                :style="selectedCustomer ? { backgroundColor: getAvatarColor(selectedCustomer.name) } : {}"
+-            >
+-              {{ selectedCustomer ? getInitials(selectedCustomer.name) : '' }}
++          <div v-if="activeDetailTab === 'detail'">
++            <div class="customer-detail-header">
++              <div
++                  class="detail-avatar avatar-initials"
++                  :style="selectedCustomer ? { backgroundColor: getAvatarColor(selectedCustomer.name) } : {}"
++              >
++                {{ selectedCustomer ? getInitials(selectedCustomer.name) : '' }}
++              </div>
++
++              <div class="detail-name-info">
++                <h4>{{ selectedCustomer ? selectedCustomer.name : '' }}</h4>
++                <p class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</p>
++                <p class="detail-received">
++                  Tiếp nhận: {{ selectedCustomer ? formatReceivedAt(selectedCustomer.receivedAt) : '' }}
++                </p>
++                <p class="detail-type">
++                  <span :class="selectedCustomer ? `type-badge ${selectedCustomer.type}` : 'type-badge'">
++                    {{ selectedCustomer ? getCustomerTypeLabel(selectedCustomer.type) : '' }}
++                  </span>
++                </p>
++              </div>
+             </div>
+
+-            <div class="detail-name-info">
+-              <h4>{{ selectedCustomer ? selectedCustomer.name : '' }}</h4>
+-              <p class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</p>
+-              <p class="detail-received">
+-                Tiếp nhận: {{ selectedCustomer ? formatReceivedAt(selectedCustomer.receivedAt) : '' }}
+-              </p>
+-              <p class="detail-type">
+-                <span :class="selectedCustomer ? `type-badge ${selectedCustomer.type}` : 'type-badge'">
+-                  {{ selectedCustomer ? getCustomerTypeLabel(selectedCustomer.type) : '' }}
+-                </span>
+-              </p>
++            <div class="detail-section">
++              <h5><i class="fas fa-map-marked-alt"></i> Thông tin địa chỉ</h5>
++              <div class="detail-row">
++                <span class="detail-label">Tỉnh hiện tại:</span>
++                <span class="detail-value">{{ selectedCustomer.province }}</span>
++              </div>
++              <div class="detail-row" v-if="selectedCustomer.oldProvince">
++                <span class="detail-label">Tỉnh cũ:</span>
++                <span class="detail-value">{{ selectedCustomer.oldProvince }}</span>
++              </div>
+             </div>
+-          </div>
+
+-          <div class="detail-section">
+-            <h5><i class="fas fa-map-marked-alt"></i> Thông tin địa chỉ</h5>
+-            <div class="detail-row">
+-              <span class="detail-label">Tỉnh hiện tại:</span>
+-              <span class="detail-value">{{ selectedCustomer.province }}</span>
++            <div class="detail-section">
++              <h5><i class="fas fa-layer-group"></i> Phân loại khách</h5>
++              <div class="detail-row">
++                <span class="detail-label">Loại khách:</span>
++                <span class="detail-value">{{ getCustomerTypeLabel(selectedCustomer.type) || 'Chưa phân loại' }}</span>
++              </div>
+             </div>
+-            <div class="detail-row" v-if="selectedCustomer.oldProvince">
+-              <span class="detail-label">Tỉnh cũ:</span>
+-              <span class="detail-value">{{ selectedCustomer.oldProvince }}</span>
++
++            <div class="detail-section">
++              <h5><i class="fas fa-tags"></i> Đánh dấu khách hàng</h5>
++              <div class="tag-selector">
++                <button
++                    v-for="tag in availableTags"
++                    :key="tag.value"
++                    class="tag-option"
++                    :class="{ active: isTagActive(tag.value) }"
++                    :style="isTagActive(tag.value) ? { backgroundColor: tag.color, borderColor: tag.color, color: '#fff' } : {}"
++                    @click="toggleCustomerStatus(tag.value)"
++                >
++                  {{ tag.label }}
++                </button>
++              </div>
+             </div>
+-          </div>
+
+-          <div class="detail-section">
+-            <h5><i class="fas fa-tags"></i> Đánh dấu khách hàng</h5>
+-            <div class="tag-selector">
+-              <button
+-                  v-for="tag in availableTags"
+-                  :key="tag.value"
+-                  class="tag-option"
+-                  :class="{ active: isTagActive(tag.value) }"
+-                  :style="isTagActive(tag.value) ? { backgroundColor: tag.color, borderColor: tag.color, color: '#fff' } : {}"
+-                  @click="toggleCustomerStatus(tag.value)"
+-              >
+-                {{ tag.label }}
+-              </button>
++            <div class="detail-section">
++              <h5>
++                <i class="fas fa-sticky-note"></i>Mô tả:
++                <span style="font-size: 14px; color: #4A4A4A; font-weight: 400">
++                  {{ selectedCustomer.note !== '' ? selectedCustomer.note : 'Không có' }}
++                </span>
++              </h5>
++            </div>
++
++            <FileNew
++                v-if="selectedCustomer"
++                :key="'request-new-asset'"
++                :file-list="fileForm.files"
++                :entity-id="selectedCustomer.id"
++                :allow-download-all="true"
++                entity-type="host"
++                :can-edit="true"
++                :on-upload="true"
++                class="mt-2"
++                @update:files="handleFileUpdate"
++            />
++
++            <div class="add-note-form">
++              <textarea v-model="newNote" placeholder="Thêm ghi chú cuộc gọi..." rows="3"></textarea>
+             </div>
+-          </div>
+
+-          <div class="detail-section">
+-            <h5>
+-              <i class="fas fa-sticky-note"></i>Mô tả:
+-              <span style="font-size: 14px; color: #4A4A4A; font-weight: 400">
+-                {{ selectedCustomer.note !== '' ? selectedCustomer.note : 'Không có' }}
+-              </span>
+-            </h5>
++            <div class="detail-actions">
++              <button class="action-btn move-btn" @click="moveToContacted">
++                <i class="fas fa-save"></i> Lưu thông tin
++              </button>
++            </div>
+           </div>
+
+-          <div class="detail-section" v-if="Array.isArray(selectedCustomer.lichSu) && selectedCustomer.lichSu.length">
+-            <h5>
+-              <i class="fas fa-history"></i>
+-              Lịch sử trạng thái
+-            </h5>
++          <div v-else class="detail-history">
++            <div class="detail-section">
++              <h5>
++                <i class="fas fa-history"></i>
++                Lịch sử trạng thái
++              </h5>
+
+-            <div class="history-list">
+-              <div
+-                  v-for="(item, idx) in selectedCustomer.lichSu"
+-                  :key="idx"
+-                  class="history-item"
+-              >
++              <div v-if="Array.isArray(selectedCustomer.lichSu) && selectedCustomer.lichSu.length" class="history-list">
+                 <div
+-                    class="history-status"
+-                    :style="{
+-            backgroundColor: STATUS_META[item.trangThai]?.color || '#94a3b8'
+-          }"
++                    v-for="(item, idx) in selectedCustomer.lichSu"
++                    :key="idx"
++                    class="history-item"
+                 >
+-                  {{ STATUS_META[item.trangThai]?.label || item.trangThai }}
+-                </div>
+-
+-                <div class="history-content">
+-                  <div class="history-time">
+-                    <i class="fas fa-clock"></i>
+-                    {{ formatReceivedAt(item.thoiGianCapNhat) }}
++                  <div class="history-header">
++                    <div
++                        class="history-status"
++                        :style="{
++                      backgroundColor: STATUS_META[item.trangThai]?.color || '#94a3b8'
++                    }"
++                    >
++                      {{ STATUS_META[item.trangThai]?.label || item.trangThai }}
++                    </div>
++
++                    <div class="history-time">
++                      <i class="fas fa-clock"></i>
++                      {{ formatReceivedAt(item.thoiGianCapNhat) }}
++                    </div>
+                   </div>
+
+                   <div class="history-note" v-if="item.ghiChu">
+                     {{ item.ghiChu }}
+                   </div>
+                   <div class="history-note muted" v-else>
+                     Không có mô tả
+                   </div>
+                 </div>
+               </div>
+-            </div>
+-          </div>
+-
+-          <FileNew
+-              v-if="selectedCustomer"
+-              :key="'request-new-asset'"
+-              :file-list="fileForm.files"
+-              :entity-id="selectedCustomer.id"
+-              :allow-download-all="true"
+-              entity-type="host"
+-              :can-edit="true"
+-              :on-upload="true"
+-              class="mt-2"
+-              @update:files="handleFileUpdate"
+-          />
+-
+-          <div class="add-note-form">
+-            <textarea v-model="newNote" placeholder="Thêm ghi chú cuộc gọi..." rows="3"></textarea>
+-          </div>
+
+-          <div class="detail-actions">
+-            <button class="action-btn move-btn" @click="moveToContacted">
+-              <i class="fas fa-save"></i> Lưu thông tin
+-            </button>
++              <div v-else class="empty-history">Chưa có lịch sử.</div>
++            </div>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
+ </template>
+
+ <script setup>
+ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+ import Chart from 'chart.js/auto'
+ import api from '/src/api/api.js'
+ import FileNew from './File.vue'
+
+ // ====== META ======
+ const STATUS_META = {
+   NEW: { label: 'Mới', color: '#94a3b8' },
+   DC_TELESALES: { label: 'Mới tiếp nhận', color: '#6366f1' },
+   CHAM_SOC: { label: 'Đang chăm sóc', color: '#38bdf8' },
+   TN_7NGAY: { label: 'Tiềm năng 7 ngày', color: '#0ea5e9' },
+   TN_14NGAY: { label: 'Tiềm năng 14 ngày', color: '#0284c7' },
+   THAT_BAI: { label: 'Thất bại', color: '#f43f5e' },
    KHONG_LIEN_LAC_DUOC: { label: 'Không liên lạc được', color: '#f97316' },
    SAI_SO_LIEU: { label: 'Sai số liệu', color: '#a855f7' },
    THANH_CONG: { label: 'Thành công (Lên VP)', color: '#22c55e' }
@@ -10,10 +357,12 @@ index 0417689e5e0036ef9164c683b9c1a78c86ef622c..2cb7c1719a9568f1e439954a831c6b5c
 
  // ====== Reactive state ======
  const activeTab = ref('new')
++const activeDetailTab = ref('detail')
  const selectedCustomer = ref(null)
  const newNote = ref('')
  const searchQuery = ref('')
  const originalFiles = ref([])
++const skipTabReload = ref(false)
 
  const fileForm = ref({
    files: [],
@@ -28,8 +377,7 @@ index 0417689e5e0036ef9164c683b9c1a78c86ef622c..2cb7c1719a9568f1e439954a831c6b5c
  const typeFilter = ref(null)
 
  const currentPage = ref(1)
--const pageSize = ref(1)
-+const pageSize = ref(10)
+ const pageSize = ref(10)
 
  const selectedTimeRange = ref('month')
  const selectedYear = ref(new Date().getFullYear())
@@ -40,121 +388,19 @@ index 0417689e5e0036ef9164c683b9c1a78c86ef622c..2cb7c1719a9568f1e439954a831c6b5c
  const summaryChartInstance = ref(null)
 
  // ✅ years = 5 năm gần nhất
- const currentYear = new Date().getFullYear()
- const years = Array.from({ length: 5 }, (_, i) => currentYear - i)
-
- const months = [
-   'Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
-   'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'
- ]
-
- const isTagActive = (value) => selectedCustomer.value?.status === value
-
- // ====== Sidebar stats ======
- const todayStats = ref({
-   soCuocGoiMoiHN: 0,
-   soCuocGoiThanhCongHomNay: 0,
-   soKhachLenVP: 0,
-   khongLienLacDuoc: 0,
-   saiSo: 0,
-   soCuocGoiChamSocHN: 0
- })
-
- // ====== Tags ======
- const availableTags = [
-   { value: 'CHAM_SOC', label: 'Đang chăm sóc', color: '#38bdf8' },
-   { value: 'TN_7NGAY', label: 'Tiềm năng 7 ngày', color: '#0ea5e9' },
-   { value: 'TN_14NGAY', label: 'Tiềm năng 14 ngày', color: '#0284c7' },
-   { value: 'THAT_BAI', label: 'Thất bại', color: '#f43f5e' },
-   { value: 'KHONG_LIEN_LAC_DUOC', label: 'Không liên lạc được', color: '#f97316' },
-   { value: 'SAI_SO_LIEU', label: 'Sai số liệu', color: '#a855f7' },
-   { value: 'THANH_CONG', label: 'Thành công (Lên VP)', color: '#22c55e' }
- ]
-
- // ====== Data from API ======
- const newCustomers = ref([])
--const contactedCustomers = ref([
--  // Mock (để UI có dữ liệu)
--  {
--    id: 6,
--    name: 'Vũ Thị Phương',
--    phone: '0967890123',
--    receivedAt: '2024-03-10T09:05:00',
--    province: 'Bình Dương',
--    oldProvince: 'Đồng Nai',
--    type: 'CHINH_CHU',
--    note: 'Đã đặt lịch thành công ngày 20/3',
--    status: 'THANH_CONG',
--    tags: ['THANH_CONG'],
--    lastCall: '2024-03-15T15:20:00'
--  },
--  {
--    id: 7,
--    name: 'Đặng Văn Quân',
--    phone: '0978901234',
--    receivedAt: '2024-03-11T13:15:00',
--    province: 'Hà Nội',
--    oldProvince: null,
--    type: 'MOI_GIOI',
--    note: 'Số điện thoại không liên lạc được',
--    status: 'KHONG_LIEN_LAC_DUOC',
--    tags: ['KHONG_LIEN_LAC_DUOC'],
--    lastCall: '2024-03-14T14:10:00'
--  },
--  {
--    id: 8,
--    name: 'Bùi Thị Hà',
--    phone: '0989012345',
--    receivedAt: '2024-03-12T10:25:00',
--    province: 'TP. Hồ Chí Minh',
--    oldProvince: 'Long An',
--    type: 'CHINH_CHU',
--    note: 'Sai số, không phải khách hàng',
--    status: 'SAI_SO_LIEU',
--    tags: ['SAI_SO_LIEU'],
--    lastCall: '2024-03-12T09:45:00'
--  }
--])
-+const contactedCustomers = ref([])
-+const contactedPagination = ref({
-+  size: 10,
-+  number: 0,
-+  totalElements: 0,
-+  totalPages: 1
-+})
-
- const thongKeTrangThai = ref([])
-
- // ✅ dữ liệu cho line chart từ BE
- // Kỳ vọng BE trả: [{ status: 'TN_14NGAY', time: 9, total: 3 }, ...]
+@@ -491,135 +529,156 @@ const thongKeTrangThai = ref([])
  // - time: nếu theo năm => 1..12 (tháng)
  // - time: nếu theo tháng => 1..31 (ngày)
  const thongKeThoiGian = ref([])
 
  // ====== Computed ======
  const filteredCustomers = computed(() => {
--  const customers = activeTab.value === 'new' ? newCustomers.value : contactedCustomers.value
--
--  const filteredBySearch = !searchQuery.value.trim()
--      ? customers
--      : customers.filter((c) => {
--        const q = searchQuery.value.toLowerCase()
--        return (
--            (c.name || '').toLowerCase().includes(q) ||
--            (c.phone || '').includes(q) ||
--            (c.province || '').toLowerCase().includes(q) ||
--            ((c.oldProvince || '').toLowerCase().includes(q))
--        )
--      })
--
--  return filterByType(filterByStatus(filteredBySearch))
-+  return activeTab.value === 'new' ? newCustomers.value : contactedCustomers.value
+   return activeTab.value === 'new' ? newCustomers.value : contactedCustomers.value
  })
 
  const totalPages = computed(() => {
    if (activeTab.value !== 'contacted') return 1
--  return Math.max(1, Math.ceil(filteredCustomers.value.length / pageSize.value))
-+  return Math.max(1, Number(contactedPagination.value.totalPages || 1))
+   return Math.max(1, Number(contactedPagination.value.totalPages || 1))
  })
 
  const pageNumbers = computed(() => {
@@ -163,36 +409,33 @@ index 0417689e5e0036ef9164c683b9c1a78c86ef622c..2cb7c1719a9568f1e439954a831c6b5c
  })
 
  const pagedCustomers = computed(() => {
--  if (activeTab.value !== 'contacted') return filteredCustomers.value
--  const start = (currentPage.value - 1) * pageSize.value
--  return filteredCustomers.value.slice(start, start + pageSize.value)
-+  return filteredCustomers.value
+   return filteredCustomers.value
  })
 
  // ====== Watchers ======
  watch(activeTab, (newVal) => {
++  if (skipTabReload.value) {
++    skipTabReload.value = false
++    return
++  }
    currentPage.value = 1
    statusFilter.value = null
    searchQuery.value = ''
 
    if (newVal === 'new') {
      loadKhachMoiTiepNhan()
-+  } else {
-+    loadKhachDaLienHe()
+   } else {
+     loadKhachDaLienHe()
    }
  })
 
  watch([statusFilter, typeFilter, searchQuery], () => {
    currentPage.value = 1
--})
--
--watch([typeFilter, searchQuery], () => {
--  if (activeTab.value === 'new') loadKhachMoiTiepNhan()
-+  if (activeTab.value === 'new') {
-+    loadKhachMoiTiepNhan()
-+  } else {
-+    loadKhachDaLienHe()
-+  }
+   if (activeTab.value === 'new') {
+     loadKhachMoiTiepNhan()
+   } else {
+     loadKhachDaLienHe()
+   }
  })
 
  // ✅ đổi thời gian => reload line chart data từ BE
@@ -200,22 +443,11 @@ index 0417689e5e0036ef9164c683b9c1a78c86ef622c..2cb7c1719a9568f1e439954a831c6b5c
    await fetchThongKeBieuDo()
  })
 
--// ====== Methods: filter ======
--const filterByStatus = (customers) => {
--  if (activeTab.value !== 'contacted' || !statusFilter.value) return customers
--  return customers.filter((c) => c.status === statusFilter.value)
--}
--
--const filterByType = (customers) => {
--  if (!typeFilter.value) return customers
--  return customers.filter((c) => c.type === typeFilter.value)
--}
--
  const changePage = (page) => {
    currentPage.value = Math.min(Math.max(page, 1), totalPages.value)
-+  if (activeTab.value === 'contacted') {
-+    loadKhachDaLienHe()
-+  }
+   if (activeTab.value === 'contacted') {
+     loadKhachDaLienHe()
+   }
  }
 
  // ====== Helpers ======
@@ -232,6 +464,22 @@ index 0417689e5e0036ef9164c683b9c1a78c86ef622c..2cb7c1719a9568f1e439954a831c6b5c
    return STATUS_META[tag]?.label || tag
  }
 
++const getLatestHistoryEntry = (customer) => {
++  const history = Array.isArray(customer?.lichSu) ? customer.lichSu : []
++  if (!history.length) return null
++  return history.reduce((latest, item) => {
++    const latestTime = new Date(latest?.thoiGianCapNhat || 0).getTime()
++    const itemTime = new Date(item?.thoiGianCapNhat || 0).getTime()
++    return itemTime >= latestTime ? item : latest
++  }, history[0])
++}
++
++const getLatestHistoryLabel = (customer) => {
++  const entry = getLatestHistoryEntry(customer)
++  if (!entry) return null
++  return STATUS_META[entry.trangThai]?.label || entry.trangThai || null
++}
++
  const getInitials = (name) => {
    if (!name) return ''
    const words = name.trim().split(/\s+/)
@@ -241,7 +489,79 @@ index 0417689e5e0036ef9164c683b9c1a78c86ef622c..2cb7c1719a9568f1e439954a831c6b5c
  }
 
  const getAvatarColor = (name) => {
-@@ -705,50 +649,51 @@ const buildFilePayload = () => {
+   if (!name) return 'hsl(210, 60%, 55%)'
+   let hash = 0
+   for (let i = 0; i < name.length; i += 1) {
+     hash = name.charCodeAt(i) + ((hash << 5) - hash)
+   }
+   const hue = Math.abs(hash) % 360
+   return `hsl(${hue}, 60%, 55%)`
+ }
+
+ const formatTime = (isoString) => {
+   if (!isoString) return 'Chưa gọi'
+   const date = new Date(isoString)
+   return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+ }
+
+ const formatReceivedAt = (isoString) => {
+   if (!isoString) return '-'
+   const date = new Date(isoString)
+   return date.toLocaleString('vi-VN', {
+     hour: '2-digit',
+     minute: '2-digit',
+     day: '2-digit',
+     month: '2-digit',
+     year: 'numeric'
+   })
+ }
+
+ // ====== Detail actions ======
+ const selectCustomer = (customer) => {
+   selectedCustomer.value = customer
++  activeDetailTab.value = 'detail'
+   newNote.value = ''
+   resetFileForm(customer?.files)
+ }
+
+ const toggleCustomerStatus = (status) => {
+   if (!selectedCustomer.value) return
+   selectedCustomer.value.status = selectedCustomer.value.status === status ? null : status
+ }
+
+ const resetFileForm = (files) => {
+   const safeFiles = Array.isArray(files) ? JSON.parse(JSON.stringify(files)) : []
+   fileForm.value = {
+     files: safeFiles,
+     newFiles: [],
+     newLandBookFiles: [],
+     deletedFileIds: [],
+     deletedLandBookFileIds: []
+   }
+   originalFiles.value = JSON.parse(JSON.stringify(safeFiles))
+ }
+
+ const handleFileUpdate = (files) => {
+   fileForm.value.files = Array.isArray(files) ? files : []
+
+   const existingFiles = fileForm.value.files.filter((file) => !file.file && file.id)
+@@ -671,67 +730,71 @@ const buildFilePayload = () => {
+       || fileForm.value.newLandBookFiles.find((file) => file?.isOnTop && file.file instanceof File)
+
+   if (mainFile) {
+     fd.append('newFileOntop', mainFile.file)
+   }
+
+   fileForm.value.newFiles.forEach((file) => {
+     if (file?.file instanceof File) {
+       fd.append('newFiles', file.file)
+     }
+   })
+
+   fileForm.value.newLandBookFiles.forEach((file) => {
+     if (file?.file instanceof File) {
+       fd.append('newLandBookFiles', file.file)
+     }
    })
 
    return fd
@@ -251,23 +571,37 @@ index 0417689e5e0036ef9164c683b9c1a78c86ef622c..2cb7c1719a9568f1e439954a831c6b5c
    if (!selectedCustomer.value) return
 
    try {
++    const targetId = selectedCustomer.value.id
      const payload = buildFilePayload()
      await api.post('/customer-crm/telesales/journey-history/create', payload, {
        headers: { 'Content-Type': 'multipart/form-data' }
      })
 
-     const index = newCustomers.value.findIndex((c) => c.id === selectedCustomer.value.id)
-     if (index !== -1) {
-       const customer = newCustomers.value.splice(index, 1)[0]
-       customer.tags = customer.status ? [customer.status] : []
-       contactedCustomers.value.unshift(customer)
-     }
+-    const index = newCustomers.value.findIndex((c) => c.id === selectedCustomer.value.id)
+-    if (index !== -1) {
+-      const customer = newCustomers.value.splice(index, 1)[0]
+-      customer.tags = customer.status ? [customer.status] : []
+-      contactedCustomers.value.unshift(customer)
+-    }
++    skipTabReload.value = activeTab.value !== 'contacted'
++    activeTab.value = 'contacted'
++    await Promise.all([loadKhachDaLienHe(), loadKhachMoiTiepNhan()])
++
++    const updatedCustomer = contactedCustomers.value.find((c) => c.id === targetId)
++        || newCustomers.value.find((c) => c.id === targetId)
 
-     selectedCustomer.value = null
+-    selectedCustomer.value = null
++    selectedCustomer.value = updatedCustomer || null
++    activeDetailTab.value = 'detail'
      newNote.value = ''
-     resetFileForm([])
-     activeTab.value = 'contacted'
-+    await loadKhachDaLienHe()
+-    resetFileForm([])
+-    activeTab.value = 'contacted'
+-    await loadKhachDaLienHe()
++    if (selectedCustomer.value) {
++      resetFileForm(selectedCustomer.value.files)
++    } else {
++      resetFileForm([])
++    }
 
      // reload thống kê
      await refreshData()
@@ -293,186 +627,231 @@ index 0417689e5e0036ef9164c683b9c1a78c86ef622c..2cb7c1719a9568f1e439954a831c6b5c
          ? data.map((item) => ({
            label: item.label,
            value: Number(item.value)
-@@ -769,50 +714,104 @@ const fetchKhachMoiTiepNhan = async () => {
-   return res.data
+@@ -1456,50 +1519,63 @@ body {
  }
 
- const loadKhachMoiTiepNhan = async () => {
-   try {
-     const data = await fetchKhachMoiTiepNhan()
-     newCustomers.value = (data || []).map((item) => ({
-       id: item.id,
-       name: item.hoTen,
-       phone: item.soDienThoai,
-       receivedAt: item.thoiGianTiepNhan,
-       province: item.tinhMoi,
-       oldProvince: item.tinhCu || null,
-       type: item.type || null, // CHINH_CHU / MOI_GIOI / NGUOI_THAN
-       note: item.ghiChu || '',
-       status: null,
-       tags: [],
-       lastCall: null,
-       files: Array.isArray(item.files) ? item.files : []
-     }))
-   } catch (err) {
-     newCustomers.value = []
-   }
+ .customer-type.MOI_GIOI {
+   background-color: #1e88e5;
+   color: #ffffff;
  }
 
-+const loadKhachDaLienHe = async () => {
-+  try {
-+    const res = await api.get('/customer-crm/telesales/khach-da-lien-he', {
-+      params: {
-+        page: Math.max(currentPage.value - 1, 0),
-+        size: pageSize.value,
-+        status: statusFilter.value || null,
-+        type: typeFilter.value || null,
-+        search: searchQuery.value?.trim() || null
-+      }
-+    })
-+
-+    const payload = res.data || {}
-+    const content = Array.isArray(payload.content) ? payload.content : []
-+    const page = payload.page || {}
-+
-+    contactedCustomers.value = content.map((item) => {
-+      const status = item.status ?? statusFilter.value ?? null
-+      return {
-+        id: item.id,
-+        name: item.hoTen,
-+        phone: item.soDienThoai,
-+        receivedAt: item.thoiGianTiepNhan,
-+        province: item.tinhMoi,
-+        oldProvince: item.tinhCu || null,
-+        type: item.type || null,
-+        note: item.ghiChu || '',
-+        status,
-+        tags: status ? [status] : [],
-+        lastCall: item.thoiGianLienHe || null,
-+        files: Array.isArray(item.files) ? item.files : []
-+      }
-+    })
-+
-+    contactedPagination.value = {
-+      size: page.size ?? pageSize.value,
-+      number: page.number ?? Math.max(currentPage.value - 1, 0),
-+      totalElements: page.totalElements ?? content.length,
-+      totalPages: page.totalPages ?? 1
-+    }
-+
-+    pageSize.value = contactedPagination.value.size
-+    currentPage.value = contactedPagination.value.number + 1
-+  } catch (err) {
-+    contactedCustomers.value = []
-+    contactedPagination.value = {
-+      size: pageSize.value,
-+      number: 0,
-+      totalElements: 0,
-+      totalPages: 1
-+    }
-+  }
+ .customer-type.CHINH_CHU {
+   background-color: #2e7d32;
+   color: #ffffff;
+ }
+
+ .customer-type.NGUOI_THAN {
+   background-color: #6a1b9a;
+   color: #ffffff;
+ }
+
+ .customer-info {
+   flex: 1;
+ }
+
+ .customer-name {
+   font-size: 16px;
+   font-weight: 600;
+   margin-bottom: 4px;
++  display: flex;
++  flex-wrap: wrap;
++  align-items: center;
++  gap: 6px;
 +}
 +
- // ====== LINE CHART (theo năm / tháng) ======
- const fetchThongKeBieuDo = async () => {
-   try {
-     let res
-
-     if (selectedTimeRange.value === 'month') {
-       res = await api.get('/customer-crm/telesales/thong-ke/thang', {
-         params: { year: selectedYear.value, month: selectedMonth.value }
-       })
-     } else {
-       res = await api.get('/customer-crm/telesales/thong-ke/nam', {
-         params: { year: selectedYear.value }
-       })
-     }
-
-     thongKeThoiGian.value = Array.isArray(res.data) ? res.data : []
-     await nextTick()
-     initLineChart()
-   } catch (e) {
-     console.error('❌ Lỗi load biểu đồ', e)
-     thongKeThoiGian.value = []
-     await nextTick()
-     initLineChart()
-   }
- }
-@@ -922,77 +921,50 @@ const refreshData = async () => {
-   await Promise.all([
-     fetchThongKeHomNay(),
-     fetchThongKeTrangThaiTeleSales(),
-     fetchThongKeBieuDo()
-   ])
-   await nextTick()
-   initSummaryChart()
++.customer-history-status {
++  font-size: 12px;
++  font-weight: 600;
++  padding: 2px 8px;
++  border-radius: 999px;
++  background: #e2e8f0;
++  color: #475569;
  }
 
- // ====== Lifecycle ======
- onMounted(async () => {
-   await Promise.all([
-     fetchThongKeHomNay(),
-     fetchThongKeTrangThaiTeleSales(),
-     loadKhachMoiTiepNhan(),
-     fetchThongKeBieuDo()
-   ])
-   await nextTick()
-   initSummaryChart()
- })
-
- onUnmounted(() => {
-   if (lineChartInstance.value) lineChartInstance.value.destroy()
-   if (summaryChartInstance.value) summaryChartInstance.value.destroy()
- })
--
--const getKhachDaLienHe = async () => {
--  try {
--    const res = await api.get(
--        '/customer-crm/telesales/khach-da-lien-he',
--        {
--          params: {
--            page: 0,
--            size: 10,
--            status: 'TN_14NGAY', // hoặc null
--            type: null,             // VD: 'NONG', 'AM'
--            search: ''              // hoặc null
--          }
--        }
--    )
--
--    console.log('✅ Response full:', res)
--    console.log('📦 Page data:', res.data)
--    console.log('📋 Content:', res.data.content)
--    console.log('📄 Total elements:', res.data.page.totalElements)
--    console.log('📑 Total pages:', res.data.page.totalPages)
--
--  } catch (err) {
--    console.error('❌ Lỗi gọi API khach-da-lien-he:', err)
--  }
--}
--getKhachDaLienHe();
- </script>
-
- <style scoped>
- /* Reset và kiểu cơ bản */
- * {
-   margin: 0;
-   padding: 0;
-   box-sizing: border-box;
+ .customer-phone {
+   font-size: 14px;
+   color: #4daf36;
+   font-weight: 600;
+   margin-bottom: 4px;
+   display: flex;
+   align-items: center;
+   gap: 5px;
  }
 
- body {
-   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-   background-color: #f0f2f5;
-   color: #333;
+ .customer-received {
+   font-size: 14px;
+   color: #444444;
+   margin-bottom: 6px;
+   display: flex;
+   align-items: center;
+   gap: 5px;
  }
 
- .telesale-app {
+ .customer-location {
+   font-size: 14px;
+   font-weight: 600;
+   color: #c92222;
+@@ -1617,50 +1693,79 @@ body {
+
+ /* Detail panel */
+ .detail-panel {
+   width: 400px;
+   background: linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%);
+   border-left: 1px solid #e2e8f0;
    display: flex;
    flex-direction: column;
-   height: 100vh;
-   overflow: hidden;
+   overflow-y: auto;
  }
 
- /* Header */
- .app-header {
+ .detail-header {
+   padding: 15px 20px;
+   border-bottom: 1px solid #e2e8f0;
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+ }
+
+ .detail-header h3 {
+   font-size: 18px;
+   color: #1e293b;
+ }
+
++.detail-tabs {
++  display: flex;
++  gap: 10px;
++  padding: 10px 20px;
++  border-bottom: 1px solid #e2e8f0;
++  background: #f8fafc;
++}
++
++.detail-tab {
++  border: 1px solid #e2e8f0;
++  background: #ffffff;
++  color: #334155;
++  padding: 6px 12px;
++  border-radius: 999px;
++  font-size: 13px;
++  font-weight: 600;
++  display: flex;
++  align-items: center;
++  gap: 6px;
++  cursor: pointer;
++  transition: all 0.2s ease;
++}
++
++.detail-tab.active {
++  background: #6366f1;
++  color: #ffffff;
++  border-color: #6366f1;
++}
++
+ .close-btn {
+   background: #f1f5ff;
+   border: 1px solid #cfd7e3;
+   font-size: 18px;
+   color: #666;
+   cursor: pointer;
+   padding: 5px;
+   border-radius: 10px;
+ }
+
+ .close-btn:hover {
+   color: #f44336;
+ }
+
+ .detail-content {
+   padding: 20px;
+   flex: 1;
+   display: flex;
+   flex-direction: column;
+   gap: 20px;
+ }
+
+ .customer-detail-header {
+   display: flex;
+   align-items: center;
+@@ -2018,64 +2123,74 @@ body {
+   }
+
+   .customer-actions {
+     width: 100%;
+     flex-direction: row;
+     justify-content: space-between;
+     margin-top: 10px;
+   }
+ }
+ .progress-fill.progress-new {
+   background: linear-gradient(to right, #6366f1, #818cf8);
+ }
+
+ .progress-fill.progress-care {
+   background: linear-gradient(to right, #0ea5e9, #38bdf8);
+ }
+ /* ===== HISTORY ===== */
+ .history-list {
+   display: flex;
+   flex-direction: column;
+   gap: 10px;
+ }
+
+ .history-item {
+   display: flex;
+-  gap: 12px;
++  flex-direction: column;
++  gap: 8px;
+   padding: 12px;
+   border-radius: 10px;
+   background: #f8fafc;
+   border: 1px solid #e5e7eb;
+ }
+
++.history-header {
++  display: flex;
++  align-items: center;
++  gap: 10px;
++  flex-wrap: wrap;
++}
++
+ .history-status {
+-  min-width: 120px;
+-  height: fit-content;
+-  padding: 6px 10px;
++  padding: 4px 10px;
+   border-radius: 999px;
+   color: #fff;
+   font-size: 12px;
+   font-weight: 600;
+   text-align: center;
+ }
+
+-.history-content {
+-  flex: 1;
+-}
+-
+ .history-time {
+   font-size: 12px;
+   color: #64748b;
+-  margin-bottom: 4px;
++  display: flex;
++  align-items: center;
++  gap: 4px;
+ }
+
+ .history-note {
+   font-size: 14px;
+   color: #334155;
+ }
+
+ .history-note.muted {
+   font-style: italic;
+   color: #94a3b8;
+ }
+
++.empty-history {
++  font-size: 14px;
++  color: #64748b;
++  font-style: italic;
++}
++
+ </style>

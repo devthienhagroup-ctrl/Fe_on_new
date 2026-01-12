@@ -483,10 +483,9 @@
       </div>
     </section>
 
-    <!-- Slider Dự án đã bán (Social Proof) -->
     <section id="du-an-da-ban" class="relative py-14 lg:py-20 border-t border-white/10">
       <div class="container mx-auto px-6">
-        <div class="max-w-2xl">
+        <div class="max-w-3xl">
           <h2 class="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
             {{ config.soldProjects.title }}
           </h2>
@@ -496,13 +495,37 @@
         </div>
 
         <div class="mt-10 relative">
-          <div class="flex overflow-x-auto pb-6 gap-5 scroll-snap-x custom-scrollbar" data-aos="fade-up">
+          <!-- Loading indicator -->
+          <div v-if="loadingSoldProjects" class="text-center py-10">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-500"></div>
+            <p class="mt-3 text-slate-400">Đang tải dự án...</p>
+          </div>
+
+          <!-- Danh sách dự án -->
+          <div
+              ref="soldProjectsContainer"
+              class="flex overflow-x-auto pb-6 gap-4 scroll-snap-x custom-scrollbar"
+              data-aos="fade-up"
+              @scroll="handleSoldProjectsScroll"
+          >
             <SoldProjectCard
-                v-for="project in config.soldProjects.items"
+                v-for="project in soldProjects"
                 :key="project.id"
                 :project="project"
-                @view-details="handleViewProjectDetails"
             />
+
+            <!-- Empty state -->
+            <div v-if="!loadingSoldProjects && soldProjects.length === 0" class="text-center py-10 w-full">
+              <svg class="w-16 h-16 text-slate-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+              <p class="text-slate-400">Chưa có dự án nào được hiển thị</p>
+            </div>
+
+            <!-- Loading more indicator -->
+            <div v-if="loadingMoreProjects" class="flex items-center justify-center min-w-[300px]">
+              <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -659,7 +682,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, onUnmounted } from "vue";
+import {computed, onMounted, reactive, ref, onUnmounted, nextTick} from "vue";
 import GlassCard from "../../UI/GlassCard.vue";
 import TestimonialCard from "../../UI/TestimonialCard.vue";
 import SoldProjectCard from "../../UI/SoldProjectCard.vue";
@@ -667,6 +690,165 @@ import { useAuthStore } from "../../../../stores/authStore.js";
 import addressData from "../../../../assets/js/address.json"
 import Fuse from "fuse.js";
 import api from "../../../../api/api.js";
+import {buildSeoUrl} from "../../../../assets/js/global.js";
+
+// ========== SOLD PROJECTS - Lấy từ API ==========
+const soldProjects = ref([]);
+const loadingSoldProjects = ref(false);
+const loadingMoreProjects = ref(false);
+const soldProjectsPage = ref(0);
+const soldProjectsTotalPages = ref(0);
+const soldProjectsContainer = ref(null);
+const hasMoreSoldProjects = ref(true);
+
+
+// Hàm format địa chỉ
+// Hàm format địa chỉ: chỉ lấy Thành phố/Tỉnh, giới hạn 40 ký tự
+const formatLocation = (address) => {
+  if (!address) return '';
+
+  const parts = address.split('/!!');
+
+  // Lấy phần cuối cùng (Thành phố / Tỉnh)
+  const city = parts[parts.length - 1]?.trim() || '';
+
+  if (city.length > 40) {
+    return city.slice(0, 40) + '...';
+  }
+
+  return city;
+};
+
+
+// Hàm format giá
+const formatPrice = (price) => {
+  if (!price && price !== 0) return '';
+
+  const priceNum = Number(price);
+  if (isNaN(priceNum)) return price;
+
+  if (priceNum >= 1000000000) {
+    // Tỷ đồng
+    const ty = priceNum / 1000000000;
+    return `${ty.toFixed(1).replace('.0', '')} tỷ VNĐ`;
+  } else if (priceNum >= 1000000) {
+    // Triệu đồng
+    const trieu = priceNum / 1000000;
+    return `${trieu.toFixed(0)} triệu VNĐ`;
+  } else {
+    // Đồng
+    return `${priceNum.toLocaleString('vi-VN')} VNĐ`;
+  }
+};
+
+// Hàm lấy dự án đã bán từ API
+const fetchSoldProjects = async (page = 0, loadMore = false) => {
+  if (loadMore) {
+    loadingMoreProjects.value = true;
+  } else {
+    loadingSoldProjects.value = true;
+  }
+
+  try {
+    const response = await api.post('/user.thg/product/user/da-ban', null, {
+      params: {
+        pageNo: page,
+        year: 2026// Số lượng item mỗi trang
+      }
+    });
+
+    if (response.data && response.data.content) {
+      const apiProjects = response.data.content;
+
+      // Map dữ liệu từ API sang format của component
+      const mappedProjects = apiProjects.map(rp => ({
+        id: rp.id || Date.now() + Math.random(),
+        type: getLoai(rp) || 'Nhà phố',
+        location: formatLocation(rp.diaChi),
+        status: rp.status || 'ĐÃ BÁN',
+        price: formatPrice(rp.giaBan),
+        saleTime: rp.capNhatNgay, // Tạm thời ẩn, có thể tính toán sau
+        priceDifference: rp.phiMoiGioi || 'Chưa cập nhật ',
+        imageUrl: rp.imageUrl || '',
+        imageClass: 'bg-gradient-to-br from-purple-500/20 to-blue-500/10',
+        detailUrl: buildSeoUrl(rp),
+        showDetailsButton: true
+      }));
+
+      if (loadMore) {
+        // Thêm vào cuối danh sách
+        soldProjects.value = [...soldProjects.value, ...mappedProjects];
+      } else {
+        // Thay thế danh sách
+        soldProjects.value = mappedProjects;
+      }
+
+      // Cập nhật thông tin phân trang
+      soldProjectsPage.value = response.data.page?.number || 0;
+      soldProjectsTotalPages.value = response.data.page?.totalPages || 0;
+      hasMoreSoldProjects.value = soldProjectsPage.value < soldProjectsTotalPages.value - 1;
+    }
+  } catch (error) {
+    console.error('Lỗi khi tải dự án đã bán:', error);
+  } finally {
+    loadingSoldProjects.value = false;
+    loadingMoreProjects.value = false;
+  }
+};
+
+
+// Hàm xử lý scroll để load thêm
+const handleSoldProjectsScroll = () => {
+  if (!soldProjectsContainer.value || loadingMoreProjects.value || !hasMoreSoldProjects.value) {
+    return;
+  }
+
+  console.log("Điều kiện scroll được kiểm tra");
+
+  const container = soldProjectsContainer.value;
+  const scrollLeft = container.scrollLeft;
+  const scrollWidth = container.scrollWidth;
+  const clientWidth = container.clientWidth;
+
+  // Debug log
+  console.log('Scroll info:', {
+    scrollLeft,
+    scrollWidth,
+    clientWidth,
+    scrollableDistance: scrollWidth - clientWidth,
+    scrolledPercentage: (scrollLeft / (scrollWidth - clientWidth)) * 100 + '%'
+  });
+
+  // Khi đã cuộn đến 70-80% thì load thêm
+  const threshold = 0.7; // 70%
+  const scrollableDistance = scrollWidth - clientWidth;
+
+  if (scrollableDistance > 0 && scrollLeft >= scrollableDistance * threshold) {
+    console.log('Triggering load more...', {
+      threshold: threshold * 100 + '%',
+      scrolled: (scrollLeft / scrollableDistance) * 100 + '%'
+    });
+    loadMoreSoldProjects();
+  }
+};
+
+
+// Hàm load thêm dự án - THÊM DEBOUNCE
+const loadMoreSoldProjects = async () => {
+  if (loadingMoreProjects.value || !hasMoreSoldProjects.value) return;
+
+  console.log('Loading more projects, page:', soldProjectsPage.value + 1);
+
+  const nextPage = soldProjectsPage.value + 1;
+  await fetchSoldProjects(nextPage, true);
+};
+
+// Hàm refresh danh sách dự án
+const refreshSoldProjects = () => {
+  soldProjectsPage.value = 0;
+  fetchSoldProjects(0, false);
+};
+
 
 // Data từ address.json
 const provinces = ref([]);
@@ -1102,50 +1284,50 @@ const config = ref({
     title: 'Dự án đã bán thành công',
     description: 'Khách hàng tin tưởng – Nhà phố được bán nhanh trong 30 ngày. Dưới đây là các giao dịch tiêu biểu.',
     items: [
-      {
-        id: 1,
-        type: 'Nhà phố 4 tầng',
-        location: 'Quận 2, TP.HCM',
-        status: 'ĐÃ BÁN',
-        price: 14.5,
-        saleTime: '28 ngày',
-        priceDifference: 8,
-        imageUrl: '',
-        imageClass: 'bg-gradient-to-br from-purple-500/20 to-blue-500/10'
-      },
-      {
-        id: 2,
-        type: 'Nhà mặt tiền',
-        location: 'Quận 7, TP.HCM',
-        status: 'ĐÃ BÁN',
-        price: 9.2,
-        saleTime: '22 ngày',
-        priceDifference: 12,
-        imageUrl: '/imgs/projects/nha-mat-tien-q7.jpg',
-        imageClass: 'bg-gradient-to-br from-blue-500/20 to-purple-500/10'
-      },
-      {
-        id: 3,
-        type: 'Nhà phố Shophouse',
-        location: 'Quận Bình Thạnh',
-        status: 'ĐÃ BÁN',
-        price: '22 tỷ VNĐ',
-        saleTime: '30 ngày',
-        priceDifference: 5,
-        imageUrl: '',
-        imageClass: 'bg-gradient-to-br from-purple-500/20 to-pink-500/10'
-      },
-      {
-        id: 4,
-        type: 'Nhà phố cao cấp',
-        location: 'Thủ Đức, TP.HCM',
-        status: 'ĐÃ BÁN',
-        price: 18.7,
-        saleTime: '25 ngày',
-        priceDifference: 10,
-        imageUrl: '/imgs/projects/nha-pho-thu-duc.jpg',
-        imageClass: 'bg-gradient-to-br from-amber-500/20 to-orange-500/10'
-      }
+      // {
+      //   id: 1,
+      //   type: 'Nhà phố 4 tầng',
+      //   location: 'Quận 2, TP.HCM',
+      //   status: 'ĐÃ BÁN',
+      //   price: 14.5,
+      //   saleTime: '28 ngày',
+      //   priceDifference: 8,
+      //   imageUrl: '',
+      //   imageClass: 'bg-gradient-to-br from-purple-500/20 to-blue-500/10'
+      // },
+      // {
+      //   id: 2,
+      //   type: 'Nhà mặt tiền',
+      //   location: 'Quận 7, TP.HCM',
+      //   status: 'ĐÃ BÁN',
+      //   price: 9.2,
+      //   saleTime: '22 ngày',
+      //   priceDifference: 12,
+      //   imageUrl: '/imgs/projects/nha-mat-tien-q7.jpg',
+      //   imageClass: 'bg-gradient-to-br from-blue-500/20 to-purple-500/10'
+      // },
+      // {
+      //   id: 3,
+      //   type: 'Nhà phố Shophouse',
+      //   location: 'Quận Bình Thạnh',
+      //   status: 'ĐÃ BÁN',
+      //   price: '22 tỷ VNĐ',
+      //   saleTime: '30 ngày',
+      //   priceDifference: 5,
+      //   imageUrl: '',
+      //   imageClass: 'bg-gradient-to-br from-purple-500/20 to-pink-500/10'
+      // },
+      // {
+      //   id: 4,
+      //   type: 'Nhà phố cao cấp',
+      //   location: 'Thủ Đức, TP.HCM',
+      //   status: 'ĐÃ BÁN',
+      //   price: 18.7,
+      //   saleTime: '25 ngày',
+      //   priceDifference: 10,
+      //   imageUrl: '/imgs/projects/nha-pho-thu-duc.jpg',
+      //   imageClass: 'bg-gradient-to-br from-amber-500/20 to-orange-500/10'
+      // }
     ]
   },
 
@@ -1377,6 +1559,40 @@ function hexToRgb(hex) {
   return `${(bigint >> 16) & 255} ${(bigint >> 8) & 255} ${bigint & 255}`
 }
 
+const getLoai = (item) => {
+  const dtcnValue = parseFloat(item.dtcn) || 0;
+  const structure = (item.structure || '').toLowerCase();
+
+  if (item.loaiTaiSan) {
+    const map = {
+      NHA: 'Nhà',
+      DAT: 'Đất',
+      DATLON: 'Đất lớn'
+    };
+
+    if (map[item.loaiTaiSan]) {
+      return map[item.loaiTaiSan];
+    }
+  }
+
+  const houseKeywords = [
+    'lầu', 'trệt', 'tầng', 'hầm', 'gác',
+    'nhà cấp', 'cấp 1', 'cấp 2', 'cấp 3', 'cấp 4',
+    'biệt thự', 'villa', 'shophouse', 'townhouse', 'nhà',
+    'chung cư', 'căn hộ', 'chcc', 'studio',
+    'condotel', 'officetel', 'apartment', 'can ho',
+    'chung cu', 'tower', 'block'
+  ];
+
+  if (houseKeywords.some((keyword) => structure.includes(keyword))) {
+    return 'Nhà';
+  }
+
+  if (dtcnValue > 10000) return 'Đất lớn';
+
+  return 'Đất';
+};
+
 onMounted(async () => {
   console.log("Chuẩn bị load config ban nhanh")
   await loadConfig();
@@ -1387,6 +1603,21 @@ onMounted(async () => {
   // Khởi tạo dropdown với 10 tỉnh đầu tiên
   filteredProvinces.value = provinces.value;
 
+  // Load dự án đã bán
+  await fetchSoldProjects(0);
+
+  // THÊM: Kiểm tra container sau khi load xong
+  nextTick(() => {
+    if (soldProjectsContainer.value) {
+      console.log('Container loaded, dimensions:', {
+        scrollWidth: soldProjectsContainer.value.scrollWidth,
+        clientWidth: soldProjectsContainer.value.clientWidth,
+        scrollLeft: soldProjectsContainer.value.scrollLeft
+      });
+    }
+  });
+
+
   // AOS initialization
   if (typeof AOS !== 'undefined') {
     AOS.init({ duration: 700, once: true, offset: 80 });
@@ -1396,6 +1627,8 @@ onMounted(async () => {
   window.addEventListener('scroll', handleScroll);
 
   console.log("màu purple",config.value.styles.colors.purple500)
+
+
 });
 
 onUnmounted(() => {
@@ -1577,5 +1810,101 @@ onUnmounted(() => {
   --tw-shadow: 0 8px 28px rgb(71, 54, 99), 0 2px 6px rgba(0,0,0,.25) !important;
   --tw-shadow-colored: 0 8px 28px var(--tw-shadow-color), 0 2px 6px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+/* Style cho scroll container */
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.5) rgba(15, 23, 42, 0.5);
+}
+
+/* Thêm padding bên phải để không bị che bởi thanh scroll */
+.flex.overflow-x-auto {
+  padding-right: 4px;
+}
+
+/*
+!* Đảm bảo các card có kích thước tối thiểu *!
+.flex.overflow-x-auto > * {
+  flex: 0 0 auto;
+  min-width: 300px;
+  scroll-snap-align: start;
+}
+*/
+
+/* Loading spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+/* THÊM: Tối ưu CSS cho container scroll */
+.flex.overflow-x-auto {
+  padding-right: 4px;
+  /* Thêm will-change để tối ưu hiệu suất scroll */
+  will-change: transform;
+  /* Đảm bảo container có overflow-x hiển thị đúng */
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch; /* Cho iOS */
+}
+
+/* Đảm bảo các card có kích thước tối thiểu */
+.flex.overflow-x-auto > * {
+  flex: 0 0 auto;
+  min-width: 300px;
+  max-width: 300px; /* THÊM: Giới hạn max-width để đồng nhất */
+  scroll-snap-align: start;
+}
+
+/* THÊM: Style cho loading indicator khi scroll */
+.flex.overflow-x-auto::after {
+  content: '';
+  min-width: 20px;
+  flex-shrink: 0;
+}
+/* THÊM: Tối ưu CSS cho container scroll */
+.flex.overflow-x-auto {
+  padding-right: 4px;
+  padding-top: 12px; /* THÊM: Tạo khoảng trống cho hover */
+  margin-bottom: -12px; /* Bù lại khoảng trống padding-top */
+  will-change: transform;
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Đảm bảo các card có kích thước tối thiểu */
+.flex.overflow-x-auto > * {
+  flex: 0 0 auto;
+  min-width: 300px;
+  max-width: 300px;
+  scroll-snap-align: start;
+  margin-bottom: 12px; /* Bù lại khoảng trống */
+}
+
+/* THÊM: Style cho loading indicator khi scroll */
+.flex.overflow-x-auto::after {
+  content: '';
+  min-width: 20px;
+  flex-shrink: 0;
+}
+
+/* THÊM: Đảm bảo SoldProjectCard có z-index cao khi hover */
+.flex.overflow-x-auto > *:hover {
+  z-index: 10; /* Đảm bảo card hover hiển thị trên các card khác */
+  position: relative;
+}
+
+/* THÊM: Tăng khoảng cách giữa các card */
+.flex.overflow-x-auto {
+  gap: 1.5rem; /* Thay vì gap-4 (16px) -> 24px */
 }
 </style>

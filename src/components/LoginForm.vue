@@ -5,7 +5,7 @@
   >
     <div class="card p-4 shadow-lg" style="max-width: 400px; width: 100%; background: rgba(0, 0, 0, 0.6); border-radius: 25px;">
       <div class="text-center mb-3">
-        <img :src="logoImage" alt="Logo" class="mb-3" style="width: 150px;" />
+        <img :src="logoImage" alt="Logo"  style="width: 150px; margin: auto" />
         <h3 class="text-white fw-bold">Đăng nhập</h3>
       </div>
 

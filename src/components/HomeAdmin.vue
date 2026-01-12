@@ -9,7 +9,7 @@
     <div class="top-bar d-flex justify-content-between align-items-center w-100 px-5 py-3">
       <!-- Logo -->
       <div class="d-flex align-items-center">
-        <img :src="logoImage" alt="Logo" height="52" class="me-3" />
+        <img :src="logoImage" alt="Logo" height="52" class="me-2" style="height: 80px !important;" />
         <span class="fw-bold fs-5 text-light">Thiên Hà Group</span>
       </div>
 
@@ -20,11 +20,10 @@
           <div class="text-secondary small"> {{ info.role}} </div>
         </div>
         <img
-        :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+        :src="' https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
         alt="Avatar"
             class="rounded-circle border border-light-subtle"
-            width="46"
-            height="46"
+         style="height: 46px; !important; width: 46px; !important;"
         />
       </div>
     </div>
