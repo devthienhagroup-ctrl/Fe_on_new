@@ -21,7 +21,7 @@ import "aos/dist/aos.css";
 
 //
 import "./components/user/UI/GlobalUI.css"
-
+import './style.css'
 // App init
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)

@@ -1,857 +1,268 @@
-diff --git a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-index 96c9920f42c677ea47a7ee4ff68a911fdbb0ea93..9b0131fe5a78713e6cd59ca6fa669f6d2da6e727 100644
---- a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-+++ b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-@@ -172,51 +172,56 @@
+diff --git a/src/components/thiet-kegiandien/test.html b/src/components/thiet-kegiandien/test.html
+index 170848747615a4943bf6d9baa5b2885a06261ba6..e59bd5fba3819e6d20933d6ddae24490fc2277cc 100644
+--- a/src/components/thiet-kegiandien/test.html
++++ b/src/components/thiet-kegiandien/test.html
+@@ -34,61 +34,66 @@
+             --dark-gradient: linear-gradient(135deg, #141e30 0%, #243b55 100%);
+             --light-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
 
-               <div class="search-box">
-                 <input v-model="searchQuery" type="text" placeholder="Tìm kiếm theo tên, số điện thoại..." />
-                 <i class="fas fa-search"></i>
-               </div>
+             --primary-color: #667eea;
+             --secondary-color: #f093fb;
+             --success-color: #43e97b;
+             --warning-color: #fa709a;
+             --danger-color: #ff5858;
+             --info-color: #4facfe;
+             --dark-color: #141e30;
+             --light-color: #f8f9fa;
+
+             --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+             --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.12);
+             --shadow-hard: 0 15px 50px rgba(0, 0, 0, 0.2);
+
+             --border-radius-sm: 12px;
+             --border-radius-md: 16px;
+             --border-radius-lg: 20px;
+
+             --transition-fast: 0.2s ease;
+             --transition-normal: 0.3s ease;
+             --transition-slow: 0.5s ease;
+         }
+
++        html {
++            font-size: 80%;
++        }
++
+         * {
+             margin: 0;
+             padding: 0;
+             box-sizing: border-box;
+         }
+
+         body {
+             font-family: 'Inter', sans-serif;
+             background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+             color: #333;
+             min-height: 100vh;
++            overflow: hidden;
+             overflow-x: hidden;
+         }
+
+         h1, h2, h3, h4, h5, h6 {
+             font-family: 'Poppins', sans-serif;
+             font-weight: 600;
+         }
+
+         /* Custom Scrollbar */
+         ::-webkit-scrollbar {
+             width: 8px;
+             height: 8px;
+         }
+
+         ::-webkit-scrollbar-track {
+             background: rgba(0, 0, 0, 0.05);
+             border-radius: 10px;
+         }
+
+         ::-webkit-scrollbar-thumb {
+             background: var(--primary-color);
+             border-radius: 10px;
+         }
+
+         ::-webkit-scrollbar-thumb:hover {
+@@ -151,50 +156,58 @@
+             transform: translateX(-50%);
+             width: 0;
+             height: 2px;
+             background: var(--primary-gradient);
+             transition: var(--transition-normal);
+         }
+
+         .nav-link-custom:hover::after, .nav-link-custom.active::after {
+             width: 80%;
+         }
+
+         /* User Dropdown */
+         .user-avatar {
+             width: 36px;
+             height: 36px;
+             border-radius: 50%;
+             background: var(--primary-gradient);
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             font-weight: 600;
+             color: white;
+             font-size: 14px;
+         }
+
++        .dashboard-layout {
++            height: calc(100vh - 100px);
++        }
++
++        .dashboard-row {
++            height: 100%;
++        }
++
+         /* Sidebar */
+         .sidebar {
+             background: rgba(255, 255, 255, 0.95);
+             backdrop-filter: blur(10px);
+             border-radius: var(--border-radius-lg);
+             padding: 25px;
+             box-shadow: var(--shadow-soft);
+             border: 1px solid rgba(255, 255, 255, 0.2);
+             height: calc(100vh - 100px);
+             position: sticky;
+             top: 85px;
+             overflow-y: auto;
+         }
+
+         .sidebar-section {
+             margin-bottom: 30px;
+         }
+
+         .sidebar-title {
+             font-size: 0.9rem;
+             text-transform: uppercase;
+             letter-spacing: 1px;
+             color: #6c757d;
+             margin-bottom: 15px;
+             font-weight: 600;
+@@ -337,51 +350,52 @@
+             font-size: 13px;
+             opacity: 0.9;
+             display: flex;
+             align-items: center;
+             gap: 5px;
+         }
+
+         .stat-icon {
+             position: absolute;
+             bottom: 20px;
+             right: 20px;
+             font-size: 48px;
+             opacity: 0.3;
+             z-index: 3;
+             transition: var(--transition-normal);
+         }
+
+         .stat-card:hover .stat-icon {
+             transform: scale(1.1) rotate(5deg);
+             opacity: 0.4;
+         }
+
+         /* Main Content */
+         .main-content {
+             padding: 25px;
+-            min-height: calc(100vh - 100px);
++            height: calc(100vh - 100px);
++            overflow-y: auto;
+         }
+
+         /* Card Custom */
+         .card-custom {
+             border-radius: var(--border-radius-lg);
+             border: none;
+             box-shadow: var(--shadow-soft);
+             transition: all var(--transition-normal);
+             margin-bottom: 25px;
+             background: rgba(255, 255, 255, 0.95);
+             backdrop-filter: blur(10px);
+             overflow: hidden;
+         }
+
+         .card-custom:hover {
+             box-shadow: var(--shadow-medium);
+             transform: translateY(-5px);
+         }
+
+         .card-header-custom {
+             background: var(--light-gradient);
+             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+             padding: 20px 25px;
+             border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0 !important;
+             font-weight: 600;
+@@ -923,52 +937,52 @@
+                         <li><a class="dropdown-item" href="#"><i class="fas fa-chart-line text-primary me-2"></i> Báo cáo tuần đã sẵn sàng</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fas fa-exclamation-triangle text-warning me-2"></i> Còn 12 cuộc gọi</a></li>
+                     </ul>
+                 </div>
+
+                 <div class="dropdown">
+                     <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+                         <div class="user-avatar me-2">NV</div>
+                         <div class="d-flex flex-column">
+                             <span class="text-white fw-medium">Nguyễn Văn A</span>
+                             <small class="text-white-50">Telesale Manager</small>
+                         </div>
+                     </a>
+                     <ul class="dropdown-menu dropdown-menu-end">
+                         <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2"></i> Hồ sơ</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Cài đặt</a></li>
+                         <li><hr class="dropdown-divider"></li>
+                         <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
+                     </ul>
+                 </div>
              </div>
-           </div>
-
-           <!-- Danh sách khách hàng -->
-           <div class="customer-list">
-             <div
-                 v-for="customer in pagedCustomers"
-                 :key="customer.id"
-                 class="customer-card"
-                 :class="{ selected: selectedCustomer && selectedCustomer.id === customer.id }"
-                 @click="selectCustomer(customer)"
-             >
-               <div class="customer-avatar">
-                 <div class="avatar-initials" :style="{ backgroundColor: getAvatarColor(customer.name) }">
-                   {{ getInitials(customer.name) }}
-                 </div>
-                 <span :class="`customer-type ${customer.type}`">{{ getCustomerTypeLabel(customer.type) }}</span>
-               </div>
-
-               <div class="customer-info">
--                <h4 class="customer-name">{{ customer.name }}</h4>
-+                <h4 class="customer-name">
-+                  {{ customer.name }}
-+                  <span v-if="getLatestHistoryLabel(customer)" class="customer-history-status">
-+                    {{ getLatestHistoryLabel(customer) }}
-+                  </span>
-+                </h4>
-
-                 <p class="customer-phone">
-                   <i class="fas fa-phone"></i> {{ customer.phone }}
-                 </p>
-
-                 <p class="customer-received">
-                   <i class="fas fa-clock"></i> Tiếp nhận: {{ formatReceivedAt(customer.receivedAt) }}
-                 </p>
-
-                 <div class="customer-location">
-                   <span class="location-current">
-                     <i class="fas fa-map-marker-alt"></i> {{ customer.province }}
-                   </span>
-                   <span v-if="customer.oldProvince" class="location-old">(Cũ: {{ customer.oldProvince }})</span>
-                 </div>
-
-                 <div class="customer-tags" v-if="Array.isArray(customer.tags) && customer.tags.length">
-                   <span v-for="tag in customer.tags" :key="tag" class="customer-tag" :class="tag">
-                     {{ getTagLabel(tag) }}
-                   </span>
-                 </div>
-               </div>
-
-               <div class="customer-actions">
-                 <div class="contact-icons">
-@@ -245,201 +250,234 @@
-                 class="page-btn"
-                 :class="{ active: currentPage === page }"
-                 @click="changePage(page)"
-             >
-               {{ page }}
-             </button>
-
-             <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
-
-             <button class="page-btn" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
-               <i class="fas fa-chevron-right"></i>
-             </button>
-           </div>
          </div>
-       </main>
-
-       <!-- Panel chi tiết khách hàng -->
-       <div class="detail-panel" v-if="selectedCustomer">
-         <div class="detail-header">
-           <h3>Chi tiết khách hàng</h3>
-           <button class="close-btn" @click="selectedCustomer = null">
-             <i class="fas fa-times"></i>
-           </button>
-         </div>
-
-+        <div class="detail-tabs">
-+          <button
-+              class="detail-tab"
-+              :class="{ active: activeDetailTab === 'detail' }"
-+              @click="activeDetailTab = 'detail'"
-+          >
-+            <i class="fas fa-id-card"></i> Chi tiết
-+          </button>
-+          <button
-+              class="detail-tab"
-+              :class="{ active: activeDetailTab === 'history' }"
-+              @click="activeDetailTab = 'history'"
-+          >
-+            <i class="fas fa-history"></i> Lịch sử
-+          </button>
-+        </div>
-+
-         <div class="detail-content" v-if="selectedCustomer">
--          <div class="customer-detail-header">
--            <div
--                class="detail-avatar avatar-initials"
--                :style="selectedCustomer ? { backgroundColor: getAvatarColor(selectedCustomer.name) } : {}"
--            >
--              {{ selectedCustomer ? getInitials(selectedCustomer.name) : '' }}
-+          <div v-if="activeDetailTab === 'detail'">
-+            <div class="customer-detail-header">
-+              <div
-+                  class="detail-avatar avatar-initials"
-+                  :style="selectedCustomer ? { backgroundColor: getAvatarColor(selectedCustomer.name) } : {}"
-+              >
-+                {{ selectedCustomer ? getInitials(selectedCustomer.name) : '' }}
-+              </div>
-+
-+              <div class="detail-name-info">
-+                <h4>{{ selectedCustomer ? selectedCustomer.name : '' }}</h4>
-+                <p class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</p>
-+                <p class="detail-received">
-+                  Tiếp nhận: {{ selectedCustomer ? formatReceivedAt(selectedCustomer.receivedAt) : '' }}
-+                </p>
-+                <p class="detail-type">
-+                  <span :class="selectedCustomer ? `type-badge ${selectedCustomer.type}` : 'type-badge'">
-+                    {{ selectedCustomer ? getCustomerTypeLabel(selectedCustomer.type) : '' }}
-+                  </span>
-+                </p>
-+              </div>
-             </div>
-
--            <div class="detail-name-info">
--              <h4>{{ selectedCustomer ? selectedCustomer.name : '' }}</h4>
--              <p class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</p>
--              <p class="detail-received">
--                Tiếp nhận: {{ selectedCustomer ? formatReceivedAt(selectedCustomer.receivedAt) : '' }}
--              </p>
--              <p class="detail-type">
--                <span :class="selectedCustomer ? `type-badge ${selectedCustomer.type}` : 'type-badge'">
--                  {{ selectedCustomer ? getCustomerTypeLabel(selectedCustomer.type) : '' }}
--                </span>
--              </p>
-+            <div class="detail-section">
-+              <h5><i class="fas fa-map-marked-alt"></i> Thông tin địa chỉ</h5>
-+              <div class="detail-row">
-+                <span class="detail-label">Tỉnh hiện tại:</span>
-+                <span class="detail-value">{{ selectedCustomer.province }}</span>
-+              </div>
-+              <div class="detail-row" v-if="selectedCustomer.oldProvince">
-+                <span class="detail-label">Tỉnh cũ:</span>
-+                <span class="detail-value">{{ selectedCustomer.oldProvince }}</span>
-+              </div>
-             </div>
--          </div>
-
--          <div class="detail-section">
--            <h5><i class="fas fa-map-marked-alt"></i> Thông tin địa chỉ</h5>
--            <div class="detail-row">
--              <span class="detail-label">Tỉnh hiện tại:</span>
--              <span class="detail-value">{{ selectedCustomer.province }}</span>
-+            <div class="detail-section">
-+              <h5><i class="fas fa-layer-group"></i> Phân loại khách</h5>
-+              <div class="detail-row">
-+                <span class="detail-label">Loại khách:</span>
-+                <span class="detail-value">{{ getCustomerTypeLabel(selectedCustomer.type) || 'Chưa phân loại' }}</span>
-+              </div>
-             </div>
--            <div class="detail-row" v-if="selectedCustomer.oldProvince">
--              <span class="detail-label">Tỉnh cũ:</span>
--              <span class="detail-value">{{ selectedCustomer.oldProvince }}</span>
-+
-+            <div class="detail-section">
-+              <h5><i class="fas fa-tags"></i> Đánh dấu khách hàng</h5>
-+              <div class="tag-selector">
-+                <button
-+                    v-for="tag in availableTags"
-+                    :key="tag.value"
-+                    class="tag-option"
-+                    :class="{ active: isTagActive(tag.value) }"
-+                    :style="isTagActive(tag.value) ? { backgroundColor: tag.color, borderColor: tag.color, color: '#fff' } : {}"
-+                    @click="toggleCustomerStatus(tag.value)"
-+                >
-+                  {{ tag.label }}
-+                </button>
-+              </div>
-             </div>
--          </div>
-
--          <div class="detail-section">
--            <h5><i class="fas fa-tags"></i> Đánh dấu khách hàng</h5>
--            <div class="tag-selector">
--              <button
--                  v-for="tag in availableTags"
--                  :key="tag.value"
--                  class="tag-option"
--                  :class="{ active: isTagActive(tag.value) }"
--                  :style="isTagActive(tag.value) ? { backgroundColor: tag.color, borderColor: tag.color, color: '#fff' } : {}"
--                  @click="toggleCustomerStatus(tag.value)"
--              >
--                {{ tag.label }}
--              </button>
-+            <div class="detail-section">
-+              <h5>
-+                <i class="fas fa-sticky-note"></i>Mô tả:
-+                <span style="font-size: 14px; color: #4A4A4A; font-weight: 400">
-+                  {{ selectedCustomer.note !== '' ? selectedCustomer.note : 'Không có' }}
-+                </span>
-+              </h5>
-+            </div>
-+
-+            <FileNew
-+                v-if="selectedCustomer"
-+                :key="'request-new-asset'"
-+                :file-list="fileForm.files"
-+                :entity-id="selectedCustomer.id"
-+                :allow-download-all="true"
-+                entity-type="host"
-+                :can-edit="true"
-+                :on-upload="true"
-+                class="mt-2"
-+                @update:files="handleFileUpdate"
-+            />
-+
-+            <div class="add-note-form">
-+              <textarea v-model="newNote" placeholder="Thêm ghi chú cuộc gọi..." rows="3"></textarea>
-             </div>
--          </div>
-
--          <div class="detail-section">
--            <h5>
--              <i class="fas fa-sticky-note"></i>Mô tả:
--              <span style="font-size: 14px; color: #4A4A4A; font-weight: 400">
--                {{ selectedCustomer.note !== '' ? selectedCustomer.note : 'Không có' }}
--              </span>
--            </h5>
-+            <div class="detail-actions">
-+              <button class="action-btn move-btn" @click="moveToContacted">
-+                <i class="fas fa-save"></i> Lưu thông tin
-+              </button>
-+            </div>
-           </div>
-
--          <div class="detail-section" v-if="Array.isArray(selectedCustomer.lichSu) && selectedCustomer.lichSu.length">
--            <h5>
--              <i class="fas fa-history"></i>
--              Lịch sử trạng thái
--            </h5>
-+          <div v-else class="detail-history">
-+            <div class="detail-section">
-+              <h5>
-+                <i class="fas fa-history"></i>
-+                Lịch sử trạng thái
-+              </h5>
-
--            <div class="history-list">
--              <div
--                  v-for="(item, idx) in selectedCustomer.lichSu"
--                  :key="idx"
--                  class="history-item"
--              >
-+              <div v-if="Array.isArray(selectedCustomer.lichSu) && selectedCustomer.lichSu.length" class="history-list">
-                 <div
--                    class="history-status"
--                    :style="{
--            backgroundColor: STATUS_META[item.trangThai]?.color || '#94a3b8'
--          }"
-+                    v-for="(item, idx) in selectedCustomer.lichSu"
-+                    :key="idx"
-+                    class="history-item"
-                 >
--                  {{ STATUS_META[item.trangThai]?.label || item.trangThai }}
--                </div>
--
--                <div class="history-content">
--                  <div class="history-time">
--                    <i class="fas fa-clock"></i>
--                    {{ formatReceivedAt(item.thoiGianCapNhat) }}
-+                  <div class="history-header">
-+                    <div
-+                        class="history-status"
-+                        :style="{
-+                      backgroundColor: STATUS_META[item.trangThai]?.color || '#94a3b8'
-+                    }"
-+                    >
-+                      {{ STATUS_META[item.trangThai]?.label || item.trangThai }}
-+                    </div>
-+
-+                    <div class="history-time">
-+                      <i class="fas fa-clock"></i>
-+                      {{ formatReceivedAt(item.thoiGianCapNhat) }}
-+                    </div>
-                   </div>
-
-                   <div class="history-note" v-if="item.ghiChu">
-                     {{ item.ghiChu }}
-                   </div>
-                   <div class="history-note muted" v-else>
-                     Không có mô tả
-                   </div>
-                 </div>
-               </div>
--            </div>
--          </div>
--
--          <FileNew
--              v-if="selectedCustomer"
--              :key="'request-new-asset'"
--              :file-list="fileForm.files"
--              :entity-id="selectedCustomer.id"
--              :allow-download-all="true"
--              entity-type="host"
--              :can-edit="true"
--              :on-upload="true"
--              class="mt-2"
--              @update:files="handleFileUpdate"
--          />
--
--          <div class="add-note-form">
--            <textarea v-model="newNote" placeholder="Thêm ghi chú cuộc gọi..." rows="3"></textarea>
--          </div>
-
--          <div class="detail-actions">
--            <button class="action-btn move-btn" @click="moveToContacted">
--              <i class="fas fa-save"></i> Lưu thông tin
--            </button>
-+              <div v-else class="empty-history">Chưa có lịch sử.</div>
-+            </div>
-           </div>
-         </div>
-       </div>
      </div>
-   </div>
- </template>
+ </nav>
 
- <script setup>
- import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
- import Chart from 'chart.js/auto'
- import api from '/src/api/api.js'
- import FileNew from './File.vue'
+-<div class="container-fluid">
+-    <div class="row">
++<div class="container-fluid dashboard-layout">
++    <div class="row dashboard-row">
+         <!-- Sidebar -->
+         <div class="col-lg-3 col-xl-2">
+             <div class="sidebar animate__animated animate__fadeInLeft">
+                 <div class="sidebar-section">
+                     <h6 class="sidebar-title"><i class="fas fa-filter"></i> Bộ lọc nâng cao</h6>
 
- // ====== META ======
- const STATUS_META = {
-   NEW: { label: 'Mới', color: '#94a3b8' },
-   DC_TELESALES: { label: 'Mới tiếp nhận', color: '#6366f1' },
-   CHAM_SOC: { label: 'Đang chăm sóc', color: '#38bdf8' },
-   TN_7NGAY: { label: 'Tiềm năng 7 ngày', color: '#0ea5e9' },
-   TN_14NGAY: { label: 'Tiềm năng 14 ngày', color: '#0284c7' },
-   THAT_BAI: { label: 'Thất bại', color: '#f43f5e' },
-   KHONG_LIEN_LAC_DUOC: { label: 'Không liên lạc được', color: '#f97316' },
-   SAI_SO_LIEU: { label: 'Sai số liệu', color: '#a855f7' },
-   THANH_CONG: { label: 'Thành công (Lên VP)', color: '#22c55e' }
- }
+                     <div class="filter-tabs">
+                         <button class="filter-tab active" data-filter="all">Tất cả</button>
+                         <button class="filter-tab" data-filter="new">Mới</button>
+                         <button class="filter-tab" data-filter="contacted">Đã LH</button>
+                     </div>
 
- // ====== Reactive state ======
- const activeTab = ref('new')
-+const activeDetailTab = ref('detail')
- const selectedCustomer = ref(null)
- const newNote = ref('')
- const searchQuery = ref('')
- const originalFiles = ref([])
-+const skipTabReload = ref(false)
+                     <div class="mb-3">
+                         <label class="form-label mb-2 fw-medium">Phân loại</label>
+                         <select class="form-select form-select-custom" id="typeFilter">
+                             <option value="all">Tất cả phân loại</option>
+                             <option value="broker">Môi giới</option>
+                             <option value="owner">Chủ nhà</option>
+                             <option value="relative">Người thân</option>
+                         </select>
+                     </div>
 
- const fileForm = ref({
-   files: [],
-   newFiles: [],
-   newLandBookFiles: [],
-   deletedFileIds: [],
-   deletedLandBookFileIds: []
- })
-
- // ✅ FIX all -> null
- const statusFilter = ref(null)
- const typeFilter = ref(null)
-
- const currentPage = ref(1)
- const pageSize = ref(10)
-
- const selectedTimeRange = ref('month')
- const selectedYear = ref(new Date().getFullYear())
- const selectedMonth = ref(new Date().getMonth() + 1)
-
- const lineChart = ref(null)
- const lineChartInstance = ref(null)
- const summaryChartInstance = ref(null)
-
- // ✅ years = 5 năm gần nhất
-@@ -491,135 +529,156 @@ const thongKeTrangThai = ref([])
- // - time: nếu theo năm => 1..12 (tháng)
- // - time: nếu theo tháng => 1..31 (ngày)
- const thongKeThoiGian = ref([])
-
- // ====== Computed ======
- const filteredCustomers = computed(() => {
-   return activeTab.value === 'new' ? newCustomers.value : contactedCustomers.value
- })
-
- const totalPages = computed(() => {
-   if (activeTab.value !== 'contacted') return 1
-   return Math.max(1, Number(contactedPagination.value.totalPages || 1))
- })
-
- const pageNumbers = computed(() => {
-   if (activeTab.value !== 'contacted') return []
-   return Array.from({ length: totalPages.value }, (_, idx) => idx + 1)
- })
-
- const pagedCustomers = computed(() => {
-   return filteredCustomers.value
- })
-
- // ====== Watchers ======
- watch(activeTab, (newVal) => {
-+  if (skipTabReload.value) {
-+    skipTabReload.value = false
-+    return
-+  }
-   currentPage.value = 1
-   statusFilter.value = null
-   searchQuery.value = ''
-
-   if (newVal === 'new') {
-     loadKhachMoiTiepNhan()
-   } else {
-     loadKhachDaLienHe()
-   }
- })
-
- watch([statusFilter, typeFilter, searchQuery], () => {
-   currentPage.value = 1
-   if (activeTab.value === 'new') {
-     loadKhachMoiTiepNhan()
-   } else {
-     loadKhachDaLienHe()
-   }
- })
-
- // ✅ đổi thời gian => reload line chart data từ BE
- watch([selectedTimeRange, selectedYear, selectedMonth], async () => {
-   await fetchThongKeBieuDo()
- })
-
- const changePage = (page) => {
-   currentPage.value = Math.min(Math.max(page, 1), totalPages.value)
-   if (activeTab.value === 'contacted') {
-     loadKhachDaLienHe()
-   }
- }
-
- // ====== Helpers ======
- const getCustomerTypeLabel = (type) => {
-   const typeLabels = {
-     MOI_GIOI: 'Môi giới',
-     CHINH_CHU: 'Chủ nhà',
-     NGUOI_THAN: 'Người thân'
-   }
-   return typeLabels[type] || type
- }
-
- const getTagLabel = (tag) => {
-   return STATUS_META[tag]?.label || tag
- }
-
-+const getLatestHistoryEntry = (customer) => {
-+  const history = Array.isArray(customer?.lichSu) ? customer.lichSu : []
-+  if (!history.length) return null
-+  return history.reduce((latest, item) => {
-+    const latestTime = new Date(latest?.thoiGianCapNhat || 0).getTime()
-+    const itemTime = new Date(item?.thoiGianCapNhat || 0).getTime()
-+    return itemTime >= latestTime ? item : latest
-+  }, history[0])
-+}
-+
-+const getLatestHistoryLabel = (customer) => {
-+  const entry = getLatestHistoryEntry(customer)
-+  if (!entry) return null
-+  return STATUS_META[entry.trangThai]?.label || entry.trangThai || null
-+}
-+
- const getInitials = (name) => {
-   if (!name) return ''
-   const words = name.trim().split(/\s+/)
-   const first = words[0]?.charAt(0) || ''
-   const last = words.length > 1 ? words[words.length - 1].charAt(0) : ''
-   return `${first}${last}`.toUpperCase()
- }
-
- const getAvatarColor = (name) => {
-   if (!name) return 'hsl(210, 60%, 55%)'
-   let hash = 0
-   for (let i = 0; i < name.length; i += 1) {
-     hash = name.charCodeAt(i) + ((hash << 5) - hash)
-   }
-   const hue = Math.abs(hash) % 360
-   return `hsl(${hue}, 60%, 55%)`
- }
-
- const formatTime = (isoString) => {
-   if (!isoString) return 'Chưa gọi'
-   const date = new Date(isoString)
-   return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
- }
-
- const formatReceivedAt = (isoString) => {
-   if (!isoString) return '-'
-   const date = new Date(isoString)
-   return date.toLocaleString('vi-VN', {
-     hour: '2-digit',
-     minute: '2-digit',
-     day: '2-digit',
-     month: '2-digit',
-     year: 'numeric'
-   })
- }
-
- // ====== Detail actions ======
- const selectCustomer = (customer) => {
-   selectedCustomer.value = customer
-+  activeDetailTab.value = 'detail'
-   newNote.value = ''
-   resetFileForm(customer?.files)
- }
-
- const toggleCustomerStatus = (status) => {
-   if (!selectedCustomer.value) return
-   selectedCustomer.value.status = selectedCustomer.value.status === status ? null : status
- }
-
- const resetFileForm = (files) => {
-   const safeFiles = Array.isArray(files) ? JSON.parse(JSON.stringify(files)) : []
-   fileForm.value = {
-     files: safeFiles,
-     newFiles: [],
-     newLandBookFiles: [],
-     deletedFileIds: [],
-     deletedLandBookFileIds: []
-   }
-   originalFiles.value = JSON.parse(JSON.stringify(safeFiles))
- }
-
- const handleFileUpdate = (files) => {
-   fileForm.value.files = Array.isArray(files) ? files : []
-
-   const existingFiles = fileForm.value.files.filter((file) => !file.file && file.id)
-@@ -671,67 +730,71 @@ const buildFilePayload = () => {
-       || fileForm.value.newLandBookFiles.find((file) => file?.isOnTop && file.file instanceof File)
-
-   if (mainFile) {
-     fd.append('newFileOntop', mainFile.file)
-   }
-
-   fileForm.value.newFiles.forEach((file) => {
-     if (file?.file instanceof File) {
-       fd.append('newFiles', file.file)
+                     <div class="mb-3">
+                         <label class="form-label mb-2 fw-medium">Trạng thái</label>
+                         <select class="form-select form-select-custom" id="statusFilter">
+@@ -2438,26 +2452,26 @@
+             opacity: 0;
+         }
      }
-   })
 
-   fileForm.value.newLandBookFiles.forEach((file) => {
-     if (file?.file instanceof File) {
-       fd.append('newLandBookFiles', file.file)
+     .alert-success {
+         background: var(--success-gradient);
+         color: white;
      }
-   })
 
-   return fd
- }
+     .alert-warning {
+         background: var(--warning-gradient);
+         color: white;
+     }
 
- const moveToContacted = async () => {
-   if (!selectedCustomer.value) return
+     .alert-info {
+         background: var(--info-gradient);
+         color: white;
+     }
 
-   try {
-+    const targetId = selectedCustomer.value.id
-     const payload = buildFilePayload()
-     await api.post('/customer-crm/telesales/journey-history/create', payload, {
-       headers: { 'Content-Type': 'multipart/form-data' }
-     })
-
--    const index = newCustomers.value.findIndex((c) => c.id === selectedCustomer.value.id)
--    if (index !== -1) {
--      const customer = newCustomers.value.splice(index, 1)[0]
--      customer.tags = customer.status ? [customer.status] : []
--      contactedCustomers.value.unshift(customer)
--    }
-+    skipTabReload.value = activeTab.value !== 'contacted'
-+    activeTab.value = 'contacted'
-+    await Promise.all([loadKhachDaLienHe(), loadKhachMoiTiepNhan()])
-+
-+    const updatedCustomer = contactedCustomers.value.find((c) => c.id === targetId)
-+        || newCustomers.value.find((c) => c.id === targetId)
-
--    selectedCustomer.value = null
-+    selectedCustomer.value = updatedCustomer || null
-+    activeDetailTab.value = 'detail'
-     newNote.value = ''
--    resetFileForm([])
--    activeTab.value = 'contacted'
--    await loadKhachDaLienHe()
-+    if (selectedCustomer.value) {
-+      resetFileForm(selectedCustomer.value.files)
-+    } else {
-+      resetFileForm([])
-+    }
-
-     // reload thống kê
-     await refreshData()
-   } catch (err) {
-     console.error(err)
-   }
- }
-
- // ====== API ======
- const fetchThongKeHomNay = async () => {
-   try {
-     const { data } = await api.get('/customer-crm/telesales/thong-ke/hom-nay')
-     todayStats.value = data
-   } catch (e) {
-     console.error('❌ Lỗi thống kê hôm nay', e)
-   }
- }
-
- const fetchThongKeTrangThaiTeleSales = async () => {
-   try {
-     const { data } = await api.get('/customer-crm/telesales/thong-ke-trang-thai')
-     thongKeTrangThai.value = Array.isArray(data)
-         ? data.map((item) => ({
-           label: item.label,
-           value: Number(item.value)
-@@ -1456,50 +1519,63 @@ body {
- }
-
- .customer-type.MOI_GIOI {
-   background-color: #1e88e5;
-   color: #ffffff;
- }
-
- .customer-type.CHINH_CHU {
-   background-color: #2e7d32;
-   color: #ffffff;
- }
-
- .customer-type.NGUOI_THAN {
-   background-color: #6a1b9a;
-   color: #ffffff;
- }
-
- .customer-info {
-   flex: 1;
- }
-
- .customer-name {
-   font-size: 16px;
-   font-weight: 600;
-   margin-bottom: 4px;
-+  display: flex;
-+  flex-wrap: wrap;
-+  align-items: center;
-+  gap: 6px;
-+}
-+
-+.customer-history-status {
-+  font-size: 12px;
-+  font-weight: 600;
-+  padding: 2px 8px;
-+  border-radius: 999px;
-+  background: #e2e8f0;
-+  color: #475569;
- }
-
- .customer-phone {
-   font-size: 14px;
-   color: #4daf36;
-   font-weight: 600;
-   margin-bottom: 4px;
-   display: flex;
-   align-items: center;
-   gap: 5px;
- }
-
- .customer-received {
-   font-size: 14px;
-   color: #444444;
-   margin-bottom: 6px;
-   display: flex;
-   align-items: center;
-   gap: 5px;
- }
-
- .customer-location {
-   font-size: 14px;
-   font-weight: 600;
-   color: #c92222;
-@@ -1617,50 +1693,79 @@ body {
-
- /* Detail panel */
- .detail-panel {
-   width: 400px;
-   background: linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%);
-   border-left: 1px solid #e2e8f0;
-   display: flex;
-   flex-direction: column;
-   overflow-y: auto;
- }
-
- .detail-header {
-   padding: 15px 20px;
-   border-bottom: 1px solid #e2e8f0;
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
- }
-
- .detail-header h3 {
-   font-size: 18px;
-   color: #1e293b;
- }
-
-+.detail-tabs {
-+  display: flex;
-+  gap: 10px;
-+  padding: 10px 20px;
-+  border-bottom: 1px solid #e2e8f0;
-+  background: #f8fafc;
-+}
-+
-+.detail-tab {
-+  border: 1px solid #e2e8f0;
-+  background: #ffffff;
-+  color: #334155;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  font-size: 13px;
-+  font-weight: 600;
-+  display: flex;
-+  align-items: center;
-+  gap: 6px;
-+  cursor: pointer;
-+  transition: all 0.2s ease;
-+}
-+
-+.detail-tab.active {
-+  background: #6366f1;
-+  color: #ffffff;
-+  border-color: #6366f1;
-+}
-+
- .close-btn {
-   background: #f1f5ff;
-   border: 1px solid #cfd7e3;
-   font-size: 18px;
-   color: #666;
-   cursor: pointer;
-   padding: 5px;
-   border-radius: 10px;
- }
-
- .close-btn:hover {
-   color: #f44336;
- }
-
- .detail-content {
-   padding: 20px;
-   flex: 1;
-   display: flex;
-   flex-direction: column;
-   gap: 20px;
- }
-
- .customer-detail-header {
-   display: flex;
-   align-items: center;
-@@ -2018,64 +2123,74 @@ body {
-   }
-
-   .customer-actions {
-     width: 100%;
-     flex-direction: row;
-     justify-content: space-between;
-     margin-top: 10px;
-   }
- }
- .progress-fill.progress-new {
-   background: linear-gradient(to right, #6366f1, #818cf8);
- }
-
- .progress-fill.progress-care {
-   background: linear-gradient(to right, #0ea5e9, #38bdf8);
- }
- /* ===== HISTORY ===== */
- .history-list {
-   display: flex;
-   flex-direction: column;
-   gap: 10px;
- }
-
- .history-item {
-   display: flex;
--  gap: 12px;
-+  flex-direction: column;
-+  gap: 8px;
-   padding: 12px;
-   border-radius: 10px;
-   background: #f8fafc;
-   border: 1px solid #e5e7eb;
- }
-
-+.history-header {
-+  display: flex;
-+  align-items: center;
-+  gap: 10px;
-+  flex-wrap: wrap;
-+}
-+
- .history-status {
--  min-width: 120px;
--  height: fit-content;
--  padding: 6px 10px;
-+  padding: 4px 10px;
-   border-radius: 999px;
-   color: #fff;
-   font-size: 12px;
-   font-weight: 600;
-   text-align: center;
- }
-
--.history-content {
--  flex: 1;
--}
--
- .history-time {
-   font-size: 12px;
-   color: #64748b;
--  margin-bottom: 4px;
-+  display: flex;
-+  align-items: center;
-+  gap: 4px;
- }
-
- .history-note {
-   font-size: 14px;
-   color: #334155;
- }
-
- .history-note.muted {
-   font-style: italic;
-   color: #94a3b8;
- }
-
-+.empty-history {
-+  font-size: 14px;
-+  color: #64748b;
-+  font-style: italic;
-+}
-+
+     .alert-danger {
+         background: var(--danger-gradient);
+         color: white;
+     }
  </style>
+ </body>
+-</html>
+\ No newline at end of file
++</html>

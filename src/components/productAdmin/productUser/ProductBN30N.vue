@@ -32,7 +32,7 @@
             Đã khóa
           </div>
           <img v-if="items[0].status === 'Đã kiểm duyệt'"
-               src="https://s3.cloudfly.vn/thg-storage/uploads-public/icon-kiem-duỵet.png"
+               src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png"
                style="width: 40px"
                alt="checked"
           />
@@ -157,7 +157,7 @@
             </div>
 
             <img v-if="item.status === 'Đã kiểm duyệt'"
-                 src="https://s3.cloudfly.vn/thg-storage/uploads-public/icon-kiem-duỵet.png"
+                 src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png"
                  style="width: 27px"
                  alt="checked"
             />

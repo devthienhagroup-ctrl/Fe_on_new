@@ -80,7 +80,7 @@ const formatAddress = (addr) => {
 // Xử lý avatar
 const avatarUrl = (img) => {
   if (!img) return "/imgs/default-avatar.png"; // fallback
-  return `https://s3.cloudfly.vn/thg-storage/uploads-public/${img}`;
+  return `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${img}`;
 };
 </script>
 <style scoped>
