@@ -113,6 +113,46 @@
               </select>
             </div>
 
+            <div class="mb-3">
+              <label class="form-label mb-2 fw-medium">Ngày tạo từ - đến</label>
+              <div class="d-flex gap-2">
+                <input
+                  type="date"
+                  class="form-control form-control-custom"
+                  v-model="filters.createdFrom"
+                  @input="applyFilters"
+                >
+              </div>
+            </div>
+            <div  class="d-flex gap-2">
+              <input
+                  type="date"
+                  class="form-control form-control-custom"
+                  v-model="filters.createdTo"
+                  @input="applyFilters"
+              >
+            </div>
+
+            <div class="mb-3 mt-3">
+              <label class="form-label mb-2 fw-medium">Ngày cập nhật từ - đến</label>
+              <div class="d-flex gap-2">
+                <input
+                  type="date"
+                  class="form-control form-control-custom"
+                  v-model="filters.updatedFrom"
+                  @input="applyFilters"
+                >
+              </div>
+            </div>
+            <div class="mb-3">
+              <input
+                  type="date"
+                  class="form-control form-control-custom"
+                  v-model="filters.updatedTo"
+                  @input="applyFilters"
+              >
+            </div>
+
             <div class="mb-3" v-if="activeTab === 'contacted'">
               <label class="form-label mb-2 fw-medium">Trạng thái</label>
               <select class="form-select form-select-custom" v-model="filters.status">
@@ -335,7 +375,7 @@
                   </div>
 
                   <div class="d-flex flex-wrap gap-2">
-                    <button class="btn-primary-custom btn-custom" @click="openAddCustomerModal">
+                    <button class="btn-primary-custom btn-custom" @click="openAddCustomerModal()">
                       <i class="fas fa-plus me-2"></i> Thêm khách hàng
                     </button>
                   </div>
@@ -367,12 +407,13 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="(customer, index) in filteredCustomers" :key="customer.id">
+                    <tr v-for="(customer, index) in filteredCustomers" :key="customer.id" class="table-row-clickable" @click="openCustomerDetail(customer)">
                       <td style="width: 20px !important;">
                         <input
                             type="checkbox"
                             class="form-check-input customer-checkbox"
                             :checked="customer.selected"
+                            @click.stop
                             @change="toggleCustomerSelection(customer.id)"
                         >
                       </td>
@@ -382,7 +423,7 @@
                           <img :src="customer.avatar" :alt="customer.name" class="customer-avatar me-3">
                           <div>
                             <div class="fw-semibold">{{ customer.name }}</div>
-                            <small class="text-muted">ID: {{ String(customer.id).padStart(4, '0') }}</small>
+                            <small class="text-muted">{{ customer.createdAt }}</small>
                           </div>
                         </div>
                       </td>
@@ -408,10 +449,10 @@
                       </td>
                       <td>
                         <div class="action-buttons">
-                          <button class="action-btn call-btn" @click="editCustomer(customer)" title="Sửa" style="background: var(--success-gradient);">
+                          <button class="action-btn call-btn" @click.stop="editCustomer(customer)" title="Sửa" style="background: var(--success-gradient);">
                             <i class="fas fa-edit"></i>
                           </button>
-                          <button class="action-btn delete-btn" @click="showDeleteConfirm(customer)" title="Xóa" style="background: var(--danger-gradient);">
+                          <button class="action-btn delete-btn" @click.stop="showDeleteConfirm(customer)" title="Xóa" style="background: var(--danger-gradient);">
                             <i class="fas fa-trash"></i>
                           </button>
                         </div>
@@ -450,14 +491,14 @@
     </div>
 
     <!-- Modals -->
-    <!-- Add/Edit Customer Modal -->
+    <!-- Add Customer Modal -->
     <div class="modal fade modal-custom" :class="{ show: showAddCustomerModal }" tabindex="-1">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
               <i class="fas fa-user-plus me-2"></i>
-              {{ isEditing ? 'Chỉnh sửa khách hàng' : 'Thêm khách hàng mới' }}
+              Thêm khách hàng mới
             </h5>
             <button type="button" class="btn-close btn-close-white" @click="closeAddCustomerModal"></button>
           </div>
@@ -537,7 +578,161 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-custom btn-custom" @click="closeAddCustomerModal">Hủy</button>
             <button type="button" class="btn btn-primary-custom btn-custom" @click="saveCustomer">
-              <i class="fas fa-save me-2"></i> {{ isEditing ? 'Cập nhật' : 'Lưu khách hàng' }}
+              <i class="fas fa-save me-2"></i> Lưu khách hàng
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Customer Modal -->
+    <div class="modal fade modal-custom" :class="{ show: showEditCustomerModal }" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="fas fa-user-edit me-2"></i>
+              Chỉnh sửa khách hàng
+            </h5>
+            <button type="button" class="btn-close btn-close-white" @click="closeEditCustomerModal"></button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="saveCustomer">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-medium">Họ và tên <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control form-control-custom" v-model="customerForm.name" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-medium">Số điện thoại <span class="text-danger">*</span></label>
+                  <input type="tel" class="form-control form-control-custom" v-model="customerForm.phone" required>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-medium">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    class="form-control form-control-custom"
+                    list="province-options"
+                    v-model="customerForm.province"
+                    placeholder="Chọn tỉnh/thành phố"
+                    required
+                  >
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-medium">Tỉnh cũ (nếu có)</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-custom"
+                    list="province-options"
+                    v-model="customerForm.oldProvince"
+                    placeholder="Chọn tỉnh/thành phố"
+                  >
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-medium">Phân loại khách hàng <span class="text-danger">*</span></label>
+                  <select class="form-select form-select-custom" v-model="customerForm.type" required>
+                    <option value="">Chọn phân loại</option>
+                    <option value="broker">Môi giới</option>
+                    <option value="owner">Chủ nhà</option>
+                    <option value="relative">Người thân</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-medium">Trạng thái <span class="text-danger">*</span></label>
+                  <select class="form-select form-select-custom" v-model="customerForm.status" required>
+                    <option value="new">Mới tiếp nhận</option>
+                    <option value="potential_7">Tiềm năng 7 ngày</option>
+                    <option value="potential_14">Tiềm năng 14 ngày</option>
+                    <option value="success">Thành công (đặt lịch)</option>
+                    <option value="wrong_number">Sai số</option>
+                    <option value="unreachable">Không liên lạc được</option>
+                    <option value="care">Chăm sóc</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-medium">Ảnh đại diện (URL)</label>
+                <input type="text" class="form-control form-control-custom" v-model="customerForm.avatar" placeholder="https://example.com/avatar.jpg">
+                <small class="text-muted">Để trống để sử dụng ảnh mặc định</small>
+              </div>
+
+              <input type="hidden" v-model="customerForm.id" />
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-custom btn-custom" @click="closeEditCustomerModal">Hủy</button>
+            <button type="button" class="btn btn-primary-custom btn-custom" @click="saveCustomer">
+              <i class="fas fa-save me-2"></i> Cập nhật
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Detail Modal -->
+    <div class="modal fade modal-custom" :class="{ show: showDetailModal }" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="fas fa-address-card me-2"></i>
+              Chi tiết khách hàng
+            </h5>
+            <button type="button" class="btn-close btn-close-white" @click="closeDetailModal"></button>
+          </div>
+          <div class="modal-body" v-if="selectedCustomer">
+            <div class="d-flex align-items-center gap-3 mb-4">
+              <img :src="selectedCustomer.avatar" :alt="selectedCustomer.name" class="customer-avatar-lg">
+              <div>
+                <h4 class="mb-1">{{ selectedCustomer.name }}</h4>
+                <div class="text-muted">SĐT: {{ formatPhoneNumber(selectedCustomer.phone) }}</div>
+                <div class="text-muted">Ngày tạo: {{ selectedCustomer.createdAt }}</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <div class="detail-label">Tỉnh/TP</div>
+                <div class="detail-value">{{ getProvinceLabel(selectedCustomer.province) }}</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="detail-label">Tỉnh cũ</div>
+                <div class="detail-value">{{ selectedCustomer.oldProvince || '-' }}</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="detail-label">Phân loại</div>
+                <div class="detail-value">{{ getTypeLabel(selectedCustomer.type) }}</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="detail-label">Trạng thái</div>
+                <div class="detail-value">{{ getStatusLabel(selectedCustomer.status) }}</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="detail-label">Ngày cập nhật</div>
+                <div class="detail-value">{{ selectedCustomer.lastUpdated }}</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="detail-label">Người tạo</div>
+                <div class="detail-value">
+                  {{ getCreatorInfo(selectedCustomer.creatorId)?.name || '-' }}
+                </div>
+              </div>
+              <div class="col-md-12 mb-2">
+                <div class="detail-label">Ghi chú</div>
+                <div class="detail-value">{{ selectedCustomer.notes || '-' }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-custom btn-custom" @click="closeDetailModal">Đóng</button>
+            <button type="button" class="btn btn-primary-custom btn-custom" @click="openEditFromDetail">
+              <i class="fas fa-edit me-2"></i> Chỉnh sửa
             </button>
           </div>
         </div>
@@ -652,16 +847,16 @@ import addressData from '/src/assets/js/address.json'
 
 // State management
 const customers = ref([
-  { id: 1, name: "Nguyễn Văn An", phone: "0912345678", province: "Thành phố Hà Nội", oldProvince: "Thành phố Hải Phòng", avatar: "https://randomuser.me/api/portraits/men/32.jpg", type: "owner", status: "potential_7", notes: "Khách hàng quan tâm đến chính sách ưu đãi, đã gửi báo giá qua email. Hẹn gọi lại vào chiều thứ 6 tuần sau.", lastUpdated: "2024-03-16", selected: false, creatorId: 1, assigneeId: 2 },
-  { id: 2, name: "Trần Thị Bình", phone: "0923456789", province: "Thành phố Hồ Chí Minh", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/44.jpg", type: "relative", status: "new", notes: "Khách hỏi về thời gian làm việc và chính sách thanh toán. Cần gọi lại vào sáng thứ 2 để tư vấn thêm.", lastUpdated: "2024-03-17", selected: false, creatorId: 2, assigneeId: 3 },
-  { id: 3, name: "Lê Văn Cường", phone: "0934567890", province: "Thành phố Đà Nẵng", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/men/67.jpg", type: "broker", status: "care", notes: "Đã trao đổi về hợp đồng hợp tác dài hạn. Gửi email chi tiết các điều khoản và chính sách ưu đãi đặc biệt.", lastUpdated: "2024-03-15", selected: false, creatorId: 3, assigneeId: 4 },
-  { id: 4, name: "Phạm Thị Dung", phone: "0945678901", province: "Thành phố Hải Phòng", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/33.jpg", type: "owner", status: "potential_14", notes: "Khách hàng đang bận công việc gia đình, hẹn gọi lại sáng thứ 2 tuần sau. Để lại thông tin chi tiết về dự án.", lastUpdated: "2024-03-16", selected: false, creatorId: 4, assigneeId: 5 },
-  { id: 5, name: "Hoàng Văn Em", phone: "0956789012", province: "Thành phố Cần Thơ", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/men/22.jpg", type: "relative", status: "success", notes: "Đã đặt lịch thành công ngày 25/3/2024 lúc 14:30. Gửi xác nhận qua SMS và email. Chuẩn bị tài liệu ký kết.", lastUpdated: "2024-03-14", selected: false, creatorId: 1, assigneeId: 6 },
-  { id: 6, name: "Vũ Thị Phương", phone: "0967890123", province: "Thành phố Hồ Chí Minh", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/women/55.jpg", type: "owner", status: "success", notes: "Đã đặt lịch thành công ngày 20/3, xác nhận lại lịch hẹn qua điện thoại. Khách hàng rất hài lòng với dịch vụ.", lastUpdated: "2024-03-15", selected: false, creatorId: 2, assigneeId: 7 },
-  { id: 7, name: "Đặng Văn Quân", phone: "0978901234", province: "Thành phố Hà Nội", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/45.jpg", type: "broker", status: "unreachable", notes: "Số điện thoại không liên lạc được, đã thử 3 lần vào các khung giờ khác nhau. Để lại tin nhắn thoại.", lastUpdated: "2024-03-14", selected: false, creatorId: 3, assigneeId: 8 },
-  { id: 8, name: "Bùi Thị Hà", phone: "0989012345", province: "Thành phố Hồ Chí Minh", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/women/25.jpg", type: "owner", status: "wrong_number", notes: "Sai số, không phải khách hàng. Đã xác minh thông tin và cập nhật lại cơ sở dữ liệu.", lastUpdated: "2024-03-12", selected: false, creatorId: 4, assigneeId: 1 },
-  { id: 9, name: "Ngô Minh Trí", phone: "0990123456", province: "Thành phố Đà Nẵng", oldProvince: "Thành phố Hà Nội", avatar: "https://randomuser.me/api/portraits/men/28.jpg", type: "broker", status: "potential_7", notes: "Khách hàng quan tâm đến gói đầu tư cao cấp. Hẹn gặp trực tiếp tuần sau để trình bày chi tiết.", lastUpdated: "2024-03-13", selected: false, creatorId: 1, assigneeId: 4 },
-  { id: 10, name: "Lý Thanh Tùng", phone: "0901234567", province: "Thành phố Hải Phòng", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/35.jpg", type: "owner", status: "care", notes: "Khách hàng cũ, cần chăm sóc định kỳ. Đã gửi quà tặng tri ân và thông tin ưu đãi mới.", lastUpdated: "2024-03-10", selected: false, creatorId: 2, assigneeId: 5 }
+  { id: 1, name: "Nguyễn Văn An", phone: "0912345678", province: "Thành phố Hà Nội", oldProvince: "Thành phố Hải Phòng", avatar: "https://randomuser.me/api/portraits/men/32.jpg", type: "owner", status: "potential_7", notes: "Khách hàng quan tâm đến chính sách ưu đãi, đã gửi báo giá qua email. Hẹn gọi lại vào chiều thứ 6 tuần sau.", createdAt: "2024-03-05", lastUpdated: "2024-03-16", selected: false, creatorId: 1, assigneeId: 2 },
+  { id: 2, name: "Trần Thị Bình", phone: "0923456789", province: "Thành phố Hồ Chí Minh", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/44.jpg", type: "relative", status: "new", notes: "Khách hỏi về thời gian làm việc và chính sách thanh toán. Cần gọi lại vào sáng thứ 2 để tư vấn thêm.", createdAt: "2024-03-08", lastUpdated: "2024-03-17", selected: false, creatorId: 2, assigneeId: 3 },
+  { id: 3, name: "Lê Văn Cường", phone: "0934567890", province: "Thành phố Đà Nẵng", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/men/67.jpg", type: "broker", status: "care", notes: "Đã trao đổi về hợp đồng hợp tác dài hạn. Gửi email chi tiết các điều khoản và chính sách ưu đãi đặc biệt.", createdAt: "2024-03-04", lastUpdated: "2024-03-15", selected: false, creatorId: 3, assigneeId: 4 },
+  { id: 4, name: "Phạm Thị Dung", phone: "0945678901", province: "Thành phố Hải Phòng", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/33.jpg", type: "owner", status: "potential_14", notes: "Khách hàng đang bận công việc gia đình, hẹn gọi lại sáng thứ 2 tuần sau. Để lại thông tin chi tiết về dự án.", createdAt: "2024-03-03", lastUpdated: "2024-03-16", selected: false, creatorId: 4, assigneeId: 5 },
+  { id: 5, name: "Hoàng Văn Em", phone: "0956789012", province: "Thành phố Cần Thơ", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/men/22.jpg", type: "relative", status: "success", notes: "Đã đặt lịch thành công ngày 25/3/2024 lúc 14:30. Gửi xác nhận qua SMS và email. Chuẩn bị tài liệu ký kết.", createdAt: "2024-03-01", lastUpdated: "2024-03-14", selected: false, creatorId: 1, assigneeId: 6 },
+  { id: 6, name: "Vũ Thị Phương", phone: "0967890123", province: "Thành phố Hồ Chí Minh", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/women/55.jpg", type: "owner", status: "success", notes: "Đã đặt lịch thành công ngày 20/3, xác nhận lại lịch hẹn qua điện thoại. Khách hàng rất hài lòng với dịch vụ.", createdAt: "2024-02-28", lastUpdated: "2024-03-15", selected: false, creatorId: 2, assigneeId: 7 },
+  { id: 7, name: "Đặng Văn Quân", phone: "0978901234", province: "Thành phố Hà Nội", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/45.jpg", type: "broker", status: "unreachable", notes: "Số điện thoại không liên lạc được, đã thử 3 lần vào các khung giờ khác nhau. Để lại tin nhắn thoại.", createdAt: "2024-02-25", lastUpdated: "2024-03-14", selected: false, creatorId: 3, assigneeId: 8 },
+  { id: 8, name: "Bùi Thị Hà", phone: "0989012345", province: "Thành phố Hồ Chí Minh", oldProvince: "Khác", avatar: "https://randomuser.me/api/portraits/women/25.jpg", type: "owner", status: "wrong_number", notes: "Sai số, không phải khách hàng. Đã xác minh thông tin và cập nhật lại cơ sở dữ liệu.", createdAt: "2024-02-22", lastUpdated: "2024-03-12", selected: false, creatorId: 4, assigneeId: 1 },
+  { id: 9, name: "Ngô Minh Trí", phone: "0990123456", province: "Thành phố Đà Nẵng", oldProvince: "Thành phố Hà Nội", avatar: "https://randomuser.me/api/portraits/men/28.jpg", type: "broker", status: "potential_7", notes: "Khách hàng quan tâm đến gói đầu tư cao cấp. Hẹn gặp trực tiếp tuần sau để trình bày chi tiết.", createdAt: "2024-02-18", lastUpdated: "2024-03-13", selected: false, creatorId: 1, assigneeId: 4 },
+  { id: 10, name: "Lý Thanh Tùng", phone: "0901234567", province: "Thành phố Hải Phòng", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/35.jpg", type: "owner", status: "care", notes: "Khách hàng cũ, cần chăm sóc định kỳ. Đã gửi quà tặng tri ân và thông tin ưu đãi mới.", createdAt: "2024-02-15", lastUpdated: "2024-03-10", selected: false, creatorId: 2, assigneeId: 5 }
 ])
 
 const staffMembers = ref([
@@ -695,13 +890,19 @@ const showAddCustomerModal = ref(false)
 const showAssignDataModal = ref(false)
 const showCallModal = ref(false)
 const showConfirmDeleteModal = ref(false)
+const showEditCustomerModal = ref(false)
+const showDetailModal = ref(false)
 
 // Data state
 const filters = reactive({
   type: 'all',
   status: 'all',
   province: '',
-  creator: 'all'
+  creator: 'all',
+  createdFrom: '',
+  createdTo: '',
+  updatedFrom: '',
+  updatedTo: ''
 })
 
 const customerForm = reactive({
@@ -727,6 +928,7 @@ const deletingCustomer = ref(null)
 const callSeconds = ref(0)
 const callNotes = ref('')
 const isEditing = ref(false)
+const selectedCustomer = ref(null)
 
 const notification = reactive({
   show: false,
@@ -766,6 +968,18 @@ const filteredCustomers = computed(() => {
       const provinceFilter = filters.province.toLowerCase()
       const provinceLabel = getProvinceLabel(customer.province).toLowerCase()
       if (!provinceLabel.includes(provinceFilter)) return false
+    }
+
+    if (filters.createdFrom || filters.createdTo) {
+      const createdDate = toDate(customer.createdAt)
+      if (filters.createdFrom && createdDate < toDate(filters.createdFrom)) return false
+      if (filters.createdTo && createdDate > toDate(filters.createdTo)) return false
+    }
+
+    if (filters.updatedFrom || filters.updatedTo) {
+      const updatedDate = toDate(customer.lastUpdated)
+      if (filters.updatedFrom && updatedDate < toDate(filters.updatedFrom)) return false
+      if (filters.updatedTo && updatedDate > toDate(filters.updatedTo)) return false
     }
 
     // Search
@@ -863,6 +1077,10 @@ const resetFilters = () => {
   filters.status = 'all'
   filters.province = ''
   filters.creator = 'all'
+  filters.createdFrom = ''
+  filters.createdTo = ''
+  filters.updatedFrom = ''
+  filters.updatedTo = ''
   searchText.value = ''
   showNotification('Đã đặt lại tất cả bộ lọc', 'info')
 }
@@ -878,6 +1096,7 @@ const closeAddCustomerModal = () => {
 }
 
 const editCustomer = (customer) => {
+  console.log('Hàm chạy được')
   Object.assign(customerForm, {
     id: customer.id,
     name: customer.name,
@@ -890,7 +1109,12 @@ const editCustomer = (customer) => {
     notes: customer.notes || ''
   })
   isEditing.value = true
-  showAddCustomerModal.value = true
+  showEditCustomerModal.value = true
+}
+
+const closeEditCustomerModal = () => {
+  showEditCustomerModal.value = false
+  isEditing.value = false
 }
 
 const resetCustomerForm = () => {
@@ -938,6 +1162,7 @@ const saveCustomer = () => {
       type: customerForm.type,
       status: customerForm.status,
       notes: customerForm.notes || '',
+      createdAt: new Date().toISOString().split('T')[0],
       lastUpdated: new Date().toISOString().split('T')[0],
       creatorId: creatorOptions.value[0]?.id ?? null,
       assigneeId: staffMembers.value[0]?.id ?? null,
@@ -947,6 +1172,8 @@ const saveCustomer = () => {
   }
 
   showAddCustomerModal.value = false
+  showEditCustomerModal.value = false
+  isEditing.value = false
   resetCustomerForm()
 }
 
@@ -1114,6 +1341,12 @@ const showNotification = (message, type = 'info') => {
 }
 
 // Helper functions
+const toDate = (value) => {
+  if (!value) return new Date(0)
+  const [year, month, day] = value.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
 const getStatusLabel = (status) => {
   const statusMap = {
     'new': 'Mới',
@@ -1149,6 +1382,23 @@ const getProvinceLabel = (province) => {
 
 const formatPhoneNumber = (phone) => {
   return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
+}
+
+const openCustomerDetail = (customer) => {
+  selectedCustomer.value = customer
+  showDetailModal.value = true
+}
+
+const closeDetailModal = () => {
+  showDetailModal.value = false
+  selectedCustomer.value = null
+}
+
+const openEditFromDetail = () => {
+  console.log("hzm")
+  if (!selectedCustomer.value) return
+  editCustomer(selectedCustomer.value)
+  showDetailModal.value = false
 }
 
 const getCreatorInfo = (creatorId) => {
@@ -1685,6 +1935,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 }
 
 .table-custom tbody tr { transition: var(--transition-fast); }
+.table-row-clickable { cursor: pointer; }
 .table-custom tbody tr:hover { background: rgba(102, 126, 234, 0.03)!important;  }
 .table-custom tbody tr:hover td {
   background: rgba(102, 126, 234, 0.06) !important;
@@ -1698,6 +1949,28 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   border: 3px solid white;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
   transition: var(--transition-normal);
+}
+
+.customer-avatar-lg {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.detail-label {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.detail-value {
+  font-weight: 600;
+  color: #1f2937;
 }
 
 .member-avatar {
