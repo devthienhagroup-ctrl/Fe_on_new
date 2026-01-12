@@ -1,268 +1,512 @@
-diff --git a/src/components/thiet-kegiandien/test.html b/src/components/thiet-kegiandien/test.html
-index 170848747615a4943bf6d9baa5b2885a06261ba6..e59bd5fba3819e6d20933d6ddae24490fc2277cc 100644
---- a/src/components/thiet-kegiandien/test.html
-+++ b/src/components/thiet-kegiandien/test.html
-@@ -34,61 +34,66 @@
-             --dark-gradient: linear-gradient(135deg, #141e30 0%, #243b55 100%);
-             --light-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+diff --git a/src/components/thiet-kegiandien/admin-saleadmin.vue b/src/components/thiet-kegiandien/admin-saleadmin.vue
+index 362422df719f749f0bc755514a305da28a6c3bce..9a077ea123f4815c80fa95eb452000e96ddf11de 100644
+--- a/src/components/thiet-kegiandien/admin-saleadmin.vue
++++ b/src/components/thiet-kegiandien/admin-saleadmin.vue
+@@ -1,27 +1,28 @@
+ <template>
+-  <div class="app-root">
++  <div class="app-scale">
++    <div class="app-root">
+     <!-- Navigation -->
+     <nav class="navbar navbar-expand-lg navbar-custom">
+       <div class="container-fluid">
+         <a class="navbar-brand" href="#">
+           <i class="fas fa-phone-alt"></i>
+           <span>Telesale Pro</span>
+         </a>
 
-             --primary-color: #667eea;
-             --secondary-color: #f093fb;
-             --success-color: #43e97b;
-             --warning-color: #fa709a;
-             --danger-color: #ff5858;
-             --info-color: #4facfe;
-             --dark-color: #141e30;
-             --light-color: #f8f9fa;
+         <button class="navbar-toggler" type="button" @click="toggleMobileMenu">
+           <span class="navbar-toggler-icon"><i class="fas fa-bars text-white"></i></span>
+         </button>
 
-             --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
-             --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.12);
-             --shadow-hard: 0 15px 50px rgba(0, 0, 0, 0.2);
-
-             --border-radius-sm: 12px;
-             --border-radius-md: 16px;
-             --border-radius-lg: 20px;
-
-             --transition-fast: 0.2s ease;
-             --transition-normal: 0.3s ease;
-             --transition-slow: 0.5s ease;
-         }
-
-+        html {
-+            font-size: 80%;
-+        }
-+
-         * {
-             margin: 0;
-             padding: 0;
-             box-sizing: border-box;
-         }
-
-         body {
-             font-family: 'Inter', sans-serif;
-             background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
-             color: #333;
-             min-height: 100vh;
-+            overflow: hidden;
-             overflow-x: hidden;
-         }
-
-         h1, h2, h3, h4, h5, h6 {
-             font-family: 'Poppins', sans-serif;
-             font-weight: 600;
-         }
-
-         /* Custom Scrollbar */
-         ::-webkit-scrollbar {
-             width: 8px;
-             height: 8px;
-         }
-
-         ::-webkit-scrollbar-track {
-             background: rgba(0, 0, 0, 0.05);
-             border-radius: 10px;
-         }
-
-         ::-webkit-scrollbar-thumb {
-             background: var(--primary-color);
-             border-radius: 10px;
-         }
-
-         ::-webkit-scrollbar-thumb:hover {
-@@ -151,50 +156,58 @@
-             transform: translateX(-50%);
-             width: 0;
-             height: 2px;
-             background: var(--primary-gradient);
-             transition: var(--transition-normal);
-         }
-
-         .nav-link-custom:hover::after, .nav-link-custom.active::after {
-             width: 80%;
-         }
-
-         /* User Dropdown */
-         .user-avatar {
-             width: 36px;
-             height: 36px;
-             border-radius: 50%;
-             background: var(--primary-gradient);
-             display: flex;
-             align-items: center;
-             justify-content: center;
-             font-weight: 600;
-             color: white;
-             font-size: 14px;
-         }
-
-+        .dashboard-layout {
-+            height: calc(100vh - 100px);
-+        }
-+
-+        .dashboard-row {
-+            height: 100%;
-+        }
-+
-         /* Sidebar */
-         .sidebar {
-             background: rgba(255, 255, 255, 0.95);
-             backdrop-filter: blur(10px);
-             border-radius: var(--border-radius-lg);
-             padding: 25px;
-             box-shadow: var(--shadow-soft);
-             border: 1px solid rgba(255, 255, 255, 0.2);
-             height: calc(100vh - 100px);
-             position: sticky;
-             top: 85px;
-             overflow-y: auto;
-         }
-
-         .sidebar-section {
-             margin-bottom: 30px;
-         }
-
-         .sidebar-title {
-             font-size: 0.9rem;
-             text-transform: uppercase;
-             letter-spacing: 1px;
-             color: #6c757d;
-             margin-bottom: 15px;
-             font-weight: 600;
-@@ -337,51 +350,52 @@
-             font-size: 13px;
-             opacity: 0.9;
-             display: flex;
-             align-items: center;
-             gap: 5px;
-         }
-
-         .stat-icon {
-             position: absolute;
-             bottom: 20px;
-             right: 20px;
-             font-size: 48px;
-             opacity: 0.3;
-             z-index: 3;
-             transition: var(--transition-normal);
-         }
-
-         .stat-card:hover .stat-icon {
-             transform: scale(1.1) rotate(5deg);
-             opacity: 0.4;
-         }
-
-         /* Main Content */
-         .main-content {
-             padding: 25px;
--            min-height: calc(100vh - 100px);
-+            height: calc(100vh - 100px);
-+            overflow-y: auto;
-         }
-
-         /* Card Custom */
-         .card-custom {
-             border-radius: var(--border-radius-lg);
-             border: none;
-             box-shadow: var(--shadow-soft);
-             transition: all var(--transition-normal);
-             margin-bottom: 25px;
-             background: rgba(255, 255, 255, 0.95);
-             backdrop-filter: blur(10px);
-             overflow: hidden;
-         }
-
-         .card-custom:hover {
-             box-shadow: var(--shadow-medium);
-             transform: translateY(-5px);
-         }
-
-         .card-header-custom {
-             background: var(--light-gradient);
-             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-             padding: 20px 25px;
-             border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0 !important;
-             font-weight: 600;
-@@ -923,52 +937,52 @@
-                         <li><a class="dropdown-item" href="#"><i class="fas fa-chart-line text-primary me-2"></i> Báo cáo tuần đã sẵn sàng</a></li>
-                         <li><a class="dropdown-item" href="#"><i class="fas fa-exclamation-triangle text-warning me-2"></i> Còn 12 cuộc gọi</a></li>
-                     </ul>
-                 </div>
-
-                 <div class="dropdown">
-                     <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
-                         <div class="user-avatar me-2">NV</div>
-                         <div class="d-flex flex-column">
-                             <span class="text-white fw-medium">Nguyễn Văn A</span>
-                             <small class="text-white-50">Telesale Manager</small>
-                         </div>
-                     </a>
-                     <ul class="dropdown-menu dropdown-menu-end">
-                         <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2"></i> Hồ sơ</a></li>
-                         <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Cài đặt</a></li>
-                         <li><hr class="dropdown-divider"></li>
-                         <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
-                     </ul>
-                 </div>
+         <div class="collapse navbar-collapse" :class="{ show: mobileMenuOpen }" id="navbarNav">
+           <ul class="navbar-nav mx-auto">
+             <li class="nav-item">
+               <a class="nav-link-custom active" href="#">
+                 <i class="fas fa-home me-2"></i> Dashboard
+               </a>
+             </li>
+             <li class="nav-item">
+               <a class="nav-link-custom" href="#">
+                 <i class="fas fa-users me-2"></i> Khách hàng
+               </a>
+             </li>
+             <li class="nav-item">
+@@ -644,50 +645,51 @@
+             <div class="text-center mb-4">
+               <div class="mb-3">
+                 <i class="fas fa-trash-alt fa-3x text-danger"></i>
+               </div>
+               <h4 class="fw-bold">Bạn có chắc chắn muốn xóa khách hàng "{{ deletingCustomer?.name }}" ?</h4>
+               <p class="text-muted">Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn.</p>
              </div>
+           </div>
+           <div class="modal-footer justify-content-center">
+             <button type="button" class="btn btn-outline-custom btn-custom" @click="closeConfirmDeleteModal">Hủy</button>
+             <button type="button" class="btn btn-danger-custom btn-custom" @click="confirmDelete">
+               <i class="fas fa-trash me-2"></i> Xác nhận xóa
+             </button>
+           </div>
          </div>
+       </div>
      </div>
- </nav>
 
--<div class="container-fluid">
--    <div class="row">
-+<div class="container-fluid dashboard-layout">
-+    <div class="row dashboard-row">
-         <!-- Sidebar -->
-         <div class="col-lg-3 col-xl-2">
-             <div class="sidebar animate__animated animate__fadeInLeft">
-                 <div class="sidebar-section">
-                     <h6 class="sidebar-title"><i class="fas fa-filter"></i> Bộ lọc nâng cao</h6>
+     <!-- Notifications -->
+     <div v-if="notification.show" class="notification" :class="notification.type">
+       <div class="d-flex align-items-start">
+         <i :class="`fas fa-${notification.icon} me-2 mt-1`"></i>
+         <span>{{ notification.message }}</span>
+       </div>
+     </div>
++    </div>
+   </div>
+ </template>
 
-                     <div class="filter-tabs">
-                         <button class="filter-tab active" data-filter="all">Tất cả</button>
-                         <button class="filter-tab" data-filter="new">Mới</button>
-                         <button class="filter-tab" data-filter="contacted">Đã LH</button>
-                     </div>
+ <script>
+ import { ref, computed, reactive, onMounted, nextTick, watch } from 'vue'
+ import Chart from 'chart.js/auto'
 
-                     <div class="mb-3">
-                         <label class="form-label mb-2 fw-medium">Phân loại</label>
-                         <select class="form-select form-select-custom" id="typeFilter">
-                             <option value="all">Tất cả phân loại</option>
-                             <option value="broker">Môi giới</option>
-                             <option value="owner">Chủ nhà</option>
-                             <option value="relative">Người thân</option>
-                         </select>
-                     </div>
+ export default {
+   name: 'DashboardView',
+   setup() {
+     // State management
+     const customers = ref([
+       { id: 1, name: "Nguyễn Văn An", phone: "0912345678", province: "hanoi", oldProvince: "haiphong", avatar: "https://randomuser.me/api/portraits/men/32.jpg", type: "owner", status: "potential_7", notes: "Khách hàng quan tâm đến chính sách ưu đãi, đã gửi báo giá qua email. Hẹn gọi lại vào chiều thứ 6 tuần sau.", lastUpdated: "2024-03-16", selected: false },
+       { id: 2, name: "Trần Thị Bình", phone: "0923456789", province: "hcm", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/44.jpg", type: "relative", status: "new", notes: "Khách hỏi về thời gian làm việc và chính sách thanh toán. Cần gọi lại vào sáng thứ 2 để tư vấn thêm.", lastUpdated: "2024-03-17", selected: false },
+       { id: 3, name: "Lê Văn Cường", phone: "0934567890", province: "danang", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/men/67.jpg", type: "broker", status: "care", notes: "Đã trao đổi về hợp đồng hợp tác dài hạn. Gửi email chi tiết các điều khoản và chính sách ưu đãi đặc biệt.", lastUpdated: "2024-03-15", selected: false },
+       { id: 4, name: "Phạm Thị Dung", phone: "0945678901", province: "haiphong", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/33.jpg", type: "owner", status: "potential_14", notes: "Khách hàng đang bận công việc gia đình, hẹn gọi lại sáng thứ 2 tuần sau. Để lại thông tin chi tiết về dự án.", lastUpdated: "2024-03-16", selected: false },
+       { id: 5, name: "Hoàng Văn Em", phone: "0956789012", province: "cantho", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/men/22.jpg", type: "relative", status: "success", notes: "Đã đặt lịch thành công ngày 25/3/2024 lúc 14:30. Gửi xác nhận qua SMS và email. Chuẩn bị tài liệu ký kết.", lastUpdated: "2024-03-14", selected: false },
+       { id: 6, name: "Vũ Thị Phương", phone: "0967890123", province: "hcm", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/women/55.jpg", type: "owner", status: "success", notes: "Đã đặt lịch thành công ngày 20/3, xác nhận lại lịch hẹn qua điện thoại. Khách hàng rất hài lòng với dịch vụ.", lastUpdated: "2024-03-15", selected: false },
+       { id: 7, name: "Đặng Văn Quân", phone: "0978901234", province: "hanoi", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/45.jpg", type: "broker", status: "unreachable", notes: "Số điện thoại không liên lạc được, đã thử 3 lần vào các khung giờ khác nhau. Để lại tin nhắn thoại.", lastUpdated: "2024-03-14", selected: false },
+       { id: 8, name: "Bùi Thị Hà", phone: "0989012345", province: "hcm", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/women/25.jpg", type: "owner", status: "wrong_number", notes: "Sai số, không phải khách hàng. Đã xác minh thông tin và cập nhật lại cơ sở dữ liệu.", lastUpdated: "2024-03-12", selected: false },
+       { id: 9, name: "Ngô Minh Trí", phone: "0990123456", province: "danang", oldProvince: "hanoi", avatar: "https://randomuser.me/api/portraits/men/28.jpg", type: "broker", status: "potential_7", notes: "Khách hàng quan tâm đến gói đầu tư cao cấp. Hẹn gặp trực tiếp tuần sau để trình bày chi tiết.", lastUpdated: "2024-03-13", selected: false },
+       { id: 10, name: "Lý Thanh Tùng", phone: "0901234567", province: "haiphong", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/35.jpg", type: "owner", status: "care", notes: "Khách hàng cũ, cần chăm sóc định kỳ. Đã gửi quà tặng tri ân và thông tin ưu đãi mới.", lastUpdated: "2024-03-10", selected: false }
+     ])
 
-                     <div class="mb-3">
-                         <label class="form-label mb-2 fw-medium">Trạng thái</label>
-                         <select class="form-select form-select-custom" id="statusFilter">
-@@ -2438,26 +2452,26 @@
-             opacity: 0;
-         }
+     const staffMembers = ref([
+@@ -1269,124 +1271,123 @@ export default {
+       closeConfirmDeleteModal,
+       confirmDelete,
+       toggleCustomerSelection,
+       toggleSelectAll,
+       clearSelection,
+       bulkDelete,
+       openAssignDataModal,
+       closeAssignDataModal,
+       toggleStaffSelection,
+       confirmAssignData,
+       exportExcel,
+       exportPDF,
+       showNotification,
+
+       // Helper functions
+       getStatusLabel,
+       getTypeLabel,
+       getProvinceLabel,
+       formatPhoneNumber
      }
+   }
+ }
+ </script>
 
-     .alert-success {
-         background: var(--success-gradient);
-         color: white;
-     }
+ <style>
+-/* Toàn bộ CSS từ file HTML cũ đặt ở đây */
+-
+-:root {
++body {
+   --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+   --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+   --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+   --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+   --danger-gradient: linear-gradient(135deg, #ff5858 0%, #f09819 100%);
+   --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+   --dark-gradient: linear-gradient(135deg, #141e30 0%, #243b55 100%);
+   --light-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
 
-     .alert-warning {
-         background: var(--warning-gradient);
-         color: white;
-     }
+   --primary-color: #667eea;
+   --secondary-color: #f093fb;
+   --success-color: #43e97b;
+   --warning-color: #fa709a;
+   --danger-color: #ff5858;
+   --info-color: #4facfe;
+   --dark-color: #141e30;
+   --light-color: #f8f9fa;
 
-     .alert-info {
-         background: var(--info-gradient);
-         color: white;
-     }
+   --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+   --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.12);
+   --shadow-hard: 0 15px 50px rgba(0, 0, 0, 0.2);
 
-     .alert-danger {
-         background: var(--danger-gradient);
-         color: white;
-     }
- </style>
- </body>
--</html>
+   --border-radius-sm: 12px;
+   --border-radius-md: 16px;
+   --border-radius-lg: 20px;
+
+   --transition-fast: 0.2s ease;
+   --transition-normal: 0.3s ease;
+   --transition-slow: 0.5s ease;
+
+   --nav-h: 85px;
+   --shell-pad: 18px;
+   --sidebar-w: 340px;
+-}
+-
+-* { margin: 0; padding: 0; box-sizing: border-box; }
+-
+-/* ✅ BODY KHÔNG SCROLL */
+-html, body, #app { height: 100%; }
+-
+-body {
+   font-family: 'Inter', sans-serif;
+   background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+   color: #333;
+   overflow: hidden;
+ }
+
++* { margin: 0; padding: 0; box-sizing: border-box; }
++
++/* ✅ BODY KHÔNG SCROLL */
++html, body { height: 100%; }
++
+ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
+
+ /* Custom Scrollbar */
+ ::-webkit-scrollbar { width: 8px; height: 8px; }
+ ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 10px; }
+ ::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 10px; }
+ ::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); }
+
+ /* ✅ SCALE 0.8 GIỮ NGUYÊN (KHÔNG SCALE HTML) */
+-.app-root {
++.app-scale {
+   transform: scale(0.8);
+   transform-origin: 0 0;
+   width: 125%;
++  height: 125%;
++}
++
++/* ✅ App layout full height, chỉ main cuộn */
++.app-root {
+   height: 125vh;
+   display: flex;
+   flex-direction: column;
+ }
+
+ .app-shell {
+   display: flex;
+   gap: var(--shell-pad);
+   padding: var(--shell-pad);
+   overflow: hidden;
+-  flex: 1;
+ }
+
+ /* Navbar */
+ .navbar-custom {
+   background: var(--dark-gradient);
+   backdrop-filter: blur(10px);
+   padding: 15px 0;
+   box-shadow: var(--shadow-medium);
+   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+   position: sticky;
+   top: 0;
+   z-index: 1030;
+   height: var(--nav-h);
+ }
+
+ .navbar-custom .navbar-brand {
+   font-weight: 700;
+   font-size: 1.5rem;
+   background: var(--primary-gradient);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+   background-clip: text;
+   display: flex;
+   align-items: center;
+   gap: 10px;
+@@ -1502,63 +1503,62 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
+ .filter-tab:not(.active):hover {
+   color: var(--primary-color);
+   background: rgba(102, 126, 234, 0.1);
+ }
+
+ /* Form Controls */
+ .form-control-custom, .form-select-custom {
+   border: 2px solid rgba(0, 0, 0, 0.08);
+   border-radius: var(--border-radius-sm);
+   padding: 12px 15px;
+   font-size: 14px;
+   transition: var(--transition-fast);
+   background: rgba(255, 255, 255, 0.9);
+ }
+
+ .form-control-custom:focus, .form-select-custom:focus {
+   border-color: var(--primary-color);
+   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+   background: white;
+ }
+
+ /* ✅ MAIN WRAP đứng yên, chỉ MAIN-SCROLL cuộn */
+ .main-wrap {
+   flex: 1 1 auto;
+   overflow: hidden;
++  border-radius: var(--border-radius-lg);
+ }
+
+ .main-scroll {
+   height: 100%;
+   overflow-y: auto;
+   overflow-x: hidden;
+   padding: 0;
+ }
+
+ /* Main Content inner padding giữ nguyên kiểu cũ */
+ .main-content {
+-  padding-right: 25px;
+-  padding-left: 10px;
+   min-height: 100%;
+ }
+
+ /* Stat Cards */
+ .stat-card {
+   border-radius: var(--border-radius-md);
+   padding: 25px;
+   color: white;
+   margin-bottom: 25px;
+   transition: all var(--transition-normal);
+   position: relative;
+   overflow: hidden;
+   box-shadow: var(--shadow-soft);
+   height: 100%;
+   display: flex;
+   flex-direction: column;
+   justify-content: space-between;
+ }
+
+ .stat-card::before {
+   content: '';
+   position: absolute;
+   inset: 0;
+   background: inherit;
+   opacity: 0.9;
+@@ -1771,79 +1771,80 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
+   text-transform: uppercase;
+   letter-spacing: 0.5px;
+   display: inline-block;
+ }
+ .type-broker { background: linear-gradient(135deg, rgba(67, 233, 123, 0.15) 0%, rgba(56, 249, 215, 0.15) 100%); color: #27ae60; border: 1px solid rgba(67, 233, 123, 0.3); }
+ .type-owner { background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); color: #667eea; border: 1px solid rgba(102, 126, 234, 0.3); }
+ .type-relative { background: linear-gradient(135deg, rgba(250, 112, 154, 0.15) 0%, rgba(254, 225, 64, 0.15) 100%); color: #fa709a; border: 1px solid rgba(250, 112, 154, 0.3); }
+
+ /* Action Buttons */
+ .action-buttons { display: flex; gap: 6px; }
+ .action-btn {
+   width: 34px; height: 34px;
+   border-radius: 10px;
+   display: flex; align-items: center; justify-content: center;
+   border: none;
+   transition: all var(--transition-fast);
+   color: white;
+   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+ }
+ .action-btn:hover { transform: translateY(-2px) scale(1.1); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
+
+ /* Charts */
+ .chart-container { position: relative; height: 320px; width: 100%; padding: 15px; }
+ .chart-center-text {
+   position: absolute;
+-  top: 40%;
++  top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   text-align: center;
+   z-index: 10;
+ }
+ .chart-center-text .total-number {
+   font-size: 28px;
+   font-weight: 700;
+   background: var(--primary-gradient);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+   background-clip: text;
+   margin-bottom: 5px;
+ }
+ .chart-center-text .total-label { font-size: 12px; color: #6c757d; font-weight: 500; }
+
+ /* Bulk Actions */
+ .bulk-actions {
+   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+   backdrop-filter: blur(10px);
+   padding: 20px;
+   border-radius: var(--border-radius-md);
+   margin-bottom: 25px;
+   box-shadow: var(--shadow-soft);
+   border: 1px solid rgba(255, 255, 255, 0.2);
+   display: none;
+   align-items: center;
+   gap: 15px;
++  animation: slideInDown 0.5s ease;
+ }
+ .bulk-actions.show { display: flex; }
+
+ /* Progress */
+ .progress-custom {
+   height: 10px;
+   border-radius: 10px;
+   background: rgba(0, 0, 0, 0.05);
+   overflow: hidden;
+   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+ }
+ .progress-custom .progress-bar {
+   border-radius: 10px;
+   transition: width 1s ease-in-out;
+   position: relative;
+   overflow: hidden;
+ }
+ .progress-custom .progress-bar::after {
+   content: '';
+   position: absolute;
+   top: 0; left: 0;
+   width: 100%; height: 100%;
+   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+   animation: shimmer 2s infinite;
+ }
+@@ -1853,51 +1854,51 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
+ .search-box { position: relative; }
+ .search-box input {
+   padding-left: 45px;
+   border-radius: var(--border-radius-sm);
+   border: 2px solid rgba(0, 0, 0, 0.08);
+   background: rgba(255, 255, 255, 0.9);
+   transition: var(--transition-fast);
+ }
+ .search-box input:focus {
+   border-color: var(--primary-color);
+   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+   background: white;
+ }
+ .search-box i {
+   position: absolute;
+   left: 15px;
+   top: 50%;
+   transform: translateY(-50%);
+   color: #6c757d;
+   z-index: 10;
+ }
+
+ /* Pagination */
+ .pagination-custom .page-link {
+   border: none;
+-  margin: 0 10px;
++  margin: 0 2px;
+   border-radius: 10px;
+   color: #6c757d;
+   font-weight: 500;
+   transition: var(--transition-fast);
+   padding: 8px 15px;
+ }
+ .pagination-custom .page-item.active .page-link {
+   background: var(--primary-gradient);
+   color: white;
+   box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+ }
+ .pagination-custom .page-link:hover:not(.active) { background: rgba(102, 126, 234, 0.1); color: var(--primary-color); }
+
+ /* Modals */
+ .modal-custom .modal-content {
+   border-radius: var(--border-radius-lg);
+   border: none;
+   overflow: hidden;
+   box-shadow: var(--shadow-hard);
+   background: rgba(255, 255, 255, 0.95);
+   backdrop-filter: blur(10px);
+ }
+ .modal-custom .modal-header {
+   background: var(--primary-gradient);
+   color: white;
+@@ -1961,86 +1962,32 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
+ }
+ .call-timer {
+   font-size: 3.5rem;
+   font-weight: 700;
+   background: var(--primary-gradient);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+   background-clip: text;
+   margin: 20px 0;
+   text-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+ }
+
+ /* Glow + gradient text */
+ .glow { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
+ .gradient-text {
+   background: var(--primary-gradient);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+   background-clip: text;
+ }
+
+ /* Equal height row */
+ .equal-height-row { display: flex; flex-wrap: wrap; }
+ .equal-height-row > [class*='col-'] { display: flex; flex-direction: column; }
+
+-/* Notification */
+-.notification {
+-  position: fixed;
+-  top: 20px;
+-  right: 20px;
+-  z-index: 9999;
+-  min-width: 300px;
+-  max-width: 500px;
+-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+-  border-radius: 12px;
+-  border: none;
+-  padding: 15px 20px;
+-  color: white;
+-  animation: slideInRight 0.3s ease;
+-  white-space: pre-line;
+-}
+-
+-.notification.success { background: var(--success-gradient); }
+-.notification.warning { background: var(--warning-gradient); }
+-.notification.info { background: var(--info-gradient); }
+-.notification.danger { background: var(--danger-gradient); }
+-
+-@keyframes slideInRight {
+-  from { transform: translateX(100%); opacity: 0; }
+-  to { transform: translateX(0); opacity: 1; }
+-}
+-
+-@keyframes slideOutRight {
+-  from { transform: translateX(0); opacity: 1; }
+-  to { transform: translateX(100%); opacity: 0; }
+-}
+-
+-/* Dropdown */
+-.dropdown-menu {
+-  display: none;
+-  position: absolute;
+-  z-index: 1000;
+-  background: white;
+-  border-radius: var(--border-radius-md);
+-  box-shadow: var(--shadow-hard);
+-  border: none;
+-  padding: 10px 0;
+-}
+-
+-.dropdown-menu.show {
+-  display: block;
+-}
+-
+-/* Modal show state */
+-.modal.show {
+-  display: block;
+-  background-color: rgba(0, 0, 0, 0.5);
+-}
+-
+ /* ✅ Responsive */
+ @media (max-width: 992px) {
+   .app-shell { flex-direction: column; }
+   .sidebar-wrap { width: 100%; flex: 0 0 auto; height: 320px; }
+   .main-wrap { flex: 1 1 auto; }
+ }
+-</style>
 \ No newline at end of file
-+</html>
++</style>

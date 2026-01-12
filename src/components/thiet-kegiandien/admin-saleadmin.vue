@@ -1,11 +1,12 @@
 <template>
-  <div class="app-root">
+  <div class="app-scale">
+    <div class="app-root">
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">
           <i class="fas fa-phone-alt"></i>
-          <span>Telesale Pro</span>
+          <span>ADMIN PRO</span>
         </a>
 
         <button class="navbar-toggler" type="button" @click="toggleMobileMenu">
@@ -76,8 +77,10 @@
       <aside class="sidebar-wrap">
         <div class="sidebar">
           <div class="sidebar-section">
-            <h6 class="sidebar-title"><i class="fas fa-filter"></i> Bộ lọc nâng cao</h6>
-
+            <h6 class="sidebar-title sidebar-title-icon">
+              <i class="fas fa-filter"></i>
+              Bộ lọc nâng cao
+            </h6>
             <div class="filter-tabs">
               <button
                   v-for="tab in filterTabs"
@@ -126,18 +129,17 @@
             </div>
 
             <div class="d-grid gap-2">
-              <button class="btn btn-primary-custom btn-custom" @click="applyFilters">
-                <i class="fas fa-check me-2"></i> Áp dụng bộ lọc
-              </button>
-              <button class="btn btn-outline-custom btn-custom" @click="resetFilters">
-                <i class="fas fa-redo me-2"></i> Đặt lại
+              <button class="btn-outline-custom btn-custom" @click="resetFilters">
+                <i class="fas fa-redo me-1"></i> Đặt lại
               </button>
             </div>
           </div>
 
           <div class="sidebar-section">
-            <h6 class="sidebar-title"><i class="fas fa-tachometer-alt"></i> Tiến độ hôm nay</h6>
-
+            <h6 class="sidebar-title">
+              <i class="fas fa-tachometer-alt sidebar-icon-yellow"></i>
+              Tiến độ hôm nay
+            </h6>
             <div class="mb-3">
               <div class="d-flex justify-content-between mb-2">
                 <span class="fw-medium">Cuộc gọi: <span class="text-primary">28/40</span></span>
@@ -180,7 +182,7 @@
               <div class="col-md-6 col-lg-3">
                 <div class="stat-card" style="background: var(--primary-gradient);">
                   <div class="stat-card-content">
-                    <h5><i class="fas fa-users"></i> Tổng khách hàng</h5>
+                    <h5><i class="fas fa-users"></i>Tổng data khách hàng</h5>
                     <div class="stat-number">1,248</div>
                     <div class="stat-change">
                       <i class="fas fa-arrow-up me-1"></i> 12% so với tháng trước
@@ -192,7 +194,7 @@
               <div class="col-md-6 col-lg-3">
                 <div class="stat-card" style="background: var(--success-gradient);">
                   <div class="stat-card-content">
-                    <h5><i class="fas fa-phone-volume"></i> Cuộc gọi hôm nay</h5>
+                    <h5><i class="fas fa-phone-volume"></i>Cuộc gọi thực hiện</h5>
                     <div class="stat-number">28/40</div>
                     <div class="stat-change">
                       <i class="fas fa-check-circle me-1"></i> 70% hoàn thành
@@ -204,7 +206,7 @@
               <div class="col-md-6 col-lg-3">
                 <div class="stat-card" style="background: var(--danger-gradient);">
                   <div class="stat-card-content">
-                    <h5><i class="fas fa-chart-line"></i> Tỷ lệ thành công</h5>
+                    <h5><i class="fas fa-chart-line"></i> Data gọi được</h5>
                     <div class="stat-number">42.5%</div>
                     <div class="stat-change">
                       <i class="fas fa-arrow-up me-1"></i> 5.2% so với tuần trước
@@ -216,7 +218,7 @@
               <div class="col-md-6 col-lg-3">
                 <div class="stat-card" style="background: var(--info-gradient);">
                   <div class="stat-card-content">
-                    <h5><i class="fas fa-calendar-check"></i> Đặt lịch thành công</h5>
+                    <h5><i class="fas fa-calendar-check"></i> Số khách hẹn lên VP</h5>
                     <div class="stat-number">156</div>
                     <div class="stat-change">
                       <i class="fas fa-arrow-up me-1"></i> 18% so với tháng trước
@@ -231,8 +233,13 @@
             <div class="row equal-height-row mb-4">
               <div class="col-lg-8">
                 <div class="card-custom h-100">
-                  <div class="card-header card-header-custom">
-                    <h3><i class="fas fa-chart-line"></i> Thống kê cuộc gọi theo tháng</h3>
+                  <div class="card-header-custom">
+                    <h3 class="section-title">
+                    <span class="icon-gradient">
+                      <i class="fas fa-chart-line"></i>
+                    </span>
+                      Thống kê cuộc gọi theo tháng
+                    </h3>
                     <div>
                       <select class="form-select form-select-custom form-select-sm w-auto d-inline-block" v-model="chartYear">
                         <option value="2023">2023</option>
@@ -250,8 +257,13 @@
               </div>
               <div class="col-lg-4">
                 <div class="card-custom h-100">
-                  <div class="card-header card-header-custom">
-                    <h3><i class="fas fa-chart-pie"></i> Phân bổ trạng thái</h3>
+                  <div class="card-header-custom">
+                    <h3 class="section-title">
+                      <span class="icon-gradient icon-customer">
+                        <i class="fas fa-chart-pie"></i>
+                      </span>
+                      Phân bổ trạng thái
+                    </h3>
                   </div>
                   <div class="card-body p-4 position-relative">
                     <div class="chart-container">
@@ -273,22 +285,22 @@
                 <div class="bulk-actions" :class="{ show: selectedCount > 0 }">
                   <span class="fw-medium">{{ selectedCount }} khách hàng được chọn</span>
                   <div class="d-flex gap-2 ms-auto">
-                    <button class="btn btn-sm btn-danger-custom btn-custom" @click="bulkDelete">
+                    <button class=" btn-danger-custom btn-custom" @click="bulkDelete">
                       <i class="fas fa-trash me-1"></i> Xóa hàng loạt
                     </button>
-                    <button class="btn btn-info-custom btn-custom" @click="openAssignDataModal">
+                    <button class="btn-info-custom btn-custom" @click="openAssignDataModal">
                       <i class="fas fa-database me-2"></i> Cấp dữ liệu
                     </button>
 
                     <div class="d-flex gap-2">
-                      <button class="btn btn-success-custom btn-custom" @click="exportExcel">
+                      <button class="btn-success-custom btn-custom" @click="exportExcel">
                         <i class="fas fa-file-excel me-2"></i> Excel
                       </button>
-                      <button class="btn btn-danger-custom btn-custom" @click="exportPDF">
+                      <button class="btn-danger-custom btn-custom" @click="exportPDF">
                         <i class="fas fa-file-pdf me-2"></i> PDF
                       </button>
                     </div>
-                    <button class="btn btn-sm btn-outline-custom btn-custom" @click="clearSelection">
+                    <button class=" btn-outline-custom btn-custom" @click="clearSelection">
                       <i class="fas fa-times me-1"></i> Bỏ chọn
                     </button>
                   </div>
@@ -297,10 +309,11 @@
                 <!-- Table Controls -->
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
                   <div class="search-box" style="width: 100%; max-width: 350px;">
-                    <i class="fas fa-search"></i>
+                    <i class="fas fa-search "></i>
                     <input
                         type="text"
-                        class="form-control form-control-custom"
+                        class="form-control"
+                        style="font-size: 18px !important;"
                         v-model="searchText"
                         placeholder="Tìm kiếm khách hàng..."
                         @input="applyFilters"
@@ -308,7 +321,7 @@
                   </div>
 
                   <div class="d-flex flex-wrap gap-2">
-                    <button class="btn btn-primary-custom btn-custom" @click="openAddCustomerModal">
+                    <button class="btn-primary-custom btn-custom" @click="openAddCustomerModal">
                       <i class="fas fa-plus me-2"></i> Thêm khách hàng
                     </button>
                   </div>
@@ -373,10 +386,7 @@
                       <td><span class="badge bg-light text-dark">{{ customer.lastUpdated }}</span></td>
                       <td>
                         <div class="action-buttons">
-                          <button class="action-btn call-btn" @click="startCall(customer)" title="Gọi" style="background: var(--success-gradient);">
-                            <i class="fas fa-phone"></i>
-                          </button>
-                          <button class="action-btn edit-btn" @click="editCustomer(customer)" title="Sửa" style="background: var(--warning-gradient);">
+                          <button class="action-btn call-btn" @click="editCustomer(customer)" title="Sửa" style="background: var(--success-gradient);">
                             <i class="fas fa-edit"></i>
                           </button>
                           <button class="action-btn delete-btn" @click="showDeleteConfirm(customer)" title="Xóa" style="background: var(--danger-gradient);">
@@ -580,58 +590,6 @@
       </div>
     </div>
 
-    <!-- Call Modal -->
-    <div class="modal fade modal-custom" :class="{ show: showCallModal }" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title"><i class="fas fa-phone-volume me-2"></i> Đang gọi khách hàng</h5>
-            <button type="button" class="btn-close btn-close-white" @click="endCall"></button>
-          </div>
-          <div class="modal-body text-center">
-            <div class="mb-4">
-              <img :src="callingCustomer?.avatar" alt="Avatar" class="call-avatar">
-              <h4 class="fw-bold gradient-text">{{ callingCustomer?.name }}</h4>
-              <h3 class="fw-bold">{{ callingCustomer ? formatPhoneNumber(callingCustomer.phone) : '' }}</h3>
-            </div>
-
-            <div class="mb-4">
-              <div class="call-timer">{{ callTimer }}</div>
-              <small class="text-muted">Thời gian cuộc gọi</small>
-            </div>
-
-            <div class="mb-3">
-              <label for="callNote" class="form-label fw-medium">Ghi chú cuộc gọi</label>
-              <textarea class="form-control form-control-custom" v-model="callNotes" rows="3" placeholder="Ghi chú về cuộc gọi..."></textarea>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-medium">Kết quả cuộc gọi</label>
-              <div class="d-flex flex-wrap gap-2 justify-content-center">
-                <button class="btn btn-sm btn-success-custom btn-custom" @click="saveCallResult('success')">
-                  <i class="fas fa-check me-1"></i> Thành công
-                </button>
-                <button class="btn btn-sm btn-warning-custom btn-custom" @click="saveCallResult('potential')">
-                  <i class="fas fa-star me-1"></i> Tiềm năng
-                </button>
-                <button class="btn btn-sm btn-danger-custom btn-custom" @click="saveCallResult('failed')">
-                  <i class="fas fa-times me-1"></i> Thất bại
-                </button>
-                <button class="btn btn-sm btn-outline-custom btn-custom" @click="saveCallResult('callback')">
-                  <i class="fas fa-redo me-1"></i> Gọi lại
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer justify-content-center">
-            <button type="button" class="btn btn-danger-custom btn-custom" @click="endCall">
-              <i class="fas fa-phone-slash me-2"></i> Kết thúc cuộc gọi
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Confirm Delete Modal -->
     <div class="modal fade modal-custom" :class="{ show: showConfirmDeleteModal }" tabindex="-1">
       <div class="modal-dialog">
@@ -665,6 +623,7 @@
         <i :class="`fas fa-${notification.icon} me-2 mt-1`"></i>
         <span>{{ notification.message }}</span>
       </div>
+    </div>
     </div>
   </div>
 </template>
@@ -761,7 +720,7 @@ export default {
     const filterTabs = computed(() => [
       { value: 'all', label: 'Tất cả' },
       { value: 'new', label: 'Mới' },
-      { value: 'contacted', label: 'Đã LH' }
+      { value: 'contacted', label: 'Đã dùng' }
     ])
 
     const filteredCustomers = computed(() => {
@@ -1154,17 +1113,17 @@ export default {
           data: {
             labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
             datasets: [
-              { label: 'Thành công', data: [65, 59, 80, 81, 56, 55, 70, 75, 82, 78, 85, 90], borderColor: '#43e97b', backgroundColor: 'rgba(67, 233, 123, 0.1)', tension: 0.4, fill: true, borderWidth: 3 },
-              { label: 'Tiềm năng', data: [28, 48, 40, 19, 86, 27, 35, 42, 50, 45, 60, 55], borderColor: '#fa709a', backgroundColor: 'rgba(250, 112, 154, 0.1)', tension: 0.4, fill: true, borderWidth: 3 },
-              { label: 'Không liên lạc', data: [18, 25, 22, 15, 30, 20, 18, 22, 25, 20, 28, 30], borderColor: '#ff5858', backgroundColor: 'rgba(255, 88, 88, 0.1)', tension: 0.4, fill: true, borderWidth: 3 },
-              { label: 'Tổng cuộc gọi', data: [120, 140, 150, 130, 180, 110, 130, 145, 165, 150, 185, 190], borderColor: '#667eea', backgroundColor: 'rgba(102, 126, 234, 0.1)', tension: 0.4, fill: true, borderWidth: 3 }
+              { label: 'Thành công', data: [65, 59, 80, 81, 56, 55, 70, 75, 82, 78, 85, 90], borderColor: '#43e97b', backgroundColor: 'rgba(67, 233, 123, 0.1)', tension: 0.2, fill: true, borderWidth: 3 },
+              { label: 'Tiềm năng', data: [28, 48, 40, 19, 86, 27, 35, 42, 50, 45, 60, 55], borderColor: '#fa709a', backgroundColor: 'rgba(250, 112, 154, 0.1)', tension: 0.2, fill: true, borderWidth: 3 },
+              { label: 'Không liên lạc', data: [18, 25, 22, 15, 30, 20, 18, 22, 25, 20, 28, 30], borderColor: '#ff5858', backgroundColor: 'rgba(255, 88, 88, 0.1)', tension: 0.2, fill: true, borderWidth: 3 },
+              { label: 'Tổng cuộc gọi', data: [120, 140, 150, 130, 180, 110, 130, 145, 165, 150, 185, 190], borderColor: '#667eea', backgroundColor: 'rgba(102, 126, 234, 0.1)', tension: 0.2, fill: true, borderWidth: 3 }
             ]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              legend: { position: 'top', labels: { font: { family: 'Poppins', size: 12 }, padding: 20, usePointStyle: true } },
+              legend: { position: 'top', labels: { font: { family: 'Poppins', size: 14  }, padding: 20, usePointStyle: true } },
               tooltip: { backgroundColor: 'rgba(255, 255, 255, 0.9)', titleColor: '#333', bodyColor: '#666', borderColor: '#667eea', borderWidth: 1, cornerRadius: 10, padding: 12 }
             },
             scales: {
@@ -1194,7 +1153,7 @@ export default {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Inter', size: 10 }, padding: 15 } },
+              legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Inter', size: 14 }, padding: 15 } },
               tooltip: {
                 callbacks: {
                   label: function (context) {
@@ -1207,7 +1166,7 @@ export default {
                 }
               }
             },
-            cutout: '65%'
+            cutout: '75%'
           }
         })
       }
@@ -1291,9 +1250,7 @@ export default {
 </script>
 
 <style>
-/* Toàn bộ CSS từ file HTML cũ đặt ở đây */
-
-:root {
+body {
   --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
@@ -1327,19 +1284,16 @@ export default {
   --nav-h: 85px;
   --shell-pad: 18px;
   --sidebar-w: 340px;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-/* ✅ BODY KHÔNG SCROLL */
-html, body, #app { height: 100%; }
-
-body {
   font-family: 'Inter', sans-serif;
   background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
   color: #333;
   overflow: hidden;
 }
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ✅ BODY KHÔNG SCROLL */
+html, body { height: 100%; }
 
 h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 
@@ -1350,10 +1304,15 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 ::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); }
 
 /* ✅ SCALE 0.8 GIỮ NGUYÊN (KHÔNG SCALE HTML) */
-.app-root {
+.app-scale {
   transform: scale(0.8);
   transform-origin: 0 0;
   width: 125%;
+  height: 125%;
+}
+
+/* ✅ App layout full height, chỉ main cuộn */
+.app-root {
   height: 125vh;
   display: flex;
   flex-direction: column;
@@ -1364,7 +1323,6 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   gap: var(--shell-pad);
   padding: var(--shell-pad);
   overflow: hidden;
-  flex: 1;
 }
 
 /* Navbar */
@@ -1462,7 +1420,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #6c757d;
+  color: #1e3a8a; /* chữ xanh */
   margin-bottom: 15px;
   font-weight: 600;
   display: flex;
@@ -1506,18 +1464,22 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 
 /* Form Controls */
 .form-control-custom, .form-select-custom {
-  border: 2px solid rgba(0, 0, 0, 0.08);
-  border-radius: var(--border-radius-sm);
-  padding: 12px 15px;
-  font-size: 14px;
-  transition: var(--transition-fast);
-  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(0, 0, 0, 0.08) !important; ;
+  border-radius: var(--border-radius-sm) !important;
+  padding: 12px 15px !important;
+  font-size: 18px !important;
+  transition: var(--transition-fast) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
 }
 
 .form-control-custom:focus, .form-select-custom:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
-  background: white;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2) !important;
+  background: white !important;
+}
+
+.form-control-custom, .form-select-custom option {
+  font-size: 14px !important;
 }
 
 /* ✅ MAIN WRAP đứng yên, chỉ MAIN-SCROLL cuộn */
@@ -1535,9 +1497,8 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 
 /* Main Content inner padding giữ nguyên kiểu cũ */
 .main-content {
-  padding-right: 25px;
-  padding-left: 10px;
   min-height: 100%;
+  padding: 0 20px;
 }
 
 /* Stat Cards */
@@ -1583,7 +1544,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 .stat-card-content { position: relative; z-index: 3; }
 
 .stat-card h5 {
-  font-size: 14px;
+  font-size: 20px;
   opacity: 0.9;
   margin-bottom: 10px;
   font-weight: 500;
@@ -1600,7 +1561,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 }
 
 .stat-card .stat-change {
-  font-size: 13px;
+  font-size: 16px;
   opacity: 0.9;
   display: flex;
   align-items: center;
@@ -1644,23 +1605,12 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   padding: 20px 25px;
   border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0 !important;
-  font-weight: 600;
+  font-weight: 600!important;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.card-header-custom h3 {
-  margin: 0;
-  font-size: 1.2rem;
-  background: var(--dark-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 
 /* Buttons */
 .btn-custom {
@@ -1707,24 +1657,37 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   box-shadow: var(--shadow-soft);
 }
 
-.table-custom { margin-bottom: 0; border-collapse: separate; border-spacing: 0; }
-.table-custom thead { background: var(--light-gradient); }
-.table-custom th {
-  font-weight: 600;
-  border-top: none;
-  padding: 18px 15px;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
-  color: #495057;
-  font-size: 14px;
+.table-custom { margin-bottom: 0;  border-spacing: 0; border-collapse:collapse !important; background-clip: border-box !important;}
+.table-custom thead {
+  background: linear-gradient(180deg, #7dd3fc 0%, #38bdf8 100%) !important;
 }
+
+.table-custom thead th {
+  background: linear-gradient(180deg, #7dd3fc 0%, #38bdf8 100%) !important;
+  background-clip: border-box !important;
+  padding: 15px 25px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  text-align: left !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.05) !important;
+}
+
 .table-custom td {
-  padding: 15px;
-  vertical-align: middle;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-  font-size: 14px;
+  padding: 15px !important ;
+  vertical-align: middle !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+  font-size: 16px !important;
 }
+
 .table-custom tbody tr { transition: var(--transition-fast); }
-.table-custom tbody tr:hover { background: rgba(102, 126, 234, 0.03); transform: translateX(5px); }
+.table-custom tbody tr:hover { background: rgba(102, 126, 234, 0.03)!important;  }
+.table-custom tbody tr:hover td {
+  background: rgba(102, 126, 234, 0.06) !important;
+  border: none !important;
+}
 
 .customer-avatar {
   width: 42px; height: 42px;
@@ -1736,8 +1699,8 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 }
 
 .table-custom tbody tr:hover .customer-avatar {
-  transform: scale(1.1);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transform: scale(1.1) !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* Status Badges */
@@ -1793,7 +1756,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 .chart-container { position: relative; height: 320px; width: 100%; padding: 15px; }
 .chart-center-text {
   position: absolute;
-  top: 40%;
+  top: 35%;
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
@@ -1822,6 +1785,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   display: none;
   align-items: center;
   gap: 15px;
+  animation: slideInDown 0.5s ease;
 }
 .bulk-actions.show { display: flex; }
 
@@ -1983,64 +1947,81 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 .equal-height-row { display: flex; flex-wrap: wrap; }
 .equal-height-row > [class*='col-'] { display: flex; flex-direction: column; }
 
-/* Notification */
-.notification {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  min-width: 300px;
-  max-width: 500px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  border-radius: 12px;
-  border: none;
-  padding: 15px 20px;
-  color: white;
-  animation: slideInRight 0.3s ease;
-  white-space: pre-line;
-}
-
-.notification.success { background: var(--success-gradient); }
-.notification.warning { background: var(--warning-gradient); }
-.notification.info { background: var(--info-gradient); }
-.notification.danger { background: var(--danger-gradient); }
-
-@keyframes slideInRight {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes slideOutRight {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(100%); opacity: 0; }
-}
-
-/* Dropdown */
-.dropdown-menu {
-  display: none;
-  position: absolute;
-  z-index: 1000;
-  background: white;
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-hard);
-  border: none;
-  padding: 10px 0;
-}
-
-.dropdown-menu.show {
-  display: block;
-}
-
-/* Modal show state */
-.modal.show {
-  display: block;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
 /* ✅ Responsive */
 @media (max-width: 992px) {
   .app-shell { flex-direction: column; }
   .sidebar-wrap { width: 100%; flex: 0 0 auto; height: 320px; }
   .main-wrap { flex: 1 1 auto; }
 }
+.progress{
+  height: 12px !important;
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e3a8a;
+
+  background: none !important;
+  -webkit-text-fill-color: initial !important;
+}
+
+.icon-gradient {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #ffffff !important;
+
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.section-title i {
+  -webkit-text-fill-color: #ffffff !important;
+}
+.icon-customer {
+  background: linear-gradient(135deg, #f59e0b, #f97316); /* vàng → cam */
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.45);
+}
+
+.sidebar-title-icon {
+  color: #1e3a8a; /* chữ xanh */
+}
+
+.sidebar-title-icon i {
+  background: linear-gradient(135deg, #4facfe, #00f2fe); /* nền icon */
+  color: #ffffff; /* icon trắng */
+
+  width: 26px;
+  height: 26px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+}
+.sidebar-icon-yellow {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  color: #ffffff;
+
+  width: 26px;
+  height: 26px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+}
+
+
+
 </style>
