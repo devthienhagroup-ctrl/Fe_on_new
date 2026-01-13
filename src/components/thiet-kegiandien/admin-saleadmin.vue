@@ -81,17 +81,6 @@
               <i class="fas fa-filter"></i>
               Bộ lọc nâng cao
             </h6>
-            <div class="filter-tabs">
-              <button
-                  v-for="tab in filterTabs"
-                  :key="tab.value"
-                  class="filter-tab"
-                  :class="{ active: activeTab === tab.value }"
-                  @click="setActiveTab(tab.value)"
-              >
-                {{ tab.label }}
-              </button>
-            </div>
 
             <div class="mb-3">
               <label class="form-label mb-2 fw-medium">Phân loại</label>
@@ -99,7 +88,22 @@
                 <option value="all">Tất cả phân loại</option>
                 <option value="MOI_GIOI">Môi giới</option>
                 <option value="CHINH_CHU">Chủ nhà</option>
-                <option value="MOI_GIOI">Người thân</option>
+                <option value="NGUOI_THAN">Người thân</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label mb-2 fw-medium">Trạng thái</label>
+              <select class="form-select form-select-custom" v-model="filters.status">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="NEW">Mới nhập</option>
+                <option value="DC_TELESALES">Chờ liên hệ</option>
+                <option value="TN_7NGAY">Tiềm năng 7 ngày</option>
+                <option value="TN_14NGAY">Tiềm năng 14 ngày</option>
+                <option value="THANH_CONG">Thành công</option>
+                <option value="SAI_SO_LIEU">Sai số</option>
+                <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc</option>
+                <option value="CHAM_SOC">Chăm sóc</option>
               </select>
             </div>
 
@@ -156,19 +160,6 @@
                   v-model="filters.updatedTo"
                   @input="applyFilters"
               >
-            </div>
-
-            <div class="mb-3" v-if="activeTab === 'contacted'">
-              <label class="form-label mb-2 fw-medium">Trạng thái</label>
-              <select class="form-select form-select-custom" v-model="filters.status">
-                <option value="all">Tất cả trạng thái</option>
-                <option value="potential_7">Tiềm năng 7 ngày</option>
-                <option value="potential_14">Tiềm năng 14 ngày</option>
-                <option value="success">Thành công</option>
-                <option value="wrong_number">Sai số</option>
-                <option value="unreachable">Không liên lạc</option>
-                <option value="care">Chăm sóc</option>
-              </select>
             </div>
 
             <div class="mb-4">
@@ -1055,7 +1046,10 @@
                 >
                   <img :src="staff.avatar" :alt="staff.name" class="staff-avatar">
                   <div class="staff-name">{{ staff.name }}</div>
-                  <div class="staff-role">{{ staff.role }}</div>
+                  <div class="staff-meta">
+                    <span v-if="staff.email">{{ staff.email }}</span>
+                    <span v-if="staff.phone">{{ staff.phone }}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1063,17 +1057,22 @@
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label for="dataQuantity" class="form-label fw-medium">Số lượng dữ liệu cấp</label>
-                <input type="number" class="form-control form-control-custom" v-model="assignData.quantity" min="1" max="1000">
-                <small class="text-muted">Số khách hàng sẽ được cấp (1-1000)</small>
+                <div class="form-control form-control-custom assign-quantity">
+                  {{ assignQuantity }}
+                </div>
+                <small class="text-muted">Số khách hàng sẽ được cấp theo số hàng đã chọn</small>
               </div>
               <div class="col-md-6 mb-3">
                 <label for="dataType" class="form-label fw-medium">Kiểm tra dữ liệu</label>
-                <select class="form-select form-select-custom" v-model="assignData.type">
-                  <option value="new">Khách hàng mới</option>
-                  <option value="potential">Khách tiềm năng</option>
-                  <option value="all">Tất cả loại khách</option>
-                  <option value="by_province">Theo tỉnh thành</option>
-                </select>
+                <div class="assign-check">
+                  <span class="assign-check-icon" :class="isAllSelectedNew ? 'is-yes' : 'is-no'">
+                    <i :class="isAllSelectedNew ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
+                  </span>
+                  <span class="assign-check-text">{{ isAllSelectedNew ? 'Yes' : 'No' }}</span>
+                </div>
+                <small class="text-muted">
+                  Tất cả khách hàng đã chọn phải ở trạng thái NEW
+                </small>
               </div>
             </div>
 
@@ -1085,7 +1084,12 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-custom btn-custom" @click="closeAssignDataModal">Hủy</button>
-            <button type="button" class="btn btn-primary-custom btn-custom" @click="confirmAssignData">
+            <button
+                type="button"
+                class="btn btn-primary-custom btn-custom"
+                :disabled="!canAssignData"
+                @click="confirmAssignData"
+            >
               <i class="fas fa-check me-2"></i> Xác nhận cấp dữ liệu
             </button>
           </div>
@@ -1143,16 +1147,7 @@ const totalElements = ref(0)
 const totalPages = ref(0)
 const loading = ref(false)
 
-const staffMembers = ref([
-  { id: 1, name: "Nguyễn Văn A", role: "Telesale Manager", avatar: "https://randomuser.me/api/portraits/men/1.jpg", selected: false },
-  { id: 2, name: "Trần Thị B", role: "Senior Telesale", avatar: "https://randomuser.me/api/portraits/women/2.jpg", selected: false },
-  { id: 3, name: "Lê Văn C", role: "Telesale Executive", avatar: "https://randomuser.me/api/portraits/men/3.jpg", selected: false },
-  { id: 4, name: "Phạm Thị D", role: "Junior Telesale", avatar: "https://randomuser.me/api/portraits/women/4.jpg", selected: false },
-  { id: 5, name: "Hoàng Văn E", role: "Telesale Team Lead", avatar: "https://randomuser.me/api/portraits/men/5.jpg", selected: false },
-  { id: 6, name: "Vũ Thị F", role: "Telesale Specialist", avatar: "https://randomuser.me/api/portraits/women/6.jpg", selected: false },
-  { id: 7, name: "Đặng Văn G", role: "Senior Telesale", avatar: "https://randomuser.me/api/portraits/men/7.jpg", selected: false },
-  { id: 8, name: "Bùi Thị H", role: "Telesale Executive", avatar: "https://randomuser.me/api/portraits/women/8.jpg", selected: false }
-])
+const staffMembers = ref([])
 
 const creatorOptions = ref([
   { id: 1, name: "Trần Minh Anh", avatar: "https://randomuser.me/api/portraits/women/11.jpg" },
@@ -1208,11 +1203,6 @@ const customerForm = reactive({
   notes: ''
 })
 
-const assignData = reactive({
-  quantity: 50,
-  type: 'new',
-  notes: ''
-})
 
 const callingCustomer = ref(null)
 const deletingCustomer = ref(null)
@@ -1247,8 +1237,29 @@ const selectedCount = computed(() => {
   return customers.value.filter(c => c.selected).length
 })
 
+const selectedCustomerIds = computed(() => {
+  return customers.value.filter(c => c.selected).map(c => c.id)
+})
+
 const isAllSelected = computed(() => {
   return selectedCount.value === customers.value.length && customers.value.length > 0
+})
+
+const isAllSelectedNew = computed(() => {
+  if (selectedCount.value === 0) return false
+  return customers.value
+      .filter(c => c.selected)
+      .every(c => c.trangThai === 'NEW')
+})
+
+const assignQuantity = computed(() => selectedCount.value)
+
+const selectedTeleSales = computed(() => {
+  return staffMembers.value.find(staff => staff.selected) || null
+})
+
+const canAssignData = computed(() => {
+  return selectedCount.value > 0 && isAllSelectedNew.value && !!selectedTeleSales.value
 })
 
 const callTimer = computed(() => {
@@ -1261,19 +1272,9 @@ const detailCustomer = computed(() => selectedCustomer.value?.customerListItemDT
 const detailHistory = computed(() => selectedCustomer.value?.lichSu || [])
 
 const assignSummary = computed(() => {
-  const selectedStaff = staffMembers.value.filter(s => s.selected)
-  if (selectedStaff.length === 0) return 'Chưa có nhân viên nào được chọn'
-
-  let typeText = ''
-  switch (assignData.type) {
-    case 'new': typeText = 'khách hàng mới'; break
-    case 'potential': typeText = 'khách tiềm năng'; break
-    case 'all': typeText = 'tất cả loại khách'; break
-    case 'by_province': typeText = 'theo tỉnh thành'; break
-  }
-
-  const staffNames = selectedStaff.map(s => s.name).join(', ')
-  return `Sẽ cấp ${assignData.quantity} ${typeText} cho ${selectedStaff.length} nhân viên: ${staffNames}`
+  if (selectedCount.value === 0) return 'Chưa có khách hàng nào được chọn'
+  if (!selectedTeleSales.value) return 'Chưa chọn nhân viên Telesale'
+  return `Sẽ cấp ${assignQuantity.value} khách hàng cho ${selectedTeleSales.value.name}`
 })
 
 const provinceOptions = computed(() => {
@@ -1553,39 +1554,47 @@ const closeAssignDataModal = () => {
 }
 
 const toggleStaffSelection = (staff) => {
-  staff.selected = !staff.selected
+  const shouldSelect = !staff.selected
+  staffMembers.value.forEach(member => {
+    member.selected = false
+  })
+  staff.selected = shouldSelect
 }
 
-const confirmAssignData = () => {
-  const selectedStaff = staffMembers.value.filter(s => s.selected)
-  if (selectedStaff.length === 0) {
-    showNotification('Vui lòng chọn ít nhất một nhân viên!', 'warning')
+const confirmAssignData = async () => {
+  if (selectedCount.value === 0) {
+    showNotification('Vui lòng chọn khách hàng trước khi cấp dữ liệu!', 'warning')
     return
   }
-  if (assignData.quantity < 1 || assignData.quantity > 1000) {
-    showNotification('Số lượng dữ liệu phải từ 1 đến 1000!', 'warning')
+  if (!isAllSelectedNew.value) {
+    showNotification('Chỉ có thể cấp dữ liệu cho khách hàng ở trạng thái NEW!', 'warning')
+    return
+  }
+  if (!selectedTeleSales.value) {
+    showNotification('Vui lòng chọn 1 nhân viên Telesale!', 'warning')
     return
   }
 
-  const dataPerStaff = Math.floor(assignData.quantity / selectedStaff.length)
-  const remainder = assignData.quantity % selectedStaff.length
+  try {
+    await api.post('/customer-crm/admin/cap-data', {
+      nhanVienId: selectedTeleSales.value.id,
+      khachHangIds: selectedCustomerIds.value
+    })
 
-  let resultMessage = `Đã cấp ${assignData.quantity} dữ liệu ${assignData.type} cho ${selectedStaff.length} nhân viên:\n`
-  selectedStaff.forEach((staff, index) => {
-    let staffQuantity = dataPerStaff
-    if (index < remainder) staffQuantity++
-    resultMessage += `- ${staff.name}: ${staffQuantity} khách\n`
-  })
-  if (assignData.notes) resultMessage += `\nGhi chú: ${assignData.notes}`
+    showAssignDataModal.value = false
 
-  showNotification(resultMessage, 'success')
+    showCenterSuccess("Cấp dữ liệu thành công!")
 
-  // Reset staff selection
-  staffMembers.value.forEach(s => s.selected = false)
-  assignData.quantity = 50
-  assignData.type = 'new'
-  assignData.notes = ''
-  showAssignDataModal.value = false
+    clearSelection()
+    await fetchCustomers()
+    staffMembers.value.forEach(member => {
+      member.selected = false
+    })
+
+  } catch (e) {
+    console.error(e)
+    showNotification('Cấp dữ liệu thất bại, vui lòng thử lại!', 'warning')
+  }
 }
 
 const exportExcel = () => {
@@ -1781,7 +1790,21 @@ const fetchMarketing = async () => {
 const fetchTeleSales = async () => {
   try {
     const res = await api.get('/customer-crm/admin/telesales')
-    console.log(res.data)
+    staffMembers.value = res.data.map((staff) => {
+      const avatarPath = staff.avatar
+        ? (staff.avatar.startsWith('http')
+          ? staff.avatar
+          : `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${staff.avatar}`)
+        : generateAvatarFromName(staff.tenNhanVien)
+      return {
+        id: staff.id,
+        name: staff.tenNhanVien,
+        avatar: avatarPath,
+        email: staff.email || '',
+        phone: staff.phone || '',
+        selected: false
+      }
+    })
   } catch (e) {
     console.error(e)
   }
@@ -1795,11 +1818,6 @@ onMounted(async () => {
 })
 
 
-watch(activeTab, (tab) => {
-  if (tab !== 'contacted') {
-    filters.status = 'all'
-  }
-})
 watch(searchText, () => {
   page.value = 0
   fetchCustomers()
@@ -1814,18 +1832,13 @@ watch(
 )
 const page = ref(0)
 const pageSize = ref(10)
-watch(activeTab, (tab) => {
-  if (tab !== 'contacted') {
-    filters.status = 'all'
-  }
-  fetchCustomers()
-})
 watch(page, () => {
   fetchCustomers()
 })
 
 import api from '/src/api/api.js'
 import {generateAvatarFromName, shortenName} from "../../assets/js/global.js";
+import {showCenterSuccess} from "../../assets/js/alertService.js";
 const marketingoptions = ref([])
 
 
@@ -2843,7 +2856,40 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 .assign-data-modal .staff-name { font-weight: 600; margin-bottom: 5px; }
-.assign-data-modal .staff-role { font-size: 12px; color: #6c757d; }
+.assign-data-modal .staff-meta {
+  font-size: 12px;
+  color: #6c757d;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.assign-data-modal .assign-quantity {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+}
+.assign-data-modal .assign-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+.assign-data-modal .assign-check-icon {
+  font-size: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.assign-data-modal .assign-check-icon.is-yes {
+  color: #16a34a;
+}
+.assign-data-modal .assign-check-icon.is-no {
+  color: #dc2626;
+}
+.assign-data-modal .assign-check-text {
+  font-weight: 600;
+}
 
 /* Call Modal */
 .call-avatar {
