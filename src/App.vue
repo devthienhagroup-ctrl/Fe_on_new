@@ -1,12 +1,34 @@
 <template>
   <div id="app">
-    <!-- router-view sẽ tự động hiển thị component theo route -->
     <router-view />
   </div>
 </template>
 
 <script setup>
-// Không cần code JS ở đây nếu bạn chỉ hiển thị router-view
+import { watch, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const updateScroll = () => {
+  if (route.path === '/test/dat-lich-2') {
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.body.style.overflow = ''
+  }
+}
+
+watch(
+    () => route.path,
+    () => {
+      updateScroll()
+    },
+    { immediate: true }
+)
+
+onBeforeUnmount(() => {
+  document.body.style.overflow = ''
+})
 </script>
 
 <style>
@@ -16,3 +38,4 @@ body {
   background-color: #f9f9f9;
 }
 </style>
+
