@@ -108,7 +108,7 @@
                 <select v-model="filters.creator" class="form-select form-select-custom ">
                   <option value="all">-- Tất cả nhân viên --</option>
                   <option
-                      v-for="nv in telesalesOptions"
+                      v-for="nv in marketingoptions"
                       :key="nv.id"
                       :value="nv.id"
                   >
@@ -831,67 +831,208 @@
     </div>
 
     <!-- Customer Detail Modal -->
-    <div v-if="showDetailModal" class="modal fade modal-custom show" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              <i class="fas fa-address-card me-2"></i>
-              Chi tiết khách hàng
-            </h5>
-            <button type="button" class="btn-close btn-close-white" @click="closeDetailModal"></button>
-          </div>
-          <div class="modal-body" v-if="selectedCustomer">
-            <div class="d-flex align-items-center gap-3 mb-4">
-              <img :src="selectedCustomer.avatar" :alt="selectedCustomer.name" class="customer-avatar-lg">
-              <div>
-                <h4 class="mb-1">{{ selectedCustomer.name }}</h4>
-                <div class="text-muted">SĐT: {{ selectedCustomer.phone }}</div>
-                <div class="text-muted">Ngày tạo: {{ selectedCustomer.createdAt }}</div>
-              </div>
+      <div v-if="showDetailModal" class="modal fade modal-custom show detail-modal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered ">
+          <div class="modal-content ">
+            <div class="modal-header">
+              <h5 class="modal-title">
+                <i class="fas fa-address-card me-2"></i>
+                Chi tiết khách hàng
+              </h5>
+              <button type="button" class="btn-close btn-close-white" @click="closeDetailModal"></button>
             </div>
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <div class="detail-label">Tỉnh/TP</div>
-                <div class="detail-value">{{selectedCustomer.province }}</div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <div class="detail-label">Tỉnh cũ</div>
-                <div class="detail-value">{{ selectedCustomer.oldProvince || '-' }}</div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <div class="detail-label">Phân loại</div>
-                <div class="detail-value">{{ getTypeLabel(selectedCustomer.type) }}</div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <div class="detail-label">Trạng thái</div>
-                <div class="detail-value">{{ getStatusLabel(selectedCustomer.status) }}</div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <div class="detail-label">Ngày cập nhật</div>
-                <div class="detail-value">{{ selectedCustomer.lastUpdated }}</div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <div class="detail-label">Người tạo</div>
-                <div class="detail-value">
-                  {{ getCreatorInfo(selectedCustomer.creatorId)?.name || '-' }}
+            <div class="modal-body" v-if="detailCustomer">
+              <!-- Hero section - Avatar và thông tin cơ bản -->
+              <div class="detail-hero">
+                <div class="detail-avatar">
+                  <div  class="avatar-img">
+                    <img
+                        :src=" generateAvatarFromName( detailCustomer.hoTen )"
+                        :alt="detailCustomer.hoTen"
+                    >
+                  </div>
+                </div>
+                <div class="detail-hero-info">
+                  <div class="detail-hero-title">
+                    <h4 class="mb-0">{{ detailCustomer.hoTen }}</h4>
+                    <span :class="`status-badge status-${detailCustomer.trangThai}`" style="font-size: 14px !important;">
+                  {{ getStatusLabel(detailCustomer.trangThai) }}
+                </span>
+                  </div>
+                  <div class="detail-hero-meta">
+                    <span><i class="fas fa-phone-alt"></i> {{ formatPhoneNumber(detailCustomer.soDienThoai) }}</span>
+                    <span><i class="fas fa-map-marker-alt"></i> {{ detailCustomer.tinhThanhPho }}</span>
+                    <span><i class="fas fa-calendar-alt"></i> Ngày tạo: {{ detailCustomer.ngayTao }}</span>
+                  </div>
+                  <div class="detail-hero-tags">
+                <span :class="`type-badge type-${detailCustomer.phanLoaiKhach}`" style="font-size: 14px !important;">
+                  {{ getTypeLabel(detailCustomer.phanLoaiKhach) }}
+                </span>
+                    <span class="update-badge" style="font-size: 16px !important;">
+                  <i class="fas fa-sync-alt me-1"></i>Cập nhật: {{ detailCustomer.ngayCapNhat }}
+                </span>
+                  </div>
                 </div>
               </div>
-              <div class="col-md-12 mb-2">
-                <div class="detail-label">Ghi chú</div>
-                <div class="detail-value">{{ selectedCustomer.notes || '-' }}</div>
+
+              <!-- Main content - 2 cột -->
+              <div class="detail-main">
+                <!-- Cột trái: Thông tin chi tiết -->
+                <div class="detail-left-col">
+                  <div class="detail-section">
+                    <h6 class="section-title-detail">
+                      <i class="fas fa-user-circle me-2 icon-red"></i>
+                      Thông tin khách hàng
+                    </h6>
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <div class="info-label">Họ và tên</div>
+                        <div class="info-value">{{ detailCustomer.hoTen }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Số điện thoại</div>
+                        <div class="info-value">{{ formatPhoneNumber(detailCustomer.soDienThoai) }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Địa chỉ</div>
+                        <div class="info-value">{{ detailCustomer.tinhThanhPho }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Phân loại</div>
+                        <div class="info-value">
+                      <span :class="`type-label type-${detailCustomer.phanLoaiKhach}`" style=" font-size: 1rem !important;">
+                        {{ getTypeLabel(detailCustomer.phanLoaiKhach) }}
+                      </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="detail-section">
+                    <h6 class="section-title-detail">
+                      <i class="fas fa-users me-2 icon-green"></i>
+                      Nhân sự phụ trách
+                    </h6>
+                    <div class="staff-grid">
+                      <div class="staff-item">
+                        <div class="staff-avatar">
+                          <div v-if="detailCustomer.nhanVienTaoAvatar" class="avatar-img">
+                            <img :src=" 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+  detailCustomer.nhanVienTaoAvatar" :alt="detailCustomer.nhanVienTaoTen">
+                          </div>
+                          <div v-else class="avatar-placeholder small">
+                            <i class="fas fa-user"></i>
+                          </div>
+                        </div>
+                        <div class="staff-info">
+                          <div class="staff-role">Người tạo</div>
+                          <div class="staff-name">{{ detailCustomer.nhanVienTaoTen || '-' }}</div>
+                        </div>
+                      </div>
+                      <div class="staff-item">
+                        <div class="staff-avatar">
+                          <div v-if="detailCustomer.nhanVienPhuTrachAvatar" class="avatar-img">
+                            <img :src=" 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+  detailCustomer.nhanVienPhuTrachAvatar" :alt="detailCustomer.nhanVienPhuTrachTen">
+                          </div>
+                          <div v-else class="avatar-placeholder small">
+                            <i class="fas fa-user"></i>
+                          </div>
+                        </div>
+                        <div class="staff-info">
+                          <div class="staff-role">NV phụ trách</div>
+                          <div class="staff-name">{{ detailCustomer.nhanVienPhuTrachTen || '-' }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="detail-section">
+                    <h6 class="section-title-detail">
+                      <i class="fas fa-paperclip me-2 icon-blue"></i>
+                      Tệp đính kèm
+                    </h6>
+                    <div class="row ps-2">
+                      <FileNew
+                          v-if="detailCustomer"
+                          :key="'customer-files'"
+                          :file-list="fileForm.files"
+                          :entity-id="detailCustomer.id"
+                          :allow-download-all="true"
+                          entity-type="host"
+                          :can-edit="true"
+                          :on-upload="true"
+                          class="file-upload-section col-10"
+                          @update:files="handleFileUpdate"
+                      />
+                      <div class="col-2 p-2 ps-3 text-muted">
+                        + {{ fileForm.files == null ? 0 : fileForm.files.length }} tệp
+                      </div>
+
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- Cột phải: Lịch sử hoạt động -->
+                <div class="detail-right-col">
+                  <div class="history-section">
+                    <h6 class="section-title-detail">
+                      <i class="fas fa-history me-2 icon-yellow"></i>
+                      Lịch sử trạng thái
+                    </h6>
+                    <div class="history-list" v-if="detailHistory.length">
+                      <div
+                          v-for="(item, index) in detailHistory"
+                          :key="`history-${index}`"
+                          class="history-item"
+                      >
+                        <div class="history-timeline">
+                          <div class="timeline-dot"></div>
+                          <div v-if="index < detailHistory.length - 1" class="timeline-line"></div>
+                        </div>
+                        <div class="history-content">
+                          <div class="history-header">
+                            <div class="history-status">
+                          <span :class="`status-badge status-${item.trangThai}`">
+                            {{ getStatusLabel(item.trangThai) }}
+                          </span>
+                            </div>
+                            <div class="history-time">
+                              <i class="fas fa-clock me-1"></i>
+                              {{ formatDateTime(item.thoiGianCapNhat) }}
+                            </div>
+                          </div>
+                          <div class="history-staff">
+                            <i class="fas fa-user me-2"></i>
+                            {{ item.tenNhanVien }}
+                          </div>
+                          <div class="history-note">
+                            {{ item.ghiChu }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-else class="no-history">
+                      <i class="fas fa-history"></i>
+                      <p>Chưa có lịch sử hoạt động</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-custom btn-custom" @click="closeDetailModal">Đóng</button>
-            <button type="button" class="btn btn-primary-custom btn-custom" @click="openEditFromDetail">
-              <i class="fas fa-edit me-2"></i> Chỉnh sửa
-            </button>
+            <div class="modal-body" v-else>
+              <div class="text-center text-muted py-5">Đang tải dữ liệu...</div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary btn-sm" @click="closeDetailModal">
+                <i class="fas fa-times me-1"></i> Đóng
+              </button>
+              <button type="button" class="btn btn-primary btn-sm" @click="openEditFromDetail">
+                <i class="fas fa-edit me-1"></i> Chỉnh sửa
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
     <!-- Assign Data Modal -->
     <div v-if="showAssignDataModal" class="modal fade modal-custom assign-data-modal show" tabindex="-1">
@@ -926,7 +1067,7 @@
                 <small class="text-muted">Số khách hàng sẽ được cấp (1-1000)</small>
               </div>
               <div class="col-md-6 mb-3">
-                <label for="dataType" class="form-label fw-medium">Loại dữ liệu</label>
+                <label for="dataType" class="form-label fw-medium">Kiểm tra dữ liệu</label>
                 <select class="form-select form-select-custom" v-model="assignData.type">
                   <option value="new">Khách hàng mới</option>
                   <option value="potential">Khách tiềm năng</option>
@@ -936,10 +1077,6 @@
               </div>
             </div>
 
-            <div class="mb-3">
-              <label for="assignNotes" class="form-label fw-medium">Ghi chú phân công</label>
-              <textarea class="form-control form-control-custom" v-model="assignData.notes" rows="2" placeholder="Ghi chú về việc phân công dữ liệu..."></textarea>
-            </div>
 
             <div class="alert alert-info">
               <i class="fas fa-info-circle me-2"></i>
@@ -998,6 +1135,7 @@
 import { ref, computed, reactive, onMounted, nextTick, watch } from 'vue'
 import Chart from 'chart.js/auto'
 import addressData from '/src/assets/js/address.json'
+import FileNew from './File.vue'
 
 // State management
 const customers = ref([])
@@ -1082,6 +1220,9 @@ const callSeconds = ref(0)
 const callNotes = ref('')
 const isEditing = ref(false)
 const selectedCustomer = ref(null)
+const fileForm = reactive({
+  files: []
+})
 
 const notification = reactive({
   show: false,
@@ -1115,6 +1256,9 @@ const callTimer = computed(() => {
   const seconds = (callSeconds.value % 60).toString().padStart(2, '0')
   return `${minutes}:${seconds}`
 })
+
+const detailCustomer = computed(() => selectedCustomer.value?.customerListItemDTO || null)
+const detailHistory = computed(() => selectedCustomer.value?.lichSu || [])
 
 const assignSummary = computed(() => {
   const selectedStaff = staffMembers.value.filter(s => s.selected)
@@ -1200,17 +1344,27 @@ const closeAddCustomerModal = () => {
 }
 
 const editCustomer = (customer) => {
-  console.log('Hàm chạy được')
+  const normalized = {
+    id: customer.id ?? customer.customerListItemDTO?.id ?? null,
+    name: customer.name ?? customer.hoTen ?? customer.customerListItemDTO?.hoTen ?? '',
+    phone: customer.phone ?? customer.soDienThoai ?? customer.customerListItemDTO?.soDienThoai ?? '',
+    province: customer.province ?? customer.tinhThanhPho ?? customer.customerListItemDTO?.tinhThanhPho ?? '',
+    oldProvince: customer.oldProvince ?? '',
+    type: customer.type ?? customer.phanLoaiKhach ?? customer.customerListItemDTO?.phanLoaiKhach ?? '',
+    status: customer.status ?? customer.trangThai ?? customer.customerListItemDTO?.trangThai ?? 'new',
+    avatar: customer.avatar ?? customer.avatarKhach ?? customer.customerListItemDTO?.avatarKhach ?? '',
+    notes: customer.notes ?? ''
+  }
   Object.assign(customerForm, {
-    id: customer.id,
-    name: customer.name,
-    phone: customer.phone,
-    province: customer.province,
-    oldProvince: customer.oldProvince || '',
-    type: customer.type,
-    status: customer.status,
-    avatar: customer.avatar || '',
-    notes: customer.notes || ''
+    id: normalized.id,
+    name: normalized.name,
+    phone: normalized.phone,
+    province: normalized.province,
+    oldProvince: normalized.oldProvince,
+    type: normalized.type,
+    status: normalized.status,
+    avatar: normalized.avatar,
+    notes: normalized.notes
   })
   isEditing.value = true
   showEditCustomerModal.value = true
@@ -1244,11 +1398,23 @@ const saveCustomer = () => {
   if (isEditing.value && customerForm.id) {
     const index = customers.value.findIndex(c => c.id === customerForm.id)
     if (index !== -1) {
-      customers.value[index] = {
-        ...customers.value[index],
-        ...customerForm,
-        lastUpdated: new Date().toISOString().split('T')[0]
-      }
+      const existing = customers.value[index]
+      customers.value[index] = existing.hoTen || existing.soDienThoai
+        ? {
+          ...existing,
+          hoTen: customerForm.name,
+          soDienThoai: customerForm.phone,
+          tinhThanhPho: customerForm.province,
+          phanLoaiKhach: customerForm.type,
+          trangThai: customerForm.status,
+          avatarKhach: customerForm.avatar || existing.avatarKhach,
+          ngayCapNhat: new Date().toISOString().split('T')[0]
+        }
+        : {
+          ...existing,
+          ...customerForm,
+          lastUpdated: new Date().toISOString().split('T')[0]
+        }
       showNotification('Cập nhật khách hàng thành công!', 'success')
     }
   } else {
@@ -1258,18 +1424,16 @@ const saveCustomer = () => {
 
     customers.value.push({
       id: newId,
-      name: customerForm.name,
-      phone: customerForm.phone,
-      province: customerForm.province,
-      oldProvince: customerForm.oldProvince || null,
-      avatar: customerForm.avatar || `https://randomuser.me/api/portraits/${customerForm.type === 'owner' || customerForm.type === 'broker' ? 'men' : 'women'}/${Math.floor(Math.random() * 70) + 1}.jpg`,
-      type: customerForm.type,
-      status: customerForm.status,
-      notes: customerForm.notes || '',
-      createdAt: new Date().toISOString().split('T')[0],
-      lastUpdated: new Date().toISOString().split('T')[0],
-      creatorId: creatorOptions.value[0]?.id ?? null,
-      assigneeId: staffMembers.value[0]?.id ?? null,
+      hoTen: customerForm.name,
+      soDienThoai: customerForm.phone,
+      tinhThanhPho: customerForm.province,
+      avatarKhach: customerForm.avatar || null,
+      phanLoaiKhach: customerForm.type,
+      trangThai: customerForm.status,
+      ngayTao: new Date().toISOString().split('T')[0],
+      ngayCapNhat: new Date().toISOString().split('T')[0],
+      nhanVienTaoId: creatorOptions.value[0]?.id ?? null,
+      nhanVienPhuTrachId: staffMembers.value[0]?.id ?? null,
       selected: false
     })
     showNotification('Thêm khách hàng mới thành công!', 'success')
@@ -1487,7 +1651,19 @@ const getProvinceLabel = (province) => {
 }
 
 const formatPhoneNumber = (phone) => {
+  if (!phone) return '-'
   return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
+}
+
+const formatDateTime = (value) => {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleString('vi-VN')
+}
+
+const handleFileUpdate = (files) => {
+  fileForm.files = files
 }
 
 const openCustomerDetail = async (customer) => {
@@ -1497,12 +1673,12 @@ const openCustomerDetail = async (customer) => {
 const closeDetailModal = () => {
   showDetailModal.value = false
   selectedCustomer.value = null
+  fileForm.files = []
 }
 
 const openEditFromDetail = () => {
-  console.log("hzm")
-  if (!selectedCustomer.value) return
-  editCustomer(selectedCustomer.value)
+  if (!detailCustomer.value) return
+  editCustomer(detailCustomer.value)
   showDetailModal.value = false
 }
 
@@ -1593,16 +1769,26 @@ const initCharts = () => {
   }
 }
 
+const fetchMarketing = async () => {
+  try {
+    const res = await api.get('/customer-crm/admin/marketing')
+    marketingoptions.value = res.data
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 const fetchTeleSales = async () => {
   try {
     const res = await api.get('/customer-crm/admin/telesales')
-    telesalesOptions.value = res.data
+    console.log(res.data)
   } catch (e) {
     console.error(e)
   }
 }
 
 onMounted(async () => {
+  await fetchMarketing()
   await fetchTeleSales()
   await fetchCustomers()
   initCharts()
@@ -1640,7 +1826,7 @@ watch(page, () => {
 
 import api from '/src/api/api.js'
 import {generateAvatarFromName, shortenName} from "../../assets/js/global.js";
-const telesalesOptions = ref([])
+const marketingoptions = ref([])
 
 
 const buildFilterPayload = () => ({
@@ -1717,7 +1903,7 @@ async function fetchCustomerDetail(customerId) {
   try {
     const res = await api.get(`/customer-crm/admin/host-temp/${customerId}`)
     selectedCustomer.value = res.data
-    console.log("selectedCustomer", selectedCustomer.value)
+    fileForm.files = res.data?.files ?? []
     showDetailModal.value = true
   } catch (e) {
     console.error(e)
@@ -2184,6 +2370,178 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
+.detail-modal .modal-content {
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.detail-hero {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.08));
+  border-radius: 18px;
+  margin-bottom: 24px;
+}
+
+.detail-avatar img {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.detail-hero-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.detail-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.detail-hero-meta i {
+  margin-right: 6px;
+  color: var(--primary-color);
+}
+
+.detail-hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.detail-card {
+  background: white;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(102, 126, 234, 0.12);
+}
+
+.detail-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+}
+
+.detail-list {
+  display: grid;
+  gap: 12px;
+}
+
+.detail-item {
+  display: grid;
+  gap: 4px;
+}
+
+.detail-people {
+  display: grid;
+  gap: 16px;
+}
+
+.detail-person {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(102, 126, 234, 0.08);
+}
+
+.detail-person img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+}
+
+.detail-person-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+}
+
+.detail-person-name {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.detail-timeline {
+  display: grid;
+  gap: 16px;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.timeline-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  margin-top: 8px;
+}
+
+.timeline-content {
+  background: rgba(15, 23, 42, 0.03);
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.timeline-title {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.timeline-time {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.timeline-user {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 6px;
+}
+
+.timeline-note {
+  margin: 0;
+  color: #4b5563;
+  font-size: 14px;
+}
+
 .detail-label {
   font-size: 13px;
   text-transform: uppercase;
@@ -2611,6 +2969,520 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   transform: scale(0.85);
 }
 
+/* Modal styling */
+.detail-modal {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.modal-content {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-bottom: none;
+  padding: 18px 24px;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.btn-close-white {
+  filter: invert(1) grayscale(100%) brightness(200%);
+  opacity: 0.8;
+}
+
+.modal-body {
+  padding: 0;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Hero section */
+.detail-hero {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 24px;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.detail-avatar {
+  flex-shrink: 0;
+}
+
+.avatar-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.avatar-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.avatar-placeholder.small {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+}
+
+.detail-hero-info {
+  flex: 1;
+}
+
+.detail-hero-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.detail-hero-title h4 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+}
+
+
+.detail-hero-meta {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.detail-hero-meta span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  font-size: 18px !important;
+}
+
+.detail-hero-meta i {
+  color: #667eea;
+  width: 16px;
+  text-align: center;
+}
+
+.detail-hero-tags {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+
+.update-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  background-color: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+/* Main content - 2 cột */
+.detail-main {
+  display: flex;
+  min-height: 400px;
+  max-height: 600px;
+  overflow: hidden;
+}
+
+.detail-left-col {
+  flex: 1;
+  border-right: 1px solid #e2e8f0;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.detail-right-col {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Sections */
+.detail-section {
+  margin-bottom: 24px;
+}
+
+.detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-title-detail {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #667eea;
+  display: flex;
+  align-items: center;
+}
+
+/* Info grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: #718096;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+  line-height: 1.4;
+}
+
+.type-label {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+
+
+/* Staff grid */
+.staff-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.staff-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background-color: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.staff-avatar {
+  flex-shrink: 0;
+}
+
+.staff-info {
+  flex: 1;
+}
+
+.staff-role {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+
+.staff-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+/* File upload */
+.file-upload-section {
+  background-color: #f8fafc;
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+/* History section */
+.history-section {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.history-item {
+  display: flex;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.history-item:last-child {
+  margin-bottom: 0;
+}
+
+.history-timeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 5px;
+  margin-right: 16px;
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #667eea;
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px #667eea;
+  z-index: 1;
+}
+
+.timeline-line {
+  flex: 1;
+  width: 2px;
+  background-color: #e2e8f0;
+  margin-top: 4px;
+}
+
+.history-content {
+  flex: 1;
+  padding-bottom: 16px;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.history-status .status-badge {
+  font-size: 0.8125rem;
+  padding: 3px 10px;
+}
+
+.history-time {
+  font-size: 1rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+}
+
+.history-staff {
+  font-size: 1rem;
+  color: #475569;
+  font-weight: 500;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.history-note {
+  font-size: 1.05rem;
+  color: #4a5568;
+  line-height: 1.5;
+  background-color: #f8fafc;
+  padding: 10px;
+  border-radius: 8px;
+  border-left: 3px solid #667eea;
+  margin: 0;
+}
+
+.no-history {
+  text-align: center;
+  padding: 40px 20px;
+  color: #94a3b8;
+}
+
+.no-history i {
+  font-size: 48px;
+  margin-bottom: 12px;
+  color: #cbd5e1;
+}
+
+.no-history p {
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Modal footer */
+.modal-footer {
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  padding: 16px 24px;
+}
+
+.btn {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+.btn-outline-secondary {
+  border-color: #cbd5e1;
+  color: #64748b;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #475569;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .detail-main {
+    flex-direction: column;
+    max-height: none;
+  }
+
+  .detail-left-col {
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .detail-right-col {
+    max-height: 300px;
+  }
+
+  .info-grid,
+  .staff-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-hero {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .detail-hero-meta {
+    justify-content: center;
+  }
+
+  .detail-hero-tags {
+    justify-content: center;
+  }
+
+  .modal-dialog {
+    margin: 10px;
+  }
+}
+/* 🔴 Đỏ */
+.icon-red {
+  background: linear-gradient(135deg, #ff4d4f, #d9363e);
+  color: #fff;
+  padding: 6px;
+  border-radius: 10px;
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 🟡 Vàng */
+.icon-yellow {
+  background: linear-gradient(135deg, #facc15, #eab308);
+  color: #fff;
+  padding: 6px;
+  border-radius: 10px;
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 🟢 Xanh lá */
+.icon-green {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #fff;
+  padding: 6px;
+  border-radius: 10px;
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 🔵 Xanh dương thiên đậm */
+.icon-blue {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: #fff;
+  padding: 6px;
+  border-radius: 10px;
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
 
 </style>
