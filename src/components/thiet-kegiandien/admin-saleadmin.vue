@@ -540,7 +540,7 @@
                           </button>
                           <button
                               class="action-btn delete-btn"
-                              @click.stop="showDeleteConfirm(customer)"
+                              @click.stop="deleteOne( customer.id )"
                               title="Xóa"
                               style="background: var(--danger-gradient);"
                           >
@@ -648,7 +648,7 @@
             <button type="button" class="btn-close btn-close-white" @click="closeAddCustomerModal"></button>
           </div>
           <div class="modal-body">
-            <form @submit.prevent="saveCustomer">
+            <form @submit.prevent="updateCustomer">
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label for="customerName" class="form-label fw-medium">Họ và tên <span class="text-danger">*</span></label>
@@ -700,13 +700,15 @@
                 <div class="col-md-6 mb-3">
                   <label for="customerStatus" class="form-label fw-medium">Trạng thái <span class="text-danger">*</span></label>
                   <select class="form-select form-select-custom" v-model="customerForm.status" required>
-                    <option value="new">Mới tiếp nhận</option>
-                    <option value="potential_7">Tiềm năng 7 ngày</option>
-                    <option value="potential_14">Tiềm năng 14 ngày</option>
-                    <option value="success">Thành công (đặt lịch)</option>
-                    <option value="wrong_number">Sai số</option>
-                    <option value="unreachable">Không liên lạc được</option>
-                    <option value="care">Chăm sóc</option>
+                    <option value="NEW">Mới</option>
+                    <option value="DC_TELESALES">Chưa gọi</option>
+                    <option value="TN_7NGAY">Tiềm năng 7 ngày</option>
+                    <option value="TN_14NGAY">Tiềm năng 14 ngày</option>
+                    <option value="THANH_CONG">Thành công</option>
+                    <option value="SAI_SO_LIEU">Sai số</option>
+                    <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc được</option>
+                    <option value="CHAM_SOC">Chăm sóc</option>
+                    <option value="THAT_BAI">Thất bại</option>
                   </select>
                 </div>
               </div>
@@ -731,8 +733,8 @@
     </div>
 
     <!-- Edit Customer Modal -->
-    <div v-if="showEditCustomerModal" class="modal fade modal-custom show" tabindex="-1">
-      <div class="modal-dialog modal-lg">
+    <div v-if="showEditCustomerModal" class="modal fade modal-custom show detail-modal edit-modal" tabindex="-1">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
@@ -742,70 +744,217 @@
             <button type="button" class="btn-close btn-close-white" @click="closeEditCustomerModal"></button>
           </div>
           <div class="modal-body">
-            <form @submit.prevent="saveCustomer">
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label fw-medium">Họ và tên <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control form-control-custom" v-model="customerForm.name" required>
+            <form @submit.prevent="updateCustomer">
+              <div class="detail-hero">
+                <div class="detail-avatar">
+                  <div class="avatar-img">
+                    <img
+                        :src="customerForm.avatar || generateAvatarFromName(customerForm.name)"
+                        :alt="customerForm.name || 'Khách hàng'"
+                    >
+                  </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                  <label class="form-label fw-medium">Số điện thoại <span class="text-danger">*</span></label>
-                  <input type="tel" class="form-control form-control-custom" v-model="customerForm.phone" required>
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label fw-medium">Tỉnh/Thành phố <span class="text-danger">*</span></label>
-                  <input
-                    type="text"
-                    class="form-control form-control-custom"
-                    list="province-options"
-                    v-model="customerForm.province"
-                    placeholder="Chọn tỉnh/thành phố"
-                    required
-                  >
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label class="form-label fw-medium">Tỉnh cũ (nếu có)</label>
-                  <input
-                    type="text"
-                    class="form-control form-control-custom"
-                    list="province-options"
-                    v-model="customerForm.oldProvince"
-                    placeholder="Chọn tỉnh/thành phố"
-                  >
+                <div class="detail-hero-info">
+                  <div class="detail-hero-title">
+                    <h4 class="mb-0">{{ customerForm.name || 'Khách hàng' }}</h4>
+                    <span v-if="customerForm.status" :class="`status-badge status-${customerForm.status}`">
+                      {{ getStatusLabel(customerForm.status) }}
+                    </span>
+                  </div>
+                  <div class="detail-hero-meta">
+                    <span><i class="fas fa-phone-alt"></i> {{ formatPhoneNumber(customerForm.phone) }}</span>
+                    <span><i class="fas fa-map-marker-alt"></i> {{ customerForm.province || '-' }}</span>
+                    <span v-if="customerForm.createdAt"><i class="fas fa-calendar-alt"></i> Ngày tạo: {{ customerForm.createdAt }}</span>
+                  </div>
+                  <div class="detail-hero-tags">
+                    <span v-if="customerForm.type" :class="`type-badge type-${customerForm.type}`">
+                      {{ getTypeLabel(customerForm.type) }}
+                    </span>
+                    <span v-if="customerForm.updatedAt" class="update-badge">
+                      <i class="fas fa-sync-alt me-1"></i>Cập nhật: {{ customerForm.updatedAt }}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label fw-medium">Phân loại khách hàng <span class="text-danger">*</span></label>
-                  <select class="form-select form-select-custom" v-model="customerForm.type" required>
-                    <option value="">Chọn phân loại</option>
-                    <option value="broker">Môi giới</option>
-                    <option value="owner">Chủ nhà</option>
-                    <option value="relative">Người thân</option>
-                  </select>
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label class="form-label fw-medium">Trạng thái <span class="text-danger">*</span></label>
-                  <select class="form-select form-select-custom" v-model="customerForm.status" required>
-                    <option value="new">Mới tiếp nhận</option>
-                    <option value="potential_7">Tiềm năng 7 ngày</option>
-                    <option value="potential_14">Tiềm năng 14 ngày</option>
-                    <option value="success">Thành công (đặt lịch)</option>
-                    <option value="wrong_number">Sai số</option>
-                    <option value="unreachable">Không liên lạc được</option>
-                    <option value="care">Chăm sóc</option>
-                  </select>
-                </div>
-              </div>
+              <div class="detail-main">
+                <div class="detail-left-col">
+                  <div class="detail-section">
+                    <h6 class="section-title-detail">
+                      <i class="fas fa-user-circle me-2 icon-red"></i>
+                      Thông tin khách hàng
+                    </h6>
+                    <div class="info-grid edit-info-grid">
+                      <div class="info-item">
+                        <label class="info-label">Họ và tên <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-custom" v-model="customerForm.name" required>
+                      </div>
+                      <div class="info-item">
+                        <label class="info-label">Số điện thoại <span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control form-control-custom" v-model="customerForm.phone" required>
+                      </div>
+                      <div class="info-item">
+                        <label class="info-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+                        <div class="province-search" :class="{ open: provinceDropdownOpen }">
+                          <input
+                            v-model="provinceSearch"
+                            @focus="provinceDropdownOpen = true"
+                            @input="handleProvinceInput"
+                            @blur="closeProvinceDropdown"
+                            type="text"
+                            class="form-control form-control-custom"
+                            placeholder="Tìm tỉnh/thành"
+                            autocomplete="off"
+                            required
+                          >
+                          <span class="province-caret" aria-hidden="true" @mousedown.prevent="toggleProvinceDropdown">
+                            <i class="fas fa-chevron-down"></i>
+                          </span>
+                          <ul
+                            v-if="provinceDropdownOpen && filteredProvinces.length"
+                            class="province-dropdown"
+                          >
+                            <li
+                              v-for="province in filteredProvinces"
+                              :key="province"
+                              @mousedown.prevent="selectProvince(province)"
+                              :class="{ selected: province === customerForm.province }"
+                            >
+                              {{ province }}
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div class="info-item">
+                        <label class="info-label">Phân loại khách hàng <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-custom" v-model="customerForm.type" required>
+                          <option value="">Chọn phân loại</option>
+                          <option value="MOI_GIOI">Môi giới</option>
+                          <option value="CHINH_CHU">Chủ nhà</option>
+                          <option value="NGUOI_THAN">Người thân</option>
+                        </select>
+                      </div>
+                      <div class="info-item">
+                        <label class="info-label">Trạng thái <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-custom" v-model="customerForm.status" required>
+                          <option value="NEW">Mới</option>
+                          <option value="DC_TELESALES">Chưa gọi</option>
+                          <option value="TN_7NGAY">Tiềm năng 7 ngày</option>
+                          <option value="TN_14NGAY">Tiềm năng 14 ngày</option>
+                          <option value="THANH_CONG">Thành công</option>
+                          <option value="SAI_SO_LIEU">Sai số</option>
+                          <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc được</option>
+                          <option value="CHAM_SOC">Chăm sóc</option>
+                          <option value="THAT_BAI">Thất bại</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
 
-              <div class="mb-3">
-                <label class="form-label fw-medium">Ảnh đại diện (URL)</label>
-                <input type="text" class="form-control form-control-custom" v-model="customerForm.avatar" placeholder="https://example.com/avatar.jpg">
-                <small class="text-muted">Để trống để sử dụng ảnh mặc định</small>
+                  <div class="detail-section">
+                    <h6 class="section-title-detail">
+                      <i class="fas fa-users me-2 icon-green"></i>
+                      Nhân sự phụ trách
+                    </h6>
+                    <div class="staff-grid">
+                      <div class="staff-item">
+                        <div class="staff-avatar">
+                          <div v-if="customerForm.creatorAvatar" class="avatar-img">
+                            <img :src="customerForm.creatorAvatar" :alt="customerForm.creatorName">
+                          </div>
+                          <div v-else class="avatar-placeholder small">
+                            <i class="fas fa-user"></i>
+                          </div>
+                        </div>
+                        <div class="staff-info">
+                          <div class="staff-role">Người tạo</div>
+                          <div class="staff-name">{{ customerForm.creatorName || '-' }}</div>
+                        </div>
+                      </div>
+                      <div class="staff-item staff-item-edit">
+                        <div class="staff-avatar">
+                          <div v-if="selectedAssignee?.avatar" class="avatar-img">
+                            <img :src="selectedAssignee.avatar" :alt="selectedAssignee.tenNhanVien">
+                          </div>
+                          <div v-else class="avatar-placeholder small">
+                            <i class="fas fa-user-tag"></i>
+                          </div>
+                        </div>
+                        <div class="staff-info">
+                          <div class="staff-role">NV phụ trách (chọn 1)</div>
+                          <div class="employee-search">
+                            <input
+                              type="text"
+                              class="form-control form-control-custom"
+                              v-model="employeeSearch"
+                              placeholder="Tìm theo tên nhân viên..."
+                              @focus="openEmployeeDropdown"
+                            >
+                            <div v-if="employeeDropdownOpen" class="employee-options">
+                              <div v-if="employeeLoading" class="employee-option muted">
+                                <i class="fas fa-spinner fa-spin me-2"></i> Đang tải dữ liệu...
+                              </div>
+                              <div v-else-if="employeeOptions.length === 0 && employeeSearch.length < 2" class="employee-option muted">
+                                Nhập ít nhất 2 ký tự để tìm kiếm.
+                              </div>
+                              <div v-else-if="employeeOptions.length === 0" class="employee-option muted">
+                                Không tìm thấy nhân viên phù hợp.
+                              </div>
+                              <div
+                                v-else
+                                v-for="employee in employeeOptions"
+                                :key="employee.id"
+                                class="employee-option"
+                                :class="{ selected: selectedAssignee?.id === employee.id }"
+                                @mousedown.prevent="selectEmployee(employee)"
+                              >
+                                <div class="employee-avatar">
+                                  <img :src="employee.avatar" :alt="employee.tenNhanVien">
+                                </div>
+                                <div class="employee-info">
+                                  <div class="employee-name">{{ employee.tenNhanVien }}</div>
+                                  <div class="employee-meta">
+                                    <span v-if="employee.email"><i class="fas fa-envelope"></i> {{ employee.email }}</span>
+                                    <span v-if="employee.phone"><i class="fas fa-phone"></i> {{ employee.phone }}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="employee-selected" v-if="selectedAssignee">
+                            <span>{{ selectedAssignee.tenNhanVien }}</span>
+                            <span v-if="selectedAssignee.email">• {{ selectedAssignee.email }}</span>
+                            <span v-if="selectedAssignee.phone">• {{ selectedAssignee.phone }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="detail-section">
+                    <h6 class="section-title-detail">
+                      <i class="fas fa-paperclip me-2 icon-blue"></i>
+                      Tệp đính kèm
+                    </h6>
+                    <div class="row ps-2">
+                      <FileNew
+                        v-if="customerForm.id"
+                        :key="'edit-customer-files'"
+                        :file-list="fileForm.files"
+                        :entity-id="customerForm.id"
+                        :allow-download-all="true"
+                        entity-type="host"
+                        :can-edit="true"
+                        :on-upload="true"
+                        class="file-upload-section col-10"
+                        @update:files="handleFileUpdate"
+                      />
+                      <div class="col-2 p-2 ps-3 text-muted">
+                        + {{ fileForm.files == null ? 0 : fileForm.files.length }} tệp
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <input type="hidden" v-model="customerForm.id" />
@@ -813,7 +962,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-custom btn-custom" @click="closeEditCustomerModal">Hủy</button>
-            <button type="button" class="btn btn-primary-custom btn-custom" @click="saveCustomer">
+            <button type="button" class="btn btn-primary-custom btn-custom" @click="updateCustomer">
               <i class="fas fa-save me-2"></i> Cập nhật
             </button>
           </div>
@@ -949,8 +1098,8 @@
                           :entity-id="detailCustomer.id"
                           :allow-download-all="true"
                           entity-type="host"
-                          :can-edit="true"
-                          :on-upload="true"
+                          :can-edit="false"
+                          :on-upload="false"
                           class="file-upload-section col-10"
                           @update:files="handleFileUpdate"
                       />
@@ -1110,7 +1259,7 @@
               <div class="mb-3">
                 <i class="fas fa-trash-alt fa-3x text-danger"></i>
               </div>
-              <h4 class="fw-bold">Bạn có chắc chắn muốn xóa khách hàng "{{ deletingCustomer?.name }}" ?</h4>
+              <h4 class="fw-bold">Bạn có chắc chắn muốn xóa khách hàng ?</h4>
               <p class="text-muted">Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn.</p>
             </div>
           </div>
@@ -1148,6 +1297,14 @@ const totalPages = ref(0)
 const loading = ref(false)
 
 const staffMembers = ref([])
+const employeeSearch = ref('')
+const employeeOptions = ref([])
+const employeeLoading = ref(false)
+const employeeDropdownOpen = ref(false)
+const selectedAssignee = ref(null)
+let employeeSearchTimer = null
+const provinceSearch = ref('')
+const provinceDropdownOpen = ref(false)
 
 const creatorOptions = ref([
   { id: 1, name: "Trần Minh Anh", avatar: "https://randomuser.me/api/portraits/women/11.jpg" },
@@ -1198,9 +1355,16 @@ const customerForm = reactive({
   province: '',
   oldProvince: '',
   type: '',
-  status: 'new',
+  status: 'NEW',
   avatar: '',
-  notes: ''
+  notes: '',
+  createdAt: '',
+  updatedAt: '',
+  creatorName: '',
+  creatorAvatar: '',
+  assigneeId: null,
+  assigneeName: '',
+  assigneeAvatar: ''
 })
 
 
@@ -1211,8 +1375,13 @@ const callNotes = ref('')
 const isEditing = ref(false)
 const selectedCustomer = ref(null)
 const fileForm = reactive({
-  files: []
+  files: [],
+  newFiles: [],
+  newLandBookFiles: [],
+  deletedFileIds: [],
+  deletedLandBookFileIds: []
 })
+const originalFiles = ref([])
 
 const notification = reactive({
   show: false,
@@ -1282,6 +1451,11 @@ const provinceOptions = computed(() => {
   return [...provinceNames, 'Khác']
 })
 
+const filteredProvinces = computed(() => {
+  const query = provinceSearch.value.toLowerCase()
+  return provinceOptions.value.filter(province => province.toLowerCase().includes(query))
+})
+
 const creatorsById = computed(() => {
   return creatorOptions.value.reduce((acc, creator) => {
     acc[creator.id] = creator
@@ -1344,7 +1518,24 @@ const closeAddCustomerModal = () => {
   showAddCustomerModal.value = false
 }
 
-const editCustomer = (customer) => {
+const resolveEmployeeAvatar = (avatar, name) => {
+  if (avatar) {
+    return avatar.startsWith('http')
+      ? avatar
+      : `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${avatar}`
+  }
+  return generateAvatarFromName(name || 'NV')
+}
+
+const normalizeEmployeeOption = (employee) => ({
+  id: employee.id,
+  tenNhanVien: employee.tenNhanVien,
+  avatar: resolveEmployeeAvatar(employee.avatar, employee.tenNhanVien),
+  email: employee.email || '',
+  phone: employee.phone || ''
+})
+
+const editCustomer = async (customer) => {
   const normalized = {
     id: customer.id ?? customer.customerListItemDTO?.id ?? null,
     name: customer.name ?? customer.hoTen ?? customer.customerListItemDTO?.hoTen ?? '',
@@ -1352,10 +1543,29 @@ const editCustomer = (customer) => {
     province: customer.province ?? customer.tinhThanhPho ?? customer.customerListItemDTO?.tinhThanhPho ?? '',
     oldProvince: customer.oldProvince ?? '',
     type: customer.type ?? customer.phanLoaiKhach ?? customer.customerListItemDTO?.phanLoaiKhach ?? '',
-    status: customer.status ?? customer.trangThai ?? customer.customerListItemDTO?.trangThai ?? 'new',
+    status: customer.status ?? customer.trangThai ?? customer.customerListItemDTO?.trangThai ?? 'NEW',
     avatar: customer.avatar ?? customer.avatarKhach ?? customer.customerListItemDTO?.avatarKhach ?? '',
-    notes: customer.notes ?? ''
+    notes: customer.notes ?? '',
+    createdAt: customer.ngayTao ?? customer.customerListItemDTO?.ngayTao ?? '',
+    updatedAt: customer.ngayCapNhat ?? customer.customerListItemDTO?.ngayCapNhat ?? '',
+    creatorName: customer.nhanVienTaoTen ?? customer.customerListItemDTO?.nhanVienTaoTen ?? '',
+    creatorAvatar: customer.nhanVienTaoAvatar ?? customer.customerListItemDTO?.nhanVienTaoAvatar ?? '',
+    assigneeId: customer.nhanVienPhuTrachId ?? customer.customerListItemDTO?.nhanVienPhuTrachId ?? null,
+    assigneeName: customer.nhanVienPhuTrachTen ?? customer.customerListItemDTO?.nhanVienPhuTrachTen ?? '',
+    assigneeAvatar: customer.nhanVienPhuTrachAvatar ?? customer.customerListItemDTO?.nhanVienPhuTrachAvatar ?? ''
   }
+
+  if (normalized.id) {
+    await fetchCustomerDetail(normalized.id, { showModal: false })
+  }
+
+  const normalizedCreatorAvatar = normalized.creatorAvatar
+    ? resolveEmployeeAvatar(normalized.creatorAvatar, normalized.creatorName)
+    : ''
+  const normalizedAssigneeAvatar = normalized.assigneeAvatar
+    ? resolveEmployeeAvatar(normalized.assigneeAvatar, normalized.assigneeName)
+    : ''
+
   Object.assign(customerForm, {
     id: normalized.id,
     name: normalized.name,
@@ -1365,8 +1575,28 @@ const editCustomer = (customer) => {
     type: normalized.type,
     status: normalized.status,
     avatar: normalized.avatar,
-    notes: normalized.notes
+    notes: normalized.notes,
+    createdAt: normalized.createdAt,
+    updatedAt: normalized.updatedAt,
+    creatorName: normalized.creatorName,
+    creatorAvatar: normalizedCreatorAvatar,
+    assigneeId: normalized.assigneeId,
+    assigneeName: normalized.assigneeName,
+    assigneeAvatar: normalizedAssigneeAvatar
   })
+
+  selectedAssignee.value = normalized.assigneeId
+    ? {
+      id: normalized.assigneeId,
+      tenNhanVien: normalized.assigneeName,
+      avatar: normalizedAssigneeAvatar,
+      email: '',
+      phone: ''
+    }
+    : null
+  employeeSearch.value = normalized.assigneeName || ''
+  employeeDropdownOpen.value = false
+  provinceSearch.value = normalized.province || ''
   isEditing.value = true
   showEditCustomerModal.value = true
 }
@@ -1374,6 +1604,67 @@ const editCustomer = (customer) => {
 const closeEditCustomerModal = () => {
   showEditCustomerModal.value = false
   isEditing.value = false
+  resetCustomerForm()
+}
+
+const openEmployeeDropdown = () => {
+  employeeDropdownOpen.value = true
+  if (employeeSearch.value.trim().length >= 2) {
+    searchEmployeeOptions(employeeSearch.value.trim())
+  }
+}
+
+const searchEmployeeOptions = async (query) => {
+  if (!query || query.length < 2) {
+    employeeOptions.value = []
+    return
+  }
+
+  employeeLoading.value = true
+  try {
+    const res = await api.get('/customer-crm/admin/employee-options', {
+      params: { search: query }
+    })
+    employeeOptions.value = Array.isArray(res.data)
+      ? res.data.map(normalizeEmployeeOption)
+      : []
+  } catch (e) {
+    console.error(e)
+    employeeOptions.value = []
+  } finally {
+    employeeLoading.value = false
+  }
+}
+
+const selectEmployee = (employee) => {
+  selectedAssignee.value = employee
+  customerForm.assigneeId = employee.id
+  customerForm.assigneeName = employee.tenNhanVien
+  customerForm.assigneeAvatar = employee.avatar
+  employeeSearch.value = employee.tenNhanVien
+  employeeDropdownOpen.value = false
+}
+
+const selectProvince = (province) => {
+  customerForm.province = province
+  provinceSearch.value = province
+  provinceDropdownOpen.value = false
+}
+
+const handleProvinceInput = () => {
+  provinceDropdownOpen.value = true
+  customerForm.province = provinceSearch.value
+}
+
+const closeProvinceDropdown = () => {
+  setTimeout(() => {
+    provinceDropdownOpen.value = false
+    provinceSearch.value = customerForm.province || ''
+  }, 120)
+}
+
+const toggleProvinceDropdown = () => {
+  provinceDropdownOpen.value = !provinceDropdownOpen.value
 }
 
 const resetCustomerForm = () => {
@@ -1384,61 +1675,140 @@ const resetCustomerForm = () => {
     province: '',
     oldProvince: '',
     type: '',
-    status: 'new',
+    status: 'NEW',
     avatar: '',
-    notes: ''
+    notes: '',
+    createdAt: '',
+    updatedAt: '',
+    creatorName: '',
+    creatorAvatar: '',
+    assigneeId: null,
+    assigneeName: '',
+    assigneeAvatar: ''
   })
+  selectedAssignee.value = null
+  employeeSearch.value = ''
+  employeeOptions.value = []
+  employeeDropdownOpen.value = false
+  provinceSearch.value = ''
+  provinceDropdownOpen.value = false
+  fileForm.files = []
+  fileForm.newFiles = []
+  fileForm.newLandBookFiles = []
+  fileForm.deletedFileIds = []
+  fileForm.deletedLandBookFileIds = []
+  originalFiles.value = []
 }
 
-const saveCustomer = () => {
+const buildCustomerUpdateFormData = (assigneePayload) => {
+  const dto = {
+    id: customerForm.id,
+    hoTen: customerForm.name,
+    soDienThoai: customerForm.phone,
+    tinhThanhPho: customerForm.province,
+    phanLoaiKhach: customerForm.type,
+    trangThai: customerForm.status,
+    nhanVienPhuTrachId: assigneePayload.nhanVienPhuTrachId,
+    nhanVienPhuTrachTen: assigneePayload.nhanVienPhuTrachTen,
+    nhanVienPhuTrachAvatar: assigneePayload.nhanVienPhuTrachAvatar,
+    deletedFileIds: fileForm.deletedFileIds,
+    deletedLandBookFileIds: fileForm.deletedLandBookFileIds
+  }
+
+  const fd = new FormData()
+  fd.append('dto', new Blob([JSON.stringify(dto)], { type: 'application/json' }))
+
+  const mainFile = [...fileForm.newFiles, ...fileForm.newLandBookFiles]
+    .find(file => file?.isOnTop && file.file instanceof File)
+
+  if (mainFile?.file) {
+    fd.append('newFileOntop', mainFile.file)
+  }
+
+  fileForm.newFiles.forEach((file) => {
+    if (file?.file instanceof File) {
+      fd.append('newFiles', file.file)
+    }
+  })
+
+  fileForm.newLandBookFiles.forEach((file) => {
+    if (file?.file instanceof File) {
+      fd.append('newLandBookFiles', file.file)
+    }
+  })
+
+  return fd
+}
+
+const updateCustomer = async () => {
   if (!customerForm.name || !customerForm.phone || !customerForm.province || !customerForm.type || !customerForm.status) {
     showNotification('Vui lòng điền đầy đủ các trường bắt buộc!', 'warning')
     return
   }
 
-  if (isEditing.value && customerForm.id) {
-    const index = customers.value.findIndex(c => c.id === customerForm.id)
-    if (index !== -1) {
-      const existing = customers.value[index]
-      customers.value[index] = existing.hoTen || existing.soDienThoai
-        ? {
-          ...existing,
-          hoTen: customerForm.name,
-          soDienThoai: customerForm.phone,
-          tinhThanhPho: customerForm.province,
-          phanLoaiKhach: customerForm.type,
-          trangThai: customerForm.status,
-          avatarKhach: customerForm.avatar || existing.avatarKhach,
-          ngayCapNhat: new Date().toISOString().split('T')[0]
-        }
-        : {
-          ...existing,
-          ...customerForm,
-          lastUpdated: new Date().toISOString().split('T')[0]
-        }
-      showNotification('Cập nhật khách hàng thành công!', 'success')
-    }
-  } else {
-    const newId = customers.value.length > 0
-        ? Math.max(...customers.value.map(c => c.id)) + 1
-        : 1
-
-    customers.value.push({
-      id: newId,
-      hoTen: customerForm.name,
-      soDienThoai: customerForm.phone,
-      tinhThanhPho: customerForm.province,
-      avatarKhach: customerForm.avatar || null,
-      phanLoaiKhach: customerForm.type,
-      trangThai: customerForm.status,
-      ngayTao: new Date().toISOString().split('T')[0],
-      ngayCapNhat: new Date().toISOString().split('T')[0],
-      nhanVienTaoId: creatorOptions.value[0]?.id ?? null,
-      nhanVienPhuTrachId: staffMembers.value[0]?.id ?? null,
-      selected: false
-    })
-    showNotification('Thêm khách hàng mới thành công!', 'success')
+  if (!customerForm.assigneeId) {
+    showNotification('Vui lòng chọn nhân viên phụ trách từ danh sách tìm kiếm!', 'warning')
+    return
   }
+
+  const assigneePayload = selectedAssignee.value
+    ? {
+      nhanVienPhuTrachId: selectedAssignee.value.id,
+      nhanVienPhuTrachTen: selectedAssignee.value.tenNhanVien,
+      nhanVienPhuTrachAvatar: selectedAssignee.value.avatar
+    }
+    : {
+      nhanVienPhuTrachId: customerForm.assigneeId,
+      nhanVienPhuTrachTen: customerForm.assigneeName,
+      nhanVienPhuTrachAvatar: customerForm.assigneeAvatar
+    }
+
+  try {
+    const payload = buildCustomerUpdateFormData(assigneePayload)
+    await api.post(`/customer-crm/admin/host-temp/update/${customerForm.id}`, payload, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    showNotification('Cập nhật khách hàng thành công!', 'success')
+    await fetchCustomers()
+    showEditCustomerModal.value = false
+    isEditing.value = false
+    resetCustomerForm()
+  } catch (e) {
+    console.error(e)
+    showNotification('Không thể cập nhật khách hàng, vui lòng thử lại!', 'warning')
+  }
+}
+
+const saveCustomer = () => {
+  if (isEditing.value) {
+    updateCustomer()
+    return
+  }
+
+  if (!customerForm.name || !customerForm.phone || !customerForm.province || !customerForm.type || !customerForm.status) {
+    showNotification('Vui lòng điền đầy đủ các trường bắt buộc!', 'warning')
+    return
+  }
+
+  const newId = customers.value.length > 0
+    ? Math.max(...customers.value.map(c => c.id)) + 1
+    : 1
+
+  customers.value.push({
+    id: newId,
+    hoTen: customerForm.name,
+    soDienThoai: customerForm.phone,
+    tinhThanhPho: customerForm.province,
+    avatarKhach: customerForm.avatar || null,
+    phanLoaiKhach: customerForm.type,
+    trangThai: customerForm.status,
+    ngayTao: new Date().toISOString().split('T')[0],
+    ngayCapNhat: new Date().toISOString().split('T')[0],
+    nhanVienTaoId: creatorOptions.value[0]?.id ?? null,
+    nhanVienPhuTrachId: staffMembers.value[0]?.id ?? null,
+    selected: false
+  })
+  showNotification('Thêm khách hàng mới thành công!', 'success')
 
   showAddCustomerModal.value = false
   showEditCustomerModal.value = false
@@ -1535,15 +1905,6 @@ const clearSelection = () => {
   customers.value.forEach(c => c.selected = false)
 }
 
-const bulkDelete = () => {
-  const selectedCustomers = customers.value.filter(c => c.selected)
-  if (selectedCustomers.length > 0) {
-    if (confirm(`Bạn có chắc chắn muốn xóa ${selectedCustomers.length} khách hàng đã chọn?`)) {
-      customers.value = customers.value.filter(c => !c.selected)
-      showNotification(`Đã xóa ${selectedCustomers.length} khách hàng thành công!`, 'success')
-    }
-  }
-}
 
 const openAssignDataModal = () => {
   showAssignDataModal.value = true
@@ -1631,6 +1992,7 @@ const getStatusLabel = (status) => {
     'TN_14NGAY': 'TN 14 ngày',
     'THANH_CONG': 'Thành công',
     'SAI_SO': 'Sai số',
+    'SAI_SO_LIEU': 'Sai số',
     'KHONG_LIEN_LAC_DUOC': 'KLLD',
     'CHAM_SOC': 'Chăm sóc',
     'DC_TELESALES': 'Chưa gọi',
@@ -1672,7 +2034,31 @@ const formatDateTime = (value) => {
 }
 
 const handleFileUpdate = (files) => {
-  fileForm.files = files
+  fileForm.files = Array.isArray(files) ? files : []
+
+  const existingFiles = fileForm.files.filter(file => !file.file && file.id)
+  const newFiles = fileForm.files.filter(file => file.file instanceof File)
+
+  fileForm.newFiles = newFiles
+    .filter(file => !file.isIG)
+    .map(file => ({ file: file.file, isOnTop: file.isOnTop }))
+
+  fileForm.newLandBookFiles = newFiles
+    .filter(file => file.isIG)
+    .map(file => ({ file: file.file, isOnTop: file.isOnTop }))
+
+  const originalIds = (originalFiles.value || []).map(file => file.id)
+  const currentIds = existingFiles.map(file => file.id)
+
+  fileForm.deletedFileIds = originalIds.filter(id => {
+    const file = (originalFiles.value || []).find(item => item.id === id)
+    return !currentIds.includes(id) && file && !file.isIG
+  })
+
+  fileForm.deletedLandBookFileIds = originalIds.filter(id => {
+    const file = (originalFiles.value || []).find(item => item.id === id)
+    return !currentIds.includes(id) && file && file.isIG
+  })
 }
 
 const openCustomerDetail = async (customer) => {
@@ -1683,6 +2069,7 @@ const closeDetailModal = () => {
   showDetailModal.value = false
   selectedCustomer.value = null
   fileForm.files = []
+  originalFiles.value = []
 }
 
 const openEditFromDetail = () => {
@@ -1822,6 +2209,35 @@ watch(searchText, () => {
   page.value = 0
   fetchCustomers()
 })
+watch(employeeSearch, (value) => {
+  if (!showEditCustomerModal.value) return
+
+  if (selectedAssignee.value && value !== selectedAssignee.value.tenNhanVien) {
+    selectedAssignee.value = null
+    customerForm.assigneeId = null
+    customerForm.assigneeName = ''
+    customerForm.assigneeAvatar = ''
+  }
+
+  if (employeeSearchTimer) {
+    clearTimeout(employeeSearchTimer)
+  }
+
+  employeeSearchTimer = setTimeout(() => {
+    searchEmployeeOptions(value.trim())
+  }, 300)
+})
+watch(() => customerForm.province, (value) => {
+  if (!showEditCustomerModal.value) return
+  provinceSearch.value = value || ''
+})
+watch(showEditCustomerModal, (isOpen) => {
+  if (!isOpen) {
+    employeeOptions.value = []
+    employeeDropdownOpen.value = false
+    provinceDropdownOpen.value = false
+  }
+})
 watch(
     () => ({ ...filters }),
     () => {
@@ -1838,7 +2254,7 @@ watch(page, () => {
 
 import api from '/src/api/api.js'
 import {generateAvatarFromName, shortenName} from "../../assets/js/global.js";
-import {showCenterSuccess} from "../../assets/js/alertService.js";
+import {confirmYesNo, showCenterSuccess} from "../../assets/js/alertService.js";
 const marketingoptions = ref([])
 
 
@@ -1910,18 +2326,98 @@ watch(pageSize, () => {
   page.value = 0
   fetchCustomers()
 })
-async function fetchCustomerDetail(customerId) {
+async function fetchCustomerDetail(customerId, { showModal = true } = {}) {
   if (!customerId) return
 
   try {
     const res = await api.get(`/customer-crm/admin/host-temp/${customerId}`)
     selectedCustomer.value = res.data
-    fileForm.files = res.data?.files ?? []
-    showDetailModal.value = true
+    const files = res.data?.files ?? []
+    fileForm.files = files
+    originalFiles.value = files
+    if (showModal) {
+      showDetailModal.value = true
+    }
   } catch (e) {
     console.error(e)
   }
 }
+const bulkDelete = async () => {
+  const ids = selectedCustomerIds.value
+
+  // ❌ Chưa chọn gì
+  if (!ids || ids.length === 0) {
+    showCenterError('Chưa chọn dữ liệu', 'Vui lòng chọn ít nhất 1 khách hàng')
+    return
+  }
+
+  // ✅ Confirm
+  confirmYesNo(
+      'Xác nhận xóa',
+      `
+      Bạn có chắc chắn muốn <b>xóa ${ids.length}</b> khách hàng đã chọn không?<br>
+      <span class="text-danger">Hành động này không thể hoàn tác!</span>
+    `,
+      async () => {
+        try {
+          await api.post(
+              '/customer-crm/admin/employee/delete-list',
+              ids // backend nhận List<Long>
+          )
+
+          showCenterSuccess(
+              'Xóa thành công',
+              `Đã xóa ${ids.length} khách hàng`
+          )
+
+          clearSelection()
+          await fetchCustomers()
+
+        } catch (e) {
+          console.error(e)
+          showCenterError(
+              'Xóa thất bại',
+              'Vui lòng thử lại sau'
+          )
+        }
+      }
+  )
+}
+
+const deleteOne = async (id) => {
+
+  if (!id) {
+    showCenterError('Lỗi', 'Không xác định được dữ liệu cần xóa')
+    return
+  }
+
+  confirmYesNo(
+      'Xác nhận xóa',
+      `
+      Bạn có chắc chắn muốn <b>xóa</b> khách hàng này không?<br>
+      <span class="text-danger">Hành động này không thể hoàn tác!</span>
+    `,
+      async () => {
+        try {
+          // ⚠️ GỬI DƯỚI DẠNG LIST
+          await api.post(
+              '/customer-crm/admin/employee/delete-list',
+              [id]
+          )
+
+          showCenterSuccess('Xóa thành công', 'Khách hàng đã được xóa')
+
+          clearSelection()
+          await fetchCustomers()
+
+        } catch (e) {
+          console.error(e)
+          showCenterError('Xóa thất bại', 'Vui lòng thử lại sau')
+        }
+      }
+  )
+}
+
 
 </script>
 
@@ -3269,6 +3765,155 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   font-size: 1.1rem;
   font-weight: 600;
   color: #2d3748;
+}
+
+.staff-item-edit {
+  align-items: flex-start;
+}
+
+.edit-modal .form-control-custom,
+.edit-modal .form-select-custom {
+  font-size: 18px;
+}
+
+.province-search {
+  position: relative;
+}
+
+.province-caret {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  cursor: pointer;
+}
+
+.province-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 6px 0;
+  list-style: none;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.province-dropdown li {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.province-dropdown li:hover {
+  background: rgba(102, 126, 234, 0.08);
+}
+
+.province-dropdown li.selected {
+  background: rgba(102, 126, 234, 0.16);
+}
+
+.employee-search {
+  position: relative;
+}
+
+.employee-options {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.employee-option {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+  cursor: pointer;
+}
+
+.employee-option:hover {
+  background: rgba(102, 126, 234, 0.08);
+}
+
+.employee-option.selected {
+  background: rgba(102, 126, 234, 0.16);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.employee-option.muted {
+  cursor: default;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.employee-avatar img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+
+.employee-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.employee-name {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.employee-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.employee-meta i {
+  margin-right: 6px;
+  color: #667eea;
+}
+
+.employee-selected {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.edit-modal .detail-main {
+  max-height: none;
+}
+
+.edit-modal .detail-left-col {
+  border-right: none;
+}
+
+.edit-modal .detail-left-col {
+  width: 100%;
 }
 
 /* File upload */

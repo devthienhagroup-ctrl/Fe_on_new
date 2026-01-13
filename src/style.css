@@ -652,6 +652,11 @@ body.use-custom-scroll::-webkit-scrollbar-thumb {
   padding: 15px 15px !important;
 }
 
+.swal-rounded-soft {
+  border-radius: 28px !important;
+  padding: 18px 18px !important;
+}
+
 /* Title đậm hơn */
 .swal-title {
   font-weight: 800 !important;
@@ -789,5 +794,4 @@ body.use-custom-scroll::-webkit-scrollbar-thumb {
   --shell-pad: 18px;
   --sidebar-w: 340px;
 }
-
 

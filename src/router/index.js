@@ -148,7 +148,7 @@ import test2 from "../components/thiet-kegiandien/admin-saleadmin.vue"
 const routes = [
     {
         path: "/test/dat-lich",
-        name: "TeamCollaboration",
+        name: "TeamCollaboration1",
         component: test,
         meta: { requiresAuth: false,     enableTailwind: false},
     },

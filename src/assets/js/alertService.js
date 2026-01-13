@@ -1,12 +1,26 @@
 import Swal from "sweetalert2";
 
+const roundedPopupClass = "swal-rounded-soft";
+
+const withRoundedPopup = (options = {}) => {
+    const customClass = options.customClass || {};
+
+    return {
+        ...options,
+        customClass: {
+            ...customClass,
+            popup: [customClass.popup, roundedPopupClass].filter(Boolean).join(" "),
+        },
+    };
+};
+
 /**
  * ✅ Thông báo thành công
  * @param {string} title - Tiêu đề
  * @param {string} text - Nội dung chi tiết
  */
 export function showSuccess(title, text = "") {
-    Swal.fire({
+    Swal.fire(withRoundedPopup({
         toast: true,
         position: "top-end",
         icon: "success",
@@ -14,7 +28,7 @@ export function showSuccess(title, text = "") {
         text: text,
         showConfirmButton: false,
         timer: 2000,
-    });
+    }));
 }
 
 /**
@@ -23,7 +37,7 @@ export function showSuccess(title, text = "") {
  * @param {string} text - Nội dung chi tiết
  */
 export function showError(title, text = "") {
-    Swal.fire({
+    Swal.fire(withRoundedPopup({
         toast: true,
         position: "top-end",
         icon: "error",
@@ -31,7 +45,7 @@ export function showError(title, text = "") {
         text: text,
         showConfirmButton: false,
         timer: 2500,
-    });
+    }));
 }
 
 /**
@@ -40,7 +54,7 @@ export function showError(title, text = "") {
  * @param {string} text - Nội dung chi tiết
  */
 export function showWarning(title, text = "") {
-    Swal.fire({
+    Swal.fire(withRoundedPopup({
         toast: true,
         position: "top-end",
         icon: "warning",
@@ -48,19 +62,19 @@ export function showWarning(title, text = "") {
         text: text,
         showConfirmButton: false,
         timer: 2500,
-    });
+    }));
 }
 
 // 🌀 Hiển thị alert xoay xoay (khi đang chờ BE)
 // ✅ Giữ loading ít nhất 2s và đợi API hoàn tất
 export async function showLoading(promise) {
-    Swal.fire({
+    Swal.fire(withRoundedPopup({
         title: "Đang xử lý...",
         text: "Vui lòng chờ trong giây lát...",
         allowOutsideClick: false,
         allowEscapeKey: false,
         didOpen: () => Swal.showLoading(),
-    });
+    }));
 
     const start = Date.now();
 
@@ -77,14 +91,14 @@ export async function showLoading(promise) {
 
 // ✅ Khi thành công → cho phép click ra ngoài + tự tắt sau 2s
 export function updateAlertSuccess(title, text = "") {
-    Swal.update({
+    Swal.update(withRoundedPopup({
         icon: "success",
         title,
         text,
         allowOutsideClick: true,   // ✅ Cho phép tắt khi click ra ngoài
         allowEscapeKey: true,
         showConfirmButton: false,
-    });
+    }));
 
     setTimeout(() => {
         Swal.close(); // Tự tắt sau 2 giây
@@ -94,14 +108,14 @@ export function updateAlertSuccess(title, text = "") {
 // ❌ Khi lỗi → cho phép click ra ngoài hoặc bấm ESC để đóng
 export function updateAlertError(title, text = "") {
 
-    Swal.update({
+    Swal.update(withRoundedPopup({
         icon: "error",
         title,
         text,
         allowOutsideClick: true,   // ✅ Cho phép click ra ngoài
         allowEscapeKey: true,
         showConfirmButton: false,   // Có nút OK
-    });
+    }));
 
     setTimeout(() => {
         Swal.close(); // Tự tắt sau 2 giây
@@ -117,7 +131,7 @@ export function updateAlertError(title, text = "") {
  * @param {function} onConfirm - Hàm thực thi khi nhập đúng
  */
 export async function confirmWithInput(title, text, expectedText, onConfirm) {
-    const { value: userInput } = await Swal.fire({
+    const { value: userInput } = await Swal.fire(withRoundedPopup({
         title: title,
         text: text,
         input: "text",
@@ -130,17 +144,17 @@ export async function confirmWithInput(title, text, expectedText, onConfirm) {
             if (value.trim() !== expectedText)
                 return "❌ Nội dung không khớp, vui lòng nhập lại!";
         },
-    });
+    }));
 
     if (userInput && userInput.trim() === expectedText) {
         // ✅ Thành công
-        await Swal.fire({
+        await Swal.fire(withRoundedPopup({
             icon: "success",
             title: "Thành công!",
             text: "Xác nhận đúng, đang thực hiện hành động...",
             showConfirmButton: false,
             timer: 1200,
-        });
+        }));
 
         // Gọi callback nếu có
         if (typeof onConfirm === "function") onConfirm();
@@ -149,7 +163,7 @@ export async function confirmWithInput(title, text, expectedText, onConfirm) {
 
 
 export async function confirmDeleteMember(memberName, onConfirm) {
-    const { isConfirmed } = await Swal.fire({
+    const { isConfirmed } = await Swal.fire(withRoundedPopup({
         title: "Xóa thành viên?",
         html: `
             Bạn có chắc muốn <b>xóa ${memberName}</b> khỏi nhóm không?<br>
@@ -160,16 +174,16 @@ export async function confirmDeleteMember(memberName, onConfirm) {
         confirmButtonText: "Xóa",
         cancelButtonText: "Hủy",
         confirmButtonColor: "#d33",
-    });
+    }));
 
     if (isConfirmed) {
         // Thông báo thành công
-        Swal.fire({
+        Swal.fire(withRoundedPopup({
             icon: "success",
             title: "Đã xóa thành viên!",
             timer: 1000,
             showConfirmButton: false,
-        });
+        }));
 
         if (typeof onConfirm === "function") onConfirm();
     }
@@ -177,7 +191,7 @@ export async function confirmDeleteMember(memberName, onConfirm) {
 
 
 export function showAlert(title, text = "") {
-    Swal.fire({
+    Swal.fire(withRoundedPopup({
         icon: "warning",
         title: title,
         text: text,
@@ -199,11 +213,11 @@ export function showAlert(title, text = "") {
         hideClass: {
             popup: "animate__animated animate__fadeOut animate__faster",
         },
-    });
+    }));
 }
 
 export async function confirmYesNo(title, message, onConfirm) {
-    const { isConfirmed } = await Swal.fire({
+    const { isConfirmed } = await Swal.fire(withRoundedPopup({
         title: title,
         html: message,
         icon: "warning",
@@ -219,7 +233,7 @@ export async function confirmYesNo(title, message, onConfirm) {
             cancelButton: 'swal-btn-cancel',
             title: 'swal-title'
         }
-    });
+    }));
 
     if (isConfirmed && typeof onConfirm === "function") {
         onConfirm();
@@ -230,7 +244,7 @@ export async function confirmYesNo(title, message, onConfirm) {
 
 /** ✔️ Thành công - hiển thị giữa màn hình */
 export function showCenterSuccess(title, text = "") {
-    Swal.fire({
+    Swal.fire(withRoundedPopup({
         icon: "success",
         title: title,
         text: text,
@@ -238,12 +252,12 @@ export function showCenterSuccess(title, text = "") {
         showConfirmButton: false,
         timer: 1800,
         timerProgressBar: true,
-    });
+    }));
 }
 
 /** ❌ Lỗi - hiển thị giữa màn hình */
 export function showCenterError(title, text = "") {
-    Swal.fire({
+    Swal.fire(withRoundedPopup({
         icon: "error",
         title: title,
         text: text,
@@ -251,12 +265,12 @@ export function showCenterError(title, text = "") {
         showConfirmButton: false,
         timer: 2000,
         timerProgressBar: true,
-    });
+    }));
 }
 
 /** ⚠️ Cảnh báo - hiển thị giữa màn hình */
 export function showCenterWarning(title, text = "") {
-    Swal.fire({
+    Swal.fire(withRoundedPopup({
         icon: "warning",
         title: title,
         text: text,
@@ -264,18 +278,18 @@ export function showCenterWarning(title, text = "") {
         showConfirmButton: false,
         timer: 2000,
         timerProgressBar: true,
-    });
+    }));
 }
 
 // 🌀 Hiển thị loading thông thường (trả về hàm đóng)
 export function showLoadingMessage(message = "Đang xử lý...") {
-    Swal.fire({
+    Swal.fire(withRoundedPopup({
         title: message,
         text: "Vui lòng chờ trong giây lát...",
         allowOutsideClick: false,
         allowEscapeKey: false,
         didOpen: () => Swal.showLoading(),
-    });
+    }));
 
     // Trả về hàm để đóng loading
     return () => Swal.close();
@@ -292,7 +306,7 @@ function showServiceExpiredAlert(message, flag, onContinue, router) {
 
     const isNoPackage = flag === 'service_no'
 
-    Swal.fire({
+    Swal.fire(withRoundedPopup({
         icon: 'warning',
         title: isNoPackage
             ? 'Bạn chưa có gói dịch vụ'
@@ -331,7 +345,7 @@ function showServiceExpiredAlert(message, flag, onContinue, router) {
             cancelButton: 'service-alert-cancel'
         }
 
-    }).then(result => {
+    })).then(result => {
 
         // 📝 Đăng ký ngay
         if (result.isConfirmed) {
@@ -367,11 +381,11 @@ export function handleServiceUsageResponse(resData, options = {}) {
             return false
         }
 
-        Swal.fire({
+        Swal.fire(withRoundedPopup({
             icon: 'error',
             title: 'Không thể thực hiện',
             text: resData.msg || 'Có lỗi xảy ra'
-        })
+        }))
 
         return false
     }
@@ -386,7 +400,7 @@ function showServiceExpiredAlert2(message, flag, router) {
 
     const isNoPackage = flag === 'service_no'
 
-    Swal.fire({
+    Swal.fire(withRoundedPopup({
         icon: 'warning',
         title: isNoPackage
             ? 'Bạn chưa có gói dịch vụ'
@@ -422,7 +436,7 @@ function showServiceExpiredAlert2(message, flag, router) {
             cancelButton: 'service-alert-cancel'
         }
 
-    }).then(result => {
+    })).then(result => {
         if (result.isConfirmed) {
             router.push('/ho-so/goi-dich-vu')
         }
@@ -449,16 +463,14 @@ export function handleServiceUsageResponse2(resData, options = {}) {
             return false
         }
 
-        Swal.fire({
+        Swal.fire(withRoundedPopup({
             icon: 'error',
             title: 'Không thể thực hiện',
             text: resData.msg || 'Có lỗi xảy ra'
-        })
+        }))
 
         return false
     }
 
     return true
 }
-
-
