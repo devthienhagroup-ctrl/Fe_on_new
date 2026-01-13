@@ -4,10 +4,13 @@
     <div v-if="!hideHeader" class="header-bg"></div>
     <header v-if="!hideHeader" class="header">
       <div class="header-content">
-        <img src="/imgs/logoTHG.png" alt="Logo THG" class="logo" />
+        <div style="display: flex; justify-content: center">
+          <img src="/imgs/logoTHG.png" alt="Logo THG" class="logo"/>
+        </div>
         <h1 class="title">CÁC GÓI DỊCH VỤ</h1>
         <p class="subtitle">
-          Bắt đầu hành trình cùng Thiên Hà Group với gói dịch vụ phù hợp nhất – linh hoạt, dễ dùng và tối ưu cho mọi nhu cầu.
+          Bắt đầu hành trình cùng Thiên Hà Group với gói dịch vụ phù hợp nhất – linh hoạt, dễ dùng và tối ưu cho mọi nhu
+          cầu.
         </p>
       </div>
     </header>
@@ -33,9 +36,10 @@
 
               <div class="price-section">
                 <div class="price">{{ formatPrice(packageItem.price) }}</div>
-                <div class="duration">/ {{ packageItem.unit }} <span class="fs-6" v-if="packageItem.tuDongGiaHan != null">
-                  ( {{ packageItem.tuDongGiaHan ? 'Gia hạn tự động':'Đã hủy' }})
-                </span> </div>
+                <div class="duration">/ {{ packageItem.unit }} <span class="fs-6"
+                                                                     v-if="packageItem.tuDongGiaHan != null">
+                  ( {{ packageItem.tuDongGiaHan ? 'Gia hạn tự động' : 'Đã hủy' }})
+                </span></div>
               </div>
 
               <div class="divider"></div>
@@ -81,7 +85,7 @@
 
                     <!-- SỐ LƯỢT (CĂN PHẢI + IN ĐẬM + CÓ MÀU) -->
                     <span class="ms-auto fw-bold text-primary">
-                      {{ detail.soLuot === null ? 'Không giới hạn':  detail.soLuot + ' lượt'}}
+                      {{ detail.soLuot === null ? 'Không giới hạn' : detail.soLuot + ' lượt' }}
                     </span>
                   </div>
                 </div>
@@ -91,7 +95,7 @@
           </div>
         </div>
       </div>
-      <AdditionalServices @cancel-package="fetchServicePackages" ></AdditionalServices>
+      <AdditionalServices @cancel-package="fetchServicePackages"></AdditionalServices>
       <!-- Call to Action Section -->
       <div class="cta-section">
         <h2 class="cta-title">Sẵn sàng nâng tầm hoạt động kinh doanh của bạn?</h2>
@@ -109,8 +113,8 @@
 
 <script setup>
 import AdditionalServices from "./AdditionalServices.vue";
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import {ref, computed, onMounted} from 'vue'
+import {useRoute} from 'vue-router'
 import api from '/src/api/api.js'   // dùng axios instance của bạn
 
 const route = useRoute()
@@ -199,7 +203,7 @@ const registerOrUpgradePackage = async (packageItem) => {
       async () => {
         try {
           // 🌀 Hiện loading + chờ API xong
-           const  res = await showLoading(
+          const res = await showLoading(
               api.post(
                   `/profile/register-or-upgrade/${packageItem.id}`
               )
@@ -207,10 +211,10 @@ const registerOrUpgradePackage = async (packageItem) => {
           const data = res.data
           console.log(data.success)
           // ❌ Không đủ tiền / nghiệp vụ fail
-          if (!data.success){
+          if (!data.success) {
             updateAlertError('Thất bại', 'Số dư không đủ để đăng ký gói dịch vụ! Vui lòng nạp thêm tiền vào tài khoản và đăng ký lại.')
             return;
-          }else{
+          } else {
             updateAlertSuccess(
                 'Thành công 🎉',
                 'Gói dịch vụ đã được kích hoạt'
@@ -336,9 +340,8 @@ const registerOrUpgradePackage = async (packageItem) => {
 }
 
 .package-card:hover {
-  box-shadow:
-      0 8px 25px rgba(0, 48, 255, 0.15),
-      0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 25px rgba(0, 48, 255, 0.15),
+  0 4px 12px rgba(0, 0, 0, 0.08);
   transform: translateY(-5px);
 }
 
@@ -477,9 +480,15 @@ const registerOrUpgradePackage = async (packageItem) => {
 }
 
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .details-toggle {
@@ -748,6 +757,7 @@ const registerOrUpgradePackage = async (packageItem) => {
     height: 450px;
   }
 }
+
 .text-blue-dark {
   color: #0f172a; /* xanh đen - slate-900 */
 }

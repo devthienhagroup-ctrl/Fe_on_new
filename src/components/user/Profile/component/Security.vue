@@ -2,9 +2,12 @@
   <div class="security-container">
     <!-- Header với ảnh SVG -->
     <div class="security-header">
-      <img src="/imgs/security-animate.svg" alt="Security" class="security-image">
+      <div  style="display: flex; align-items: center; justify-content: center">
+        <img src="/imgs/security-animate.svg" alt="Security" class="security-image">
+      </div>
       <h1 class="security-title">Mật khẩu và đăng nhập</h1>
-      <p class="security-subtitle">Giữ tài khoản luôn an toàn — chỉnh thông tin, siết bảo mật, yên tâm dùng hệ thống.</p>
+      <p class="security-subtitle">Giữ tài khoản luôn an toàn — chỉnh thông tin, siết bảo mật, yên tâm dùng hệ
+        thống.</p>
     </div>
 
     <!-- Danh sách các chức năng -->
@@ -223,9 +226,11 @@
                 id="reset-confirm-password"
                 v-model="resetConfirmPassword"
             >
-            <p v-if="resetConfirmPassword && resetPassword !== resetConfirmPassword" class="error-message">Mật khẩu không khớp</p>
+            <p v-if="resetConfirmPassword && resetPassword !== resetConfirmPassword" class="error-message">Mật khẩu
+              không khớp</p>
           </div>
-          <button class="confirm-btn" @click="resetPasswordAction" :disabled="!isResetPasswordValid || resettingPassword">
+          <button class="confirm-btn" @click="resetPasswordAction"
+                  :disabled="!isResetPasswordValid || resettingPassword">
             {{ resettingPassword ? 'Đang đặt lại mật khẩu...' : 'Xác nhận' }}
           </button>
           <p v-if="resetPasswordError" class="error-message">{{ resetPasswordError }}</p>

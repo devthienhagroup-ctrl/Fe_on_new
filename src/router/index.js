@@ -139,6 +139,8 @@ import GlobalCSS from "../components/cms/NewCms/homeNew/GlobalCSS.vue";
 import MainContent from "../components/cms/NewCms/homeNew/MainContent.vue";
 import QuickSale30D from "../components/user/NewUser/QuickSale30D/QuickSale30D.vue";
 import QuickSale from "../components/cms/NewCms/QuickSaleNew/QuickSale.vue";
+import ESNew from "../components/user/NewUser/EstimateProperty/ESNew.vue";
+import EstimatePropertyNew from "../components/cms/NewCms/EstimatePropertyNew/EstimatePropertyNew.vue";
 
 
 import DemoGiaoDien from "../components/thiet-kegiandien/marketing-cap-da-ta.vue";
@@ -458,6 +460,18 @@ const routes = [
                         component: Faq
                     }
 
+                ]
+            },
+            {
+                path: 'dinh-gia-moi',
+                name: 'newES',
+                component: cms,
+                children: [
+                    {
+                        path: 'noi-dung-chinh',
+                        name: 'NewES',
+                        component: EstimatePropertyNew
+                    }
                 ]
             },
             {
@@ -1420,6 +1434,11 @@ const routes = [
                 path: 'ban-nhanh-bds',
                 name: "quickSaleNew",
                 component: QuickSale30D
+            },
+            {
+                path: 'dinh-gia-bat-dong-san',
+                name: 'ESNew',
+                component: ESNew
             }
         ]
     },

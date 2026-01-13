@@ -96,12 +96,17 @@ export const useAuthStore = defineStore('auth', {
                 this.clearToken()
                 socketService.disconnect()
 
-                const link = localStorage.getItem("loginFrom");
-                router.push(link === "admin" ? "/-thg/dang-nhap" : "/")
+                const isAuthPage = router.currentRoute.value.meta?.requiresAuth
+
+                if (isAuthPage) {
+                    const link = localStorage.getItem("loginFrom");
+                    await router.push(link === "admin" ? "/-thg/dang-nhap" : "/")
+                }
 
                 updateAlertSuccess("Đăng xuất thành công")
             }
         },
+
         // ==============================
 // ⭐ 1) LẤY QUYỀN TRONG PROJECT
 // ==============================

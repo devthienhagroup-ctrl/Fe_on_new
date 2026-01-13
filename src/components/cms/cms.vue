@@ -244,6 +244,14 @@ const menuData = ref([
     }
   },
   {
+    id: 13,
+    name: 'Định giá mới',
+    slug: 'dinh-gia-moi',
+    sections: {
+      'noi-dung-chinh': 'Nội dung chính'
+    }
+  },
+  {
     id: 6,
     name: 'Tuyển dụng',
     slug: 'tuyen-dung',
@@ -296,6 +304,7 @@ const getMenuIcon = (slug) => {
     'ban-nhanh': 'fas fa-bolt',
     'ban-nhanh-moi': 'fas fa-bolt',
     'dinh-gia-bds': 'fas fa-calculator',
+    'dinh-gia-moi': 'fas fa-calculator',
     'tuyen-dung': 'fas fa-users',
     'cong-tac-vien': 'fas fa-handshake',
     'dau-tu': 'fas fa-chart-line',
