@@ -58,7 +58,7 @@
                   class="absolute top-3 mr-0 ms-3 right-2 flex items-center gap-2"
                   style="width: 60px; position: absolute; top: 7px; right: 3px"
                 >
-                  <img src="https://s3.cloudfly.vn/thg-storage/uploads-public/icon-kiem-duỵet.png" />
+                  <img src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png" />
                 </div>
               </div>
 
@@ -521,7 +521,7 @@ async function fetchFilteredAssets() {
           ...item,
           imageUrl: item.imageUrl
               ? item.imageUrl
-              : 'https://s3.cloudfly.vn/thg-storage/uploads-public/default.jpg'
+              : 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg'
         }))
         : [];
 

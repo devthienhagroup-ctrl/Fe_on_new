@@ -269,7 +269,7 @@ body.use-custom-scroll::-webkit-scrollbar-thumb {
   --gray-1: #f5f5f5;
   --gray-2: rgba(153, 153, 153, 0.5);
   --gray-3: #999999;
-  --primary-color: #3b82f6;
+  --primary-color: #043688;
   --hover-color: #eff6ff;
   --border-color: #d1d5db;
   --disabled-color: #9ca3af;
@@ -652,6 +652,11 @@ body.use-custom-scroll::-webkit-scrollbar-thumb {
   padding: 15px 15px !important;
 }
 
+.swal-rounded-soft {
+  border-radius: 28px !important;
+  padding: 18px 18px !important;
+}
+
 /* Title đậm hơn */
 .swal-title {
   font-weight: 800 !important;
@@ -752,5 +757,41 @@ body.use-custom-scroll::-webkit-scrollbar-thumb {
 
 .service-alert-cancel:hover {
   background: #e5e7eb !important;
+}
+
+:root {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  --danger-gradient: linear-gradient(135deg, #ff5858 0%, #f09819 100%);
+  --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --dark-gradient: linear-gradient(135deg, #141e30 0%, #243b55 100%);
+  --light-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+
+  --primary-color: #667eea;
+  --secondary-color: #f093fb;
+  --success-color: #43e97b;
+  --warning-color: #fa709a;
+  --danger-color: #ff5858;
+  --info-color: #4facfe;
+  --dark-color: #141e30;
+  --light-color: #f8f9fa;
+
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --shadow-hard: 0 15px 50px rgba(0, 0, 0, 0.2);
+
+  --border-radius-sm: 12px;
+  --border-radius-md: 16px;
+  --border-radius-lg: 20px;
+
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  --nav-h: 85px;
+  --shell-pad: 18px;
+  --sidebar-w: 340px;
 }
 

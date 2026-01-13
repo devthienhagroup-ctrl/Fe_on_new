@@ -87,7 +87,7 @@ export const logout = async (accessToken) => {
 
     localStorage.removeItem('remember');
 }
-export const baseImgaeUrl="https://s3.cloudfly.vn/thg-storage/uploads-public/";
+export const baseImgaeUrl="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/";
 
 export function slugify(str = '') {
     return str
@@ -124,3 +124,93 @@ export function slugify(str = '') {
 //         .trim()
 //         .replace(/\s+/g, '-')
 // }
+
+export function shortenName(fullName, maxLength = 10) {
+    if (!fullName) return ''
+
+    const name = fullName.trim().replace(/\s+/g, ' ')
+    if (name.length <= maxLength) return name
+
+    const parts = name.split(' ')
+    if (parts.length === 1) return name.slice(0, maxLength)
+
+    const lastName = parts[parts.length - 1]
+    const initials = parts
+        .slice(0, -1)
+        .map(word => word.charAt(0).toUpperCase())
+        .join('')
+
+    const shortName = `${initials}.${lastName}`
+
+    // nếu vẫn dài hơn max → cắt tên cuối
+    if (shortName.length > maxLength) {
+        const allowedLastNameLength =
+            maxLength - initials.length - 1 // trừ dấu '.'
+
+        if (allowedLastNameLength <= 0) {
+            return initials.slice(0, maxLength)
+        }
+
+        return `${initials}.${lastName.slice(0, allowedLastNameLength)}`
+    }
+
+    return shortName
+}
+
+export function generateAvatarFromName(name, size = 64) {
+    if (!name) return ''
+
+    const cleanName = name.trim()
+    const parts = cleanName.split(/\s+/)
+
+    // Lấy chữ cái đầu + chữ cái cuối
+    let initials = ''
+    if (parts.length === 1) {
+        initials = parts[0].charAt(0)
+    } else {
+        initials =
+            parts[0].charAt(0) +
+            parts[parts.length - 1].charAt(0)
+    }
+
+    initials = initials.toUpperCase()
+
+    // ===== Hash tên để tạo màu ổn định =====
+    const hash = Array.from(cleanName).reduce(
+        (acc, char) => acc + char.charCodeAt(0),
+        0
+    )
+
+    const hue1 = hash % 360
+    const hue2 = (hue1 + 40) % 360
+
+    const color1 = `hsl(${hue1}, 75%, 55%)`
+    const color2 = `hsl(${hue2}, 75%, 45%)`
+
+    // ===== SVG Avatar =====
+    const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
+    <defs>
+      <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="${color1}" />
+        <stop offset="100%" stop-color="${color2}" />
+      </linearGradient>
+    </defs>
+    <rect width="100%" height="100%" rx="${size / 2}" fill="url(#grad)" />
+    <text
+      x="50%"
+      y="52%"
+      text-anchor="middle"
+      dominant-baseline="middle"
+      font-size="${size * 0.42}"
+      font-family="Inter, Arial, sans-serif"
+      fill="white"
+      font-weight="600"
+    >
+      ${initials}
+    </text>
+  </svg>
+  `
+
+    return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`
+}

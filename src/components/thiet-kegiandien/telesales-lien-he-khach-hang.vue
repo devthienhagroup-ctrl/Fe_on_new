@@ -997,6 +997,10 @@ const initLineChart = () => {
       scales: {
         y: {
           beginAtZero: true,
+          ticks: {
+            stepSize: 1,          // ✅ mỗi ô = 1 đơn vị
+            precision: 0          // ✅ không hiện số lẻ
+          },
           title: { display: true, text: 'Số lượng cuộc gọi' }
         },
         x: {

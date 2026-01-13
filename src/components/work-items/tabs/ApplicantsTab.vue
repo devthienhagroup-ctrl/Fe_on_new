@@ -200,7 +200,7 @@ const welcomeMessage = ref("");
 const rejectReason = ref("");
 let searchTimeout = null;
 
-const ASSET_BASE_URL = "https://s3.cloudfly.vn/thg-storage/uploads-public/";
+const ASSET_BASE_URL = "https://s3.cloudfly.vn/thg-storage-dev/uploads-public/";
 
 const formatDate = (value) => {
   if (!value) return "Chưa cập nhật";

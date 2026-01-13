@@ -120,7 +120,7 @@
                 <div class="person">
                   <div class="avatar">
                     <img
-                        :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/' + (request.avatarNguoiGui == null ? 'vat-default.jpg': request.avatarNguoiGui)"
+                        :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + (request.avatarNguoiGui == null ? 'vat-default.jpg': request.avatarNguoiGui)"
                         :alt="request.tenNguoiGui"
                     />
                   </div>
@@ -193,7 +193,7 @@
                 <div class="manager">
                   <div class="manager__avatar">
                     <img
-                        :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/' + (request.nguoiAvatarQuanLy == null ? 'vat-default.jpg': request.nguoiAvatarQuanLy )"
+                        :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + (request.nguoiAvatarQuanLy == null ? 'vat-default.jpg': request.nguoiAvatarQuanLy )"
                         :alt="request.tenNguoiQuanLy"
                     />
                   </div>

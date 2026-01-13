@@ -1,857 +1,1500 @@
-diff --git a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-index 96c9920f42c677ea47a7ee4ff68a911fdbb0ea93..9b0131fe5a78713e6cd59ca6fa669f6d2da6e727 100644
---- a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-+++ b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-@@ -172,51 +172,56 @@
+diff --git a/src/components/thiet-kegiandien/admin-saleadmin.vue b/src/components/thiet-kegiandien/admin-saleadmin.vue
+index 1a6646b90f0491952e45e2560ccdf28536ffce09..4a878686b1beea4f015dcb9e08ff7eb71f0cd65d 100644
+--- a/src/components/thiet-kegiandien/admin-saleadmin.vue
++++ b/src/components/thiet-kegiandien/admin-saleadmin.vue
+@@ -626,51 +626,51 @@
 
-               <div class="search-box">
-                 <input v-model="searchQuery" type="text" placeholder="Tìm kiếm theo tên, số điện thoại..." />
-                 <i class="fas fa-search"></i>
+                   </ul>
+                 </nav>
+
                </div>
              </div>
-           </div>
-
-           <!-- Danh sách khách hàng -->
-           <div class="customer-list">
-             <div
-                 v-for="customer in pagedCustomers"
-                 :key="customer.id"
-                 class="customer-card"
-                 :class="{ selected: selectedCustomer && selectedCustomer.id === customer.id }"
-                 @click="selectCustomer(customer)"
-             >
-               <div class="customer-avatar">
-                 <div class="avatar-initials" :style="{ backgroundColor: getAvatarColor(customer.name) }">
-                   {{ getInitials(customer.name) }}
-                 </div>
-                 <span :class="`customer-type ${customer.type}`">{{ getCustomerTypeLabel(customer.type) }}</span>
-               </div>
-
-               <div class="customer-info">
--                <h4 class="customer-name">{{ customer.name }}</h4>
-+                <h4 class="customer-name">
-+                  {{ customer.name }}
-+                  <span v-if="getLatestHistoryLabel(customer)" class="customer-history-status">
-+                    {{ getLatestHistoryLabel(customer) }}
-+                  </span>
-+                </h4>
-
-                 <p class="customer-phone">
-                   <i class="fas fa-phone"></i> {{ customer.phone }}
-                 </p>
-
-                 <p class="customer-received">
-                   <i class="fas fa-clock"></i> Tiếp nhận: {{ formatReceivedAt(customer.receivedAt) }}
-                 </p>
-
-                 <div class="customer-location">
-                   <span class="location-current">
-                     <i class="fas fa-map-marker-alt"></i> {{ customer.province }}
-                   </span>
-                   <span v-if="customer.oldProvince" class="location-old">(Cũ: {{ customer.oldProvince }})</span>
-                 </div>
-
-                 <div class="customer-tags" v-if="Array.isArray(customer.tags) && customer.tags.length">
-                   <span v-for="tag in customer.tags" :key="tag" class="customer-tag" :class="tag">
-                     {{ getTagLabel(tag) }}
-                   </span>
-                 </div>
-               </div>
-
-               <div class="customer-actions">
-                 <div class="contact-icons">
-@@ -245,201 +250,234 @@
-                 class="page-btn"
-                 :class="{ active: currentPage === page }"
-                 @click="changePage(page)"
-             >
-               {{ page }}
-             </button>
-
-             <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
-
-             <button class="page-btn" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
-               <i class="fas fa-chevron-right"></i>
-             </button>
            </div>
          </div>
-       </main>
+       </section>
+     </div>
 
-       <!-- Panel chi tiết khách hàng -->
-       <div class="detail-panel" v-if="selectedCustomer">
-         <div class="detail-header">
-           <h3>Chi tiết khách hàng</h3>
-           <button class="close-btn" @click="selectedCustomer = null">
-             <i class="fas fa-times"></i>
-           </button>
-         </div>
-
-+        <div class="detail-tabs">
-+          <button
-+              class="detail-tab"
-+              :class="{ active: activeDetailTab === 'detail' }"
-+              @click="activeDetailTab = 'detail'"
-+          >
-+            <i class="fas fa-id-card"></i> Chi tiết
-+          </button>
-+          <button
-+              class="detail-tab"
-+              :class="{ active: activeDetailTab === 'history' }"
-+              @click="activeDetailTab = 'history'"
-+          >
-+            <i class="fas fa-history"></i> Lịch sử
-+          </button>
-+        </div>
-+
-         <div class="detail-content" v-if="selectedCustomer">
--          <div class="customer-detail-header">
--            <div
--                class="detail-avatar avatar-initials"
--                :style="selectedCustomer ? { backgroundColor: getAvatarColor(selectedCustomer.name) } : {}"
--            >
--              {{ selectedCustomer ? getInitials(selectedCustomer.name) : '' }}
-+          <div v-if="activeDetailTab === 'detail'">
-+            <div class="customer-detail-header">
-+              <div
-+                  class="detail-avatar avatar-initials"
-+                  :style="selectedCustomer ? { backgroundColor: getAvatarColor(selectedCustomer.name) } : {}"
-+              >
-+                {{ selectedCustomer ? getInitials(selectedCustomer.name) : '' }}
-+              </div>
-+
-+              <div class="detail-name-info">
-+                <h4>{{ selectedCustomer ? selectedCustomer.name : '' }}</h4>
-+                <p class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</p>
-+                <p class="detail-received">
-+                  Tiếp nhận: {{ selectedCustomer ? formatReceivedAt(selectedCustomer.receivedAt) : '' }}
-+                </p>
-+                <p class="detail-type">
-+                  <span :class="selectedCustomer ? `type-badge ${selectedCustomer.type}` : 'type-badge'">
-+                    {{ selectedCustomer ? getCustomerTypeLabel(selectedCustomer.type) : '' }}
-+                  </span>
-+                </p>
-+              </div>
-             </div>
-
--            <div class="detail-name-info">
--              <h4>{{ selectedCustomer ? selectedCustomer.name : '' }}</h4>
--              <p class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</p>
--              <p class="detail-received">
--                Tiếp nhận: {{ selectedCustomer ? formatReceivedAt(selectedCustomer.receivedAt) : '' }}
--              </p>
--              <p class="detail-type">
--                <span :class="selectedCustomer ? `type-badge ${selectedCustomer.type}` : 'type-badge'">
--                  {{ selectedCustomer ? getCustomerTypeLabel(selectedCustomer.type) : '' }}
--                </span>
--              </p>
-+            <div class="detail-section">
-+              <h5><i class="fas fa-map-marked-alt"></i> Thông tin địa chỉ</h5>
-+              <div class="detail-row">
-+                <span class="detail-label">Tỉnh hiện tại:</span>
-+                <span class="detail-value">{{ selectedCustomer.province }}</span>
-+              </div>
-+              <div class="detail-row" v-if="selectedCustomer.oldProvince">
-+                <span class="detail-label">Tỉnh cũ:</span>
-+                <span class="detail-value">{{ selectedCustomer.oldProvince }}</span>
-+              </div>
-             </div>
--          </div>
-
--          <div class="detail-section">
--            <h5><i class="fas fa-map-marked-alt"></i> Thông tin địa chỉ</h5>
--            <div class="detail-row">
--              <span class="detail-label">Tỉnh hiện tại:</span>
--              <span class="detail-value">{{ selectedCustomer.province }}</span>
-+            <div class="detail-section">
-+              <h5><i class="fas fa-layer-group"></i> Phân loại khách</h5>
-+              <div class="detail-row">
-+                <span class="detail-label">Loại khách:</span>
-+                <span class="detail-value">{{ getCustomerTypeLabel(selectedCustomer.type) || 'Chưa phân loại' }}</span>
-+              </div>
-             </div>
--            <div class="detail-row" v-if="selectedCustomer.oldProvince">
--              <span class="detail-label">Tỉnh cũ:</span>
--              <span class="detail-value">{{ selectedCustomer.oldProvince }}</span>
-+
-+            <div class="detail-section">
-+              <h5><i class="fas fa-tags"></i> Đánh dấu khách hàng</h5>
-+              <div class="tag-selector">
-+                <button
-+                    v-for="tag in availableTags"
-+                    :key="tag.value"
-+                    class="tag-option"
-+                    :class="{ active: isTagActive(tag.value) }"
-+                    :style="isTagActive(tag.value) ? { backgroundColor: tag.color, borderColor: tag.color, color: '#fff' } : {}"
-+                    @click="toggleCustomerStatus(tag.value)"
-+                >
-+                  {{ tag.label }}
-+                </button>
-+              </div>
-             </div>
--          </div>
-
--          <div class="detail-section">
--            <h5><i class="fas fa-tags"></i> Đánh dấu khách hàng</h5>
--            <div class="tag-selector">
--              <button
--                  v-for="tag in availableTags"
--                  :key="tag.value"
--                  class="tag-option"
--                  :class="{ active: isTagActive(tag.value) }"
--                  :style="isTagActive(tag.value) ? { backgroundColor: tag.color, borderColor: tag.color, color: '#fff' } : {}"
--                  @click="toggleCustomerStatus(tag.value)"
--              >
--                {{ tag.label }}
--              </button>
-+            <div class="detail-section">
-+              <h5>
-+                <i class="fas fa-sticky-note"></i>Mô tả:
-+                <span style="font-size: 14px; color: #4A4A4A; font-weight: 400">
-+                  {{ selectedCustomer.note !== '' ? selectedCustomer.note : 'Không có' }}
-+                </span>
-+              </h5>
-+            </div>
-+
-+            <FileNew
-+                v-if="selectedCustomer"
-+                :key="'request-new-asset'"
-+                :file-list="fileForm.files"
-+                :entity-id="selectedCustomer.id"
-+                :allow-download-all="true"
-+                entity-type="host"
-+                :can-edit="true"
-+                :on-upload="true"
-+                class="mt-2"
-+                @update:files="handleFileUpdate"
-+            />
-+
-+            <div class="add-note-form">
-+              <textarea v-model="newNote" placeholder="Thêm ghi chú cuộc gọi..." rows="3"></textarea>
-             </div>
--          </div>
-
--          <div class="detail-section">
--            <h5>
--              <i class="fas fa-sticky-note"></i>Mô tả:
--              <span style="font-size: 14px; color: #4A4A4A; font-weight: 400">
--                {{ selectedCustomer.note !== '' ? selectedCustomer.note : 'Không có' }}
--              </span>
--            </h5>
-+            <div class="detail-actions">
-+              <button class="action-btn move-btn" @click="moveToContacted">
-+                <i class="fas fa-save"></i> Lưu thông tin
-+              </button>
-+            </div>
+     <!-- Modals -->
+     <div v-if="isAnyModalOpen" class="modal-backdrop-custom"></div>
+     <!-- Add Customer Modal -->
+     <div v-if="showAddCustomerModal" class="modal fade modal-custom show" tabindex="-1">
+       <div class="modal-dialog modal-lg">
+         <div class="modal-content">
+           <div class="modal-header">
+             <h5 class="modal-title">
+               <i class="fas fa-user-plus me-2"></i>
+               Thêm khách hàng mới
+             </h5>
+             <button type="button" class="btn-close btn-close-white" @click="closeAddCustomerModal"></button>
            </div>
-
--          <div class="detail-section" v-if="Array.isArray(selectedCustomer.lichSu) && selectedCustomer.lichSu.length">
--            <h5>
--              <i class="fas fa-history"></i>
--              Lịch sử trạng thái
--            </h5>
-+          <div v-else class="detail-history">
-+            <div class="detail-section">
-+              <h5>
-+                <i class="fas fa-history"></i>
-+                Lịch sử trạng thái
-+              </h5>
-
--            <div class="history-list">
--              <div
--                  v-for="(item, idx) in selectedCustomer.lichSu"
--                  :key="idx"
--                  class="history-item"
--              >
-+              <div v-if="Array.isArray(selectedCustomer.lichSu) && selectedCustomer.lichSu.length" class="history-list">
-                 <div
--                    class="history-status"
--                    :style="{
--            backgroundColor: STATUS_META[item.trangThai]?.color || '#94a3b8'
--          }"
-+                    v-for="(item, idx) in selectedCustomer.lichSu"
-+                    :key="idx"
-+                    class="history-item"
-                 >
--                  {{ STATUS_META[item.trangThai]?.label || item.trangThai }}
--                </div>
--
--                <div class="history-content">
--                  <div class="history-time">
--                    <i class="fas fa-clock"></i>
--                    {{ formatReceivedAt(item.thoiGianCapNhat) }}
-+                  <div class="history-header">
-+                    <div
-+                        class="history-status"
-+                        :style="{
-+                      backgroundColor: STATUS_META[item.trangThai]?.color || '#94a3b8'
-+                    }"
-+                    >
-+                      {{ STATUS_META[item.trangThai]?.label || item.trangThai }}
-+                    </div>
-+
-+                    <div class="history-time">
-+                      <i class="fas fa-clock"></i>
-+                      {{ formatReceivedAt(item.thoiGianCapNhat) }}
-+                    </div>
-                   </div>
-
-                   <div class="history-note" v-if="item.ghiChu">
-                     {{ item.ghiChu }}
-                   </div>
-                   <div class="history-note muted" v-else>
-                     Không có mô tả
-                   </div>
+           <div class="modal-body">
+-            <form @submit.prevent="saveCustomer">
++            <form @submit.prevent="updateCustomer">
+               <div class="row">
+                 <div class="col-md-6 mb-3">
+                   <label for="customerName" class="form-label fw-medium">Họ và tên <span class="text-danger">*</span></label>
+                   <input type="text" class="form-control form-control-custom" v-model="customerForm.name" required>
+                 </div>
+                 <div class="col-md-6 mb-3">
+                   <label for="customerPhone" class="form-label fw-medium">Số điện thoại <span class="text-danger">*</span></label>
+                   <input type="tel" class="form-control form-control-custom" v-model="customerForm.phone" required>
                  </div>
                </div>
--            </div>
--          </div>
--
--          <FileNew
--              v-if="selectedCustomer"
--              :key="'request-new-asset'"
--              :file-list="fileForm.files"
--              :entity-id="selectedCustomer.id"
--              :allow-download-all="true"
--              entity-type="host"
--              :can-edit="true"
--              :on-upload="true"
--              class="mt-2"
--              @update:files="handleFileUpdate"
--          />
--
--          <div class="add-note-form">
--            <textarea v-model="newNote" placeholder="Thêm ghi chú cuộc gọi..." rows="3"></textarea>
--          </div>
 
--          <div class="detail-actions">
--            <button class="action-btn move-btn" @click="moveToContacted">
--              <i class="fas fa-save"></i> Lưu thông tin
--            </button>
-+              <div v-else class="empty-history">Chưa có lịch sử.</div>
-+            </div>
+               <div class="row">
+                 <div class="col-md-6 mb-3">
+                   <label for="customerProvince" class="form-label fw-medium">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+                   <input
+                     type="text"
+                     class="form-control form-control-custom"
+                     list="province-options"
+                     v-model="customerForm.province"
+                     placeholder="Chọn tỉnh/thành phố"
+                     required
+                   >
+                 </div>
+                 <div class="col-md-6 mb-3">
+                   <label for="customerOldProvince" class="form-label fw-medium">Tỉnh cũ (nếu có)</label>
+@@ -678,164 +678,313 @@
+                     type="text"
+                     class="form-control form-control-custom"
+                     list="province-options"
+                     v-model="customerForm.oldProvince"
+                     placeholder="Chọn tỉnh/thành phố"
+                   >
+                   <datalist id="province-options">
+                     <option v-for="province in provinceOptions" :key="province" :value="province"></option>
+                   </datalist>
+                 </div>
+               </div>
+
+               <div class="row">
+                 <div class="col-md-6 mb-3">
+                   <label for="customerType" class="form-label fw-medium">Phân loại khách hàng <span class="text-danger">*</span></label>
+                   <select class="form-select form-select-custom" v-model="customerForm.type" required>
+                     <option value="">Chọn phân loại</option>
+                     <option value="MOI_GIOI">Môi giới</option>
+                     <option value="CHINH_CHU">Chủ nhà</option>
+                     <option value="NGUOI_THAN">Người thân</option>
+                   </select>
+                 </div>
+                 <div class="col-md-6 mb-3">
+                   <label for="customerStatus" class="form-label fw-medium">Trạng thái <span class="text-danger">*</span></label>
+                   <select class="form-select form-select-custom" v-model="customerForm.status" required>
+-                    <option value="new">Mới tiếp nhận</option>
+-                    <option value="potential_7">Tiềm năng 7 ngày</option>
+-                    <option value="potential_14">Tiềm năng 14 ngày</option>
+-                    <option value="success">Thành công (đặt lịch)</option>
+-                    <option value="wrong_number">Sai số</option>
+-                    <option value="unreachable">Không liên lạc được</option>
+-                    <option value="care">Chăm sóc</option>
++                    <option value="NEW">Mới</option>
++                    <option value="DC_TELESALES">Chưa gọi</option>
++                    <option value="TN_7NGAY">Tiềm năng 7 ngày</option>
++                    <option value="TN_14NGAY">Tiềm năng 14 ngày</option>
++                    <option value="THANH_CONG">Thành công</option>
++                    <option value="SAI_SO_LIEU">Sai số</option>
++                    <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc được</option>
++                    <option value="CHAM_SOC">Chăm sóc</option>
++                    <option value="THAT_BAI">Thất bại</option>
+                   </select>
+                 </div>
+               </div>
+
+               <div class="mb-3">
+                 <label for="customerAvatar" class="form-label fw-medium">Ảnh đại diện (URL)</label>
+                 <input type="text" class="form-control form-control-custom" v-model="customerForm.avatar" placeholder="https://example.com/avatar.jpg">
+                 <small class="text-muted">Để trống để sử dụng ảnh mặc định</small>
+               </div>
+
+               <input type="hidden" v-model="customerForm.id" />
+             </form>
+           </div>
+           <div class="modal-footer">
+             <button type="button" class="btn btn-outline-custom btn-custom" @click="closeAddCustomerModal">Hủy</button>
+             <button type="button" class="btn btn-primary-custom btn-custom" @click="saveCustomer">
+               <i class="fas fa-save me-2"></i> Lưu khách hàng
+             </button>
            </div>
          </div>
        </div>
+     </div>
+
+     <!-- Edit Customer Modal -->
+-    <div v-if="showEditCustomerModal" class="modal fade modal-custom show" tabindex="-1">
+-      <div class="modal-dialog modal-lg">
++    <div v-if="showEditCustomerModal" class="modal fade modal-custom show detail-modal edit-modal" tabindex="-1">
++      <div class="modal-dialog modal-xl modal-dialog-centered">
+         <div class="modal-content">
+           <div class="modal-header">
+             <h5 class="modal-title">
+               <i class="fas fa-user-edit me-2"></i>
+               Chỉnh sửa khách hàng
+             </h5>
+             <button type="button" class="btn-close btn-close-white" @click="closeEditCustomerModal"></button>
+           </div>
+           <div class="modal-body">
+-            <form @submit.prevent="saveCustomer">
+-              <div class="row">
+-                <div class="col-md-6 mb-3">
+-                  <label class="form-label fw-medium">Họ và tên <span class="text-danger">*</span></label>
+-                  <input type="text" class="form-control form-control-custom" v-model="customerForm.name" required>
++            <form @submit.prevent="updateCustomer">
++              <div class="detail-hero">
++                <div class="detail-avatar">
++                  <div class="avatar-img">
++                    <img
++                        :src="customerForm.avatar || generateAvatarFromName(customerForm.name)"
++                        :alt="customerForm.name || 'Khách hàng'"
++                    >
++                  </div>
+                 </div>
+-                <div class="col-md-6 mb-3">
+-                  <label class="form-label fw-medium">Số điện thoại <span class="text-danger">*</span></label>
+-                  <input type="tel" class="form-control form-control-custom" v-model="customerForm.phone" required>
++                <div class="detail-hero-info">
++                  <div class="detail-hero-title">
++                    <h4 class="mb-0">{{ customerForm.name || 'Khách hàng' }}</h4>
++                    <span v-if="customerForm.status" :class="`status-badge status-${customerForm.status}`">
++                      {{ getStatusLabel(customerForm.status) }}
++                    </span>
++                  </div>
++                  <div class="detail-hero-meta">
++                    <span><i class="fas fa-phone-alt"></i> {{ formatPhoneNumber(customerForm.phone) }}</span>
++                    <span><i class="fas fa-map-marker-alt"></i> {{ customerForm.province || '-' }}</span>
++                    <span v-if="customerForm.createdAt"><i class="fas fa-calendar-alt"></i> Ngày tạo: {{ customerForm.createdAt }}</span>
++                  </div>
++                  <div class="detail-hero-tags">
++                    <span v-if="customerForm.type" :class="`type-badge type-${customerForm.type}`">
++                      {{ getTypeLabel(customerForm.type) }}
++                    </span>
++                    <span v-if="customerForm.updatedAt" class="update-badge">
++                      <i class="fas fa-sync-alt me-1"></i>Cập nhật: {{ customerForm.updatedAt }}
++                    </span>
++                  </div>
+                 </div>
+               </div>
+
+-              <div class="row">
+-                <div class="col-md-6 mb-3">
+-                  <label class="form-label fw-medium">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+-                  <input
+-                    type="text"
+-                    class="form-control form-control-custom"
+-                    list="province-options"
+-                    v-model="customerForm.province"
+-                    placeholder="Chọn tỉnh/thành phố"
+-                    required
+-                  >
+-                </div>
+-                <div class="col-md-6 mb-3">
+-                  <label class="form-label fw-medium">Tỉnh cũ (nếu có)</label>
+-                  <input
+-                    type="text"
+-                    class="form-control form-control-custom"
+-                    list="province-options"
+-                    v-model="customerForm.oldProvince"
+-                    placeholder="Chọn tỉnh/thành phố"
+-                  >
+-                </div>
+-              </div>
++              <div class="detail-main">
++                <div class="detail-left-col">
++                  <div class="detail-section">
++                    <h6 class="section-title-detail">
++                      <i class="fas fa-user-circle me-2 icon-red"></i>
++                      Thông tin khách hàng
++                    </h6>
++                    <div class="info-grid edit-info-grid">
++                      <div class="info-item">
++                        <label class="info-label">Họ và tên <span class="text-danger">*</span></label>
++                        <input type="text" class="form-control form-control-custom" v-model="customerForm.name" required>
++                      </div>
++                      <div class="info-item">
++                        <label class="info-label">Số điện thoại <span class="text-danger">*</span></label>
++                        <input type="tel" class="form-control form-control-custom" v-model="customerForm.phone" required>
++                      </div>
++                      <div class="info-item">
++                        <label class="info-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
++                        <div class="province-search" :class="{ open: provinceDropdownOpen }">
++                          <input
++                            v-model="provinceSearch"
++                            @focus="provinceDropdownOpen = true"
++                            @input="handleProvinceInput"
++                            @blur="closeProvinceDropdown"
++                            type="text"
++                            class="form-control form-control-custom"
++                            placeholder="Tìm tỉnh/thành"
++                            autocomplete="off"
++                            required
++                          >
++                          <span class="province-caret" aria-hidden="true" @mousedown.prevent="toggleProvinceDropdown">
++                            <i class="fas fa-chevron-down"></i>
++                          </span>
++                          <ul
++                            v-if="provinceDropdownOpen && filteredProvinces.length"
++                            class="province-dropdown"
++                          >
++                            <li
++                              v-for="province in filteredProvinces"
++                              :key="province"
++                              @mousedown.prevent="selectProvince(province)"
++                              :class="{ selected: province === customerForm.province }"
++                            >
++                              {{ province }}
++                            </li>
++                          </ul>
++                        </div>
++                      </div>
++                      <div class="info-item">
++                        <label class="info-label">Phân loại khách hàng <span class="text-danger">*</span></label>
++                        <select class="form-select form-select-custom" v-model="customerForm.type" required>
++                          <option value="">Chọn phân loại</option>
++                          <option value="MOI_GIOI">Môi giới</option>
++                          <option value="CHINH_CHU">Chủ nhà</option>
++                          <option value="NGUOI_THAN">Người thân</option>
++                        </select>
++                      </div>
++                      <div class="info-item">
++                        <label class="info-label">Trạng thái <span class="text-danger">*</span></label>
++                        <select class="form-select form-select-custom" v-model="customerForm.status" required>
++                          <option value="NEW">Mới</option>
++                          <option value="DC_TELESALES">Chưa gọi</option>
++                          <option value="TN_7NGAY">Tiềm năng 7 ngày</option>
++                          <option value="TN_14NGAY">Tiềm năng 14 ngày</option>
++                          <option value="THANH_CONG">Thành công</option>
++                          <option value="SAI_SO_LIEU">Sai số</option>
++                          <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc được</option>
++                          <option value="CHAM_SOC">Chăm sóc</option>
++                          <option value="THAT_BAI">Thất bại</option>
++                        </select>
++                      </div>
++                    </div>
++                  </div>
+
+-              <div class="row">
+-                <div class="col-md-6 mb-3">
+-                  <label class="form-label fw-medium">Phân loại khách hàng <span class="text-danger">*</span></label>
+-                  <select class="form-select form-select-custom" v-model="customerForm.type" required>
+-                    <option value="">Chọn phân loại</option>
+-                    <option value="broker">Môi giới</option>
+-                    <option value="owner">Chủ nhà</option>
+-                    <option value="relative">Người thân</option>
+-                  </select>
+-                </div>
+-                <div class="col-md-6 mb-3">
+-                  <label class="form-label fw-medium">Trạng thái <span class="text-danger">*</span></label>
+-                  <select class="form-select form-select-custom" v-model="customerForm.status" required>
+-                    <option value="new">Mới tiếp nhận</option>
+-                    <option value="potential_7">Tiềm năng 7 ngày</option>
+-                    <option value="potential_14">Tiềm năng 14 ngày</option>
+-                    <option value="success">Thành công (đặt lịch)</option>
+-                    <option value="wrong_number">Sai số</option>
+-                    <option value="unreachable">Không liên lạc được</option>
+-                    <option value="care">Chăm sóc</option>
+-                  </select>
+-                </div>
+-              </div>
++                  <div class="detail-section">
++                    <h6 class="section-title-detail">
++                      <i class="fas fa-users me-2 icon-green"></i>
++                      Nhân sự phụ trách
++                    </h6>
++                    <div class="staff-grid">
++                      <div class="staff-item">
++                        <div class="staff-avatar">
++                          <div v-if="customerForm.creatorAvatar" class="avatar-img">
++                            <img :src="customerForm.creatorAvatar" :alt="customerForm.creatorName">
++                          </div>
++                          <div v-else class="avatar-placeholder small">
++                            <i class="fas fa-user"></i>
++                          </div>
++                        </div>
++                        <div class="staff-info">
++                          <div class="staff-role">Người tạo</div>
++                          <div class="staff-name">{{ customerForm.creatorName || '-' }}</div>
++                        </div>
++                      </div>
++                      <div class="staff-item staff-item-edit">
++                        <div class="staff-avatar">
++                          <div v-if="selectedAssignee?.avatar" class="avatar-img">
++                            <img :src="selectedAssignee.avatar" :alt="selectedAssignee.tenNhanVien">
++                          </div>
++                          <div v-else class="avatar-placeholder small">
++                            <i class="fas fa-user-tag"></i>
++                          </div>
++                        </div>
++                        <div class="staff-info">
++                          <div class="staff-role">NV phụ trách (chọn 1)</div>
++                          <div class="employee-search">
++                            <input
++                              type="text"
++                              class="form-control form-control-custom"
++                              v-model="employeeSearch"
++                              placeholder="Tìm theo tên nhân viên..."
++                              @focus="openEmployeeDropdown"
++                            >
++                            <div v-if="employeeDropdownOpen" class="employee-options">
++                              <div v-if="employeeLoading" class="employee-option muted">
++                                <i class="fas fa-spinner fa-spin me-2"></i> Đang tải dữ liệu...
++                              </div>
++                              <div v-else-if="employeeOptions.length === 0 && employeeSearch.length < 2" class="employee-option muted">
++                                Nhập ít nhất 2 ký tự để tìm kiếm.
++                              </div>
++                              <div v-else-if="employeeOptions.length === 0" class="employee-option muted">
++                                Không tìm thấy nhân viên phù hợp.
++                              </div>
++                              <div
++                                v-else
++                                v-for="employee in employeeOptions"
++                                :key="employee.id"
++                                class="employee-option"
++                                :class="{ selected: selectedAssignee?.id === employee.id }"
++                                @mousedown.prevent="selectEmployee(employee)"
++                              >
++                                <div class="employee-avatar">
++                                  <img :src="employee.avatar" :alt="employee.tenNhanVien">
++                                </div>
++                                <div class="employee-info">
++                                  <div class="employee-name">{{ employee.tenNhanVien }}</div>
++                                  <div class="employee-meta">
++                                    <span v-if="employee.email"><i class="fas fa-envelope"></i> {{ employee.email }}</span>
++                                    <span v-if="employee.phone"><i class="fas fa-phone"></i> {{ employee.phone }}</span>
++                                  </div>
++                                </div>
++                              </div>
++                            </div>
++                          </div>
++                          <div class="employee-selected" v-if="selectedAssignee">
++                            <span>{{ selectedAssignee.tenNhanVien }}</span>
++                            <span v-if="selectedAssignee.email">• {{ selectedAssignee.email }}</span>
++                            <span v-if="selectedAssignee.phone">• {{ selectedAssignee.phone }}</span>
++                          </div>
++                        </div>
++                      </div>
++                    </div>
++                  </div>
+
+-              <div class="mb-3">
+-                <label class="form-label fw-medium">Ảnh đại diện (URL)</label>
+-                <input type="text" class="form-control form-control-custom" v-model="customerForm.avatar" placeholder="https://example.com/avatar.jpg">
+-                <small class="text-muted">Để trống để sử dụng ảnh mặc định</small>
++                  <div class="detail-section">
++                    <h6 class="section-title-detail">
++                      <i class="fas fa-paperclip me-2 icon-blue"></i>
++                      Tệp đính kèm
++                    </h6>
++                    <div class="row ps-2">
++                      <FileNew
++                        v-if="customerForm.id"
++                        :key="'edit-customer-files'"
++                        :file-list="fileForm.files"
++                        :entity-id="customerForm.id"
++                        :allow-download-all="true"
++                        entity-type="host"
++                        :can-edit="true"
++                        :on-upload="true"
++                        class="file-upload-section col-10"
++                        @update:files="handleFileUpdate"
++                      />
++                      <div class="col-2 p-2 ps-3 text-muted">
++                        + {{ fileForm.files == null ? 0 : fileForm.files.length }} tệp
++                      </div>
++                    </div>
++                  </div>
++                </div>
+               </div>
+
+               <input type="hidden" v-model="customerForm.id" />
+             </form>
+           </div>
+           <div class="modal-footer">
+             <button type="button" class="btn btn-outline-custom btn-custom" @click="closeEditCustomerModal">Hủy</button>
+-            <button type="button" class="btn btn-primary-custom btn-custom" @click="saveCustomer">
++            <button type="button" class="btn btn-primary-custom btn-custom" @click="updateCustomer">
+               <i class="fas fa-save me-2"></i> Cập nhật
+             </button>
+           </div>
+         </div>
+       </div>
+     </div>
+
+     <!-- Customer Detail Modal -->
+       <div v-if="showDetailModal" class="modal fade modal-custom show detail-modal" tabindex="-1">
+         <div class="modal-dialog modal-xl modal-dialog-centered ">
+           <div class="modal-content ">
+             <div class="modal-header">
+               <h5 class="modal-title">
+                 <i class="fas fa-address-card me-2"></i>
+                 Chi tiết khách hàng
+               </h5>
+               <button type="button" class="btn-close btn-close-white" @click="closeDetailModal"></button>
+             </div>
+             <div class="modal-body" v-if="detailCustomer">
+               <!-- Hero section - Avatar và thông tin cơ bản -->
+               <div class="detail-hero">
+                 <div class="detail-avatar">
+                   <div  class="avatar-img">
+                     <img
+                         :src=" generateAvatarFromName( detailCustomer.hoTen )"
+@@ -1126,115 +1275,135 @@
+
+     <!-- Notifications -->
+     <div v-if="notification.show" class="notification" :class="notification.type">
+       <div class="d-flex align-items-start">
+         <i :class="`fas fa-${notification.icon} me-2 mt-1`"></i>
+         <span>{{ notification.message }}</span>
+       </div>
+     </div>
      </div>
    </div>
  </template>
 
  <script setup>
- import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+ import { ref, computed, reactive, onMounted, nextTick, watch } from 'vue'
  import Chart from 'chart.js/auto'
- import api from '/src/api/api.js'
+ import addressData from '/src/assets/js/address.json'
  import FileNew from './File.vue'
 
- // ====== META ======
- const STATUS_META = {
-   NEW: { label: 'Mới', color: '#94a3b8' },
-   DC_TELESALES: { label: 'Mới tiếp nhận', color: '#6366f1' },
-   CHAM_SOC: { label: 'Đang chăm sóc', color: '#38bdf8' },
-   TN_7NGAY: { label: 'Tiềm năng 7 ngày', color: '#0ea5e9' },
-   TN_14NGAY: { label: 'Tiềm năng 14 ngày', color: '#0284c7' },
-   THAT_BAI: { label: 'Thất bại', color: '#f43f5e' },
-   KHONG_LIEN_LAC_DUOC: { label: 'Không liên lạc được', color: '#f97316' },
-   SAI_SO_LIEU: { label: 'Sai số liệu', color: '#a855f7' },
-   THANH_CONG: { label: 'Thành công (Lên VP)', color: '#22c55e' }
+ // State management
+ const customers = ref([])
+ const totalElements = ref(0)
+ const totalPages = ref(0)
+ const loading = ref(false)
+
+ const staffMembers = ref([])
++const employeeSearch = ref('')
++const employeeOptions = ref([])
++const employeeLoading = ref(false)
++const employeeDropdownOpen = ref(false)
++const selectedAssignee = ref(null)
++let employeeSearchTimer = null
++const provinceSearch = ref('')
++const provinceDropdownOpen = ref(false)
+
+ const creatorOptions = ref([
+   { id: 1, name: "Trần Minh Anh", avatar: "https://randomuser.me/api/portraits/women/11.jpg" },
+   { id: 2, name: "Phạm Quốc Huy", avatar: "https://randomuser.me/api/portraits/men/12.jpg" },
+   { id: 3, name: "Nguyễn Thảo My", avatar: "https://randomuser.me/api/portraits/women/13.jpg" },
+   { id: 4, name: "Lê Hoàng Nam", avatar: "https://randomuser.me/api/portraits/men/14.jpg" }
+ ])
+
+ // UI state
+ const mobileMenuOpen = ref(false)
+ const notificationsOpen = ref(false)
+ const userMenuOpen = ref(false)
+ const activeTab = ref('all')
+ const chartYear = ref('2024')
+ const searchText = ref('')
+
+ // Modal states
+ const showAddCustomerModal = ref(false)
+ const showAssignDataModal = ref(false)
+ const showCallModal = ref(false)
+ const showConfirmDeleteModal = ref(false)
+ const showEditCustomerModal = ref(false)
+ const showDetailModal = ref(false)
+ const isAnyModalOpen = computed(() =>
+   showAddCustomerModal.value ||
+   showEditCustomerModal.value ||
+   showDetailModal.value ||
+   showAssignDataModal.value ||
+   showConfirmDeleteModal.value
+ )
+
+ // Data state
+ const filters = reactive({
+   type: 'all',
+   status: 'all',
+   province: '',
+   creator: 'all',
+   createdFrom: '',
+   createdTo: '',
+   updatedFrom: '',
+   updatedTo: ''
+ })
+
+ const customerForm = reactive({
+   id: null,
+   name: '',
+   phone: '',
+   province: '',
+   oldProvince: '',
+   type: '',
+-  status: 'new',
++  status: 'NEW',
+   avatar: '',
+-  notes: ''
++  notes: '',
++  createdAt: '',
++  updatedAt: '',
++  creatorName: '',
++  creatorAvatar: '',
++  assigneeId: null,
++  assigneeName: '',
++  assigneeAvatar: ''
+ })
+
+
+ const callingCustomer = ref(null)
+ const deletingCustomer = ref(null)
+ const callSeconds = ref(0)
+ const callNotes = ref('')
+ const isEditing = ref(false)
+ const selectedCustomer = ref(null)
+ const fileForm = reactive({
+-  files: []
++  files: [],
++  newFiles: [],
++  newLandBookFiles: [],
++  deletedFileIds: [],
++  deletedLandBookFileIds: []
+ })
++const originalFiles = ref([])
+
+ const notification = reactive({
+   show: false,
+   message: '',
+   type: 'info',
+   icon: 'info-circle'
+ })
+
+ // Refs
+ const monthlyChart = ref(null)
+ const statusChart = ref(null)
+
+ // Computed properties
+ const filterTabs = computed(() => [
+   { value: 'all', label: 'Tất cả' },
+   { value: 'new', label: 'Mới' },
+   { value: 'contacted', label: 'Đã dùng' }
+ ])
+
+
+ const selectedCount = computed(() => {
+   return customers.value.filter(c => c.selected).length
+ })
+
+ const selectedCustomerIds = computed(() => {
+@@ -1260,50 +1429,55 @@ const selectedTeleSales = computed(() => {
+
+ const canAssignData = computed(() => {
+   return selectedCount.value > 0 && isAllSelectedNew.value && !!selectedTeleSales.value
+ })
+
+ const callTimer = computed(() => {
+   const minutes = Math.floor(callSeconds.value / 60).toString().padStart(2, '0')
+   const seconds = (callSeconds.value % 60).toString().padStart(2, '0')
+   return `${minutes}:${seconds}`
+ })
+
+ const detailCustomer = computed(() => selectedCustomer.value?.customerListItemDTO || null)
+ const detailHistory = computed(() => selectedCustomer.value?.lichSu || [])
+
+ const assignSummary = computed(() => {
+   if (selectedCount.value === 0) return 'Chưa có khách hàng nào được chọn'
+   if (!selectedTeleSales.value) return 'Chưa chọn nhân viên Telesale'
+   return `Sẽ cấp ${assignQuantity.value} khách hàng cho ${selectedTeleSales.value.name}`
+ })
+
+ const provinceOptions = computed(() => {
+   const provinceNames = addressData.map(province => province.name)
+   return [...provinceNames, 'Khác']
+ })
+
++const filteredProvinces = computed(() => {
++  const query = provinceSearch.value.toLowerCase()
++  return provinceOptions.value.filter(province => province.toLowerCase().includes(query))
++})
++
+ const creatorsById = computed(() => {
+   return creatorOptions.value.reduce((acc, creator) => {
+     acc[creator.id] = creator
+     return acc
+   }, {})
+ })
+
+ const staffById = computed(() => {
+   return staffMembers.value.reduce((acc, staff) => {
+     acc[staff.id] = staff
+     return acc
+   }, {})
+ })
+
+ // Methods
+ const toggleMobileMenu = () => {
+   mobileMenuOpen.value = !mobileMenuOpen.value
  }
 
- // ====== Reactive state ======
- const activeTab = ref('new')
-+const activeDetailTab = ref('detail')
- const selectedCustomer = ref(null)
- const newNote = ref('')
- const searchQuery = ref('')
- const originalFiles = ref([])
-+const skipTabReload = ref(false)
+ const toggleNotifications = () => {
+   notificationsOpen.value = !notificationsOpen.value
+   userMenuOpen.value = false
+ }
 
- const fileForm = ref({
-   files: [],
-   newFiles: [],
-   newLandBookFiles: [],
-   deletedFileIds: [],
-   deletedLandBookFileIds: []
- })
+ const toggleUserMenu = () => {
+@@ -1322,146 +1496,342 @@ const applyFilters = () => {
 
- // ✅ FIX all -> null
- const statusFilter = ref(null)
- const typeFilter = ref(null)
+ const resetFilters = () => {
+   activeTab.value = 'all'
+   filters.type = 'all'
+   filters.status = 'all'
+   filters.province = ''
+   filters.creator = 'all'
+   filters.createdFrom = ''
+   filters.createdTo = ''
+   filters.updatedFrom = ''
+   filters.updatedTo = ''
+   searchText.value = ''
+   showNotification('Đã đặt lại tất cả bộ lọc', 'info')
+ }
 
- const currentPage = ref(1)
- const pageSize = ref(10)
+ const openAddCustomerModal = () => {
+   resetCustomerForm()
+   isEditing.value = false
+   showAddCustomerModal.value = true
+ }
 
- const selectedTimeRange = ref('month')
- const selectedYear = ref(new Date().getFullYear())
- const selectedMonth = ref(new Date().getMonth() + 1)
+ const closeAddCustomerModal = () => {
+   showAddCustomerModal.value = false
+ }
 
- const lineChart = ref(null)
- const lineChartInstance = ref(null)
- const summaryChartInstance = ref(null)
+-const editCustomer = (customer) => {
++const resolveEmployeeAvatar = (avatar, name) => {
++  if (avatar) {
++    return avatar.startsWith('http')
++      ? avatar
++      : `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${avatar}`
++  }
++  return generateAvatarFromName(name || 'NV')
++}
++
++const normalizeEmployeeOption = (employee) => ({
++  id: employee.id,
++  tenNhanVien: employee.tenNhanVien,
++  avatar: resolveEmployeeAvatar(employee.avatar, employee.tenNhanVien),
++  email: employee.email || '',
++  phone: employee.phone || ''
++})
++
++const editCustomer = async (customer) => {
+   const normalized = {
+     id: customer.id ?? customer.customerListItemDTO?.id ?? null,
+     name: customer.name ?? customer.hoTen ?? customer.customerListItemDTO?.hoTen ?? '',
+     phone: customer.phone ?? customer.soDienThoai ?? customer.customerListItemDTO?.soDienThoai ?? '',
+     province: customer.province ?? customer.tinhThanhPho ?? customer.customerListItemDTO?.tinhThanhPho ?? '',
+     oldProvince: customer.oldProvince ?? '',
+     type: customer.type ?? customer.phanLoaiKhach ?? customer.customerListItemDTO?.phanLoaiKhach ?? '',
+-    status: customer.status ?? customer.trangThai ?? customer.customerListItemDTO?.trangThai ?? 'new',
++    status: customer.status ?? customer.trangThai ?? customer.customerListItemDTO?.trangThai ?? 'NEW',
+     avatar: customer.avatar ?? customer.avatarKhach ?? customer.customerListItemDTO?.avatarKhach ?? '',
+-    notes: customer.notes ?? ''
++    notes: customer.notes ?? '',
++    createdAt: customer.ngayTao ?? customer.customerListItemDTO?.ngayTao ?? '',
++    updatedAt: customer.ngayCapNhat ?? customer.customerListItemDTO?.ngayCapNhat ?? '',
++    creatorName: customer.nhanVienTaoTen ?? customer.customerListItemDTO?.nhanVienTaoTen ?? '',
++    creatorAvatar: customer.nhanVienTaoAvatar ?? customer.customerListItemDTO?.nhanVienTaoAvatar ?? '',
++    assigneeId: customer.nhanVienPhuTrachId ?? customer.customerListItemDTO?.nhanVienPhuTrachId ?? null,
++    assigneeName: customer.nhanVienPhuTrachTen ?? customer.customerListItemDTO?.nhanVienPhuTrachTen ?? '',
++    assigneeAvatar: customer.nhanVienPhuTrachAvatar ?? customer.customerListItemDTO?.nhanVienPhuTrachAvatar ?? ''
++  }
++
++  if (normalized.id) {
++    await fetchCustomerDetail(normalized.id, { showModal: false })
+   }
++
++  const normalizedCreatorAvatar = normalized.creatorAvatar
++    ? resolveEmployeeAvatar(normalized.creatorAvatar, normalized.creatorName)
++    : ''
++  const normalizedAssigneeAvatar = normalized.assigneeAvatar
++    ? resolveEmployeeAvatar(normalized.assigneeAvatar, normalized.assigneeName)
++    : ''
++
+   Object.assign(customerForm, {
+     id: normalized.id,
+     name: normalized.name,
+     phone: normalized.phone,
+     province: normalized.province,
+     oldProvince: normalized.oldProvince,
+     type: normalized.type,
+     status: normalized.status,
+     avatar: normalized.avatar,
+-    notes: normalized.notes
++    notes: normalized.notes,
++    createdAt: normalized.createdAt,
++    updatedAt: normalized.updatedAt,
++    creatorName: normalized.creatorName,
++    creatorAvatar: normalizedCreatorAvatar,
++    assigneeId: normalized.assigneeId,
++    assigneeName: normalized.assigneeName,
++    assigneeAvatar: normalizedAssigneeAvatar
+   })
++
++  selectedAssignee.value = normalized.assigneeId
++    ? {
++      id: normalized.assigneeId,
++      tenNhanVien: normalized.assigneeName,
++      avatar: normalizedAssigneeAvatar,
++      email: '',
++      phone: ''
++    }
++    : null
++  employeeSearch.value = normalized.assigneeName || ''
++  employeeDropdownOpen.value = false
++  provinceSearch.value = normalized.province || ''
+   isEditing.value = true
+   showEditCustomerModal.value = true
+ }
 
- // ✅ years = 5 năm gần nhất
-@@ -491,135 +529,156 @@ const thongKeTrangThai = ref([])
- // - time: nếu theo năm => 1..12 (tháng)
- // - time: nếu theo tháng => 1..31 (ngày)
- const thongKeThoiGian = ref([])
-
- // ====== Computed ======
- const filteredCustomers = computed(() => {
-   return activeTab.value === 'new' ? newCustomers.value : contactedCustomers.value
- })
-
- const totalPages = computed(() => {
-   if (activeTab.value !== 'contacted') return 1
-   return Math.max(1, Number(contactedPagination.value.totalPages || 1))
- })
-
- const pageNumbers = computed(() => {
-   if (activeTab.value !== 'contacted') return []
-   return Array.from({ length: totalPages.value }, (_, idx) => idx + 1)
- })
-
- const pagedCustomers = computed(() => {
-   return filteredCustomers.value
- })
-
- // ====== Watchers ======
- watch(activeTab, (newVal) => {
-+  if (skipTabReload.value) {
-+    skipTabReload.value = false
+ const closeEditCustomerModal = () => {
+   showEditCustomerModal.value = false
+   isEditing.value = false
++  resetCustomerForm()
++}
++
++const openEmployeeDropdown = () => {
++  employeeDropdownOpen.value = true
++  if (employeeSearch.value.trim().length >= 2) {
++    searchEmployeeOptions(employeeSearch.value.trim())
++  }
++}
++
++const searchEmployeeOptions = async (query) => {
++  if (!query || query.length < 2) {
++    employeeOptions.value = []
 +    return
 +  }
-   currentPage.value = 1
-   statusFilter.value = null
-   searchQuery.value = ''
-
-   if (newVal === 'new') {
-     loadKhachMoiTiepNhan()
-   } else {
-     loadKhachDaLienHe()
-   }
- })
-
- watch([statusFilter, typeFilter, searchQuery], () => {
-   currentPage.value = 1
-   if (activeTab.value === 'new') {
-     loadKhachMoiTiepNhan()
-   } else {
-     loadKhachDaLienHe()
-   }
- })
-
- // ✅ đổi thời gian => reload line chart data từ BE
- watch([selectedTimeRange, selectedYear, selectedMonth], async () => {
-   await fetchThongKeBieuDo()
- })
-
- const changePage = (page) => {
-   currentPage.value = Math.min(Math.max(page, 1), totalPages.value)
-   if (activeTab.value === 'contacted') {
-     loadKhachDaLienHe()
-   }
- }
-
- // ====== Helpers ======
- const getCustomerTypeLabel = (type) => {
-   const typeLabels = {
-     MOI_GIOI: 'Môi giới',
-     CHINH_CHU: 'Chủ nhà',
-     NGUOI_THAN: 'Người thân'
-   }
-   return typeLabels[type] || type
- }
-
- const getTagLabel = (tag) => {
-   return STATUS_META[tag]?.label || tag
- }
-
-+const getLatestHistoryEntry = (customer) => {
-+  const history = Array.isArray(customer?.lichSu) ? customer.lichSu : []
-+  if (!history.length) return null
-+  return history.reduce((latest, item) => {
-+    const latestTime = new Date(latest?.thoiGianCapNhat || 0).getTime()
-+    const itemTime = new Date(item?.thoiGianCapNhat || 0).getTime()
-+    return itemTime >= latestTime ? item : latest
-+  }, history[0])
++
++  employeeLoading.value = true
++  try {
++    const res = await api.get('/customer-crm/admin/employee-options', {
++      params: { search: query }
++    })
++    employeeOptions.value = Array.isArray(res.data)
++      ? res.data.map(normalizeEmployeeOption)
++      : []
++  } catch (e) {
++    console.error(e)
++    employeeOptions.value = []
++  } finally {
++    employeeLoading.value = false
++  }
 +}
 +
-+const getLatestHistoryLabel = (customer) => {
-+  const entry = getLatestHistoryEntry(customer)
-+  if (!entry) return null
-+  return STATUS_META[entry.trangThai]?.label || entry.trangThai || null
++const selectEmployee = (employee) => {
++  selectedAssignee.value = employee
++  customerForm.assigneeId = employee.id
++  customerForm.assigneeName = employee.tenNhanVien
++  customerForm.assigneeAvatar = employee.avatar
++  employeeSearch.value = employee.tenNhanVien
++  employeeDropdownOpen.value = false
 +}
 +
- const getInitials = (name) => {
-   if (!name) return ''
-   const words = name.trim().split(/\s+/)
-   const first = words[0]?.charAt(0) || ''
-   const last = words.length > 1 ? words[words.length - 1].charAt(0) : ''
-   return `${first}${last}`.toUpperCase()
++const selectProvince = (province) => {
++  customerForm.province = province
++  provinceSearch.value = province
++  provinceDropdownOpen.value = false
++}
++
++const handleProvinceInput = () => {
++  provinceDropdownOpen.value = true
++  customerForm.province = provinceSearch.value
++}
++
++const closeProvinceDropdown = () => {
++  setTimeout(() => {
++    provinceDropdownOpen.value = false
++    provinceSearch.value = customerForm.province || ''
++  }, 120)
++}
++
++const toggleProvinceDropdown = () => {
++  provinceDropdownOpen.value = !provinceDropdownOpen.value
  }
 
- const getAvatarColor = (name) => {
-   if (!name) return 'hsl(210, 60%, 55%)'
-   let hash = 0
-   for (let i = 0; i < name.length; i += 1) {
-     hash = name.charCodeAt(i) + ((hash << 5) - hash)
-   }
-   const hue = Math.abs(hash) % 360
-   return `hsl(${hue}, 60%, 55%)`
- }
-
- const formatTime = (isoString) => {
-   if (!isoString) return 'Chưa gọi'
-   const date = new Date(isoString)
-   return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
- }
-
- const formatReceivedAt = (isoString) => {
-   if (!isoString) return '-'
-   const date = new Date(isoString)
-   return date.toLocaleString('vi-VN', {
-     hour: '2-digit',
-     minute: '2-digit',
-     day: '2-digit',
-     month: '2-digit',
-     year: 'numeric'
+ const resetCustomerForm = () => {
+   Object.assign(customerForm, {
+     id: null,
+     name: '',
+     phone: '',
+     province: '',
+     oldProvince: '',
+     type: '',
+-    status: 'new',
++    status: 'NEW',
+     avatar: '',
+-    notes: ''
++    notes: '',
++    createdAt: '',
++    updatedAt: '',
++    creatorName: '',
++    creatorAvatar: '',
++    assigneeId: null,
++    assigneeName: '',
++    assigneeAvatar: ''
++  })
++  selectedAssignee.value = null
++  employeeSearch.value = ''
++  employeeOptions.value = []
++  employeeDropdownOpen.value = false
++  provinceSearch.value = ''
++  provinceDropdownOpen.value = false
++  fileForm.files = []
++  fileForm.newFiles = []
++  fileForm.newLandBookFiles = []
++  fileForm.deletedFileIds = []
++  fileForm.deletedLandBookFileIds = []
++  originalFiles.value = []
++}
++
++const buildCustomerUpdateFormData = (assigneePayload) => {
++  const dto = {
++    id: customerForm.id,
++    hoTen: customerForm.name,
++    soDienThoai: customerForm.phone,
++    tinhThanhPho: customerForm.province,
++    phanLoaiKhach: customerForm.type,
++    trangThai: customerForm.status,
++    nhanVienPhuTrachId: assigneePayload.nhanVienPhuTrachId,
++    nhanVienPhuTrachTen: assigneePayload.nhanVienPhuTrachTen,
++    nhanVienPhuTrachAvatar: assigneePayload.nhanVienPhuTrachAvatar,
++    deletedFileIds: fileForm.deletedFileIds,
++    deletedLandBookFileIds: fileForm.deletedLandBookFileIds
++  }
++
++  const fd = new FormData()
++  fd.append('dto', new Blob([JSON.stringify(dto)], { type: 'application/json' }))
++
++  const mainFile = [...fileForm.newFiles, ...fileForm.newLandBookFiles]
++    .find(file => file?.isOnTop && file.file instanceof File)
++
++  if (mainFile?.file) {
++    fd.append('newFileOntop', mainFile.file)
++  }
++
++  fileForm.newFiles.forEach((file) => {
++    if (file?.file instanceof File) {
++      fd.append('newFiles', file.file)
++    }
    })
++
++  fileForm.newLandBookFiles.forEach((file) => {
++    if (file?.file instanceof File) {
++      fd.append('newLandBookFiles', file.file)
++    }
++  })
++
++  return fd
  }
 
- // ====== Detail actions ======
- const selectCustomer = (customer) => {
-   selectedCustomer.value = customer
-+  activeDetailTab.value = 'detail'
-   newNote.value = ''
-   resetFileForm(customer?.files)
- }
-
- const toggleCustomerStatus = (status) => {
-   if (!selectedCustomer.value) return
-   selectedCustomer.value.status = selectedCustomer.value.status === status ? null : status
- }
-
- const resetFileForm = (files) => {
-   const safeFiles = Array.isArray(files) ? JSON.parse(JSON.stringify(files)) : []
-   fileForm.value = {
-     files: safeFiles,
-     newFiles: [],
-     newLandBookFiles: [],
-     deletedFileIds: [],
-     deletedLandBookFileIds: []
+-const saveCustomer = () => {
++const updateCustomer = async () => {
+   if (!customerForm.name || !customerForm.phone || !customerForm.province || !customerForm.type || !customerForm.status) {
+     showNotification('Vui lòng điền đầy đủ các trường bắt buộc!', 'warning')
+     return
    }
-   originalFiles.value = JSON.parse(JSON.stringify(safeFiles))
+
+-  if (isEditing.value && customerForm.id) {
+-    const index = customers.value.findIndex(c => c.id === customerForm.id)
+-    if (index !== -1) {
+-      const existing = customers.value[index]
+-      customers.value[index] = existing.hoTen || existing.soDienThoai
+-        ? {
+-          ...existing,
+-          hoTen: customerForm.name,
+-          soDienThoai: customerForm.phone,
+-          tinhThanhPho: customerForm.province,
+-          phanLoaiKhach: customerForm.type,
+-          trangThai: customerForm.status,
+-          avatarKhach: customerForm.avatar || existing.avatarKhach,
+-          ngayCapNhat: new Date().toISOString().split('T')[0]
+-        }
+-        : {
+-          ...existing,
+-          ...customerForm,
+-          lastUpdated: new Date().toISOString().split('T')[0]
+-        }
+-      showNotification('Cập nhật khách hàng thành công!', 'success')
++  if (!customerForm.assigneeId) {
++    showNotification('Vui lòng chọn nhân viên phụ trách từ danh sách tìm kiếm!', 'warning')
++    return
++  }
++
++  const assigneePayload = selectedAssignee.value
++    ? {
++      nhanVienPhuTrachId: selectedAssignee.value.id,
++      nhanVienPhuTrachTen: selectedAssignee.value.tenNhanVien,
++      nhanVienPhuTrachAvatar: selectedAssignee.value.avatar
++    }
++    : {
++      nhanVienPhuTrachId: customerForm.assigneeId,
++      nhanVienPhuTrachTen: customerForm.assigneeName,
++      nhanVienPhuTrachAvatar: customerForm.assigneeAvatar
+     }
+-  } else {
+-    const newId = customers.value.length > 0
+-        ? Math.max(...customers.value.map(c => c.id)) + 1
+-        : 1
+-
+-    customers.value.push({
+-      id: newId,
+-      hoTen: customerForm.name,
+-      soDienThoai: customerForm.phone,
+-      tinhThanhPho: customerForm.province,
+-      avatarKhach: customerForm.avatar || null,
+-      phanLoaiKhach: customerForm.type,
+-      trangThai: customerForm.status,
+-      ngayTao: new Date().toISOString().split('T')[0],
+-      ngayCapNhat: new Date().toISOString().split('T')[0],
+-      nhanVienTaoId: creatorOptions.value[0]?.id ?? null,
+-      nhanVienPhuTrachId: staffMembers.value[0]?.id ?? null,
+-      selected: false
++
++  try {
++    const payload = buildCustomerUpdateFormData(assigneePayload)
++    await api.post(`/customer-crm/admin/host-temp/update/${customerForm.id}`, payload, {
++      headers: { 'Content-Type': 'multipart/form-data' }
+     })
+-    showNotification('Thêm khách hàng mới thành công!', 'success')
++    showNotification('Cập nhật khách hàng thành công!', 'success')
++    await fetchCustomers()
++    showEditCustomerModal.value = false
++    isEditing.value = false
++    resetCustomerForm()
++  } catch (e) {
++    console.error(e)
++    showNotification('Không thể cập nhật khách hàng, vui lòng thử lại!', 'warning')
++  }
++}
++
++const saveCustomer = () => {
++  if (isEditing.value) {
++    updateCustomer()
++    return
++  }
++
++  if (!customerForm.name || !customerForm.phone || !customerForm.province || !customerForm.type || !customerForm.status) {
++    showNotification('Vui lòng điền đầy đủ các trường bắt buộc!', 'warning')
++    return
+   }
+
++  const newId = customers.value.length > 0
++    ? Math.max(...customers.value.map(c => c.id)) + 1
++    : 1
++
++  customers.value.push({
++    id: newId,
++    hoTen: customerForm.name,
++    soDienThoai: customerForm.phone,
++    tinhThanhPho: customerForm.province,
++    avatarKhach: customerForm.avatar || null,
++    phanLoaiKhach: customerForm.type,
++    trangThai: customerForm.status,
++    ngayTao: new Date().toISOString().split('T')[0],
++    ngayCapNhat: new Date().toISOString().split('T')[0],
++    nhanVienTaoId: creatorOptions.value[0]?.id ?? null,
++    nhanVienPhuTrachId: staffMembers.value[0]?.id ?? null,
++    selected: false
++  })
++  showNotification('Thêm khách hàng mới thành công!', 'success')
++
+   showAddCustomerModal.value = false
+   showEditCustomerModal.value = false
+   isEditing.value = false
+   resetCustomerForm()
+ }
+
+ const startCall = (customer) => {
+   callingCustomer.value = customer
+   callSeconds.value = 0
+   callNotes.value = ''
+   showCallModal.value = true
+
+   // Start timer
+   const timer = setInterval(() => {
+     if (showCallModal.value) {
+       callSeconds.value++
+     } else {
+       clearInterval(timer)
+     }
+   }, 1000)
+ }
+
+ const endCall = () => {
+   showCallModal.value = false
+   callingCustomer.value = null
+@@ -1609,102 +1979,128 @@ const showNotification = (message, type = 'info') => {
+   notification.message = message
+   notification.type = type
+   notification.icon = type === 'success' ? 'check-circle' :
+       type === 'warning' ? 'exclamation-triangle' : 'info-circle'
+   notification.show = true
+
+   setTimeout(() => {
+     notification.show = false
+   }, 5000)
+ }
+
+ // Helper functions
+ const toDate = (value) => {
+   if (!value) return new Date(0)
+   const [year, month, day] = value.split('-').map(Number)
+   return new Date(year, month - 1, day)
+ }
+
+ const getStatusLabel = (status) => {
+   const statusMap = {
+       'NEW': 'Mới',
+     'TN_7NGAY': 'TN 7 ngày',
+     'TN_14NGAY': 'TN 14 ngày',
+     'THANH_CONG': 'Thành công',
+     'SAI_SO': 'Sai số',
++    'SAI_SO_LIEU': 'Sai số',
+     'KHONG_LIEN_LAC_DUOC': 'KLLD',
+     'CHAM_SOC': 'Chăm sóc',
+     'DC_TELESALES': 'Chưa gọi',
+     'THAT_BAI': 'Thất bại'
+   }
+   return statusMap[status] || status
+ }
+
+ const getTypeLabel = (type) => {
+   const typeMap = { 'MOI_GIOI': 'Môi giới', 'CHINH_CHU': 'Chủ nhà', 'NGUOI_THAN': 'Người thân' }
+   return typeMap[type] || type
+ }
+
+ const getProvinceLabel = (province) => {
+   if (!province) return '-'
+   if (province === 'Khác' || province === 'other') return 'Khác'
+   const provinceMatch = addressData.find(item => item.name === province)
+   if (provinceMatch) return provinceMatch.name
+   const legacyMap = {
+     'hanoi': 'Thành phố Hà Nội',
+     'hcm': 'Thành phố Hồ Chí Minh',
+     'danang': 'Thành phố Đà Nẵng',
+     'haiphong': 'Thành phố Hải Phòng',
+     'cantho': 'Thành phố Cần Thơ'
+   }
+   return legacyMap[province] || province
+ }
+
+ const formatPhoneNumber = (phone) => {
+   if (!phone) return '-'
+   return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
+ }
+
+ const formatDateTime = (value) => {
+   if (!value) return '-'
+   const date = new Date(value)
+   if (Number.isNaN(date.getTime())) return value
+   return date.toLocaleString('vi-VN')
  }
 
  const handleFileUpdate = (files) => {
-   fileForm.value.files = Array.isArray(files) ? files : []
-
-   const existingFiles = fileForm.value.files.filter((file) => !file.file && file.id)
-@@ -671,67 +730,71 @@ const buildFilePayload = () => {
-       || fileForm.value.newLandBookFiles.find((file) => file?.isOnTop && file.file instanceof File)
-
-   if (mainFile) {
-     fd.append('newFileOntop', mainFile.file)
-   }
-
-   fileForm.value.newFiles.forEach((file) => {
-     if (file?.file instanceof File) {
-       fd.append('newFiles', file.file)
-     }
-   })
-
-   fileForm.value.newLandBookFiles.forEach((file) => {
-     if (file?.file instanceof File) {
-       fd.append('newLandBookFiles', file.file)
-     }
-   })
-
-   return fd
+-  fileForm.files = files
++  fileForm.files = Array.isArray(files) ? files : []
++
++  const existingFiles = fileForm.files.filter(file => !file.file && file.id)
++  const newFiles = fileForm.files.filter(file => file.file instanceof File)
++
++  fileForm.newFiles = newFiles
++    .filter(file => !file.isIG)
++    .map(file => ({ file: file.file, isOnTop: file.isOnTop }))
++
++  fileForm.newLandBookFiles = newFiles
++    .filter(file => file.isIG)
++    .map(file => ({ file: file.file, isOnTop: file.isOnTop }))
++
++  const originalIds = (originalFiles.value || []).map(file => file.id)
++  const currentIds = existingFiles.map(file => file.id)
++
++  fileForm.deletedFileIds = originalIds.filter(id => {
++    const file = (originalFiles.value || []).find(item => item.id === id)
++    return !currentIds.includes(id) && file && !file.isIG
++  })
++
++  fileForm.deletedLandBookFileIds = originalIds.filter(id => {
++    const file = (originalFiles.value || []).find(item => item.id === id)
++    return !currentIds.includes(id) && file && file.isIG
++  })
  }
 
- const moveToContacted = async () => {
-   if (!selectedCustomer.value) return
+ const openCustomerDetail = async (customer) => {
+   await fetchCustomerDetail(customer.id);
+ }
 
-   try {
-+    const targetId = selectedCustomer.value.id
-     const payload = buildFilePayload()
-     await api.post('/customer-crm/telesales/journey-history/create', payload, {
-       headers: { 'Content-Type': 'multipart/form-data' }
+ const closeDetailModal = () => {
+   showDetailModal.value = false
+   selectedCustomer.value = null
+   fileForm.files = []
++  originalFiles.value = []
+ }
+
+ const openEditFromDetail = () => {
+   if (!detailCustomer.value) return
+   editCustomer(detailCustomer.value)
+   showDetailModal.value = false
+ }
+
+ const getCreatorInfo = (creatorId) => {
+   return creatorsById.value[creatorId] || null
+ }
+
+ const getAssigneeInfo = (assigneeId) => {
+   return staffById.value[assigneeId] || null
+ }
+
+ const getProvinceShortLabel = (province) => {
+   const label = getProvinceLabel(province)
+
+   if (!label || label === '-' || label === 'Khác') return label
+
+   return label
+       .replace(/^Thành phố\s+/i, 'TP. ')
+       .replace(/^Tỉnh\s+/i, 'T. ')
+ }
+@@ -1800,50 +2196,79 @@ const fetchTeleSales = async () => {
+         id: staff.id,
+         name: staff.tenNhanVien,
+         avatar: avatarPath,
+         email: staff.email || '',
+         phone: staff.phone || '',
+         selected: false
+       }
      })
-
--    const index = newCustomers.value.findIndex((c) => c.id === selectedCustomer.value.id)
--    if (index !== -1) {
--      const customer = newCustomers.value.splice(index, 1)[0]
--      customer.tags = customer.status ? [customer.status] : []
--      contactedCustomers.value.unshift(customer)
--    }
-+    skipTabReload.value = activeTab.value !== 'contacted'
-+    activeTab.value = 'contacted'
-+    await Promise.all([loadKhachDaLienHe(), loadKhachMoiTiepNhan()])
-+
-+    const updatedCustomer = contactedCustomers.value.find((c) => c.id === targetId)
-+        || newCustomers.value.find((c) => c.id === targetId)
-
--    selectedCustomer.value = null
-+    selectedCustomer.value = updatedCustomer || null
-+    activeDetailTab.value = 'detail'
-     newNote.value = ''
--    resetFileForm([])
--    activeTab.value = 'contacted'
--    await loadKhachDaLienHe()
-+    if (selectedCustomer.value) {
-+      resetFileForm(selectedCustomer.value.files)
-+    } else {
-+      resetFileForm([])
-+    }
-
-     // reload thống kê
-     await refreshData()
-   } catch (err) {
-     console.error(err)
-   }
- }
-
- // ====== API ======
- const fetchThongKeHomNay = async () => {
-   try {
-     const { data } = await api.get('/customer-crm/telesales/thong-ke/hom-nay')
-     todayStats.value = data
    } catch (e) {
-     console.error('❌ Lỗi thống kê hôm nay', e)
+     console.error(e)
    }
  }
 
- const fetchThongKeTrangThaiTeleSales = async () => {
+ onMounted(async () => {
+   await fetchMarketing()
+   await fetchTeleSales()
+   await fetchCustomers()
+   initCharts()
+ })
+
+
+ watch(searchText, () => {
+   page.value = 0
+   fetchCustomers()
+ })
++watch(employeeSearch, (value) => {
++  if (!showEditCustomerModal.value) return
++
++  if (selectedAssignee.value && value !== selectedAssignee.value.tenNhanVien) {
++    selectedAssignee.value = null
++    customerForm.assigneeId = null
++    customerForm.assigneeName = ''
++    customerForm.assigneeAvatar = ''
++  }
++
++  if (employeeSearchTimer) {
++    clearTimeout(employeeSearchTimer)
++  }
++
++  employeeSearchTimer = setTimeout(() => {
++    searchEmployeeOptions(value.trim())
++  }, 300)
++})
++watch(() => customerForm.province, (value) => {
++  if (!showEditCustomerModal.value) return
++  provinceSearch.value = value || ''
++})
++watch(showEditCustomerModal, (isOpen) => {
++  if (!isOpen) {
++    employeeOptions.value = []
++    employeeDropdownOpen.value = false
++    provinceDropdownOpen.value = false
++  }
++})
+ watch(
+     () => ({ ...filters }),
+     () => {
+       page.value = 0
+       fetchCustomers()
+     },
+     { deep: true }
+ )
+ const page = ref(0)
+ const pageSize = ref(10)
+ watch(page, () => {
+   fetchCustomers()
+ })
+
+ import api from '/src/api/api.js'
+ import {generateAvatarFromName, shortenName} from "../../assets/js/global.js";
+ import {showCenterSuccess} from "../../assets/js/alertService.js";
+ const marketingoptions = ref([])
+
+
+ const buildFilterPayload = () => ({
+   search: searchText.value || null,
+
+   phanLoaiKhach: filters.type !== 'all' ? filters.type : null,
+   trangThai: filters.status !== 'all' ? filters.status : null,
+@@ -1888,58 +2313,62 @@ const visiblePages = computed(() => {
+     start = Math.max(0, end - maxVisible)
+   }
+
+   const pages = []
+   for (let i = start; i < end; i++) {
+     pages.push(i)
+   }
+   return pages
+ })
+ const goToPage = (p) => {
+   if (p < 0 || p >= totalPages.value || p === page.value) return
+   page.value = p
+ }
+
+ const prevPage = () => {
+   if (page.value > 0) page.value--
+ }
+
+ const nextPage = () => {
+   if (page.value < totalPages.value - 1) page.value++
+ }
+ watch(pageSize, () => {
+   page.value = 0
+   fetchCustomers()
+ })
+-async function fetchCustomerDetail(customerId) {
++async function fetchCustomerDetail(customerId, { showModal = true } = {}) {
+   if (!customerId) return
+
    try {
-     const { data } = await api.get('/customer-crm/telesales/thong-ke-trang-thai')
-     thongKeTrangThai.value = Array.isArray(data)
-         ? data.map((item) => ({
-           label: item.label,
-           value: Number(item.value)
-@@ -1456,50 +1519,63 @@ body {
+     const res = await api.get(`/customer-crm/admin/host-temp/${customerId}`)
+     selectedCustomer.value = res.data
+-    fileForm.files = res.data?.files ?? []
+-    showDetailModal.value = true
++    const files = res.data?.files ?? []
++    fileForm.files = files
++    originalFiles.value = files
++    if (showModal) {
++      showDetailModal.value = true
++    }
+   } catch (e) {
+     console.error(e)
+   }
  }
 
- .customer-type.MOI_GIOI {
-   background-color: #1e88e5;
-   color: #ffffff;
- }
+ </script>
 
- .customer-type.CHINH_CHU {
-   background-color: #2e7d32;
-   color: #ffffff;
- }
+ <style scoped>
+ body {
+   --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+   --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+   --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+   --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+   --danger-gradient: linear-gradient(135deg, #ff5858 0%, #f09819 100%);
+   --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+   --dark-gradient: linear-gradient(135deg, #141e30 0%, #243b55 100%);
+   --light-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
 
- .customer-type.NGUOI_THAN {
-   background-color: #6a1b9a;
-   color: #ffffff;
- }
-
- .customer-info {
-   flex: 1;
- }
-
- .customer-name {
-   font-size: 16px;
-   font-weight: 600;
-   margin-bottom: 4px;
-+  display: flex;
-+  flex-wrap: wrap;
-+  align-items: center;
-+  gap: 6px;
-+}
-+
-+.customer-history-status {
-+  font-size: 12px;
-+  font-weight: 600;
-+  padding: 2px 8px;
-+  border-radius: 999px;
-+  background: #e2e8f0;
-+  color: #475569;
- }
-
- .customer-phone {
-   font-size: 14px;
-   color: #4daf36;
-   font-weight: 600;
-   margin-bottom: 4px;
-   display: flex;
-   align-items: center;
-   gap: 5px;
- }
-
- .customer-received {
-   font-size: 14px;
-   color: #444444;
-   margin-bottom: 6px;
-   display: flex;
-   align-items: center;
-   gap: 5px;
- }
-
- .customer-location {
-   font-size: 14px;
-   font-weight: 600;
-   color: #c92222;
-@@ -1617,50 +1693,79 @@ body {
-
- /* Detail panel */
- .detail-panel {
-   width: 400px;
-   background: linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%);
-   border-left: 1px solid #e2e8f0;
-   display: flex;
-   flex-direction: column;
-   overflow-y: auto;
- }
-
- .detail-header {
-   padding: 15px 20px;
-   border-bottom: 1px solid #e2e8f0;
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
- }
-
- .detail-header h3 {
-   font-size: 18px;
-   color: #1e293b;
- }
-
-+.detail-tabs {
-+  display: flex;
-+  gap: 10px;
-+  padding: 10px 20px;
-+  border-bottom: 1px solid #e2e8f0;
-+  background: #f8fafc;
-+}
-+
-+.detail-tab {
-+  border: 1px solid #e2e8f0;
-+  background: #ffffff;
-+  color: #334155;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  font-size: 13px;
-+  font-weight: 600;
-+  display: flex;
-+  align-items: center;
-+  gap: 6px;
-+  cursor: pointer;
-+  transition: all 0.2s ease;
-+}
-+
-+.detail-tab.active {
-+  background: #6366f1;
-+  color: #ffffff;
-+  border-color: #6366f1;
-+}
-+
- .close-btn {
-   background: #f1f5ff;
-   border: 1px solid #cfd7e3;
-   font-size: 18px;
-   color: #666;
-   cursor: pointer;
-   padding: 5px;
+   --primary-color: #667eea;
+   --secondary-color: #f093fb;
+   --success-color: #43e97b;
+   --warning-color: #fa709a;
+   --danger-color: #ff5858;
+   --info-color: #4facfe;
+   --dark-color: #141e30;
+@@ -3249,50 +3678,199 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
+   background-color: #f8fafc;
    border-radius: 10px;
+   border: 1px solid #e2e8f0;
  }
 
- .close-btn:hover {
-   color: #f44336;
+ .staff-avatar {
+   flex-shrink: 0;
  }
 
- .detail-content {
-   padding: 20px;
+ .staff-info {
    flex: 1;
+ }
+
+ .staff-role {
+   font-size: 0.875rem;
+   color: #64748b;
+   margin-bottom: 2px;
+ }
+
+ .staff-name {
+   font-size: 1.1rem;
+   font-weight: 600;
+   color: #2d3748;
+ }
+
++.staff-item-edit {
++  align-items: flex-start;
++}
++
++.edit-modal .form-control-custom,
++.edit-modal .form-select-custom {
++  font-size: 18px;
++}
++
++.province-search {
++  position: relative;
++}
++
++.province-caret {
++  position: absolute;
++  right: 12px;
++  top: 50%;
++  transform: translateY(-50%);
++  color: #64748b;
++  cursor: pointer;
++}
++
++.province-dropdown {
++  position: absolute;
++  left: 0;
++  right: 0;
++  top: calc(100% + 6px);
++  z-index: 20;
++  background: #fff;
++  border: 1px solid #e2e8f0;
++  border-radius: 10px;
++  max-height: 200px;
++  overflow-y: auto;
++  margin: 0;
++  padding: 6px 0;
++  list-style: none;
++  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
++}
++
++.province-dropdown li {
++  padding: 8px 12px;
++  cursor: pointer;
++  transition: background 0.2s ease;
++}
++
++.province-dropdown li:hover {
++  background: rgba(102, 126, 234, 0.08);
++}
++
++.province-dropdown li.selected {
++  background: rgba(102, 126, 234, 0.16);
++}
++
++.employee-search {
++  position: relative;
++}
++
++.employee-options {
++  position: absolute;
++  z-index: 20;
++  top: calc(100% + 6px);
++  left: 0;
++  right: 0;
++  background: white;
++  border-radius: 12px;
++  border: 1px solid #e2e8f0;
++  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
++  max-height: 260px;
++  overflow-y: auto;
++  padding: 6px;
++}
++
++.employee-option {
++  display: flex;
++  gap: 12px;
++  align-items: center;
++  padding: 10px;
++  border-radius: 10px;
++  transition: background 0.2s ease;
++  cursor: pointer;
++}
++
++.employee-option:hover {
++  background: rgba(102, 126, 234, 0.08);
++}
++
++.employee-option.selected {
++  background: rgba(102, 126, 234, 0.16);
++  border: 1px solid rgba(102, 126, 234, 0.2);
++}
++
++.employee-option.muted {
++  cursor: default;
++  color: #94a3b8;
++  font-weight: 500;
++}
++
++.employee-avatar img {
++  width: 42px;
++  height: 42px;
++  border-radius: 50%;
++  object-fit: cover;
++  border: 2px solid #fff;
++  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
++}
++
++.employee-info {
++  display: flex;
++  flex-direction: column;
++  gap: 4px;
++}
++
++.employee-name {
++  font-weight: 600;
++  color: #1f2937;
++}
++
++.employee-meta {
++  display: flex;
++  flex-direction: column;
++  gap: 2px;
++  font-size: 0.85rem;
++  color: #64748b;
++}
++
++.employee-meta i {
++  margin-right: 6px;
++  color: #667eea;
++}
++
++.employee-selected {
++  margin-top: 8px;
++  font-size: 0.9rem;
++  color: #475569;
++  font-weight: 500;
++}
++
++.edit-modal .detail-main {
++  max-height: none;
++}
++
++.edit-modal .detail-left-col {
++  border-right: none;
++}
++
++.edit-modal .detail-left-col {
++  width: 100%;
++}
++
+ /* File upload */
+ .file-upload-section {
+   background-color: #f8fafc;
+   border-radius: 10px;
+   padding: 12px;
+   border: 1px solid #e2e8f0;
+ }
+
+ /* History section */
+ .history-section {
+   height: 100%;
    display: flex;
    flex-direction: column;
-   gap: 20px;
  }
 
- .customer-detail-header {
-   display: flex;
-   align-items: center;
-@@ -2018,64 +2123,74 @@ body {
-   }
-
-   .customer-actions {
-     width: 100%;
-     flex-direction: row;
-     justify-content: space-between;
-     margin-top: 10px;
-   }
- }
- .progress-fill.progress-new {
-   background: linear-gradient(to right, #6366f1, #818cf8);
- }
-
- .progress-fill.progress-care {
-   background: linear-gradient(to right, #0ea5e9, #38bdf8);
- }
- /* ===== HISTORY ===== */
  .history-list {
-   display: flex;
-   flex-direction: column;
-   gap: 10px;
+   flex: 1;
+   overflow-y: auto;
  }
 
  .history-item {
    display: flex;
--  gap: 12px;
-+  flex-direction: column;
-+  gap: 8px;
-   padding: 12px;
-   border-radius: 10px;
-   background: #f8fafc;
-   border: 1px solid #e5e7eb;
+   margin-bottom: 20px;
+   position: relative;
  }
-
-+.history-header {
-+  display: flex;
-+  align-items: center;
-+  gap: 10px;
-+  flex-wrap: wrap;
-+}
-+
- .history-status {
--  min-width: 120px;
--  height: fit-content;
--  padding: 6px 10px;
-+  padding: 4px 10px;
-   border-radius: 999px;
-   color: #fff;
-   font-size: 12px;
-   font-weight: 600;
-   text-align: center;
- }
-
--.history-content {
--  flex: 1;
--}
--
- .history-time {
-   font-size: 12px;
-   color: #64748b;
--  margin-bottom: 4px;
-+  display: flex;
-+  align-items: center;
-+  gap: 4px;
- }
-
- .history-note {
-   font-size: 14px;
-   color: #334155;
- }
-
- .history-note.muted {
-   font-style: italic;
-   color: #94a3b8;
- }
-
-+.empty-history {
-+  font-size: 14px;
-+  color: #64748b;
-+  font-style: italic;
-+}
-+
- </style>
