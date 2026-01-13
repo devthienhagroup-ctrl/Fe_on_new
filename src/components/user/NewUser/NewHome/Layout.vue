@@ -18,7 +18,7 @@
     </div>
 
     <!-- FOOTER -->
-    <FooterHome @scrollToTop="scrollToTop" />
+<!--    <FooterHome @scrollToTop="scrollToTop" />-->
     <FloatingContact
       align="left"
     ></FloatingContact>

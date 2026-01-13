@@ -22,6 +22,14 @@
       <slot></slot>
     </div>
 
+    <!-- List Content -->
+    <ul v-if="hasListContent" class="space-y-2 mt-4 p-0">
+      <li v-for="(item, index) in listContent" :key="index" class="flex items-center text-sm text-slate-400">
+        <i :class="listItemIconClass" class="mr-2" :style="listItemIconStyles" style="font-size: 14px"></i>
+        {{ item }}
+      </li>
+    </ul>
+
     <!-- Link - chỉ hiển thị khi có link hoặc quickAccessUrl hoặc slot link -->
     <div v-if="hasLinkSection" class="mt-6 space-y-3">
       <!-- Container cho 2 nút hiển thị cùng hàng -->
@@ -93,12 +101,45 @@ const props = defineProps({
     default: true
   },
   aos: String,
-  aosDelay: String
+  aosDelay: String,
+  // Thêm props cho danh sách nội dung
+  listContent: {
+    type: Array,
+    default: () => []
+  },
+  listDotIconClass: {
+    type: String,
+    default: 'fas fa-circle text-xs' // Mặc định là dấu chấm tròn
+  }
 })
 
 // Check if color is a preset or hex
 const isHexColor = computed(() => {
   return /^#[0-9A-F]{6}$/i.test(props.color);
+});
+
+// Kiểm tra xem có nội dung danh sách không
+const hasListContent = computed(() => {
+  return props.listContent && props.listContent.length > 0;
+});
+
+// Class cho icon trong danh sách
+const listItemIconClass = computed(() => {
+  return props.listDotIconClass;
+});
+
+// Styles cho icon trong danh sách (áp dụng màu cho hex colors)
+const listItemIconStyles = computed(() => {
+  if (!isHexColor.value) return {};
+
+  // Nếu là icon mặc định (fas fa-circle), áp dụng màu
+  if (props.listDotIconClass === 'fas fa-circle text-xs') {
+    return {
+      'color': hexColor.value
+    };
+  }
+
+  return {};
 });
 
 // Sửa preset color classes để điều chỉnh hover effect

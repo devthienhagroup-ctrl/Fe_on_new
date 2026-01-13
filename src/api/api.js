@@ -7,7 +7,7 @@ import { showAlert, showError } from "../assets/js/alertService.js";
 /* ===================== CONFIG ===================== */
 
 const api = axios.create({
-    baseURL: 'https://thienhagroup.vn/apithienha',
+    baseURL: 'http://localhost:8084/apithienha',
     withCredentials: true, // gửi cookie refreshToken
 })
 

@@ -8,6 +8,8 @@
         </div>
         THIÊN HÀ<span class="text-blue-400">GROUP</span>
       </a>
+
+      <!-- Desktop Menu -->
       <div class="hidden md:flex space-x-8 items-center" data-aos="fade-down" data-aos-delay="100">
         <router-link to="/" class="hover:text-blue-400 transition text-sm font-semibold uppercase tracking-widest">Trang chủ</router-link>
         <a href="#about" class="hover:text-blue-400 transition text-sm font-semibold uppercase tracking-widest">Về chúng tôi</a>
@@ -28,28 +30,142 @@
           <span class="logout-text">Đăng xuất</span>
         </button>
       </div>
+
+      <!-- Hamburger Button for Mobile -->
+      <button
+          class="hamburger md:hidden"
+          id="hamburger"
+          :class="{ 'active': isMenuOpen }"
+          @click="toggleMobileMenu"
+          aria-label="Menu"
+          aria-expanded="isMenuOpen"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div
+        class="mobile-menu-overlay fixed inset-0 bg-brand-dark/95 z-40 md:hidden transition-all duration-300"
+        :class="{ 'opacity-0 invisible': !isMenuOpen, 'opacity-100 visible': isMenuOpen }"
+        @click="closeMobileMenu"
+    >
+      <div
+          class="mobile-menu-content absolute top-20 left-0 w-full p-6 transform transition-transform duration-300"
+          :class="{ '-translate-y-4': !isMenuOpen, 'translate-y-0': isMenuOpen }"
+          @click.stop
+      >
+        <div class="flex flex-col space-y-6 text-center">
+          <router-link
+              to="/"
+              class="text-white hover:text-blue-400 transition text-lg font-semibold uppercase tracking-widest py-3"
+              @click="closeMobileMenu"
+          >
+            Trang chủ
+          </router-link>
+          <a
+              href="#about"
+              class="text-white hover:text-blue-400 transition text-lg font-semibold uppercase tracking-widest py-3"
+              @click="closeMobileMenu"
+          >
+            Về chúng tôi
+          </a>
+          <a
+              href="#services"
+              class="text-white hover:text-blue-400 transition text-lg font-semibold uppercase tracking-widest py-3"
+              @click="closeMobileMenu"
+          >
+            Lĩnh vực
+          </a>
+          <a
+              href="#contact"
+              class="text-white hover:text-blue-400 transition text-lg font-semibold uppercase tracking-widest py-3"
+              @click="closeMobileMenu"
+          >
+            Liên hệ
+          </a>
+
+          <!-- Mobile Auth Buttons -->
+          <div class="pt-6 border-t border-gray-700">
+            <button
+                v-if="auth.userInfo == null"
+                class="w-full px-6 py-3 rounded-full border border-blue-500 text-blue-400 hover:bg-blue-600 hover:text-white transition duration-300"
+                @click="openMobileLogin"
+            >
+              <i class="fa fa-user mr-2"></i> Đăng nhập
+            </button>
+
+            <button
+                v-else
+                class="w-full px-6 py-3 rounded-full border border-blue-500 text-blue-400 hover:bg-blue-600 hover:text-white transition duration-300"
+                @click="handleMobileLogout"
+            >
+              <i class="fa-solid fa-right-from-bracket mr-2"></i> Đăng xuất
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </nav>
 </template>
 
 <script setup>
-import {onMounted} from "vue";
-import {useAuthStore} from "../../../../stores/authStore.js";
+import { onMounted, ref } from "vue";
+import { useAuthStore } from "../../../../stores/authStore.js";
+
 const auth = useAuthStore();
+const isMenuOpen = ref(false);
 
 const openLoginModal = () => {
-  window.dispatchEvent(new Event('open-login-modal'))
-}
-
-// Hàm xử lý đăng xuất
-const handleLogout =async () => {
-  const store = useAuthStore();
-  await store.logout();
+  window.dispatchEvent(new Event('open-login-modal'));
+  closeMobileMenu();
 };
 
-onMounted(() => {
+const openMobileLogin = () => {
+  openLoginModal();
+  closeMobileMenu();
+};
 
-})
+// Hàm xử lý đăng xuất
+const handleLogout = async () => {
+  const store = useAuthStore();
+  await store.logout();
+  closeMobileMenu();
+};
+
+const handleMobileLogout = async () => {
+  await handleLogout();
+};
+
+// Toggle mobile menu
+const toggleMobileMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+  // Prevent body scrolling when menu is open
+  document.body.style.overflow = isMenuOpen.value ? 'hidden' : '';
+};
+
+// Close mobile menu
+const closeMobileMenu = () => {
+  isMenuOpen.value = false;
+  document.body.style.overflow = '';
+};
+
+// Close menu on ESC key
+onMounted(() => {
+  const handleEscKey = (e) => {
+    if (e.key === 'Escape' && isMenuOpen.value) {
+      closeMobileMenu();
+    }
+  };
+
+  window.addEventListener('keydown', handleEscKey);
+
+  return () => {
+    window.removeEventListener('keydown', handleEscKey);
+  };
+});
 </script>
 
 <style scoped lang="css">
@@ -104,5 +220,62 @@ onMounted(() => {
 .login-btn:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+
+/* Hamburger Styles */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  z-index: 1001;
+  position: relative;
+  padding: 10px;
+  background: none;
+  border: none;
+  margin: -10px;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background-color: white;
+  margin: 3px 0;
+  transition: 0.3s;
+  pointer-events: none;
+}
+
+/* Hamburger Animation */
+.hamburger.active span:nth-child(1) {
+  transform: rotate(-45deg) translate(-5px, 6px);
+  background-color: #60a5fa; /* blue-400 */
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: rotate(45deg) translate(-5px, -6px);
+  background-color: #60a5fa; /* blue-400 */
+}
+
+/* Mobile Responsive */
+@media (max-width: 767px) {
+  .hamburger {
+    display: flex;
+  }
+
+  .mobile-menu-overlay {
+    backdrop-filter: blur(5px);
+  }
+}
+
+/* Smooth transitions for mobile menu */
+.mobile-menu-content {
+  will-change: transform;
+}
+
+.mobile-menu-overlay {
+  will-change: opacity;
 }
 </style>

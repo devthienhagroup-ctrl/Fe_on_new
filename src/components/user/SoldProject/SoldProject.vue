@@ -107,7 +107,7 @@
               :key="item.id"
               class="asset-card"
           >
-            <div @click="goToDetail(item.id)" class="card-clickable">
+            <div @click="$router.push(buildSeoUrl(item))" class="card-clickable">
               <div class="card-image-container">
                 <div class="image-wrapper">
                   <img

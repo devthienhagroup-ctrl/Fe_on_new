@@ -1,7 +1,7 @@
 <!-- MiniCardIcon.vue -->
 <template>
   <div
-      class="bg-slate-800/50 backdrop-blur-sm p-6 rounded-2xl border border-slate-700 transition-colors duration-300 group"
+      class="bg-slate-800/50 backdrop-blur-sm p-6 rounded-2xl border-2 border-slate-700 transition-colors duration-300 group"
       :class="{
       'hover:border-blue-500': color === 'blue',
       'hover:border-purple-500': color === 'purple',

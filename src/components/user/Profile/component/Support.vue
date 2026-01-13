@@ -1,7 +1,9 @@
 <template>
   <div class="support-container">
     <div class="support-header">
-      <img src="/imgs/active-support-animate.svg" alt="Support" class="support-image">
+      <div class="flex justify-center">
+        <img src="/imgs/active-support-animate.svg" alt="Support" class="support-image">
+      </div>
       <h1 class="support-title">Thiên Hà Support</h1>
       <p class="support-subtitle">Luôn sẵn sàng đồng hành và giải đáp mọi thắc mắc của bạn.</p>
     </div>
@@ -61,8 +63,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import {ref, onMounted, onUnmounted} from 'vue'
+import {useRouter} from 'vue-router'
 
 const router = useRouter()
 const activeFAQ = ref(null)

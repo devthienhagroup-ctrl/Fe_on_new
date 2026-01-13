@@ -443,17 +443,18 @@
               </div>
 
               <!-- Nút đăng nhập để xem chi tiết -->
+              <!-- Nút đăng nhập để xem chi tiết -->
               <div class="text-center pt-4">
-                <router-link to="#"
-                             class="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-semibold
-                 text-white
-                transition-all duration-300 w-full shadow-lg hover:shadow-purple-500/25">
+                <button
+                    @click="handleViewDetails"
+                    class="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-semibold
+           btn-gradient transition-all duration-300 w-full shadow-lg hover:shadow-purple-500/25">
                   <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                   </svg>
                   {{ authStore.userInfo == null ? config.buttons.loginToView.text : config.buttons.viewDetails.text }}
-                </router-link>
+                </button>
                 <p class="text-xs text-slate-500 mt-3">{{ searchResultSavedNotice }}</p>
               </div>
             </div>
@@ -682,15 +683,16 @@
 </template>
 
 <script setup>
-import {computed, onMounted, reactive, ref, onUnmounted, nextTick} from "vue";
+import { computed, onMounted, reactive, ref, onUnmounted, nextTick } from "vue";
 import GlassCard from "../../UI/GlassCard.vue";
 import TestimonialCard from "../../UI/TestimonialCard.vue";
 import SoldProjectCard from "../../UI/SoldProjectCard.vue";
 import { useAuthStore } from "../../../../stores/authStore.js";
-import addressData from "../../../../assets/js/address.json"
+import addressData from "../../../../assets/js/address.json";
 import Fuse from "fuse.js";
 import api from "../../../../api/api.js";
-import {buildSeoUrl} from "../../../../assets/js/global.js";
+import { buildSeoUrl } from "../../../../assets/js/global.js";
+import Swal from 'sweetalert2';
 
 // ========== SOLD PROJECTS - Lấy từ API ==========
 const soldProjects = ref([]);
@@ -701,8 +703,6 @@ const soldProjectsTotalPages = ref(0);
 const soldProjectsContainer = ref(null);
 const hasMoreSoldProjects = ref(true);
 
-
-// Hàm format địa chỉ
 // Hàm format địa chỉ: chỉ lấy Thành phố/Tỉnh, giới hạn 40 ký tự
 const formatLocation = (address) => {
   if (!address) return '';
@@ -718,7 +718,6 @@ const formatLocation = (address) => {
 
   return city;
 };
-
 
 // Hàm format giá
 const formatPrice = (price) => {
@@ -796,7 +795,6 @@ const fetchSoldProjects = async (page = 0, loadMore = false) => {
   }
 };
 
-
 // Hàm xử lý scroll để load thêm
 const handleSoldProjectsScroll = () => {
   if (!soldProjectsContainer.value || loadingMoreProjects.value || !hasMoreSoldProjects.value) {
@@ -832,7 +830,6 @@ const handleSoldProjectsScroll = () => {
   }
 };
 
-
 // Hàm load thêm dự án - THÊM DEBOUNCE
 const loadMoreSoldProjects = async () => {
   if (loadingMoreProjects.value || !hasMoreSoldProjects.value) return;
@@ -848,7 +845,6 @@ const refreshSoldProjects = () => {
   soldProjectsPage.value = 0;
   fetchSoldProjects(0, false);
 };
-
 
 // Data từ address.json
 const provinces = ref([]);
@@ -1283,52 +1279,7 @@ const config = ref({
   soldProjects: {
     title: 'Dự án đã bán thành công',
     description: 'Khách hàng tin tưởng – Nhà phố được bán nhanh trong 30 ngày. Dưới đây là các giao dịch tiêu biểu.',
-    items: [
-      // {
-      //   id: 1,
-      //   type: 'Nhà phố 4 tầng',
-      //   location: 'Quận 2, TP.HCM',
-      //   status: 'ĐÃ BÁN',
-      //   price: 14.5,
-      //   saleTime: '28 ngày',
-      //   priceDifference: 8,
-      //   imageUrl: '',
-      //   imageClass: 'bg-gradient-to-br from-purple-500/20 to-blue-500/10'
-      // },
-      // {
-      //   id: 2,
-      //   type: 'Nhà mặt tiền',
-      //   location: 'Quận 7, TP.HCM',
-      //   status: 'ĐÃ BÁN',
-      //   price: 9.2,
-      //   saleTime: '22 ngày',
-      //   priceDifference: 12,
-      //   imageUrl: '/imgs/projects/nha-mat-tien-q7.jpg',
-      //   imageClass: 'bg-gradient-to-br from-blue-500/20 to-purple-500/10'
-      // },
-      // {
-      //   id: 3,
-      //   type: 'Nhà phố Shophouse',
-      //   location: 'Quận Bình Thạnh',
-      //   status: 'ĐÃ BÁN',
-      //   price: '22 tỷ VNĐ',
-      //   saleTime: '30 ngày',
-      //   priceDifference: 5,
-      //   imageUrl: '',
-      //   imageClass: 'bg-gradient-to-br from-purple-500/20 to-pink-500/10'
-      // },
-      // {
-      //   id: 4,
-      //   type: 'Nhà phố cao cấp',
-      //   location: 'Thủ Đức, TP.HCM',
-      //   status: 'ĐÃ BÁN',
-      //   price: 18.7,
-      //   saleTime: '25 ngày',
-      //   priceDifference: 10,
-      //   imageUrl: '/imgs/projects/nha-pho-thu-duc.jpg',
-      //   imageClass: 'bg-gradient-to-br from-amber-500/20 to-orange-500/10'
-      // }
-    ]
+    items: []
   },
 
   // ========== PROCESS ==========
@@ -1429,6 +1380,471 @@ const searchResult = reactive({
   maxPrice: 0  // Thêm trường max
 });
 
+// ========== HÀM XỬ LÝ LOCALSTORAGE ==========
+
+// Hàm chuẩn hóa giá trị (chuyển tất cả về string để so sánh)
+const normalizeValue = (value) => {
+  if (value === undefined || value === null) return '';
+  if (typeof value === 'number') return String(value);
+  if (typeof value === 'string') return value.trim();
+  return String(value);
+};
+
+// Hàm tạo hash đơn giản từ string
+const hashString = (str) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash).toString(36);
+};
+
+// Hàm tạo key cho localStorage dựa trên thông tin form
+const generateStorageKey = () => {
+  const keyData = {
+    tinhThanh: normalizeValue(searchForm.tinhThanh),
+    quanHuyen: normalizeValue(searchForm.quanHuyen),
+    soTo: normalizeValue(searchForm.soTo),
+    soThua: normalizeValue(searchForm.soThua),
+    dienTichDat: normalizeValue(searchForm.dienTichDat),
+    dienTichSan: normalizeValue(searchForm.dienTichSan),
+    giaMongMuon: normalizeValue(searchForm.giaMongMuon)
+  };
+
+  // Tạo string JSON
+  const jsonString = JSON.stringify(keyData);
+
+  // Tạo hash từ dữ liệu để tránh key quá dài
+  return `search_result_${hashString(jsonString)}`;
+};
+
+// Hàm kiểm tra kết quả có khớp với form hiện tại không
+const isResultMatchingCurrentForm = (savedResult) => {
+  // Kiểm tra từng trường quan trọng
+  const fieldsToCheck = [
+    'tinhThanh',
+    'quanHuyen',
+    'soTo',
+    'soThua',
+    'dienTichDat',
+    'dienTichSan',
+    'giaMongMuon'
+  ];
+
+  for (const field of fieldsToCheck) {
+    const savedValue = savedResult._meta?.formData?.[field] || savedResult[field];
+    const currentValue = searchForm[field];
+
+    // Chuyển đổi cả hai về string để so sánh
+    const savedStr = savedValue !== undefined && savedValue !== null ? String(savedValue).trim() : '';
+    const currentStr = currentValue !== undefined && currentValue !== null ? String(currentValue).trim() : '';
+
+    // So sánh giá trị
+    if (savedStr !== currentStr) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+// Hàm kiểm tra và lấy kết quả từ localStorage
+const getResultFromLocalStorage = () => {
+  const storageKey = generateStorageKey();
+  const savedResult = localStorage.getItem(storageKey);
+
+  if (savedResult) {
+    try {
+      const parsedResult = JSON.parse(savedResult);
+
+      // Kiểm tra xem kết quả có phù hợp với form hiện tại không
+      if (isResultMatchingCurrentForm(parsedResult)) {
+        return parsedResult;
+      } else {
+        // Nếu không phù hợp, xóa kết quả cũ
+        localStorage.removeItem(storageKey);
+      }
+    } catch (e) {
+      console.error('Lỗi khi parse kết quả từ localStorage:', e);
+      localStorage.removeItem(storageKey);
+    }
+  }
+  return null;
+};
+
+// Hàm lưu kết quả vào localStorage
+const saveResultToLocalStorage = (result) => {
+  const storageKey = generateStorageKey();
+
+  // Thêm thời gian lưu và dữ liệu form để kiểm tra sau
+  const resultToSave = {
+    ...result,
+    _meta: {
+      savedAt: new Date().toISOString(),
+      formData: {
+        tinhThanh: normalizeValue(searchForm.tinhThanh),
+        quanHuyen: normalizeValue(searchForm.quanHuyen),
+        soTo: normalizeValue(searchForm.soTo),
+        soThua: normalizeValue(searchForm.soThua),
+        dienTichDat: normalizeValue(searchForm.dienTichDat),
+        dienTichSan: normalizeValue(searchForm.dienTichSan),
+        giaMongMuon: normalizeValue(searchForm.giaMongMuon)
+      }
+    }
+  };
+
+  localStorage.setItem(storageKey, JSON.stringify(resultToSave));
+};
+
+// ========== HÀM XỬ LÝ FORM ==========
+
+// Hàm hiện thông báo đăng nhập bằng SweetAlert2
+const showLoginPrompt = () => {
+  return new Promise((resolve) => {
+    Swal.fire({
+      title: 'Yêu cầu đăng nhập',
+      html: `
+        <div class="text-slate-300 text-sm leading-relaxed">
+          <p class="mb-3">Vui lòng đăng nhập để xem kết quả dự đoán chi tiết từ hệ thống AI.</p>
+          <p class="text-xs text-slate-400">Kết quả sẽ được lưu vào tài khoản của bạn để xem lại sau.</p>
+        </div>
+      `,
+      background: '#0f172a',
+      color: '#e2e8f0',
+      showCancelButton: true,
+      cancelButtonText: 'Bỏ qua',
+      confirmButtonText: 'Đăng nhập',
+      reverseButtons: true,
+      customClass: {
+        popup: 'rounded-2xl border border-white/10',
+        title: 'text-white text-lg font-bold mb-4',
+        confirmButton: 'btn-gradient !rounded-xl !px-6 !py-2.5 !text-sm !font-semibold',
+        cancelButton: '!bg-transparent !text-slate-300 !border !border-white/10 !rounded-xl !px-6 !py-2.5 !text-sm !font-semibold hover:!bg-white/10 hover:!border-white/20'
+      },
+      buttonsStyling: false,
+      showLoaderOnConfirm: false,
+      preConfirm: () => {
+        openLoginModal();
+        // return false; // Không đóng modal SweetAlert ngay
+      }
+    }).then((result) => {
+      if (result.dismiss === Swal.DismissReason.cancel) {
+        resolve(false);
+      } else {
+        resolve(true);
+      }
+    });
+  });
+};
+
+// Hàm tính toán và hiển thị kết quả
+const calculateAndShowResult = async () => {
+  // Hiển thị thông báo đang tính toán
+  Swal.fire({
+    title: 'Đang phân tích...',
+    html: '<div class="text-slate-300 text-sm">Hệ thống AI đang phân tích dữ liệu và dự đoán thời gian bán</div>',
+    background: '#0f172a',
+    color: '#e2e8f0',
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  // Giả lập delay để tính toán
+  await new Promise(resolve => setTimeout(resolve, 1500));
+
+  // Giả lập tính toán dựa trên dữ liệu nhập
+  let heSoKhuVuc = 1.0;
+  const tinhThanh = normalizeValue(searchForm.tinhThanh);
+  if (tinhThanh.includes('Hồ Chí Minh')) heSoKhuVuc = 1.05;
+  else if (tinhThanh.includes('Hà Nội')) heSoKhuVuc = 1.08;
+  else if (tinhThanh.includes('Đà Nẵng')) heSoKhuVuc = 0.98;
+  else heSoKhuVuc = 0.95;
+
+  const giaMongMuon = parseFloat(searchForm.giaMongMuon) || 15;
+  const giaDeXuat = parseFloat((giaMongMuon * heSoKhuVuc).toFixed(1));
+
+  // Tính toán min-max dựa trên giaDeXuat
+  const minPrice = parseFloat((giaDeXuat * 0.92).toFixed(1));  // -8%
+  const maxPrice = parseFloat((giaDeXuat * 1.03).toFixed(1));  // +3%
+
+  // Tính ngày bán dự kiến
+  let ngayBan = 28;
+  if (tinhThanh.includes('Hồ Chí Minh')) ngayBan = Math.floor(Math.random() * 8) + 18;
+  else if (tinhThanh.includes('Hà Nội')) ngayBan = Math.floor(Math.random() * 10) + 20;
+  else ngayBan = Math.floor(Math.random() * 12) + 22;
+
+  ngayBan = Math.min(ngayBan, 30);
+
+  const phanTram = Math.floor((ngayBan / 30) * 100);
+  const chenhLech = parseFloat(((giaDeXuat / giaMongMuon - 1) * 100).toFixed(1));
+
+  // Tạo đối tượng kết quả
+  const resultData = {
+    show: true,
+    tinhThanh: tinhThanh || 'TP. Hồ Chí Minh',
+    quanHuyen: normalizeValue(searchForm.quanHuyen) || 'Phường Tân Phú',
+    ngayBan: ngayBan,
+    giaDeXuat: giaDeXuat,
+    chenhLech: chenhLech,
+    phanTram: phanTram,
+    minPrice: minPrice,
+    maxPrice: maxPrice
+  };
+
+  // Lưu vào localStorage
+  saveResultToLocalStorage(resultData);
+
+  // Cập nhật kết quả hiển thị
+  Object.assign(searchResult, resultData);
+
+  // Đóng thông báo loading
+  Swal.close();
+
+  // Hiển thị thông báo thành công
+  Swal.fire({
+    title: 'Phân tích hoàn tất!',
+    html: '<div class="text-slate-300 text-sm">Kết quả đã được lưu vào tài khoản của bạn</div>',
+    icon: 'success',
+    background: '#0f172a',
+    color: '#e2e8f0',
+    confirmButtonText: 'Xem kết quả',
+    customClass: {
+      popup: 'rounded-2xl border border-white/10',
+      confirmButton: 'btn-gradient !rounded-xl !px-6 !py-2.5 !text-sm !font-semibold'
+    },
+    buttonsStyling: false,
+    timer: 2000
+  });
+
+  // Scroll đến kết quả
+  setTimeout(() => {
+    const resultEl = document.getElementById('ket-qua-du-doan');
+    if (resultEl) {
+      resultEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 100);
+};
+
+// Hàm xử lý submit form - đã thêm tính toán min-max và kiểm tra localStorage
+const handleSearchSubmit = async (e) => {
+  e.preventDefault();
+
+  // Kiểm tra các trường bắt buộc
+  const requiredFields = [
+    'hoTen',
+    'soDienThoai',
+    'email',
+    'tinhThanh',
+    'quanHuyen',
+    'dienTichDat',
+    'giaMongMuon'
+  ];
+
+  // Kiểm tra xem các trường bắt buộc có được điền không
+  const missingFields = requiredFields.filter(field => {
+    const value = searchForm[field];
+
+    // Kiểm tra các trường string
+    if (field === 'hoTen' || field === 'soDienThoai' || field === 'email' ||
+        field === 'tinhThanh' || field === 'quanHuyen') {
+      return !value || String(value).trim() === '';
+    }
+
+    // Kiểm tra các trường số
+    if (field === 'dienTichDat' || field === 'giaMongMuon') {
+      return !value && value !== 0;
+    }
+
+    return !value;
+  });
+
+  if (missingFields.length > 0) {
+    const fieldLabels = {
+      'hoTen': 'Họ tên',
+      'soDienThoai': 'Số điện thoại',
+      'email': 'Email',
+      'tinhThanh': 'Tỉnh/Thành phố',
+      'quanHuyen': 'Quận/Huyện',
+      'dienTichDat': 'Diện tích đất',
+      'giaMongMuon': 'Giá mong muốn'
+    };
+
+    const missingFieldNames = missingFields.map(field => fieldLabels[field] || field).join(', ');
+
+    Swal.fire({
+      title: 'Thiếu thông tin',
+      html: `<div class="text-slate-300 text-sm">
+              <p class="mb-2">Vui lòng điền đầy đủ các trường bắt buộc:</p>
+              <p class="text-amber-300 font-medium">${missingFieldNames}</p>
+            </div>`,
+      icon: 'warning',
+      background: '#0f172a',
+      color: '#e2e8f0',
+      confirmButtonText: 'OK',
+      customClass: {
+        popup: 'rounded-2xl border border-white/10',
+        confirmButton: 'btn-gradient !rounded-xl !px-6 !py-2.5 !text-sm !font-semibold'
+      },
+      buttonsStyling: false
+    });
+    return;
+  }
+
+  // Kiểm tra định dạng email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(searchForm.email.trim())) {
+    Swal.fire({
+      title: 'Email không hợp lệ',
+      html: '<div class="text-slate-300 text-sm">Vui lòng nhập địa chỉ email hợp lệ</div>',
+      icon: 'warning',
+      background: '#0f172a',
+      color: '#e2e8f0',
+      confirmButtonText: 'OK',
+      customClass: {
+        popup: 'rounded-2xl border border-white/10',
+        confirmButton: 'btn-gradient !rounded-xl !px-6 !py-2.5 !text-sm !font-semibold'
+      },
+      buttonsStyling: false
+    });
+    return;
+  }
+
+  // Kiểm tra định dạng số điện thoại Việt Nam
+  const phoneRegex = /^(0\d{9}|\+84\d{9})$/;
+  const phoneNumber = searchForm.soDienThoai.trim().replace(/\s+/g, '');
+  if (!phoneRegex.test(phoneNumber)) {
+    Swal.fire({
+      title: 'Số điện thoại không hợp lệ',
+      html: '<div class="text-slate-300 text-sm">Vui lòng nhập số điện thoại hợp lệ (10-11 số, bắt đầu bằng 0 hoặc +84)</div>',
+      icon: 'warning',
+      background: '#0f172a',
+      color: '#e2e8f0',
+      confirmButtonText: 'OK',
+      customClass: {
+        popup: 'rounded-2xl border border-white/10',
+        confirmButton: 'btn-gradient !rounded-xl !px-6 !py-2.5 !text-sm !font-semibold'
+      },
+      buttonsStyling: false
+    });
+    return;
+  }
+
+  // Kiểm tra nếu đã có kết quả trong localStorage
+  const savedResult = getResultFromLocalStorage();
+  if (savedResult && authStore.userInfo) {
+    // Nếu đã đăng nhập và có kết quả cũ, hiển thị kết quả đã lưu
+    Object.assign(searchResult, savedResult);
+    searchResult.show = true;
+
+    // Hiển thị thông báo đã lấy từ cache
+    Swal.fire({
+      title: 'Đã tìm thấy kết quả',
+      html: `<div class="text-slate-300 text-sm">Hiển thị kết quả đã được lưu trước đó</div>`,
+      icon: 'info',
+      background: '#0f172a',
+      color: '#e2e8f0',
+      confirmButtonText: 'OK',
+      customClass: {
+        popup: 'rounded-2xl border border-white/10',
+        confirmButton: 'btn-gradient !rounded-xl !px-6 !py-2.5 !text-sm !font-semibold'
+      },
+      buttonsStyling: false,
+      timer: 1500
+    });
+
+    // Scroll đến kết quả
+    setTimeout(() => {
+      const resultEl = document.getElementById('ket-qua-du-doan');
+      if (resultEl) {
+        resultEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+
+    return;
+  }
+
+  // Nếu chưa đăng nhập, hiện thông báo yêu cầu đăng nhập
+  if (!authStore.userInfo) {
+    await showLoginPrompt();
+    return;
+  }
+
+  // Nếu đã đăng nhập, tiến hành tính toán
+  await calculateAndShowResult();
+};
+
+// ========== HÀM XỬ LÝ SỰ KIỆN ĐĂNG NHẬP ==========
+
+// Hàm xử lý khi đăng nhập thành công
+const handleLoginSuccess = async () => {
+  // Kiểm tra nếu form đã được điền đầy đủ
+  if (isFormFilled()) {
+    // Hiển thị thông báo đang tính toán
+    Swal.fire({
+      title: 'Đang tính toán...',
+      html: '<div class="text-slate-300 text-sm">Hệ thống AI đang phân tích dữ liệu của bạn</div>',
+      background: '#0f172a',
+      color: '#e2e8f0',
+      showConfirmButton: false,
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    // Đợi một chút để người dùng thấy thông báo
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Thực hiện tính toán
+    await calculateAndShowResult();
+
+    // Đóng thông báo
+    Swal.close();
+  }
+};
+
+// Hàm kiểm tra form đã điền đầy đủ chưa
+const isFormFilled = () => {
+  return searchForm.hoTen &&
+      searchForm.soDienThoai &&
+      searchForm.email &&
+      searchForm.tinhThanh &&
+      searchForm.quanHuyen &&
+      searchForm.dienTichDat &&
+      searchForm.giaMongMuon;
+};
+
+// Hàm xử lý khi nhấn nút xem chi tiết
+const handleViewDetails = () => {
+  if (!authStore.userInfo) {
+    // Hiển thị thông báo đăng nhập nếu chưa đăng nhập
+    showLoginPrompt();
+  } else {
+    // Nếu đã đăng nhập, kiểm tra xem đã có kết quả chưa
+    if (!searchResult.show) {
+      Swal.fire({
+        title: 'Chưa có kết quả',
+        html: '<div class="text-slate-300 text-sm">Vui lòng nhập thông tin và tra cứu trước</div>',
+        icon: 'info',
+        background: '#0f172a',
+        color: '#e2e8f0',
+        confirmButtonText: 'OK',
+        customClass: {
+          popup: 'rounded-2xl border border-white/10',
+          confirmButton: 'btn-gradient !rounded-xl !px-6 !py-2.5 !text-sm !font-semibold'
+        },
+        buttonsStyling: false
+      });
+    }
+    // Nếu đã có kết quả, nút này sẽ không làm gì thêm (kết quả đã hiển thị)
+  }
+};
+
 // Computed property cho chênh lệch giá
 const chenhLechText = computed(() => {
   return searchResult.chenhLech > 0
@@ -1453,55 +1869,6 @@ const formattedSuggestedPriceSubtitle = computed(() => {
       .replace('{min}', searchResult.minPrice)
       .replace('{max}', searchResult.maxPrice);
 });
-
-// Hàm xử lý submit form - đã thêm tính toán min-max
-const handleSearchSubmit = (e) => {
-  e.preventDefault();
-
-  // Giả lập tính toán dựa trên dữ liệu nhập
-  let heSoKhuVuc = 1.0;
-  if (searchForm.tinhThanh.includes('Hồ Chí Minh')) heSoKhuVuc = 1.05;
-  else if (searchForm.tinhThanh.includes('Hà Nội')) heSoKhuVuc = 1.08;
-  else if (searchForm.tinhThanh.includes('Đà Nẵng')) heSoKhuVuc = 0.98;
-  else heSoKhuVuc = 0.95;
-
-  const giaMongMuon = parseFloat(searchForm.giaMongMuon) || 15;
-  const giaDeXuat = parseFloat((giaMongMuon * heSoKhuVuc).toFixed(1));
-
-  // Tính toán min-max dựa trên giaDeXuat (theo logic từ HTML template)
-  const minPrice = parseFloat((giaDeXuat * 0.92).toFixed(1));  // -8%
-  const maxPrice = parseFloat((giaDeXuat * 1.03).toFixed(1));  // +3%
-
-  // Tính ngày bán dự kiến
-  let ngayBan = 28;
-  if (searchForm.tinhThanh.includes('Hồ Chí Minh')) ngayBan = Math.floor(Math.random() * 8) + 18;
-  else if (searchForm.tinhThanh.includes('Hà Nội')) ngayBan = Math.floor(Math.random() * 10) + 20;
-  else ngayBan = Math.floor(Math.random() * 12) + 22;
-
-  ngayBan = Math.min(ngayBan, 30);
-
-  const phanTram = Math.floor((ngayBan / 30) * 100);
-  const chenhLech = parseFloat(((giaDeXuat / giaMongMuon - 1) * 100).toFixed(1));
-
-  // Cập nhật kết quả
-  searchResult.show = true;
-  searchResult.tinhThanh = searchForm.tinhThanh || 'TP. Hồ Chí Minh';
-  searchResult.quanHuyen = searchForm.quanHuyen || 'Phường Tân Phú';
-  searchResult.ngayBan = ngayBan;
-  searchResult.giaDeXuat = giaDeXuat;
-  searchResult.chenhLech = chenhLech;
-  searchResult.phanTram = phanTram;
-  searchResult.minPrice = minPrice; // Lưu min
-  searchResult.maxPrice = maxPrice; // Lưu max
-
-  // Scroll đến kết quả
-  setTimeout(() => {
-    const resultEl = document.getElementById('ket-qua-du-doan');
-    if (resultEl) {
-      resultEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, 100);
-};
 
 // Hàm xử lý xem chi tiết dự án
 const handleViewProjectDetails = (project) => {
@@ -1617,7 +1984,6 @@ onMounted(async () => {
     }
   });
 
-
   // AOS initialization
   if (typeof AOS !== 'undefined') {
     AOS.init({ duration: 700, once: true, offset: 80 });
@@ -1626,13 +1992,15 @@ onMounted(async () => {
   // Scroll event listener
   window.addEventListener('scroll', handleScroll);
 
+  // Thêm event listener cho sự kiện đăng nhập thành công
+  window.addEventListener('login-success', handleLoginSuccess);
+
   console.log("màu purple",config.value.styles.colors.purple500)
-
-
 });
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
+  window.removeEventListener('login-success', handleLoginSuccess);
 });
 </script>
 

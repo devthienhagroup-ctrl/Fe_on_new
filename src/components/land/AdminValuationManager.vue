@@ -2226,8 +2226,8 @@ async function generateValuationPDF(asset, report) {
   // Thêm link dẫn ngược về hệ thống
   noteY += 12;
   const linkColor = rgb(0.1, 0.1, 0.1); // gần đen
-  const link1 = "https://thienhagroup.vn";    // đường dẫn thật bạn có thể thay
-  const link2 = "https://thienhagroup.vn/giai-phap-ban-nhanh";    // đường dẫn thật bạn có thể thay
+  const link1 = "http://localhost:8084";    // đường dẫn thật bạn có thể thay
+  const link2 = "http://localhost:8084/giai-phap-ban-nhanh";    // đường dẫn thật bạn có thể thay
 
   page.drawText("Khảo sát thực tế - ", { x: 40, y: toY(noteY), font: fB, size: 10, color: linkColor });
   const link1X = 40 + fB.widthOfTextAtSize("Khảo sát thực tế - ", 10);
