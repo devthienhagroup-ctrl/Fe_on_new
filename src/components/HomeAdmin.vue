@@ -128,7 +128,30 @@ const allMenuItems = [
     icon: 'fa-solid fa-handshake text-primary fs-2',
     title: 'Yêu cầu hợp tác',
     desc: 'Quản lý các yêu cầu hợp tác từ môi giới'
+  },
+  {
+    label: 'MRAKETINGINSERT',
+    route: '/1',
+    icon: 'fa-solid fa-file-import text-success fs-2',
+    title: 'Nhập liệu khách hàng',
+    desc: 'Tạo mới và nhập dữ liệu khách hàng'
+  },
+  {
+    label: 'TELESALEUPDATE',
+    route: '/2',
+    icon: 'fa-solid fa-database text-warning fs-2',
+    title: 'Dữ liệu',
+    desc: 'Cập nhật và thao tác dữ liệu khách hàng'
+  },
+  {
+    label: 'CUSTOMERADMINALL',
+    route: '/3',
+    icon: 'fa-solid fa-users-gear text-danger fs-2',
+    title: 'Quản trị khách hàng',
+    desc: 'Toàn quyền quản lý dữ liệu khách hàng'
   }
+
+
 
 
 

@@ -652,7 +652,7 @@
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label for="customerName" class="form-label fw-medium">Họ và tên <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control form-control-custom" v-model="customerForm.name" required>
+                  <input type="text" class="form-control form-control-custom" v-model="customerForm.name">
                 </div>
                 <div class="col-md-6 mb-3">
                   <label for="customerPhone" class="form-label fw-medium">Số điện thoại <span class="text-danger">*</span></label>
@@ -1768,7 +1768,7 @@ const updateCustomer = async () => {
     await api.post(`/customer-crm/admin/host-temp/update/${customerForm.id}`, payload, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
-    showNotification('Cập nhật khách hàng thành công!', 'success')
+    showCenterSuccess('Cập nhật khách hàng thành công!', 'Dữ liệu đã được ghi nhận!')
     await fetchCustomers()
     showEditCustomerModal.value = false
     isEditing.value = false
@@ -2649,7 +2649,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   background: white !important;
 }
 
-.form-control-custom, .form-select-custom option {
+.form-select-custom option {
   font-size: 14px !important;
 }
 
@@ -2796,11 +2796,13 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   gap: 8px;
   position: relative;
   overflow: hidden;
+
 }
 
 .btn-custom::before {
   content: '';
   position: absolute;
+
   top: 0;
   left: -100%;
   width: 100%;
@@ -3773,7 +3775,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 
 .edit-modal .form-control-custom,
 .edit-modal .form-select-custom {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .province-search {

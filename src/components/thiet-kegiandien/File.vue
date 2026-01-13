@@ -5,7 +5,7 @@
     <div class="file-buttons-row">
       <!-- View buttons (icon only) -->
       <div class="view-buttons">
-        <button class="file-btn view-btn image-btn"
+        <button type="button" class="file-btn view-btn image-btn"
                 :disabled="!normalImages.length"
                 :class="{ 'opacity-50 pointer-events-none': !normalImages.length }"
                 @click="normalImages.length && openLightbox(0,'normal')"
@@ -13,7 +13,7 @@
           <i class="fa-solid fa-image"></i>
         </button>
 
-        <button class="file-btn view-btn landbook-btn"
+        <button type="button" class="file-btn view-btn landbook-btn"
                 :disabled="!landBookImages.length"
                 :class="{ 'opacity-50 pointer-events-none': !landBookImages.length }"
                 @click="landBookImages.length && openLightbox(0,'landBook')"
@@ -21,7 +21,7 @@
           <i class="fa-solid fa-landmark-dome"></i>
         </button>
 
-        <button class="file-btn view-btn file-gtn-btn "
+        <button type="button" class="file-btn view-btn file-gtn-btn "
                 :disabled="!files.length"
                 :class="{ 'opacity-50 pointer-events-none': !files.length }"
                 @click="files.length && openFileModal()"
@@ -32,12 +32,12 @@
 
       <!-- Upload buttons (with text) -->
       <div class="upload-buttons" v-if="canEdit && onUpload">
-        <button class="file-btn upload-btn upload-file-btn" @click="triggerFileUpload('normal')">
+        <button type="button" class="file-btn upload-btn upload-file-btn" @click="triggerFileUpload('normal')">
           <i class="fa-solid fa-plus"></i>
           <span>File</span>
         </button>
 
-        <button class="file-btn upload-btn upload-landbook-btn" @click="triggerFileUpload('landBook')">
+        <button type="button" class="file-btn upload-btn upload-landbook-btn" @click="triggerFileUpload('landBook')">
           <i class="fa-solid fa-plus"></i>
           <span>Sổ</span>
         </button>
@@ -45,6 +45,7 @@
 
       <!-- Download all button -->
       <button v-if="(normalImages.length || landBookImages.length || files.length) && allowDownloadAll"
+              type="button"
               class="file-btn download-all-btn"
               @click="downloadAllFiles"
               title="Tải tất cả">
@@ -73,7 +74,7 @@
               <div class="modal-subtitle">Tổng cộng {{ files.length }} file</div>
             </div>
           </div>
-          <button class="modal-close-btn" @click="closeFileModal">
+          <button type="button" class="modal-close-btn" @click="closeFileModal">
             <i class="fa-solid fa-times"></i>
           </button>
         </div>
@@ -89,12 +90,13 @@
                 <div class="file-size">{{ formatFileSize(f.size) }}</div>
               </div>
               <div class="file-actions">
-                <button class="file-action-btn download-btn"
+                <button type="button" class="file-action-btn download-btn"
                         @click="downloadFile(f.id,f.fileName)"
                         title="Tải xuống">
                   <i class="fa-solid fa-download"></i>
                 </button>
                 <button v-if="canEdit"
+                        type="button"
                         class="file-action-btn delete-btn"
                         @click="removeFile(i)"
                         title="Xóa">
@@ -112,7 +114,7 @@
         </div>
 
         <div class="file-modal-footer">
-          <button class="btn btn-outline-secondary" @click="closeFileModal">Đóng</button>
+          <button type="button" class="btn btn-outline-secondary" @click="closeFileModal">Đóng</button>
         </div>
       </div>
     </div>
@@ -137,6 +139,7 @@
 
           <div class="lightbox-header-right">
             <button v-if="canEdit"
+                    type="button"
                     class="lightbox-action-btn pin-btn"
                     :class="{ active: isMainImage(previewIndex) }"
                     @click="setMainImage(previewIndex)"
@@ -144,20 +147,21 @@
               <i class="fa-solid fa-thumbtack"></i>
             </button>
 
-            <button class="lightbox-action-btn download-btn"
+            <button type="button" class="lightbox-action-btn download-btn"
                     @click="downloadFile(currentImage?.id, currentImage?.fileName)"
                     title="Tải xuống">
               <i class="fa-solid fa-download"></i>
             </button>
 
             <button v-if="canEdit"
+                    type="button"
                     class="lightbox-action-btn delete-btn"
                     @click="removeImage(previewIndex)"
                     title="Xóa">
               <i class="fa-solid fa-trash"></i>
             </button>
 
-            <button class="lightbox-action-btn close-btn" @click="closeLightbox" title="Đóng">
+            <button type="button" class="lightbox-action-btn close-btn" @click="closeLightbox" title="Đóng">
               <i class="fa-solid fa-times"></i>
             </button>
           </div>
@@ -165,7 +169,7 @@
 
         <!-- Main image -->
         <div class="lightbox-body">
-          <button class="nav-btn prev-btn" @click="goPrev" title="Ảnh trước">
+          <button type="button" class="nav-btn prev-btn" @click="goPrev" title="Ảnh trước">
             <i class="fa-solid fa-chevron-left"></i>
           </button>
 
@@ -176,7 +180,7 @@
                  @click="closeLightbox" />
           </div>
 
-          <button class="nav-btn next-btn" @click="goNext" title="Ảnh sau">
+          <button type="button" class="nav-btn next-btn" @click="goNext" title="Ảnh sau">
             <i class="fa-solid fa-chevron-right"></i>
           </button>
         </div>
