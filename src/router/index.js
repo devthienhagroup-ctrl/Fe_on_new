@@ -147,6 +147,7 @@ import DemoGiaoDien from "../components/thiet-kegiandien/marketing-cap-da-ta.vue
 import test from "../components/thiet-kegiandien/marketing-cap-da-ta.vue"
 import test1 from "../components/thiet-kegiandien/telesales-lien-he-khach-hang.vue"
 import test2 from "../components/thiet-kegiandien/admin-saleadmin.vue"
+import AppointmentPage from "../components/thiet-kegiandien/AppointmentsPage.vue";
 const routes = [
     {
         path: "/-thg/nhap-lieu",
@@ -172,11 +173,11 @@ const routes = [
         name: "LoginForm",
         component: LoginForm,
     },
-    // {
-    //     path: '/giao-dien',
-    //     component: DemoGiaoDien,
-    //     meta: {requiresAuth: false, loginFrom: "admin", enableTailwind: true},
-    // },
+    {
+        path: '/giao-dien',
+        component: AppointmentsPage,
+        meta: {requiresAuth: false, loginFrom: "admin", enableTailwind: true},
+    },
     {
         path: "/user/quan-ly-san-pham",
         component: MenuUser,

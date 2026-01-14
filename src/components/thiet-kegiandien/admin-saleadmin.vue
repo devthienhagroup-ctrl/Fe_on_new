@@ -457,11 +457,6 @@
                       <i class="fas fa-database me-2"></i> Cấp dữ liệu
                     </button>
 
-                    <div class="d-flex gap-2">
-                      <button class="btn-success-custom btn-custom" @click="exportExcel">
-                        <i class="fas fa-file-excel me-2"></i> Excel
-                      </button>
-                    </div>
                     <button class=" btn-outline-custom btn-custom" @click="clearSelection">
                       <i class="fas fa-times me-1"></i> Bỏ chọn
                     </button>
@@ -504,6 +499,17 @@
   </span>
                   </div>
                   <div class="d-flex flex-wrap gap-2">
+                    <input
+                        ref="excelInput"
+                        type="file"
+                        accept=".xlsx,.xls"
+                        class="d-none"
+                        @change="handleExcelSelected"
+                    />
+
+                    <button class="btn-success-custom btn-custom" @click="openExcelPicker">
+                      <i class="fas fa-file-excel me-2"></i>Add Excel
+                    </button>
                     <button class="btn-primary-custom btn-custom" @click="openAddCustomerModal()">
                       <i class="fas fa-plus me-2"></i> Thêm khách hàng
                     </button>
@@ -749,8 +755,8 @@
     <!-- Modals -->
     <div v-if="isAnyModalOpen" class="modal-backdrop-custom"></div>
     <!-- Add Customer Modal -->
-    <div v-if="showAddCustomerModal" class="modal fade modal-custom show" tabindex="-1">
-      <div class="modal-dialog modal-lg">
+    <div v-if="showAddCustomerModal" class="modal fade modal-custom show add-customer-modal" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-shifted">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
@@ -760,84 +766,183 @@
             <button type="button" class="btn-close btn-close-white" @click="closeAddCustomerModal"></button>
           </div>
           <div class="modal-body">
-            <form @submit.prevent="updateCustomer">
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label for="customerName" class="form-label fw-medium">Họ và tên <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control form-control-custom" v-model="customerForm.name">
+            <form @submit.prevent="submitAddCustomer" class="compact-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label style="font-size: 16px!important;">Họ tên <span class="required">*</span></label>
+                  <div class="input-icon">
+                    <span class="icon-chip" style="background: linear-gradient(135deg, #36D1DC, #5B86E5); color: white;">
+                      <i class="fas fa-user"></i>
+                    </span>
+                    <input
+                      v-model="addCustomerForm.name"
+                      type="text"
+                      style="font-size: 16px!important;"
+                      class="form-control"
+                      placeholder="Nguyễn Văn A"
+                      required
+                    />
+                  </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                  <label for="customerPhone" class="form-label fw-medium">Số điện thoại <span class="text-danger">*</span></label>
-                  <input type="tel" class="form-control form-control-custom" v-model="customerForm.phone" required>
+
+                <div class="form-group">
+                  <label style="font-size: 16px!important;">Số điện thoại <span class="required">*</span></label>
+                  <div class="input-icon">
+                    <span class="icon-chip" style="background: linear-gradient(135deg, #FF416C, #FF4B2B); color: white;">
+                      <i class="fas fa-phone"></i>
+                    </span>
+                    <input style="font-size: 16px!important;"
+                      v-model="addCustomerForm.phone"
+                      type="tel"
+                      class="form-control"
+                      placeholder="09xxxxxxxx"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label for="customerProvince" class="form-label fw-medium">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+              <div class="form-row">
+                <div class="form-group">
+                  <label style="font-size: 16px!important;" >Tỉnh/Thành <span class="required">*</span></label>
+                  <div class="input-icon select-like" :class="{ open: addProvinceDropdownOpen }" style="position: relative;">
+                    <span  class="icon-chip" style="background: linear-gradient(135deg, #8344C5, #3A7BD5); color: white;">
+                      <i class="fas fa-location-dot"></i>
+                    </span>
+
+                    <input
+                      v-model="addProvinceSearch"
+                      @focus="addProvinceDropdownOpen = true"
+                      @input="addProvinceDropdownOpen = true"
+                      @blur="closeAddProvinceDropdown"
+                      type="text"
+                      class="form-control"
+                      placeholder="Tìm tỉnh/thành"
+                      autocomplete="off"
+                      style="cursor: pointer; font-size: 16px!important;"
+                    />
+
+                    <span class="select-caret" aria-hidden="true" @mousedown.prevent="toggleAddProvinceDropdown">
+                      <i class="fas fa-chevron-down"></i>
+                    </span>
+
+                    <ul
+                      v-if="addProvinceDropdownOpen && filteredAddProvinces.length"
+                      class="province-dropdown"
+                      style="position: absolute; left: 0; right: 0; top: 110%; z-index: 10; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; max-height: 180px; overflow-y: auto; margin: 0; padding: 0;"
+                    >
+                      <li
+                        v-for="province in filteredAddProvinces"
+                        :key="province"
+                        @mousedown.prevent="selectAddProvince(province)"
+                        style="padding: 0.5rem 1rem; cursor: pointer; list-style: none;"
+                        :style="{ background: province === addCustomerForm.area ? '#e0e7ff' : 'transparent' }"
+                      >
+                        {{ province }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label style="font-size: 16px!important;">Tên tỉnh cũ</label>
+                  <div class="input-icon">
+                    <span class="icon-chip" style="background: linear-gradient(135deg, #6b7280, #707f98); color: #f9fafb;">
+                      <i class="fas fa-map-marked-alt"></i>
+                    </span>
+                    <input
+                        style="font-size: 16px!important;"
+                      v-model="addCustomerForm.oldArea"
+                      type="text"
+                      class="form-control"
+                      placeholder="Tên tỉnh cũ (nếu có)"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label style="font-size: 16px!important;">Giá <span class="required">*</span></label>
+                <div class="input-icon">
+                  <span class="icon-chip" style="background: linear-gradient(135deg, #00b09b, #96c93d); color: white;">
+                    <i class="fas fa-coins"></i>
+                  </span>
                   <input
+                      style="font-size: 16px!important;"
+                    :value="addPriceDisplay"
                     type="text"
-                    class="form-control form-control-custom"
-                    list="province-options"
-                    v-model="customerForm.province"
-                    placeholder="Chọn tỉnh/thành phố"
+                    inputmode="numeric"
+                    class="form-control"
+                    placeholder="0"
+                    @input="handleAddPriceInput"
+                    @blur="syncAddPriceDisplay"
                     required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label style="font-size: 16px!important;">Phân loại <span class="required">*</span></label>
+                <div class="type-buttons" >
+                  <button
+
+                    v-for="type in customerTypes"
+                    :key="type.id"
+                    type="button"
+                    :class="['type-btn', type.id, { active: addCustomerForm.type === type.id }]"
+                    @click="addCustomerForm.type = type.id"
                   >
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label for="customerOldProvince" class="form-label fw-medium">Tỉnh cũ (nếu có)</label>
-                  <input
-                    type="text"
-                    class="form-control form-control-custom"
-                    list="province-options"
-                    v-model="customerForm.oldProvince"
-                    placeholder="Chọn tỉnh/thành phố"
-                  >
-                  <datalist id="province-options">
-                    <option v-for="province in provinceOptions" :key="province" :value="province"></option>
-                  </datalist>
+                    <i :class="type.icon"></i>
+                    {{ type.label }}
+                  </button>
                 </div>
               </div>
 
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label for="customerType" class="form-label fw-medium">Phân loại khách hàng <span class="text-danger">*</span></label>
-                  <select class="form-select form-select-custom" v-model="customerForm.type" required>
-                    <option value="">Chọn phân loại</option>
-                    <option value="MOI_GIOI">Môi giới</option>
-                    <option value="CHINH_CHU">Chủ nhà</option>
-                    <option value="NGUOI_THAN">Người thân</option>
-                  </select>
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label for="customerStatus" class="form-label fw-medium">Trạng thái <span class="text-danger">*</span></label>
-                  <select class="form-select form-select-custom" v-model="customerForm.status" required>
-                    <option value="NEW">Mới</option>
-                    <option value="DC_TELESALES">Chưa gọi</option>
-                    <option value="TN_7NGAY">Tiềm năng 7 ngày</option>
-                    <option value="TN_14NGAY">Tiềm năng 14 ngày</option>
-                    <option value="THANH_CONG">Thành công</option>
-                    <option value="SAI_SO_LIEU">Sai số</option>
-                    <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc được</option>
-                    <option value="CHAM_SOC">Chăm sóc</option>
-                    <option value="THAT_BAI">Thất bại</option>
-                  </select>
+              <div class="form-group">
+                <label style="font-size: 16px!important;" >Ghi chú</label>
+                <div class="input-icon">
+                  <span class="icon-chip" style="background: linear-gradient(135deg, #FF9966, #FF5E62); color: white;">
+                    <i class="fas fa-note-sticky"></i>
+                  </span>
+                  <textarea
+                      style="font-size: 16px!important;"
+                    v-model="addCustomerForm.note"
+                    class="form-control"
+                    rows="2"
+                    placeholder="Thông tin bổ sung..."
+                  ></textarea>
                 </div>
               </div>
 
-              <div class="mb-3">
-                <label for="customerAvatar" class="form-label fw-medium">Ảnh đại diện (URL)</label>
-                <input type="text" class="form-control form-control-custom" v-model="customerForm.avatar" placeholder="https://example.com/avatar.jpg">
-                <small class="text-muted">Để trống để sử dụng ảnh mặc định</small>
+              <div class="form-group">
+                <label style="font-size: 16px!important;">Đính kèm (tuỳ chọn)</label>
+                <div class="upload-row">
+                  <label class="upload-btn" title="Tải tệp nhỏ">
+                    <i class="fas fa-paperclip"></i>
+                    <span>Up file</span>
+                    <input id="addCustomerFileInput" class="upload-input" type="file" multiple @change="onPickAddFile" />
+                  </label>
+                  <div class="upload-meta" v-if="addPickedFileNames.length">
+                    <i class="fas fa-file-lines"></i>
+                    <span class="text-truncate">{{ addPickedFileLabel }}</span>
+                    <button type="button" class="upload-clear" @click="clearAddPickedFile" title="Bỏ chọn">
+                      <i class="fas fa-xmark"></i>
+                    </button>
+                  </div>
+                  <div class="upload-meta muted" v-else>
+                    <i class="fas fa-circle-info"></i>
+                    <span>Chọn tệp (nhỏ) để lưu kèm</span>
+                  </div>
+                </div>
               </div>
-
-              <input type="hidden" v-model="customerForm.id" />
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-custom btn-custom" @click="closeAddCustomerModal">Hủy</button>
-            <button type="button" class="btn btn-primary-custom btn-custom" @click="saveCustomer">
-              <i class="fas fa-save me-2"></i> Lưu khách hàng
+            <button type="button" class="btn btn-outline-custom btn-custom" @click="resetAddCustomerForm">
+              <i class="fas fa-rotate-right me-1"></i> Làm mới
+            </button>
+            <button type="button" class="btn btn-primary-custom btn-custom" @click="submitAddCustomer">
+              <i class="fas fa-check me-2"></i> Ghi nhận
             </button>
           </div>
         </div>
@@ -1451,6 +1556,8 @@ const selectedAssignee = ref(null)
 let employeeSearchTimer = null
 const provinceSearch = ref('')
 const provinceDropdownOpen = ref(false)
+const addProvinceSearch = ref('')
+const addProvinceDropdownOpen = ref(false)
 
 const creatorOptions = ref([
   { id: 1, name: "Trần Minh Anh", avatar: "https://randomuser.me/api/portraits/women/11.jpg" },
@@ -1512,6 +1619,24 @@ const customerForm = reactive({
   assigneeAvatar: ''
 })
 
+const addCustomerForm = reactive({
+  name: '',
+  phone: '',
+  area: '',
+  oldArea: '',
+  type: 'CHINH_CHU',
+  price: '',
+  note: ''
+})
+
+const addPriceDisplay = ref('')
+const addPickedFileNames = ref([])
+
+const customerTypes = [
+  { id: 'CHINH_CHU', label: 'Chủ nhà', icon: 'fas fa-house-user' },
+  { id: 'MOI_GIOI', label: 'Môi giới', icon: 'fas fa-handshake' },
+  { id: 'NGUOI_THAN', label: 'Người thân', icon: 'fas fa-people-group' }
+]
 
 const callingCustomer = ref(null)
 const deletingCustomer = ref(null)
@@ -1545,6 +1670,12 @@ const filterTabs = computed(() => [
   { value: 'new', label: 'Mới' },
   { value: 'contacted', label: 'Đã dùng' }
 ])
+
+const addPickedFileLabel = computed(() => {
+  if (!addPickedFileNames.value.length) return ''
+  if (addPickedFileNames.value.length === 1) return addPickedFileNames.value[0]
+  return `${addPickedFileNames.value.length} tệp: ${addPickedFileNames.value.join(', ')}`
+})
 
 
 const selectedCount = computed(() => {
@@ -1598,6 +1729,11 @@ const provinceOptions = computed(() => {
 
 const filteredProvinces = computed(() => {
   const query = provinceSearch.value.toLowerCase()
+  return provinceOptions.value.filter(province => province.toLowerCase().includes(query))
+})
+
+const filteredAddProvinces = computed(() => {
+  const query = addProvinceSearch.value.toLowerCase()
   return provinceOptions.value.filter(province => province.toLowerCase().includes(query))
 })
 const totalStatusCount = computed(() => {
@@ -1657,14 +1793,74 @@ const resetFilters = () => {
   showNotification('Đã đặt lại tất cả bộ lọc', 'info')
 }
 
+
+const excelInput = ref(null)
+
+/**
+ * 1️⃣ Click nút → mở chọn file
+ */
+const openExcelPicker = () => {
+  excelInput.value?.click()
+}
+
+/**
+ * 2️⃣ Chọn file xong → TỰ GỌI API
+ */
+const handleExcelSelected = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  try {
+    // 🌀 Loading + đợi API hoàn tất
+    const res = await showLoading(
+        api.post(
+            '/customer-crm/admin/import-excel',
+            formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              }
+            }
+        )
+    )
+
+    const data = res.data
+
+    // ✅ Update popup thành công
+    updateAlertSuccess(
+        'Import Excel thành công',
+        `Đã thêm ${data.soKhachThemMoi} khách · Bỏ qua ${data.soKhachBiBoQua} khách trùng SĐT`
+    )
+
+    // 👉 nếu cần reload list
+    await reloadAllData()
+
+  } catch (err) {
+    console.error(err)
+
+    updateAlertError(
+        'Import Excel thất bại',
+        'Vui lòng kiểm tra file hoặc thử lại'
+    )
+  } finally {
+    // ⚠️ reset input để chọn lại cùng file vẫn trigger change
+    event.target.value = ''
+  }
+}
+
+
 const openAddCustomerModal = () => {
-  resetCustomerForm()
   isEditing.value = false
+  resetAddCustomerForm()
   showAddCustomerModal.value = true
 }
 
 const closeAddCustomerModal = () => {
   showAddCustomerModal.value = false
+  resetAddCustomerForm()
 }
 
 const resolveEmployeeAvatar = (avatar, name) => {
@@ -1816,6 +2012,23 @@ const toggleProvinceDropdown = () => {
   provinceDropdownOpen.value = !provinceDropdownOpen.value
 }
 
+const selectAddProvince = (province) => {
+  addCustomerForm.area = province
+  addProvinceSearch.value = province
+  addProvinceDropdownOpen.value = false
+}
+
+const closeAddProvinceDropdown = () => {
+  setTimeout(() => {
+    addProvinceDropdownOpen.value = false
+    addProvinceSearch.value = addCustomerForm.area || ''
+  }, 120)
+}
+
+const toggleAddProvinceDropdown = () => {
+  addProvinceDropdownOpen.value = !addProvinceDropdownOpen.value
+}
+
 const resetCustomerForm = () => {
   Object.assign(customerForm, {
     id: null,
@@ -1847,6 +2060,145 @@ const resetCustomerForm = () => {
   fileForm.deletedFileIds = []
   fileForm.deletedLandBookFileIds = []
   originalFiles.value = []
+}
+
+const resetAddCustomerForm = () => {
+  Object.assign(addCustomerForm, {
+    name: '',
+    phone: '',
+    area: '',
+    oldArea: '',
+    type: 'CHINH_CHU',
+    price: '',
+    note: ''
+  })
+  addPriceDisplay.value = ''
+  addPickedFileNames.value = []
+  addProvinceSearch.value = ''
+  addProvinceDropdownOpen.value = false
+  const fileInput = document.getElementById('addCustomerFileInput')
+  if (fileInput) fileInput.value = ''
+}
+
+function normalizePriceInput(value) {
+  return String(value || '').replace(/[^\d]/g, '')
+}
+
+function formatPriceDisplay(value) {
+  if (!value) return ''
+  return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
+function handleAddPriceInput(event) {
+  const raw = normalizePriceInput(event.target.value)
+  addPriceDisplay.value = formatPriceDisplay(raw)
+  addCustomerForm.price = raw ? Number(raw) : ''
+}
+
+function syncAddPriceDisplay() {
+  const raw = normalizePriceInput(addPriceDisplay.value)
+  addPriceDisplay.value = formatPriceDisplay(raw)
+  addCustomerForm.price = raw ? Number(raw) : ''
+}
+
+function onPickAddFile(e) {
+  const files = Array.from(e?.target?.files || [])
+  addPickedFileNames.value = files.map(file => file.name)
+}
+
+function clearAddPickedFile() {
+  addPickedFileNames.value = []
+  const fileInput = document.getElementById('addCustomerFileInput')
+  if (fileInput) fileInput.value = ''
+}
+
+function isValidName(name) {
+  const normalized = name.trim().replace(/\s+/g, ' ')
+  if (!normalized) return false
+  const words = normalized.split(' ')
+  if (words.length < 2) return false
+  return /^[A-Za-zÀ-ỹ\s]+$/u.test(normalized)
+}
+
+function isValidPhone(phone) {
+  return /^(0\d{9})$/.test(phone)
+}
+
+function validateAddCustomerForm() {
+  if (!addCustomerForm.name?.trim()) {
+    showCenterWarning('Vui lòng nhập họ tên.')
+    return false
+  }
+  if (!isValidName(addCustomerForm.name)) {
+    showCenterWarning('Họ tên phải có ít nhất 2 từ và không chứa số hoặc ký tự đặc biệt.')
+    return false
+  }
+  if (!addCustomerForm.phone?.trim()) {
+    showCenterWarning('Vui lòng nhập số điện thoại.')
+    return false
+  }
+  if (!isValidPhone(addCustomerForm.phone)) {
+    showCenterWarning('Số điện thoại không đúng định dạng (ví dụ: 09xxxxxxxx).')
+    return false
+  }
+  if (!addCustomerForm.area?.trim()) {
+    showCenterWarning('Vui lòng chọn tỉnh/thành.')
+    return false
+  }
+  if (!addCustomerForm.price) {
+    showWarning('Vui lòng nhập giá bán.')
+    return false
+  }
+  if (!addCustomerForm.type) {
+    showWarning('Vui lòng chọn phân loại.')
+    return false
+  }
+  return true
+}
+
+const submitAddCustomer = async () => {
+  try {
+    if (!validateAddCustomerForm()) return
+
+    const form = new FormData()
+    const dto = {
+      name: addCustomerForm.name,
+      phone: addCustomerForm.phone,
+      area: addCustomerForm.area,
+      oldArea: addCustomerForm.oldArea,
+      type: addCustomerForm.type,
+      price: addCustomerForm.price,
+      note: addCustomerForm.note
+    }
+
+    form.append('dto', new Blob([JSON.stringify(dto)], { type: 'application/json' }))
+
+    const fileInput = document.getElementById('addCustomerFileInput')
+    if (fileInput?.files?.length) {
+      Array.from(fileInput.files).forEach(file => form.append('files', file))
+    }
+
+    const res = await showLoading(
+      api.post('/customer-crm/marketing/create', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        withCredentials: true
+      })
+    )
+
+    const data = res.data
+    if (!data.success) {
+      updateAlertError(data?.message || 'Gửi dữ liệu không thành công. Vui lòng thử lại!')
+      return
+    }
+
+    updateAlertSuccess('Đã ghi nhận dữ liệu khách hàng mới.')
+    showAddCustomerModal.value = false
+    resetAddCustomerForm()
+    await reloadAllData()
+  } catch (err) {
+    console.error(err)
+    showCenterError('Gửi dữ liệu thất bại. Vui lòng thử lại!')
+  }
 }
 
 const buildCustomerUpdateFormData = (assigneePayload) => {
@@ -1922,47 +2274,11 @@ const updateCustomer = async () => {
     showEditCustomerModal.value = false
     isEditing.value = false
     resetCustomerForm()
+    await reloadAllData()
   } catch (e) {
     console.error(e)
     showNotification('Không thể cập nhật khách hàng, vui lòng thử lại!', 'warning')
   }
-}
-
-const saveCustomer = () => {
-  if (isEditing.value) {
-    updateCustomer()
-    return
-  }
-
-  if (!customerForm.name || !customerForm.phone || !customerForm.province || !customerForm.type || !customerForm.status) {
-    showNotification('Vui lòng điền đầy đủ các trường bắt buộc!', 'warning')
-    return
-  }
-
-  const newId = customers.value.length > 0
-    ? Math.max(...customers.value.map(c => c.id)) + 1
-    : 1
-
-  customers.value.push({
-    id: newId,
-    hoTen: customerForm.name,
-    soDienThoai: customerForm.phone,
-    tinhThanhPho: customerForm.province,
-    avatarKhach: customerForm.avatar || null,
-    phanLoaiKhach: customerForm.type,
-    trangThai: customerForm.status,
-    ngayTao: new Date().toISOString().split('T')[0],
-    ngayCapNhat: new Date().toISOString().split('T')[0],
-    nhanVienTaoId: creatorOptions.value[0]?.id ?? null,
-    nhanVienPhuTrachId: staffMembers.value[0]?.id ?? null,
-    selected: false
-  })
-  showNotification('Thêm khách hàng mới thành công!', 'success')
-
-  showAddCustomerModal.value = false
-  showEditCustomerModal.value = false
-  isEditing.value = false
-  resetCustomerForm()
 }
 
 const startCall = (customer) => {
@@ -2096,7 +2412,7 @@ const confirmAssignData = async () => {
     showCenterSuccess("Cấp dữ liệu thành công!")
 
     clearSelection()
-    await fetchCustomers()
+    await reloadAllData()
     staffMembers.value.forEach(member => {
       member.selected = false
     })
@@ -2482,22 +2798,29 @@ const fetchTeleSales = async () => {
 const clampPercent = (p) => Math.min(100, Math.max(0, p || 0))
 
 onMounted(async () => {
+  await reloadAllData()
+})
+
+const reloadAllData = async () => {
+  // 🔥 Tổng quan telesales
   await fetchTeleSalesSummary()
 
   // 🔥 DONUT
   await fetchStatusStats()
   initStatusChart()
 
-  // 🔥 LINE (THIẾU)
+  // 🔥 LINE
   await fetchMonthlyStats()
   initMonthlyChart()
+
+  // 🔥 KPI hôm nay
   await fetchTodayProgress()
 
+  // 🔥 Danh sách
   await fetchMarketing()
   await fetchTeleSales()
   await fetchCustomers()
-})
-
+}
 
 
 watch(searchText, () => {
@@ -2526,6 +2849,10 @@ watch(() => customerForm.province, (value) => {
   if (!showEditCustomerModal.value) return
   provinceSearch.value = value || ''
 })
+watch(() => addCustomerForm.area, (value) => {
+  if (!showAddCustomerModal.value) return
+  addProvinceSearch.value = value || ''
+})
 watch(showEditCustomerModal, (isOpen) => {
   if (!isOpen) {
     employeeOptions.value = []
@@ -2549,7 +2876,16 @@ watch(page, () => {
 
 import api from '/src/api/api.js'
 import {generateAvatarFromName, shortenName} from "../../assets/js/global.js";
-import {confirmYesNo, showCenterSuccess, showCenterWarning, showWarning} from "../../assets/js/alertService.js";
+import {
+  confirmYesNo,
+  showCenterError,
+  showCenterSuccess,
+  showCenterWarning,
+  showLoading,
+  showWarning,
+  updateAlertError,
+  updateAlertSuccess
+} from "../../assets/js/alertService.js";
 const marketingoptions = ref([])
 
 
@@ -2666,7 +3002,7 @@ const bulkDelete = async () => {
           )
 
           clearSelection()
-          await fetchCustomers()
+          await reloadAllData()
 
         } catch (e) {
           console.error(e)
@@ -2703,7 +3039,7 @@ const deleteOne = async (id) => {
           showCenterSuccess('Xóa thành công', 'Khách hàng đã được xóa')
 
           clearSelection()
-          await fetchCustomers()
+          await reloadAllData()
 
         } catch (e) {
           console.error(e)
@@ -3617,6 +3953,175 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   padding: 20px 25px;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
   background: rgba(0, 0, 0, 0.02);
+}
+.add-customer-modal .modal-dialog-shifted {
+  transform: translateY(-18px);
+}
+.add-customer-modal .modal-body {
+  padding: 24px 28px;
+}
+.add-customer-modal .compact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+.add-customer-modal .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.add-customer-modal .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.add-customer-modal .form-group label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #475569;
+}
+.add-customer-modal .required {
+  color: #ef4444;
+  margin-left: 4px;
+}
+.add-customer-modal .form-control {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  color: #1e293b;
+  background: white;
+  transition: all 0.2s ease;
+}
+.add-customer-modal .form-control:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+.add-customer-modal .form-control::placeholder {
+  color: #94a3b8;
+}
+.add-customer-modal .input-icon {
+  position: relative;
+}
+.add-customer-modal .icon-chip {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+.add-customer-modal .input-icon .form-control {
+  padding-left: 48px;
+}
+.add-customer-modal .select-like .form-control {
+  padding-right: 2rem;
+}
+.add-customer-modal .select-like.open .form-control {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+.add-customer-modal .select-caret {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+.add-customer-modal .select-like.open .select-caret {
+  transform: translateY(-50%) rotate(180deg);
+  color: #4338ca;
+}
+.add-customer-modal .type-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+.add-customer-modal .type-btn {
+  padding: 0.7rem 0.55rem;
+  background: rgba(248, 250, 252, 0.9);
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  color: #64748b;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+.add-customer-modal .type-btn:hover {
+  border-color: #cbd5e1;
+  background: rgba(241, 245, 249, 0.95);
+
+}
+.add-customer-modal .type-btn.active {
+  background: #e0e7ff;
+  border-color: #4f46e5;
+  color: #4f46e5;
+}
+.add-customer-modal .upload-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.add-customer-modal .upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 999px;
+  border: 1px dashed rgba(148, 163, 184, 0.8);
+  background: rgba(255, 255, 255, 0.75);
+  color: #475569;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.add-customer-modal .upload-btn:hover {
+  border-color: rgba(79, 70, 229, 0.45);
+  color: #4f46e5;
+  background: rgba(224, 231, 255, 0.35);
+}
+.add-customer-modal .upload-input {
+  display: none;
+}
+.add-customer-modal .upload-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(248, 250, 252, 0.85);
+  color: #334155;
+  font-size: 0.82rem;
+  max-width: 280px;
+}
+.add-customer-modal .upload-meta.muted {
+  color: #64748b;
+  background: rgba(248, 250, 252, 0.75);
+}
+.add-customer-modal .upload-clear {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  padding: 0 4px;
+  cursor: pointer;
+}
+.add-customer-modal .upload-clear:hover {
+  color: #ef4444;
 }
 .modal.fade.show {
   display: block;
