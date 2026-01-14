@@ -869,7 +869,7 @@ async function submitData() {
     );
 
     const data = res.data;
-    if (!data?.success) {
+    if (!data.success) {
       updateAlertError(data?.message || "Gửi dữ liệu không thành công. Vui lòng thử lại!");
       return;
     }
@@ -983,6 +983,9 @@ onBeforeUnmount(() => {
 </script>
 <style scoped>
 /* ===== MODERN DASHBOARD STYLES ===== */
+.container{
+  max-width: 1300px;
+}
 .refined-dashboard {
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);

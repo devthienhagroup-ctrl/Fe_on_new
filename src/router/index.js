@@ -149,20 +149,20 @@ import test1 from "../components/thiet-kegiandien/telesales-lien-he-khach-hang.v
 import test2 from "../components/thiet-kegiandien/admin-saleadmin.vue"
 const routes = [
     {
-        path: "/test/dat-lich",
+        path: "/-thg/nhap-lieu",
         name: "TeamCollaboration1",
         component: test,
         meta: { requiresAuth: false,     enableTailwind: false},
     },
     {
-        path: "/test/dat-lich-2",
+        path: "/-thg/quan-tri-du-lieu",
         name: "TeamCollaboration",
         component: test2,
         meta: { requiresAuth: false,     enableTailwind: false},
     },
     {
-        path: "/test/tele-sales",
-        name: "TELESALES",
+        path: "/-thg/telesale-lien-he-khach-hang",
+        name: "TELESALESetyui",
         component: test1,
         meta: { requiresAuth: false, enableTailwind: false},
     },

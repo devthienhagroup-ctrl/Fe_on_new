@@ -125,21 +125,21 @@ const allMenuItems = [
   },
   {
     label: 'MRAKETINGINSERT',
-    route: '/-thg/nhap-lieu-khach-hang',
+    route: '/-thg/nhap-lieu',
     icon: 'fa-solid fa-file-import text-success fs-5',
     title: 'Nhập liệu KH',
     desc: 'Tạo mới và nhập dữ liệu khách hàng'
   },
   {
     label: 'TELESALEUPDATE',
-    route: '/-thg/quan-ly-du-lieu-khach-hang',
+    route: '/-thg/telesale-lien-he-khach-hang',
     icon: 'fa-solid fa-database text-warning fs-5',
     title: 'Dữ liệu',
     desc: 'Cập nhật và thao tác dữ liệu khách hàng'
   },
   {
     label: 'CUSTOMERADMINALL',
-    route: '/-thg/quan-tri-khach-hang',
+    route: '/-thg/quan-tri-du-lieu',
     icon: 'fa-solid fa-users-gear text-danger fs-5',
     title: 'Quản trị KH',
     desc: 'Toàn quyền quản lý dữ liệu khách hàng'

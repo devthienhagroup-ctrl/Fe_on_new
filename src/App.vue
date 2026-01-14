@@ -11,7 +11,7 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 
 const updateScroll = () => {
-  if (route.path === '/test/dat-lich-2') {
+  if (route.path === '/-thg/quan-tri-du-lieu') {
     document.body.style.overflow = 'hidden'
   } else {
     document.body.style.overflow = ''

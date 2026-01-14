@@ -190,36 +190,113 @@
               <i class="fas fa-tachometer-alt sidebar-icon-yellow"></i>
               Tiến độ hôm nay
             </h6>
+
+            <!-- Tổng -->
             <div class="mb-3">
               <div class="d-flex justify-content-between mb-2">
-                <span class="fw-medium">Cuộc gọi: <span class="text-primary">28/40</span></span>
-                <span class="fw-bold gradient-text">70%</span>
+      <span class="fw-medium">
+        Tổng liên hệ:
+        <span class="text-primary">
+          {{ todayProgress.tongCuocGoiHomNay }} / {{ todayProgress.kpiTongCuocGoi }}
+        </span>
+      </span>
+
+                <span
+                    class="fw-bold"
+                    :class="todayProgress.tiLeTongCuocGoi > 100
+          ? 'kpi-over-text'
+          : 'gradient-text'"
+                >
+        {{ todayProgress.tiLeTongCuocGoi }}%
+        <i
+            v-if="todayProgress.tiLeTongCuocGoi > 100"
+            class="fas fa-crown ms-1 kpi-over-icon"
+        ></i>
+      </span>
               </div>
+
               <div class="progress progress-custom">
-                <div class="progress-bar" style="width: 70%; background: var(--primary-gradient);"></div>
+                <div
+                    class="progress-bar"
+                    :style="{
+          width: clampPercent(todayProgress.tiLeTongCuocGoi) + '%',
+          background: 'var(--primary-gradient)'
+        }"
+                ></div>
               </div>
             </div>
 
+            <!-- Gọi mới -->
             <div class="mb-3">
               <div class="d-flex justify-content-between mb-2">
-                <span class="fw-medium">Thành công: <span class="text-success">12</span></span>
-                <span class="fw-bold gradient-text">42.8%</span>
+      <span class="fw-medium">
+        Liên hệ mới:
+        <span class="text-success">
+          {{ todayProgress.cuocGoiMoiHomNay }} / {{ todayProgress.kpiCuocGoiMoi }}
+        </span>
+      </span>
+
+                <span
+                    class="fw-bold"
+                    :class="todayProgress.tiLeCuocGoiMoi > 100
+          ? 'kpi-over-text'
+          : 'gradient-text'"
+                >
+        {{ todayProgress.tiLeCuocGoiMoi }}%
+        <i
+            v-if="todayProgress.tiLeCuocGoiMoi > 100"
+            class="fas fa-fire ms-1 kpi-over-icon"
+        ></i>
+      </span>
               </div>
+
               <div class="progress progress-custom">
-                <div class="progress-bar" style="width: 42.8%; background: var(--success-gradient);"></div>
+                <div
+                    class="progress-bar"
+                    :style="{
+          width: clampPercent(todayProgress.tiLeCuocGoiMoi) + '%',
+          background: 'var(--success-gradient)'
+        }"
+                ></div>
               </div>
             </div>
 
+            <!-- Chăm sóc -->
             <div class="mb-3">
               <div class="d-flex justify-content-between mb-2">
-                <span class="fw-medium">Tiềm năng: <span class="text-warning">8</span></span>
-                <span class="fw-bold gradient-text">28.6%</span>
+      <span class="fw-medium">
+        Chăm sóc:
+        <span class="text-warning">
+          {{ todayProgress.cuocGoiChamSocHomNay }} / {{ todayProgress.kpiCuocGoiChamSoc }}
+        </span>
+      </span>
+
+                <span
+                    class="fw-bold"
+                    :class="todayProgress.tiLeCuocGoiChamSoc > 100
+          ? 'kpi-over-text'
+          : 'gradient-text'"
+                >
+        {{ todayProgress.tiLeCuocGoiChamSoc }}%
+        <i
+            v-if="todayProgress.tiLeCuocGoiChamSoc > 100"
+            class="fas fa-star ms-1 kpi-over-icon"
+        ></i>
+      </span>
               </div>
+
               <div class="progress progress-custom">
-                <div class="progress-bar" style="width: 28.6%; background: var(--warning-gradient);"></div>
+                <div
+                    class="progress-bar"
+                    :style="{
+          width: clampPercent(todayProgress.tiLeCuocGoiChamSoc) + '%',
+          background: 'var(--warning-gradient)'
+        }"
+                ></div>
               </div>
             </div>
           </div>
+
         </div>
       </aside>
 
@@ -229,56 +306,72 @@
           <div class="main-content">
             <!-- Stat Cards -->
             <div class="row mb-4">
+
+              <!-- Tổng data -->
               <div class="col-md-6 col-lg-3">
                 <div class="stat-card" style="background: var(--primary-gradient);">
                   <div class="stat-card-content">
-                    <h5><i class="fas fa-users"></i>Tổng data khách hàng</h5>
-                    <div class="stat-number">1,248</div>
+                    <h5><i class="fas fa-users"></i> Tổng data khách hàng</h5>
+                    <div class="stat-number">{{ summary.totalCustomers.toLocaleString() }}</div>
+
                     <div class="stat-change">
-                      <i class="fas fa-arrow-up me-1"></i> 12% so với tháng trước
+                      <i class="fas me-1" :class="percentIcon(summary.totalCustomersPercent)"></i>
+                      {{ percentLabel(summary.totalCustomersPercent) }}
                     </div>
                   </div>
                   <i class="fas fa-user-friends stat-icon"></i>
                 </div>
               </div>
-              <div class="col-md-6 col-lg-3">
-                <div class="stat-card" style="background: var(--success-gradient);">
-                  <div class="stat-card-content">
-                    <h5><i class="fas fa-phone-volume"></i>Cuộc gọi thực hiện</h5>
-                    <div class="stat-number">28/40</div>
-                    <div class="stat-change">
-                      <i class="fas fa-check-circle me-1"></i> 70% hoàn thành
-                    </div>
-                  </div>
-                  <i class="fas fa-phone-alt stat-icon"></i>
-                </div>
-              </div>
-              <div class="col-md-6 col-lg-3">
-                <div class="stat-card" style="background: var(--danger-gradient);">
-                  <div class="stat-card-content">
-                    <h5><i class="fas fa-chart-line"></i> Data gọi được</h5>
-                    <div class="stat-number">42.5%</div>
-                    <div class="stat-change">
-                      <i class="fas fa-arrow-up me-1"></i> 5.2% so với tuần trước
-                    </div>
-                  </div>
-                  <i class="fas fa-chart-pie stat-icon"></i>
-                </div>
-              </div>
+
+              <!-- Hẹn VP -->
               <div class="col-md-6 col-lg-3">
                 <div class="stat-card" style="background: var(--info-gradient);">
                   <div class="stat-card-content">
-                    <h5><i class="fas fa-calendar-check"></i> Số khách hẹn lên VP</h5>
-                    <div class="stat-number">156</div>
+                    <h5><i class="fas fa-calendar-check"></i> Khách hẹn lên VP</h5>
+                    <div class="stat-number">{{ summary.appointmentCount }}</div>
+
                     <div class="stat-change">
-                      <i class="fas fa-arrow-up me-1"></i> 18% so với tháng trước
+                      <i class="fas me-1" :class="percentIcon(summary.appointmentPercent)"></i>
+                      {{ percentLabel(summary.appointmentPercent) }}
                     </div>
                   </div>
                   <i class="fas fa-calendar-alt stat-icon"></i>
                 </div>
               </div>
-            </div>
 
+              <!-- Tổng cuộc gọi -->
+              <div class="col-md-6 col-lg-3">
+                <div class="stat-card" style="background: var(--success-gradient);">
+                  <div class="stat-card-content">
+                    <h5><i class="fas fa-phone-volume"></i> Cuộc gọi thực hiện</h5>
+                    <div class="stat-number">{{ summary.totalCalls.toLocaleString() }}</div>
+
+                    <div class="stat-change">
+                      <i class="fas me-1" :class="percentIcon(summary.totalCallsPercent)"></i>
+                      {{ percentLabel(summary.totalCallsPercent) }}
+                    </div>
+                  </div>
+                  <i class="fas fa-phone-alt stat-icon"></i>
+                </div>
+              </div>
+
+              <!-- Data gọi được -->
+              <div class="col-md-6 col-lg-3">
+                <div class="stat-card" style="background: var(--danger-gradient);">
+                  <div class="stat-card-content">
+                    <h5><i class="fas fa-chart-line"></i> Data gọi được</h5>
+                    <div class="stat-number">{{ summary.successfulCalls }}</div>
+
+                    <div class="stat-change">
+                      <i class="fas me-1" :class="percentIcon(summary.successfulCallsPercent)"></i>
+                      {{ percentLabel(summary.successfulCallsPercent) }}
+                    </div>
+                  </div>
+                  <i class="fas fa-chart-pie stat-icon"></i>
+                </div>
+              </div>
+
+            </div>
             <!-- Charts -->
             <div class="row equal-height-row mb-4">
               <div class="col-lg-8">
@@ -290,13 +383,31 @@
                     </span>
                       Thống kê cuộc gọi theo tháng
                     </h3>
-                    <div>
-                      <select class="form-select form-select-custom form-select-sm w-auto d-inline-block" v-model="chartYear">
-                        <option value="2023">2023</option>
-                        <option value="2024" selected>2024</option>
-                        <option value="2022">2022</option>
+                    <div class="d-flex align-items-center gap-2">
+                      <!-- Chọn năm -->
+                      <select
+                          class="form-select form-select-custom form-select-sm w-auto d-inline-block"
+                          v-model="chartYear"
+                      >
+                        <option
+                            v-for="year in recentYears"
+                            :key="year"
+                            :value="year"
+                        >
+                          {{ year }}
+                        </option>
+                      </select>
+
+                      <!-- Chọn kiểu thống kê -->
+                      <select
+                          class="form-select form-select-custom form-select-sm w-auto d-inline-block"
+                          v-model="chartType"
+                      >
+                        <option value="STATUS">Thống kê trạng thái</option>
+                        <option value="PHAN_LOAI">Thống kê phân loại</option>
                       </select>
                     </div>
+
                   </div>
                   <div class="card-body p-4">
                     <div class="chart-container">
@@ -315,11 +426,15 @@
                       Phân bổ trạng thái
                     </h3>
                   </div>
-                  <div class="card-body p-4 position-relative">
+                  <div class="card-body p-4 position-relative" style=" overflow: visible !important;">
                     <div class="chart-container">
                       <div class="chart-center-text">
-                        <div class="total-number">570</div>
-                        <div class="total-label">Tổng khách hàng</div>
+                        <div class="total-number">
+                          {{ totalStatusCount.toLocaleString() }}
+                        </div>
+                        <div class="total-label">
+                          Tổng KH
+                        </div>
                       </div>
                       <canvas ref="statusChart"></canvas>
                     </div>
@@ -345,9 +460,6 @@
                     <div class="d-flex gap-2">
                       <button class="btn-success-custom btn-custom" @click="exportExcel">
                         <i class="fas fa-file-excel me-2"></i> Excel
-                      </button>
-                      <button class="btn-danger-custom btn-custom" @click="exportPDF">
-                        <i class="fas fa-file-pdf me-2"></i> PDF
                       </button>
                     </div>
                     <button class=" btn-outline-custom btn-custom" @click="clearSelection">
@@ -376,7 +488,7 @@
                     </div>
 
                     <!-- Page size -->
-                    <span class="fw-medium text-nowrap">Hiển thị</span>
+                    <span class="text-primary fw-medium">Hiển thị</span>
 
                     <select
                         class="form-select w-auto"  style="font-size: 18px !important; border-radius: 10px !important;"
@@ -387,7 +499,7 @@
                       <option :value="50">50</option>
                     </select>
 
-                    <span class="fw-medium text-nowrap">
+                    <span class="text-primary fw-medium">
     / {{ totalElements }} khách
   </span>
                   </div>
@@ -1194,11 +1306,7 @@
                     @click="toggleStaffSelection(staff)"
                 >
                   <img :src="staff.avatar" :alt="staff.name" class="staff-avatar">
-                  <div class="staff-name">{{ staff.name }}</div>
-                  <div class="staff-meta">
-                    <span v-if="staff.email">{{ staff.email }}</span>
-                    <span v-if="staff.phone">{{ staff.phone }}</span>
-                  </div>
+                  <div class="staff-name">{{ shortenName(staff.name, 15) }}</div>
                 </div>
               </div>
             </div>
@@ -1289,6 +1397,44 @@ import { ref, computed, reactive, onMounted, nextTick, watch } from 'vue'
 import Chart from 'chart.js/auto'
 import addressData from '/src/assets/js/address.json'
 import FileNew from './File.vue'
+const chartYear = ref(new Date().getFullYear())
+const chartType = ref('STATUS') // STATUS | PHAN_LOAI
+const recentYears = computed(() => {
+  const currentYear = new Date().getFullYear()
+  return Array.from({ length: 5 }, (_, i) => currentYear - i)
+})
+const phanLoaiStats = ref([])
+watch([chartYear, chartType], async () => {
+  // 🔥 LINE CHART (CHUNG)
+  await fetchMonthlyStats()
+  initMonthlyChart()
+
+})
+const isOverKpi = (percent) => (percent || 0) > 100
+
+
+const todayProgress = ref({
+  tongCuocGoiHomNay: 0,
+  tiLeTongCuocGoi: 0,
+  kpiTongCuocGoi: 0,
+  cuocGoiMoiHomNay: 0,
+  tiLeCuocGoiMoi: 0,
+  kpiCuocGoiMoi: 0,
+  cuocGoiChamSocHomNay: 0,
+  tiLeCuocGoiChamSoc: 0,
+  kpiCuocGoiChamSoc: 0
+})
+
+const fetchTodayProgress = async () => {
+  try {
+    const res = await api.get('/customer-crm/admin/cuoc-goi-hom-nay')
+    todayProgress.value = res.data
+  } catch (e) {
+    console.error('❌ Không lấy được tiến độ hôm nay', e)
+  }
+}
+
+
 
 // State management
 const customers = ref([])
@@ -1318,7 +1464,6 @@ const mobileMenuOpen = ref(false)
 const notificationsOpen = ref(false)
 const userMenuOpen = ref(false)
 const activeTab = ref('all')
-const chartYear = ref('2024')
 const searchText = ref('')
 
 // Modal states
@@ -1455,7 +1600,11 @@ const filteredProvinces = computed(() => {
   const query = provinceSearch.value.toLowerCase()
   return provinceOptions.value.filter(province => province.toLowerCase().includes(query))
 })
-
+const totalStatusCount = computed(() => {
+  return statusStats.value.reduce((sum, item) => {
+    return sum + (item.count || 0)
+  }, 0)
+})
 const creatorsById = computed(() => {
   return creatorOptions.value.reduce((acc, creator) => {
     acc[creator.id] = creator
@@ -1742,12 +1891,12 @@ const buildCustomerUpdateFormData = (assigneePayload) => {
 
 const updateCustomer = async () => {
   if (!customerForm.name || !customerForm.phone || !customerForm.province || !customerForm.type || !customerForm.status) {
-    showNotification('Vui lòng điền đầy đủ các trường bắt buộc!', 'warning')
+    showCenterWarning('Vui lòng điền đầy đủ các trường bắt buộc!', 'warning')
     return
   }
 
   if (!customerForm.assigneeId) {
-    showNotification('Vui lòng chọn nhân viên phụ trách từ danh sách tìm kiếm!', 'warning')
+    showCenterWarning('Vui lòng chọn nhân viên phụ trách từ danh sách tìm kiếm!', 'warning')
     return
   }
 
@@ -1985,6 +2134,8 @@ const toDate = (value) => {
   return new Date(year, month - 1, day)
 }
 
+
+
 const getStatusLabel = (status) => {
   const statusMap = {
       'NEW': 'Mới',
@@ -2095,74 +2246,206 @@ const getProvinceShortLabel = (province) => {
       .replace(/^Thành phố\s+/i, 'TP. ')
       .replace(/^Tỉnh\s+/i, 'T. ')
 }
+const STATUS_META = {
+  NEW: { label: 'Mới', color: '#94a3b8' },
+  DC_TELESALES: { label: 'Mới tiếp nhận', color: '#6366f1' },
+  CHAM_SOC: { label: 'Đang chăm sóc', color: '#38bdf8' },
+  TN_7NGAY: { label: 'Tiềm năng 7 ngày', color: '#0ea5e9' },
+  TN_14NGAY: { label: 'Tiềm năng 14 ngày', color: '#0284c7' },
+  THAT_BAI: { label: 'Thất bại', color: '#f43f5e' },
+  KHONG_LIEN_LAC_DUOC: { label: 'Không liên lạc được', color: '#f97316' },
+  SAI_SO_LIEU: { label: 'Sai số liệu', color: '#a855f7' },
+  THANH_CONG: { label: 'Thành công (Lên VP)', color: '#22c55e' }
+}
+const PHAN_LOAI_META = {
+  MOI_GIOI: {
+    label: 'Môi giới',
+    color: '#43e97b' // xanh lá (match type-MOI_GIOI)
+  },
+  CHINH_CHU: {
+    label: 'Chủ nhà',
+    color: '#667eea' // xanh dương (match type-CHINH_CHU)
+  },
+  NGUOI_THAN: {
+    label: 'Người thân',
+    color: '#fa709a' // hồng (match type-NGUOI_THAN)
+  }
+}
+const monthlyStats = ref([])
+let monthlyChartInstance = null
+
+const fetchMonthlyStats = async () => {
+  try {
+    const res = await api.get('/customer-crm/admin/monthly-category', {
+      params: {
+        year: chartYear.value,
+        chartType: chartType.value // 👈 LẤY TỪ UI
+      }
+    })
+    monthlyStats.value = res.data || []
+  } catch (e) {
+    console.error('❌ Lỗi fetch monthly stats', e)
+    monthlyStats.value = []
+  }
+}
+
+const buildMonthlyLineDatasets = () => {
+  const meta =
+      chartType.value === 'STATUS'
+          ? STATUS_META
+          : PHAN_LOAI_META
+
+  const datasets = []
+
+  Object.entries(meta).forEach(([key, metaItem]) => {
+    const dataByMonth = Array(12).fill(0)
+
+    monthlyStats.value
+        .filter(i => i.key === key)
+        .forEach(i => {
+          dataByMonth[i.month - 1] = i.count
+        })
+
+    // ❌ không có dữ liệu thì bỏ
+    if (dataByMonth.every(v => v === 0)) return
+
+    datasets.push({
+      label: metaItem.label,
+      data: dataByMonth,
+      borderColor: metaItem.color,
+      backgroundColor: metaItem.color + '22',
+      tension: 0.3,
+      fill: true,
+      borderWidth: 3
+    })
+  })
+
+  return datasets
+}
 
 // Initialize charts
-const initCharts = () => {
-  // Monthly Chart
-  const monthlyCtx = monthlyChart.value?.getContext('2d')
-  if (monthlyCtx) {
-    new Chart(monthlyCtx, {
-      type: 'line',
-      data: {
-        labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
-        datasets: [
-          { label: 'Thành công', data: [65, 59, 80, 81, 56, 55, 70, 75, 82, 78, 85, 90], borderColor: '#43e97b', backgroundColor: 'rgba(67, 233, 123, 0.1)', tension: 0.2, fill: true, borderWidth: 3 },
-          { label: 'Tiềm năng', data: [28, 48, 40, 19, 86, 27, 35, 42, 50, 45, 60, 55], borderColor: '#fa709a', backgroundColor: 'rgba(250, 112, 154, 0.1)', tension: 0.2, fill: true, borderWidth: 3 },
-          { label: 'Không liên lạc', data: [18, 25, 22, 15, 30, 20, 18, 22, 25, 20, 28, 30], borderColor: '#ff5858', backgroundColor: 'rgba(255, 88, 88, 0.1)', tension: 0.2, fill: true, borderWidth: 3 },
-          { label: 'Tổng cuộc gọi', data: [120, 140, 150, 130, 180, 110, 130, 145, 165, 150, 185, 190], borderColor: '#667eea', backgroundColor: 'rgba(102, 126, 234, 0.1)', tension: 0.2, fill: true, borderWidth: 3 }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'top', labels: { font: { family: 'Poppins', size: 14  }, padding: 20, usePointStyle: true } },
-          tooltip: { backgroundColor: 'rgba(255, 255, 255, 0.9)', titleColor: '#333', bodyColor: '#666', borderColor: '#667eea', borderWidth: 1, cornerRadius: 10, padding: 12 }
-        },
-        scales: {
-          y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { font: { family: 'Inter' } } },
-          x: { grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { font: { family: 'Inter' } } }
-        }
-      }
-    })
+const initMonthlyChart = () => {
+  const ctx = monthlyChart.value?.getContext('2d')
+  if (!ctx) return
+
+  if (monthlyChartInstance) {
+    monthlyChartInstance.destroy()
   }
 
-  // Status Chart
-  const statusCtx = statusChart.value?.getContext('2d')
-  if (statusCtx) {
-    const statusData = [156, 85, 42, 78, 24, 65, 120]
-    new Chart(statusCtx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Thành công', 'Tiềm năng 7 ngày', 'Tiềm năng 14 ngày', 'Không liên lạc', 'Sai số', 'Chăm sóc', 'Mới'],
-        datasets: [{
-          data: statusData,
-          backgroundColor: ['#43e97b', '#fa709a', '#f09819', '#ff5858', '#8E2DE2', '#FF5ACD', '#4facfe'],
-          borderWidth: 0,
-          hoverOffset: 15
-        }]
+  monthlyChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [
+        'Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
+        'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'
+      ],
+      datasets: buildMonthlyLineDatasets()
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            font: { family: 'Inter', size: 14 },
+            usePointStyle: true
+          }
+        }
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Inter', size: 14 }, padding: 15 } },
-          tooltip: {
-            callbacks: {
-              label: function (context) {
-                const label = context.label || ''
-                const value = context.raw || 0
-                const total = context.dataset.data.reduce((a, b) => a + b, 0)
-                const percentage = Math.round((value / total) * 100)
-                return `${label}: ${value} (${percentage}%)`
-              }
-            }
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  })
+}
+
+let statusChartInstance = null
+
+const initStatusChart = () => {
+  const ctx = statusChart.value?.getContext('2d')
+  if (!ctx) return
+
+  // destroy chart cũ nếu có (tránh vẽ đè)
+  if (statusChartInstance) {
+    statusChartInstance.destroy()
+  }
+
+  const { labels, data, backgroundColor } = buildStatusChartData()
+
+  statusChartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor,
+        borderWidth: 0,
+        hoverOffset: 15
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '75%',
+      layout: {
+        padding: 10
+      },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: 12,
+            padding: 15,
+            font: { family: 'Inter', size: 14 }
           }
         },
-        cutout: '75%'
+        tooltip: {
+          callbacks: {
+            label(context) {
+              const label = context.label || ''
+              const value = context.raw || 0
+              const total = context.dataset.data.reduce((a, b) => a + b, 0)
+              const percent = total ? ((value / total) * 100).toFixed(1) : 0
+              return `${label}: ${value} (${percent}%)`
+            }
+          }
+        }
       }
-    })
+    }
+  })
+}
+
+const statusStats = ref([])
+const fetchStatusStats = async () => {
+  try {
+    const res = await api.get('/customer-crm/admin/status-summary')
+    statusStats.value = res.data || []
+  } catch (e) {
+    console.error('❌ Lỗi lấy thống kê trạng thái', e)
+    statusStats.value = []
   }
+}
+const buildStatusChartData = () => {
+  const labels = []
+  const data = []
+  const backgroundColor = []
+
+  Object.entries(STATUS_META).forEach(([statusKey, meta]) => {
+    const found = statusStats.value.find(s => s.status === statusKey)
+    const value = found ? found.count : 0
+
+    // nếu muốn ẩn status = 0 thì uncomment dòng dưới
+    // if (value === 0) return
+
+    labels.push(meta.label)
+    data.push(value)
+    backgroundColor.push(meta.color)
+  })
+
+  return { labels, data, backgroundColor }
 }
 
 const fetchMarketing = async () => {
@@ -2196,13 +2479,25 @@ const fetchTeleSales = async () => {
     console.error(e)
   }
 }
+const clampPercent = (p) => Math.min(100, Math.max(0, p || 0))
 
 onMounted(async () => {
+  await fetchTeleSalesSummary()
+
+  // 🔥 DONUT
+  await fetchStatusStats()
+  initStatusChart()
+
+  // 🔥 LINE (THIẾU)
+  await fetchMonthlyStats()
+  initMonthlyChart()
+  await fetchTodayProgress()
+
   await fetchMarketing()
   await fetchTeleSales()
   await fetchCustomers()
-  initCharts()
 })
+
 
 
 watch(searchText, () => {
@@ -2254,7 +2549,7 @@ watch(page, () => {
 
 import api from '/src/api/api.js'
 import {generateAvatarFromName, shortenName} from "../../assets/js/global.js";
-import {confirmYesNo, showCenterSuccess} from "../../assets/js/alertService.js";
+import {confirmYesNo, showCenterSuccess, showCenterWarning, showWarning} from "../../assets/js/alertService.js";
 const marketingoptions = ref([])
 
 
@@ -2417,6 +2712,31 @@ const deleteOne = async (id) => {
       }
   )
 }
+const summary = ref({
+  totalCustomers: 0,
+  totalCustomersPercent: 0,
+  totalCalls: 0,
+  totalCallsPercent: 0,
+  successfulCalls: 0,
+  successfulCallsPercent: 0,
+  appointmentCount: 0,
+  appointmentPercent: 0
+})
+const fetchTeleSalesSummary = async () => {
+  try {
+    const res = await api.get('/customer-crm/admin/dashboard/telesales/summary')
+    summary.value = res.data
+  } catch (e) {
+    console.error('❌ Không lấy được summary telesales', e)
+  }
+}
+const isIncrease = (percent) => percent >= 0
+
+const percentIcon = (percent) =>
+    percent >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'
+
+const percentLabel = (percent) =>
+    `${Math.abs(percent).toFixed(1)}% so với tháng trước`
 
 
 </script>
@@ -3177,10 +3497,10 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 .action-btn:hover { transform: translateY(-2px) scale(1.1); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
 
 /* Charts */
-.chart-container { position: relative; height: 320px; width: 100%; padding: 15px; }
+.chart-container { position: relative; height: 320px; width: 100%; overflow: visible !important; }
 .chart-center-text {
   position: absolute;
-  top: 35%;
+  top: 30%;
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
@@ -3193,9 +3513,8 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 5px;
 }
-.chart-center-text .total-label { font-size: 12px; color: #6c757d; font-weight: 500; }
+.chart-center-text .total-label { font-size: 14px; color: #6c757d; font-weight: 500; }
 
 /* Bulk Actions */
 .bulk-actions {
@@ -4177,5 +4496,20 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   justify-content: center;
 }
 
+.kpi-over-text {
+  color: #f59e0b; /* vàng cam */
+  text-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+}
+
+.kpi-over-icon {
+  color: #f59e0b;
+  animation: kpi-glow 1.2s infinite;
+}
+
+@keyframes kpi-glow {
+  0% { opacity: 1 }
+  50% { opacity: 0.6 }
+  100% { opacity: 1 }
+}
 
 </style>
