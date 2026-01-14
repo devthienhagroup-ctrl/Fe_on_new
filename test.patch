@@ -1,1213 +1,296 @@
-diff --git a/src/components/thiet-kegiandien/admin-saleadmin.vue b/src/components/thiet-kegiandien/admin-saleadmin.vue
-index 5c062b6ef64e025b49e0b4cbb52ab18d0370b996..bbef958fffc080bd8edc2eb7aa8a743e65fa82ac 100644
---- a/src/components/thiet-kegiandien/admin-saleadmin.vue
-+++ b/src/components/thiet-kegiandien/admin-saleadmin.vue
-@@ -727,139 +727,233 @@
-                     </li>
+diff --git a/src/components/thiet-kegiandien/AppointmentsPage.vue b/src/components/thiet-kegiandien/AppointmentsPage.vue
+index 93fdf2872598c9375d0ebc89e0b1505a31aa5160..5a04a503dc7c26cc147c678b4c20b0792f17651f 100644
+--- a/src/components/thiet-kegiandien/AppointmentsPage.vue
++++ b/src/components/thiet-kegiandien/AppointmentsPage.vue
+@@ -990,51 +990,80 @@ onMounted(() => {
+     }
+   });
 
-                     <!-- Next -->
-                     <li
-                         class="page-item"
-                         :class="{ disabled: page === totalPages - 1 }"
-                     >
-                       <a class="page-link" href="#" @click.prevent="nextPage">
-                         <i class="fas fa-chevron-right"></i>
-                       </a>
-                     </li>
+   generateCalendar();
+   updateDaySchedule();
+   updateFilteredAppointments();
 
-                   </ul>
-                 </nav>
+   showToast('Sẵn sàng', 'Đã thêm NV tư vấn + KQ tư vấn + phân loại + đánh giá.', 'success');
 
-               </div>
-             </div>
+   registerWindowListener('keydown', (e) => {
+     if (e.key === 'Escape' && isModalOpen.value) {
+       closeModal();
+     }
+   });
+ });
+
+ onBeforeUnmount(() => {
+   cleanupHandlers.forEach((cleanup) => cleanup());
+ });
+ </script>
+
+ <template>
+   <div ref="rootRef" class="appointments-page">
+     <div class="toast-wrap" id="toastWrap"></div>
+
+-    <div class="appointments-container">
++    <div class="container">
++      <aside class="sidebar">
++        <div class="logo">
++          <div class="logo-icon"><i class="fas fa-calendar-check"></i></div>
++          <h1>Quản lý lịch hẹn</h1>
++        </div>
++
++        <div class="user-profile">
++          <div class="avatar">LH</div>
++          <div class="user-info">
++            <h3>Lê Hiếu</h3>
++            <p>Quản lý lịch hẹn</p>
++          </div>
++        </div>
++
++        <nav class="menu">
++          <a href="#" class="menu-item active"><i class="fas fa-calendar-alt"></i><span>Lịch hẹn</span></a>
++          <a href="#" class="menu-item"><i class="fas fa-users"></i><span>Khách hàng</span></a>
++          <a href="#" class="menu-item"><i class="fas fa-user-tie"></i><span>Nhân viên</span></a>
++          <a href="#" class="menu-item"><i class="fas fa-chart-bar"></i><span>Báo cáo</span></a>
++          <a href="#" class="menu-item"><i class="fas fa-cog"></i><span>Cài đặt</span></a>
++        </nav>
++
++        <div class="sidebar-footer">
++          <button class="btn btn-secondary" type="button">
++            <i class="fas fa-sign-out-alt"></i>Đăng xuất
++          </button>
++        </div>
++      </aside>
++
+       <main class="main-content">
+         <div class="header">
+           <div class="page-title">
+             <h2>Quản lý lịch hẹn</h2>
+             <p>Tạo, theo dõi và cập nhật trạng thái + tư vấn + phân loại + đánh giá</p>
+           </div>
+
+           <div class="search-bar">
+             <i class="fas fa-search search-icon"></i>
+             <input id="searchInput" type="text" placeholder="Tìm theo tên / SĐT / NV phụ trách / NV tư vấn..." />
            </div>
          </div>
-       </section>
-     </div>
 
-     <!-- Modals -->
-     <div v-if="isAnyModalOpen" class="modal-backdrop-custom"></div>
-     <!-- Add Customer Modal -->
--    <div v-if="showAddCustomerModal" class="modal fade modal-custom show" tabindex="-1">
--      <div class="modal-dialog modal-lg">
-+    <div v-if="showAddCustomerModal" class="modal fade modal-custom show add-customer-modal" tabindex="-1">
-+      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-shifted">
-         <div class="modal-content">
-           <div class="modal-header">
-             <h5 class="modal-title">
-               <i class="fas fa-user-plus me-2"></i>
-               Thêm khách hàng mới
-             </h5>
-             <button type="button" class="btn-close btn-close-white" @click="closeAddCustomerModal"></button>
+         <section class="stats">
+           <div class="stat">
+             <div class="k">Tổng lịch hẹn (theo bộ lọc)</div>
+             <div class="v">{{ statTotal }}</div>
+             <div class="hint">Cập nhật theo tab / trạng thái / tìm kiếm</div>
+             <div class="i"><i class="fa-solid fa-layer-group"></i></div>
            </div>
-           <div class="modal-body">
--            <form @submit.prevent="updateCustomer">
--              <div class="row">
--                <div class="col-md-6 mb-3">
--                  <label for="customerName" class="form-label fw-medium">Họ và tên <span class="text-danger">*</span></label>
--                  <input type="text" class="form-control form-control-custom" v-model="customerForm.name">
-+            <form @submit.prevent="submitAddCustomer" class="compact-form">
-+              <div class="form-row">
-+                <div class="form-group">
-+                  <label>Họ tên <span class="required">*</span></label>
-+                  <div class="input-icon">
-+                    <span class="icon-chip" style="background: linear-gradient(135deg, #36D1DC, #5B86E5); color: white;">
-+                      <i class="fas fa-user"></i>
-+                    </span>
-+                    <input
-+                      v-model="addCustomerForm.name"
-+                      type="text"
-+                      class="form-control"
-+                      placeholder="Nguyễn Văn A"
-+                      required
-+                    />
-+                  </div>
-+                </div>
-+
-+                <div class="form-group">
-+                  <label>Số điện thoại <span class="required">*</span></label>
-+                  <div class="input-icon">
-+                    <span class="icon-chip" style="background: linear-gradient(135deg, #FF416C, #FF4B2B); color: white;">
-+                      <i class="fas fa-phone"></i>
-+                    </span>
-+                    <input
-+                      v-model="addCustomerForm.phone"
-+                      type="tel"
-+                      class="form-control"
-+                      placeholder="09xxxxxxxx"
-+                      required
-+                    />
-+                  </div>
-+                </div>
-+              </div>
-+
-+              <div class="form-row">
-+                <div class="form-group">
-+                  <label>Tỉnh/Thành <span class="required">*</span></label>
-+                  <div class="input-icon select-like" :class="{ open: addProvinceDropdownOpen }" style="position: relative;">
-+                    <span class="icon-chip" style="background: linear-gradient(135deg, #8344C5, #3A7BD5); color: white;">
-+                      <i class="fas fa-location-dot"></i>
-+                    </span>
-+
-+                    <input
-+                      v-model="addProvinceSearch"
-+                      @focus="addProvinceDropdownOpen = true"
-+                      @input="addProvinceDropdownOpen = true"
-+                      @blur="closeAddProvinceDropdown"
-+                      type="text"
-+                      class="form-control"
-+                      placeholder="Tìm tỉnh/thành"
-+                      autocomplete="off"
-+                      style="cursor: pointer;"
-+                    />
-+
-+                    <span class="select-caret" aria-hidden="true" @mousedown.prevent="toggleAddProvinceDropdown">
-+                      <i class="fas fa-chevron-down"></i>
-+                    </span>
-+
-+                    <ul
-+                      v-if="addProvinceDropdownOpen && filteredAddProvinces.length"
-+                      class="province-dropdown"
-+                      style="position: absolute; left: 0; right: 0; top: 110%; z-index: 10; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; max-height: 180px; overflow-y: auto; margin: 0; padding: 0;"
-+                    >
-+                      <li
-+                        v-for="province in filteredAddProvinces"
-+                        :key="province"
-+                        @mousedown.prevent="selectAddProvince(province)"
-+                        style="padding: 0.5rem 1rem; cursor: pointer; list-style: none;"
-+                        :style="{ background: province === addCustomerForm.area ? '#e0e7ff' : 'transparent' }"
-+                      >
-+                        {{ province }}
-+                      </li>
-+                    </ul>
-+                  </div>
-                 </div>
--                <div class="col-md-6 mb-3">
--                  <label for="customerPhone" class="form-label fw-medium">Số điện thoại <span class="text-danger">*</span></label>
--                  <input type="tel" class="form-control form-control-custom" v-model="customerForm.phone" required>
-+
-+                <div class="form-group">
-+                  <label>Tên tỉnh cũ</label>
-+                  <div class="input-icon">
-+                    <span class="icon-chip" style="background: linear-gradient(135deg, #6b7280, #707f98); color: #f9fafb;">
-+                      <i class="fas fa-map-marked-alt"></i>
-+                    </span>
-+                    <input
-+                      v-model="addCustomerForm.oldArea"
-+                      type="text"
-+                      class="form-control"
-+                      placeholder="Tên tỉnh cũ (nếu có)"
-+                    />
-+                  </div>
-                 </div>
-               </div>
-
--              <div class="row">
--                <div class="col-md-6 mb-3">
--                  <label for="customerProvince" class="form-label fw-medium">Tỉnh/Thành phố <span class="text-danger">*</span></label>
-+              <div class="form-group">
-+                <label>Giá <span class="required">*</span></label>
-+                <div class="input-icon">
-+                  <span class="icon-chip" style="background: linear-gradient(135deg, #00b09b, #96c93d); color: white;">
-+                    <i class="fas fa-coins"></i>
-+                  </span>
-                   <input
-+                    :value="addPriceDisplay"
-                     type="text"
--                    class="form-control form-control-custom"
--                    list="province-options"
--                    v-model="customerForm.province"
--                    placeholder="Chọn tỉnh/thành phố"
-+                    inputmode="numeric"
-+                    class="form-control"
-+                    placeholder="0"
-+                    @input="handleAddPriceInput"
-+                    @blur="syncAddPriceDisplay"
-                     required
--                  >
-+                  />
-                 </div>
--                <div class="col-md-6 mb-3">
--                  <label for="customerOldProvince" class="form-label fw-medium">Tỉnh cũ (nếu có)</label>
--                  <input
--                    type="text"
--                    class="form-control form-control-custom"
--                    list="province-options"
--                    v-model="customerForm.oldProvince"
--                    placeholder="Chọn tỉnh/thành phố"
-+              </div>
-+
-+              <div class="form-group">
-+                <label>Phân loại <span class="required">*</span></label>
-+                <div class="type-buttons">
-+                  <button
-+                    v-for="type in customerTypes"
-+                    :key="type.id"
-+                    type="button"
-+                    :class="['type-btn', type.id, { active: addCustomerForm.type === type.id }]"
-+                    @click="addCustomerForm.type = type.id"
-                   >
--                  <datalist id="province-options">
--                    <option v-for="province in provinceOptions" :key="province" :value="province"></option>
--                  </datalist>
-+                    <i :class="type.icon"></i>
-+                    {{ type.label }}
-+                  </button>
-                 </div>
-               </div>
-
--              <div class="row">
--                <div class="col-md-6 mb-3">
--                  <label for="customerType" class="form-label fw-medium">Phân loại khách hàng <span class="text-danger">*</span></label>
--                  <select class="form-select form-select-custom" v-model="customerForm.type" required>
--                    <option value="">Chọn phân loại</option>
--                    <option value="MOI_GIOI">Môi giới</option>
--                    <option value="CHINH_CHU">Chủ nhà</option>
--                    <option value="NGUOI_THAN">Người thân</option>
--                  </select>
--                </div>
--                <div class="col-md-6 mb-3">
--                  <label for="customerStatus" class="form-label fw-medium">Trạng thái <span class="text-danger">*</span></label>
--                  <select class="form-select form-select-custom" v-model="customerForm.status" required>
--                    <option value="NEW">Mới</option>
--                    <option value="DC_TELESALES">Chưa gọi</option>
--                    <option value="TN_7NGAY">Tiềm năng 7 ngày</option>
--                    <option value="TN_14NGAY">Tiềm năng 14 ngày</option>
--                    <option value="THANH_CONG">Thành công</option>
--                    <option value="SAI_SO_LIEU">Sai số</option>
--                    <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc được</option>
--                    <option value="CHAM_SOC">Chăm sóc</option>
--                    <option value="THAT_BAI">Thất bại</option>
--                  </select>
-+              <div class="form-group">
-+                <label>Ghi chú</label>
-+                <div class="input-icon">
-+                  <span class="icon-chip" style="background: linear-gradient(135deg, #FF9966, #FF5E62); color: white;">
-+                    <i class="fas fa-note-sticky"></i>
-+                  </span>
-+                  <textarea
-+                    v-model="addCustomerForm.note"
-+                    class="form-control"
-+                    rows="2"
-+                    placeholder="Thông tin bổ sung..."
-+                  ></textarea>
-                 </div>
-               </div>
-
--              <div class="mb-3">
--                <label for="customerAvatar" class="form-label fw-medium">Ảnh đại diện (URL)</label>
--                <input type="text" class="form-control form-control-custom" v-model="customerForm.avatar" placeholder="https://example.com/avatar.jpg">
--                <small class="text-muted">Để trống để sử dụng ảnh mặc định</small>
-+              <div class="form-group">
-+                <label>Đính kèm (tuỳ chọn)</label>
-+                <div class="upload-row">
-+                  <label class="upload-btn" title="Tải tệp nhỏ">
-+                    <i class="fas fa-paperclip"></i>
-+                    <span>Up file</span>
-+                    <input id="addCustomerFileInput" class="upload-input" type="file" multiple @change="onPickAddFile" />
-+                  </label>
-+                  <div class="upload-meta" v-if="addPickedFileNames.length">
-+                    <i class="fas fa-file-lines"></i>
-+                    <span class="text-truncate">{{ addPickedFileLabel }}</span>
-+                    <button type="button" class="upload-clear" @click="clearAddPickedFile" title="Bỏ chọn">
-+                      <i class="fas fa-xmark"></i>
-+                    </button>
-+                  </div>
-+                  <div class="upload-meta muted" v-else>
-+                    <i class="fas fa-circle-info"></i>
-+                    <span>Chọn tệp (nhỏ) để lưu kèm</span>
-+                  </div>
-+                </div>
-               </div>
--
--              <input type="hidden" v-model="customerForm.id" />
-             </form>
+           <div class="stat">
+             <div class="k">Trong ngày đang chọn</div>
+             <div class="v">{{ statSelectedDay }}</div>
+             <div class="hint">Số lịch trong Day Schedule</div>
+             <div class="i"><i class="fa-solid fa-calendar-day"></i></div>
+@@ -1048,51 +1077,51 @@ onBeforeUnmount(() => {
+           <div class="stat">
+             <div class="k">Chưa lên / Tạm hoãn</div>
+             <div class="v">{{ statPending }}</div>
+             <div class="hint">Trong danh sách đang lọc</div>
+             <div class="i"><i class="fa-solid fa-bell"></i></div>
            </div>
-           <div class="modal-footer">
--            <button type="button" class="btn btn-outline-custom btn-custom" @click="closeAddCustomerModal">Hủy</button>
--            <button type="button" class="btn btn-primary-custom btn-custom" @click="saveCustomer">
--              <i class="fas fa-save me-2"></i> Lưu khách hàng
-+            <button type="button" class="btn btn-outline-custom btn-custom" @click="resetAddCustomerForm">
-+              <i class="fas fa-rotate-right me-1"></i> Làm mới
-+            </button>
-+            <button type="button" class="btn btn-primary-custom btn-custom" @click="submitAddCustomer">
-+              <i class="fas fa-check me-2"></i> Ghi nhận
-             </button>
+         </section>
+
+         <div class="filters">
+           <div class="filter-tabs" id="filterTabs">
+             <button class="filter-btn active" data-range="all">Tất cả lịch hẹn</button>
+             <button class="filter-btn" data-range="today">Hôm nay</button>
+             <button class="filter-btn" data-range="week">Tuần này</button>
+             <button class="filter-btn" data-range="month">Tháng này</button>
            </div>
+
+           <div class="status-filter" id="statusFilter">
+             <div class="status-tag status-all active" data-status="ALL">Tất cả</div>
+             <div class="status-tag status-up" data-status="UP">Đã lên</div>
+             <div class="status-tag status-not-up" data-status="NOT_UP">Chưa lên</div>
+             <div class="status-tag status-postponed" data-status="POSTPONED">Tạm hoãn</div>
+             <div class="status-tag status-cancelled" data-status="CANCELLED">Huỷ</div>
+           </div>
+
+           <div class="action-buttons">
+-<!--            <button class="btn btn-secondary" id="exportBtn"><i class="fas fa-download"></i>Xuất file</button>-->
++            <button class="btn btn-secondary" id="exportBtn"><i class="fas fa-download"></i>Xuất file</button>
+             <button class="btn btn-primary" id="createAppointmentBtn"><i class="fas fa-plus"></i>Tạo lịch hẹn</button>
+           </div>
+         </div>
+
+         <div class="appointment-container">
+           <div class="stack">
+             <section class="calendar-section">
+               <div class="calendar-header">
+                 <h3 id="calendarTitle">{{ calendarTitle }}</h3>
+                 <div class="calendar-nav">
+                   <button class="calendar-nav-btn" id="prevMonthBtn"><i class="fas fa-chevron-left"></i></button>
+                   <button class="calendar-nav-btn" id="nextMonthBtn"><i class="fas fa-chevron-right"></i></button>
+                 </div>
+               </div>
+
+               <div class="calendar-days">
+                 <div class="day-name">CN</div>
+                 <div class="day-name">T2</div>
+                 <div class="day-name">T3</div>
+                 <div class="day-name">T4</div>
+                 <div class="day-name">T5</div>
+                 <div class="day-name">T6</div>
+                 <div class="day-name">T7</div>
+               </div>
+
+@@ -1497,54 +1526,122 @@ onBeforeUnmount(() => {
+         </div>
+
+         <div class="modal-foot">
+           <button class="btn btn-secondary" type="button" @click="closeModal">Đóng</button>
+           <button class="btn btn-primary" type="button" @click="saveModal">
+             <i class="fa-solid fa-floppy-disk"></i>Lưu thay đổi
+           </button>
          </div>
        </div>
      </div>
+   </div>
+ </template>
 
-     <!-- Edit Customer Modal -->
-     <div v-if="showEditCustomerModal" class="modal fade modal-custom show detail-modal edit-modal" tabindex="-1">
-       <div class="modal-dialog modal-xl modal-dialog-centered">
-         <div class="modal-content">
-           <div class="modal-header">
-             <h5 class="modal-title">
-               <i class="fas fa-user-edit me-2"></i>
-               Chỉnh sửa khách hàng
-             </h5>
-             <button type="button" class="btn-close btn-close-white" @click="closeEditCustomerModal"></button>
-           </div>
-           <div class="modal-body">
-             <form @submit.prevent="updateCustomer">
-               <div class="detail-hero">
-                 <div class="detail-avatar">
-                   <div class="avatar-img">
-                     <img
-                         :src="customerForm.avatar || generateAvatarFromName(customerForm.name)"
-                         :alt="customerForm.name || 'Khách hàng'"
-@@ -1429,50 +1523,52 @@ const fetchTodayProgress = async () => {
-   try {
-     const res = await api.get('/customer-crm/admin/cuoc-goi-hom-nay')
-     todayProgress.value = res.data
-   } catch (e) {
-     console.error('❌ Không lấy được tiến độ hôm nay', e)
-   }
+ <style scoped>
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+ .appointments-page{
+   min-height:100vh;
+   background:#f5f7fa;
+   color:#0f172a;
+   line-height:1.6;
  }
 
+ *{ margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; }
 
-
- // State management
- const customers = ref([])
- const totalElements = ref(0)
- const totalPages = ref(0)
- const loading = ref(false)
-
- const staffMembers = ref([])
- const employeeSearch = ref('')
- const employeeOptions = ref([])
- const employeeLoading = ref(false)
- const employeeDropdownOpen = ref(false)
- const selectedAssignee = ref(null)
- let employeeSearchTimer = null
- const provinceSearch = ref('')
- const provinceDropdownOpen = ref(false)
-+const addProvinceSearch = ref('')
-+const addProvinceDropdownOpen = ref(false)
-
- const creatorOptions = ref([
-   { id: 1, name: "Trần Minh Anh", avatar: "https://randomuser.me/api/portraits/women/11.jpg" },
-   { id: 2, name: "Phạm Quốc Huy", avatar: "https://randomuser.me/api/portraits/men/12.jpg" },
-   { id: 3, name: "Nguyễn Thảo My", avatar: "https://randomuser.me/api/portraits/women/13.jpg" },
-   { id: 4, name: "Lê Hoàng Nam", avatar: "https://randomuser.me/api/portraits/men/14.jpg" }
- ])
-
- // UI state
- const mobileMenuOpen = ref(false)
- const notificationsOpen = ref(false)
- const userMenuOpen = ref(false)
- const activeTab = ref('all')
- const searchText = ref('')
-
- // Modal states
- const showAddCustomerModal = ref(false)
- const showAssignDataModal = ref(false)
- const showCallModal = ref(false)
- const showConfirmDeleteModal = ref(false)
- const showEditCustomerModal = ref(false)
- const showDetailModal = ref(false)
- const isAnyModalOpen = computed(() =>
-   showAddCustomerModal.value ||
-   showEditCustomerModal.value ||
-@@ -1490,84 +1586,108 @@ const filters = reactive({
-   createdFrom: '',
-   createdTo: '',
-   updatedFrom: '',
-   updatedTo: ''
- })
-
- const customerForm = reactive({
-   id: null,
-   name: '',
-   phone: '',
-   province: '',
-   oldProvince: '',
-   type: '',
-   status: 'NEW',
-   avatar: '',
-   notes: '',
-   createdAt: '',
-   updatedAt: '',
-   creatorName: '',
-   creatorAvatar: '',
-   assigneeId: null,
-   assigneeName: '',
-   assigneeAvatar: ''
- })
-
-+const addCustomerForm = reactive({
-+  name: '',
-+  phone: '',
-+  area: '',
-+  oldArea: '',
-+  type: 'CHINH_CHU',
-+  price: '',
-+  note: ''
-+})
+-.appointments-container{ min-height:100vh; }
++.container{ display:flex; min-height:100vh; }
 +
-+const addPriceDisplay = ref('')
-+const addPickedFileNames = ref([])
++/* Sidebar */
++.sidebar{
++  width:270px;
++  background:#ffffff;
++  box-shadow: 2px 0 18px rgba(0,0,0,.05);
++  display:flex;
++  flex-direction:column;
++  z-index:10;
++}
++.logo{
++  padding:22px 20px;
++  border-bottom:1px solid rgba(15,23,42,.08);
++  display:flex;
++  align-items:center;
++  gap:12px;
++  position:relative;
++}
++.logo h1{ font-size:18px; font-weight:800; color:#111827; }
++.logo-icon{ color:#4d7cfe; font-size:22px; }
 +
-+const customerTypes = [
-+  { id: 'CHINH_CHU', label: 'Chủ nhà', icon: 'fas fa-house-user' },
-+  { id: 'MOI_GIOI', label: 'Môi giới', icon: 'fas fa-handshake' },
-+  { id: 'NGUOI_THAN', label: 'Người thân', icon: 'fas fa-people-group' }
-+]
-
- const callingCustomer = ref(null)
- const deletingCustomer = ref(null)
- const callSeconds = ref(0)
- const callNotes = ref('')
- const isEditing = ref(false)
- const selectedCustomer = ref(null)
- const fileForm = reactive({
-   files: [],
-   newFiles: [],
-   newLandBookFiles: [],
-   deletedFileIds: [],
-   deletedLandBookFileIds: []
- })
- const originalFiles = ref([])
-
- const notification = reactive({
-   show: false,
-   message: '',
-   type: 'info',
-   icon: 'info-circle'
- })
-
- // Refs
- const monthlyChart = ref(null)
- const statusChart = ref(null)
-
- // Computed properties
- const filterTabs = computed(() => [
-   { value: 'all', label: 'Tất cả' },
-   { value: 'new', label: 'Mới' },
-   { value: 'contacted', label: 'Đã dùng' }
- ])
-
-+const addPickedFileLabel = computed(() => {
-+  if (!addPickedFileNames.value.length) return ''
-+  if (addPickedFileNames.value.length === 1) return addPickedFileNames.value[0]
-+  return `${addPickedFileNames.value.length} tệp: ${addPickedFileNames.value.join(', ')}`
-+})
++.user-profile{
++  padding:18px 20px;
++  display:flex;
++  align-items:center;
++  gap:12px;
++  border-bottom:1px solid rgba(15,23,42,.08);
++}
++.avatar{
++  width:42px;
++  height:42px;
++  border-radius:50%;
++  background:linear-gradient(135deg, #4d7cfe, #7c3aed);
++  color:white;
++  display:flex;
++  align-items:center;
++  justify-content:center;
++  font-weight:700;
++  box-shadow: 0 10px 20px rgba(77,124,254,.25);
++}
++.user-info h3{ font-size:15px; font-weight:700; margin-bottom:2px; }
++.user-info p{ font-size:13px; color:#64748b; }
 +
-
- const selectedCount = computed(() => {
-   return customers.value.filter(c => c.selected).length
- })
-
- const selectedCustomerIds = computed(() => {
-   return customers.value.filter(c => c.selected).map(c => c.id)
- })
-
- const isAllSelected = computed(() => {
-   return selectedCount.value === customers.value.length && customers.value.length > 0
- })
-
- const isAllSelectedNew = computed(() => {
-   if (selectedCount.value === 0) return false
-   return customers.value
-       .filter(c => c.selected)
-       .every(c => c.trangThai === 'NEW')
- })
-
- const assignQuantity = computed(() => selectedCount.value)
-
- const selectedTeleSales = computed(() => {
-   return staffMembers.value.find(staff => staff.selected) || null
- })
-@@ -1578,50 +1698,55 @@ const canAssignData = computed(() => {
-
- const callTimer = computed(() => {
-   const minutes = Math.floor(callSeconds.value / 60).toString().padStart(2, '0')
-   const seconds = (callSeconds.value % 60).toString().padStart(2, '0')
-   return `${minutes}:${seconds}`
- })
-
- const detailCustomer = computed(() => selectedCustomer.value?.customerListItemDTO || null)
- const detailHistory = computed(() => selectedCustomer.value?.lichSu || [])
-
- const assignSummary = computed(() => {
-   if (selectedCount.value === 0) return 'Chưa có khách hàng nào được chọn'
-   if (!selectedTeleSales.value) return 'Chưa chọn nhân viên Telesale'
-   return `Sẽ cấp ${assignQuantity.value} khách hàng cho ${selectedTeleSales.value.name}`
- })
-
- const provinceOptions = computed(() => {
-   const provinceNames = addressData.map(province => province.name)
-   return [...provinceNames, 'Khác']
- })
-
- const filteredProvinces = computed(() => {
-   const query = provinceSearch.value.toLowerCase()
-   return provinceOptions.value.filter(province => province.toLowerCase().includes(query))
- })
++.menu{ padding:14px 0; flex-grow:1; }
++.menu-item{
++  padding:12px 18px;
++  display:flex;
++  align-items:center;
++  gap:12px;
++  color:#334155;
++  text-decoration:none;
++  transition:.22s ease;
++  margin:2px 10px;
++  border-radius:12px;
++}
++.menu-item:hover{ background:rgba(77,124,254,.08); color:#4d7cfe; transform: translateX(2px); }
++.menu-item.active{
++  background:rgba(77,124,254,.12);
++  color:#4d7cfe;
++  box-shadow: inset 0 0 0 1px rgba(77,124,254,.18);
++}
 +
-+const filteredAddProvinces = computed(() => {
-+  const query = addProvinceSearch.value.toLowerCase()
-+  return provinceOptions.value.filter(province => province.toLowerCase().includes(query))
-+})
- const totalStatusCount = computed(() => {
-   return statusStats.value.reduce((sum, item) => {
-     return sum + (item.count || 0)
-   }, 0)
- })
- const creatorsById = computed(() => {
-   return creatorOptions.value.reduce((acc, creator) => {
-     acc[creator.id] = creator
-     return acc
-   }, {})
- })
++.sidebar-footer{
++  padding:16px 20px;
++  margin-top:auto;
++  border-top: 1px solid rgba(15,23,42,.08);
++}
++.sidebar-footer .btn{ width:100%; justify-content:center; }
 
- const staffById = computed(() => {
-   return staffMembers.value.reduce((acc, staff) => {
-     acc[staff.id] = staff
-     return acc
-   }, {})
- })
+ /* Main */
+-.main-content{ width:100%; padding:22px; }
++.main-content{ flex-grow:1; padding:22px; overflow-y:auto; }
+ .header{
+   display:flex; justify-content:space-between; align-items:center;
+   margin-bottom:18px; gap:16px; flex-wrap:wrap;
+ }
+ .page-title h2{ font-size:22px; font-weight:800; color:#0b1220; }
+ .page-title p{ font-size:13px; color:#64748b; margin-top:4px; }
 
- // Methods
- const toggleMobileMenu = () => {
-   mobileMenuOpen.value = !mobileMenuOpen.value
+ .search-bar{ position:relative; width:420px; max-width:100%; }
+ .search-bar input{
+   width:100%; padding:12px 14px 12px 40px;
+   border:1px solid rgba(15,23,42,.08);
+   border-radius:12px; font-size:14px;
+   background:#ffffff; transition:.2s ease;
+ }
+ .search-bar input:focus{ outline:none; border-color:rgba(77,124,254,.5); box-shadow: 0 0 0 3px rgba(77, 124, 254, 0.12); }
+ .search-icon{ position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; }
+
+ /* Stats */
+ .stats{
+   display:grid; grid-template-columns: repeat(4, minmax(0,1fr));
+   gap:14px; margin: 10px 0 18px;
+ }
+ .stat{
+   background:#ffffff; border:1px solid rgba(15,23,42,.08);
+   border-radius: 16px;
+@@ -2089,29 +2186,31 @@ tr:hover td{ background: rgba(77,124,254,.03); }
+   align-items:flex-start;
+   animation: pop .12s ease-out;
+ }
+ .toast .ico{
+   width:36px; height:36px;
+   border-radius:14px;
+   display:flex; align-items:center; justify-content:center;
+   background: rgba(77,124,254,.10);
+   color: #4d7cfe;
+   flex:0 0 auto;
+ }
+ .toast .t{ display:flex; flex-direction:column; gap:2px; flex:1; }
+ .toast .t .a{ font-weight:900; font-size:13px; color:#0f172a; }
+ .toast .t .b{ font-weight:700; font-size:12.5px; color:#64748b; }
+ .toast .x{
+   width:34px; height:34px;
+   border-radius:12px;
+   border:1px solid rgba(15,23,42,.08);
+   background:#ffffff;
+   cursor:pointer;
+   display:flex; align-items:center; justify-content:center;
  }
 
- const toggleNotifications = () => {
-@@ -1636,57 +1761,58 @@ const toggleUserMenu = () => {
-
- const setActiveTab = (tab) => {
-   activeTab.value = tab
-   applyFilters()
+ /* Responsive */
+ @media (max-width: 768px){
++  .container{ flex-direction:column; }
++  .sidebar{ width:100%; }
+   .filters{ align-items:flex-start; }
+   .search-bar{ width:100%; }
  }
-
- const applyFilters = () => {
-   // Filters are automatically applied through computed property
- }
-
- const resetFilters = () => {
-   activeTab.value = 'all'
-   filters.type = 'all'
-   filters.status = 'all'
-   filters.province = ''
-   filters.creator = 'all'
-   filters.createdFrom = ''
-   filters.createdTo = ''
-   filters.updatedFrom = ''
-   filters.updatedTo = ''
-   searchText.value = ''
-   showNotification('Đã đặt lại tất cả bộ lọc', 'info')
- }
-
- const openAddCustomerModal = () => {
--  resetCustomerForm()
-   isEditing.value = false
-+  resetAddCustomerForm()
-   showAddCustomerModal.value = true
- }
-
- const closeAddCustomerModal = () => {
-   showAddCustomerModal.value = false
-+  resetAddCustomerForm()
- }
-
- const resolveEmployeeAvatar = (avatar, name) => {
-   if (avatar) {
-     return avatar.startsWith('http')
-       ? avatar
-       : `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${avatar}`
-   }
-   return generateAvatarFromName(name || 'NV')
- }
-
- const normalizeEmployeeOption = (employee) => ({
-   id: employee.id,
-   tenNhanVien: employee.tenNhanVien,
-   avatar: resolveEmployeeAvatar(employee.avatar, employee.tenNhanVien),
-   email: employee.email || '',
-   phone: employee.phone || ''
- })
-
- const editCustomer = async (customer) => {
-   const normalized = {
-     id: customer.id ?? customer.customerListItemDTO?.id ?? null,
-     name: customer.name ?? customer.hoTen ?? customer.customerListItemDTO?.hoTen ?? '',
-     phone: customer.phone ?? customer.soDienThoai ?? customer.customerListItemDTO?.soDienThoai ?? '',
-     province: customer.province ?? customer.tinhThanhPho ?? customer.customerListItemDTO?.tinhThanhPho ?? '',
-@@ -1794,83 +1920,239 @@ const selectEmployee = (employee) => {
-   employeeDropdownOpen.value = false
- }
-
- const selectProvince = (province) => {
-   customerForm.province = province
-   provinceSearch.value = province
-   provinceDropdownOpen.value = false
- }
-
- const handleProvinceInput = () => {
-   provinceDropdownOpen.value = true
-   customerForm.province = provinceSearch.value
- }
-
- const closeProvinceDropdown = () => {
-   setTimeout(() => {
-     provinceDropdownOpen.value = false
-     provinceSearch.value = customerForm.province || ''
-   }, 120)
- }
-
- const toggleProvinceDropdown = () => {
-   provinceDropdownOpen.value = !provinceDropdownOpen.value
- }
-
-+const selectAddProvince = (province) => {
-+  addCustomerForm.area = province
-+  addProvinceSearch.value = province
-+  addProvinceDropdownOpen.value = false
-+}
-+
-+const closeAddProvinceDropdown = () => {
-+  setTimeout(() => {
-+    addProvinceDropdownOpen.value = false
-+    addProvinceSearch.value = addCustomerForm.area || ''
-+  }, 120)
-+}
-+
-+const toggleAddProvinceDropdown = () => {
-+  addProvinceDropdownOpen.value = !addProvinceDropdownOpen.value
-+}
-+
- const resetCustomerForm = () => {
-   Object.assign(customerForm, {
-     id: null,
-     name: '',
-     phone: '',
-     province: '',
-     oldProvince: '',
-     type: '',
-     status: 'NEW',
-     avatar: '',
-     notes: '',
-     createdAt: '',
-     updatedAt: '',
-     creatorName: '',
-     creatorAvatar: '',
-     assigneeId: null,
-     assigneeName: '',
-     assigneeAvatar: ''
-   })
-   selectedAssignee.value = null
-   employeeSearch.value = ''
-   employeeOptions.value = []
-   employeeDropdownOpen.value = false
-   provinceSearch.value = ''
-   provinceDropdownOpen.value = false
-   fileForm.files = []
-   fileForm.newFiles = []
-   fileForm.newLandBookFiles = []
-   fileForm.deletedFileIds = []
-   fileForm.deletedLandBookFileIds = []
-   originalFiles.value = []
- }
-
-+const resetAddCustomerForm = () => {
-+  Object.assign(addCustomerForm, {
-+    name: '',
-+    phone: '',
-+    area: '',
-+    oldArea: '',
-+    type: 'CHINH_CHU',
-+    price: '',
-+    note: ''
-+  })
-+  addPriceDisplay.value = ''
-+  addPickedFileNames.value = []
-+  addProvinceSearch.value = ''
-+  addProvinceDropdownOpen.value = false
-+  const fileInput = document.getElementById('addCustomerFileInput')
-+  if (fileInput) fileInput.value = ''
-+}
-+
-+function normalizePriceInput(value) {
-+  return String(value || '').replace(/[^\d]/g, '')
-+}
-+
-+function formatPriceDisplay(value) {
-+  if (!value) return ''
-+  return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-+}
-+
-+function handleAddPriceInput(event) {
-+  const raw = normalizePriceInput(event.target.value)
-+  addPriceDisplay.value = formatPriceDisplay(raw)
-+  addCustomerForm.price = raw ? Number(raw) : ''
-+}
-+
-+function syncAddPriceDisplay() {
-+  const raw = normalizePriceInput(addPriceDisplay.value)
-+  addPriceDisplay.value = formatPriceDisplay(raw)
-+  addCustomerForm.price = raw ? Number(raw) : ''
-+}
-+
-+function onPickAddFile(e) {
-+  const files = Array.from(e?.target?.files || [])
-+  addPickedFileNames.value = files.map(file => file.name)
-+}
-+
-+function clearAddPickedFile() {
-+  addPickedFileNames.value = []
-+  const fileInput = document.getElementById('addCustomerFileInput')
-+  if (fileInput) fileInput.value = ''
-+}
-+
-+function isValidName(name) {
-+  const normalized = name.trim().replace(/\s+/g, ' ')
-+  if (!normalized) return false
-+  const words = normalized.split(' ')
-+  if (words.length < 2) return false
-+  return /^[A-Za-zÀ-ỹ\s]+$/u.test(normalized)
-+}
-+
-+function isValidPhone(phone) {
-+  return /^(0\d{9})$/.test(phone)
-+}
-+
-+function validateAddCustomerForm() {
-+  if (!addCustomerForm.name?.trim()) {
-+    showCenterWarning('Vui lòng nhập họ tên.')
-+    return false
-+  }
-+  if (!isValidName(addCustomerForm.name)) {
-+    showCenterWarning('Họ tên phải có ít nhất 2 từ và không chứa số hoặc ký tự đặc biệt.')
-+    return false
-+  }
-+  if (!addCustomerForm.phone?.trim()) {
-+    showCenterWarning('Vui lòng nhập số điện thoại.')
-+    return false
-+  }
-+  if (!isValidPhone(addCustomerForm.phone)) {
-+    showCenterWarning('Số điện thoại không đúng định dạng (ví dụ: 09xxxxxxxx).')
-+    return false
-+  }
-+  if (!addCustomerForm.area?.trim()) {
-+    showCenterWarning('Vui lòng chọn tỉnh/thành.')
-+    return false
-+  }
-+  if (!addCustomerForm.price) {
-+    showWarning('Vui lòng nhập giá bán.')
-+    return false
-+  }
-+  if (!addCustomerForm.type) {
-+    showWarning('Vui lòng chọn phân loại.')
-+    return false
-+  }
-+  return true
-+}
-+
-+const submitAddCustomer = async () => {
-+  try {
-+    if (!validateAddCustomerForm()) return
-+
-+    const form = new FormData()
-+    const dto = {
-+      name: addCustomerForm.name,
-+      phone: addCustomerForm.phone,
-+      area: addCustomerForm.area,
-+      oldArea: addCustomerForm.oldArea,
-+      type: addCustomerForm.type,
-+      price: addCustomerForm.price,
-+      note: addCustomerForm.note
-+    }
-+
-+    form.append('dto', new Blob([JSON.stringify(dto)], { type: 'application/json' }))
-+
-+    const fileInput = document.getElementById('addCustomerFileInput')
-+    if (fileInput?.files?.length) {
-+      Array.from(fileInput.files).forEach(file => form.append('files', file))
-+    }
-+
-+    const res = await showLoading(
-+      api.post('/customer-crm/marketing/create', form, {
-+        headers: { 'Content-Type': 'multipart/form-data' },
-+        withCredentials: true
-+      })
-+    )
-+
-+    const data = res.data
-+    if (!data.success) {
-+      updateAlertError(data?.message || 'Gửi dữ liệu không thành công. Vui lòng thử lại!')
-+      return
-+    }
-+
-+    updateAlertSuccess('Đã ghi nhận dữ liệu khách hàng mới.')
-+    showAddCustomerModal.value = false
-+    resetAddCustomerForm()
-+    await fetchCustomers()
-+  } catch (err) {
-+    console.error(err)
-+    showCenterError('Gửi dữ liệu thất bại. Vui lòng thử lại!')
-+  }
-+}
-+
- const buildCustomerUpdateFormData = (assigneePayload) => {
-   const dto = {
-     id: customerForm.id,
-     hoTen: customerForm.name,
-     soDienThoai: customerForm.phone,
-     tinhThanhPho: customerForm.province,
-     phanLoaiKhach: customerForm.type,
-     trangThai: customerForm.status,
-     nhanVienPhuTrachId: assigneePayload.nhanVienPhuTrachId,
-     nhanVienPhuTrachTen: assigneePayload.nhanVienPhuTrachTen,
-     nhanVienPhuTrachAvatar: assigneePayload.nhanVienPhuTrachAvatar,
-     deletedFileIds: fileForm.deletedFileIds,
-     deletedLandBookFileIds: fileForm.deletedLandBookFileIds
-   }
-
-   const fd = new FormData()
-   fd.append('dto', new Blob([JSON.stringify(dto)], { type: 'application/json' }))
-
-   const mainFile = [...fileForm.newFiles, ...fileForm.newLandBookFiles]
-     .find(file => file?.isOnTop && file.file instanceof File)
-
-   if (mainFile?.file) {
-     fd.append('newFileOntop', mainFile.file)
-   }
-
-@@ -1906,87 +2188,50 @@ const updateCustomer = async () => {
-       nhanVienPhuTrachTen: selectedAssignee.value.tenNhanVien,
-       nhanVienPhuTrachAvatar: selectedAssignee.value.avatar
-     }
-     : {
-       nhanVienPhuTrachId: customerForm.assigneeId,
-       nhanVienPhuTrachTen: customerForm.assigneeName,
-       nhanVienPhuTrachAvatar: customerForm.assigneeAvatar
-     }
-
-   try {
-     const payload = buildCustomerUpdateFormData(assigneePayload)
-     await api.post(`/customer-crm/admin/host-temp/update/${customerForm.id}`, payload, {
-       headers: { 'Content-Type': 'multipart/form-data' }
-     })
-     showCenterSuccess('Cập nhật khách hàng thành công!', 'Dữ liệu đã được ghi nhận!')
-     await fetchCustomers()
-     showEditCustomerModal.value = false
-     isEditing.value = false
-     resetCustomerForm()
-   } catch (e) {
-     console.error(e)
-     showNotification('Không thể cập nhật khách hàng, vui lòng thử lại!', 'warning')
-   }
- }
-
--const saveCustomer = () => {
--  if (isEditing.value) {
--    updateCustomer()
--    return
--  }
--
--  if (!customerForm.name || !customerForm.phone || !customerForm.province || !customerForm.type || !customerForm.status) {
--    showNotification('Vui lòng điền đầy đủ các trường bắt buộc!', 'warning')
--    return
--  }
--
--  const newId = customers.value.length > 0
--    ? Math.max(...customers.value.map(c => c.id)) + 1
--    : 1
--
--  customers.value.push({
--    id: newId,
--    hoTen: customerForm.name,
--    soDienThoai: customerForm.phone,
--    tinhThanhPho: customerForm.province,
--    avatarKhach: customerForm.avatar || null,
--    phanLoaiKhach: customerForm.type,
--    trangThai: customerForm.status,
--    ngayTao: new Date().toISOString().split('T')[0],
--    ngayCapNhat: new Date().toISOString().split('T')[0],
--    nhanVienTaoId: creatorOptions.value[0]?.id ?? null,
--    nhanVienPhuTrachId: staffMembers.value[0]?.id ?? null,
--    selected: false
--  })
--  showNotification('Thêm khách hàng mới thành công!', 'success')
--
--  showAddCustomerModal.value = false
--  showEditCustomerModal.value = false
--  isEditing.value = false
--  resetCustomerForm()
--}
--
- const startCall = (customer) => {
-   callingCustomer.value = customer
-   callSeconds.value = 0
-   callNotes.value = ''
-   showCallModal.value = true
-
-   // Start timer
-   const timer = setInterval(() => {
-     if (showCallModal.value) {
-       callSeconds.value++
-     } else {
-       clearInterval(timer)
-     }
-   }, 1000)
- }
-
- const endCall = () => {
-   showCallModal.value = false
-   callingCustomer.value = null
-   callSeconds.value = 0
-
-   if (callNotes.value.trim()) {
-     showNotification('Cuộc gọi đã kết thúc. Ghi chú đã được lưu.', 'success')
-   }
- }
-@@ -2504,74 +2749,87 @@ watch(searchText, () => {
-   page.value = 0
-   fetchCustomers()
- })
- watch(employeeSearch, (value) => {
-   if (!showEditCustomerModal.value) return
-
-   if (selectedAssignee.value && value !== selectedAssignee.value.tenNhanVien) {
-     selectedAssignee.value = null
-     customerForm.assigneeId = null
-     customerForm.assigneeName = ''
-     customerForm.assigneeAvatar = ''
-   }
-
-   if (employeeSearchTimer) {
-     clearTimeout(employeeSearchTimer)
-   }
-
-   employeeSearchTimer = setTimeout(() => {
-     searchEmployeeOptions(value.trim())
-   }, 300)
- })
- watch(() => customerForm.province, (value) => {
-   if (!showEditCustomerModal.value) return
-   provinceSearch.value = value || ''
- })
-+watch(() => addCustomerForm.area, (value) => {
-+  if (!showAddCustomerModal.value) return
-+  addProvinceSearch.value = value || ''
-+})
- watch(showEditCustomerModal, (isOpen) => {
-   if (!isOpen) {
-     employeeOptions.value = []
-     employeeDropdownOpen.value = false
-     provinceDropdownOpen.value = false
-   }
- })
- watch(
-     () => ({ ...filters }),
-     () => {
-       page.value = 0
-       fetchCustomers()
-     },
-     { deep: true }
- )
- const page = ref(0)
- const pageSize = ref(10)
- watch(page, () => {
-   fetchCustomers()
- })
-
- import api from '/src/api/api.js'
- import {generateAvatarFromName, shortenName} from "../../assets/js/global.js";
--import {confirmYesNo, showCenterSuccess, showCenterWarning, showWarning} from "../../assets/js/alertService.js";
-+import {
-+  confirmYesNo,
-+  showCenterError,
-+  showCenterSuccess,
-+  showCenterWarning,
-+  showLoading,
-+  showWarning,
-+  updateAlertError,
-+  updateAlertSuccess
-+} from "../../assets/js/alertService.js";
- const marketingoptions = ref([])
-
-
- const buildFilterPayload = () => ({
-   search: searchText.value || null,
-
-   phanLoaiKhach: filters.type !== 'all' ? filters.type : null,
-   trangThai: filters.status !== 'all' ? filters.status : null,
-   tinhThanhPho: filters.province || null,
-   nguoiTaoId: filters.creator !== 'all' ? filters.creator : null,
-
-   ngayTaoTu: filters.createdFrom || null,
-   ngayTaoDen: filters.createdTo || null,
-   ngayCapNhatTu: filters.updatedFrom || null,
-   ngayCapNhatDen: filters.updatedTo || null,
-
-   page: page.value,
-   size: pageSize.value
- })
-
- const fetchCustomers = async () => {
-   loading.value = true
-   try {
-     const res = await api.post(
-         '/customer-crm/admin/filter',
-@@ -3596,50 +3854,218 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
- }
- .pagination-custom .page-link:hover:not(.active) { background: rgba(102, 126, 234, 0.1); color: var(--primary-color); }
-
- /* Modals */
- .modal-custom .modal-content {
-   border-radius: var(--border-radius-lg);
-   border: none;
-   overflow: hidden;
-   box-shadow: var(--shadow-hard);
-   background: rgba(255, 255, 255, 0.95);
-   backdrop-filter: blur(10px);
- }
- .modal-custom .modal-header {
-   background: var(--primary-gradient);
-   color: white;
-   padding: 25px;
-   border-bottom: none;
- }
- .modal-custom .modal-title { font-weight: 600; font-size: 1.3rem; }
- .modal-custom .modal-body { padding: 25px; }
- .modal-custom .modal-footer {
-   padding: 20px 25px;
-   border-top: 1px solid rgba(0, 0, 0, 0.05);
-   background: rgba(0, 0, 0, 0.02);
- }
-+.add-customer-modal .modal-dialog-shifted {
-+  transform: translateY(-18px);
-+}
-+.add-customer-modal .modal-body {
-+  padding: 24px 28px;
-+}
-+.add-customer-modal .compact-form {
-+  display: flex;
-+  flex-direction: column;
-+  gap: 1.15rem;
-+}
-+.add-customer-modal .form-row {
-+  display: grid;
-+  grid-template-columns: 1fr 1fr;
-+  gap: 1rem;
-+}
-+.add-customer-modal .form-group {
-+  display: flex;
-+  flex-direction: column;
-+  gap: 0.5rem;
-+}
-+.add-customer-modal .form-group label {
-+  font-size: 0.8125rem;
-+  font-weight: 500;
-+  color: #475569;
-+}
-+.add-customer-modal .required {
-+  color: #ef4444;
-+  margin-left: 4px;
-+}
-+.add-customer-modal .form-control {
-+  padding: 0.625rem 0.875rem;
-+  border: 1px solid #e2e8f0;
-+  border-radius: 10px;
-+  font-size: 0.875rem;
-+  color: #1e293b;
-+  background: white;
-+  transition: all 0.2s ease;
-+}
-+.add-customer-modal .form-control:focus {
-+  outline: none;
-+  border-color: #4f46e5;
-+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-+}
-+.add-customer-modal .form-control::placeholder {
-+  color: #94a3b8;
-+}
-+.add-customer-modal .input-icon {
-+  position: relative;
-+}
-+.add-customer-modal .icon-chip {
-+  position: absolute;
-+  top: 50%;
-+  left: 10px;
-+  transform: translateY(-50%);
-+  width: 30px;
-+  height: 30px;
-+  border-radius: 10px;
-+  display: inline-flex;
-+  align-items: center;
-+  justify-content: center;
-+  font-size: 13px;
-+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
-+  border: 1px solid rgba(226, 232, 240, 0.9);
-+}
-+.add-customer-modal .input-icon .form-control {
-+  padding-left: 48px;
-+}
-+.add-customer-modal .select-like .form-control {
-+  padding-right: 2rem;
-+}
-+.add-customer-modal .select-like.open .form-control {
-+  border-color: #6366f1;
-+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-+}
-+.add-customer-modal .select-caret {
-+  position: absolute;
-+  right: 12px;
-+  top: 50%;
-+  transform: translateY(-50%);
-+  color: #64748b;
-+  transition: transform 0.2s ease, color 0.2s ease;
-+}
-+.add-customer-modal .select-like.open .select-caret {
-+  transform: translateY(-50%) rotate(180deg);
-+  color: #4338ca;
-+}
-+.add-customer-modal .type-buttons {
-+  display: grid;
-+  grid-template-columns: repeat(3, 1fr);
-+  gap: 0.5rem;
-+}
-+.add-customer-modal .type-btn {
-+  padding: 0.7rem 0.55rem;
-+  background: rgba(248, 250, 252, 0.9);
-+  border: 1px solid #e2e8f0;
-+  border-radius: 10px;
-+  color: #64748b;
-+  font-size: 0.8125rem;
-+  cursor: pointer;
-+  transition: all 0.2s ease;
-+  display: inline-flex;
-+  align-items: center;
-+  justify-content: center;
-+  gap: 0.45rem;
-+}
-+.add-customer-modal .type-btn:hover {
-+  border-color: #cbd5e1;
-+  background: rgba(241, 245, 249, 0.95);
-+}
-+.add-customer-modal .type-btn.active {
-+  background: #e0e7ff;
-+  border-color: #4f46e5;
-+  color: #4f46e5;
-+}
-+.add-customer-modal .upload-row {
-+  display: flex;
-+  align-items: center;
-+  gap: 0.75rem;
-+  flex-wrap: wrap;
-+}
-+.add-customer-modal .upload-btn {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 0.45rem;
-+  padding: 0.45rem 0.65rem;
-+  border-radius: 999px;
-+  border: 1px dashed rgba(148, 163, 184, 0.8);
-+  background: rgba(255, 255, 255, 0.75);
-+  color: #475569;
-+  font-size: 0.82rem;
-+  cursor: pointer;
-+  transition: all 0.15s ease;
-+}
-+.add-customer-modal .upload-btn:hover {
-+  border-color: rgba(79, 70, 229, 0.45);
-+  color: #4f46e5;
-+  background: rgba(224, 231, 255, 0.35);
-+}
-+.add-customer-modal .upload-input {
-+  display: none;
-+}
-+.add-customer-modal .upload-meta {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 0.45rem;
-+  padding: 0.45rem 0.65rem;
-+  border-radius: 999px;
-+  border: 1px solid rgba(226, 232, 240, 0.9);
-+  background: rgba(248, 250, 252, 0.85);
-+  color: #334155;
-+  font-size: 0.82rem;
-+  max-width: 280px;
-+}
-+.add-customer-modal .upload-meta.muted {
-+  color: #64748b;
-+  background: rgba(248, 250, 252, 0.75);
-+}
-+.add-customer-modal .upload-clear {
-+  border: none;
-+  background: transparent;
-+  color: #94a3b8;
-+  padding: 0 4px;
-+  cursor: pointer;
-+}
-+.add-customer-modal .upload-clear:hover {
-+  color: #ef4444;
-+}
- .modal.fade.show {
-   display: block;
- }
- .modal-backdrop-custom {
-   position: fixed;
-   inset: 0;
-   background: rgba(15, 23, 42, 0.55);
-   backdrop-filter: blur(2px);
-   z-index: 1040;
-   opacity: 0;
-   animation: modalBackdropFadeIn 0.2s ease forwards;
- }
-
- @keyframes modalBackdropFadeIn {
-   to {
-     opacity: 1;
-   }
- }
-
- /* Assign Data Modal */
- .assign-data-modal .staff-grid {
-   display: grid;
-   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-   gap: 15px;
-   margin: 20px 0;
+ </style>

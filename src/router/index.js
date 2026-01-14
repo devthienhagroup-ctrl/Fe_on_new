@@ -58,7 +58,6 @@ import HostManager from "../components/host/HostManager.vue";
 
 import Ga4EventExample from "../components/Ga4EventExample.vue";
 import PaymentPage2 from "../components/productAdmin/PaymentPage2.vue";
-import AppointmentsPage from "../components/Appointments/AppointmentsPage.vue";
 
 import cms from "/src/components/cms/cms.vue";
 import Banner from "../components/cms/components/home/Banner.vue";
@@ -148,6 +147,7 @@ import test from "../components/thiet-kegiandien/marketing-cap-da-ta.vue"
 import test1 from "../components/thiet-kegiandien/telesales-lien-he-khach-hang.vue"
 import test2 from "../components/thiet-kegiandien/admin-saleadmin.vue"
 import AppointmentPage from "../components/thiet-kegiandien/AppointmentsPage.vue";
+import AppointmentsPage from "../components/thiet-kegiandien/AppointmentsPage.vue";
 const routes = [
     {
         path: "/-thg/nhap-lieu",
@@ -175,7 +175,7 @@ const routes = [
     },
     {
         path: '/giao-dien',
-        component: AppointmentsPage,
+        component: AppointmentPage,
         meta: {requiresAuth: false, loginFrom: "admin", enableTailwind: true},
     },
     {
@@ -907,7 +907,7 @@ const routes = [
         children: [
             {
                 path: '',
-                name: 'AppointmentsPage',
+                name: 'AppointmentsPage1',
                 component: AppointmentsPage
             }
         ]
