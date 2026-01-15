@@ -17,8 +17,8 @@
       <router-view></router-view>
     </div>
 
-    <!-- FOOTER -->
-<!--    <FooterHome @scrollToTop="scrollToTop" />-->
+<!--     FOOTER -->
+    <FooterHome @scrollToTop="scrollToTop" />
     <FloatingContact
       align="left"
     ></FloatingContact>

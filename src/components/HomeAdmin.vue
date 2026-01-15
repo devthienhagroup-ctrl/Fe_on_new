@@ -103,7 +103,7 @@ const allMenuItems = [
   },
   {
     label: 'APPOINTMENT',
-    route: '/-thg/lich-hen',
+    route: '/-thg/quan-ly-lich-hen',
     icon: 'fa-solid fa-calendar-check text-primary fs-2',
     title: 'Lịch hẹn',
     desc: 'Quản lý lịch hẹn, phân công và theo dõi kết quả'

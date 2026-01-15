@@ -775,6 +775,7 @@ const moveToContacted = async () => {
   try {
     const targetId = selectedCustomer.value.id
     const payload = buildFilePayload()
+    const flag = selectedCustomer.value.status === 'THANH_CONG'
     await api.post('/customer-crm/telesales/journey-history/create', payload, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
@@ -794,6 +795,16 @@ const moveToContacted = async () => {
     } else {
       resetFileForm([])
     }
+
+    // ===== LƯU LOCAL STORAGE + CHUYỂN TRANG =====
+    if (flag) {
+      localStorage.setItem('flagDatLich', 'true')
+      localStorage.setItem('customerPhone', selectedCustomer.value.phone)
+
+      // chuyển qua trang đặt lịch
+      window.location.href = '/-thg/quan-ly-lich-hen'
+    }
+
 
     // reload thống kê
     await refreshData()

@@ -1,57 +1,54 @@
 diff --git a/src/components/thiet-kegiandien/AppointmentsPage.vue b/src/components/thiet-kegiandien/AppointmentsPage.vue
-index 5b21cfe23246e485ff2a264e5e4c83506ae29cf2..63934b90386246bbaf0926aadf531f93efd6c973 100644
+index d476074c58483b05380f4bf1bd82fae5fadbaff8..4bc5b0471886a54472415d383be18067fbe76cb9 100644
 --- a/src/components/thiet-kegiandien/AppointmentsPage.vue
 +++ b/src/components/thiet-kegiandien/AppointmentsPage.vue
-@@ -55,60 +55,68 @@ function getTodayISO() {
- }
-
- const currentUser = { name: 'Lê Hiếu' }
-
- const STAFF_BY_BRANCH = {
-   CN_Q1: ['Lê Hiếu', 'Nguyễn Văn A', 'Trần Thị B'],
-   CN_TD: ['Phạm Văn C', 'Trần Thị B'],
-   CN_BD: ['Nguyễn Văn A', 'Phạm Văn C'],
- }
- const CONSULTANTS = ['Tư vấn 1', 'Tư vấn 2', 'Nguyễn Văn A', 'Trần Thị B', 'Lê Hiếu']
-
- const STATUS = {
-   WAITING: { label: 'Chờ xác nhận', cls: 'st-wait', dot: '#fbbf24' },
-   UP: { label: 'Đã lên', cls: 'st-up', dot: '#22c55e' },
-   NOT_UP: { label: 'Chưa lên', cls: 'st-not', dot: '#fa709a' },
-   POSTPONED: { label: 'Tạm hoãn', cls: 'st-post', dot: '#4facfe' },
-   CANCELLED: { label: 'Huỷ', cls: 'st-cancel', dot: '#ff5858' },
- }
-
- const CONSULT_STATUS = {
+@@ -75,51 +75,70 @@ const CONSULT_STATUS = {
    SUCCESS: { label: 'Thành công', cls: 'cs-ok', icon: 'fa-circle-check' },
    FAIL: { label: 'Thất bại', cls: 'cs-fail', icon: 'fa-circle-xmark' },
    CARE: { label: 'Chăm sóc', cls: 'cs-care', icon: 'fa-hand-holding-heart' },
  }
 
-+const APPOINTMENT_ACTION = {
-+  CREATE: { label: 'Tạo mới', cls: 'act-create' },
-+  EDIT: { label: 'Chỉnh sửa', cls: 'act-edit' },
-+  STATUS: { label: 'Đổi trạng thái', cls: 'act-status' },
-+  RESCHEDULE: { label: 'Dời lịch', cls: 'act-reschedule' },
-+  NOTE: { label: 'Ghi chú', cls: 'act-note' },
-+  DELETE: { label: 'Xoá lịch', cls: 'act-delete' },
-+}
-+
+ const APPOINTMENT_ACTION = {
+   CREATE: { label: 'Tạo mới', cls: 'act-create' },
+   EDIT: { label: 'Chỉnh sửa', cls: 'act-edit' },
+   STATUS: { label: 'Đổi trạng thái', cls: 'act-status' },
+   RESCHEDULE: { label: 'Dời lịch', cls: 'act-reschedule' },
+   NOTE: { label: 'Ghi chú', cls: 'act-note' },
+   DELETE: { label: 'Xoá lịch', cls: 'act-delete' },
+ }
+
  const CUSTOMER_TYPE = {
-   OWNER: { label: 'Chính chủ', cls: 'ct-owner' },
-   BROKER: { label: 'Môi giới', cls: 'ct-broker' },
-   RELATIVE: { label: 'Người thân', cls: 'ct-relative' },
+   CHINH_CHU: { label: 'Chính chủ', cls: 'ct-owner' },
+   MOI_GIOI: { label: 'Môi giới', cls: 'ct-broker' },
+   NGUOI_THAN: { label: 'Người thân', cls: 'ct-relative' },
  }
 
  const RATING = {
--  POTENTIAL: { label: 'Tiềm năng', cls: 'rt-pot' },
--  NOT_POTENTIAL: { label: 'Không tiềm năng', cls: 'rt-npot' },
--  CARE: { label: 'Chăm sóc', cls: 'rt-care' },
-+  BAN_NHANH_30N: { label: 'Bán nhanh 30 ngày', cls: 'rt-bn30' },
-+  BAN_GP: { label: 'Bán giải pháp', cls: 'rt-bgp' },
+   BAN_NHANH_30N: { label: 'Bán nhanh 30 ngày', cls: 'rt-bn30' },
+   BAN_GP: { label: 'Bán giải pháp', cls: 'rt-bgp' },
  }
 
- const TIME_SLOTS = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00']
+-const TIME_SLOTS = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00']
++const DAY_START_HOUR = 8
++const DAY_END_HOUR = 17
++const TIME_SLOTS = Array.from({ length: DAY_END_HOUR - DAY_START_HOUR + 1 }, (_, i) => `${pad2(DAY_START_HOUR + i)}:00`)
++
++function timeToMinutes(time) {
++  const [h, m] = String(time || '').split(':')
++  return Number(h) * 60 + Number(m)
++}
++
++function buildDaySlotTimes(list) {
++  const times = new Set(TIME_SLOTS)
++  list.forEach((a) => {
++    if (!a?.time) return
++    const minutes = timeToMinutes(a.time)
++    if (Number.isNaN(minutes)) return
++    if (minutes < DAY_START_HOUR * 60 || minutes > DAY_END_HOUR * 60) return
++    times.add(a.time)
++  })
++  return Array.from(times).sort((a, b) => timeToMinutes(a) - timeToMinutes(b))
++}
 
  function formatVNDate(yyyyMMdd) {
    const [y, m, d] = yyyyMMdd.split('-')
@@ -74,464 +71,71 @@ index 5b21cfe23246e485ff2a264e5e4c83506ae29cf2..63934b90386246bbaf0926aadf531f93
    e.setDate(e.getDate() + 7)
    return e
  }
-@@ -172,51 +180,51 @@ const selectedAppointment = ref(null)
-
- // ===== Create form =====
- const createForm = reactive({
-   customerSearch: '',
-   selectedCustomer: null,
-   branch: null,
-   date: '',
-   time: '',
-   staff: '',
-   consultant: 'Tư vấn 1',
-   note: '',
-   rating: 'BAN_NHANH_30N'
- })
-
- const editForm = reactive({
-   customer: '',
-   phone: '',
-   branch: 'CN_Q1',
-   date: '',
-   time: '',
-   staff: '',
-   consultant: '',
-   status: 'UP',
-   consultStatus: 'CARE',
-   customerType: 'OWNER',
--  rating: 'CARE',
-+  rating: 'BAN_NHANH_30N',
-   note: '',
- })
-
- function makeHistory(actor, action, desc) {
-   return { ts: nowISO(), actor, action, desc }
+ function endOfWeekInclusive(dateObj) {
+   const s = startOfWeek(dateObj)
+   const e = new Date(s)
+@@ -459,58 +478,62 @@ function handleMonthNav(dir) {
+   const y = calendarMonth.value.getFullYear()
+   const m = calendarMonth.value.getMonth()
+   const next = new Date(y, m + dir, 1)
+   calendarMonth.value = next
+   const nextISO = `${next.getFullYear()}-${pad2(next.getMonth() + 1)}-01`
+   selectedDateISO.value = nextISO
+   generateCalendar()
+   updateDaySchedule()
+   updateFilterOutputs()
+   updateGlobalStats()
  }
 
-
-
- /**
-  * Flags for marker rule:
-  * - createdByMe => ORANGE marker
-  * - inCharge => BLUE marker
-  */
- const appointments = ref([])
-
- function getRowMarker(appt) {
-   if (appt?.createdByMe) return { color: '#f97316', glow: 'rgba(253, 230, 138, 0.75)' } // ORANGE
-   if (appt?.inCharge) return { color: '#2563eb', glow: 'rgba(191, 219, 254, 0.78)' } // BLUE
-   return { color: '#667eea', glow: 'rgba(224, 231, 255, 0.7)' }
+ // ===== Day schedule (ăn theo selectedDate + filter range disable) =====
+ function apptsForSelectedDay() {
+   // Day Schedule cũng phải nằm trong range
+   const inRange = isCellEnabled(selectedDateISO.value)
+   if (!inRange) return []
+   return appointments.value.filter((a) => a.date === selectedDateISO.value).sort((a, b) => a.time.localeCompare(b.time))
  }
 
- function monthTitle(d) {
-   return `Tháng ${d.getMonth() + 1}, ${d.getFullYear()}`
- }
-@@ -724,83 +732,84 @@ async function openCreateModal() {
-   createForm.note = ''
+ function updateDaySchedule() {
+   dayTitle.value = `Day Schedule • ${formatVNDate(selectedDateISO.value)}`
+   const list = apptsForSelectedDay()
+   statSelectedDay.value = list.length
 
-   // ✅ CHI NHÁNH ĐẦU TIÊN
-   if (!createForm.branch && BRANCHES.value.length > 0) {
-     createForm.branch = BRANCHES.value[0].key
-   }
-
-   // ✅ LOAD NV TƯ VẤN THEO CHI NHÁNH
-   await fetchCreateConsultantsByBranch(createForm.branch)
-
-   isCreateModalOpen.value = true
- }
-
- function closeCreateModal() {
-   isCreateModalOpen.value = false
-   createForm.selectedCustomer = null
-   createForm.customerSearch = ''
- }
-
- // ===== History =====
- function renderHistory(appt) {
-   const history = (appt.history || []).slice(0, 120)
-   historyItems.value = history.map((h) => {
-     const dt = new Date(h.ts)
-     const stamp = `${pad2(dt.getHours())}:${pad2(dt.getMinutes())} • ${pad2(dt.getDate())}/${pad2(dt.getMonth() + 1)}/${dt.getFullYear()}`
--    return { ...h, stamp }
-+    const actionInfo = getActionInfo(h.action)
-+    return { ...h, stamp, actionLabel: actionInfo.label, actionClass: actionInfo.cls }
++  const slotTimes = buildDaySlotTimes(list)
+   const byTime = new Map()
+-  TIME_SLOTS.forEach((t) => byTime.set(t, []))
++  slotTimes.forEach((t) => byTime.set(t, []))
+   list.forEach((a) => {
++    const minutes = timeToMinutes(a.time)
++    if (Number.isNaN(minutes)) return
++    if (minutes < DAY_START_HOUR * 60 || minutes > DAY_END_HOUR * 60) return
+     if (!byTime.has(a.time)) byTime.set(a.time, [])
+     byTime.get(a.time).push(a)
    })
+
+-  daySlots.value = TIME_SLOTS.map((t) => ({ time: t, appointments: byTime.get(t) || [] }))
++  daySlots.value = slotTimes.map((t) => ({ time: t, appointments: byTime.get(t) || [] }))
  }
 
- // ===== Detail modal =====
- function openDetailModal(appt) {
-   selectedAppointment.value = appt
-   renderHistory(appt)
-   isDetailModalOpen.value = true
+ // ===== Drag/drop =====
+ function handleDragStart(e, appt) {
+   if (appt.status === 'CANCELLED') return
+   e.dataTransfer.setData('text/plain', String(appt.id))
+   e.dataTransfer.effectAllowed = 'move'
  }
- function closeDetailModal() {
-   isDetailModalOpen.value = false
-   selectedAppointment.value = null
+ function handleDragOver(e, time) {
+   e.preventDefault()
+   dragOverSlot.value = time
  }
+ function handleDragLeave(time) {
+   if (dragOverSlot.value === time) dragOverSlot.value = null
+ }
+ function handleDrop(e, targetTime) {
+   e.preventDefault()
+   dragOverSlot.value = null
 
- // ===== Edit modal =====
- function openEditModal(id) {
+   const id = Number(e.dataTransfer.getData('text/plain'))
+   if (!id || !targetTime) return
+
    const appt = appointments.value.find((x) => x.id === id)
    if (!appt) return
 
-   editId.value = id
-
-   editForm.customer = appt.customer || ''
-   editForm.phone = appt.phone || ''
-   editForm.branch = appt.branch || 'CN_Q1'
-   editForm.date = appt.date
-   editForm.time = appt.time
-   editForm.staff = appt.staff
-   editForm.consultant = appt.consultant
-   editForm.status = appt.status
-   editForm.consultStatus = appt.consultStatus || 'CARE'
-   editForm.customerType = appt.customerType || 'OWNER'
--  editForm.rating = appt.rating || 'CARE'
-+  editForm.rating = appt.rating || 'BAN_NHANH_30N'
-   editForm.note = appt.note || ''
-
-   renderHistory(appt)
-   isModalOpen.value = true
- }
- function closeEditModal() {
-   isModalOpen.value = false
-   editId.value = null
- }
- function saveEditModal() {
-   if (editId.value == null) return
-   const idx = appointments.value.findIndex((x) => x.id === editId.value)
-   if (idx < 0) return
-
-   const current = appointments.value[idx]
-   const next = {
-     ...current,
-     customer: editForm.customer.trim() || current.customer,
-     phone: editForm.phone.trim(),
-     branch: editForm.branch,
-     date: editForm.date,
-     time: editForm.time,
-     staff: editForm.staff,
-     consultant: editForm.consultant,
-     status: editForm.status,
-@@ -1267,50 +1276,53 @@ function initCharts() {
- // ===== Action menu =====
- function toggleActionMenu(id) {
-   openActionMenuId.value = openActionMenuId.value === id ? null : id
- }
- function handleAction(type, appt, event) {
-   openActionMenuId.value = null
-   if (type === 'edit') openEditModal(appt.id)
-   else if (type === 'status') openStatusPopover(event.currentTarget, appt.id)
-   else if (type === 'delete') {
-     appointments.value = appointments.value.filter((x) => x.id !== appt.id)
-     generateCalendar()
-     updateDaySchedule()
-     updateFilterOutputs()
-     updateGlobalStats()
-     showToast('Đã xoá lịch hẹn', appt.customer || 'Đã xoá.', 'success')
-   } else if (type === 'detail') openDetailModal(appt)
- }
-
- // ===== Helpers =====
- function getStatusInfo(status) {
-   return STATUS[status]
- }
- function getConsultInfo(status) {
-   return CONSULT_STATUS[status] || CONSULT_STATUS.CARE
- }
-+function getActionInfo(action) {
-+  return APPOINTMENT_ACTION[action] || { label: action || 'Khác', cls: 'act-other' }
-+}
- function getCustomerTypeInfo(value) {
-   return CUSTOMER_TYPE[value] || Object.values(CUSTOMER_TYPE)[0]
- }
- function getRatingInfo(value) {
-   return RATING[value] || Object.values(RATING)[0]
- }
-
- // ===== Watchers =====
- watch(
-     () => [activeRange.value, activeStatus.value],
-     () => {
-       // đổi range:
-       // - today/week: khoá month nav, giữ selectedDate nằm trong range
-       if (activeRange.value === 'month') {
-         const d = new Date(`${selectedDateISO.value}T00:00:00`)
-         calendarMonth.value = new Date(d.getFullYear(), d.getMonth(), 1)
-       } else {
-         // đảm bảo selected date enable
-         if (!isCellEnabled(selectedDateISO.value)) {
-           // kéo về start tuần / today
-           if (activeRange.value === 'today') selectedDateISO.value = getTodayISO()
-           if (activeRange.value === 'week') selectedDateISO.value = toISODate(startOfWeek(new Date(`${selectedDateISO.value}T00:00:00`)))
-         }
-       }
-
-@@ -2128,80 +2140,82 @@ onBeforeUnmount(() => {
-                 </select>
-               </div>
-
-               <div class="form-group">
-                 <label class="form-label">
-                   <span class="lbl">
-                     <span class="lbl-ico gi11"><i class="fa-solid fa-tag"></i></span>
-                     Phân loại
-                   </span>
-                 </label>
-                 <select class="form-select" v-model="editForm.customerType">
-                   <option value="OWNER">Chính chủ</option>
-                   <option value="BROKER">Môi giới</option>
-                   <option value="RELATIVE">Người thân</option>
-                 </select>
-               </div>
-
-               <div class="form-group">
-                 <label class="form-label">
-                   <span class="lbl">
-                     <span class="lbl-ico gi12"><i class="fa-solid fa-star"></i></span>
-                     Đánh giá
-                   </span>
-                 </label>
-                 <select class="form-select" v-model="editForm.rating">
--                  <option value="POTENTIAL">Tiềm năng</option>
--                  <option value="NOT_POTENTIAL">Không tiềm năng</option>
--                  <option value="CARE">Chăm sóc</option>
-+                  <option value="BAN_NHANH_30N">Bán nhanh 30 ngày</option>
-+                  <option value="BAN_GP">Bán giải pháp</option>
-                 </select>
-               </div>
-             </div>
-
-             <div class="form-group">
-               <label class="form-label">
-                 <span class="lbl">
-                   <span class="lbl-ico gi7"><i class="fa-regular fa-note-sticky"></i></span>
-                   Ghi chú
-                 </span>
-               </label>
-               <textarea class="form-textarea" v-model="editForm.note" placeholder="Cập nhật ghi chú..."></textarea>
-             </div>
-           </div>
-
-           <div class="modal-panel">
-             <h5>
-               <span class="sec-ico si4"><i class="fa-solid fa-clock-rotate-left"></i></span>
-               Lịch sử thay đổi
-             </h5>
-
-             <div class="history">
-               <div v-if="!historyItems.length" class="muted-empty">Chưa có lịch sử.</div>
-               <div v-else>
-                 <div v-for="item in historyItems" :key="item.ts" class="h-item">
-                   <div class="h-top">
--                    <span>{{ item.actor }} • {{ item.action }}</span>
-+                    <span>
-+                      {{ item.actor }} •
-+                      <span class="action-pill" :class="item.actionClass">{{ item.actionLabel }}</span>
-+                    </span>
-                     <span>{{ item.stamp }}</span>
-                   </div>
-                   <div class="h-desc">{{ item.desc || '' }}</div>
-                 </div>
-               </div>
-             </div>
-           </div>
-         </div>
-
-         <div class="modal-foot">
-           <button class="btn btn-secondary" type="button" @click="closeEditModal">Đóng</button>
-           <button class="btn btn-primary" type="button" @click="saveEditModal">
-             <i class="fa-solid fa-floppy-disk"></i>Lưu thay đổi
-           </button>
-         </div>
-       </div>
-     </div>
-
-     <!-- Modal chi tiết (màu mới đẹp hơn + icon nhỏ chung label) -->
-     <div v-if="isDetailModalOpen && selectedAppointment" class="backdrop" @click.self="closeDetailModal">
-       <div class="editor-modal detail" role="dialog" aria-modal="true">
-         <div class="modal-head">
-           <div class="mh-left">
-             <div class="mh-ico"><i class="fa-regular fa-eye"></i></div>
-             <div>
-@@ -2315,51 +2329,54 @@ onBeforeUnmount(() => {
-                 <div class="d-ico di10"><i class="fa-solid fa-shield-halved"></i></div>
-                 <div class="d-main">
-                   <div class="d-label">Người tạo</div>
-                   <div class="d-value">{{ selectedAppointment.creator }}</div>
-                 </div>
-               </div>
-             </div>
-
-             <div class="note-box">
-               <div class="note-cap"><i class="fa-regular fa-note-sticky"></i> Ghi chú</div>
-               <div class="note-body">{{ selectedAppointment.note || 'Không có ghi chú' }}</div>
-             </div>
-           </div>
-
-           <div class="modal-panel">
-             <h5>
-               <span class="sec-ico si4"><i class="fa-solid fa-clock-rotate-left"></i></span>
-               Lịch sử thay đổi
-             </h5>
-
-             <div class="history">
-               <div v-if="!historyItems.length" class="muted-empty">Chưa có lịch sử.</div>
-               <div v-else>
-                 <div v-for="item in historyItems" :key="item.ts" class="h-item">
-                   <div class="h-top">
--                    <span>{{ item.actor }} • {{ item.action }}</span>
-+                    <span>
-+                      {{ item.actor }} •
-+                      <span class="action-pill" :class="item.actionClass">{{ item.actionLabel }}</span>
-+                    </span>
-                     <span>{{ item.stamp }}</span>
-                   </div>
-                   <div class="h-desc">{{ item.desc || '' }}</div>
-                 </div>
-               </div>
-             </div>
-           </div>
-         </div>
-
-         <div class="modal-foot">
-           <button class="btn btn-secondary" type="button" @click="closeDetailModal">Đóng</button>
-           <button class="btn btn-primary" type="button" @click="openEditModal(selectedAppointment.id)">
-             <i class="fa-regular fa-pen-to-square"></i>Chỉnh sửa
-           </button>
-         </div>
-       </div>
-     </div>
-   </div>
- </template>
-
- <style scoped>
- @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
- /* ===== Base ===== */
- .appointments-page{
-@@ -2998,53 +3015,52 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
-   left:50%;
-   top:50%;
-   width:20px;
-   height:20px;
-   transform: translate(-50%, -50%);
-   border-radius:999px;
-   background: var(--mkGlow, rgba(79,172,254,0.28));
- }
-
- /* Chips / consult */
- .chip{
-   display:inline-flex;
-   align-items:center;
-   gap:8px;
-   padding:6px 10px;
-   border-radius:999px;
-   font-weight:900;
-   font-size:12px;
-   border:1px solid rgba(20,22,30,0.06);
-   white-space:nowrap;
- }
- .ct-owner{ background: rgba(148,163,184,0.16); color:#334155; }
- .ct-broker{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
- .ct-relative{ background: rgba(250,112,154,0.16); color:#a43e73; }
-
--.rt-pot{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
--.rt-npot{ background: rgba(255,88,88,0.18); color:#b83b2c; }
--.rt-care{ background: rgba(79,172,254,0.18); color:#0b6ea8; }
-+.rt-bn30{ background: rgba(34,197,94,0.18); color:#166534; }
-+.rt-bgp{ background: rgba(147,51,234,0.18); color:#6b21a8; }
-
- .consult-badge{
-   padding:7px 12px;
-   border-radius:999px;
-   font-size:12px;
-   font-weight:900;
-   display:inline-flex;
-   align-items:center;
-   gap:8px;
-   border:1px solid rgba(20,22,30,0.06);
-   white-space:nowrap;
- }
- .consult-badge i{ font-size:11px; opacity:0.9; }
- .cs-ok{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
- .cs-fail{ background: rgba(255,88,88,0.18); color:#b83b2c; }
- .cs-care{ background: rgba(79,172,254,0.18); color:#0b6ea8; }
-
- /* Action menu */
- .action-dropdown{ position:relative; }
- .action-btn{
-   width:40px; height:40px;
-   border-radius:14px;
-   border:1px solid rgba(20,22,30,0.10);
-   background: rgba(255,255,255,0.92);
-   display:flex; align-items:center; justify-content:center;
-@@ -3239,50 +3255,67 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
-   flex-direction:column;
-   gap:8px;
-   max-height: 420px;
-   overflow:auto;
-   padding-right:4px;
- }
- .h-item{
-   border:1px solid rgba(20,22,30,0.10);
-   border-radius:16px;
-   padding:10px;
-   background: rgba(255,255,255,0.92);
-   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
- }
- .h-top{
-   display:flex;
-   justify-content:space-between;
-   gap:10px;
-   flex-wrap:wrap;
-   font-weight:900;
-   font-size:12px;
-   color:#334155;
-   margin-bottom:4px;
- }
- .h-desc{ font-size:12.5px; color:#5b6576; font-weight:650; line-height:1.4; }
- .muted-empty{ font-weight:800; color:#93a2b8; font-size:12.5px; }
-+.action-pill{
-+  display:inline-flex;
-+  align-items:center;
-+  padding:2px 8px;
-+  border-radius:999px;
-+  font-weight:800;
-+  font-size:11px;
-+  text-transform:uppercase;
-+  letter-spacing:0.02em;
-+}
-+.act-create{ background: rgba(67,233,123,0.2); color:#0b7f6a; }
-+.act-edit{ background: rgba(102,126,234,0.18); color:#2f3aa8; }
-+.act-status{ background: rgba(251,191,36,0.2); color:#a16207; }
-+.act-reschedule{ background: rgba(79,172,254,0.2); color:#0b6ea8; }
-+.act-note{ background: rgba(236,72,153,0.18); color:#9f1239; }
-+.act-delete{ background: rgba(255,88,88,0.2); color:#b83b2c; }
-+.act-other{ background: rgba(148,163,184,0.2); color:#334155; }
-
- .modal-foot{
-   padding:14px 16px;
-   border-top:1px solid rgba(20,22,30,0.10);
-   display:flex;
-   gap:10px;
-   justify-content:flex-end;
-   background: rgba(255,255,255,0.72);
-   backdrop-filter: blur(10px);
- }
-
- /* Section title + gradient icons */
- .section-title{
-   display:flex;
-   align-items:center;
-   gap:10px;
-   margin:12px 0 10px;
-   font-weight:950;
-   color:#0b1220;
-   font-size:13px;
- }
- .sec-ico{
-   width:22px; height:22px;
-   border-radius:10px;
-   display:flex; align-items:center; justify-content:center;

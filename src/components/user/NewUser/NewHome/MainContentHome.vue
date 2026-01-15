@@ -108,7 +108,6 @@
   <!-- SERVICES SECTION -->
   <section id="services" class="py-24 bg-[#0B1120] relative">
     <div class="circle-decor">
-      <img src="/imgs/circle.png" alt="Circle Decor">
     </div>
     <div class="container mx-auto px-6">
       <div class="text-center mb-16" data-aos="fade-up">

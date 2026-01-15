@@ -37,6 +37,12 @@ const statusPopover = reactive({
   options: [],
   handler: null,
 })
+function getActionInfo(action) {
+  return APPOINTMENT_ACTION[action] || {
+    label: action,
+    cls: 'act-other',
+  }
+}
 
 const registerWindowListener = (event, handler, options) => {
   window.addEventListener(event, handler, options)
@@ -55,6 +61,7 @@ function getTodayISO() {
 }
 
 const currentUser = { name: 'Lê Hiếu' }
+
 
 const STAFF_BY_BRANCH = {
   CN_Q1: ['Lê Hiếu', 'Nguyễn Văn A', 'Trần Thị B'],
@@ -76,6 +83,23 @@ const CONSULT_STATUS = {
   FAIL: { label: 'Thất bại', cls: 'cs-fail', icon: 'fa-circle-xmark' },
   CARE: { label: 'Chăm sóc', cls: 'cs-care', icon: 'fa-hand-holding-heart' },
 }
+function getConsultInfo(value) {
+  // ✅ null / undefined
+  if (!value) {
+    return {
+      label: 'Chưa có',
+      cls: 'cs-none',
+      icon: 'fa-circle-minus',
+    }
+  }
+
+  // ✅ value không nằm trong enum
+  return CONSULT_STATUS[value] || {
+    label: value,
+    cls: 'cs-unknown',
+    icon: 'fa-circle-question',
+  }
+}
 
 const APPOINTMENT_ACTION = {
   CREATE: { label: 'Tạo mới', cls: 'act-create' },
@@ -87,17 +111,37 @@ const APPOINTMENT_ACTION = {
 }
 
 const CUSTOMER_TYPE = {
-  CHINH_CHU: { label: 'Chính chủ', cls: 'ct-owner' },
-  MOI_GIOI: { label: 'Môi giới', cls: 'ct-broker' },
+  CHINH_CHU:  { label: 'Chính chủ', cls: 'ct-owner' },
+  MOI_GIOI:   { label: 'Môi giới', cls: 'ct-broker' },
   NGUOI_THAN: { label: 'Người thân', cls: 'ct-relative' },
 }
+
 
 const RATING = {
   BAN_NHANH_30N: { label: 'Bán nhanh 30 ngày', cls: 'rt-bn30' },
   BAN_GP: { label: 'Bán giải pháp', cls: 'rt-bgp' },
 }
 
-const TIME_SLOTS = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00']
+const DAY_START_HOUR = 8
+const DAY_END_HOUR = 17
+const TIME_SLOTS = Array.from({ length: DAY_END_HOUR - DAY_START_HOUR + 1 }, (_, i) => `${pad2(DAY_START_HOUR + i)}:00`)
+
+function timeToMinutes(time) {
+  const [h, m] = String(time || '').split(':')
+  return Number(h) * 60 + Number(m)
+}
+
+function buildDaySlotTimes(list) {
+  const times = new Set(TIME_SLOTS)
+  list.forEach((a) => {
+    if (!a?.time) return
+    const minutes = timeToMinutes(a.time)
+    if (Number.isNaN(minutes)) return
+    if (minutes < DAY_START_HOUR * 60 || minutes > DAY_END_HOUR * 60) return
+    times.add(a.time)
+  })
+  return Array.from(times).sort((a, b) => timeToMinutes(a) - timeToMinutes(b))
+}
 
 function formatVNDate(yyyyMMdd) {
   const [y, m, d] = yyyyMMdd.split('-')
@@ -410,6 +454,55 @@ function mapAppointmentFromApi(dto) {
     history: dto.history || [],
   }
 }
+const detailLoading = ref(false)
+const detailError = ref('')
+function mapAppointmentDetailFromApi(dto) {
+  return {
+    id: dto.appointmentId,
+
+    customer: dto.customer?.name,
+    phone: dto.customer?.phone,
+    address: dto.customer?.address,
+    customerNote: dto.customer?.customerNote,
+    customerType: dto.customer?.customerType,
+    files: dto.customer?.files || [],
+
+    date: dto.appointmentDate,
+    time: dto.appointmentTime,
+    status: dto.status,
+    consultStatus: dto.consultStatus,
+    rating: dto.rating,
+    note: dto.note,
+    branch: dto.branch,
+
+    consultant: dto.consultant?.name,
+    creator: dto.creator?.name,
+
+    history: (dto.histories || []).map(h => ({
+      ts: h.createdAt,
+      actor: h.actorName,
+      action: h.action,
+      desc: h.note,
+    })),
+  }
+}
+async function openDetailModal(appt) {
+  isDetailModalOpen.value = true
+  selectedAppointment.value = null
+  detailLoading.value = true
+  detailError.value = ''
+
+  try {
+    const res = await api.get(`/customer-crm/admin/lich-hen/${appt.id}`)
+    const mapped = mapAppointmentDetailFromApi(res.data)
+    selectedAppointment.value = mapped
+    renderHistory(mapped)
+  } catch (e) {
+    detailError.value = 'Không thể tải chi tiết lịch hẹn'
+  } finally {
+    detailLoading.value = false
+  }
+}
 
 async function fetchAppointments() {
   if (appointmentsLoading.value) return
@@ -481,14 +574,18 @@ function updateDaySchedule() {
   const list = apptsForSelectedDay()
   statSelectedDay.value = list.length
 
+  const slotTimes = buildDaySlotTimes(list)
   const byTime = new Map()
-  TIME_SLOTS.forEach((t) => byTime.set(t, []))
+  slotTimes.forEach((t) => byTime.set(t, []))
   list.forEach((a) => {
+    const minutes = timeToMinutes(a.time)
+    if (Number.isNaN(minutes)) return
+    if (minutes < DAY_START_HOUR * 60 || minutes > DAY_END_HOUR * 60) return
     if (!byTime.has(a.time)) byTime.set(a.time, [])
     byTime.get(a.time).push(a)
   })
 
-  daySlots.value = TIME_SLOTS.map((t) => ({ time: t, appointments: byTime.get(t) || [] }))
+  daySlots.value = slotTimes.map((t) => ({ time: t, appointments: byTime.get(t) || [] }))
 }
 
 // ===== Drag/drop =====
@@ -760,11 +857,6 @@ function renderHistory(appt) {
 }
 
 // ===== Detail modal =====
-function openDetailModal(appt) {
-  selectedAppointment.value = appt
-  renderHistory(appt)
-  isDetailModalOpen.value = true
-}
 function closeDetailModal() {
   isDetailModalOpen.value = false
   selectedAppointment.value = null
@@ -1295,12 +1387,6 @@ function handleAction(type, appt, event) {
 function getStatusInfo(status) {
   return STATUS[status]
 }
-function getConsultInfo(status) {
-  return CONSULT_STATUS[status] || CONSULT_STATUS.CARE
-}
-function getActionInfo(action) {
-  return APPOINTMENT_ACTION[action] || { label: action || 'Khác', cls: 'act-other' }
-}
 function getCustomerTypeInfo(value) {
   return CUSTOMER_TYPE[value] || Object.values(CUSTOMER_TYPE)[0]
 }
@@ -1351,11 +1437,48 @@ watch(
       fetchAppointments()
     },
 )
+async function autoPickCustomerByPhone(phone) {
+  // gán vào input tìm kiếm
+  createForm.customerSearch = phone
+
+  // gọi search
+  await fetchCustomerSearch(phone)
+
+  // đợi DOM + data
+  await nextTick()
+
+  // auto chọn khách đầu tiên (SĐT unique)
+  if (customerSearchResults.value.length > 0) {
+    selectCustomer(customerSearchResults.value[0])
+  }
+
+
+}
 
 // ===== Mount =====
 onMounted(async () => {
   if (!rootRef.value) return
+// ===== AUTO MỞ MODAL TẠO LỊCH TỪ TELESALE =====
 
+  const flagDatLich = localStorage.getItem('flagDatLich')
+  const customerPhone = localStorage.getItem('customerPhone')
+  try {
+    await fetchBranchOptions()
+  } catch (e) {
+    console.error('Fetch branch failed', e)
+  }
+  if (flagDatLich === 'true' && customerPhone) {
+    // mở modal tạo lịch
+    await openCreateModal()
+    await nextTick()
+
+    // auto tìm + chọn khách theo SĐT
+    await autoPickCustomerByPhone(customerPhone)
+
+    // xoá localStorage để tránh lặp
+    localStorage.removeItem('flagDatLich')
+    localStorage.removeItem('customerPhone')
+  }
   // ===== Init date =====
   selectedDateISO.value = getTodayISO()
   calendarMonth.value = new Date() // tháng hiện tại
@@ -1368,11 +1491,7 @@ onMounted(async () => {
   initCharts()
 
   // ===== Fetch branch options (ONLY ONCE) =====
-  try {
-    await fetchBranchOptions()
-  } catch (e) {
-    console.error('Fetch branch failed', e)
-  }
+
 
   // ===== Ready toast =====
   showToast('Sẵn sàng', 'Hệ thống quản lý lịch hẹn đã sẵn sàng.', 'success')
@@ -1390,6 +1509,9 @@ onMounted(async () => {
     await nextTick()
     initCharts()
   })
+
+
+
 })
 
 
@@ -1643,7 +1765,7 @@ onBeforeUnmount(() => {
                           </span>
                         </div>
 
-                        <div class="appt-sub">
+                        <div v-if="appt.consultStatus" class="appt-sub">
                           KQ tư vấn: <b>{{ getConsultInfo(appt.consultStatus).label }}</b>
                         </div>
                       </div>
@@ -2023,12 +2145,6 @@ onBeforeUnmount(() => {
               <i class="fa-solid fa-gear"></i>
               <span>Nội dung chỉnh sửa</span>
             </div>
-
-            <div class="section-title">
-              <span class="sec-ico si1"><i class="fa-solid fa-user"></i></span>
-              <span>Khách hàng</span>
-            </div>
-
             <div class="form-grid">
               <div class="form-group">
                 <label class="form-label">
@@ -2049,11 +2165,6 @@ onBeforeUnmount(() => {
                 </label>
                 <input type="text" class="form-input" v-model="editForm.phone" />
               </div>
-            </div>
-
-            <div class="section-title">
-              <span class="sec-ico si2"><i class="fa-solid fa-building"></i></span>
-              <span>Chi nhánh & nhân sự</span>
             </div>
 
             <div class="form-grid">
@@ -2108,10 +2219,6 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <div class="section-title">
-              <span class="sec-ico si3"><i class="fa-solid fa-tags"></i></span>
-              <span>Trạng thái & đánh giá</span>
-            </div>
 
             <div class="form-grid">
               <div class="form-group">
@@ -2284,8 +2391,8 @@ onBeforeUnmount(() => {
                 <div class="d-main">
                   <div class="d-label">Tình trạng</div>
                   <div class="d-value">
-                    <span class="status-badge" :class="getStatusInfo(selectedAppointment.status).cls">
-                      {{ getStatusInfo(selectedAppointment.status).label }}
+                    <span class="status-badge" :class="STATUS[selectedAppointment.status].cls">
+                      {{ STATUS[selectedAppointment.status].label }}
                     </span>
                   </div>
                 </div>
@@ -2296,9 +2403,13 @@ onBeforeUnmount(() => {
                 <div class="d-main">
                   <div class="d-label">KQ tư vấn</div>
                   <div class="d-value">
-                    <span class="consult-badge" :class="getConsultInfo(selectedAppointment.consultStatus).cls">
-                      <i class="fa-solid" :class="getConsultInfo(selectedAppointment.consultStatus).icon"></i>
-                      {{ getConsultInfo(selectedAppointment.consultStatus).label }}
+                    <span
+                        v-if="appt && appt.consultStatus != null"
+                        class="consult-badge"
+                        :class="getConsultInfo(appt.consultStatus).cls"
+                    >
+                      <i class="fa-solid" :class="getConsultInfo(appt.consultStatus).icon"></i>
+                      {{ getConsultInfo(appt.consultStatus).label }}
                     </span>
                   </div>
                 </div>
@@ -2309,8 +2420,8 @@ onBeforeUnmount(() => {
                 <div class="d-main">
                   <div class="d-label">Phân loại</div>
                   <div class="d-value">
-                    <span class="chip" :class="getCustomerTypeInfo(selectedAppointment.customerType).cls">
-                      {{ getCustomerTypeInfo(selectedAppointment.customerType).label }}
+                    <span class="chip" :class="CUSTOMER_TYPE[selectedAppointment.customerType].cls">
+                      {{ CUSTOMER_TYPE[selectedAppointment.customerType].label }}
                     </span>
                   </div>
                 </div>
@@ -2319,10 +2430,10 @@ onBeforeUnmount(() => {
               <div class="d-item">
                 <div class="d-ico di9"><i class="fa-solid fa-star"></i></div>
                 <div class="d-main">
-                  <div class="d-label">Đánh giá</div>
+                  <div class="d-label">Loại dịch vụ</div>
                   <div class="d-value">
-                    <span class="chip" :class="getRatingInfo(selectedAppointment.rating).cls">
-                      {{ getRatingInfo(selectedAppointment.rating).label }}
+                    <span class="chip" :class="RATING[selectedAppointment.rating].cls">
+                      {{ RATING[selectedAppointment.rating].label }}
                     </span>
                   </div>
                 </div>
@@ -2356,7 +2467,9 @@ onBeforeUnmount(() => {
                   <div class="h-top">
                     <span>
                       {{ item.actor }} •
-                      <span class="action-pill" :class="item.actionClass">{{ item.actionLabel }}</span>
+                      <span class="action-pill" :class="getActionInfo(item.action).cls">
+                        {{ getActionInfo(item.action).label }}
+                      </span>
                     </span>
                     <span>{{ item.stamp }}</span>
                   </div>
@@ -3524,4 +3637,23 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
   .filters{ align-items:flex-start; }
   .search-bar{ width:100%; }
 }
+.action-pill.act-create {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #fff;
+}
+
+.action-pill.act-edit {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  color: #fff;
+}
+.consult-badge.cs-none {
+  background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+  color: #374151;
+}
+
+.consult-badge.cs-unknown {
+  background: linear-gradient(135deg, #facc15, #f97316);
+  color: #fff;
+}
+
 </style>
