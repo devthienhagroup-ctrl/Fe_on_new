@@ -64,7 +64,7 @@ const STAFF_BY_BRANCH = {
 const CONSULTANTS = ['Tư vấn 1', 'Tư vấn 2', 'Nguyễn Văn A', 'Trần Thị B', 'Lê Hiếu']
 
 const STATUS = {
-  WAITING: { label: 'Chờ xác nhận', cls: 'st-wait', dot: '#fbbf24' },
+  WAITING: { label: 'Chờ đến hẹn', cls: 'st-wait', dot: '#fbbf24' },
   UP: { label: 'Đã lên', cls: 'st-up', dot: '#22c55e' },
   NOT_UP: { label: 'Chưa lên', cls: 'st-not', dot: '#fa709a' },
   POSTPONED: { label: 'Tạm hoãn', cls: 'st-post', dot: '#4facfe' },
@@ -77,16 +77,24 @@ const CONSULT_STATUS = {
   CARE: { label: 'Chăm sóc', cls: 'cs-care', icon: 'fa-hand-holding-heart' },
 }
 
+const APPOINTMENT_ACTION = {
+  CREATE: { label: 'Tạo mới', cls: 'act-create' },
+  EDIT: { label: 'Chỉnh sửa', cls: 'act-edit' },
+  STATUS: { label: 'Đổi trạng thái', cls: 'act-status' },
+  RESCHEDULE: { label: 'Dời lịch', cls: 'act-reschedule' },
+  NOTE: { label: 'Ghi chú', cls: 'act-note' },
+  DELETE: { label: 'Xoá lịch', cls: 'act-delete' },
+}
+
 const CUSTOMER_TYPE = {
-  OWNER: { label: 'Chính chủ', cls: 'ct-owner' },
-  BROKER: { label: 'Môi giới', cls: 'ct-broker' },
-  RELATIVE: { label: 'Người thân', cls: 'ct-relative' },
+  CHINH_CHU: { label: 'Chính chủ', cls: 'ct-owner' },
+  MOI_GIOI: { label: 'Môi giới', cls: 'ct-broker' },
+  NGUOI_THAN: { label: 'Người thân', cls: 'ct-relative' },
 }
 
 const RATING = {
-  POTENTIAL: { label: 'Tiềm năng', cls: 'rt-pot' },
-  NOT_POTENTIAL: { label: 'Không tiềm năng', cls: 'rt-npot' },
-  CARE: { label: 'Chăm sóc', cls: 'rt-care' },
+  BAN_NHANH_30N: { label: 'Bán nhanh 30 ngày', cls: 'rt-bn30' },
+  BAN_GP: { label: 'Bán giải pháp', cls: 'rt-bgp' },
 }
 
 const TIME_SLOTS = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00']
@@ -194,7 +202,7 @@ const editForm = reactive({
   status: 'UP',
   consultStatus: 'CARE',
   customerType: 'OWNER',
-  rating: 'CARE',
+  rating: 'BAN_NHANH_30N',
   note: '',
 })
 
@@ -746,7 +754,8 @@ function renderHistory(appt) {
   historyItems.value = history.map((h) => {
     const dt = new Date(h.ts)
     const stamp = `${pad2(dt.getHours())}:${pad2(dt.getMinutes())} • ${pad2(dt.getDate())}/${pad2(dt.getMonth() + 1)}/${dt.getFullYear()}`
-    return { ...h, stamp }
+    const actionInfo = getActionInfo(h.action)
+    return { ...h, stamp, actionLabel: actionInfo.label, actionClass: actionInfo.cls }
   })
 }
 
@@ -778,7 +787,7 @@ function openEditModal(id) {
   editForm.status = appt.status
   editForm.consultStatus = appt.consultStatus || 'CARE'
   editForm.customerType = appt.customerType || 'OWNER'
-  editForm.rating = appt.rating || 'CARE'
+  editForm.rating = appt.rating || 'BAN_NHANH_30N'
   editForm.note = appt.note || ''
 
   renderHistory(appt)
@@ -1289,6 +1298,9 @@ function getStatusInfo(status) {
 function getConsultInfo(status) {
   return CONSULT_STATUS[status] || CONSULT_STATUS.CARE
 }
+function getActionInfo(action) {
+  return APPOINTMENT_ACTION[action] || { label: action || 'Khác', cls: 'act-other' }
+}
 function getCustomerTypeInfo(value) {
   return CUSTOMER_TYPE[value] || Object.values(CUSTOMER_TYPE)[0]
 }
@@ -1679,7 +1691,7 @@ onBeforeUnmount(() => {
               <th>NV phụ trách</th>
               <th>KQ tư vấn</th>
               <th>Phân loại</th>
-              <th>Diịch vụ</th>
+              <th>Dịch vụ</th>
               <th>Tình trạng</th>
               <th>Người tạo</th>
               <th style="width: 90px">Thao tác</th>
@@ -1718,11 +1730,14 @@ onBeforeUnmount(() => {
 
               <td>{{ appt.staff }}</td>
 
-              <td>
+              <td v-if="appt.consultStatus != null">
                   <span class="consult-badge" :class="getConsultInfo(appt.consultStatus).cls">
                     <i class="fa-solid" :class="getConsultInfo(appt.consultStatus).icon"></i>
                     {{ getConsultInfo(appt.consultStatus).label }}
                   </span>
+              </td>
+              <td v-else>
+                 <span>- - - -</span>
               </td>
 
               <td>
@@ -2150,9 +2165,8 @@ onBeforeUnmount(() => {
                   </span>
                 </label>
                 <select class="form-select" v-model="editForm.rating">
-                  <option value="POTENTIAL">Tiềm năng</option>
-                  <option value="NOT_POTENTIAL">Không tiềm năng</option>
-                  <option value="CARE">Chăm sóc</option>
+                  <option value="BAN_NHANH_30N">Bán nhanh 30 ngày</option>
+                  <option value="BAN_GP">Bán giải pháp</option>
                 </select>
               </div>
             </div>
@@ -2179,7 +2193,10 @@ onBeforeUnmount(() => {
               <div v-else>
                 <div v-for="item in historyItems" :key="item.ts" class="h-item">
                   <div class="h-top">
-                    <span>{{ item.actor }} • {{ item.action }}</span>
+                    <span>
+                      {{ item.actor }} •
+                      <span class="action-pill" :class="item.actionClass">{{ item.actionLabel }}</span>
+                    </span>
                     <span>{{ item.stamp }}</span>
                   </div>
                   <div class="h-desc">{{ item.desc || '' }}</div>
@@ -2337,7 +2354,10 @@ onBeforeUnmount(() => {
               <div v-else>
                 <div v-for="item in historyItems" :key="item.ts" class="h-item">
                   <div class="h-top">
-                    <span>{{ item.actor }} • {{ item.action }}</span>
+                    <span>
+                      {{ item.actor }} •
+                      <span class="action-pill" :class="item.actionClass">{{ item.actionLabel }}</span>
+                    </span>
                     <span>{{ item.stamp }}</span>
                   </div>
                   <div class="h-desc">{{ item.desc || '' }}</div>
@@ -3020,9 +3040,8 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
 .ct-broker{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
 .ct-relative{ background: rgba(250,112,154,0.16); color:#a43e73; }
 
-.rt-pot{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
-.rt-npot{ background: rgba(255,88,88,0.18); color:#b83b2c; }
-.rt-care{ background: rgba(79,172,254,0.18); color:#0b6ea8; }
+.rt-bn30{ background: rgba(34,197,94,0.18); color:#166534; }
+.rt-bgp{ background: rgba(147,51,234,0.18); color:#6b21a8; }
 
 .consult-badge{
   padding:7px 12px;
@@ -3261,6 +3280,23 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
 }
 .h-desc{ font-size:12.5px; color:#5b6576; font-weight:650; line-height:1.4; }
 .muted-empty{ font-weight:800; color:#93a2b8; font-size:12.5px; }
+.action-pill{
+  display:inline-flex;
+  align-items:center;
+  padding:2px 8px;
+  border-radius:999px;
+  font-weight:800;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:0.02em;
+}
+.act-create{ background: rgba(67,233,123,0.2); color:#0b7f6a; }
+.act-edit{ background: rgba(102,126,234,0.18); color:#2f3aa8; }
+.act-status{ background: rgba(251,191,36,0.2); color:#a16207; }
+.act-reschedule{ background: rgba(79,172,254,0.2); color:#0b6ea8; }
+.act-note{ background: rgba(236,72,153,0.18); color:#9f1239; }
+.act-delete{ background: rgba(255,88,88,0.2); color:#b83b2c; }
+.act-other{ background: rgba(148,163,184,0.2); color:#334155; }
 
 .modal-foot{
   padding:14px 16px;

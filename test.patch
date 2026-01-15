@@ -1,40 +1,9 @@
 diff --git a/src/components/thiet-kegiandien/AppointmentsPage.vue b/src/components/thiet-kegiandien/AppointmentsPage.vue
-index 8f15c1ba8d6f42a7d86aada068393515a56d69c3..9441450d09e7db600c023976b1a27d80ed7901a5 100644
+index 5b21cfe23246e485ff2a264e5e4c83506ae29cf2..63934b90386246bbaf0926aadf531f93efd6c973 100644
 --- a/src/components/thiet-kegiandien/AppointmentsPage.vue
 +++ b/src/components/thiet-kegiandien/AppointmentsPage.vue
-@@ -24,483 +24,438 @@ const filteredAppointments = ref([])
- const daySlots = ref([])
- const dayTitle = ref('')
- const calendarTitle = ref('')
- const calendarCells = ref([])
- const historyItems = ref([])
-
- const openActionMenuId = ref(null)
- const dragOverSlot = ref(null)
-
- const statusPopover = reactive({
-   open: false,
-   top: '0px',
-   left: '0px',
-   options: [],
-   handler: null,
- })
-
- const registerWindowListener = (event, handler, options) => {
-   window.addEventListener(event, handler, options)
-   cleanupHandlers.push(() => window.removeEventListener(event, handler, options))
+@@ -55,60 +55,68 @@ function getTodayISO() {
  }
-
- const $ = (sel, root = rootRef.value) => (root ? root.querySelector(sel) : null)
- const pad2 = (n) => String(n).padStart(2, '0')
- const nowISO = () => new Date().toISOString()
-+function getTodayISO() {
-+  const now = new Date()
-+  const y = now.getFullYear()
-+  const m = String(now.getMonth() + 1).padStart(2, '0')
-+  const d = String(now.getDate()).padStart(2, '0')
-+  return `${y}-${m}-${d}`
-+}
 
  const currentUser = { name: 'Lê Hiếu' }
 
@@ -45,19 +14,8 @@ index 8f15c1ba8d6f42a7d86aada068393515a56d69c3..9441450d09e7db600c023976b1a27d80
  }
  const CONSULTANTS = ['Tư vấn 1', 'Tư vấn 2', 'Nguyễn Văn A', 'Trần Thị B', 'Lê Hiếu']
 
--const CUSTOMERS = [
--  { id: 1, name: 'Nguyễn Văn A', phone: '0987 654 321', avatar: 'NA' },
--  { id: 2, name: 'Trần Thị B', phone: '0912 345 678', avatar: 'TB' },
--  { id: 3, name: 'Phạm Văn C', phone: '0933 222 111', avatar: 'PC' },
--  { id: 4, name: 'Lê Văn D', phone: '0978 876 543', avatar: 'LD' },
--  { id: 5, name: 'Mai H.', phone: '0901 111 222', avatar: 'MH' },
--  { id: 6, name: 'Đỗ Thị E', phone: '0922 333 444', avatar: 'DE' },
--  { id: 7, name: 'Hoàng Văn F', phone: '0944 555 666', avatar: 'HF' },
--  { id: 8, name: 'Bùi Thị G', phone: '0955 666 777', avatar: 'BG' },
--]
--
  const STATUS = {
-+  WAITING: { label: 'Chờ xác nhận', cls: 'st-wait', dot: '#fbbf24' },
+   WAITING: { label: 'Chờ xác nhận', cls: 'st-wait', dot: '#fbbf24' },
    UP: { label: 'Đã lên', cls: 'st-up', dot: '#22c55e' },
    NOT_UP: { label: 'Chưa lên', cls: 'st-not', dot: '#fa709a' },
    POSTPONED: { label: 'Tạm hoãn', cls: 'st-post', dot: '#4facfe' },
@@ -70,6 +28,15 @@ index 8f15c1ba8d6f42a7d86aada068393515a56d69c3..9441450d09e7db600c023976b1a27d80
    CARE: { label: 'Chăm sóc', cls: 'cs-care', icon: 'fa-hand-holding-heart' },
  }
 
++const APPOINTMENT_ACTION = {
++  CREATE: { label: 'Tạo mới', cls: 'act-create' },
++  EDIT: { label: 'Chỉnh sửa', cls: 'act-edit' },
++  STATUS: { label: 'Đổi trạng thái', cls: 'act-status' },
++  RESCHEDULE: { label: 'Dời lịch', cls: 'act-reschedule' },
++  NOTE: { label: 'Ghi chú', cls: 'act-note' },
++  DELETE: { label: 'Xoá lịch', cls: 'act-delete' },
++}
++
  const CUSTOMER_TYPE = {
    OWNER: { label: 'Chính chủ', cls: 'ct-owner' },
    BROKER: { label: 'Môi giới', cls: 'ct-broker' },
@@ -77,9 +44,11 @@ index 8f15c1ba8d6f42a7d86aada068393515a56d69c3..9441450d09e7db600c023976b1a27d80
  }
 
  const RATING = {
-   POTENTIAL: { label: 'Tiềm năng', cls: 'rt-pot' },
-   NOT_POTENTIAL: { label: 'Không tiềm năng', cls: 'rt-npot' },
-   CARE: { label: 'Chăm sóc', cls: 'rt-care' },
+-  POTENTIAL: { label: 'Tiềm năng', cls: 'rt-pot' },
+-  NOT_POTENTIAL: { label: 'Không tiềm năng', cls: 'rt-npot' },
+-  CARE: { label: 'Chăm sóc', cls: 'rt-care' },
++  BAN_NHANH_30N: { label: 'Bán nhanh 30 ngày', cls: 'rt-bn30' },
++  BAN_GP: { label: 'Bán giải pháp', cls: 'rt-bgp' },
  }
 
  const TIME_SLOTS = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00']
@@ -105,67 +74,7 @@ index 8f15c1ba8d6f42a7d86aada068393515a56d69c3..9441450d09e7db600c023976b1a27d80
    e.setDate(e.getDate() + 7)
    return e
  }
-+function endOfWeekInclusive(dateObj) {
-+  const s = startOfWeek(dateObj)
-+  const e = new Date(s)
-+  e.setDate(e.getDate() + 6)
-+  return e
-+}
- function initials(name) {
-   const parts = String(name || '')
-       .trim()
-       .split(/\s+/)
-       .filter(Boolean)
-   if (parts.length === 0) return 'NA'
-   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
- }
-
- function showToast(title, body, type = 'info') {
-   const wrap = $('#toastWrap')
-   if (!wrap) return
-   const icon = type === 'error' ? 'fa-triangle-exclamation' : type === 'success' ? 'fa-circle-check' : 'fa-circle-info'
-
-   const t = document.createElement('div')
-   t.className = `toast ${type}`
-   t.innerHTML = `
-     <div class="ico"><i class="fa-solid ${icon}"></i></div>
-     <div class="t">
-       <div class="a">${title}</div>
-       <div class="b">${body || ''}</div>
-     </div>
-     <button class="x" aria-label="close"><i class="fa-solid fa-xmark"></i></button>
-   `
-   wrap.appendChild(t)
-
-   const kill = () => t.remove()
-   t.querySelector('.x').addEventListener('click', kill)
-   setTimeout(kill, 3800)
- }
-
--// ===== Demo date =====
--const demoToday = new Date(2026, 0, 3)
--const selectedDateISO = ref('2026-01-03')
--const calendarMonth = ref(new Date(2026, 0, 1))
-+// ===== Date =====
-+const selectedDateISO = ref(getTodayISO())
-+const calendarMonth = ref(new Date())
-
- // ===== Filter controls =====
- const activeRange = ref('week') // today | week | month
- const activeStatus = ref('ALL')
- const searchQuery = ref('')
-+const searchKeyword = ref('')
-+const appointmentsLoading = ref(false)
-+const appointmentsError = ref('')
-+let searchTimer = null
-
- // ===== Modals =====
- const editId = ref(null)
- const isModalOpen = ref(false)
- const isCreateModalOpen = ref(false)
- const isDetailModalOpen = ref(false)
- const selectedAppointment = ref(null)
+@@ -172,51 +180,51 @@ const selectedAppointment = ref(null)
 
  // ===== Create form =====
  const createForm = reactive({
@@ -177,6 +86,7 @@ index 8f15c1ba8d6f42a7d86aada068393515a56d69c3..9441450d09e7db600c023976b1a27d80
    staff: '',
    consultant: 'Tư vấn 1',
    note: '',
+   rating: 'BAN_NHANH_30N'
  })
 
  const editForm = reactive({
@@ -190,7 +100,8 @@ index 8f15c1ba8d6f42a7d86aada068393515a56d69c3..9441450d09e7db600c023976b1a27d80
    status: 'UP',
    consultStatus: 'CARE',
    customerType: 'OWNER',
-   rating: 'CARE',
+-  rating: 'CARE',
++  rating: 'BAN_NHANH_30N',
    note: '',
  })
 
@@ -205,104 +116,7 @@ index 8f15c1ba8d6f42a7d86aada068393515a56d69c3..9441450d09e7db600c023976b1a27d80
   * - createdByMe => ORANGE marker
   * - inCharge => BLUE marker
   */
--const appointments = ref([
--  {
--    id: 1,
--    customer: 'Nguyễn Văn A',
--    phone: '0987 654 321',
--    branch: 'CN_Q1',
--    date: '2026-01-03',
--    time: '10:00',
--    staff: 'Lê Hiếu',
--    consultant: 'Tư vấn 1',
--    status: 'UP',
--    consultStatus: 'SUCCESS',
--    customerType: 'OWNER',
--    rating: 'POTENTIAL',
--    creator: 'Lê Hiếu',
--    createdByMe: true,
--    inCharge: true,
--    note: 'Khách ưu tiên làm nhanh.',
--    history: [makeHistory('Lê Hiếu', 'CREATE', 'Tạo lịch hẹn.')],
--  },
--  {
--    id: 2,
--    customer: 'Trần Thị B',
--    phone: '0912 345 678',
--    branch: 'CN_Q1',
--    date: '2026-01-03',
--    time: '14:00',
--    staff: 'Nguyễn Văn A',
--    consultant: 'Tư vấn 2',
--    status: 'NOT_UP',
--    consultStatus: 'CARE',
--    customerType: 'RELATIVE',
--    rating: 'CARE',
--    creator: 'Lê Hiếu',
--    createdByMe: true,
--    inCharge: false,
--    note: 'Gọi xác nhận trước 1h.',
--    history: [makeHistory('Lê Hiếu', 'CREATE', 'Tạo lịch hẹn.')],
--  },
--  {
--    id: 3,
--    customer: 'Phạm Văn C',
--    phone: '0933 222 111',
--    branch: 'CN_TD',
--    date: '2026-01-02',
--    time: '09:00',
--    staff: 'Lê Hiếu',
--    consultant: 'Nguyễn Văn A',
--    status: 'CANCELLED',
--    consultStatus: 'FAIL',
--    customerType: 'BROKER',
--    rating: 'NOT_POTENTIAL',
--    creator: 'Nguyễn Văn A',
--    createdByMe: false,
--    inCharge: true,
--    note: '',
--    history: [makeHistory('Nguyễn Văn A', 'CREATE', 'Tạo lịch hẹn.'), makeHistory('Nguyễn Văn A', 'STATUS', 'Đổi trạng thái: Huỷ.')],
--  },
--  {
--    id: 4,
--    customer: 'Lê Văn D',
--    phone: '0978 876 543',
--    branch: 'CN_BD',
--    date: '2026-01-01',
--    time: '15:00',
--    staff: 'Trần Thị B',
--    consultant: 'Tư vấn 1',
--    status: 'POSTPONED',
--    consultStatus: 'CARE',
--    customerType: 'OWNER',
--    rating: 'CARE',
--    creator: 'Lê Hiếu',
--    createdByMe: true,
--    inCharge: false,
--    note: 'Dời vì khách bận.',
--    history: [makeHistory('Lê Hiếu', 'CREATE', 'Tạo lịch hẹn.'), makeHistory('Lê Hiếu', 'STATUS', 'Đổi trạng thái: Tạm hoãn.')],
--  },
--  {
--    id: 5,
--    customer: 'Mai H.',
--    phone: '0901 111 222',
--    branch: 'CN_TD',
--    date: '2026-01-10',
--    time: '11:00',
--    staff: 'Phạm Văn C',
--    consultant: 'Tư vấn 2',
--    status: 'NOT_UP',
--    consultStatus: 'FAIL',
--    customerType: 'BROKER',
--    rating: 'NOT_POTENTIAL',
--    creator: 'Lê Hiếu',
--    createdByMe: true,
--    inCharge: false,
--    note: '',
--    history: [makeHistory('Lê Hiếu', 'CREATE', 'Tạo lịch hẹn.')],
--  },
--])
-+const appointments = ref([])
+ const appointments = ref([])
 
  function getRowMarker(appt) {
    if (appt?.createdByMe) return { color: '#f97316', glow: 'rgba(253, 230, 138, 0.75)' } // ORANGE
@@ -313,347 +127,127 @@ index 8f15c1ba8d6f42a7d86aada068393515a56d69c3..9441450d09e7db600c023976b1a27d80
  function monthTitle(d) {
    return `Tháng ${d.getMonth() + 1}, ${d.getFullYear()}`
  }
+@@ -724,83 +732,84 @@ async function openCreateModal() {
+   createForm.note = ''
 
- // ===== Conflict =====
- function hasConflict({ id = null, date, time, staff }) {
-   return appointments.value.find((a) => a.id !== id && a.date === date && a.time === time && a.staff === staff && a.status !== 'CANCELLED')
+   // ✅ CHI NHÁNH ĐẦU TIÊN
+   if (!createForm.branch && BRANCHES.value.length > 0) {
+     createForm.branch = BRANCHES.value[0].key
+   }
+
+   // ✅ LOAD NV TƯ VẤN THEO CHI NHÁNH
+   await fetchCreateConsultantsByBranch(createForm.branch)
+
+   isCreateModalOpen.value = true
  }
 
- // ===== Apply filters (Calendar + Day + Table) =====
- function applyFilters(list) {
--  let out = [...list]
--  const refDate = new Date(`${selectedDateISO.value}T00:00:00`)
--  const refISO = selectedDateISO.value
--
--  if (activeRange.value === 'today') {
--    out = out.filter((a) => a.date === refISO)
--  } else if (activeRange.value === 'week') {
--    const s = startOfWeek(refDate)
--    const e = endOfWeek(refDate)
--    out = out.filter((a) => {
--      const d = new Date(`${a.date}T00:00:00`)
--      return d >= s && d < e
--    })
--  } else if (activeRange.value === 'month') {
--    const y = calendarMonth.value.getFullYear()
--    const m = calendarMonth.value.getMonth()
--    out = out.filter((a) => {
--      const d = new Date(`${a.date}T00:00:00`)
--      return d.getFullYear() === y && d.getMonth() === m
--    })
--  }
--
--  if (activeStatus.value !== 'ALL') out = out.filter((a) => a.status === activeStatus.value)
--
--  if (searchQuery.value.trim()) {
--    const q = searchQuery.value.trim().toLowerCase()
--    out = out.filter(
--        (a) =>
--            (a.customer || '').toLowerCase().includes(q) ||
--            (a.phone || '').toLowerCase().includes(q) ||
--            (a.staff || '').toLowerCase().includes(q) ||
--            (a.creator || '').toLowerCase().includes(q),
--    )
--  }
--
-+  const out = [...list]
-   out.sort((a, b) => `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`))
-   return out
+ function closeCreateModal() {
+   isCreateModalOpen.value = false
+   createForm.selectedCustomer = null
+   createForm.customerSearch = ''
  }
 
- function updateFilterOutputs() {
-   const filtered = applyFilters(appointments.value)
-   filteredAppointments.value = filtered
-   activeFilterCount.value = filtered.length
-
-   const rangeText =
-       activeRange.value === 'today' ? 'Hôm nay' : activeRange.value === 'week' ? 'Tuần này' : 'Tháng này'
-   const stText = activeStatus.value !== 'ALL' ? ` • ${STATUS[activeStatus.value].label}` : ''
-   activeFilterText.value = `${rangeText}${stText}`
- }
-
- function updateGlobalStats() {
-   const all = [...appointments.value]
-   statTotal.value = all.length
-   statSelectedDay.value = all.filter((a) => a.date === selectedDateISO.value).length
-   statUp.value = all.filter((a) => a.status === 'UP').length
--  statPending.value = all.filter((a) => ['NOT_UP', 'POSTPONED'].includes(a.status)).length
-+  statPending.value = all.filter((a) => ['WAITING', 'NOT_UP', 'POSTPONED'].includes(a.status)).length
- }
-
- // ===== Calendar markers by day (orange/blue) =====
- function getMonthKey() {
-   const y = calendarMonth.value.getFullYear()
-   const m = calendarMonth.value.getMonth()
-   return { y, m, key: `${y}-${pad2(m + 1)}` }
- }
- function buildDayMarkerMap(monthKey) {
-   const map = new Map() // dayNumber -> marker {color, glow}
-   const monthAppts = appointments.value.filter((a) => a.date.startsWith(monthKey) && a.status !== 'CANCELLED')
-   monthAppts.forEach((a) => {
-     const day = Number(a.date.slice(-2))
-     const mk = map.get(day)
-     const marker = getRowMarker(a)
-     // ưu tiên ORANGE nếu có createdByMe; nếu không thì BLUE
-     if (!mk) {
-       map.set(day, marker)
-     } else {
-       if (marker.color === '#ffb347') map.set(day, marker)
-     }
+ // ===== History =====
+ function renderHistory(appt) {
+   const history = (appt.history || []).slice(0, 120)
+   historyItems.value = history.map((h) => {
+     const dt = new Date(h.ts)
+     const stamp = `${pad2(dt.getHours())}:${pad2(dt.getMinutes())} • ${pad2(dt.getDate())}/${pad2(dt.getMonth() + 1)}/${dt.getFullYear()}`
+-    return { ...h, stamp }
++    const actionInfo = getActionInfo(h.action)
++    return { ...h, stamp, actionLabel: actionInfo.label, actionClass: actionInfo.cls }
    })
-   return map
  }
 
- // ===== Disable calendar days for today/week =====
- function isCellEnabled(iso) {
-   if (!iso) return false
-   if (activeRange.value === 'month') return true
-   const refDate = new Date(`${selectedDateISO.value}T00:00:00`)
-   if (activeRange.value === 'today') return iso === selectedDateISO.value
-   if (activeRange.value === 'week') {
-     const s = startOfWeek(refDate)
-     const e = endOfWeek(refDate)
-     const d = new Date(`${iso}T00:00:00`)
-     return d >= s && d < e
-   }
-   return true
+ // ===== Detail modal =====
+ function openDetailModal(appt) {
+   selectedAppointment.value = appt
+   renderHistory(appt)
+   isDetailModalOpen.value = true
+ }
+ function closeDetailModal() {
+   isDetailModalOpen.value = false
+   selectedAppointment.value = null
  }
 
- function generateCalendar() {
-   calendarTitle.value = monthTitle(calendarMonth.value)
-   const year = calendarMonth.value.getFullYear()
-   const month = calendarMonth.value.getMonth()
-+  const todayIso = getTodayISO()
+ // ===== Edit modal =====
+ function openEditModal(id) {
+   const appt = appointments.value.find((x) => x.id === id)
+   if (!appt) return
 
-   const firstDay = new Date(year, month, 1).getDay()
-   const daysInMonth = new Date(year, month + 1, 0).getDate()
-   const prevMonthDays = new Date(year, month, 0).getDate()
+   editId.value = id
 
-   const { key: monthKey } = getMonthKey()
-   const markerMap = buildDayMarkerMap(monthKey)
+   editForm.customer = appt.customer || ''
+   editForm.phone = appt.phone || ''
+   editForm.branch = appt.branch || 'CN_Q1'
+   editForm.date = appt.date
+   editForm.time = appt.time
+   editForm.staff = appt.staff
+   editForm.consultant = appt.consultant
+   editForm.status = appt.status
+   editForm.consultStatus = appt.consultStatus || 'CARE'
+   editForm.customerType = appt.customerType || 'OWNER'
+-  editForm.rating = appt.rating || 'CARE'
++  editForm.rating = appt.rating || 'BAN_NHANH_30N'
+   editForm.note = appt.note || ''
 
-   const cells = []
+   renderHistory(appt)
+   isModalOpen.value = true
+ }
+ function closeEditModal() {
+   isModalOpen.value = false
+   editId.value = null
+ }
+ function saveEditModal() {
+   if (editId.value == null) return
+   const idx = appointments.value.findIndex((x) => x.id === editId.value)
+   if (idx < 0) return
 
-   for (let i = firstDay - 1; i >= 0; i -= 1) {
-     cells.push({
-       key: `prev-${i}`,
-       label: prevMonthDays - i,
-       iso: null,
-       currentMonth: false,
-       enabled: false,
-       marker: null,
-       classes: ['cal-date', 'other'],
-     })
-   }
-
-   for (let day = 1; day <= daysInMonth; day += 1) {
-     const iso = `${year}-${pad2(month + 1)}-${pad2(day)}`
-     const classes = ['cal-date', 'current']
--    if (iso === toISODate(demoToday)) classes.push('today')
-+    if (iso === todayIso) classes.push('today')
-     if (iso === selectedDateISO.value) classes.push('selected')
-
-     const marker = markerMap.get(day) || null
-     if (marker) classes.push('has-appt')
-
-     const enabled = isCellEnabled(iso)
-     if (!enabled) classes.push('disabled')
-
-     cells.push({
-       key: `current-${iso}`,
-       label: day,
-       iso,
-       currentMonth: true,
-       enabled,
-       marker,
-       classes,
-     })
-   }
-
-   const totalCells = 42
-   const nextMonthDays = totalCells - (firstDay + daysInMonth)
-   for (let i = 1; i <= nextMonthDays; i += 1) {
-     cells.push({
-       key: `next-${i}`,
-       label: i,
-       iso: null,
-       currentMonth: false,
-       enabled: false,
-       marker: null,
-       classes: ['cal-date', 'other'],
-     })
-   }
-
-   calendarCells.value = cells
+   const current = appointments.value[idx]
+   const next = {
+     ...current,
+     customer: editForm.customer.trim() || current.customer,
+     phone: editForm.phone.trim(),
+     branch: editForm.branch,
+     date: editForm.date,
+     time: editForm.time,
+     staff: editForm.staff,
+     consultant: editForm.consultant,
+     status: editForm.status,
+@@ -1267,50 +1276,53 @@ function initCharts() {
+ // ===== Action menu =====
+ function toggleActionMenu(id) {
+   openActionMenuId.value = openActionMenuId.value === id ? null : id
+ }
+ function handleAction(type, appt, event) {
+   openActionMenuId.value = null
+   if (type === 'edit') openEditModal(appt.id)
+   else if (type === 'status') openStatusPopover(event.currentTarget, appt.id)
+   else if (type === 'delete') {
+     appointments.value = appointments.value.filter((x) => x.id !== appt.id)
+     generateCalendar()
+     updateDaySchedule()
+     updateFilterOutputs()
+     updateGlobalStats()
+     showToast('Đã xoá lịch hẹn', appt.customer || 'Đã xoá.', 'success')
+   } else if (type === 'detail') openDetailModal(appt)
  }
 
-+function getFilterRange() {
-+  const selectedDate = new Date(`${selectedDateISO.value}T00:00:00`)
-+
-+  if (activeRange.value === 'today') {
-+    return { startDate: selectedDateISO.value, endDate: selectedDateISO.value }
-+  }
-+
-+  if (activeRange.value === 'week') {
-+    const start = startOfWeek(selectedDate)
-+    const end = endOfWeekInclusive(selectedDate)
-+    return { startDate: toISODate(start), endDate: toISODate(end) }
-+  }
-+
-+  const year = calendarMonth.value.getFullYear()
-+  const month = calendarMonth.value.getMonth()
-+  const start = new Date(year, month, 1)
-+  const end = new Date(year, month + 1, 0)
-+  return { startDate: toISODate(start), endDate: toISODate(end) }
-+}
-+
-+function mapAppointmentFromApi(dto) {
-+  return {
-+    id: dto.appointmentId,
-+    customerId: dto.customerId,
-+    customer: dto.customerName,
-+    phone: dto.customerPhone,
-+    date: dto.appointmentDate,
-+    time: dto.appointmentTime,
-+    staffId: dto.staffId,
-+    staff: dto.staffName,
-+    consultantId: dto.consultantId,
-+    consultant: dto.consultantName,
-+    creatorId: dto.creatorId,
-+    creator: dto.creatorName,
-+    status: dto.status,
-+    consultStatus: dto.consultStatus,
-+    rating: dto.rating,
-+    createdByMe: dto.createdByMe,
-+    inCharge: dto.inCharge,
-+    branch: dto.branch || '',
-+    customerType: dto.customerType || null,
-+    note: dto.note || '',
-+    history: dto.history || [],
-+  }
-+}
-+
-+async function fetchAppointments() {
-+  if (appointmentsLoading.value) return
-+
-+  const { startDate, endDate } = getFilterRange()
-+  const payload = {
-+    startDate,
-+    endDate,
-+    status: activeStatus.value === 'ALL' ? null : activeStatus.value,
-+    search: searchKeyword.value ? searchKeyword.value.trim() : null,
-+  }
-+
-+  appointmentsLoading.value = true
-+  appointmentsError.value = ''
-+
-+  try {
-+    const res = await api.post('/apithienha/customer-crm/admin/lich-hen/filter', payload)
-+    const data = Array.isArray(res.data) ? res.data : []
-+    appointments.value = data.map(mapAppointmentFromApi)
-+  } catch (e) {
-+    appointments.value = []
-+    appointmentsError.value = 'Không thể tải lịch hẹn.'
-+    showToast('Lỗi tải lịch hẹn', e?.response?.data?.message || 'Không thể tải dữ liệu.', 'error')
-+  } finally {
-+    appointmentsLoading.value = false
-+  }
-+
-+  generateCalendar()
-+  updateDaySchedule()
-+  updateFilterOutputs()
-+  updateGlobalStats()
-+}
-+
- function handleCalendarClick(cell) {
-   if (!cell.currentMonth || !cell.iso) return
-   if (!cell.enabled) return
-
-   selectedDateISO.value = cell.iso
-   updateDaySchedule()
-   updateFilterOutputs()
-   updateGlobalStats()
-   generateCalendar()
+ // ===== Helpers =====
+ function getStatusInfo(status) {
+   return STATUS[status]
  }
-
- function handleMonthNav(dir) {
-   if (activeRange.value !== 'month') return
-   const y = calendarMonth.value.getFullYear()
-   const m = calendarMonth.value.getMonth()
-   const next = new Date(y, m + dir, 1)
-   calendarMonth.value = next
-   const nextISO = `${next.getFullYear()}-${pad2(next.getMonth() + 1)}-01`
-   selectedDateISO.value = nextISO
-   generateCalendar()
-   updateDaySchedule()
-   updateFilterOutputs()
-   updateGlobalStats()
- }
-
-@@ -1077,51 +1032,51 @@ async function saveNewAppointment() {
-       return
-     }
-
-     updateAlertSuccess('Tạo lịch hẹn thành công', 'Lịch hẹn đã được tạo.')
-
-
-     closeCreateModal()
-   } catch (e) {
-     console.error(e)
-     showToast(
-         'Tạo lịch thất bại',
-         e?.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.',
-         'error'
-     )
-   }
- }
-
- // ===== Export (theo filter của table) =====
- function exportCSV() {
-   const filtered = applyFilters(appointments.value)
-   const header = ['Khách hàng', 'SĐT', 'Chi nhánh', 'Ngày', 'Giờ', 'NV phụ trách', 'Tình trạng', 'KQ tư vấn', 'Phân loại', 'Đánh giá', 'Người tạo', 'Ghi chú']
-
-   const rows = filtered.map((a) => [
-     a.customer,
-     a.phone,
--    BRANCHES.find((b) => b.key === a.branch)?.label || a.branch,
-+    a.branch ? BRANCHES.find((b) => b.key === a.branch)?.label || a.branch : '-',
-     a.date,
-     a.time,
-     a.staff,
-     STATUS[a.status].label,
-     CONSULT_STATUS[a.consultStatus]?.label || '',
-     CUSTOMER_TYPE[a.customerType]?.label || '',
-     RATING[a.rating]?.label || '',
-     a.creator,
-     a.note || '',
-   ])
-
-   const csv = [header, ...rows].map((r) => r.map((v) => `"${String(v || '').replaceAll('"', '""')}"`).join(',')).join('\n')
-
-   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-   const url = URL.createObjectURL(blob)
-   const a = document.createElement('a')
-   a.href = url
-   a.download = `lich-hen_${selectedDateISO.value}.csv`
-   document.body.appendChild(a)
-   a.click()
-   a.remove()
-   URL.revokeObjectURL(url)
-
-   showToast('Xuất file thành công', `Đã xuất ${filtered.length} dòng CSV.`, 'success')
- }
-@@ -1333,88 +1288,91 @@ function getConsultInfo(status) {
+ function getConsultInfo(status) {
    return CONSULT_STATUS[status] || CONSULT_STATUS.CARE
  }
++function getActionInfo(action) {
++  return APPOINTMENT_ACTION[action] || { label: action || 'Khác', cls: 'act-other' }
++}
  function getCustomerTypeInfo(value) {
    return CUSTOMER_TYPE[value] || Object.values(CUSTOMER_TYPE)[0]
  }
  function getRatingInfo(value) {
    return RATING[value] || Object.values(RATING)[0]
- }
- function getBranchLabel(key) {
-   return BRANCHES.find((b) => b.key === key)?.label || key
  }
 
  // ===== Watchers =====
@@ -669,306 +263,187 @@ index 8f15c1ba8d6f42a7d86aada068393515a56d69c3..9441450d09e7db600c023976b1a27d80
          // đảm bảo selected date enable
          if (!isCellEnabled(selectedDateISO.value)) {
            // kéo về start tuần / today
--          if (activeRange.value === 'today') selectedDateISO.value = toISODate(demoToday)
-+          if (activeRange.value === 'today') selectedDateISO.value = getTodayISO()
+           if (activeRange.value === 'today') selectedDateISO.value = getTodayISO()
            if (activeRange.value === 'week') selectedDateISO.value = toISODate(startOfWeek(new Date(`${selectedDateISO.value}T00:00:00`)))
          }
        }
 
-       generateCalendar()
-       updateDaySchedule()
-       updateFilterOutputs()
-     },
- )
+@@ -2128,80 +2140,82 @@ onBeforeUnmount(() => {
+                 </select>
+               </div>
 
- watch(
-     () => searchQuery.value,
-+    (val) => {
-+      if (searchTimer) clearTimeout(searchTimer)
-+      searchTimer = setTimeout(() => {
-+        searchKeyword.value = (val || '').trim()
-+      }, 300)
-+    },
-+)
-+
-+watch(
-     () => {
--      updateFilterOutputs()
-+      const { startDate, endDate } = getFilterRange()
-+      return [startDate, endDate, activeStatus.value, searchKeyword.value].join('|')
-+    },
-+    () => {
-+      fetchAppointments()
-     },
- )
--function getTodayISO() {
--  const now = new Date()
--  const y = now.getFullYear()
--  const m = String(now.getMonth() + 1).padStart(2, '0')
--  const d = String(now.getDate()).padStart(2, '0')
--  return `${y}-${m}-${d}`
--}
+               <div class="form-group">
+                 <label class="form-label">
+                   <span class="lbl">
+                     <span class="lbl-ico gi11"><i class="fa-solid fa-tag"></i></span>
+                     Phân loại
+                   </span>
+                 </label>
+                 <select class="form-select" v-model="editForm.customerType">
+                   <option value="OWNER">Chính chủ</option>
+                   <option value="BROKER">Môi giới</option>
+                   <option value="RELATIVE">Người thân</option>
+                 </select>
+               </div>
 
- // ===== Mount =====
- onMounted(async () => {
-   if (!rootRef.value) return
-
-   // ===== Init date =====
-   selectedDateISO.value = getTodayISO()
-   calendarMonth.value = new Date() // tháng hiện tại
-
-   // ===== Init data =====
--  generateCalendar()
--  updateDaySchedule()
--  updateFilterOutputs()
--  updateGlobalStats()
-+  await fetchAppointments()
-
-   // ===== Init charts =====
-   await nextTick()
-   initCharts()
-
-   // ===== Fetch branch options (ONLY ONCE) =====
-   try {
-     await fetchBranchOptions()
-   } catch (e) {
-     console.error('Fetch branch failed', e)
-   }
-
-   // ===== Ready toast =====
-   showToast('Sẵn sàng', 'Hệ thống quản lý lịch hẹn đã sẵn sàng.', 'success')
-
-   // ===== Global listeners =====
-   registerWindowListener('keydown', (e) => {
-     if (e.key === 'Escape' && (isModalOpen.value || isCreateModalOpen.value || isDetailModalOpen.value)) {
-       if (isModalOpen.value) closeEditModal()
-       if (isCreateModalOpen.value) closeCreateModal()
-       if (isDetailModalOpen.value) closeDetailModal()
-     }
-   })
-
-   registerWindowListener('resize', async () => {
-@@ -1516,50 +1474,51 @@ onBeforeUnmount(() => {
-               <p class="sub">Hiệu quả theo kết quả</p>
-             </div>
-           </div>
-           <div class="chart-container">
-             <canvas id="successChart"></canvas>
-           </div>
-         </div>
-       </section>
-
-       <!-- Filters (CHỈ cho lịch + day + table) -->
-       <div class="filters">
-         <div class="filter-tabs">
-           <button class="filter-btn" :class="{ active: activeRange === 'today' }" @click="activeRange = 'today'">
-             Hôm nay
-           </button>
-           <button class="filter-btn" :class="{ active: activeRange === 'week' }" @click="activeRange = 'week'">
-             Tuần này
-           </button>
-           <button class="filter-btn" :class="{ active: activeRange === 'month' }" @click="activeRange = 'month'">
-             Tháng
-           </button>
-         </div>
-
-         <div class="status-filter">
-           <div class="status-tag st-all" :class="{ active: activeStatus === 'ALL' }" @click="activeStatus = 'ALL'">Tất cả</div>
-+          <div class="status-tag st-wait-tag" :class="{ active: activeStatus === 'WAITING' }" @click="activeStatus = 'WAITING'">Chờ xác nhận</div>
-           <div class="status-tag st-up-tag" :class="{ active: activeStatus === 'UP' }" @click="activeStatus = 'UP'">Đã lên</div>
-           <div class="status-tag st-not-tag" :class="{ active: activeStatus === 'NOT_UP' }" @click="activeStatus = 'NOT_UP'">Chưa lên</div>
-           <div class="status-tag st-post-tag" :class="{ active: activeStatus === 'POSTPONED' }" @click="activeStatus = 'POSTPONED'">Tạm hoãn</div>
-           <div class="status-tag st-cancel-tag" :class="{ active: activeStatus === 'CANCELLED' }" @click="activeStatus = 'CANCELLED'">Huỷ</div>
-         </div>
-
-         <div class="action-buttons">
-           <button class="btn btn-secondary" @click="exportCSV"><i class="fas fa-download"></i>Xuất file</button>
-           <button class="btn btn-primary" @click="openCreateModal"><i class="fas fa-plus"></i>Tạo lịch hẹn</button>
-         </div>
-       </div>
-
-       <!-- Calendar + Day Schedule -->
-       <div class="calendar-day-row">
-         <section class="card-surface calendar-section">
-           <div class="card-head">
-             <div class="card-title">
-               <div class="ico-bubble gD"><i class="fa-solid fa-calendar"></i></div>
-               <div>
-                 <h3>{{ calendarTitle }}</h3>
-                 <p class="sub">Click ngày để xem lịch • Chỉ ngày trong phạm vi filter được thao tác</p>
+               <div class="form-group">
+                 <label class="form-label">
+                   <span class="lbl">
+                     <span class="lbl-ico gi12"><i class="fa-solid fa-star"></i></span>
+                     Đánh giá
+                   </span>
+                 </label>
+                 <select class="form-select" v-model="editForm.rating">
+-                  <option value="POTENTIAL">Tiềm năng</option>
+-                  <option value="NOT_POTENTIAL">Không tiềm năng</option>
+-                  <option value="CARE">Chăm sóc</option>
++                  <option value="BAN_NHANH_30N">Bán nhanh 30 ngày</option>
++                  <option value="BAN_GP">Bán giải pháp</option>
+                 </select>
                </div>
              </div>
 
-             <!-- chỉ hiện khi Tháng này -->
-@@ -1642,51 +1601,51 @@ onBeforeUnmount(() => {
-                     <div
-                         v-for="appt in slot.appointments"
-                         :key="appt.id"
-                         class="appt-card"
-                         :draggable="appt.status !== 'CANCELLED'"
-                         :class="{ disabled: appt.status === 'CANCELLED' }"
-                         @dragstart="handleDragStart($event, appt)"
-                         @click="openDetailModal(appt)"
-                         style="cursor: pointer"
-                     >
-                       <!-- marker dot (blink halo) -->
-                       <span
-                           class="appt-dot"
-                           :style="{ '--mk': getRowMarker(appt).color, '--mkGlow': getRowMarker(appt).glow }"
-                       ></span>
+             <div class="form-group">
+               <label class="form-label">
+                 <span class="lbl">
+                   <span class="lbl-ico gi7"><i class="fa-regular fa-note-sticky"></i></span>
+                   Ghi chú
+                 </span>
+               </label>
+               <textarea class="form-textarea" v-model="editForm.note" placeholder="Cập nhật ghi chú..."></textarea>
+             </div>
+           </div>
 
-                       <div class="appt-main">
-                         <div class="n">{{ appt.customer }}</div>
-                         <div class="m phone-line">
-                           <i class="fa-solid fa-phone me-1"></i>
-                           {{ appt.phone || '' }}
-                         </div>
+           <div class="modal-panel">
+             <h5>
+               <span class="sec-ico si4"><i class="fa-solid fa-clock-rotate-left"></i></span>
+               Lịch sử thay đổi
+             </h5>
 
-                         <div class="appt-meta">
-                           <span class="pill-soft">
--                            <i class="fa-solid fa-building"></i>{{ appt.branch }}
-+                            <i class="fa-solid fa-building"></i>{{ appt.branch ? getBranchLabel(appt.branch) : '-' }}
-                           </span>
-                           <span class="pill-soft">
-                             <i class="fa-solid fa-user-tie"></i>{{ appt.staff }}
-                           </span>
-
-                           <!-- trạng thái giống table -->
-                           <span
-                               class="status-badge"
-                               data-status-badge="1"
-                               :class="getStatusInfo(appt.status).cls"
-                               @click.stop="openStatusPopover($event.currentTarget, appt.id)"
-                           >
-                             {{ getStatusInfo(appt.status).label }}
-                             <i class="fa-solid fa-chevron-down" style="font-size: 11px; opacity: 0.85"></i>
-                           </span>
-                         </div>
-
-                         <div class="appt-sub">
-                           KQ tư vấn: <b>{{ getConsultInfo(appt.consultStatus).label }}</b>
-                         </div>
-                       </div>
-
-                       <div class="appt-cta">
-                         <button class="mini-btn" title="Sửa" @click.stop="openEditModal(appt.id)">
-                           <i class="fa-regular fa-pen-to-square"></i>
-@@ -1741,51 +1700,51 @@ onBeforeUnmount(() => {
-             <tr v-for="appt in filteredAppointments" :key="appt.id">
-               <td>
-                 <div class="customer-info">
-                   <div
-                       class="customer-avatar"
-                       :style="{ '--mk': getRowMarker(appt).color, '--mkGlow': getRowMarker(appt).glow }"
-                   >
-                     {{ initials(appt.customer) }}
-                     <span class="ava-dot"></span>
+             <div class="history">
+               <div v-if="!historyItems.length" class="muted-empty">Chưa có lịch sử.</div>
+               <div v-else>
+                 <div v-for="item in historyItems" :key="item.ts" class="h-item">
+                   <div class="h-top">
+-                    <span>{{ item.actor }} • {{ item.action }}</span>
++                    <span>
++                      {{ item.actor }} •
++                      <span class="action-pill" :class="item.actionClass">{{ item.actionLabel }}</span>
++                    </span>
+                     <span>{{ item.stamp }}</span>
                    </div>
-                   <div>
-                     <div class="customer-name">{{ appt.customer }}</div>
-                     <div class="customer-phone"><i class="fa-solid fa-phone me-1"></i>{{ appt.phone || '' }}</div>
-                   </div>
+                   <div class="h-desc">{{ item.desc || '' }}</div>
                  </div>
-               </td>
+               </div>
+             </div>
+           </div>
+         </div>
 
-               <td>
-                   <span class="pill-muted">
-                     <i class="fa-regular fa-calendar"></i>{{ formatVNDate(appt.date) }} • {{ appt.time }}
-                   </span>
-               </td>
+         <div class="modal-foot">
+           <button class="btn btn-secondary" type="button" @click="closeEditModal">Đóng</button>
+           <button class="btn btn-primary" type="button" @click="saveEditModal">
+             <i class="fa-solid fa-floppy-disk"></i>Lưu thay đổi
+           </button>
+         </div>
+       </div>
+     </div>
 
-               <td>
-                   <span class="pill-soft">
--                    <i class="fa-solid fa-building"></i>{{ appt.branch }}
-+                    <i class="fa-solid fa-building"></i>{{ appt.branch ? getBranchLabel(appt.branch) : '-' }}
-                   </span>
-               </td>
+     <!-- Modal chi tiết (màu mới đẹp hơn + icon nhỏ chung label) -->
+     <div v-if="isDetailModalOpen && selectedAppointment" class="backdrop" @click.self="closeDetailModal">
+       <div class="editor-modal detail" role="dialog" aria-modal="true">
+         <div class="modal-head">
+           <div class="mh-left">
+             <div class="mh-ico"><i class="fa-regular fa-eye"></i></div>
+             <div>
+@@ -2315,51 +2329,54 @@ onBeforeUnmount(() => {
+                 <div class="d-ico di10"><i class="fa-solid fa-shield-halved"></i></div>
+                 <div class="d-main">
+                   <div class="d-label">Người tạo</div>
+                   <div class="d-value">{{ selectedAppointment.creator }}</div>
+                 </div>
+               </div>
+             </div>
 
-               <td>{{ appt.staff }}</td>
+             <div class="note-box">
+               <div class="note-cap"><i class="fa-regular fa-note-sticky"></i> Ghi chú</div>
+               <div class="note-body">{{ selectedAppointment.note || 'Không có ghi chú' }}</div>
+             </div>
+           </div>
 
-               <td>
-                   <span class="consult-badge" :class="getConsultInfo(appt.consultStatus).cls">
-                     <i class="fa-solid" :class="getConsultInfo(appt.consultStatus).icon"></i>
-                     {{ getConsultInfo(appt.consultStatus).label }}
-                   </span>
-               </td>
+           <div class="modal-panel">
+             <h5>
+               <span class="sec-ico si4"><i class="fa-solid fa-clock-rotate-left"></i></span>
+               Lịch sử thay đổi
+             </h5>
 
-               <td>
-                   <span class="chip" :class="getCustomerTypeInfo(appt.customerType).cls">
-                     {{ getCustomerTypeInfo(appt.customerType).label }}
-                   </span>
-               </td>
+             <div class="history">
+               <div v-if="!historyItems.length" class="muted-empty">Chưa có lịch sử.</div>
+               <div v-else>
+                 <div v-for="item in historyItems" :key="item.ts" class="h-item">
+                   <div class="h-top">
+-                    <span>{{ item.actor }} • {{ item.action }}</span>
++                    <span>
++                      {{ item.actor }} •
++                      <span class="action-pill" :class="item.actionClass">{{ item.actionLabel }}</span>
++                    </span>
+                     <span>{{ item.stamp }}</span>
+                   </div>
+                   <div class="h-desc">{{ item.desc || '' }}</div>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
 
-               <td>
-                   <span class="chip" :class="getRatingInfo(appt.rating).cls">
-                     {{ getRatingInfo(appt.rating).label }}
-                   </span>
-               </td>
+         <div class="modal-foot">
+           <button class="btn btn-secondary" type="button" @click="closeDetailModal">Đóng</button>
+           <button class="btn btn-primary" type="button" @click="openEditModal(selectedAppointment.id)">
+             <i class="fa-regular fa-pen-to-square"></i>Chỉnh sửa
+           </button>
+         </div>
+       </div>
+     </div>
+   </div>
+ </template>
 
-               <td style="position: relative">
-@@ -2599,50 +2558,51 @@ onBeforeUnmount(() => {
- .filter-btn:hover{ border-color: rgba(102,126,234,0.35); color:#3846c2; }
- .filter-btn.active{
-   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-   color:#fff;
-   border-color: transparent;
-   box-shadow: 0 16px 40px rgba(102,126,234,0.22);
+ <style scoped>
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+ /* ===== Base ===== */
+ .appointments-page{
+@@ -2998,53 +3015,52 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
+   left:50%;
+   top:50%;
+   width:20px;
+   height:20px;
+   transform: translate(-50%, -50%);
+   border-radius:999px;
+   background: var(--mkGlow, rgba(79,172,254,0.28));
  }
 
- .status-tag{
-   padding:8px 12px;
-   border-radius: 999px;
-   font-size:12.5px;
-   font-weight:800;
-   cursor:pointer;
-   border:1px solid transparent;
-   transition:0.2s ease;
-   user-select:none;
-   backdrop-filter: blur(10px);
- }
- .status-tag.active{
-   transform: translateY(-1px);
-   border:1px solid rgba(20,22,30,0.08);
-   box-shadow: 0 14px 28px rgba(0,0,0,0.10);
- }
- .st-all{ background: rgba(148,163,184,0.20); color:#334155; }
-+.st-wait-tag{ background: rgba(251,191,36,0.18); color:#a16207; }
- .st-up-tag{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
- .st-not-tag{ background: rgba(250,112,154,0.18); color:#a43e73; }
- .st-post-tag{ background: rgba(79,172,254,0.18); color:#0b6ea8; }
- .st-cancel-tag{ background: rgba(255,88,88,0.18); color:#b83b2c; }
-
- .btn{
-   padding:11px 14px;
-   border-radius:14px;
-   font-size:13px;
-   font-weight:850;
-   cursor:pointer;
+ /* Chips / consult */
+ .chip{
    display:inline-flex;
    align-items:center;
    gap:8px;
-   transition:0.2s ease;
-   border:none;
+   padding:6px 10px;
+   border-radius:999px;
+   font-weight:900;
+   font-size:12px;
+   border:1px solid rgba(20,22,30,0.06);
+   white-space:nowrap;
  }
- .btn-sm{ padding:10px 12px; border-radius:12px; font-size:12.6px; }
- .btn-primary{
-   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-   color:#fff;
-   box-shadow: 0 16px 40px rgba(102,126,234,0.20);
- }
- .btn-primary:hover{ transform: translateY(-1px); filter: brightness(0.99); }
- .btn-secondary{
-@@ -2918,50 +2878,51 @@ onBeforeUnmount(() => {
-   color:#455064;
- }
- .mini-btn:hover{
-   background: rgba(102,126,234,0.08);
-   color:#3846c2;
-   border-color: rgba(102,126,234,0.28);
- }
+ .ct-owner{ background: rgba(148,163,184,0.16); color:#334155; }
+ .ct-broker{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
+ .ct-relative{ background: rgba(250,112,154,0.16); color:#a43e73; }
 
- /* Status badges (table + day schedule) */
- .status-badge{
+-.rt-pot{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
+-.rt-npot{ background: rgba(255,88,88,0.18); color:#b83b2c; }
+-.rt-care{ background: rgba(79,172,254,0.18); color:#0b6ea8; }
++.rt-bn30{ background: rgba(34,197,94,0.18); color:#166534; }
++.rt-bgp{ background: rgba(147,51,234,0.18); color:#6b21a8; }
+
+ .consult-badge{
    padding:7px 12px;
    border-radius:999px;
    font-size:12px;
@@ -976,37 +451,87 @@ index 8f15c1ba8d6f42a7d86aada068393515a56d69c3..9441450d09e7db600c023976b1a27d80
    display:inline-flex;
    align-items:center;
    gap:8px;
-   cursor:pointer;
-   user-select:none;
    border:1px solid rgba(20,22,30,0.06);
-   transition:0.15s ease;
    white-space:nowrap;
  }
- .status-badge:hover{ transform: translateY(-1px); box-shadow: 0 14px 22px rgba(0,0,0,0.10); }
+ .consult-badge i{ font-size:11px; opacity:0.9; }
+ .cs-ok{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
+ .cs-fail{ background: rgba(255,88,88,0.18); color:#b83b2c; }
+ .cs-care{ background: rgba(79,172,254,0.18); color:#0b6ea8; }
 
-+.st-wait{ background: rgba(251,191,36,0.2); color:#a16207; }
- .st-up{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
- .st-not{ background: rgba(250,112,154,0.18); color:#a43e73; }
- .st-post{ background: rgba(79,172,254,0.18); color:#0b6ea8; }
- .st-cancel{ background: rgba(255,88,88,0.18); color:#b83b2c; }
-
- /* ===== Table ===== */
- .appointments-list .list-header{
-   display:flex; justify-content:space-between; align-items:center;
-   gap:10px; flex-wrap:wrap;
-   margin-bottom:12px;
- }
- .appointments-list h3{ font-size:16px; font-weight:900; display:flex; align-items:center; }
- .pill-muted{
-   display:inline-flex;
-   align-items:center;
+ /* Action menu */
+ .action-dropdown{ position:relative; }
+ .action-btn{
+   width:40px; height:40px;
+   border-radius:14px;
+   border:1px solid rgba(20,22,30,0.10);
+   background: rgba(255,255,255,0.92);
+   display:flex; align-items:center; justify-content:center;
+@@ -3239,50 +3255,67 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
+   flex-direction:column;
    gap:8px;
-   padding:8px 10px;
-   border-radius:999px;
-   background: rgba(148,163,184,0.16);
-   color:#334155;
-   font-weight:850;
+   max-height: 420px;
+   overflow:auto;
+   padding-right:4px;
+ }
+ .h-item{
+   border:1px solid rgba(20,22,30,0.10);
+   border-radius:16px;
+   padding:10px;
+   background: rgba(255,255,255,0.92);
+   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+ }
+ .h-top{
+   display:flex;
+   justify-content:space-between;
+   gap:10px;
+   flex-wrap:wrap;
+   font-weight:900;
    font-size:12px;
-   border:1px solid rgba(20,22,30,0.06);
+   color:#334155;
+   margin-bottom:4px;
+ }
+ .h-desc{ font-size:12.5px; color:#5b6576; font-weight:650; line-height:1.4; }
+ .muted-empty{ font-weight:800; color:#93a2b8; font-size:12.5px; }
++.action-pill{
++  display:inline-flex;
++  align-items:center;
++  padding:2px 8px;
++  border-radius:999px;
++  font-weight:800;
++  font-size:11px;
++  text-transform:uppercase;
++  letter-spacing:0.02em;
++}
++.act-create{ background: rgba(67,233,123,0.2); color:#0b7f6a; }
++.act-edit{ background: rgba(102,126,234,0.18); color:#2f3aa8; }
++.act-status{ background: rgba(251,191,36,0.2); color:#a16207; }
++.act-reschedule{ background: rgba(79,172,254,0.2); color:#0b6ea8; }
++.act-note{ background: rgba(236,72,153,0.18); color:#9f1239; }
++.act-delete{ background: rgba(255,88,88,0.2); color:#b83b2c; }
++.act-other{ background: rgba(148,163,184,0.2); color:#334155; }
+
+ .modal-foot{
+   padding:14px 16px;
+   border-top:1px solid rgba(20,22,30,0.10);
+   display:flex;
+   gap:10px;
+   justify-content:flex-end;
+   background: rgba(255,255,255,0.72);
+   backdrop-filter: blur(10px);
  }
 
+ /* Section title + gradient icons */
+ .section-title{
+   display:flex;
+   align-items:center;
+   gap:10px;
+   margin:12px 0 10px;
+   font-weight:950;
+   color:#0b1220;
+   font-size:13px;
+ }
+ .sec-ico{
+   width:22px; height:22px;
+   border-radius:10px;
+   display:flex; align-items:center; justify-content:center;
