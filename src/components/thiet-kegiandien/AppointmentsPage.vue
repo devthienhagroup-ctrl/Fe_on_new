@@ -2,6 +2,7 @@
 import { ref, reactive, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import api from '/src/api/api.js'
+import FileNew from './File.vue'
 Chart.register(...registerables)
 
 const rootRef = ref(null)
@@ -100,6 +101,13 @@ function getConsultInfo(value) {
     icon: 'fa-circle-question',
   }
 }
+function getStatusInfo(value) {
+  return STATUS[value] || {
+    label: value || 'Chưa có',
+    cls: 'st-unknown',
+    dot: '#94a3b8',
+  }
+}
 
 const APPOINTMENT_ACTION = {
   CREATE: { label: 'Tạo mới', cls: 'act-create' },
@@ -115,11 +123,23 @@ const CUSTOMER_TYPE = {
   MOI_GIOI:   { label: 'Môi giới', cls: 'ct-broker' },
   NGUOI_THAN: { label: 'Người thân', cls: 'ct-relative' },
 }
+function getCustomerTypeInfo(value) {
+  return CUSTOMER_TYPE[value] || {
+    label: value || 'Chưa có',
+    cls: 'ct-unknown',
+  }
+}
 
 
 const RATING = {
   BAN_NHANH_30N: { label: 'Bán nhanh 30 ngày', cls: 'rt-bn30' },
   BAN_GP: { label: 'Bán giải pháp', cls: 'rt-bgp' },
+}
+function getRatingInfo(value) {
+  return RATING[value] || {
+    label: value || 'Chưa có',
+    cls: 'rt-unknown',
+  }
 }
 
 const DAY_START_HOUR = 8
@@ -221,6 +241,8 @@ const isModalOpen = ref(false)
 const isCreateModalOpen = ref(false)
 const isDetailModalOpen = ref(false)
 const selectedAppointment = ref(null)
+const detailCardRef = ref(null)
+const historyPanelRef = ref(null)
 
 // ===== Create form =====
 const createForm = reactive({
@@ -460,9 +482,11 @@ function mapAppointmentDetailFromApi(dto) {
   return {
     id: dto.appointmentId,
 
+    customerId: dto.customer?.id,
     customer: dto.customer?.name,
     phone: dto.customer?.phone,
     address: dto.customer?.address,
+    oldAddress: dto.customer?.oldAress,
     customerNote: dto.customer?.customerNote,
     customerType: dto.customer?.customerType,
     files: dto.customer?.files || [],
@@ -483,6 +507,8 @@ function mapAppointmentDetailFromApi(dto) {
       actor: h.actorName,
       action: h.action,
       desc: h.note,
+      status: h.status,
+      consultStatus: h.consultStatus,
     })),
   }
 }
@@ -497,6 +523,8 @@ async function openDetailModal(appt) {
     const mapped = mapAppointmentDetailFromApi(res.data)
     selectedAppointment.value = mapped
     renderHistory(mapped)
+    await nextTick()
+    syncHistoryPanelHeight()
   } catch (e) {
     detailError.value = 'Không thể tải chi tiết lịch hẹn'
   } finally {
@@ -862,6 +890,13 @@ function closeDetailModal() {
   selectedAppointment.value = null
 }
 
+function syncHistoryPanelHeight() {
+  if (!detailCardRef.value || !historyPanelRef.value) return
+  const leftHeight = detailCardRef.value.offsetHeight
+  if (!leftHeight) return
+  historyPanelRef.value.style.height = `${leftHeight}px`
+}
+
 // ===== Edit modal =====
 function openEditModal(id) {
   const appt = appointments.value.find((x) => x.id === id)
@@ -984,6 +1019,10 @@ async function fetchBranchOptions() {
   } finally {
     branchLoading.value = false
   }
+}
+function getBranchLabel(branchKey) {
+  if (!branchKey) return '-'
+  return BRANCHES.value.find((b) => b.key === branchKey)?.label || branchKey
 }
 // ======= Lấy nhân viên theo chi nhánh =======
 // ===== Consultants for CREATE modal =====
@@ -1383,17 +1422,6 @@ function handleAction(type, appt, event) {
   } else if (type === 'detail') openDetailModal(appt)
 }
 
-// ===== Helpers =====
-function getStatusInfo(status) {
-  return STATUS[status]
-}
-function getCustomerTypeInfo(value) {
-  return CUSTOMER_TYPE[value] || Object.values(CUSTOMER_TYPE)[0]
-}
-function getRatingInfo(value) {
-  return RATING[value] || Object.values(RATING)[0]
-}
-
 // ===== Watchers =====
 watch(
     () => [activeRange.value, activeStatus.value],
@@ -1425,6 +1453,14 @@ watch(
       searchTimer = setTimeout(() => {
         searchKeyword.value = (val || '').trim()
       }, 300)
+    },
+)
+
+watch(
+    () => [selectedAppointment.value, historyItems.value.length],
+    async () => {
+      await nextTick()
+      syncHistoryPanelHeight()
     },
 )
 
@@ -1508,6 +1544,7 @@ onMounted(async () => {
   registerWindowListener('resize', async () => {
     await nextTick()
     initCharts()
+    syncHistoryPanelHeight()
   })
 
 
@@ -2323,7 +2360,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Modal chi tiết (màu mới đẹp hơn + icon nhỏ chung label) -->
-    <div v-if="isDetailModalOpen && selectedAppointment" class="backdrop" @click.self="closeDetailModal">
+    <div v-if="isDetailModalOpen" class="backdrop" @click.self="closeDetailModal">
       <div class="editor-modal detail" role="dialog" aria-modal="true">
         <div class="modal-head">
           <div class="mh-left">
@@ -2339,145 +2376,199 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="modal-body grid">
-          <div class="modal-card detail-card">
-            <div class="card-cap">
-              <i class="fa-solid fa-id-card"></i>
-              <span>Thông tin lịch hẹn</span>
-            </div>
-
-            <div class="detail-grid">
-              <div class="d-item">
-                <div class="d-ico di1"><i class="fa-solid fa-user"></i></div>
-                <div class="d-main">
-                  <div class="d-label">Khách hàng</div>
-                  <div class="d-value">{{ selectedAppointment.customer }}</div>
-                </div>
-              </div>
-
-              <div class="d-item">
-                <div class="d-ico di2"><i class="fa-solid fa-phone"></i></div>
-                <div class="d-main">
-                  <div class="d-label">Số điện thoại</div>
-                  <div class="d-value">{{ selectedAppointment.phone || 'Chưa có' }}</div>
-                </div>
-              </div>
-
-              <div class="d-item">
-                <div class="d-ico di3"><i class="fa-solid fa-building"></i></div>
-                <div class="d-main">
-                  <div class="d-label">Chi nhánh</div>
-                  <div class="d-value">{{ selectedAppointment.branch }}</div>
-                </div>
-              </div>
-
-              <div class="d-item">
-                <div class="d-ico di4"><i class="fa-regular fa-calendar"></i></div>
-                <div class="d-main">
-                  <div class="d-label">Ngày & Giờ</div>
-                  <div class="d-value">{{ formatVNDate(selectedAppointment.date) }} • {{ selectedAppointment.time }}</div>
-                </div>
-              </div>
-
-              <div class="d-item">
-                <div class="d-ico di5"><i class="fa-solid fa-user-tie"></i></div>
-                <div class="d-main">
-                  <div class="d-label">NV phụ trách</div>
-                  <div class="d-value">{{ selectedAppointment.staff }}</div>
-                </div>
-              </div>
-
-              <div class="d-item">
-                <div class="d-ico di6"><i class="fa-solid fa-circle-dot"></i></div>
-                <div class="d-main">
-                  <div class="d-label">Tình trạng</div>
-                  <div class="d-value">
-                    <span class="status-badge" :class="STATUS[selectedAppointment.status].cls">
-                      {{ STATUS[selectedAppointment.status].label }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="d-item">
-                <div class="d-ico di7"><i class="fa-solid fa-bullseye"></i></div>
-                <div class="d-main">
-                  <div class="d-label">KQ tư vấn</div>
-                  <div class="d-value">
-                    <span
-                        v-if="appt && appt.consultStatus != null"
-                        class="consult-badge"
-                        :class="getConsultInfo(appt.consultStatus).cls"
-                    >
-                      <i class="fa-solid" :class="getConsultInfo(appt.consultStatus).icon"></i>
-                      {{ getConsultInfo(appt.consultStatus).label }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="d-item">
-                <div class="d-ico di8"><i class="fa-solid fa-tag"></i></div>
-                <div class="d-main">
-                  <div class="d-label">Phân loại</div>
-                  <div class="d-value">
-                    <span class="chip" :class="CUSTOMER_TYPE[selectedAppointment.customerType].cls">
-                      {{ CUSTOMER_TYPE[selectedAppointment.customerType].label }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="d-item">
-                <div class="d-ico di9"><i class="fa-solid fa-star"></i></div>
-                <div class="d-main">
-                  <div class="d-label">Loại dịch vụ</div>
-                  <div class="d-value">
-                    <span class="chip" :class="RATING[selectedAppointment.rating].cls">
-                      {{ RATING[selectedAppointment.rating].label }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="d-item">
-                <div class="d-ico di10"><i class="fa-solid fa-shield-halved"></i></div>
-                <div class="d-main">
-                  <div class="d-label">Người tạo</div>
-                  <div class="d-value">{{ selectedAppointment.creator }}</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="note-box">
-              <div class="note-cap"><i class="fa-regular fa-note-sticky"></i> Ghi chú</div>
-              <div class="note-body">{{ selectedAppointment.note || 'Không có ghi chú' }}</div>
-            </div>
+          <div v-if="detailLoading" class="detail-state">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Đang tải dữ liệu...
           </div>
+          <div v-else-if="detailError" class="detail-state error">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            {{ detailError }}
+          </div>
+          <div v-else-if="!selectedAppointment" class="detail-state error">
+            <i class="fa-solid fa-circle-xmark"></i>
+            Không có dữ liệu chi tiết.
+          </div>
+          <template v-else>
+            <div ref="detailCardRef" class="modal-card detail-card">
+              <div class="card-cap">
+                <i class="fa-solid fa-id-card"></i>
+                <span>Chi tiết lịch hẹn</span>
+              </div>
 
-          <div class="modal-panel">
-            <h5>
-              <span class="sec-ico si4"><i class="fa-solid fa-clock-rotate-left"></i></span>
-              Lịch sử thay đổi
-            </h5>
-
-            <div class="history">
-              <div v-if="!historyItems.length" class="muted-empty">Chưa có lịch sử.</div>
-              <div v-else>
-                <div v-for="item in historyItems" :key="item.ts" class="h-item">
-                  <div class="h-top">
-                    <span>
-                      {{ item.actor }} •
-                      <span class="action-pill" :class="getActionInfo(item.action).cls">
-                        {{ getActionInfo(item.action).label }}
+              <div class="detail-section">
+                <div class="section-head">
+                  <span class="section-ico si-appointment"><i class="fa-regular fa-calendar-check"></i></span>
+                  <h5>Thông tin lịch hẹn</h5>
+                </div>
+                <div class="section-divider"></div>
+                <div class="section-grid">
+                  <div class="field-row">
+                    <div class="field-label">Ngày & Giờ</div>
+                    <div class="field-value">{{ formatVNDate(selectedAppointment.date) }} • {{ selectedAppointment.time }}</div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field-label">Trạng thái</div>
+                    <div class="field-value">
+                      <span class="status-badge" :class="getStatusInfo(selectedAppointment.status).cls">
+                        {{ getStatusInfo(selectedAppointment.status).label }}
                       </span>
-                    </span>
-                    <span>{{ item.stamp }}</span>
+                    </div>
                   </div>
-                  <div class="h-desc">{{ item.desc || '' }}</div>
+                  <div class="field-row">
+                    <div class="field-label">KQ tư vấn</div>
+                    <div class="field-value">
+                      <span class="consult-badge" :class="getConsultInfo(selectedAppointment.consultStatus).cls">
+                        <i class="fa-solid" :class="getConsultInfo(selectedAppointment.consultStatus).icon"></i>
+                        {{ getConsultInfo(selectedAppointment.consultStatus).label }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field-label">Loại dịch vụ</div>
+                    <div class="field-value">
+                      <span class="chip" :class="getRatingInfo(selectedAppointment.rating).cls">
+                        {{ getRatingInfo(selectedAppointment.rating).label }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field-label">Chi nhánh</div>
+                    <div class="field-value">{{ getBranchLabel(selectedAppointment.branch) }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <div class="section-head">
+                  <span class="section-ico si-customer"><i class="fa-solid fa-user"></i></span>
+                  <h5>Thông tin khách hàng</h5>
+                </div>
+                <div class="section-divider"></div>
+                <div class="section-grid">
+                  <div class="field-row">
+                    <div class="field-label">Mã khách</div>
+                    <div class="field-value">{{ selectedAppointment.customerId || '-' }}</div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field-label">Tên khách hàng</div>
+                    <div class="field-value">{{ selectedAppointment.customer || '-' }}</div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field-label">Số điện thoại</div>
+                    <div class="field-value">{{ selectedAppointment.phone || '-' }}</div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field-label">Địa chỉ hiện tại</div>
+                    <div class="field-value">{{ selectedAppointment.address || '-' }}</div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field-label">Địa chỉ cũ</div>
+                    <div class="field-value">{{ selectedAppointment.oldAddress || '-' }}</div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field-label">Loại khách</div>
+                    <div class="field-value">
+                      <span class="chip" :class="getCustomerTypeInfo(selectedAppointment.customerType).cls">
+                        {{ getCustomerTypeInfo(selectedAppointment.customerType).label }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <div class="section-head">
+                  <span class="section-ico si-note"><i class="fa-regular fa-note-sticky"></i></span>
+                  <h5>Ghi chú</h5>
+                </div>
+                <div class="section-divider"></div>
+                <div class="note-grid">
+                  <div class="note-card">
+                    <div class="note-title">Ghi chú lịch hẹn</div>
+                    <div class="note-body">{{ selectedAppointment.note || 'Không có ghi chú' }}</div>
+                  </div>
+                  <div class="note-card">
+                    <div class="note-title">Ghi chú khách</div>
+                    <div class="note-body">{{ selectedAppointment.customerNote || 'Không có ghi chú' }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <div class="section-head">
+                  <span class="section-ico si-staff"><i class="fa-solid fa-user-tie"></i></span>
+                  <h5>Nhân sự liên quan</h5>
+                </div>
+                <div class="section-divider"></div>
+                <div class="section-grid">
+                  <div class="field-row">
+                    <div class="field-label">Tư vấn viên</div>
+                    <div class="field-value">{{ selectedAppointment.consultant || '-' }}</div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field-label">Người tạo</div>
+                    <div class="field-value">{{ selectedAppointment.creator || '-' }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <div class="section-head">
+                  <span class="section-ico si-file"><i class="fa-solid fa-paperclip"></i></span>
+                  <h5>Tệp đính kèm</h5>
+                  <span class="section-sub">({{ selectedAppointment.files.length }} tệp)</span>
+                </div>
+                <div class="section-divider"></div>
+                <div class="file-list">
+                  <div v-if="!selectedAppointment.files.length" class="muted-empty">Không có tệp đính kèm.</div>
+                  <FileNew
+                      v-else
+                      :key="'appointment-files'"
+                      :file-list="selectedAppointment.files"
+                      :entity-id="selectedAppointment.customerId"
+                      entity-type="host"
+                      :allow-download-all="true"
+                      :can-edit="false"
+                      :on-upload="false"
+                  />
                 </div>
               </div>
             </div>
-          </div>
+
+            <div ref="historyPanelRef" class="modal-panel">
+              <h5>
+                <span class="sec-ico si4"><i class="fa-solid fa-clock-rotate-left"></i></span>
+                Lịch sử thay đổi
+              </h5>
+
+              <div class="history">
+                <div v-if="!historyItems.length" class="muted-empty">Chưa có lịch sử.</div>
+                <div v-else>
+                  <div v-for="item in historyItems" :key="item.ts" class="h-item">
+                    <div class="h-top">
+                      <span>
+                        {{ item.actor }} •
+                        <span class="action-pill" :class="getActionInfo(item.action).cls">
+                          {{ getActionInfo(item.action).label }}
+                        </span>
+                      </span>
+                      <span>{{ item.stamp }}</span>
+                    </div>
+                    <div v-if="item.status || item.consultStatus" class="h-meta">
+                      <span v-if="item.status" class="status-badge" :class="getStatusInfo(item.status).cls">
+                        {{ getStatusInfo(item.status).label }}
+                      </span>
+                      <span v-if="item.consultStatus" class="consult-badge" :class="getConsultInfo(item.consultStatus).cls">
+                        <i class="fa-solid" :class="getConsultInfo(item.consultStatus).icon"></i>
+                        {{ getConsultInfo(item.consultStatus).label }}
+                      </span>
+                    </div>
+                    <div class="h-desc">{{ item.desc || '' }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
         </div>
 
         <div class="modal-foot">
@@ -3152,9 +3243,11 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
 .ct-owner{ background: rgba(148,163,184,0.16); color:#334155; }
 .ct-broker{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
 .ct-relative{ background: rgba(250,112,154,0.16); color:#a43e73; }
+.ct-unknown{ background: rgba(148,163,184,0.22); color:#475569; }
 
 .rt-bn30{ background: rgba(34,197,94,0.18); color:#166534; }
 .rt-bgp{ background: rgba(147,51,234,0.18); color:#6b21a8; }
+.rt-unknown{ background: rgba(148,163,184,0.22); color:#475569; }
 
 .consult-badge{
   padding:7px 12px;
@@ -3171,6 +3264,8 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
 .cs-ok{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
 .cs-fail{ background: rgba(255,88,88,0.18); color:#b83b2c; }
 .cs-care{ background: rgba(79,172,254,0.18); color:#0b6ea8; }
+
+.st-unknown{ background: rgba(148,163,184,0.2); color:#475569; }
 
 /* Action menu */
 .action-dropdown{ position:relative; }
@@ -3318,6 +3413,7 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
   grid-template-columns: 1.15fr 0.85fr;
   gap:14px;
   align-content:start;
+  align-items:stretch;
 }
 .modal-body.single{ display:block; }
 @media (max-width:920px){
@@ -3334,6 +3430,21 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
 .detail-card{
   background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(255,255,255,0.86));
 }
+.detail-state{
+  grid-column: 1 / -1;
+  background: rgba(255,255,255,0.88);
+  border:1px solid rgba(20,22,30,0.10);
+  border-radius:18px;
+  padding:20px;
+  font-weight:800;
+  color:#334155;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+.detail-state.error{ color:#b83b2c; }
 
 .card-cap{
   display:inline-flex;
@@ -3356,6 +3467,10 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
   box-shadow: 0 8px 26px rgba(0,0,0,0.08);
   backdrop-filter: blur(10px);
   min-height: 260px;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
 }
 .modal-panel h5{
   font-size:13px;
@@ -3370,7 +3485,7 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
   display:flex;
   flex-direction:column;
   gap:8px;
-  max-height: 420px;
+  flex:1;
   overflow:auto;
   padding-right:4px;
 }
@@ -3390,6 +3505,12 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
   font-size:12px;
   color:#334155;
   margin-bottom:4px;
+}
+.h-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-bottom:6px;
 }
 .h-desc{ font-size:12.5px; color:#5b6576; font-weight:650; line-height:1.4; }
 .muted-empty{ font-weight:800; color:#93a2b8; font-size:12.5px; }
@@ -3631,6 +3752,121 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
   font-weight:650;
   line-height:1.5;
 }
+
+/* Detail sections (compact, grouped) */
+.detail-section + .detail-section{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px dashed rgba(148,163,184,0.35);
+}
+.section-head{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:8px;
+  color:#0b1220;
+}
+.section-divider{
+  height:2px;
+  width:100%;
+  border-radius:999px;
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
+  margin-bottom:10px;
+  opacity:0.85;
+}
+.section-head h5{
+  margin:0;
+  font-size:13.5px;
+  font-weight:900;
+}
+.section-ico{
+  width:26px; height:26px;
+  border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  color:#fff;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.14);
+  flex:0 0 auto;
+}
+.section-ico i{ font-size:12px; }
+.si-appointment{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.si-customer{ background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.si-note{ background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+.si-staff{ background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+.si-file{ background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.section-sub{
+  margin-left:auto;
+  font-size:12px;
+  font-weight:800;
+  color:#64748b;
+}
+.section-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:8px;
+}
+@media (max-width:560px){ .section-grid{ grid-template-columns: 1fr; } }
+.field-row{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  padding:8px 10px;
+  border-radius:14px;
+  border:1px solid rgba(20,22,30,0.06);
+  background: rgba(255,255,255,0.92);
+}
+.field-label{
+  font-size:12px;
+  font-weight:800;
+  color:#5b6576;
+}
+.field-value{
+  font-size:13px;
+  font-weight:850;
+  color:#0b1220;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.note-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:10px;
+}
+@media (max-width:560px){ .note-grid{ grid-template-columns: 1fr; } }
+.note-card{
+  border-radius:16px;
+  border:1px solid rgba(20,22,30,0.06);
+  background: rgba(255,255,255,0.92);
+  padding:10px;
+}
+.note-title{
+  font-size:12px;
+  font-weight:900;
+  color:#334155;
+  margin-bottom:6px;
+}
+.file-list ul{
+  list-style:none;
+  padding:0;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.file-list li{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12.5px;
+  font-weight:750;
+  color:#334155;
+  padding:6px 8px;
+  border-radius:12px;
+  border:1px solid rgba(20,22,30,0.06);
+  background: rgba(255,255,255,0.92);
+}
+.file-list i{ color:#64748b; }
 
 /* Responsive */
 @media (max-width:768px){
