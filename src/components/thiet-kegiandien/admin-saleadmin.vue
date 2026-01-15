@@ -2,93 +2,41 @@
   <div class="app-scale">
     <div class="app-root">
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#" style="text-align: justify ">
-          <i class="fas fa-phone-alt"></i>
-          <span>ADMIN PRO</span>
-          <div class="d-flex align-items-center gap-2">
-            <NotificationBell />
+      <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid">
+
+          <!-- ===== BRAND (BÊN TRÁI) ===== -->
+          <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+            <i class="fas fa-phone-alt"></i>
+            <span class="fw-bold">ADMIN PRO</span>
+          </a>
+
+          <!-- ===== USER INFO (BÊN PHẢI) ===== -->
+          <div class="ms-auto d-flex align-items-center gap-2">
             <div class="d-flex flex-column align-items-end text-end">
-              <div class="fw-semibold text-dark">{{ info.fullName }}</div>
+              <div class="fw-semibold text-dark">
+                {{ info.fullName }}
+              </div>
             </div>
 
             <img
                 v-if="info.avatarUrl"
-                :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+                :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
                 alt="avatar"
                 class="rounded-circle border"
                 style="width: 36px; height: 36px; object-fit: cover;"
             />
+
             <div v-else class="avatar-circle">
               {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
             </div>
           </div>
-        </a>
 
-        <button class="navbar-toggler" type="button" @click="toggleMobileMenu">
-          <span class="navbar-toggler-icon"><i class="fas fa-bars text-white"></i></span>
-        </button>
-
-        <div class="collapse navbar-collapse" :class="{ show: mobileMenuOpen }" id="navbarNav">
-          <ul class="navbar-nav mx-auto">
-            <li class="nav-item">
-              <a class="nav-link-custom active" href="#">
-                <i class="fas fa-home me-2"></i> Dashboard
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link-custom" href="#">
-                <i class="fas fa-users me-2"></i> Khách hàng
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link-custom" href="#">
-                <i class="fas fa-chart-bar me-2"></i> Báo cáo
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link-custom" href="#">
-                <i class="fas fa-cog me-2"></i> Cài đặt
-              </a>
-            </li>
-          </ul>
-
-          <div class="d-flex align-items-center gap-3">
-            <div class="dropdown">
-              <button class="btn btn-outline-custom btn-custom" type="button" @click="toggleNotifications">
-                <i class="fas fa-bell"></i>
-                <span class="badge bg-danger rounded-pill">3</span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end" :class="{ show: notificationsOpen }">
-                <li><h6 class="dropdown-header">Thông báo mới</h6></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-user-check text-success me-2"></i> 5 khách hàng mới</a></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-chart-line text-primary me-2"></i> Báo cáo tuần đã sẵn sàng</a></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-exclamation-triangle text-warning me-2"></i> Còn 12 cuộc gọi</a></li>
-              </ul>
-            </div>
-
-            <div class="dropdown">
-              <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" @click="toggleUserMenu">
-                <div class="user-avatar me-2">NV</div>
-                <div class="d-flex flex-column">
-                  <span class="text-white fw-medium">Nguyễn Văn A</span>
-                  <small class="text-white-50">Telesale Manager</small>
-                </div>
-              </a>
-              <ul class="dropdown-menu dropdown-menu-end" :class="{ show: userMenuOpen }">
-                <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2"></i> Hồ sơ</a></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Cài đặt</a></li>
-                <li><hr class="dropdown-divider" /></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
-              </ul>
-            </div>
-          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
 
-    <!-- ✅ Shell: Sidebar đứng yên + Main cuộn riêng -->
+
+      <!-- ✅ Shell: Sidebar đứng yên + Main cuộn riêng -->
     <div class="app-shell">
       <!-- Sidebar -->
       <aside class="sidebar-wrap">

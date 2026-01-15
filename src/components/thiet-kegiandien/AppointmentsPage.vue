@@ -4,7 +4,10 @@ import { Chart, registerables } from 'chart.js'
 import api from '/src/api/api.js'
 import FileNew from './File.vue'
 Chart.register(...registerables)
-
+import {useAuthStore} from "/src/stores/authStore.js";
+const authStore = useAuthStore();
+const info = authStore.userInfo;
+// Trong script setup, thêm route
 const rootRef = ref(null)
 const cleanupHandlers = []
 let chart1 = null
@@ -505,7 +508,7 @@ function mapAppointmentDetailFromApi(dto) {
     customerFee: dto.customer?.phi ?? null,
     customerType: dto.customer?.customerType,
     files: dto.customer?.files || [],
-
+    giaBDS: dto.customer?.giaBDS || null,
     date: dto.appointmentDate,
     time: dto.appointmentTime,
     status: dto.status,
@@ -1904,6 +1907,22 @@ onBeforeUnmount(() => {
           <h2><i class="fa-solid fa-calendar-check me-2"></i>Quản lý lịch hẹn</h2>
           <p>Tạo, theo dõi và cập nhật trạng thái • phân loại • đánh giá</p>
         </div>
+        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex flex-column align-items-end text-end">
+          <div class="fw-semibold text-dark">{{ info.fullName }}</div>
+        </div>
+
+        <img
+            v-if="info.avatarUrl"
+            :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+            alt="avatar"
+            class="rounded-circle border"
+            style="width: 36px; height: 36px; object-fit: cover;"
+        />
+        <div v-else class="avatar-circle">
+          {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
+        </div>
+        </div>
       </div>
 
       <!-- Stats (KHÔNG ăn filter) -->
@@ -1935,7 +1954,7 @@ onBeforeUnmount(() => {
       </section>
 
       <!-- Charts row (NẰM TRÊN BỘ LỌC + LỊCH) -->
-      <section class="charts-row">
+      <section v-if="authStore.hasPermission('TELE_VIEN')" class="charts-row">
         <div class="chart-card c1">
           <div class="chart-head">
             <div class="ico-bubble gA"><i class="fa-solid fa-chart-column"></i></div>
@@ -1976,7 +1995,7 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <section class="charts-row">
+      <section v-if="authStore.hasPermission('TU_VAN_VIEN')" class="charts-row">
         <div class="chart-card c3">
           <div class="chart-head">
             <div class="ico-bubble gC"><i class="fa-solid fa-bullseye"></i></div>
@@ -1990,11 +2009,11 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div class="chart-card c1">
+        <div class="chart-card c1 revenue-chart">
           <div class="chart-head">
             <div class="ico-bubble gA"><i class="fa-solid fa-sack-dollar"></i></div>
             <div>
-              <h4>Doanh thu theo ngày</h4>
+              <h4>Doanh thu</h4>
               <p class="sub">Tổng phí từ lịch hẹn trong khoảng thời gian</p>
             </div>
           </div>
@@ -2172,9 +2191,6 @@ onBeforeUnmount(() => {
                         <button class="mini-btn" title="Sửa" @click.stop="openEditModal(appt.id)">
                           <i class="fa-regular fa-pen-to-square"></i>
                         </button>
-                        <button class="mini-btn" title="Đổi trạng thái" data-mini="status" @click.stop="openStatusPopover($event.currentTarget, appt.id)">
-                          <i class="fa-solid fa-rotate"></i>
-                        </button>
                       </div>
                     </div>
                   </template>
@@ -2296,14 +2312,6 @@ onBeforeUnmount(() => {
                     <button @click.stop="handleAction('edit', appt, $event)">
                       <i class="fa-regular fa-pen-to-square"></i>
                       Sửa lịch hẹn
-                    </button>
-                    <button @click.stop="handleAction('status', appt, $event)">
-                      <i class="fa-solid fa-rotate"></i>
-                      Đổi tình trạng
-                    </button>
-                    <button @click.stop="handleAction('delete', appt, $event)">
-                      <i class="fa-regular fa-trash-can"></i>
-                      Xoá lịch hẹn
                     </button>
                   </div>
                 </div>
@@ -2796,12 +2804,15 @@ onBeforeUnmount(() => {
                 <div class="section-divider"></div>
                 <div class="section-grid">
                   <div class="field-row">
-                    <div class="field-label">Mã khách</div>
-                    <div class="field-value">{{ selectedAppointment.customerId || '-' }}</div>
-                  </div>
-                  <div class="field-row">
                     <div class="field-label">Tên khách hàng</div>
                     <div class="field-value">{{ selectedAppointment.customer || '-' }}</div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field-label">Giá BĐS: </div>
+                    <div class="field-value">
+                      {{ formatCurrencyVND(selectedAppointment.giaBDS) }}
+                    </div>
+
                   </div>
                   <div class="field-row">
                     <div class="field-label">Số điện thoại</div>
@@ -2947,6 +2958,15 @@ onBeforeUnmount(() => {
   line-height:1.6;
   background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
   zoom: 0.8;
+}
+/* ===== Revenue chart chiếm 2 cột ===== */
+.revenue-chart{
+  grid-column: span 2;
+  min-height: 420px;
+}
+
+.revenue-chart .chart-container{
+  height: 340px; /* cao hơn chart thường */
 }
 
 /* ===== Toast ===== */
