@@ -1492,77 +1492,74 @@ const router = createRouter({
     }
 });
 
+
+
 router.beforeEach((to, from, next) => {
-    console.group(`=== Navigation từ "${from.fullPath || '/'}" đến "${to.fullPath}" ===`);
+    console.group(`=== Navigation từ "${from.fullPath || '/'}" đến "${to.fullPath}" ===`)
 
-    const auth = useAuthStore();
-    const isLoggedIn = !!auth.accessToken;
-    const loginFrom = localStorage.getItem("loginFrom");
+    const auth = useAuthStore()
+    const isLoggedIn = !!auth.accessToken
+    const loginFrom = localStorage.getItem('loginFrom')
 
-    console.log("1. Trạng thái hiện tại:");
-    console.log("   - isLoggedIn:", isLoggedIn);
-    console.log("   - accessToken:", auth.accessToken ? "Có" : "Không");
-    console.log("   - loginFrom trong localStorage:", loginFrom);
-    console.log("   - to.meta.requiresAuth:", to.meta.requiresAuth);
-    console.log("   - to.meta.loginFrom:", to.meta.loginFrom);
+    console.log('1. Trạng thái hiện tại:')
+    console.log('   - isLoggedIn:', isLoggedIn)
+    console.log('   - to.meta.requiresAuth:', to.meta.requiresAuth)
+    console.log('   - to.meta.loginFrom:', to.meta.loginFrom)
 
-    if (to.meta.requiresAuth) {
-        console.log("2. Route yêu cầu xác thực");
+    // ===== ROUTE CẦN ĐĂNG NHẬP =====
+    if (to.meta.requiresAuth && !isLoggedIn) {
+        console.log('2. Route yêu cầu xác thực nhưng CHƯA đăng nhập')
 
-        if (!isLoggedIn) {
-            console.log("3. Người dùng CHƯA đăng nhập");
-            console.log("   - Lưu redirectUrl:", to.fullPath);
-            localStorage.setItem("redirectUrl", to.fullPath);
+        localStorage.setItem('redirectUrl', to.fullPath)
 
-            if (to.meta.loginFrom === "user") {
-                console.log("4. Đăng nhập từ trang user");
-                localStorage.setItem("loginFrom", "user");
-                console.log("   - Kích hoạt mở modal đăng nhập");
-                window.dispatchEvent(new Event('open-login-modal'));
-                console.log("   - Dừng navigation, ở lại trang hiện tại");
-                console.groupEnd();
-                return next(false);
-            } else {
-                console.log("4. Đăng nhập từ trang admin");
-                localStorage.setItem("loginFrom", "admin");
-                console.log("   - Chuyển hướng đến trang đăng nhập admin");
-                console.groupEnd();
-                return next("/-thg/dang-nhap");
-            }
-        } else {
-            console.log("3. Người dùng ĐÃ đăng nhập");
-            if (to.meta.loginFrom === "user") {
-                localStorage.setItem("loginFrom", "user");
-                console.log("   - Đặt loginFrom thành 'user'");
-            } else {
-                localStorage.setItem("loginFrom", "admin");
-                console.log("   - Đặt loginFrom thành 'admin'");
-            }
+        if (to.meta.loginFrom === 'user') {
+            console.log('3. Login dạng USER → mở modal')
+
+            localStorage.setItem('loginFrom', 'user')
+            auth.openLoginModal()
+
+            console.groupEnd()
+            return next('/') // chặn route, nhưng UI vẫn render
         }
-    } else {
-        console.log("2. Route KHÔNG yêu cầu xác thực");
+
+        console.log('3. Login dạng ADMIN → redirect page')
+        localStorage.setItem('loginFrom', 'admin')
+
+        console.groupEnd()
+        return next('/-thg/dang-nhap')
     }
 
-    if ((to.path === "/-thg/dang-nhap" || to.path === "/dang-nhap") && isLoggedIn) {
-        console.log("5. Truy cập trang đăng nhập khi đã đăng nhập");
-        console.log("   - loginFrom:", loginFrom);
+    // ===== ĐÃ ĐĂNG NHẬP =====
+    if (to.meta.requiresAuth && isLoggedIn) {
+        localStorage.setItem(
+            'loginFrom',
+            to.meta.loginFrom === 'user' ? 'user' : 'admin'
+        )
+    }
 
-        if (loginFrom === "user") {
-            console.log("   - Chuyển hướng về trang chủ user");
-            console.groupEnd();
-            return next("/");
+    // ===== ĐÃ LOGIN MÀ VÀO TRANG LOGIN =====
+    if (
+        (to.path === '/-thg/dang-nhap' || to.path === '/dang-nhap') &&
+        isLoggedIn
+    ) {
+        console.log('4. Đã đăng nhập mà vào trang login')
+
+        if (loginFrom === 'user') {
+            console.groupEnd()
+            return next('/')
         }
-        if (loginFrom === "admin") {
-            console.log("   - Chuyển hướng về trang quản lý admin");
-            console.groupEnd();
-            return next("/-thg/quan-ly");
+
+        if (loginFrom === 'admin') {
+            console.groupEnd()
+            return next('/-thg/quan-ly')
         }
     }
 
-    console.log("6. Cho phép navigation tiếp tục");
-    console.groupEnd();
-    next();
-});
+    console.log('5. Cho phép navigation')
+    console.groupEnd()
+    next()
+})
+
 
 router.afterEach((to, from, failure) => {
     // Nếu có failure hoặc navigation không thành công, không xử lý tailwind

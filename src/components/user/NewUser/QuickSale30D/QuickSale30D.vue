@@ -399,12 +399,26 @@
               <!-- Giá đề xuất -->
               <div class="bg-slate-900/50 rounded-xl p-5 border border-blue-400/20">
                 <div class="flex items-center justify-between">
-                  <div>
-                    <p class="text-slate-400 text-sm">{{ searchResultSuggestedPrice.title }}</p>
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                      <p class="text-slate-400 text-sm">{{ searchResultSuggestedPrice.title }}</p>
+                      <!-- Icon con mắt bị gạch khi chưa đăng nhập -->
+                      <button
+                          v-if="!isLoggedIn"
+                          @click="handleViewPrice"
+                          class="text-slate-400 hover:text-purple-400 transition p-1"
+                          title="Đăng nhập để xem giá"
+                      >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                        </svg>
+                      </button>
+                    </div>
                     <p class="text-3xl font-bold text-white mt-1">
-                      {{ searchResult.giaDeXuat }} tỷ VNĐ
+                      {{ displayedGiaDeXuat }}
                     </p>
-                    <p class="text-sm text-slate-300 mt-1">{{ formattedSuggestedPriceSubtitle }}</p>
+                    <p class="text-sm text-slate-300 mt-1">{{ displayedPriceRange }}</p>
                   </div>
                   <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
                     <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -416,11 +430,11 @@
                 <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
                   <div class="p-3 bg-slate-800/50 rounded-lg">
                     <p class="text-slate-400">{{ searchResultSuggestedPrice.compare }}</p>
-                    <p :class="chenhLechClass">{{ chenhLechText }}</p>
+                    <p :class="isLoggedIn ? chenhLechClass : ''">{{ displayedChenhLech }}</p>
                   </div>
                   <div class="p-3 bg-slate-800/50 rounded-lg">
                     <p class="text-slate-400">{{ searchResultSuggestedPrice.average }}</p>
-                    <p class="text-white font-semibold">{{ (searchResult.giaDeXuat * 0.96).toFixed(1) }} tỷ</p>
+                    <p class="text-white font-semibold">{{ displayedAveragePrice }}</p>
                   </div>
                 </div>
               </div>
@@ -443,7 +457,6 @@
               </div>
 
               <!-- Nút đăng nhập để xem chi tiết -->
-              <!-- Nút đăng nhập để xem chi tiết -->
               <div class="text-center pt-4">
                 <button
                     @click="handleViewDetails"
@@ -453,9 +466,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                   </svg>
-                  {{ authStore.userInfo == null ? config.buttons.loginToView.text : config.buttons.viewDetails.text }}
+                  {{ isLoggedIn ? config.buttons.viewDetails.text : config.buttons.loginToView.text }}
                 </button>
-                <p class="text-xs text-slate-500 mt-3">{{ searchResultSavedNotice }}</p>
+                <p class="text-xs text-slate-500 mt-3">{{ isLoggedIn ? searchResultSavedNotice : 'Đăng nhập để xem giá và lưu kết quả' }}</p>
               </div>
             </div>
           </div>
@@ -956,7 +969,7 @@ const selectWard = (ward) => {
 const authStore = useAuthStore();
 
 const openLoginModal = () => {
-  window.dispatchEvent(new Event('open-login-modal'));
+  authStore.openLoginModal()
 }
 
 // ========== FORM CONFIG (SET CỨNG) ==========
@@ -980,11 +993,11 @@ const searchFormPlaceholders = {
 };
 
 const landUseOptions = [
-  { value: 'so-do', label: 'Sổ đỏ (Sở hữu lâu dài)' },
-  { value: 'so-hong', label: 'Sổ hồng (Nhà nước cho thuê đất)' },
-  { value: 'hop-dong', label: 'Hợp đồng thuê đất' },
-  { value: 'chua-co', label: 'Chưa có sổ' },
-  { value: 'giay-to-khac', label: 'Giấy tờ khác' }
+  { value: 'SO_DO', label: 'Sổ đỏ (Sở hữu lâu dài)' },
+  { value: 'SO_HONG', label: 'Sổ hồng (Nhà nước cho thuê đất)' },
+  { value: 'HOP_DONG_THUE_DAT', label: 'Hợp đồng thuê đất' },
+  { value: 'CHUA_CO_SO', label: 'Chưa có sổ' },
+  { value: 'GIAY_TO_KHAC', label: 'Giấy tờ khác' }
 ];
 
 const priceHint = 'Nhập giá bạn mong muốn bán (đơn vị: tỷ đồng)';
@@ -1379,6 +1392,87 @@ const searchResult = reactive({
   minPrice: 0, // Thêm trường min
   maxPrice: 0  // Thêm trường max
 });
+//Dữ liệu gửi về BE
+const PropertySaleDTO = reactive({
+  fullName: '',
+  phone: '',
+  email: '',
+  province: '',
+  ward: '',
+  addressDetail: '',
+  soTo: 0,
+  soThua: 0,
+  dienTichDat: 0,
+  dienTichSan: 0,
+  ketCauCongTrinh: '',
+
+  landUseRight: '',
+  expectedPrice: 0,
+
+  estimatedSaleTimeDays: 0,
+  suggestedPrice: 0,
+  priceChangePercent: 0,
+  areaAveragePrice: 0,
+  acceptedPriceMin: 0,
+  acceptedPriceMax: 0,
+  saleSuccessRate: 0,
+})
+
+// ========== COMPUTED PROPERTIES ==========
+const isLoggedIn = computed(() => authStore.userInfo != null);
+
+// Computed properties cho hiển thị giá
+const displayedGiaDeXuat = computed(() => {
+  if (isLoggedIn.value) {
+    return `${searchResult.giaDeXuat} tỷ VNĐ`;
+  }
+  return '*******';
+});
+
+const displayedChenhLech = computed(() => {
+  if (isLoggedIn.value) {
+    return chenhLechText.value;
+  }
+  return '******';
+});
+
+const displayedAveragePrice = computed(() => {
+  if (isLoggedIn.value) {
+    return `${(searchResult.giaDeXuat * 0.96).toFixed(1)} tỷ`;
+  }
+  return '******';
+});
+
+const displayedPriceRange = computed(() => {
+  if (isLoggedIn.value) {
+    return `Giá thị trường chấp nhận: ${searchResult.minPrice} - ${searchResult.maxPrice} tỷ`;
+  }
+  return 'Giá thị trường chấp nhận: ******* - ******* tỷ';
+});
+
+// Computed property cho chênh lệch giá
+const chenhLechText = computed(() => {
+  return searchResult.chenhLech > 0
+      ? `+${searchResult.chenhLech}%`
+      : `${searchResult.chenhLech}%`;
+});
+
+const chenhLechClass = computed(() => {
+  return searchResult.chenhLech > 0
+      ? 'text-green-400 font-semibold'
+      : 'text-rose-400 font-semibold';
+});
+
+// Computed property cho progress bar
+const progressWidth = computed(() => {
+  const totalDays = 30
+  const soldDays = searchResult.ngayBan || 0
+
+  const percent = Math.min((soldDays / totalDays) * 100, 100)
+
+  return `${percent}%`
+})
+
 
 // ========== HÀM XỬ LÝ LOCALSTORAGE ==========
 
@@ -1501,13 +1595,13 @@ const saveResultToLocalStorage = (result) => {
 // ========== HÀM XỬ LÝ FORM ==========
 
 // Hàm hiện thông báo đăng nhập bằng SweetAlert2
-const showLoginPrompt = () => {
+const showLoginPrompt = (message = 'Vui lòng đăng nhập để xem kết quả dự đoán chi tiết từ hệ thống AI.') => {
   return new Promise((resolve) => {
     Swal.fire({
       title: 'Yêu cầu đăng nhập',
       html: `
         <div class="text-slate-300 text-sm leading-relaxed">
-          <p class="mb-3">Vui lòng đăng nhập để xem kết quả dự đoán chi tiết từ hệ thống AI.</p>
+          <p class="mb-3">${message}</p>
           <p class="text-xs text-slate-400">Kết quả sẽ được lưu vào tài khoản của bạn để xem lại sau.</p>
         </div>
       `,
@@ -1527,7 +1621,6 @@ const showLoginPrompt = () => {
       showLoaderOnConfirm: false,
       preConfirm: () => {
         openLoginModal();
-        // return false; // Không đóng modal SweetAlert ngay
       }
     }).then((result) => {
       if (result.dismiss === Swal.DismissReason.cancel) {
@@ -1539,6 +1632,7 @@ const showLoginPrompt = () => {
   });
 };
 
+// Hàm tính toán và hiển thị kết quả
 // Hàm tính toán và hiển thị kết quả
 const calculateAndShowResult = async () => {
   // Hiển thị thông báo đang tính toán
@@ -1557,7 +1651,7 @@ const calculateAndShowResult = async () => {
   // Giả lập delay để tính toán
   await new Promise(resolve => setTimeout(resolve, 1500));
 
-  // Giả lập tính toán dựa trên dữ liệu nhập
+  // Tính toán các giá trị (giữ nguyên logic cũ)
   let heSoKhuVuc = 1.0;
   const tinhThanh = normalizeValue(searchForm.tinhThanh);
   if (tinhThanh.includes('Hồ Chí Minh')) heSoKhuVuc = 1.05;
@@ -1567,21 +1661,28 @@ const calculateAndShowResult = async () => {
 
   const giaMongMuon = parseFloat(searchForm.giaMongMuon) || 15;
   const giaDeXuat = parseFloat((giaMongMuon * heSoKhuVuc).toFixed(1));
+  const minPrice = parseFloat((giaDeXuat * 0.92).toFixed(1));
+  const maxPrice = parseFloat((giaDeXuat * 1.03).toFixed(1));
 
-  // Tính toán min-max dựa trên giaDeXuat
-  const minPrice = parseFloat((giaDeXuat * 0.92).toFixed(1));  // -8%
-  const maxPrice = parseFloat((giaDeXuat * 1.03).toFixed(1));  // +3%
-
-  // Tính ngày bán dự kiến
   let ngayBan = 28;
   if (tinhThanh.includes('Hồ Chí Minh')) ngayBan = Math.floor(Math.random() * 8) + 18;
   else if (tinhThanh.includes('Hà Nội')) ngayBan = Math.floor(Math.random() * 10) + 20;
   else ngayBan = Math.floor(Math.random() * 12) + 22;
-
   ngayBan = Math.min(ngayBan, 30);
 
   const phanTram = Math.floor((ngayBan / 30) * 100);
   const chenhLech = parseFloat(((giaDeXuat / giaMongMuon - 1) * 100).toFixed(1));
+
+  // Cập nhật PropertySaleDTO với kết quả tính toán
+  Object.assign(PropertySaleDTO, {
+    estimatedSaleTimeDays: ngayBan,
+    suggestedPrice: giaDeXuat,
+    priceChangePercent: chenhLech,
+    areaAveragePrice: parseFloat((giaDeXuat * 0.96).toFixed(1)),
+    acceptedPriceMin: minPrice,
+    acceptedPriceMax: maxPrice,
+    saleSuccessRate: phanTram
+  });
 
   // Tạo đối tượng kết quả
   const resultData = {
@@ -1608,7 +1709,9 @@ const calculateAndShowResult = async () => {
   // Hiển thị thông báo thành công
   Swal.fire({
     title: 'Phân tích hoàn tất!',
-    html: '<div class="text-slate-300 text-sm">Kết quả đã được lưu vào tài khoản của bạn</div>',
+    html: `<div class="text-slate-300 text-sm">
+            ${isLoggedIn.value ? 'Kết quả đã được lưu vào tài khoản của bạn' : 'Kết quả đã được tính toán'}
+          </div>`,
     icon: 'success',
     background: '#0f172a',
     color: '#e2e8f0',
@@ -1630,6 +1733,7 @@ const calculateAndShowResult = async () => {
   }, 100);
 };
 
+// Hàm xử lý submit form - đã thêm tính toán min-max và kiểm tra localStorage
 // Hàm xử lý submit form - đã thêm tính toán min-max và kiểm tra localStorage
 const handleSearchSubmit = async (e) => {
   e.preventDefault();
@@ -1734,10 +1838,71 @@ const handleSearchSubmit = async (e) => {
     return;
   }
 
+  // ========== CHUẨN BỊ DỮ LIỆU GỬI VỀ BE ==========
+  const preparePropertySaleDTO = () => {
+    //
+    // console.log('=== PREPARE DTO START ===');
+    // console.log('searchForm.hoTen:', searchForm.hoTen);
+    // Tính toán các giá trị giống như trong calculateAndShowResult
+    let heSoKhuVuc = 1.0;
+    const tinhThanh = normalizeValue(searchForm.tinhThanh);
+    if (tinhThanh.includes('Hồ Chí Minh')) heSoKhuVuc = 1.05;
+    else if (tinhThanh.includes('Hà Nội')) heSoKhuVuc = 1.08;
+    else if (tinhThanh.includes('Đà Nẵng')) heSoKhuVuc = 0.98;
+    else heSoKhuVuc = 0.95;
+
+    const giaMongMuon = parseFloat(searchForm.giaMongMuon) || 15;
+    const giaDeXuat = parseFloat((giaMongMuon * heSoKhuVuc).toFixed(1));
+    const minPrice = parseFloat((giaDeXuat * 0.92).toFixed(1));
+    const maxPrice = parseFloat((giaDeXuat * 1.03).toFixed(1));
+
+    // Tính ngày bán dự kiến
+    let ngayBan = 28;
+    if (tinhThanh.includes('Hồ Chí Minh')) ngayBan = Math.floor(Math.random() * 8) + 18;
+    else if (tinhThanh.includes('Hà Nội')) ngayBan = Math.floor(Math.random() * 10) + 20;
+    else ngayBan = Math.floor(Math.random() * 12) + 22;
+    ngayBan = Math.min(ngayBan, 30);
+
+    const phanTram = Math.floor((ngayBan / 30) * 100);
+    const chenhLech = parseFloat(((giaDeXuat / giaMongMuon - 1) * 100).toFixed(1));
+
+    // Cập nhật PropertySaleDTO
+    Object.assign(PropertySaleDTO, {
+      fullName: searchForm.hoTen.trim(),
+      phone: phoneNumber,
+      email: searchForm.email.trim(),
+      province: searchForm.tinhThanh.trim(),
+      ward: searchForm.quanHuyen.trim(),
+      addressDetail: searchForm.diaChiChiTiet?.trim() || '',
+      soTo: parseInt(searchForm.soTo) || 0,
+      soThua: parseInt(searchForm.soThua) || 0,
+      dienTichDat: parseFloat(searchForm.dienTichDat) || 0,
+      dienTichSan: parseFloat(searchForm.dienTichSan) || 0,
+      ketCauCongTrinh: searchForm.ketCauCongTrinh?.trim() || '',
+      landUseRight: searchForm.quyenSuDungDat || '',
+      expectedPrice: parseFloat(searchForm.giaMongMuon) || 0,
+
+      // Kết quả dự đoán
+      estimatedSaleTimeDays: ngayBan,
+      suggestedPrice: giaDeXuat,
+      priceChangePercent: chenhLech,
+      areaAveragePrice: parseFloat((giaDeXuat * 0.96).toFixed(1)), // Giá trung bình khu vực
+      acceptedPriceMin: minPrice,
+      acceptedPriceMax: maxPrice,
+      saleSuccessRate: phanTram
+    });
+
+    // console.log('PropertySaleDTO sau khi assign:', PropertySaleDTO);
+    // console.log('=== PREPARE DTO END ===');
+  };
+
+  // Gọi hàm chuẩn bị dữ liệu
+  preparePropertySaleDTO();
+
   // Kiểm tra nếu đã có kết quả trong localStorage
   const savedResult = getResultFromLocalStorage();
-  if (savedResult && authStore.userInfo) {
-    // Nếu đã đăng nhập và có kết quả cũ, hiển thị kết quả đã lưu
+  if (savedResult) {
+    // Hiển thị kết quả đã lưu
     Object.assign(searchResult, savedResult);
     searchResult.show = true;
 
@@ -1757,6 +1922,9 @@ const handleSearchSubmit = async (e) => {
       timer: 1500
     });
 
+    // GỬI DỮ LIỆU VỀ BE (kể cả khi có cache)
+    await sendPropertySaleData();
+
     // Scroll đến kết quả
     setTimeout(() => {
       const resultEl = document.getElementById('ket-qua-du-doan');
@@ -1768,43 +1936,52 @@ const handleSearchSubmit = async (e) => {
     return;
   }
 
-  // Nếu chưa đăng nhập, hiện thông báo yêu cầu đăng nhập
-  if (!authStore.userInfo) {
-    await showLoginPrompt();
-    return;
-  }
-
-  // Nếu đã đăng nhập, tiến hành tính toán
+  // Tiến hành tính toán
   await calculateAndShowResult();
+
+  // GỬI DỮ LIỆU VỀ BE sau khi tính toán
+  await sendPropertySaleData();
+};
+
+
+// Hàm gửi dữ liệu PropertySaleDTO về BE
+const sendPropertySaleData = async () => {
+  try {
+    // Kiểm tra nếu đã có thông tin người dùng
+    if (authStore.userInfo && authStore.userInfo.id) {
+      PropertySaleDTO.userId = authStore.userInfo.id;
+    }
+
+    // Gửi request đến API
+    const response = await api.post('thg/public/property-sales', PropertySaleDTO);
+
+    if (response.status === 200 || response.status === 201) {
+      // console.log('Dữ liệu tra cứu đã được lưu thành công:', response.data);
+
+      // Nếu có response data và có id, có thể lưu lại để sử dụng sau
+      if (response.data && response.data.id) {
+        PropertySaleDTO.id = response.data.id;
+      }
+    } else {
+      console.warn('API trả về status không mong muốn:', response.status);
+    }
+  } catch (error) {
+    console.error('Lỗi khi gửi dữ liệu tra cứu về BE:', error);
+
+    // Không hiển thị lỗi cho người dùng để không làm gián đoạn trải nghiệm
+    // Chỉ log ra console để debug
+  }
 };
 
 // ========== HÀM XỬ LÝ SỰ KIỆN ĐĂNG NHẬP ==========
 
 // Hàm xử lý khi đăng nhập thành công
 const handleLoginSuccess = async () => {
-  // Kiểm tra nếu form đã được điền đầy đủ
-  if (isFormFilled()) {
-    // Hiển thị thông báo đang tính toán
-    Swal.fire({
-      title: 'Đang tính toán...',
-      html: '<div class="text-slate-300 text-sm">Hệ thống AI đang phân tích dữ liệu của bạn</div>',
-      background: '#0f172a',
-      color: '#e2e8f0',
-      showConfirmButton: false,
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
-    // Đợi một chút để người dùng thấy thông báo
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Thực hiện tính toán
-    await calculateAndShowResult();
-
-    // Đóng thông báo
-    Swal.close();
+  // Kiểm tra nếu form đã được điền đầy đủ và đã có kết quả
+  if (isFormFilled() && searchResult.show) {
+    // Nếu đã có kết quả, chỉ cần re-render để hiển thị giá
+    // Không cần tính toán lại
+    return;
   }
 };
 
@@ -1819,9 +1996,16 @@ const isFormFilled = () => {
       searchForm.giaMongMuon;
 };
 
+// Hàm xử lý khi nhấn vào icon xem giá
+const handleViewPrice = () => {
+  if (!isLoggedIn.value) {
+    showLoginPrompt('Đăng nhập để xem giá đề xuất và phân tích chi tiết.');
+  }
+};
+
 // Hàm xử lý khi nhấn nút xem chi tiết
 const handleViewDetails = () => {
-  if (!authStore.userInfo) {
+  if (!isLoggedIn.value) {
     // Hiển thị thông báo đăng nhập nếu chưa đăng nhập
     showLoginPrompt();
   } else {
@@ -1844,31 +2028,6 @@ const handleViewDetails = () => {
     // Nếu đã có kết quả, nút này sẽ không làm gì thêm (kết quả đã hiển thị)
   }
 };
-
-// Computed property cho chênh lệch giá
-const chenhLechText = computed(() => {
-  return searchResult.chenhLech > 0
-      ? `+${searchResult.chenhLech}%`
-      : `${searchResult.chenhLech}%`;
-});
-
-const chenhLechClass = computed(() => {
-  return searchResult.chenhLech > 0
-      ? 'text-green-400 font-semibold'
-      : 'text-rose-400 font-semibold';
-});
-
-// Computed property cho progress bar
-const progressWidth = computed(() => {
-  return `${100 - searchResult.phanTram}%`;
-});
-
-// Computed property để format subtitle với min-max
-const formattedSuggestedPriceSubtitle = computed(() => {
-  return searchResultSuggestedPrice.subtitle
-      .replace('{min}', searchResult.minPrice)
-      .replace('{max}', searchResult.maxPrice);
-});
 
 // Hàm xử lý xem chi tiết dự án
 const handleViewProjectDetails = (project) => {
@@ -2196,15 +2355,6 @@ onUnmounted(() => {
   padding-right: 4px;
 }
 
-/*
-!* Đảm bảo các card có kích thước tối thiểu *!
-.flex.overflow-x-auto > * {
-  flex: 0 0 auto;
-  min-width: 300px;
-  scroll-snap-align: start;
-}
-*/
-
 /* Loading spinner */
 @keyframes spin {
   to { transform: rotate(360deg); }
@@ -2274,5 +2424,11 @@ onUnmounted(() => {
 /* THÊM: Tăng khoảng cách giữa các card */
 .flex.overflow-x-auto {
   gap: 1.5rem; /* Thay vì gap-4 (16px) -> 24px */
+}
+
+/* Style cho icon ẩn giá */
+button.text-slate-400:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
 }
 </style>

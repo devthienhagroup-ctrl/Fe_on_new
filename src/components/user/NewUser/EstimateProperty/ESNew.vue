@@ -1733,7 +1733,7 @@ const isLoading = ref(false)
 
 const auth = useAuthStore();
 const openLoginModal = () => {
-  window.dispatchEvent(new Event('open-login-modal'));
+  auth.openLoginModal();
 };
 
 const validateStep3 = () => {

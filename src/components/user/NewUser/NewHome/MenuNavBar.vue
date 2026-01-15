@@ -119,7 +119,7 @@ const auth = useAuthStore();
 const isMenuOpen = ref(false);
 
 const openLoginModal = () => {
-  window.dispatchEvent(new Event('open-login-modal'));
+  auth.openLoginModal();
   closeMobileMenu();
 };
 
