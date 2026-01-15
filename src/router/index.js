@@ -58,7 +58,6 @@ import HostManager from "../components/host/HostManager.vue";
 
 import Ga4EventExample from "../components/Ga4EventExample.vue";
 import PaymentPage2 from "../components/productAdmin/PaymentPage2.vue";
-import AppointmentsPage from "../components/Appointments/AppointmentsPage.vue";
 
 import cms from "/src/components/cms/cms.vue";
 import Banner from "../components/cms/components/home/Banner.vue";
@@ -149,22 +148,24 @@ import test1 from "../components/thiet-kegiandien/telesales-lien-he-khach-hang.v
 import test2 from "../components/thiet-kegiandien/admin-saleadmin.vue"
 import TeamManagement from "../components/user/NewUser/TeamManagement/TeamManagement.vue";
 import TeamManagementCMS from "../components/cms/NewCms/TeamManagement/TeamManagementCMS.vue";
+import AppointmentPage from "../components/thiet-kegiandien/AppointmentsPage.vue";
+import AppointmentsPage from "../components/thiet-kegiandien/AppointmentsPage.vue";
 const routes = [
     {
-        path: "/test/dat-lich",
+        path: "/-thg/nhap-lieu",
         name: "TeamCollaboration1",
         component: test,
         meta: { requiresAuth: false,     enableTailwind: false},
     },
     {
-        path: "/test/dat-lich-2",
+        path: "/-thg/quan-tri-du-lieu",
         name: "TeamCollaboration",
         component: test2,
         meta: { requiresAuth: false,     enableTailwind: false},
     },
     {
-        path: "/test/tele-sales",
-        name: "TELESALES",
+        path: "/-thg/telesale-lien-he-khach-hang",
+        name: "TELESALESetyui",
         component: test1,
         meta: { requiresAuth: false, enableTailwind: false},
     },
@@ -174,11 +175,11 @@ const routes = [
         name: "LoginForm",
         component: LoginForm,
     },
-    // {
-    //     path: '/giao-dien',
-    //     component: DemoGiaoDien,
-    //     meta: {requiresAuth: false, loginFrom: "admin", enableTailwind: true},
-    // },
+    {
+        path: '/giao-dien',
+        component: AppointmentPage,
+        meta: {requiresAuth: false, loginFrom: "admin", enableTailwind: true},
+    },
     {
         path: "/user/quan-ly-san-pham",
         component: MenuUser,
@@ -920,7 +921,7 @@ const routes = [
         children: [
             {
                 path: '',
-                name: 'AppointmentsPage',
+                name: 'AppointmentsPage1',
                 component: AppointmentsPage
             }
         ]

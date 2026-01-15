@@ -51,6 +51,7 @@
   "
               alt="Department"
               class="avatar-form"
+              style="margin: auto"
           />
           <!-- Overlay chứa icon camera -->
           <div
@@ -425,7 +426,7 @@ async function addDepartment() {
     const { data } = await api.post("/admin.thg/department/add", formData, {
       headers: { "Content-Type": "multipart/form-data" }
     });
-    showSuccess("Thêm mới thành công !", "Thm một phòng ban đã được ghi vào hệ thống.");
+    showSuccess("Thêm mới thành công !", "Thêm một phòng ban đã được ghi vào hệ thống.");
     resetForm();
     await getTable();
 

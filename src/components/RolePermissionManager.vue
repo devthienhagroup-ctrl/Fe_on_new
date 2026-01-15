@@ -207,32 +207,34 @@
               </div>
             </div>
           </div>
-          <!-- Accordion danh sách quyền -->
-          <div v-if="permissions.length" class="accordion" id="permissionAccordion">
+          <!-- Accordion danh sách quyền - Sử dụng Taiwind CSS -->
+          <div v-if="permissions.length" class="space-y-2">
             <div
                 v-for="(group, idx) in permissions"
                 :key="group.module"
-                class="accordion-item border-0 mb-2 shadow-sm rounded-3"
+                class="border-0 rounded-3 shadow-sm overflow-hidden"
             >
-              <h2 class="accordion-header" :id="`heading-${idx}`">
-                <button
-                    class="accordion-button fw-semibold"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    :data-bs-target="`#collapse-${idx}`"
-                    aria-expanded="true"
-                >
-                  <i class="fa-solid fa-layer-group me-2 text-primary"></i>
-                  {{ group.module }}
-                </button>
-              </h2>
-
-              <div
-                  :id="`collapse-${idx}`"
-                  class="accordion-collapse collapse show"
-                  :aria-labelledby="`heading-${idx}`"
+              <!-- Accordion Header -->
+              <button
+                  class="w-full flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors "
+                  @click="toggleAccordion(idx)"
               >
-                <div class="accordion-body">
+                <div class="flex items-center">
+                  <i class="fa-solid fa-layer-group me-2 text-primary"></i>
+                  <span class="fw-semibold">{{ group.module }}</span>
+                </div>
+                <i
+                    class="fa-solid transition-transform duration-300"
+                    :class="accordionOpen[idx] ? 'fa-chevron-up' : 'fa-chevron-down'"
+                ></i>
+              </button>
+
+              <!-- Accordion Content -->
+              <div
+                  v-show="accordionOpen[idx]"
+                  class="bg-white border-t"
+              >
+                <div class="p-4">
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="fw-medium text-secondary">Danh sách quyền</span>
                     <button
@@ -273,7 +275,7 @@
                       <!-- Mô tả -->
                       <div
                           v-if="activePermission === perm.permissionID"
-                          class="mt-2 bg-white border-start border-4 border-primary rounded-end px-3 py-2 small text-secondary"
+                          class="mt-2 bg-white border-start border-1 border-primary rounded-lg px-3 py-2 small text-secondary"
                       >
                         <i class="fa-solid fa-circle-info me-1 text-primary"></i>
                         <template v-if="perm.description">
@@ -329,10 +331,16 @@ const roles = ref([])
 const selectedRole = ref('')
 const permissions = ref([])
 const activePermission = ref(null)
+const accordionOpen = ref({}) // Quản lý trạng thái accordion
 
 const selectedRoleObj = computed(() =>
     roles.value.find((r) => r.roleName === selectedRole.value)
 )
+
+// Toggle accordion
+const toggleAccordion = (idx) => {
+  accordionOpen.value[idx] = !accordionOpen.value[idx]
+}
 
 // 🧩 Lấy danh sách Role
 const fetchRoles = async () => {
@@ -355,6 +363,13 @@ const fetchPermissions = async () => {
   try {
     const { data } = await api.get(`/admin.thg/role-permission/${selectedRole.value}`)
     permissions.value = data || []
+
+    // Mở tất cả accordion khi tải dữ liệu mới
+    if (permissions.value.length) {
+      permissions.value.forEach((_, idx) => {
+        accordionOpen.value[idx] = true
+      })
+    }
   } catch {
     Swal.fire('Lỗi', 'Không thể tải quyền. Vui lòng kiểm tra lại.', 'error')
   }
@@ -579,5 +594,10 @@ const deleteRoleConfirm = async () => {
 
 .header-menu-toggle:active {
   transform: scale(0.98);
+}
+
+/* Animation cho accordion */
+.accordion-content {
+  transition: all 0.3s ease;
 }
 </style>
