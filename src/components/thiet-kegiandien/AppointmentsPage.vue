@@ -301,9 +301,9 @@ const appointments = ref([
 ])
 
 function getRowMarker(appt) {
-  if (appt?.createdByMe) return { color: '#ffb347', glow: 'rgba(255,179,71,0.32)' } // ORANGE
-  if (appt?.inCharge) return { color: '#4facfe', glow: 'rgba(79,172,254,0.30)' } // BLUE
-  return { color: '#667eea', glow: 'rgba(102,126,234,0.28)' }
+  if (appt?.createdByMe) return { color: '#f97316', glow: 'rgba(253, 230, 138, 0.75)' } // ORANGE
+  if (appt?.inCharge) return { color: '#2563eb', glow: 'rgba(191, 219, 254, 0.78)' } // BLUE
+  return { color: '#667eea', glow: 'rgba(224, 231, 255, 0.7)' }
 }
 
 function monthTitle(d) {
@@ -1532,7 +1532,7 @@ onBeforeUnmount(() => {
             Tuần này
           </button>
           <button class="filter-btn" :class="{ active: activeRange === 'month' }" @click="activeRange = 'month'">
-            Tháng này
+            Tháng
           </button>
         </div>
 
@@ -2749,36 +2749,29 @@ onBeforeUnmount(() => {
 }
 .cal-date.disabled:hover{ background: rgba(148,163,184,0.08); }
 
-/* has appointment: DOT + blinking halo pastel outside */
+/* has appointment: DOT + soft pastel halo */
 .cal-date.has-appt::before{
   content:"";
   position:absolute;
-  bottom:8px;
-  left:50%;
-  width:26px;
-  height:26px;
-  transform: translateX(-50%);
+  left:5%;
+  top: calc(100% - 40px);
+  width:16px;
+  height:16px;
+  transform: translate(-50%, -50%);
   border-radius:50%;
   background: var(--mkGlow, rgba(79,172,254,0.28));
-  animation: pulseHalo 1.25s ease-in-out infinite;
 }
 
 .cal-date.has-appt::after{
   content:"";
   position:absolute;
-  bottom:14px;
-  left:50%;
-  width:7px;
-  height:7px;
-  transform: translateX(-50%);
+  left:5%;
+  top: calc(100% - 40px);
+  width:8px;
+  height:8px;
+  transform: translate(-50%, -50%);
   border-radius:50%;
   background: var(--mk, #4facfe);
-}
-
-@keyframes pulseHalo{
-  0%{ opacity:0.35; transform: translateX(-50%) scale(0.90); }
-  50%{ opacity:0.75; transform: translateX(-50%) scale(1.08); }
-  100%{ opacity:0.35; transform: translateX(-50%) scale(0.90); }
 }
 
 .legend{
@@ -2792,10 +2785,10 @@ onBeforeUnmount(() => {
 .lg{ display:flex; gap:8px; align-items:center; font-weight:750; font-size:12.5px; color:#5b6576; }
 .mk{
   width:10px; height:10px; border-radius: 50%;
-  box-shadow: 0 0 0 4px rgba(20,22,30,0.05);
+  box-shadow: 0 0 0 6px var(--mkGlow, rgba(20,22,30,0.05));
 }
-.mk-orange{ background:#ffb347; }
-.mk-blue{ background:#4facfe; }
+.mk-orange{ background:#f97316; --mkGlow: rgba(253, 230, 138, 0.75); }
+.mk-blue{ background:#2563eb; --mkGlow: rgba(191, 219, 254, 0.78); }
 
 /* Day schedule (scroll riêng) */
 .day-actions{ display:flex; gap:10px; flex-wrap:wrap; }
@@ -2876,12 +2869,11 @@ onBeforeUnmount(() => {
   position:absolute;
   left:50%;
   top:50%;
-  width:26px;
-  height:26px;
+  width:20px;
+  height:20px;
   transform: translate(-50%, -50%);
   border-radius:50%;
   background: var(--mkGlow, rgba(79,172,254,0.30));
-  animation: pulseHalo 1.2s ease-in-out infinite;
 }
 
 
@@ -3028,10 +3020,13 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
 .customer-avatar .ava-dot::before{
   content:"";
   position:absolute;
-  inset:-8px;
+  left:50%;
+  top:50%;
+  width:20px;
+  height:20px;
+  transform: translate(-50%, -50%);
   border-radius:999px;
   background: var(--mkGlow, rgba(79,172,254,0.28));
-  animation: pulseHalo 1.25s ease-in-out infinite;
 }
 
 /* Chips / consult */
