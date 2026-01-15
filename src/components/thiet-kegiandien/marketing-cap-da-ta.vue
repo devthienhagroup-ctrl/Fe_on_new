@@ -13,14 +13,24 @@
               <p class="dashboard-subtitle">Nhập liệu & phân tích theo thời gian thực</p>
             </div>
           </div>
-          <div class="header-actions">
-            <button @click="generateSampleData" class="btn btn-sm btn-outline">
-              <i class="fas fa-sparkles"></i> Dữ liệu mẫu
-            </button>
-            <button @click="exportData" class="btn btn-sm btn-primary">
-              <i class="fas fa-download"></i> Xuất dữ liệu
-            </button>
+          <div class="d-flex align-items-center gap-2">
+            <NotificationBell />
+            <div class="d-flex flex-column align-items-end text-end">
+              <div class="fw-semibold text-dark">{{ info.fullName }}</div>
+            </div>
+
+            <img
+                v-if="info.avatarUrl"
+                :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+                alt="avatar"
+                class="rounded-circle border"
+                style="width: 36px; height: 36px; object-fit: cover;"
+            />
+            <div v-else class="avatar-circle">
+              {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
+            </div>
           </div>
+
         </div>
       </div>
     </div>
@@ -420,7 +430,10 @@ import {
   showCenterWarning,
   showWarning
 } from "../../assets/js/alertService.js";
-
+import NotificationBell from "../NotificationBell.vue";
+import { useAuthStore } from "/src/stores/authStore.js";
+const authStore = useAuthStore();
+const info = authStore.userInfo;
 const provinces = ref(addressData);
 
 const formData = reactive({
@@ -984,7 +997,7 @@ onBeforeUnmount(() => {
 <style scoped>
 /* ===== MODERN DASHBOARD STYLES ===== */
 .container{
-  max-width: 1300px;
+  padding: 10px 0px;
 }
 .refined-dashboard {
   min-height: 100vh;
@@ -993,16 +1006,17 @@ onBeforeUnmount(() => {
   font-size: 14px;
   line-height: 1.5;
   color: #1e293b;
+  position: relative;
+  top:-8px !important;
 }
 
 /* ===== HEADER ===== */
 .dashboard-header {
+  top:-8px;
   background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
-  padding: 1rem 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   position: sticky;
-  top: 0;
   z-index: 100;
 }
 
@@ -1140,6 +1154,7 @@ onBeforeUnmount(() => {
 /* ===== PANELS ===== */
 .main-content {
   padding: 1.5rem 0;
+  margin: 10px auto;
 }
 
 .form-panel,

@@ -154,8 +154,13 @@ const routes = [
     {
         path: "/-thg/nhap-lieu",
         name: "TeamCollaboration1",
-        component: test,
-        meta: { requiresAuth: false,     enableTailwind: false},
+        component: Menu,
+        meta: {requiresAuth: false, enableTailwind: false},
+        children: [{
+            path: '',
+            name: "NHAP_LIEU",
+            component: test,
+    }]
     },
     {
         path: "/-thg/quan-tri-du-lieu",

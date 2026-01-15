@@ -16,7 +16,7 @@ const statTotal = ref(0)
 const statSelectedDay = ref(0)
 const statUp = ref(0)
 const statPending = ref(0)
-
+const statCancelled = ref(0)
 // ===== Filter (CHỈ áp dụng cho Calendar + Day Schedule + Table) =====
 const activeFilterText = ref('Tuần này')
 const activeFilterCount = ref(0)
@@ -30,14 +30,11 @@ const historyItems = ref([])
 
 const openActionMenuId = ref(null)
 const dragOverSlot = ref(null)
+// ===== Summary from BE =====
+const summaryLoading = ref(false)
+const summaryError = ref('')
 
-const statusPopover = reactive({
-  open: false,
-  top: '0px',
-  left: '0px',
-  options: [],
-  handler: null,
-})
+
 function getActionInfo(action) {
   return APPOINTMENT_ACTION[action] || {
     label: action,
@@ -77,6 +74,12 @@ const STATUS = {
   NOT_UP: { label: 'Chưa lên', cls: 'st-not', dot: '#fa709a' },
   POSTPONED: { label: 'Tạm hoãn', cls: 'st-post', dot: '#4facfe' },
   CANCELLED: { label: 'Huỷ', cls: 'st-cancel', dot: '#ff5858' },
+}
+// ===== Consult Status (KQ tư vấn) =====
+const ConsultStatus = {
+  SUCCESS: 'SUCCESS',
+  FAIL: 'FAIL',
+  CARE: 'CARE',
 }
 
 const CONSULT_STATUS = {
@@ -258,18 +261,16 @@ const createForm = reactive({
 })
 
 const editForm = reactive({
-  customer: '',
-  phone: '',
-  branch: 'CN_Q1',
+  branch: null,
   date: '',
   time: '',
-  staff: '',
-  consultant: '',
-  status: 'UP',
-  consultStatus: 'CARE',
-  customerType: 'OWNER',
+  consultantId: null,
+  status: 'WAITING',
   rating: 'BAN_NHANH_30N',
   note: '',
+  customerNote: '',
+  updateReason: '',
+  consultStatus: null
 })
 
 function makeHistory(actor, action, desc) {
@@ -314,8 +315,7 @@ function updateFilterOutputs() {
 
   const rangeText =
       activeRange.value === 'today' ? 'Hôm nay' : activeRange.value === 'week' ? 'Tuần này' : 'Tháng này'
-  const stText = activeStatus.value !== 'ALL' ? ` • ${STATUS[activeStatus.value].label}` : ''
-  activeFilterText.value = `${rangeText}${stText}`
+  activeFilterText.value = `${rangeText}`
 }
 
 function updateGlobalStats() {
@@ -478,6 +478,8 @@ function mapAppointmentFromApi(dto) {
 }
 const detailLoading = ref(false)
 const detailError = ref('')
+const editLoading = ref(false)
+const editError = ref('')
 function mapAppointmentDetailFromApi(dto) {
   return {
     id: dto.appointmentId,
@@ -497,8 +499,10 @@ function mapAppointmentDetailFromApi(dto) {
     consultStatus: dto.consultStatus,
     rating: dto.rating,
     note: dto.note,
-    branch: dto.branch,
+    branchId: dto.branchID ?? null,   // ✅ ID
+    branch: dto.branch ?? null,
 
+    consultantId: dto.consultant?.id ?? dto.consultantId,
     consultant: dto.consultant?.name,
     creator: dto.creator?.name,
 
@@ -561,7 +565,6 @@ async function fetchAppointments() {
   generateCalendar()
   updateDaySchedule()
   updateFilterOutputs()
-  updateGlobalStats()
 }
 
 function handleCalendarClick(cell) {
@@ -571,7 +574,6 @@ function handleCalendarClick(cell) {
   selectedDateISO.value = cell.iso
   updateDaySchedule()
   updateFilterOutputs()
-  updateGlobalStats()
   generateCalendar()
 }
 
@@ -586,7 +588,6 @@ function handleMonthNav(dir) {
   generateCalendar()
   updateDaySchedule()
   updateFilterOutputs()
-  updateGlobalStats()
 }
 
 // ===== Day schedule (ăn theo selectedDate + filter range disable) =====
@@ -629,7 +630,7 @@ function handleDragOver(e, time) {
 function handleDragLeave(time) {
   if (dragOverSlot.value === time) dragOverSlot.value = null
 }
-function handleDrop(e, targetTime) {
+async function handleDrop(e, targetTime) {
   e.preventDefault()
   dragOverSlot.value = null
 
@@ -640,98 +641,46 @@ function handleDrop(e, targetTime) {
   if (!appt) return
 
   if (appt.status === 'CANCELLED') {
-    showToast('Không thể dời giờ', 'Lịch đã huỷ không được kéo thả.', 'error')
+    showToast('Không thể dời giờ', 'Lịch đã huỷ không thể thay đổi.', 'error')
     return
   }
 
-  // nếu đang filter today/week thì chỉ cho drop vào selected day (đúng rồi) + cell enabled
+  // chỉ cho đổi trong ngày đang chọn
   if (!isCellEnabled(selectedDateISO.value)) return
 
   if (appt.date === selectedDateISO.value && appt.time === targetTime) return
 
-  const conflict = hasConflict({ id: appt.id, date: selectedDateISO.value, time: targetTime, staff: appt.staff })
-  if (conflict) {
-    showToast(
-        'Trùng lịch theo nhân viên',
-        `${appt.staff} đã có lịch ${formatVNDate(conflict.date)} • ${conflict.time} với ${conflict.customer}.`,
-        'error',
-    )
-    return
-  }
-
-  const from = `${formatVNDate(appt.date)} • ${appt.time}`
-  const to = `${formatVNDate(selectedDateISO.value)} • ${targetTime}`
-
-  appt.date = selectedDateISO.value
-  appt.time = targetTime
-  appt.history = appt.history || []
-  appt.history.unshift({ ts: nowISO(), actor: currentUser.name, action: 'RESCHEDULE', desc: `Dời lịch: ${from} → ${to}.` })
-
-  showToast('Đã dời giờ', `${appt.customer}: ${from} → ${to}`, 'success')
-  generateCalendar()
-  updateDaySchedule()
-  updateFilterOutputs()
-  updateGlobalStats()
-}
-
-// ===== Status popover =====
-function closeStatusPopover() {
-  statusPopover.open = false
-  statusPopover.options = []
-  if (statusPopover.handler) {
-    window.removeEventListener('click', statusPopover.handler)
-    statusPopover.handler = null
-  }
-}
-function setStatus(id, newStatus, source = 'STATUS') {
-  const appt = appointments.value.find((x) => x.id === id)
-  if (!appt) return
-  const old = appt.status
-  if (old === newStatus) return
-
-  appt.status = newStatus
-  appt.history = appt.history || []
-  appt.history.unshift({ ts: nowISO(), actor: currentUser.name, action: source, desc: `Đổi trạng thái: ${STATUS[old].label} → ${STATUS[newStatus].label}.` })
-
-  showToast('Đã cập nhật trạng thái', `${appt.customer}: ${STATUS[newStatus].label}`, 'success')
-  generateCalendar()
-  updateDaySchedule()
-  updateFilterOutputs()
-  updateGlobalStats()
-}
-function openStatusPopover(anchorEl, id) {
-  const appt = appointments.value.find((x) => x.id === id)
-  if (!appt) return
-
-  if (statusPopover.handler) {
-    window.removeEventListener('click', statusPopover.handler)
-    statusPopover.handler = null
-  }
-
-  statusPopover.options = Object.keys(STATUS).map((k) => {
-    const s = STATUS[k]
-    return { key: k, label: s.label, dot: s.dot, active: k === appt.status, id }
-  })
-
-  const rect = anchorEl.getBoundingClientRect()
-  const top = rect.bottom + window.scrollY + 8
-  const left = Math.min(rect.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - 260)
-  statusPopover.top = `${top}px`
-  statusPopover.left = `${left}px`
-  statusPopover.open = true
-
-  const handler = (e) => {
-    if (!e.target.closest('#statusPopover') && !e.target.closest('[data-status-badge="1"]') && !e.target.closest('[data-mini="status"]')) {
-      closeStatusPopover()
+  try {
+    const payload = {
+      appointmentId: appt.id,
+      appointmentDate: selectedDateISO.value,
+      appointmentTime: targetTime, // String HH:mm
     }
-  }
 
-  window.addEventListener('click', handler, { once: false })
-  statusPopover.handler = handler
-}
-function handleStatusOptionClick(option) {
-  setStatus(option.id, option.key, 'STATUS')
-  closeStatusPopover()
+    const res = await showLoading(
+        api.post('/customer-crm/admin/lich-hen/update-time', payload)
+    )
+
+    if (!res.data.success) {
+      updateAlertError('Không thể dời giờ', res.data.message)
+      return
+    }
+
+    // ✅ CHỈ SAU KHI BE OK → reload
+    await fetchAppointments()
+
+    updateAlertSuccess(
+        'Đã dời giờ hẹn',
+        `${appt.customer}: ${formatVNDate(appt.date)} → ${targetTime}`
+    )
+  } catch (e) {
+    console.error(e)
+    showToast(
+        'Lỗi dời giờ',
+        e?.response?.data?.message || 'Không thể cập nhật giờ hẹn.',
+        'error'
+    )
+  }
 }
 
 // ===== Customer search =====
@@ -898,96 +847,82 @@ function syncHistoryPanelHeight() {
 }
 
 // ===== Edit modal =====
-function openEditModal(id) {
-  const appt = appointments.value.find((x) => x.id === id)
-  if (!appt) return
-
+async function openEditModal(id) {
   editId.value = id
-
-  editForm.customer = appt.customer || ''
-  editForm.phone = appt.phone || ''
-  editForm.branch = appt.branch || 'CN_Q1'
-  editForm.date = appt.date
-  editForm.time = appt.time
-  editForm.staff = appt.staff
-  editForm.consultant = appt.consultant
-  editForm.status = appt.status
-  editForm.consultStatus = appt.consultStatus || 'CARE'
-  editForm.customerType = appt.customerType || 'OWNER'
-  editForm.rating = appt.rating || 'BAN_NHANH_30N'
-  editForm.note = appt.note || ''
-
-  renderHistory(appt)
+  closeDetailModal()
   isModalOpen.value = true
+  editLoading.value = true
+  editError.value = ''
+
+  try {
+    const res = await api.get(`/customer-crm/admin/lich-hen/${id}`)
+    const mapped = mapAppointmentDetailFromApi(res.data)
+    console.log('Edit appointment data', mapped.branchId)
+    editForm.branch = BRANCHES.value.find(
+        b => b.key === mapped.branchId
+    )?.key ?? null
+    console.log('Mapped branch ID for edit form', editForm.branch)
+    editForm.date = mapped.date || ''
+    editForm.time = mapped.time || ''
+    editForm.consultantId = mapped.consultantId || null
+    editForm.status = mapped.status || 'WAITING'
+    editForm.rating = mapped.rating || 'BAN_NHANH_30N'
+    editForm.note = mapped.note || ''
+    editForm.customerNote = mapped.customerNote || ''
+    editForm.consultStatus = mapped.consultStatus || null
+
+    renderHistory(mapped)
+    await fetchEditConsultantsByBranch(editForm.branch)
+  } catch (e) {
+    editError.value = 'Không thể tải chi tiết lịch hẹn'
+    showToast('Lỗi tải lịch hẹn', 'Không thể tải chi tiết lịch hẹn.', 'error')
+  } finally {
+    editLoading.value = false
+  }
 }
 function closeEditModal() {
   isModalOpen.value = false
   editId.value = null
+  editError.value = ''
+  editLoading.value = false,
+  editForm.updateReason = ''
 }
-function saveEditModal() {
+async function saveEditModal() {
   if (editId.value == null) return
-  const idx = appointments.value.findIndex((x) => x.id === editId.value)
-  if (idx < 0) return
 
-  const current = appointments.value[idx]
-  const next = {
-    ...current,
-    customer: editForm.customer.trim() || current.customer,
-    phone: editForm.phone.trim(),
-    branch: editForm.branch,
-    date: editForm.date,
-    time: editForm.time,
-    staff: editForm.staff,
-    consultant: editForm.consultant,
+  const payload = {
+    appointmentId: editId.value,
+    branchId: editForm.branch,
+    appointmentDate: editForm.date,
+    appointmentTime: editForm.time,
+    consultantId: editForm.consultantId,
     status: editForm.status,
-    consultStatus: editForm.consultStatus,
-    customerType: editForm.customerType,
     rating: editForm.rating,
-    note: editForm.note.trim(),
-    inCharge: editForm.staff === currentUser.name,
+    consultStatus: editForm.consultStatus || null, // ✅ thêm
+    note: editForm.note?.trim(),
+    customerNote: editForm.customerNote?.trim(),
+    updateReason: editForm.updateReason?.trim(),
   }
 
-  if (next.status !== 'CANCELLED') {
-    const conflict = hasConflict({ id: next.id, date: next.date, time: next.time, staff: next.staff })
-    if (conflict) {
-      showToast(
-          'Trùng lịch theo nhân viên',
-          `${next.staff} đã có lịch ${formatVNDate(conflict.date)} • ${conflict.time} với ${conflict.customer}.`,
-          'error',
-      )
-      return
+  console.log('Update appointment payload', payload)
+
+  try {
+    const res = await showLoading( api.post(
+        '/customer-crm/admin/lich-hen/update',
+        payload
+    ));
+
+    if (res.data.success) {
+      updateAlertSuccess('✅ Cập nhật lịch hẹn thành công')
+      closeEditModal()
+      // reload list / calendar nếu cần
+    } else {
+      updateAlertError('❌ Cập nhật thất bại:', res.data.message)
+      alert(res.data.message)
     }
+  } catch (e) {
+    console.error('❌ Lỗi gọi API update lịch hẹn', e)
   }
-
-  const changes = []
-  if ((current.branch || '') !== (next.branch || '')) changes.push('Đổi chi nhánh.')
-  if (current.date !== next.date || current.time !== next.time) changes.push(`Dời lịch: ${formatVNDate(current.date)} • ${current.time} → ${formatVNDate(next.date)} • ${next.time}.`)
-  if (current.staff !== next.staff) changes.push(`Đổi NV phụ trách: ${current.staff} → ${next.staff}.`)
-  if (current.status !== next.status) changes.push(`Đổi tình trạng: ${STATUS[current.status].label} → ${STATUS[next.status].label}.`)
-  if ((current.consultStatus || '') !== (next.consultStatus || '')) changes.push(`Đổi KQ tư vấn: ${CONSULT_STATUS[current.consultStatus]?.label || '-'} → ${CONSULT_STATUS[next.consultStatus]?.label || '-'}.`)
-  if ((current.customerType || '') !== (next.customerType || '')) changes.push(`Đổi phân loại KH: ${CUSTOMER_TYPE[current.customerType]?.label || '-'} → ${CUSTOMER_TYPE[next.customerType]?.label || '-'}.`)
-  if ((current.rating || '') !== (next.rating || '')) changes.push(`Đổi đánh giá: ${RATING[current.rating]?.label || '-'} → ${RATING[next.rating]?.label || '-'}.`)
-  if ((current.note || '') !== (next.note || '')) changes.push('Cập nhật ghi chú.')
-  if ((current.customer || '') !== (next.customer || '') || (current.phone || '') !== (next.phone || '')) changes.push('Cập nhật thông tin khách.')
-
-  next.history = next.history || []
-  if (changes.length) next.history.unshift(makeHistory(currentUser.name, 'EDIT', changes.join(' ')))
-
-  appointments.value[idx] = next
-
-  // giữ selectedDate trong range (week/today)
-  selectedDateISO.value = next.date
-  if (activeRange.value === 'month') {
-    const d = new Date(`${next.date}T00:00:00`)
-    calendarMonth.value = new Date(d.getFullYear(), d.getMonth(), 1)
-  }
-
-  showToast('Đã lưu thay đổi', `${next.customer}: ${formatVNDate(next.date)} • ${next.time}`, 'success')
-  generateCalendar()
-  updateDaySchedule()
-  updateFilterOutputs()
-  updateGlobalStats()
-  closeEditModal()
 }
 // ===== Lấy tất cả chi nhánh =========
 // ===== Branch options (API) =====
@@ -1058,6 +993,43 @@ watch(
     async (branchId) => {
       if (!isCreateModalOpen.value) return
       await fetchCreateConsultantsByBranch(branchId)
+    },
+)
+
+// ===== Consultants for EDIT modal =====
+const EDIT_CONSULTANTS = ref([])
+const editConsultantsLoading = ref(false)
+async function fetchEditConsultantsByBranch(branchId) {
+  if (!branchId) {
+    EDIT_CONSULTANTS.value = []
+    editForm.consultantId = null
+    return
+  }
+
+  editConsultantsLoading.value = true
+  try {
+    const res = await api.get('/customer-crm/admin/lich-hen/consultants', {
+      params: { branchId },
+    })
+
+    EDIT_CONSULTANTS.value = Array.isArray(res.data) ? res.data : []
+
+    if (!EDIT_CONSULTANTS.value.find((c) => c.id === editForm.consultantId)) {
+      editForm.consultantId = EDIT_CONSULTANTS.value[0]?.id || null
+    }
+  } catch (e) {
+    EDIT_CONSULTANTS.value = []
+    editForm.consultantId = null
+    showToast('Lỗi tải NV phụ trách', 'Không thể tải danh sách nhân viên.', 'error')
+  } finally {
+    editConsultantsLoading.value = false
+  }
+}
+watch(
+    () => editForm.branch,
+    async (branchId) => {
+      if (!isModalOpen.value) return
+      await fetchEditConsultantsByBranch(branchId)
     },
 )
 
@@ -1325,10 +1297,10 @@ function initCharts() {
   chart2 = new Chart(ctx2, {
     type: 'doughnut',
     data: {
-      labels: ['Đã lên', 'Chưa lên', 'Tạm hoãn', 'Huỷ'],
+      labels: [],
       datasets: [
         {
-          data: [45, 30, 15, 10],
+          data: [],
           backgroundColor: [gUp, gNot, gPost, gCancel],
           borderWidth: 0,
           hoverOffset: 6,
@@ -1417,9 +1389,74 @@ function handleAction(type, appt, event) {
     generateCalendar()
     updateDaySchedule()
     updateFilterOutputs()
-    updateGlobalStats()
     showToast('Đã xoá lịch hẹn', appt.customer || 'Đã xoá.', 'success')
   } else if (type === 'detail') openDetailModal(appt)
+}
+// ===== Status chart from BE =====
+const statusChartLoading = ref(false)
+const statusChartError = ref('')
+const statusChartData = ref({
+  UP: 0,
+  WAITING: 0,
+  NOT_UP: 0,
+  POSTPONED: 0,
+  CANCELLED: 0,
+})
+async function fetchStatusChart() {
+  const { startDate, endDate } = getFilterRange()
+
+  statusChartLoading.value = true
+  statusChartError.value = ''
+
+  try {
+    const res = await api.get('/customer-crm/admin/lich-hen/status-chart', {
+      params: {
+        from: startDate,
+        to: endDate,
+      },
+    })
+
+    // reset
+    statusChartData.value = {
+      UP: 0,
+      WAITING: 0,
+      NOT_UP: 0,
+      POSTPONED: 0,
+      CANCELLED: 0,
+    }
+
+    // BE trả: { items: [{ status, count }] }
+    ;(res.data.items || []).forEach(i => {
+      statusChartData.value[i.status] = i.count
+    })
+
+    // 🔥 update chart 2
+    updateStatusChart()
+
+  } catch (e) {
+    statusChartError.value = 'Không thể tải biểu đồ trạng thái'
+  } finally {
+    statusChartLoading.value = false
+  }
+}
+function updateStatusChart() {
+  if (!chart2) return
+
+  chart2.data.labels = [
+    STATUS.UP.label,
+    STATUS.NOT_UP.label,
+    STATUS.POSTPONED.label,
+    STATUS.CANCELLED.label,
+  ]
+
+  chart2.data.datasets[0].data = [
+    statusChartData.value.UP || 0,
+    statusChartData.value.NOT_UP || 0,
+    statusChartData.value.POSTPONED || 0,
+    statusChartData.value.CANCELLED || 0,
+  ]
+
+  chart2.update()
 }
 
 // ===== Watchers =====
@@ -1445,6 +1482,42 @@ watch(
       updateFilterOutputs()
     },
 )
+watch(
+    () => {
+      const { startDate, endDate } = getFilterRange()
+      return `${startDate}|${endDate}`
+    },
+    () => {
+      fetchAppointmentSummary()
+      fetchStatusChart()
+    },
+    { immediate: true }
+)
+async function fetchAppointmentSummary() {
+  const { startDate, endDate } = getFilterRange()
+
+  summaryLoading.value = true
+  summaryError.value = ''
+
+  try {
+    const res = await api.get('/customer-crm/admin/lich-hen/summary', {
+      params: {
+        fromDate: startDate,
+        toDate: endDate,
+      },
+    })
+
+    statTotal.value = res.data.total ?? 0
+    statUp.value = res.data.up ?? 0
+    statPending.value = res.data.pending ?? 0
+    statCancelled.value = res.data.cancelled ?? 0
+
+  } catch (e) {
+    summaryError.value = 'Không thể tải thống kê'
+  } finally {
+    summaryLoading.value = false
+  }
+}
 
 watch(
     () => searchQuery.value,
@@ -1507,7 +1580,6 @@ onMounted(async () => {
     // mở modal tạo lịch
     await openCreateModal()
     await nextTick()
-
     // auto tìm + chọn khách theo SĐT
     await autoPickCustomerByPhone(customerPhone)
 
@@ -1521,6 +1593,7 @@ onMounted(async () => {
 
   // ===== Init data =====
   await fetchAppointments()
+
 
   // ===== Init charts =====
   await nextTick()
@@ -1547,7 +1620,8 @@ onMounted(async () => {
     syncHistoryPanelHeight()
   })
 
-
+  await fetchAppointmentSummary()
+  await fetchStatusChart()
 
 })
 
@@ -1575,25 +1649,25 @@ onBeforeUnmount(() => {
         <div class="stat s1">
           <div class="k">Tổng lịch hẹn</div>
           <div class="v">{{ statTotal }}</div>
-          <div class="hint">Toàn hệ thống</div>
+          <div class="hint">Trong {{ activeFilterText }}</div>
           <div class="i"><i class="fa-solid fa-layer-group"></i></div>
         </div>
-        <div class="stat s2">
-          <div class="k">Trong ngày đang chọn</div>
-          <div class="v">{{ statSelectedDay }}</div>
-          <div class="hint">Theo calendar</div>
-          <div class="i"><i class="fa-solid fa-calendar-day"></i></div>
+        <div class="stat s5">
+          <div class="k">Huỷ hẹn</div>
+          <div class="v">{{ statCancelled }}</div>
+          <div class="hint">Trong {{ activeFilterText }}</div>
+          <div class="i"><i class="fa-solid fa-circle-xmark"></i></div>
         </div>
         <div class="stat s3">
           <div class="k">Đã lên</div>
           <div class="v">{{ statUp }}</div>
-          <div class="hint">Toàn hệ thống</div>
+          <div class="hint">Trong {{ activeFilterText }}</div>
           <div class="i"><i class="fa-solid fa-circle-check"></i></div>
         </div>
         <div class="stat s4">
           <div class="k">Chưa lên / Tạm hoãn</div>
           <div class="v">{{ statPending }}</div>
-          <div class="hint">Toàn hệ thống</div>
+          <div class="hint">Trong {{ activeFilterText }}</div>
           <div class="i"><i class="fa-solid fa-bell"></i></div>
         </div>
       </section>
@@ -1792,13 +1866,10 @@ onBeforeUnmount(() => {
 
                           <!-- trạng thái giống table -->
                           <span
-                              class="status-badge"
-                              data-status-badge="1"
+                              class="status-badge readonly"
                               :class="getStatusInfo(appt.status).cls"
-                              @click.stop="openStatusPopover($event.currentTarget, appt.id)"
                           >
                             {{ getStatusInfo(appt.status).label }}
-                            <i class="fa-solid fa-chevron-down" style="font-size: 11px; opacity: 0.85"></i>
                           </span>
                         </div>
 
@@ -1913,13 +1984,10 @@ onBeforeUnmount(() => {
 
               <td style="position: relative">
                   <span
-                      class="status-badge"
-                      data-status-badge="1"
+                      class="status-badge readonly"
                       :class="getStatusInfo(appt.status).cls"
-                      @click.stop="openStatusPopover($event.currentTarget, appt.id)"
                   >
                     {{ getStatusInfo(appt.status).label }}
-                    <i class="fa-solid fa-chevron-down" style="font-size: 11px; opacity: 0.85"></i>
                   </span>
               </td>
 
@@ -1958,12 +2026,6 @@ onBeforeUnmount(() => {
     </main>
 
     <!-- Quick status popover -->
-    <div class="status-pop" id="statusPopover" :class="{ open: statusPopover.open }" :style="{ top: statusPopover.top, left: statusPopover.left }">
-      <button v-for="option in statusPopover.options" :key="option.key" class="opt" @click.stop="handleStatusOptionClick(option)">
-        <span>{{ option.label }}</span>
-        <span class="dot" :style="{ background: option.dot, boxShadow: option.active ? '0 0 0 3px rgba(20,22,30,.06)' : '' }"></span>
-      </button>
-    </div>
 
     <!-- Modal tạo lịch hẹn mới -->
     <div v-if="isCreateModalOpen" class="backdrop" @click.self="closeCreateModal">
@@ -2162,7 +2224,7 @@ onBeforeUnmount(() => {
 
     <!-- Modal chỉnh sửa (FIX scrollbar + icon nhỏ chung label) -->
     <div v-if="isModalOpen" class="backdrop" @click.self="closeEditModal">
-      <div class="editor-modal edit" role="dialog" aria-modal="true">
+      <div class="editor-modal-update edit" role="dialog" aria-modal="true">
         <div class="modal-head">
           <div class="mh-left">
             <div class="mh-ico"><i class="fa-regular fa-pen-to-square"></i></div>
@@ -2176,184 +2238,182 @@ onBeforeUnmount(() => {
           </button>
         </div>
 
-        <div class="modal-body grid">
-          <div class="modal-card">
-            <div class="card-cap">
-              <i class="fa-solid fa-gear"></i>
-              <span>Nội dung chỉnh sửa</span>
-            </div>
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label">
-                  <span class="lbl">
-                    <span class="lbl-ico gi1"><i class="fa-solid fa-user"></i></span>
-                    Tên khách
-                  </span>
-                </label>
-                <input type="text" class="form-input" v-model="editForm.customer" />
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">
-                  <span class="lbl">
-                    <span class="lbl-ico gi8"><i class="fa-solid fa-phone"></i></span>
-                    Số điện thoại
-                  </span>
-                </label>
-                <input type="text" class="form-input" v-model="editForm.phone" />
-              </div>
-            </div>
-
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label">
-                  <span class="lbl">
-                    <span class="lbl-ico gi2"><i class="fa-solid fa-building"></i></span>
-                    Chi nhánh
-                  </span>
-                </label>
-                <select
-                    class="form-select"
-                    v-model="editForm.branch"
-                    @change="editForm.staff = (getStaffOptionsByBranch(editForm.branch)[0] || '')"
-                >
-                  <option v-for="b in BRANCHES" :key="b.key" :value="b.key">{{ b.label }}</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">
-                  <span class="lbl">
-                    <span class="lbl-ico gi5"><i class="fa-solid fa-user-tie"></i></span>
-                    NV phụ trách
-                  </span>
-                </label>
-                <select class="form-select" v-model="editForm.staff">
-                  <option v-for="staff in getStaffOptionsByBranch(editForm.branch)" :key="staff" :value="staff">{{ staff }}</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">
-                  <span class="lbl">
-                    <span class="lbl-ico gi3"><i class="fa-regular fa-calendar"></i></span>
-                    Ngày hẹn
-                  </span>
-                </label>
-                <input type="date" class="form-input" v-model="editForm.date" />
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">
-                  <span class="lbl">
-                    <span class="lbl-ico gi4"><i class="fa-regular fa-clock"></i></span>
-                    Giờ hẹn
-                  </span>
-                </label>
-                <select class="form-select" v-model="editForm.time">
-                  <option v-for="slot in TIME_SLOTS" :key="slot" :value="slot">{{ slot }}</option>
-                </select>
-              </div>
-            </div>
-
-
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label">
-                  <span class="lbl">
-                    <span class="lbl-ico gi9"><i class="fa-solid fa-traffic-light"></i></span>
-                    Tình trạng
-                  </span>
-                </label>
-                <select class="form-select" v-model="editForm.status">
-                  <option value="UP">Đã lên</option>
-                  <option value="NOT_UP">Chưa lên</option>
-                  <option value="POSTPONED">Tạm hoãn</option>
-                  <option value="CANCELLED">Huỷ</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">
-                  <span class="lbl">
-                    <span class="lbl-ico gi10"><i class="fa-solid fa-bullseye"></i></span>
-                    KQ tư vấn
-                  </span>
-                </label>
-                <select class="form-select" v-model="editForm.consultStatus">
-                  <option value="SUCCESS">Thành công</option>
-                  <option value="FAIL">Thất bại</option>
-                  <option value="CARE">Chăm sóc</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">
-                  <span class="lbl">
-                    <span class="lbl-ico gi11"><i class="fa-solid fa-tag"></i></span>
-                    Phân loại
-                  </span>
-                </label>
-                <select class="form-select" v-model="editForm.customerType">
-                  <option value="OWNER">Chính chủ</option>
-                  <option value="BROKER">Môi giới</option>
-                  <option value="RELATIVE">Người thân</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">
-                  <span class="lbl">
-                    <span class="lbl-ico gi12"><i class="fa-solid fa-star"></i></span>
-                    Đánh giá
-                  </span>
-                </label>
-                <select class="form-select" v-model="editForm.rating">
-                  <option value="BAN_NHANH_30N">Bán nhanh 30 ngày</option>
-                  <option value="BAN_GP">Bán giải pháp</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">
-                <span class="lbl">
-                  <span class="lbl-ico gi7"><i class="fa-regular fa-note-sticky"></i></span>
-                  Ghi chú
-                </span>
-              </label>
-              <textarea class="form-textarea" v-model="editForm.note" placeholder="Cập nhật ghi chú..."></textarea>
-            </div>
+        <div class="modal-body  single">
+          <div v-if="editLoading" class="detail-state">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            Đang tải chi tiết...
           </div>
+          <div v-else-if="editError" class="detail-state error">
+            {{ editError }}
+          </div>
+          <template v-else>
+            <div class="modal-card">
+              <div class="card-cap">
+                <i class="fa-solid fa-gear"></i>
+                <span>Nội dung chỉnh sửa</span>
+              </div>
 
-          <div class="modal-panel">
-            <h5>
-              <span class="sec-ico si4"><i class="fa-solid fa-clock-rotate-left"></i></span>
-              Lịch sử thay đổi
-            </h5>
-
-            <div class="history">
-              <div v-if="!historyItems.length" class="muted-empty">Chưa có lịch sử.</div>
-              <div v-else>
-                <div v-for="item in historyItems" :key="item.ts" class="h-item">
-                  <div class="h-top">
-                    <span>
-                      {{ item.actor }} •
-                      <span class="action-pill" :class="item.actionClass">{{ item.actionLabel }}</span>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">
+                    <span class="lbl">
+                      <span class="lbl-ico gi2"><i class="fa-solid fa-building"></i></span>
+                      Chi nhánh
                     </span>
-                    <span>{{ item.stamp }}</span>
-                  </div>
-                  <div class="h-desc">{{ item.desc || '' }}</div>
+                  </label>
+                  <select
+                      class="form-select"
+                      v-model="editForm.branch"
+                  >
+                    <option v-for="b in BRANCHES" :key="b.key" :value="b.key">{{ b.label }}</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">
+                    <span class="lbl">
+                      <span class="lbl-ico gi6"><i class="fa-solid fa-headset"></i></span>
+                      Nhân viên phụ trách
+                    </span>
+                  </label>
+                  <select class="form-select" v-model="editForm.consultantId">
+                    <option v-if="editConsultantsLoading" disabled>
+                      Đang tải nhân viên...
+                    </option>
+                    <option
+                        v-for="c in EDIT_CONSULTANTS"
+                        :key="c.id"
+                        :value="c.id"
+                    >
+                      {{ c.name }} <span v-if="c.phone">- {{ c.phone }}</span>
+                    </option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">
+                    <span class="lbl">
+                      <span class="lbl-ico gi3"><i class="fa-regular fa-calendar"></i></span>
+                      Ngày hẹn
+                    </span>
+                  </label>
+                  <input type="date" class="form-input" v-model="editForm.date" />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">
+                    <span class="lbl">
+                      <span class="lbl-ico gi4"><i class="fa-regular fa-clock"></i></span>
+                      Giờ hẹn
+                    </span>
+                  </label>
+                  <input type="time" class="form-input" v-model="editForm.time" />
                 </div>
               </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">
+                    <span class="lbl">
+                      <span class="lbl-ico gi9"><i class="fa-solid fa-traffic-light"></i></span>
+                      Trạng thái
+                    </span>
+                  </label>
+                  <select class="form-select" v-model="editForm.status">
+                    <option value="WAITING">Chờ đến hẹn</option>
+                    <option value="UP">Đã lên</option>
+                    <option value="NOT_UP">Chưa lên</option>
+                    <option value="POSTPONED">Tạm hoãn</option>
+                    <option value="CANCELLED">Huỷ</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">
+                    <span class="lbl">
+                      <span class="lbl-ico gi12"><i class="fa-solid fa-star"></i></span>
+                      Dịch vụ tư vấn
+                    </span>
+                  </label>
+                  <select class="form-select" v-model="editForm.rating">
+                    <option value="BAN_NHANH_30N">Bán nhanh 30 ngày</option>
+                    <option value="BAN_GP">Bán giải pháp</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">
+    <span class="lbl">
+      <span class="lbl-ico gi10"><i class="fa-solid fa-handshake"></i></span>
+      Kết quả tư vấn
+    </span>
+                  </label>
+
+                  <select class="form-select" v-model="editForm.consultStatus">
+                    <option :value="null">Chưa có</option>
+                    <option :value="ConsultStatus.SUCCESS">Thành công</option>
+                    <option :value="ConsultStatus.FAIL">Thất bại</option>
+                    <option :value="ConsultStatus.CARE">Chăm sóc</option>
+                  </select>
+                </div>
+
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="lbl">
+                    <span class="lbl-ico gi7"><i class="fa-regular fa-note-sticky"></i></span>
+                    Ghi chú lịch hẹn
+                  </span>
+                </label>
+                <textarea class="form-textarea" v-model="editForm.note" placeholder="Cập nhật ghi chú lịch hẹn..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="lbl">
+                    <span class="lbl-ico gi7"><i class="fa-regular fa-note-sticky"></i></span>
+                    Ghi chú khách hàng
+                  </span>
+                </label>
+                <textarea class="form-textarea" v-model="editForm.customerNote" placeholder="Cập nhật ghi chú khách hàng..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">
+                <span class="lbl">
+                  <span class="lbl-ico gi13">
+                     <span class="lbl-ico gi7"><i class="fa-regular fa-note-sticky"></i></span>
+                  </span>
+                  Lý do cập nhật <span class="req">*</span>
+                </span>
+                </label>
+
+                <textarea
+                    class="form-textarea reason-textarea"
+                    v-model="editForm.updateReason"
+                    placeholder="Nhập lý do chỉnh sửa lịch hẹn (vd: khách đổi giờ, đổi chi nhánh, cập nhật NV tư vấn...)"
+                    rows="3"
+                ></textarea>
+              </div>
             </div>
-          </div>
+
+
+            <div class="form-group edit-session-note">
+              <div class="session-note">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>
+      <b>Lưu ý:</b> Mỗi lần cập nhật lịch hẹn sẽ được ghi nhận vào
+      <b>lịch sử chỉnh sửa</b> để theo dõi thay đổi.
+    </span>
+              </div>
+            </div>
+
+          </template>
         </div>
 
         <div class="modal-foot">
           <button class="btn btn-secondary" type="button" @click="closeEditModal">Đóng</button>
           <button class="btn btn-primary" type="button" @click="saveEditModal">
-            <i class="fa-solid fa-floppy-disk"></i>Lưu thay đổi
+            <i class="fa-solid fa-floppy-disk"></i>Cập nhật
           </button>
         </div>
       </div>
@@ -3358,7 +3418,19 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
   padding:24px;
 }
 .editor-modal{
-  width: min(1020px, 96vw);
+  width: min(1050px, 96vw);
+  background: rgba(253,251,251,0.92);
+  border-radius: 26px;
+  box-shadow: 0 15px 50px rgba(0,0,0,0.20);
+  display:flex;
+  flex-direction:column;
+  max-height: calc(100vh - 48px);
+  overflow:hidden;
+  animation: modalIn 0.16s ease-out;
+  border:1px solid rgba(255,255,255,0.38);
+}
+.editor-modal-update{
+  width: min(750px, 96vw);
   background: rgba(253,251,251,0.92);
   border-radius: 26px;
   box-shadow: 0 15px 50px rgba(0,0,0,0.20);
@@ -3890,6 +3962,48 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
 .consult-badge.cs-unknown {
   background: linear-gradient(135deg, #facc15, #f97316);
   color: #fff;
+}
+/* ===== Modal Edit: full left column ===== */
+.editor-modal.edit .modal-body.single {
+  display: block;
+  padding: 18px 20px 8px;
+}
+
+.editor-modal.edit .modal-card {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* ===== Ghi chú phiên chỉnh sửa ===== */
+.edit-session-note {
+  margin-top: 12px;
+}
+
+.session-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #eef2ff, #f8fafc);
+  border: 1px dashed #c7d2fe;
+  font-size: 13px;
+  color: #334155;
+}
+
+.session-note i {
+  margin-top: 2px;
+  color: #6366f1;
+  font-size: 14px;
+}
+.reason-textarea {
+  background: linear-gradient(135deg, #fff7ed, #fff);
+  border: 1px solid #fed7aa;
+}
+
+.reason-textarea:focus {
+  border-color: #fb923c;
+  box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.15);
 }
 
 </style>
