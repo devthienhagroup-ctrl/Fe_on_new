@@ -4,9 +4,26 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="#" style="text-align: justify ">
           <i class="fas fa-phone-alt"></i>
           <span>ADMIN PRO</span>
+          <div class="d-flex align-items-center gap-2">
+            <NotificationBell />
+            <div class="d-flex flex-column align-items-end text-end">
+              <div class="fw-semibold text-dark">{{ info.fullName }}</div>
+            </div>
+
+            <img
+                v-if="info.avatarUrl"
+                :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+                alt="avatar"
+                class="rounded-circle border"
+                style="width: 36px; height: 36px; object-fit: cover;"
+            />
+            <div v-else class="avatar-circle">
+              {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
+            </div>
+          </div>
         </a>
 
         <button class="navbar-toggler" type="button" @click="toggleMobileMenu">
@@ -1508,6 +1525,9 @@ const recentYears = computed(() => {
   const currentYear = new Date().getFullYear()
   return Array.from({ length: 5 }, (_, i) => currentYear - i)
 })
+import { useAuthStore } from "/src/stores/authStore.js";
+const authStore = useAuthStore();
+const info = authStore.userInfo;
 const phanLoaiStats = ref([])
 watch([chartYear, chartType], async () => {
   // 🔥 LINE CHART (CHUNG)
@@ -2454,17 +2474,26 @@ const toDate = (value) => {
 
 const getStatusLabel = (status) => {
   const statusMap = {
-      'NEW': 'Mới',
-    'TN_7NGAY': 'TN 7 ngày',
-    'TN_14NGAY': 'TN 14 ngày',
-    'THANH_CONG': 'Thành công',
-    'SAI_SO': 'Sai số',
-    'SAI_SO_LIEU': 'Sai số',
-    'KHONG_LIEN_LAC_DUOC': 'KLLD',
-    'CHAM_SOC': 'Chăm sóc',
-    'DC_TELESALES': 'Chưa gọi',
-    'THAT_BAI': 'Thất bại'
+    NEW: 'Mới',
+
+    DC_TELESALES: 'Chưa gọi',
+    CHAM_SOC: 'Chăm sóc',
+    TN_7NGAY: 'TN 7 ngày',
+    TN_14NGAY: 'TN 14 ngày',
+
+    THANH_CONG: 'Thành công',
+
+    // ===== BỔ SUNG =====
+    KHACH_HUY_HEN: 'Huỷ hẹn',
+    BAN_NHANH: 'Bán nhanh',
+    BAN_GP: 'Bán GP',
+
+    THAT_BAI: 'Thất bại',
+    KHONG_LIEN_LAC_DUOC: 'KLLD',
+    SAI_SO: 'Sai số',
+    SAI_SO_LIEU: 'Sai số',
   }
+
   return statusMap[status] || status
 }
 
@@ -2568,11 +2597,19 @@ const STATUS_META = {
   CHAM_SOC: { label: 'Đang chăm sóc', color: '#38bdf8' },
   TN_7NGAY: { label: 'Tiềm năng 7 ngày', color: '#0ea5e9' },
   TN_14NGAY: { label: 'Tiềm năng 14 ngày', color: '#0284c7' },
+
   THAT_BAI: { label: 'Thất bại', color: '#f43f5e' },
   KHONG_LIEN_LAC_DUOC: { label: 'Không liên lạc được', color: '#f97316' },
   SAI_SO_LIEU: { label: 'Sai số liệu', color: '#a855f7' },
-  THANH_CONG: { label: 'Thành công (Lên VP)', color: '#22c55e' }
+
+  THANH_CONG: { label: 'Thành công (Lên VP)', color: '#22c55e' },
+
+  // ===== BỔ SUNG =====
+  KHACH_HUY_HEN: { label: 'Khách huỷ hẹn', color: '#b45309' }, // huỷ – cam nâu
+  BAN_NHANH: { label: 'Bán nhanh', color: '#15803d' },        // bán nhanh – xanh đậm
+  BAN_GP: { label: 'Bán GP', color: '#0f766e' }               // đã lên VP – xanh ngọc
 }
+
 const PHAN_LOAI_META = {
   MOI_GIOI: {
     label: 'Môi giới',
@@ -2886,6 +2923,7 @@ import {
   updateAlertError,
   updateAlertSuccess
 } from "../../assets/js/alertService.js";
+import NotificationBell from "../NotificationBell.vue";
 const marketingoptions = ref([])
 
 
@@ -3132,15 +3170,15 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 
 /* ✅ SCALE 0.8 GIỮ NGUYÊN (KHÔNG SCALE HTML) */
 .app-scale {
-  transform: scale(0.8);
   transform-origin: 0 0;
-  width: 125%;
-  height: 125%;
+  zoom: 0.8;
 }
 
 /* ✅ App layout full height, chỉ main cuộn */
 .app-root {
-  height: 125vh;
+  position: relative;
+  top: -10px;
+  height: 122vh;
   display: flex;
   flex-direction: column;
 }
@@ -3148,7 +3186,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 .app-shell {
   display: flex;
   gap: var(--shell-pad);
-  padding: var(--shell-pad);
+  padding: 10px 0px;
   overflow: hidden;
 }
 
@@ -3160,7 +3198,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   box-shadow: var(--shadow-medium);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: sticky;
-  top: 0;
+  top: -10px;
   z-index: 1030;
   height: var(--nav-h);
 }
@@ -3482,11 +3520,12 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 .table-container {
   background: white;
   border-radius: var(--border-radius-md);
-  overflow: hidden;
+  overflow-x: auto !important;
   box-shadow: var(--shadow-soft);
 }
 
 .table-custom { margin-bottom: 0;  border-spacing: 0; border-collapse:collapse !important; background-clip: border-box !important;}
+
 .table-custom thead {
   background: linear-gradient(180deg, #7dd3fc 0%, #38bdf8 100%) !important;
 }
@@ -3801,6 +3840,23 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 /* ===== Thành công (lên VP) ===== */
 .status-THANH_CONG {
   background: linear-gradient(135deg, #3CD3AD 0%, #4CB8C4 100%);
+  color: white;
+}
+/* ===== Khách huỷ hẹn ===== */
+.status-KHACH_HUY_HEN {
+  background: linear-gradient(135deg, #b45309 0%, #f59e0b 100%);
+  color: white;
+}
+
+/* ===== Bán nhanh ===== */
+.status-BAN_NHANH {
+  background: linear-gradient(135deg, #0f9b0f 0%, #38ef7d 100%);
+  color: white;
+}
+
+/* ===== Bán GP (đã lên VP) ===== */
+.status-BAN_GP {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
   color: white;
 }
 

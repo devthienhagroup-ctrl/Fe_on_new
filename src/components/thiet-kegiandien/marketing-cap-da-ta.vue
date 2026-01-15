@@ -463,16 +463,25 @@ const distributionCanvas = ref(null);
 let distributionChart = null;
 
 const STATUS_META = {
-  NEW: { label: "Mới", color: "#94a3b8" },
-  DC_TELESALES: { label: "Đã cấp Telesales", color: "#6366f1" },
-  CHAM_SOC: { label: "Đang chăm sóc", color: "#38bdf8" },
+  NEW: { label: "Mới", color: "#94a3b8" },                 // xám
+  DC_TELESALES: { label: "Đã cấp Telesales", color: "#6366f1" }, // tím xanh
+  CHAM_SOC: { label: "Đang chăm sóc", color: "#38bdf8" },  // xanh trời
   TN_7NGAY: { label: "Theo dõi 7 ngày", color: "#0ea5e9" },
   TN_14NGAY: { label: "Theo dõi 14 ngày", color: "#0284c7" },
-  THAT_BAI: { label: "Thất bại", color: "#f43f5e" },
-  KHONG_LIEN_LAC_DUOC: { label: "Không liên lạc được", color: "#f97316" },
-  SAI_SO_LIEU: { label: "Sai số liệu", color: "#a855f7" },
-  THANH_CONG: { label: "Thành công (Lên VP)", color: "#22c55e" },
+
+  THAT_BAI: { label: "Thất bại", color: "#dc2626" },       // đỏ đậm
+  KHONG_LIEN_LAC_DUOC: { label: "Không liên lạc được", color: "#ea580c" }, // cam đậm
+  SAI_SO_LIEU: { label: "Sai số liệu", color: "#9333ea" }, // tím đậm
+
+  THANH_CONG: { label: "Lên VP (ĐK)", color: "#22c55e" },  // xanh lá tươi
+
+  // ===== BỔ SUNG (ĐỔI MÀU RÕ HƠN) =====
+  KHACH_HUY_HEN: { label: "Khách huỷ hẹn", color: "#b45309" }, // nâu cam (huỷ)
+  BAN_NHANH: { label: "Bán nhanh", color: "#15803d" },        // xanh lá đậm
+  BAN_GP: { label: "Bán GP (Đã lên VP)", color: "#0f766e" },  // xanh ngọc đậm (premium)
 };
+
+
 
 const statusChartData = ref([]); // [{label,value,color}]
 

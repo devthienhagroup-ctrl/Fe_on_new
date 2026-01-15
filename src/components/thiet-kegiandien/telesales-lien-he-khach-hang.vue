@@ -4,11 +4,22 @@
     <!-- Header -->
     <header class="app-header">
       <h1><i class="fas fa-phone-alt"></i> Hệ Thống Telesale</h1>
-      <div class="user-info">
-        <span>Nhân viên: Nguyễn Văn A</span>
-        <button class="logout-btn">
-          <i class="fas fa-sign-out-alt"></i> Đăng xuất
-        </button>
+      <div class="d-flex align-items-center gap-2">
+        <NotificationBell />
+        <div class="d-flex flex-column align-items-end text-end">
+          <div class="fw-semibold text-dark">{{ info.fullName }}</div>
+        </div>
+
+        <img
+            v-if="info.avatarUrl"
+            :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+            alt="avatar"
+            class="rounded-circle border"
+            style="width: 36px; height: 36px; object-fit: cover;"
+        />
+        <div v-else class="avatar-circle">
+          {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
+        </div>
       </div>
     </header>
 
@@ -450,18 +461,31 @@ import Chart from 'chart.js/auto'
 import api from '/src/api/api.js'
 import FileNew from './File.vue'
 
+import NotificationBell from "../NotificationBell.vue";
+import { useAuthStore } from "/src/stores/authStore.js";
+const authStore = useAuthStore();
+const info = authStore.userInfo;
 // ====== META ======
 const STATUS_META = {
   NEW: { label: 'Mới', color: '#94a3b8' },
+
   DC_TELESALES: { label: 'Mới tiếp nhận', color: '#6366f1' },
   CHAM_SOC: { label: 'Đang chăm sóc', color: '#38bdf8' },
   TN_7NGAY: { label: 'Tiềm năng 7 ngày', color: '#0ea5e9' },
   TN_14NGAY: { label: 'Tiềm năng 14 ngày', color: '#0284c7' },
+
   THAT_BAI: { label: 'Thất bại', color: '#f43f5e' },
   KHONG_LIEN_LAC_DUOC: { label: 'Không liên lạc được', color: '#f97316' },
   SAI_SO_LIEU: { label: 'Sai số liệu', color: '#a855f7' },
-  THANH_CONG: { label: 'Thành công (Lên VP)', color: '#22c55e' }
+
+  THANH_CONG: { label: 'Thành công (Lên VP)', color: '#22c55e' },
+
+  // ===== BỔ SUNG =====
+  KHACH_HUY_HEN: { label: 'Khách huỷ hẹn', color: '#b45309' },   // cam nâu – huỷ
+  BAN_NHANH: { label: 'Bán nhanh', color: '#15803d' },          // xanh lá đậm
+  BAN_GP: { label: 'Bán GP (Đã lên VP)', color: '#0f766e' },    // xanh ngọc đậm
 }
+
 
 // ====== Reactive state ======
 const activeTab = ref('new')
@@ -1099,17 +1123,22 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f0f2f5;
   color: #333;
+
 }
 
 .telesale-app {
+  position: relative;
+  top: -10px!important;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 108vh;
   overflow: hidden;
+  zoom: 0.9;
 }
 
 /* Header */
 .app-header {
+  top: -10px!important;
   background: linear-gradient(135deg, #3f51b5, #2196f3);
   color: white;
   padding: 15px 25px;

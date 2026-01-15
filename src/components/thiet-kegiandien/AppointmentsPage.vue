@@ -10,6 +10,8 @@ const cleanupHandlers = []
 let chart1 = null
 let chart2 = null
 let chart3 = null
+let chart4 = null
+let chart5 = null
 const statsReady = ref(false)
 
 // ===== Stats (KHÔNG ăn theo bộ lọc) =====
@@ -32,8 +34,7 @@ const historyItems = ref([])
 const openActionMenuId = ref(null)
 const dragOverSlot = ref(null)
 // ===== Summary from BE =====
-const summaryLoading = ref(false)
-const summaryError = ref('')
+const statsAppointments = ref([])
 
 
 function getActionInfo(action) {
@@ -173,6 +174,11 @@ function formatVNDate(yyyyMMdd) {
 }
 function formatShortDateLabel(dateObj) {
   return `${dateObj.getDate()}/${dateObj.getMonth() + 1}`
+}
+function formatCurrencyVND(value) {
+  const number = Number(value)
+  if (!Number.isFinite(number)) return '-'
+  return number.toLocaleString('vi-VN') + ' đ'
 }
 function toISODate(d) {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
@@ -323,11 +329,12 @@ function updateFilterOutputs() {
 }
 
 function updateGlobalStats() {
-  const all = [...appointments.value]
+  const all = [...statsAppointments.value]
   statTotal.value = all.length
   statSelectedDay.value = all.filter((a) => a.date === selectedDateISO.value).length
   statUp.value = all.filter((a) => a.status === 'UP').length
   statPending.value = all.filter((a) => ['WAITING', 'NOT_UP', 'POSTPONED'].includes(a.status)).length
+  statCancelled.value = all.filter((a) => a.status === 'CANCELLED').length
 }
 
 // ===== Calendar markers by day (orange/blue) =====
@@ -472,6 +479,7 @@ function mapAppointmentFromApi(dto) {
     status: dto.status,
     consultStatus: dto.consultStatus,
     rating: dto.rating,
+    fee: dto.phi ?? 0,
     createdByMe: dto.createdByMe,
     inCharge: dto.inCharge,
     branch: dto.branch || '',
@@ -494,6 +502,7 @@ function mapAppointmentDetailFromApi(dto) {
     address: dto.customer?.address,
     oldAddress: dto.customer?.oldAress,
     customerNote: dto.customer?.customerNote,
+    customerFee: dto.customer?.phi ?? null,
     customerType: dto.customer?.customerType,
     files: dto.customer?.files || [],
 
@@ -571,6 +580,25 @@ async function fetchAppointments() {
   updateFilterOutputs()
 }
 
+async function fetchStatsAppointments() {
+  const { startDate, endDate } = getFilterRange()
+  const payload = {
+    startDate,
+    endDate,
+    status: null,
+    search: null,
+  }
+
+  try {
+    const res = await api.post('/customer-crm/admin/lich-hen/filter', payload)
+    const data = Array.isArray(res.data) ? res.data : []
+    statsAppointments.value = data.map(mapAppointmentFromApi)
+  } catch (e) {
+    statsAppointments.value = []
+    showToast('Lỗi tải thống kê', e?.response?.data?.message || 'Không thể tải dữ liệu.', 'error')
+  }
+}
+
 function handleCalendarClick(cell) {
   if (!cell.currentMonth || !cell.iso) return
   if (!cell.enabled) return
@@ -605,7 +633,6 @@ function apptsForSelectedDay() {
 function updateDaySchedule() {
   dayTitle.value = `Day Schedule • ${formatVNDate(selectedDateISO.value)}`
   const list = apptsForSelectedDay()
-  statSelectedDay.value = list.length
 
   const slotTimes = buildDaySlotTimes(list)
   const byTime = new Map()
@@ -1213,17 +1240,51 @@ function destroyCharts() {
     chart3.destroy()
     chart3 = null
   }
+  if (chart4) {
+    chart4.destroy()
+    chart4 = null
+  }
+  if (chart5) {
+    chart5.destroy()
+    chart5 = null
+  }
 }
 function makeGrad(ctx, stops) {
   const g = ctx.createLinearGradient(0, 0, 0, 220)
   stops.forEach((s) => g.addColorStop(s[0], s[1]))
   return g
 }
+const doughnutCenterPlugin = {
+  id: 'doughnutCenterText',
+  beforeDraw(chart) {
+    const { ctx, chartArea } = chart
+    if (!chartArea) return
+    const dataset = chart.data.datasets?.[0]
+    if (!dataset) return
+    const total = (dataset.data || []).reduce((sum, val) => sum + (Number(val) || 0), 0)
+
+    const centerX = (chartArea.left + chartArea.right) / 2
+    const centerY = (chartArea.top + chartArea.bottom) / 2
+
+    ctx.save()
+    ctx.font = '700 22px "Plus Jakarta Sans", sans-serif'
+    ctx.fillStyle = '#0f172a'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(total.toLocaleString('vi-VN'), centerX, centerY - 4)
+    ctx.font = '600 12px "Plus Jakarta Sans", sans-serif'
+    ctx.fillStyle = '#64748b'
+    ctx.fillText('Tổng', centerX, centerY + 16)
+    ctx.restore()
+  },
+}
 function initCharts() {
   const c1 = $('#appointmentsChart')
   const c2 = $('#statusChart')
   const c3 = $('#successChart')
-  if (!c1 || !c2 || !c3) return
+  const c4 = $('#successChartSecondary')
+  const c5 = $('#revenueChart')
+  if (!c1 || !c2 || !c3 || !c4 || !c5) return
 
   destroyCharts()
 
@@ -1231,8 +1292,8 @@ function initCharts() {
   const ctx1 = c1.getContext('2d')
   const barGrad = makeGrad(ctx1, [
     [0, 'rgba(102,126,234,0.95)'],
-    [0.55, 'rgba(118,75,162,0.78)'],
-    [1, 'rgba(79,172,254,0.50)'],
+    [0.6, 'rgba(118,75,162,0.7)'],
+    [1, 'rgba(79,172,254,0.35)'],
   ])
 
   chart1 = new Chart(ctx1, {
@@ -1245,20 +1306,25 @@ function initCharts() {
           data: [],
           backgroundColor: barGrad,
           borderWidth: 0,
-          borderRadius: 14,
+          borderRadius: 10,
           borderSkipped: false,
-          barPercentage: 0.7,
-          categoryPercentage: 0.72,
+          barPercentage: 0.62,
+          categoryPercentage: 0.7,
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false,
+      },
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: 'rgba(20,22,30,0.92)',
+          enabled: true,
+          backgroundColor: 'rgba(15,23,42,0.95)',
           padding: 10,
           titleColor: '#fff',
           bodyColor: '#e8edf6',
@@ -1269,7 +1335,7 @@ function initCharts() {
         y: {
           beginAtZero: true,
           ticks: { color: '#5b6576', font: { weight: '600' } },
-          grid: { color: 'rgba(20,22,30,.08)' },
+          grid: { color: 'rgba(148,163,184,0.22)' },
         },
         x: {
           ticks: { color: '#5b6576', font: { weight: '600' } },
@@ -1282,8 +1348,8 @@ function initCharts() {
   // Chart 2 (Doughnut)
   const ctx2 = c2.getContext('2d')
   const gWait = makeGrad(ctx2, [
-    [0, 'rgba(251,191,36,0.95)'],   // vàng 400
-    [1, 'rgba(253,230,138,0.55)'],  // vàng nhạt
+    [0, 'rgba(251,191,36,0.95)'],
+    [1, 'rgba(253,230,138,0.55)'],
   ])
   const gUp = makeGrad(ctx2, [
     [0, 'rgba(67,233,123,0.95)'],
@@ -1291,17 +1357,16 @@ function initCharts() {
   ])
   const gNot = makeGrad(ctx2, [
     [0, 'rgba(250,112,154,0.92)'],
-    [1, 'rgba(254,225,64,0.50)'],
+    [1, 'rgba(254,225,64,0.55)'],
   ])
   const gPost = makeGrad(ctx2, [
     [0, 'rgba(79,172,254,0.95)'],
     [1, 'rgba(0,242,254,0.55)'],
   ])
   const gCancel = makeGrad(ctx2, [
-    [0, 'rgba(255,88,88,0.90)'],
+    [0, 'rgba(255,88,88,0.9)'],
     [1, 'rgba(240,152,25,0.55)'],
   ])
-
   chart2 = new Chart(ctx2, {
     type: 'doughnut',
     data: {
@@ -1319,13 +1384,18 @@ function initCharts() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      cutout: '70%',
+      cutout: '72%',
+      interaction: {
+        mode: 'nearest',
+        intersect: false,
+      },
       plugins: {
         legend: {
           position: 'bottom',
           labels: { color: '#455064', boxWidth: 10, boxHeight: 10, font: { weight: '600' } },
         },
         tooltip: {
+          enabled: true,
           backgroundColor: 'rgba(20,22,30,0.92)',
           padding: 10,
           titleColor: '#fff',
@@ -1334,6 +1404,7 @@ function initCharts() {
         },
       },
     },
+    plugins: [doughnutCenterPlugin],
   })
 
   // Chart 3 (Pie)
@@ -1343,14 +1414,13 @@ function initCharts() {
     [1, 'rgba(56,249,215,0.55)'],
   ])
   const gFail = makeGrad(ctx3, [
-    [0, 'rgba(255,88,88,0.90)'],
+    [0, 'rgba(255,88,88,0.9)'],
     [1, 'rgba(240,152,25,0.55)'],
   ])
   const gCare = makeGrad(ctx3, [
     [0, 'rgba(79,172,254,0.95)'],
     [1, 'rgba(0,242,254,0.55)'],
   ])
-
   chart3 = new Chart(ctx3, {
     type: 'pie',
     data: {
@@ -1368,16 +1438,143 @@ function initCharts() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: {
+        mode: 'nearest',
+        intersect: false,
+      },
       plugins: {
         legend: {
           position: 'bottom',
           labels: { color: '#455064', boxWidth: 10, boxHeight: 10, font: { weight: '600' } },
         },
         tooltip: {
+          enabled: true,
           backgroundColor: 'rgba(20,22,30,0.92)',
           padding: 10,
           titleColor: '#fff',
           bodyColor: '#e8edf6',
+        },
+      },
+    },
+  })
+
+  // Chart 4 (Pie - Secondary)
+  const ctx4 = c4.getContext('2d')
+  const gSuccess2 = makeGrad(ctx4, [
+    [0, 'rgba(67,233,123,0.95)'],
+    [1, 'rgba(56,249,215,0.55)'],
+  ])
+  const gFail2 = makeGrad(ctx4, [
+    [0, 'rgba(255,88,88,0.9)'],
+    [1, 'rgba(240,152,25,0.55)'],
+  ])
+  const gCare2 = makeGrad(ctx4, [
+    [0, 'rgba(79,172,254,0.95)'],
+    [1, 'rgba(0,242,254,0.55)'],
+  ])
+  chart4 = new Chart(ctx4, {
+    type: 'pie',
+    data: {
+      labels: ['Thành công', 'Thất bại', 'Chăm sóc'],
+      datasets: [
+        {
+          data: [0, 0, 0],
+          backgroundColor: [gSuccess2, gFail2, gCare2],
+          borderWidth: 0,
+          hoverOffset: 6,
+          spacing: 2,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: 'nearest',
+        intersect: false,
+      },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: '#455064', boxWidth: 10, boxHeight: 10, font: { weight: '600' } },
+        },
+        tooltip: {
+          enabled: true,
+          backgroundColor: 'rgba(20,22,30,0.92)',
+          padding: 10,
+          titleColor: '#fff',
+          bodyColor: '#e8edf6',
+        },
+      },
+    },
+  })
+
+  // Chart 5 (Revenue)
+  const ctx5 = c5.getContext('2d')
+  const revenueGrad = makeGrad(ctx5, [
+    [0, 'rgba(102,126,234,0.5)'],
+    [0.6, 'rgba(118,75,162,0.25)'],
+    [1, 'rgba(79,172,254,0.12)'],
+  ])
+  const revenueBorder = makeGrad(ctx5, [
+    [0, 'rgba(102,126,234,0.95)'],
+    [1, 'rgba(118,75,162,0.85)'],
+  ])
+  chart5 = new Chart(ctx5, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: 'Doanh thu',
+          data: [],
+          backgroundColor: revenueGrad,
+          borderColor: revenueBorder,
+          borderWidth: 2,
+          fill: true,
+          tension: 0.35,
+          pointRadius: 3,
+          pointHoverRadius: 4,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#667eea',
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false,
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          backgroundColor: 'rgba(15,23,42,0.95)',
+          padding: 10,
+          titleColor: '#fff',
+          bodyColor: '#e8edf6',
+          callbacks: {
+            label(context) {
+              return `Doanh thu: ${formatCurrencyVND(context.parsed.y)}`
+            },
+          },
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: '#5b6576',
+            font: { weight: '600' },
+            callback: (value) => formatCurrencyVND(value),
+          },
+          grid: { color: 'rgba(148,163,184,0.22)' },
+        },
+        x: {
+          ticks: { color: '#5b6576', font: { weight: '600' } },
+          grid: { display: false },
         },
       },
     },
@@ -1400,55 +1597,22 @@ function handleAction(type, appt, event) {
     showToast('Đã xoá lịch hẹn', appt.customer || 'Đã xoá.', 'success')
   } else if (type === 'detail') openDetailModal(appt)
 }
-// ===== Status chart from BE =====
-const statusChartLoading = ref(false)
-const statusChartError = ref('')
-const statusChartData = ref({
-  UP: 0,
-  WAITING: 0,
-  NOT_UP: 0,
-  POSTPONED: 0,
-  CANCELLED: 0,
-})
-async function fetchStatusChart() {
-  const { startDate, endDate } = getFilterRange()
-
-  statusChartLoading.value = true
-  statusChartError.value = ''
-
-  try {
-    const res = await api.get('/customer-crm/admin/lich-hen/status-chart', {
-      params: {
-        from: startDate,
-        to: endDate,
-      },
-    })
-
-    // reset
-    statusChartData.value = {
-      UP: 0,
-      WAITING: 0,
-      NOT_UP: 0,
-      POSTPONED: 0,
-      CANCELLED: 0,
-    }
-
-    // BE trả: { items: [{ status, count }] }
-    ;(res.data.items || []).forEach(i => {
-      statusChartData.value[i.status] = i.count
-    })
-
-    // 🔥 update chart 2
-    updateStatusChart()
-
-  } catch (e) {
-    statusChartError.value = 'Không thể tải biểu đồ trạng thái'
-  } finally {
-    statusChartLoading.value = false
-  }
-}
 function updateStatusChart() {
   if (!chart2) return
+
+  const counts = {
+    WAITING: 0,
+    UP: 0,
+    NOT_UP: 0,
+    POSTPONED: 0,
+    CANCELLED: 0,
+  }
+
+  statsAppointments.value.forEach((appt) => {
+    if (!appt?.status) return
+    if (counts[appt.status] === undefined) return
+    counts[appt.status] += 1
+  })
 
   chart2.data.labels = [
     STATUS.WAITING.label,
@@ -1459,11 +1623,11 @@ function updateStatusChart() {
   ]
 
   chart2.data.datasets[0].data = [
-    statusChartData.value.WAITING || 0,
-    statusChartData.value.UP || 0,
-    statusChartData.value.NOT_UP || 0,
-    statusChartData.value.POSTPONED || 0,
-    statusChartData.value.CANCELLED || 0,
+    counts.WAITING || 0,
+    counts.UP || 0,
+    counts.NOT_UP || 0,
+    counts.POSTPONED || 0,
+    counts.CANCELLED || 0,
   ]
 
   chart2.update()
@@ -1484,7 +1648,7 @@ function updateAppointmentsChart() {
   if (!chart1) return
 
   const counts = new Map()
-  appointments.value.forEach((appt) => {
+  statsAppointments.value.forEach((appt) => {
     if (!appt?.date) return
     counts.set(appt.date, (counts.get(appt.date) || 0) + 1)
   })
@@ -1498,25 +1662,63 @@ function updateAppointmentsChart() {
   chart1.update()
 }
 function updateConsultChart() {
-  if (!chart3) return
+  if (!chart3 && !chart4) return
   const counts = {
     [ConsultStatus.SUCCESS]: 0,
     [ConsultStatus.FAIL]: 0,
     [ConsultStatus.CARE]: 0,
   }
 
-  appointments.value.forEach((appt) => {
+  statsAppointments.value.forEach((appt) => {
     if (!appt?.consultStatus) return
     if (counts[appt.consultStatus] === undefined) return
     counts[appt.consultStatus] += 1
   })
 
-  chart3.data.datasets[0].data = [
+  const dataset = [
     counts[ConsultStatus.SUCCESS],
     counts[ConsultStatus.FAIL],
     counts[ConsultStatus.CARE],
   ]
-  chart3.update()
+
+  if (chart3) {
+    chart3.data.datasets[0].data = dataset
+    chart3.update()
+  }
+  if (chart4) {
+    chart4.data.datasets[0].data = dataset
+    chart4.update()
+  }
+}
+
+function getDateRangeDays() {
+  const { startDate, endDate } = getFilterRange()
+  const start = new Date(`${startDate}T00:00:00`)
+  const end = new Date(`${endDate}T00:00:00`)
+  const days = []
+  const cursor = new Date(start)
+  while (cursor <= end) {
+    days.push(new Date(cursor))
+    cursor.setDate(cursor.getDate() + 1)
+  }
+  return days
+}
+
+function updateRevenueChart() {
+  if (!chart5) return
+
+  const totals = new Map()
+  statsAppointments.value.forEach((appt) => {
+    if (!appt?.date) return
+    const fee = Number(appt.fee || 0)
+    if (!Number.isFinite(fee)) return
+    totals.set(appt.date, (totals.get(appt.date) || 0) + fee)
+  })
+
+  const days = getDateRangeDays()
+  chart5.data.labels = days.map((d) => formatShortDateLabel(d))
+  chart5.data.datasets[0].data = days.map((d) => totals.get(toISODate(d)) || 0)
+  chart5.update()
 }
 
 // ===== Watchers =====
@@ -1549,36 +1751,10 @@ watch(
     },
     () => {
       if (!statsReady.value) return
-      fetchAppointmentSummary()
-      fetchStatusChart()
+      fetchStatsAppointments()
     },
     { immediate: false }
 )
-async function fetchAppointmentSummary() {
-  const { startDate, endDate } = getFilterRange()
-
-  summaryLoading.value = true
-  summaryError.value = ''
-
-  try {
-    const res = await api.get('/customer-crm/admin/lich-hen/summary', {
-      params: {
-        fromDate: startDate,
-        toDate: endDate,
-      },
-    })
-
-    statTotal.value = res.data.total ?? 0
-    statUp.value = res.data.up ?? 0
-    statPending.value = res.data.pending ?? 0
-    statCancelled.value = res.data.cancelled ?? 0
-
-  } catch (e) {
-    summaryError.value = 'Không thể tải thống kê'
-  } finally {
-    summaryLoading.value = false
-  }
-}
 
 watch(
     () => searchQuery.value,
@@ -1599,6 +1775,13 @@ watch(
 )
 
 watch(
+    () => selectedDateISO.value,
+    () => {
+      updateGlobalStats()
+    },
+)
+
+watch(
     () => {
       const { startDate, endDate } = getFilterRange()
       return [startDate, endDate, activeStatus.value, searchKeyword.value].join('|')
@@ -1608,10 +1791,13 @@ watch(
     },
 )
 watch(
-    () => appointments.value,
+    () => statsAppointments.value,
     () => {
+      updateGlobalStats()
       updateAppointmentsChart()
+      updateStatusChart()
       updateConsultChart()
+      updateRevenueChart()
     },
 )
 async function autoPickCustomerByPhone(phone) {
@@ -1669,6 +1855,7 @@ onMounted(async () => {
   updateStatusChart()
   updateAppointmentsChart()
   updateConsultChart()
+  updateRevenueChart()
   statsReady.value = true
 
   // ===== Fetch branch options (ONLY ONCE) =====
@@ -1693,10 +1880,10 @@ onMounted(async () => {
     updateStatusChart()
     updateAppointmentsChart()
     updateConsultChart()
+    updateRevenueChart()
   })
 
-  await fetchAppointmentSummary()
-  await fetchStatusChart()
+  await fetchStatsAppointments()
 
 })
 
@@ -1785,6 +1972,34 @@ onBeforeUnmount(() => {
           </div>
           <div class="chart-container">
             <canvas id="successChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section class="charts-row">
+        <div class="chart-card c3">
+          <div class="chart-head">
+            <div class="ico-bubble gC"><i class="fa-solid fa-bullseye"></i></div>
+            <div>
+              <h4>Tỷ lệ thành công tư vấn</h4>
+              <p class="sub">Biểu đồ kết quả (bản sao)</p>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="successChartSecondary"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card c1">
+          <div class="chart-head">
+            <div class="ico-bubble gA"><i class="fa-solid fa-sack-dollar"></i></div>
+            <div>
+              <h4>Doanh thu theo ngày</h4>
+              <p class="sub">Tổng phí từ lịch hẹn trong khoảng thời gian</p>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="revenueChart"></canvas>
           </div>
         </div>
       </section>
@@ -2608,6 +2823,10 @@ onBeforeUnmount(() => {
                       </span>
                     </div>
                   </div>
+                  <div class="field-row">
+                    <div class="field-label">Phí dịch vụ</div>
+                    <div class="field-value">{{ formatCurrencyVND(selectedAppointment.customerFee) }}</div>
+                  </div>
                 </div>
               </div>
 
@@ -2890,6 +3109,12 @@ onBeforeUnmount(() => {
   overflow:hidden;
   background: linear-gradient(135deg, rgba(255,255,255,0.70), rgba(255,255,255,0.86));
   border: 1px solid rgba(20,22,30,0.06);
+}
+.chart-container canvas{
+  width:100% !important;
+  height:100% !important;
+  display:block;
+  pointer-events:auto;
 }
 
 /* ===== Bubbles ===== */
