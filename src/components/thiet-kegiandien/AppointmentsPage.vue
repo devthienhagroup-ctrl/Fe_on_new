@@ -10,6 +10,7 @@ const cleanupHandlers = []
 let chart1 = null
 let chart2 = null
 let chart3 = null
+const statsReady = ref(false)
 
 // ===== Stats (KHÔNG ăn theo bộ lọc) =====
 const statTotal = ref(0)
@@ -169,6 +170,9 @@ function buildDaySlotTimes(list) {
 function formatVNDate(yyyyMMdd) {
   const [y, m, d] = yyyyMMdd.split('-')
   return `${d}/${m}/${y}`
+}
+function formatShortDateLabel(dateObj) {
+  return `${dateObj.getDate()}/${dateObj.getMonth() + 1}`
 }
 function toISODate(d) {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
@@ -1234,11 +1238,11 @@ function initCharts() {
   chart1 = new Chart(ctx1, {
     type: 'bar',
     data: {
-      labels: ['3/1', '2/1', '1/1', '31/12', '30/12', '29/12', '28/12'],
+      labels: [],
       datasets: [
         {
           label: 'Số lịch hẹn',
-          data: [4, 3, 2, 1, 2, 3, 2],
+          data: [],
           backgroundColor: barGrad,
           borderWidth: 0,
           borderRadius: 14,
@@ -1277,6 +1281,10 @@ function initCharts() {
 
   // Chart 2 (Doughnut)
   const ctx2 = c2.getContext('2d')
+  const gWait = makeGrad(ctx2, [
+    [0, 'rgba(251,191,36,0.95)'],   // vàng 400
+    [1, 'rgba(253,230,138,0.55)'],  // vàng nhạt
+  ])
   const gUp = makeGrad(ctx2, [
     [0, 'rgba(67,233,123,0.95)'],
     [1, 'rgba(56,249,215,0.55)'],
@@ -1301,7 +1309,7 @@ function initCharts() {
       datasets: [
         {
           data: [],
-          backgroundColor: [gUp, gNot, gPost, gCancel],
+          backgroundColor: [gWait, gUp, gNot, gPost, gCancel],
           borderWidth: 0,
           hoverOffset: 6,
           spacing: 3,
@@ -1349,7 +1357,7 @@ function initCharts() {
       labels: ['Thành công', 'Thất bại', 'Chăm sóc'],
       datasets: [
         {
-          data: [60, 20, 20],
+          data: [0, 0, 0],
           backgroundColor: [gSuccess, gFail, gCare],
           borderWidth: 0,
           hoverOffset: 6,
@@ -1443,6 +1451,7 @@ function updateStatusChart() {
   if (!chart2) return
 
   chart2.data.labels = [
+    STATUS.WAITING.label,
     STATUS.UP.label,
     STATUS.NOT_UP.label,
     STATUS.POSTPONED.label,
@@ -1450,6 +1459,7 @@ function updateStatusChart() {
   ]
 
   chart2.data.datasets[0].data = [
+    statusChartData.value.WAITING || 0,
     statusChartData.value.UP || 0,
     statusChartData.value.NOT_UP || 0,
     statusChartData.value.POSTPONED || 0,
@@ -1457,6 +1467,56 @@ function updateStatusChart() {
   ]
 
   chart2.update()
+}
+
+function getLast7Days() {
+  const days = []
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  for (let i = 0; i < 7; i += 1) {
+    const d = new Date(today)
+    d.setDate(today.getDate() - i)
+    days.push(d)
+  }
+  return days
+}
+function updateAppointmentsChart() {
+  if (!chart1) return
+
+  const counts = new Map()
+  appointments.value.forEach((appt) => {
+    if (!appt?.date) return
+    counts.set(appt.date, (counts.get(appt.date) || 0) + 1)
+  })
+
+  const days = getLast7Days()
+  chart1.data.labels = days.map((d) => formatShortDateLabel(d))
+  chart1.data.datasets[0].data = days.map((d) => {
+    const iso = toISODate(d)
+    return counts.get(iso) || 0
+  })
+  chart1.update()
+}
+function updateConsultChart() {
+  if (!chart3) return
+  const counts = {
+    [ConsultStatus.SUCCESS]: 0,
+    [ConsultStatus.FAIL]: 0,
+    [ConsultStatus.CARE]: 0,
+  }
+
+  appointments.value.forEach((appt) => {
+    if (!appt?.consultStatus) return
+    if (counts[appt.consultStatus] === undefined) return
+    counts[appt.consultStatus] += 1
+  })
+
+  chart3.data.datasets[0].data = [
+    counts[ConsultStatus.SUCCESS],
+    counts[ConsultStatus.FAIL],
+    counts[ConsultStatus.CARE],
+  ]
+  chart3.update()
 }
 
 // ===== Watchers =====
@@ -1488,10 +1548,11 @@ watch(
       return `${startDate}|${endDate}`
     },
     () => {
+      if (!statsReady.value) return
       fetchAppointmentSummary()
       fetchStatusChart()
     },
-    { immediate: true }
+    { immediate: false }
 )
 async function fetchAppointmentSummary() {
   const { startDate, endDate } = getFilterRange()
@@ -1546,6 +1607,13 @@ watch(
       fetchAppointments()
     },
 )
+watch(
+    () => appointments.value,
+    () => {
+      updateAppointmentsChart()
+      updateConsultChart()
+    },
+)
 async function autoPickCustomerByPhone(phone) {
   // gán vào input tìm kiếm
   createForm.customerSearch = phone
@@ -1598,6 +1666,10 @@ onMounted(async () => {
   // ===== Init charts =====
   await nextTick()
   initCharts()
+  updateStatusChart()
+  updateAppointmentsChart()
+  updateConsultChart()
+  statsReady.value = true
 
   // ===== Fetch branch options (ONLY ONCE) =====
 
@@ -1618,6 +1690,9 @@ onMounted(async () => {
     await nextTick()
     initCharts()
     syncHistoryPanelHeight()
+    updateStatusChart()
+    updateAppointmentsChart()
+    updateConsultChart()
   })
 
   await fetchAppointmentSummary()
