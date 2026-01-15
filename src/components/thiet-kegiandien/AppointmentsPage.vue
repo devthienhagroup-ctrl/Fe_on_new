@@ -1679,7 +1679,7 @@ onBeforeUnmount(() => {
               <th>NV phụ trách</th>
               <th>KQ tư vấn</th>
               <th>Phân loại</th>
-              <th>Dịch vụ</th>
+              <th>Diịch vụ</th>
               <th>Tình trạng</th>
               <th>Người tạo</th>
               <th style="width: 90px">Thao tác</th>
