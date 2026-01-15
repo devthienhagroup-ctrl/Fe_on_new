@@ -47,7 +47,7 @@
                 {{ props.modelValue }}
               </div>
               <div class="current-color-value">
-                {{ previewColor }}
+                {{ displayValue }}
               </div>
             </div>
           </div>
@@ -65,6 +65,13 @@
                 :class="{ active: activeTab === 'custom' }"
             >
               Màu tự chọn
+            </button>
+            <button
+                v-if="props.returnType === 'rgba'"
+                @click="activeTab = 'rgba'"
+                :class="{ active: activeTab === 'rgba' }"
+            >
+              RGBA
             </button>
           </div>
 
@@ -91,25 +98,19 @@
               />
             </div>
 
-            <!-- Thông báo khi dùng colors từ props -->
-<!--            <div v-if="props.colors && !globalColorsLoaded" class="info-message">-->
-<!--              <span class="info-icon">ℹ️</span>-->
-<!--              Đang sử dụng danh sách màu từ cấu hình-->
-<!--            </div>-->
-
             <div class="color-grid">
               <div
                   v-for="(colorValue, colorKey) in filteredColors"
                   :key="colorKey"
                   class="color-option"
-                  :class="{ selected: props.modelValue === colorKey }"
+                  :class="{ selected: isSelectedColor(colorKey, colorValue) }"
                   :style="{ backgroundColor: colorValue }"
                   :title="`${colorKey}: ${colorValue}`"
                   @click="selectPresetColor(colorKey, colorValue)"
               >
                 <span class="color-label">{{ colorKey }}</span>
                 <span class="color-hex">{{ colorValue }}</span>
-                <div v-if="props.modelValue === colorKey" class="selected-indicator">
+                <div v-if="isSelectedColor(colorKey, colorValue)" class="selected-indicator">
                   ✓
                 </div>
               </div>
@@ -174,6 +175,135 @@
             </div>
           </div>
 
+          <!-- Nội dung tab RGBA -->
+          <div v-if="activeTab === 'rgba'" class="rgba-color">
+            <div class="rgba-preview-container">
+              <div
+                  class="rgba-color-preview"
+                  :style="{ backgroundColor: rgbaPreview }"
+              ></div>
+              <div class="rgba-color-value">
+                {{ rgbaValue }}
+              </div>
+            </div>
+
+            <div class="rgba-inputs">
+              <div class="input-row">
+                <div class="input-group">
+                  <label for="rgba-r">R (0-255):</label>
+                  <input
+                      id="rgba-r"
+                      type="number"
+                      v-model.number="rgbaR"
+                      min="0"
+                      max="255"
+                      class="rgba-input"
+                      @input="updateRgbaFromInputs"
+                  />
+                </div>
+                <div class="input-group">
+                  <label for="rgba-g">G (0-255):</label>
+                  <input
+                      id="rgba-g"
+                      type="number"
+                      v-model.number="rgbaG"
+                      min="0"
+                      max="255"
+                      class="rgba-input"
+                      @input="updateRgbaFromInputs"
+                  />
+                </div>
+                <div class="input-group">
+                  <label for="rgba-b">B (0-255):</label>
+                  <input
+                      id="rgba-b"
+                      type="number"
+                      v-model.number="rgbaB"
+                      min="0"
+                      max="255"
+                      class="rgba-input"
+                      @input="updateRgbaFromInputs"
+                  />
+                </div>
+                <div class="input-group">
+                  <label for="rgba-a">Alpha (0-1):</label>
+                  <input
+                      id="rgba-a"
+                      type="number"
+                      v-model.number="rgbaA"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      class="rgba-input"
+                      @input="updateRgbaFromInputs"
+                  />
+                </div>
+              </div>
+
+              <div class="input-row">
+                <div class="input-group">
+                  <label for="rgba-hex">HEX Color:</label>
+                  <input
+                      id="rgba-hex"
+                      type="text"
+                      v-model="rgbaHex"
+                      placeholder="#000000"
+                      class="rgba-input hex-input"
+                      @change="updateRgbaFromHex"
+                      pattern="^#[0-9A-Fa-f]{6}$"
+                      maxlength="7"
+                  />
+                </div>
+                <div class="input-group">
+                  <label for="rgba-opacity">Opacity:</label>
+                  <div class="opacity-slider-container">
+                    <input
+                        id="rgba-opacity"
+                        type="range"
+                        v-model.number="rgbaA"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        class="opacity-slider"
+                        @input="updateRgbaFromInputs"
+                    />
+                    <span class="opacity-value">{{ (rgbaA * 100).toFixed(0) }}%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rgba-actions">
+                <button
+                    @click="applyRgbaColor"
+                    class="apply-button"
+                >
+                  Áp dụng RGBA
+                </button>
+                <button
+                    @click="convertCurrentToRgba"
+                    class="convert-button"
+                >
+                  Chuyển màu hiện tại
+                </button>
+              </div>
+            </div>
+
+            <!-- Preset opacities -->
+            <div class="opacity-presets" v-if="props.returnType === 'rgba'">
+              <h4>Độ trong suốt thường dùng:</h4>
+              <div class="opacity-buttons">
+                <button
+                    v-for="opacity in opacityPresets"
+                    :key="opacity.value"
+                    @click="setOpacity(opacity.value)"
+                    class="opacity-button"
+                >
+                  {{ opacity.label }}
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Footer modal -->
           <div class="modal-footer">
             <button @click="showModal = false" class="cancel-button">
@@ -185,6 +315,13 @@
                 class="confirm-button"
             >
               Chọn màu
+            </button>
+            <button
+                v-if="activeTab === 'rgba'"
+                @click="applyRgbaColor"
+                class="confirm-button"
+            >
+              Chọn RGBA
             </button>
           </div>
         </div>
@@ -206,7 +343,7 @@ const props = defineProps({
   returnType: {
     type: String,
     default: 'value',
-    validator: (value) => ['value', 'key'].includes(value)
+    validator: (value) => ['value', 'key', 'rgba'].includes(value)
   },
   // Nhận colors từ component cha để giảm API calls
   colors: {
@@ -232,6 +369,24 @@ const error = ref(null)
 const searchQuery = ref('')
 const recentColors = ref([])
 const globalColorsLoaded = ref(false) // Đánh dấu đã load từ API
+
+// RGBA state
+const rgbaR = ref(0)
+const rgbaG = ref(0)
+const rgbaB = ref(0)
+const rgbaA = ref(1)
+const rgbaHex = ref('#000000')
+
+// Opacity presets
+const opacityPresets = [
+  { label: '100%', value: 1 },
+  { label: '90%', value: 0.9 },
+  { label: '75%', value: 0.75 },
+  { label: '50%', value: 0.5 },
+  { label: '25%', value: 0.25 },
+  { label: '10%', value: 0.1 },
+  { label: '0%', value: 0 }
+]
 
 // Computed properties
 // Danh sách màu sẵn có (ưu tiên từ props, sau đó từ API)
@@ -269,6 +424,11 @@ const previewColor = computed(() => {
     return props.modelValue
   }
 
+  // Nếu modelValue là RGBA
+  if (isRgbaColor(props.modelValue)) {
+    return props.modelValue
+  }
+
   return '#ffffff'
 })
 
@@ -285,6 +445,11 @@ const displayValue = computed(() => {
 
   // Nếu là mã màu hex
   if (isHexColor(props.modelValue)) {
+    return props.modelValue
+  }
+
+  // Nếu là RGBA
+  if (isRgbaColor(props.modelValue)) {
     return props.modelValue
   }
 
@@ -307,6 +472,15 @@ const filteredColors = computed(() => {
   )
 })
 
+// RGBA computed properties
+const rgbaValue = computed(() => {
+  return `rgba(${rgbaR.value}, ${rgbaG.value}, ${rgbaB.value}, ${rgbaA.value})`
+})
+
+const rgbaPreview = computed(() => {
+  return `rgba(${rgbaR.value}, ${rgbaG.value}, ${rgbaB.value}, ${rgbaA.value})`
+})
+
 // Methods
 const isColorKey = (value) => {
   return typeof value === 'string' && value.startsWith('--')
@@ -316,10 +490,59 @@ const isHexColor = (value) => {
   return typeof value === 'string' && /^#[0-9A-Fa-f]{6}$/.test(value)
 }
 
+const isRgbaColor = (value) => {
+  if (typeof value !== 'string') return false
+  const rgbaRegex = /^rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(0|1|0?\.\d+)\s*\)$/
+  if (!rgbaRegex.test(value)) return false
+
+  const match = value.match(rgbaRegex)
+  if (!match) return false
+
+  const r = parseInt(match[1])
+  const g = parseInt(match[2])
+  const b = parseInt(match[3])
+
+  return r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255
+}
+
+const isSelectedColor = (colorKey, colorValue) => {
+  if (!props.modelValue) return false
+
+  if (props.returnType === 'key') {
+    return props.modelValue === colorKey
+  } else if (props.returnType === 'value') {
+    return props.modelValue === colorValue
+  } else if (props.returnType === 'rgba') {
+    // For RGBA mode, compare the hex part
+    if (isHexColor(props.modelValue)) {
+      return props.modelValue === colorValue
+    } else if (isRgbaColor(props.modelValue)) {
+      // Extract hex from RGBA for comparison
+      const hex = rgbaToHex(props.modelValue)
+      return hex === colorValue
+    }
+  }
+
+  return false
+}
+
 const getBorderColor = (backgroundColor) => {
   if (!backgroundColor || backgroundColor === '#ffffff') return '#ccc'
 
   try {
+    // Handle RGBA colors
+    if (backgroundColor.startsWith('rgba')) {
+      const match = backgroundColor.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/)
+      if (match) {
+        const r = parseInt(match[1])
+        const g = parseInt(match[2])
+        const b = parseInt(match[3])
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+        return luminance > 0.7 ? '#ccc' : 'transparent'
+      }
+    }
+
+    // Handle HEX colors
     const hex = backgroundColor.replace('#', '')
     if (hex.length !== 6) return '#ccc'
 
@@ -336,16 +559,84 @@ const getBorderColor = (backgroundColor) => {
   }
 }
 
+const hexToRgb = (hex) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : { r: 0, g: 0, b: 0 }
+}
+
+const rgbToHex = (r, g, b) => {
+  const toHex = (c) => {
+    const hex = c.toString(16)
+    return hex.length === 1 ? '0' + hex : hex
+  }
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+}
+
+const rgbaToHex = (rgba) => {
+  if (!rgba.startsWith('rgba')) return rgba
+
+  const match = rgba.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/)
+  if (match) {
+    const r = parseInt(match[1])
+    const g = parseInt(match[2])
+    const b = parseInt(match[3])
+    return rgbToHex(r, g, b)
+  }
+
+  return '#000000'
+}
+
+const parseRgba = (rgbaString) => {
+  if (!rgbaString || !rgbaString.startsWith('rgba')) {
+    return { r: 0, g: 0, b: 0, a: 1 }
+  }
+
+  const match = rgbaString.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/)
+  if (match) {
+    return {
+      r: parseInt(match[1]),
+      g: parseInt(match[2]),
+      b: parseInt(match[3]),
+      a: parseFloat(match[4])
+    }
+  }
+
+  return { r: 0, g: 0, b: 0, a: 1 }
+}
+
 const openModal = async () => {
   showModal.value = true
 
   // Reset search
   searchQuery.value = ''
 
-  // Nếu modelValue là màu hex, chuyển sang tab custom và set màu
-  if (props.modelValue && isHexColor(props.modelValue)) {
-    activeTab.value = 'custom'
-    customColor.value = props.modelValue
+  // Set active tab based on current value
+  if (props.modelValue) {
+    if (isHexColor(props.modelValue)) {
+      activeTab.value = 'custom'
+      customColor.value = props.modelValue
+      // Also update RGBA tab
+      const rgb = hexToRgb(props.modelValue)
+      rgbaR.value = rgb.r
+      rgbaG.value = rgb.g
+      rgbaB.value = rgb.b
+      rgbaA.value = 1
+      rgbaHex.value = props.modelValue
+    } else if (isRgbaColor(props.modelValue)) {
+      activeTab.value = 'rgba'
+      const rgba = parseRgba(props.modelValue)
+      rgbaR.value = rgba.r
+      rgbaG.value = rgba.g
+      rgbaB.value = rgba.b
+      rgbaA.value = rgba.a
+      rgbaHex.value = rgbToHex(rgba.r, rgba.g, rgba.b)
+    } else {
+      activeTab.value = 'preset'
+    }
   } else {
     activeTab.value = 'preset'
   }
@@ -392,19 +683,39 @@ const fetchGlobalColors = async () => {
 }
 
 const selectPresetColor = (colorKey, colorValue) => {
-  const selectedValue = props.returnType === 'key' ? colorKey : colorValue
+  let selectedValue
+
+  if (props.returnType === 'key') {
+    selectedValue = colorKey
+  } else if (props.returnType === 'value') {
+    selectedValue = colorValue
+  } else if (props.returnType === 'rgba') {
+    // For RGBA mode, convert hex to rgba with full opacity
+    const rgb = hexToRgb(colorValue)
+    selectedValue = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`
+  }
+
   emit('update:modelValue', selectedValue)
   showModal.value = false
 
   // Thêm vào recent colors nếu là màu hex
-  if (!isColorKey(colorValue)) {
+  if (!isColorKey(colorValue) && props.returnType !== 'rgba') {
     addToRecentColors(colorValue)
   }
 }
 
 const selectCustomColor = () => {
   if (customColor.value && /^#[0-9A-Fa-f]{6}$/.test(customColor.value)) {
-    emit('update:modelValue', customColor.value)
+    let selectedValue
+
+    if (props.returnType === 'rgba') {
+      const rgb = hexToRgb(customColor.value)
+      selectedValue = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`
+    } else {
+      selectedValue = customColor.value
+    }
+
+    emit('update:modelValue', selectedValue)
     addToRecentColors(customColor.value)
     showModal.value = false
   } else {
@@ -415,6 +726,71 @@ const selectCustomColor = () => {
 const selectCustomColorDirect = (color) => {
   customColor.value = color
   selectCustomColor()
+}
+
+// RGBA methods
+const updateRgbaFromInputs = () => {
+  // Ensure values are within valid ranges
+  rgbaR.value = Math.min(255, Math.max(0, rgbaR.value))
+  rgbaG.value = Math.min(255, Math.max(0, rgbaG.value))
+  rgbaB.value = Math.min(255, Math.max(0, rgbaB.value))
+  rgbaA.value = Math.min(1, Math.max(0, rgbaA.value))
+
+  // Update hex value
+  rgbaHex.value = rgbToHex(rgbaR.value, rgbaG.value, rgbaB.value)
+}
+
+const updateRgbaFromHex = () => {
+  if (/^#[0-9A-Fa-f]{6}$/.test(rgbaHex.value)) {
+    const rgb = hexToRgb(rgbaHex.value)
+    rgbaR.value = rgb.r
+    rgbaG.value = rgb.g
+    rgbaB.value = rgb.b
+  }
+}
+
+const applyRgbaColor = () => {
+  const rgbaString = `rgba(${rgbaR.value}, ${rgbaG.value}, ${rgbaB.value}, ${rgbaA.value})`
+  emit('update:modelValue', rgbaString)
+
+  // Add to recent colors (as hex)
+  addToRecentColors(rgbaHex.value)
+  showModal.value = false
+}
+
+const convertCurrentToRgba = () => {
+  if (!props.modelValue) return
+
+  if (isHexColor(props.modelValue)) {
+    const rgb = hexToRgb(props.modelValue)
+    rgbaR.value = rgb.r
+    rgbaG.value = rgb.g
+    rgbaB.value = rgb.b
+    rgbaA.value = 1
+    rgbaHex.value = props.modelValue
+  } else if (isColorKey(props.modelValue)) {
+    const colorValue = previewColor.value
+    if (isHexColor(colorValue)) {
+      const rgb = hexToRgb(colorValue)
+      rgbaR.value = rgb.r
+      rgbaG.value = rgb.g
+      rgbaB.value = rgb.b
+      rgbaA.value = 1
+      rgbaHex.value = colorValue
+    }
+  } else if (isRgbaColor(props.modelValue)) {
+    const rgba = parseRgba(props.modelValue)
+    rgbaR.value = rgba.r
+    rgbaG.value = rgba.g
+    rgbaB.value = rgba.b
+    rgbaA.value = rgba.a
+    rgbaHex.value = rgbToHex(rgba.r, rgba.g, rgba.b)
+  }
+}
+
+const setOpacity = (opacity) => {
+  rgbaA.value = opacity
+  updateRgbaFromInputs()
 }
 
 const addToRecentColors = (color) => {
@@ -442,9 +818,23 @@ onMounted(() => {
     }
   }
 
-  // Nếu modelValue đã có, set màu custom phù hợp
-  if (props.modelValue && isHexColor(props.modelValue)) {
-    customColor.value = props.modelValue
+  // Initialize RGBA from current value if exists
+  if (props.modelValue) {
+    if (isHexColor(props.modelValue)) {
+      customColor.value = props.modelValue
+      const rgb = hexToRgb(props.modelValue)
+      rgbaR.value = rgb.r
+      rgbaG.value = rgb.g
+      rgbaB.value = rgb.b
+      rgbaHex.value = props.modelValue
+    } else if (isRgbaColor(props.modelValue)) {
+      const rgba = parseRgba(props.modelValue)
+      rgbaR.value = rgba.r
+      rgbaG.value = rgba.g
+      rgbaB.value = rgba.b
+      rgbaA.value = rgba.a
+      rgbaHex.value = rgbToHex(rgba.r, rgba.g, rgba.b)
+    }
   }
 
   // Nếu có colors từ props, không cần preload API
@@ -456,10 +846,22 @@ onMounted(() => {
   }
 })
 
-// Watch cho modelValue để update customColor khi cần
+// Watch cho modelValue để update các state khi cần
 watch(() => props.modelValue, (newValue) => {
   if (newValue && isHexColor(newValue)) {
     customColor.value = newValue
+    const rgb = hexToRgb(newValue)
+    rgbaR.value = rgb.r
+    rgbaG.value = rgb.g
+    rgbaB.value = rgb.b
+    rgbaHex.value = newValue
+  } else if (newValue && isRgbaColor(newValue)) {
+    const rgba = parseRgba(newValue)
+    rgbaR.value = rgba.r
+    rgbaG.value = rgba.g
+    rgbaB.value = rgba.b
+    rgbaA.value = rgba.a
+    rgbaHex.value = rgbToHex(rgba.r, rgba.g, rgba.b)
   }
 })
 
@@ -472,23 +874,187 @@ watch(() => props.colors, (newColors) => {
 </script>
 
 <style scoped>
-/* Các styles giữ nguyên từ phiên bản trước, chỉ thêm một số class mới */
+/* Các styles giữ nguyên từ phiên bản trước, thêm styles cho RGBA */
 
-.info-message {
-  background: #e0f2fe;
-  border: 1px solid #7dd3fc;
-  border-radius: 6px;
-  padding: 10px 15px;
-  margin: 0 20px 15px;
-  color: #0369a1;
-  font-size: 13px;
+/* RGBA tab styles */
+.rgba-color {
+  padding: 20px;
+}
+
+.rgba-preview-container {
   display: flex;
   align-items: center;
+  gap: 20px;
+  margin-bottom: 25px;
+  padding: 15px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.rgba-color-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  border: 2px solid #cbd5e1;
+  flex-shrink: 0;
+  background-image:
+      linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+      linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+      linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+.rgba-color-value {
+  font-size: 16px;
+  font-family: monospace;
+  font-weight: 600;
+  color: #1e293b;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  flex: 1;
+}
+
+.rgba-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-row {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+}
+
+.input-row .input-group {
+  flex: 1;
+}
+
+.rgba-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.rgba-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.hex-input {
+  font-family: monospace;
+}
+
+.opacity-slider-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.opacity-slider {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,1));
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.opacity-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.opacity-value {
+  min-width: 40px;
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.rgba-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.convert-button {
+  padding: 12px 24px;
+  background: #8b5cf6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+  font-weight: 500;
+  flex: 1;
+}
+
+.convert-button:hover {
+  background: #7c3aed;
+}
+
+.opacity-presets {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.opacity-presets h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.opacity-buttons {
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.info-icon {
-  font-size: 14px;
+.opacity-button {
+  padding: 8px 12px;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.opacity-button:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
 }
 
 /* Giữ nguyên tất cả styles khác từ phiên bản trước */
@@ -583,7 +1149,7 @@ watch(() => props.colors, (newColors) => {
   background: white;
   border-radius: 8px;
   width: 90%;
-  max-width: 600px;
+  max-width: 700px;
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);

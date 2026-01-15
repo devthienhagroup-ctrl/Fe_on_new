@@ -107,6 +107,9 @@
 
   <!-- SERVICES SECTION -->
   <section id="services" class="py-24 bg-[#0B1120] relative">
+    <div class="circle-decor">
+      <img src="/imgs/circle.png" alt="Circle Decor">
+    </div>
     <div class="container mx-auto px-6">
       <div class="text-center mb-16" data-aos="fade-up">
         <h2 class="text-4xl font-display font-bold text-white mb-4">{{ config.sections.services.title }}</h2>
@@ -122,7 +125,7 @@
             :icon-class="service.iconClass"
             :link="service.link"
             :link-text="service.linkText"
-            :color="service.color"
+            :color="service.color === 'custom' ? service.customColor : service.color"
             :padding="service.padding"
             :hover-effect="service.hoverEffect"
             :aos="service.aos"
@@ -262,7 +265,7 @@
             :position="testimonial.position"
             :quote="testimonial.quote"
             :initials="testimonial.initials"
-            :color="testimonial.color"
+            :color="testimonial.color === 'custom' ? testimonial.customColor : testimonial.color"
             :rating="testimonial.rating"
         />
       </div>
@@ -788,6 +791,51 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
+.circle-decor {
+  position: absolute;
+  left: -30%;
+  top: 10%;
+  animation: spin 10s linear infinite;
+  opacity: 0.5; /* Giảm opacity để không làm loạn mắt */
+  z-index: 0;
+  pointer-events: none;
+}
+
+.circle-decor img {
+  width: 100%;
+  height: 100%;
+  max-width: 1000px; /* Giới hạn kích thước tối đa */
+}
+
+/* Responsive cho mobile */
+@media (max-width: 768px) {
+  .circle-decor {
+    left: -50%; /* Di chuyển ra ngoài nhiều hơn */
+    top: 5%;
+    width: 400px; /* Giảm kích thước trên mobile */
+    height: 400px;
+    opacity: 0.25; /* Giảm opacity hơn nữa */
+  }
+}
+
+@media (max-width: 640px) {
+  .circle-decor {
+    left: -60%;
+    top: 10%;
+    width: 300px;
+    height: 300px;
+    display: none; /* Hoặc có thể ẩn hoàn toàn trên mobile nhỏ */
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 /* Sử dụng biến CSS từ config object */
 #home .text-blue-400 {
   color: v-bind('config.styles.colors.blue400');

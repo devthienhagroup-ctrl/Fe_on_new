@@ -285,6 +285,14 @@ const menuData = ref([
     }
   },
   {
+    id: 14,
+    name: 'Quản lý nhóm',
+    slug: 'quan-ly-nhom',
+    sections: {
+      'noi-dung-chinh': 'Nội dung chính'
+    }
+  },
+  {
     id: 9,
     name: 'Quản lý tin tức',
     slug: 'quan-ly-tin-tuc'
@@ -309,7 +317,8 @@ const getMenuIcon = (slug) => {
     'cong-tac-vien': 'fas fa-handshake',
     'dau-tu': 'fas fa-chart-line',
     'hop-tac': 'fa-solid fa-sack-dollar',
-    'quan-ly-tin-tuc': 'fa-regular fa-folder-open'
+    'quan-ly-tin-tuc': 'fa-regular fa-folder-open',
+    'quan-ly-nhom': 'fas fa-users-cog'
   }
   return icons[slug] || 'fas fa-file'
 }

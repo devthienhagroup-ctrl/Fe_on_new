@@ -433,6 +433,7 @@ const togglePasswordVisibility = () => {
 
 const closeModal = () => {
   emit('close')
+  localStorage.removeItem('redirectUrl')
 }
 
 const switchToLogin = () => {

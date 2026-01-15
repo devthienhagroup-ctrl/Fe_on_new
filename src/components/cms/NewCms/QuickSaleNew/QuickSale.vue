@@ -40,13 +40,13 @@
       >
         <i class="fas fa-cog"></i> Dịch vụ
       </button>
-<!--      <button-->
-<!--          class="tab-button"-->
-<!--          :class="{ active: activeTab === 'projects' }"-->
-<!--          @click="activeTab = 'projects'"-->
-<!--      >-->
-<!--        <i class="fas fa-building"></i> Dự án đã bán-->
-<!--      </button>-->
+      <!--      <button-->
+      <!--          class="tab-button"-->
+      <!--          :class="{ active: activeTab === 'projects' }"-->
+      <!--          @click="activeTab = 'projects'"-->
+      <!--      >-->
+      <!--        <i class="fas fa-building"></i> Dự án đã bán-->
+      <!--      </button>-->
       <button
           class="tab-button"
           :class="{ active: activeTab === 'process' }"
@@ -327,9 +327,21 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Màu sắc</label>
+                  <select v-model="service.color" @change="handleServiceColorChange(index, $event)">
+                    <option value="blue">Blue</option>
+                    <option value="purple">Purple</option>
+                    <option value="teal">Teal</option>
+                    <option value="pink">Pink</option>
+                    <option value="amber">Amber</option>
+                    <option value="orange">Orange</option>
+                    <option value="sky">Sky</option>
+                    <option value="cyan">Cyan</option>
+                    <option value="custom">Tùy chỉnh</option>
+                  </select>
                   <ColorInputWithGlobalColors
-                      v-model="service.color"
-                      placeholder="blue"
+                      v-if="service.color === 'custom'"
+                      v-model="service.customColor"
+                      placeholder="Nhập mã màu tùy chỉnh"
                       return-type="key" :colors="globalColors"
                   />
                 </div>
@@ -468,15 +480,15 @@
                   </div>
                 </div>
 
-<!--                <div v-if="!projectImagePreviews[index] && !project.imageUrl" class="form-group">-->
-<!--                  <label :for="`project-image-url-${index}`">Hoặc nhập URL ảnh</label>-->
-<!--                  <input-->
-<!--                      type="text"-->
-<!--                      :id="`project-image-url-${index}`"-->
-<!--                      v-model="project.imageUrl"-->
-<!--                      placeholder="https://example.com/image.jpg"-->
-<!--                  />-->
-<!--                </div>-->
+                <!--                <div v-if="!projectImagePreviews[index] && !project.imageUrl" class="form-group">-->
+                <!--                  <label :for="`project-image-url-${index}`">Hoặc nhập URL ảnh</label>-->
+                <!--                  <input-->
+                <!--                      type="text"-->
+                <!--                      :id="`project-image-url-${index}`"-->
+                <!--                      v-model="project.imageUrl"-->
+                <!--                      placeholder="https://example.com/image.jpg"-->
+                <!--                  />-->
+                <!--                </div>-->
               </div>
 
               <div class="form-group">
@@ -600,9 +612,18 @@
                 </div>
                 <div class="form-group">
                   <label>Màu sắc</label>
+                  <select v-model="testimonial.color" @change="handleTestimonialColorChange(index, $event)">
+                    <option value="blue">Blue</option>
+                    <option value="purple">Purple</option>
+                    <option value="emerald">Emerald</option>
+                    <option value="indigo">Indigo</option>
+                    <option value="pink">Pink</option>
+                    <option value="custom">Tùy chỉnh</option>
+                  </select>
                   <ColorInputWithGlobalColors
-                      v-model="testimonial.color"
-                      placeholder="blue"
+                      v-if="testimonial.color === 'custom'"
+                      v-model="testimonial.customColor"
+                      placeholder="Nhập mã màu tùy chỉnh"
                       return-type="key" :colors="globalColors"
                   />
                 </div>
@@ -772,6 +793,7 @@ const content = reactive({
       title: "Định giá theo dữ liệu",
       description: "Phân tích thị trường, so sánh giao dịch thực tế, đề xuất mức giá tối ưu theo mục tiêu chốt nhanh.",
       color: "blue",
+      customColor: "",
       link: null,
       linkText: null,
       iconName: "fa-solid fa-chart-line",
@@ -788,6 +810,7 @@ const content = reactive({
       title: "Marketing đa kênh thông minh",
       description: "Chuẩn hoá nội dung, ảnh/clip, phân phối đúng tệp khách mua nhà phố — tăng lịch hẹn, giảm khách ảo.",
       color: "purple",
+      customColor: "",
       link: null,
       linkText: null,
       iconName: "fa-solid fa-bullhorn",
@@ -804,6 +827,7 @@ const content = reactive({
       title: "Dự án & Tiến độ (Real-time)",
       description: "Theo dõi lượt xem – phản hồi – lịch dẫn khách – đàm phán – checklist pháp lý. Rõ ràng từng ngày.",
       color: "teal",
+      customColor: "",
       link: null,
       linkText: null,
       iconName: "fa-solid fa-chart-gantt",
@@ -820,6 +844,7 @@ const content = reactive({
       title: "Chuẩn hoá hồ sơ pháp lý",
       description: "Kiểm tra và hoàn thiện giấy tờ pháp lý, đảm bảo giao dịch minh bạch, nhanh chóng và an toàn.",
       color: "teal",
+      customColor: "",
       link: null,
       linkText: null,
       iconName: "fa-solid fa-file-contract",
@@ -836,6 +861,7 @@ const content = reactive({
       title: "Lọc khách chất lượng",
       description: "Hệ thống sàng lọc và phân loại khách hàng tiềm năng, tập trung vào khách có nhu cầu thực.",
       color: "blue",
+      customColor: "",
       link: null,
       linkText: null,
       iconName: "fa-solid fa-filter",
@@ -852,6 +878,7 @@ const content = reactive({
       title: "Hỗ trợ đàm phán & chốt deal",
       description: "Tư vấn chiến lược đàm phán, hỗ trợ thương lượng và hoàn tất thủ tục chuyển nhượng.",
       color: "purple",
+      customColor: "",
       link: null,
       linkText: null,
       iconName: "fa-solid fa-handshake",
@@ -955,6 +982,7 @@ const content = reactive({
         quote: "Tôi đã thử bán tự do 6 tháng không được. Nhờ Thiên Hà Group, nhà bán được sau 24 ngày với giá cao hơn dự kiến 10%. Rất chuyên nghiệp!",
         initials: "NM",
         color: "blue",
+        customColor: "",
         rating: 5
       },
       {
@@ -964,6 +992,7 @@ const content = reactive({
         quote: "Dịch vụ định giá theo dữ liệu rất chuẩn. Team marketing đa kênh giúp tôi tiếp cận đúng khách thiệt, giảm 90% khách ảo. Highly recommend!",
         initials: "TM",
         color: "purple",
+        customColor: "",
         rating: 5
       },
       {
@@ -973,6 +1002,7 @@ const content = reactive({
         quote: "Dashboard theo dõi tiến độ real-time giúp tôi yên tâm. Mọi thứ minh bạch, hỗ trợ pháp lý rất tận tình. Cảm ơn Thiên Hà Group!",
         initials: "LT",
         color: "emerald",
+        customColor: "",
         rating: 5
       }
     ]
@@ -1209,6 +1239,9 @@ const loadData = async () => {
 
       uploadedFiles.value = []
 
+      // Initialize custom colors for services and testimonials
+      initializeCustomColors()
+
       showToast('Dữ liệu đã được tải thành công', 'success')
     }
   } catch (error) {
@@ -1223,8 +1256,28 @@ const saveChanges = async () => {
   try {
     isLoading.value = true
 
-    // Prepare content data
-    const contentData = {...content}
+    // Prepare content data - convert custom colors to proper format
+    const contentData = JSON.parse(JSON.stringify(content))
+
+    // Convert service colors
+    contentData.services = contentData.services.map(service => {
+      const serviceCopy = { ...service }
+      if (serviceCopy.color === 'custom' && serviceCopy.customColor) {
+        serviceCopy.color = serviceCopy.customColor
+      }
+      delete serviceCopy.customColor
+      return serviceCopy
+    })
+
+    // Convert testimonial colors
+    contentData.testimonials.items = contentData.testimonials.items.map(testimonial => {
+      const testimonialCopy = { ...testimonial }
+      if (testimonialCopy.color === 'custom' && testimonialCopy.customColor) {
+        testimonialCopy.color = testimonialCopy.customColor
+      }
+      delete testimonialCopy.customColor
+      return testimonialCopy
+    })
 
     // Prepare FormData
     const formData = new FormData()
@@ -1370,6 +1423,56 @@ const loadDataColors = async () => {
   globalColors.value = parsedJSON.colors || {}
 }
 
+// ========== COLOR HANDLING FUNCTIONS ==========
+const handleServiceColorChange = (index, event) => {
+  const selectedColor = event.target.value
+  const service = content.services[index]
+
+  if (selectedColor !== 'custom') {
+    service.customColor = ''
+  }
+}
+
+const handleTestimonialColorChange = (index, event) => {
+  const selectedColor = event.target.value
+  const testimonial = content.testimonials.items[index]
+
+  if (selectedColor !== 'custom') {
+    testimonial.customColor = ''
+  }
+}
+
+// Hàm khởi tạo customColor từ dữ liệu hiện có
+const initializeCustomColors = () => {
+  // Định nghĩa danh sách màu hợp lệ
+  const serviceColorOptions = ['blue', 'purple', 'teal', 'pink', 'amber', 'orange', 'sky', 'cyan']
+  const testimonialColorOptions = ['blue', 'purple', 'emerald', 'indigo', 'pink']
+
+  // Khởi tạo cho services
+  content.services.forEach(service => {
+    if (!serviceColorOptions.includes(service.color) && service.color !== 'custom') {
+      service.customColor = service.color
+      service.color = 'custom'
+    }
+
+    if (!service.customColor) {
+      service.customColor = ''
+    }
+  })
+
+  // Khởi tạo cho testimonials
+  content.testimonials.items.forEach(testimonial => {
+    if (!testimonialColorOptions.includes(testimonial.color) && testimonial.color !== 'custom') {
+      testimonial.customColor = testimonial.color
+      testimonial.color = 'custom'
+    }
+
+    if (!testimonial.customColor) {
+      testimonial.customColor = ''
+    }
+  })
+}
+
 // ========== HERO TAGS MANAGEMENT ==========
 const addTag = () => {
   if (!content.hero.tags) {
@@ -1411,6 +1514,7 @@ const addService = () => {
     title: "",
     description: "",
     color: "blue",
+    customColor: "",
     link: null,
     linkText: null,
     iconName: "fas fa-star",
@@ -1536,6 +1640,7 @@ const addTestimonial = () => {
     quote: "",
     initials: "",
     color: "blue",
+    customColor: "",
     rating: 5
   })
   showToast('Đã thêm đánh giá mới', 'success')
@@ -1822,7 +1927,8 @@ onMounted(async () => {
 }
 
 .form-group input:focus,
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group select:focus {
   border-color: #4a6cf7;
   outline: none;
   box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
@@ -2309,5 +2415,27 @@ onMounted(async () => {
     padding: 8px 12px;
     font-size: 0.8rem;
   }
+}
+
+/* Style cho select */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+select:focus {
+  border-color: #4a6cf7;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
+}
+
+/* Khoảng cách giữa select và ColorInput */
+select + .color-input-wrapper {
+  margin-top: 10px;
 }
 </style>

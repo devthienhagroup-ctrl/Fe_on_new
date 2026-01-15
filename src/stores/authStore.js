@@ -14,7 +14,11 @@ export const useAuthStore = defineStore('auth', {
         listPermission: null,
         listAuthority: null,
         listPermissionProjects: [],
-        listPermissionTeams: []
+        listPermissionTeams: [],
+
+        //Đăng nhập
+        isAuthenticated: false,
+        showLoginModal: false
     }),
 
     actions: {
@@ -171,7 +175,15 @@ export const useAuthStore = defineStore('auth', {
         hasPermission(permissionKey) {
             return Array.isArray(this.listAuthority) &&
                 this.listAuthority.includes(permissionKey);
-        }
+        },
+
+        //Đăng nhập modal
+        openLoginModal() {
+            this.showLoginModal = true
+        },
+        closeLoginModal() {
+            this.showLoginModal = false
+        },
 
 
 

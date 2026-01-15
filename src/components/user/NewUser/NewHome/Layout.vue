@@ -26,8 +26,8 @@
 
   <!-- Modal đăng nhập/đăng ký -->
   <AuthModal
-      v-if="showAuthModal"
-      @close="showAuthModal = false"
+      v-if="auth.showLoginModal"
+      @close="closeLoginModal"
       @open-forgot="showForgotPassword = true"
   />
 
@@ -46,13 +46,20 @@ import ForgotPassword from "../../Login/Modal/ForgotPassword.vue";
 import MenuNavBar from "./MenuNavBar.vue";
 import FooterHome from "./FooterHome.vue";
 import FloatingContact from "../../Home/FloatingContact.vue";
+import {useAuthStore} from "../../../../stores/authStore.js";
 
 import api from "../../../../api/api.js";
 
 const isCssLoaded = ref(false)
 const isLoading = ref(false)
-const showAuthModal = ref(false)
 const showForgotPassword = ref(false)
+
+//Đăng nhập
+const auth = useAuthStore();
+
+const closeLoginModal = () => {
+  auth.closeLoginModal();
+}
 
 // Cách 1: Viết hàm riêng
 const scrollToTop = () => {
