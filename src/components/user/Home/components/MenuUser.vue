@@ -158,7 +158,7 @@
   </div>
   <Footer :showMap="!route.meta.hideFooterMap" />
   <PopupQuickSale v-if="showQSPopup" @close="closePopup"></PopupQuickSale>
-  <FloatingContact></FloatingContact>
+  <FloatingContact align="left"></FloatingContact>
   <!-- Modal đăng nhập/đăng ký -->
   <AuthModal
       v-if="showAuthModal"

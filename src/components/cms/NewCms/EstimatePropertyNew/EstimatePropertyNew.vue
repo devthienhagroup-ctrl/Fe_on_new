@@ -76,33 +76,33 @@
           </div>
 
           <!-- Gradients -->
-<!--          <div class="setting-section">-->
-<!--            <h3><i class="fas fa-gradient"></i> Gradients</h3>-->
+          <!--          <div class="setting-section">-->
+          <!--            <h3><i class="fas fa-gradient"></i> Gradients</h3>-->
 
-<!--            <div class="gradient-input-group" v-for="(gradient, gradientKey) in content.styles.gradients" :key="gradientKey">-->
-<!--              <label>{{ gradientKey }}</label>-->
-<!--              <div class="gradient-controls">-->
-<!--                <div class="gradient-color-picker">-->
-<!--                  <label>Màu bắt đầu</label>-->
-<!--                  <ColorInputWithGlobalColors-->
-<!--                      v-model="content.styles.gradients[gradientKey].from"-->
-<!--                      placeholder="Chọn màu bắt đầu"-->
-<!--                      return-type="key"-->
-<!--                      :colors="globalColors"-->
-<!--                  />-->
-<!--                </div>-->
-<!--                <div class="gradient-color-picker">-->
-<!--                  <label>Màu kết thúc</label>-->
-<!--                  <ColorInputWithGlobalColors-->
-<!--                      v-model="content.styles.gradients[gradientKey].to"-->
-<!--                      placeholder="Chọn màu kết thúc"-->
-<!--                      return-type="key"-->
-<!--                      :colors="globalColors"-->
-<!--                  />-->
-<!--                </div>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </div>-->
+          <!--            <div class="gradient-input-group" v-for="(gradient, gradientKey) in content.styles.gradients" :key="gradientKey">-->
+          <!--              <label>{{ gradientKey }}</label>-->
+          <!--              <div class="gradient-controls">-->
+          <!--                <div class="gradient-color-picker">-->
+          <!--                  <label>Màu bắt đầu</label>-->
+          <!--                  <ColorInputWithGlobalColors-->
+          <!--                      v-model="content.styles.gradients[gradientKey].from"-->
+          <!--                      placeholder="Chọn màu bắt đầu"-->
+          <!--                      return-type="key"-->
+          <!--                      :colors="globalColors"-->
+          <!--                  />-->
+          <!--                </div>-->
+          <!--                <div class="gradient-color-picker">-->
+          <!--                  <label>Màu kết thúc</label>-->
+          <!--                  <ColorInputWithGlobalColors-->
+          <!--                      v-model="content.styles.gradients[gradientKey].to"-->
+          <!--                      placeholder="Chọn màu kết thúc"-->
+          <!--                      return-type="key"-->
+          <!--                      :colors="globalColors"-->
+          <!--                  />-->
+          <!--                </div>-->
+          <!--              </div>-->
+          <!--            </div>-->
+          <!--          </div>-->
         </div>
       </div>
 
@@ -304,11 +304,38 @@
                 </div>
                 <div class="form-group">
                   <label>Màu sắc</label>
-                  <ColorInputWithGlobalColors
-                      v-model="feature.color"
-                      placeholder="purple"
-                      return-type="key" :colors="globalColors"
-                  />
+                  <div class="color-selection">
+                    <select
+                        v-model="feature.colorSelect"
+                        @change="onFeatureColorSelect(feature, $event.target.value)"
+                        class="color-select"
+                    >
+                      <option
+                          v-for="color in featureColorOptions"
+                          :key="color"
+                          :value="color"
+                      >
+                        {{ color }}
+                      </option>
+                    </select>
+
+                    <ColorInputWithGlobalColors
+                        v-if="feature.colorSelect === 'custom'"
+                        v-model="feature.customColor"
+                        placeholder="Chọn màu tùy chỉnh"
+                        return-type="key"
+                        :colors="globalColors"
+                        class="custom-color-input"
+                        @update:modelValue="onCustomColorChange(feature, $event)"
+                    />
+
+                    <div
+                        v-if="feature.colorSelect !== 'custom' && feature.colorSelect"
+                        class="color-preview"
+                        :style="{ backgroundColor: getColorPreview(feature.colorSelect) }"
+                        :title="feature.colorSelect"
+                    ></div>
+                  </div>
                 </div>
                 <div class="form-group">
                   <label>AOS Delay (ms)</label>
@@ -516,11 +543,38 @@
                 </div>
                 <div class="form-group">
                   <label>Màu sắc</label>
-                  <ColorInputWithGlobalColors
-                      v-model="testimonial.color"
-                      placeholder="purple"
-                      return-type="key" :colors="globalColors"
-                  />
+                  <div class="color-selection">
+                    <select
+                        v-model="testimonial.colorSelect"
+                        @change="onTestimonialColorSelect(testimonial, $event.target.value)"
+                        class="color-select"
+                    >
+                      <option
+                          v-for="color in testimonialColorOptions"
+                          :key="color"
+                          :value="color"
+                      >
+                        {{ color }}
+                      </option>
+                    </select>
+
+                    <ColorInputWithGlobalColors
+                        v-if="testimonial.colorSelect === 'custom'"
+                        v-model="testimonial.customColor"
+                        placeholder="Chọn màu tùy chỉnh"
+                        return-type="key"
+                        :colors="globalColors"
+                        class="custom-color-input"
+                        @update:modelValue="onTestimonialCustomColorChange(testimonial, $event)"
+                    />
+
+                    <div
+                        v-if="testimonial.colorSelect !== 'custom' && testimonial.colorSelect"
+                        class="color-preview"
+                        :style="{ backgroundColor: getColorPreview(testimonial.colorSelect) }"
+                        :title="testimonial.colorSelect"
+                    ></div>
+                  </div>
                 </div>
                 <div class="form-group">
                   <label>Đánh giá (sao)</label>
@@ -661,7 +715,7 @@
 </template>
 
 <script setup>
-import {ref, reactive, onMounted} from 'vue'
+import {ref, reactive, onMounted, computed} from 'vue'
 import api from '../../../../api/api.js'
 import IconPicker from "../../../RichTextEditor/IconPicker.vue";
 import ColorInputWithGlobalColors from "../homeNew/ColorInputWithGlobalColors.vue";
@@ -669,6 +723,24 @@ import ColorInputWithGlobalColors from "../homeNew/ColorInputWithGlobalColors.vu
 // ========== STATE MANAGEMENT ==========
 const activeTab = ref('styles')
 const isLoading = ref(false)
+
+// ========== COLOR OPTIONS ==========
+const featureColorOptions = ref([
+  'blue', 'purple', 'teal', 'pink', 'amber', 'orange', 'sky', 'cyan', 'custom'
+])
+
+const testimonialColorOptions = ref([
+  'blue', 'purple', 'emerald', 'indigo', 'pink', 'custom'
+])
+
+// Computed để lấy danh sách màu không bao gồm 'custom'
+const featureColorsWithoutCustom = computed(() =>
+    featureColorOptions.value.filter(color => color !== 'custom')
+)
+
+const testimonialColorsWithoutCustom = computed(() =>
+    testimonialColorOptions.value.filter(color => color !== 'custom')
+)
 
 // Content structure based on JSON
 const content = reactive({
@@ -757,6 +829,8 @@ const content = reactive({
         title: "AI Phân Tích Nâng Cao",
         iconName: "fas fa-brain",
         color: "purple",
+        colorSelect: "purple",
+        customColor: "",
         aosDelay: "0",
         description: "Hệ thống AI phân tích 50+ yếu tố ảnh hưởng đến giá BĐS, từ vị trí đến xu hướng thị trường.",
         listContent: [
@@ -770,6 +844,8 @@ const content = reactive({
         title: "Big Data Thời Gian Thực",
         iconName: "fas fa-database",
         color: "blue",
+        colorSelect: "blue",
+        customColor: "",
         aosDelay: "100",
         description: "Cập nhật 10,000+ dữ liệu giao dịch mỗi ngày từ các sàn BĐS lớn và cơ quan nhà nước.",
         listContent: [
@@ -783,6 +859,8 @@ const content = reactive({
         title: "Báo Cáo Chi Tiết",
         iconName: "fas fa-chart-line",
         color: "purple",
+        colorSelect: "purple",
+        customColor: "",
         aosDelay: "200",
         description: "Xuất báo cáo đầy đủ với biểu đồ, phân tích SWOT và khuyến nghị giá tối ưu.",
         listContent: [
@@ -843,6 +921,8 @@ const content = reactive({
         quote: "Công cụ định giá giúp tôi bán nhà nhanh hơn 30% so với dự kiến.",
         initials: "NA",
         color: "purple",
+        colorSelect: "purple",
+        customColor: "",
         rating: 5,
         aos: "fade-up",
         aosDelay: "0"
@@ -854,6 +934,8 @@ const content = reactive({
         quote: "Giá đề xuất rất sát thị trường, khách hàng tin tưởng hơn.",
         initials: "TB",
         color: "blue",
+        colorSelect: "blue",
+        customColor: "",
         rating: 5,
         aos: "fade-up",
         aosDelay: "100"
@@ -865,6 +947,8 @@ const content = reactive({
         quote: "Phân tích SWOT giúp tôi ra quyết định đầu tư chính xác.",
         initials: "LC",
         color: "purple",
+        colorSelect: "purple",
+        customColor: "",
         rating: 5,
         aos: "fade-up",
         aosDelay: "200"
@@ -973,6 +1057,67 @@ const toGradientString = (gradientObj) => {
   return '';
 };
 
+// ========== COLOR SELECTION METHODS ==========
+
+// Phương thức xử lý khi chọn màu trong feature
+const onFeatureColorSelect = (feature, selectedColor) => {
+  if (selectedColor === 'custom') {
+    // Nếu chọn custom, giữ nguyên customColor nếu có
+    if (!feature.customColor) {
+      feature.customColor = feature.color || '';
+    }
+  } else {
+    // Nếu chọn màu cố định, gán vào color và xóa customColor
+    feature.color = selectedColor;
+    delete feature.customColor;
+  }
+  feature.colorSelect = selectedColor;
+}
+
+// Phương thức xử lý khi thay đổi màu custom trong feature
+const onCustomColorChange = (feature, customColorValue) => {
+  feature.color = customColorValue;
+  feature.customColor = customColorValue;
+}
+
+// Phương thức xử lý khi chọn màu trong testimonial
+const onTestimonialColorSelect = (testimonial, selectedColor) => {
+  if (selectedColor === 'custom') {
+    // Nếu chọn custom, giữ nguyên customColor nếu có
+    if (!testimonial.customColor) {
+      testimonial.customColor = testimonial.color || '';
+    }
+  } else {
+    // Nếu chọn màu cố định, gán vào color và xóa customColor
+    testimonial.color = selectedColor;
+    delete testimonial.customColor;
+  }
+  testimonial.colorSelect = selectedColor;
+}
+
+// Phương thức xử lý khi thay đổi màu custom trong testimonial
+const onTestimonialCustomColorChange = (testimonial, customColorValue) => {
+  testimonial.color = customColorValue;
+  testimonial.customColor = customColorValue;
+}
+
+// Phương thức lấy màu xem trước (đơn giản)
+const getColorPreview = (colorName) => {
+  const colorMap = {
+    'blue': '#3b82f6',
+    'purple': '#8b5cf6',
+    'teal': '#14b8a6',
+    'pink': '#ec4899',
+    'amber': '#f59e0b',
+    'orange': '#f97316',
+    'sky': '#0ea5e9',
+    'cyan': '#06b6d4',
+    'emerald': '#10b981',
+    'indigo': '#6366f1'
+  };
+  return colorMap[colorName] || '#6b7280';
+}
+
 // ========== API INTEGRATION ==========
 const loadData = async () => {
   try {
@@ -1007,6 +1152,34 @@ const loadData = async () => {
           }
         }
       });
+
+      // Khởi tạo colorSelect cho features
+      if (data.features && data.features.items) {
+        data.features.items.forEach(feature => {
+          // Kiểm tra xem màu hiện tại có phải là màu cố định không
+          const isFixedColor = featureColorsWithoutCustom.value.includes(feature.color);
+          feature.colorSelect = isFixedColor ? feature.color : 'custom';
+          if (!isFixedColor) {
+            feature.customColor = feature.color;
+          } else {
+            feature.customColor = '';
+          }
+        });
+      }
+
+      // Khởi tạo colorSelect cho testimonials
+      if (data.testimonials && data.testimonials.items) {
+        data.testimonials.items.forEach(testimonial => {
+          // Kiểm tra xem màu hiện tại có phải là màu cố định không
+          const isFixedColor = testimonialColorsWithoutCustom.value.includes(testimonial.color);
+          testimonial.colorSelect = isFixedColor ? testimonial.color : 'custom';
+          if (!isFixedColor) {
+            testimonial.customColor = testimonial.color;
+          } else {
+            testimonial.customColor = '';
+          }
+        });
+      }
 
       // Update content with loaded data
       Object.assign(content, data)
@@ -1046,6 +1219,24 @@ const saveChanges = async () => {
         delete contentData[section].titleHighlight.hasGradient;
       }
     });
+
+    // Xử lý màu sắc cho features trước khi lưu
+    if (contentData.features && contentData.features.items) {
+      contentData.features.items.forEach(feature => {
+        // Xóa các trường tạm thời
+        delete feature.colorSelect;
+        delete feature.customColor;
+      });
+    }
+
+    // Xử lý màu sắc cho testimonials trước khi lưu
+    if (contentData.testimonials && contentData.testimonials.items) {
+      contentData.testimonials.items.forEach(testimonial => {
+        // Xóa các trường tạm thời
+        delete testimonial.colorSelect;
+        delete testimonial.customColor;
+      });
+    }
 
     // Prepare FormData
     const formData = new FormData()
@@ -1141,6 +1332,8 @@ const addFeature = () => {
     title: "",
     iconName: "fas fa-star",
     color: "purple",
+    colorSelect: "purple",
+    customColor: "",
     aosDelay: "0",
     description: "",
     listContent: [],
@@ -1235,6 +1428,8 @@ const addTestimonial = () => {
     quote: "",
     initials: "",
     color: "purple",
+    colorSelect: "purple",
+    customColor: "",
     rating: 5,
     aos: "fade-up",
     aosDelay: "0"
@@ -1501,6 +1696,35 @@ onMounted(async () => {
 
 .stat-item .form-group {
   width: 45% !important;
+}
+
+/* Color Selection Styles */
+.color-selection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-select {
+  flex: 1;
+  padding: 8px 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  background-color: white;
+  font-size: 0.9rem;
+  min-width: 120px;
+}
+
+.custom-color-input {
+  flex: 2;
+}
+
+.color-preview {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 2px solid #e9ecef;
+  flex-shrink: 0;
 }
 
 /* Form Styles */
@@ -1865,6 +2089,15 @@ onMounted(async () => {
 
   .checkbox-group {
     margin-top: 10px;
+  }
+
+  .color-selection {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .color-preview {
+    align-self: flex-start;
   }
 }
 

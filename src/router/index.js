@@ -147,6 +147,8 @@ import DemoGiaoDien from "../components/thiet-kegiandien/marketing-cap-da-ta.vue
 import test from "../components/thiet-kegiandien/marketing-cap-da-ta.vue"
 import test1 from "../components/thiet-kegiandien/telesales-lien-he-khach-hang.vue"
 import test2 from "../components/thiet-kegiandien/admin-saleadmin.vue"
+import TeamManagement from "../components/user/NewUser/TeamManagement/TeamManagement.vue";
+import TeamManagementCMS from "../components/cms/NewCms/TeamManagement/TeamManagementCMS.vue";
 const routes = [
     {
         path: "/test/dat-lich",
@@ -594,6 +596,18 @@ const routes = [
                         path: 'chi-tiet-danh-sach-nguoi-hop-tac',
                         name: 'detailInvestor',
                         component: DetailInvestor
+                    }
+                ]
+            },
+            {
+                path: 'quan-ly-nhom',
+                name: 'teammanagement-cms',
+                component: cms,
+                children: [
+                    {
+                        path: 'noi-dung-chinh',
+                        name: 'TeamManagementCMS',
+                        component: TeamManagementCMS
                     }
                 ]
             },
@@ -1439,7 +1453,12 @@ const routes = [
                 path: 'dinh-gia-bat-dong-san',
                 name: 'ESNew',
                 component: ESNew
-            }
+            },
+            {
+                path: 'quan-ly-nhom',
+                name: 'TeamManagement',
+                component: TeamManagement
+            },
         ]
     },
     {

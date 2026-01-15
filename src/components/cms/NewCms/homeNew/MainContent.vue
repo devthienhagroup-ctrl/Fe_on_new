@@ -317,11 +317,9 @@
 
               <div class="form-group">
                 <label>Màu sắc</label>
-                <ColorInputWithGlobalColors
-                    v-model="stat.color"
-                    placeholder="blue"
-                    return-type="key" :colors="globalColors"
-                />
+                <select v-model="stat.color" class="color-select">
+                  <option v-for="color in quickStatsColors" :value="color">{{ color }}</option>
+                </select>
               </div>
             </div>
 
@@ -374,10 +372,17 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Màu sắc</label>
+                  <select v-model="service.color" class="color-select" @change="handleServiceColorChange(service)">
+                    <option v-for="color in serviceColors" :value="color">{{ color }}</option>
+                    <option value="custom">Tùy chỉnh</option>
+                  </select>
                   <ColorInputWithGlobalColors
-                      v-model="service.color"
-                      placeholder="blue"
-                      return-type="key" :colors="globalColors"
+                      v-if="service.color === 'custom'"
+                      v-model="service.customColor"
+                      placeholder="Nhập mã màu tùy chỉnh"
+                      return-type="hex"
+                      :colors="globalColors"
+                      class="mt-2"
                   />
                 </div>
                 <div class="form-group">
@@ -615,10 +620,17 @@
                 </div>
                 <div class="form-group">
                   <label>Màu sắc</label>
+                  <select v-model="testimonial.color" class="color-select" @change="handleTestimonialColorChange(testimonial)">
+                    <option v-for="color in testimonialColors" :value="color">{{ color }}</option>
+                    <option value="custom">Tùy chỉnh</option>
+                  </select>
                   <ColorInputWithGlobalColors
-                      v-model="testimonial.color"
-                      placeholder="blue"
-                      return-type="key" :colors="globalColors"
+                      v-if="testimonial.color === 'custom'"
+                      v-model="testimonial.customColor"
+                      placeholder="Nhập mã màu tùy chỉnh"
+                      return-type="hex"
+                      :colors="globalColors"
+                      class="mt-2"
                   />
                 </div>
                 <div class="form-group">
@@ -681,6 +693,11 @@ import ColorInputWithGlobalColors from "./ColorInputWithGlobalColors.vue";
 // ========== STATE MANAGEMENT ==========
 const activeTab = ref('styles')
 const isLoading = ref(false)
+
+// Color options
+const serviceColors = ['blue', 'purple', 'teal', 'pink', 'amber', 'orange', 'sky', 'cyan']
+const quickStatsColors = ['blue', 'purple', 'emerald', 'green', 'amber', 'red']
+const testimonialColors = ['blue', 'purple', 'emerald', 'indigo', 'pink']
 
 // Content structure based on new JSON data
 const content = reactive({
@@ -800,6 +817,7 @@ const content = reactive({
       title: "Phát triển đội nhóm",
       description: "Tạo dựng và mở rộng đội nhóm của bạn trên một hệ sinh thái duy nhất. Thiên Hà Group tiên phong giải pháp hợp tác toàn diện cho môi giới toàn quốc, cung cấp nguồn hàng chất lượng, tiềm năng cao.",
       color: "blue",
+      customColor: "",
       link: "#",
       linkText: "Xem chi tiết",
       iconName: "fas fa-building",
@@ -815,6 +833,7 @@ const content = reactive({
       title: "Quản lý tài sản",
       description: "Một công cụ – tối ưu cả quy trình môi giới. Lưu trữ và quản trị khách hàng/sản phẩm tập trung, cập nhật theo thời gian thực, nhận thông báo sản phẩm 'đúng gu' và tăng tỷ lệ chốt nhờ mạng lưới hợp tác 10.000+ môi giới.",
       color: "purple",
+      customColor: "",
       link: "#",
       linkText: "Xem chi tiết",
       iconName: "fas fa-chart-bar",
@@ -874,6 +893,7 @@ const content = reactive({
       quote: "Thiên Hà Group mang đến giải pháp tích hợp công nghệ rất hiệu quả. Đội ngũ tư vấn tận tâm, triển khai nhanh và ROI tốt.",
       initials: "NV",
       color: "blue",
+      customColor: "",
       rating: 5
     }
   ]
@@ -1066,6 +1086,19 @@ const handleRemoveFile = (imageUrl, contentPath, previewRef) => {
 
 const generateId = () => {
   return Date.now() + Math.floor(Math.random() * 1000)
+}
+
+// Color change handlers
+const handleServiceColorChange = (service) => {
+  if (service.color !== 'custom') {
+    service.customColor = ''
+  }
+}
+
+const handleTestimonialColorChange = (testimonial) => {
+  if (testimonial.color !== 'custom') {
+    testimonial.customColor = ''
+  }
 }
 
 // ========== API INTEGRATION ==========
@@ -1297,7 +1330,8 @@ const addService = () => {
     title: "",
     description: "",
     color: "blue",
-    link: "#", // Thêm dòng này
+    customColor: "",
+    link: "#",
     linkText: "Xem chi tiết",
     iconName: "fas fa-star",
     iconClass: "",
@@ -1405,6 +1439,7 @@ const addTestimonial = () => {
     quote: "",
     initials: "",
     color: "blue",
+    customColor: "",
     rating: 5
   })
   showToast('Đã thêm đánh giá mới', 'success')
@@ -1652,6 +1687,23 @@ onMounted(async () => {
 .btn-danger:hover {
   background: linear-gradient(135deg, #c82333 0%, #dc3545 100%);
   color: white !important;
+}
+
+/* Color select styles */
+.color-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background-color: white;
+}
+
+.color-select:focus {
+  border-color: #4a6cf7;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
 }
 
 /* Input with icon preview */

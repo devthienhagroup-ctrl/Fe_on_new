@@ -1,5 +1,5 @@
 <template>
-  <section id="pricing" class="py-16 md:py-24">
+  <section id="pricing" class="py-16 md:py-24" :class="{'gradient-pink-purple': gradientPinkPurple}">
     <div class="container mx-auto px-4">
       <div class="text-center mb-16">
         <h2 class="text-3xl md:text-4xl font-bold text-slate-50 mb-4">
@@ -14,9 +14,10 @@
       <div v-if="loading" class="flex justify-center items-center py-20">
         <div class="text-center">
           <div class="relative mx-auto w-20 h-20 mb-4">
-            <div class="absolute inset-0 border-4 border-purple-500/20 rounded-full"></div>
+            <div :class="gradientPinkPurple ? 'border-pink-500/20' : 'border-purple-500/20'" class="absolute inset-0 border-4 rounded-full"></div>
             <div
-                class="absolute inset-0 border-4 border-transparent border-t-purple-500 rounded-full animate-spin"></div>
+                :class="gradientPinkPurple ? 'border-t-pink-500' : 'border-t-purple-500'"
+                class="absolute inset-0 border-4 border-transparent rounded-full animate-spin"></div>
           </div>
           <p class="text-slate-300">Đang tải thông tin gói dịch vụ...</p>
         </div>
@@ -29,7 +30,10 @@
           <h3 class="text-xl font-bold text-slate-50 mb-2">Không thể tải thông tin gói dịch vụ</h3>
           <p class="text-slate-300 mb-4">{{ error }}</p>
           <button @click="fetchPackages"
-                  class="px-6 py-2 bg-purple-500/20 border border-purple-500/30 text-purple-300 rounded-lg hover:bg-purple-500/30 transition">
+                  :class="gradientPinkPurple ?
+                    'bg-pink-500/20 border-pink-500/30 text-pink-300 hover:bg-pink-500/30' :
+                    'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/30'"
+                  class="px-6 py-2 border rounded-lg transition">
             Thử lại
           </button>
         </div>
@@ -39,7 +43,7 @@
       <div v-else class="grid md:grid-cols-3 gap-8 mx-auto">
         <div v-for="(packageItem, index) in packages" :key="packageItem.id"
              class="glass-card rounded-2xl p-8 relative hover-lift flex flex-col justify-between gap-0"
-             :class="index === 1 ? 'border-2 border-purple-500' : ''"
+             :class="index === 1 ? (gradientPinkPurple ? 'border-2 border-pink-500' : 'border-2 border-purple-500') : ''"
              data-aos="fade-up" :data-aos-delay="index * 100">
 
           <!-- Popular badge for middle package -->
@@ -55,7 +59,16 @@
               <div class="flex items-center justify-between gap-3 mb-4">
                 <h3 class="text-3xl font-bold text-slate-50">{{ packageItem.name }}</h3>
                 <i v-if="index === 1" :class="packageItem.icon" class="text-5xl gradient-text"></i>
-                <i v-else :class="packageItem.icon" class="text-3xl text-purple-400"></i>
+                <i
+                    v-else
+                    :class="{
+    [packageItem.icon]: true,
+    'text-pink-400': gradientPinkPurple,
+    'text-purple-400': !gradientPinkPurple,
+    'text-3xl': true
+  }"
+                ></i>
+
               </div>
 
               <!-- Price -->
@@ -75,30 +88,23 @@
           <div class="bottom-wrapper">
             <ul class="space-y-4 mb-8 p-0">
               <li v-for="(detail, idx) in packageItem.details" :key="idx" class="flex items-center">
-                <i class="fas fa-check text-purple-400 mr-3"></i>
+                <i :class="gradientPinkPurple ? 'text-pink-400' : 'text-purple-400'" class="fas fa-check mr-3"></i>
                 <span class="text-slate-300">
                 {{ detail.text }}
-                <span v-if="detail.soLuot" class="text-purple-300 font-semibold">
+                <span v-if="detail.soLuot" :class="gradientPinkPurple ? 'text-pink-300' : 'text-purple-300'" class="font-semibold">
                   ({{ detail.soLuot }} lượt)
                 </span>
-                <span v-else class="text-purple-300 font-semibold">
+                <span v-else :class="gradientPinkPurple ? 'text-pink-300' : 'text-purple-300'" class="font-semibold">
                   (Không giới hạn)
                 </span>
               </span>
               </li>
             </ul>
-
-<!--            &lt;!&ndash; Button &ndash;&gt;-->
-<!--            <button :class="index === 1 ? 'btn-gradient' : 'border-purple-500 text-purple-400 hover:bg-purple-500/10'"-->
-<!--                    class="w-full py-3 rounded-lg font-semibold hover:opacity-90 transition flex items-center justify-center gap-2"-->
-<!--                    :style="index === 1 ? '' : 'border-width:1px'">-->
-<!--              <span>{{ packageItem.buttonText }}</span>-->
-<!--            </button>-->
           </div>
         </div>
       </div>
       <div class="flex justify-end mt-2" data-aos="fade-left" data-aos-delay="100">
-        <router-link to="/ho-so/goi-dich-vu" class="btn-gradient glow py-2 rounded-lg px-3">Tới trang đăng ký </router-link>
+        <router-link to="/ho-so/goi-dich-vu" class="btn-gradient glow py-2 rounded-lg px-3">Tới trang đăng ký</router-link>
       </div>
     </div>
   </section>
@@ -107,6 +113,13 @@
 <script setup>
 import {ref, onMounted} from 'vue'
 import api from "../../../../api/api.js";
+
+const props = defineProps({
+  gradientPinkPurple: {
+    type: Boolean,
+    default: false
+  }
+})
 
 const loading = ref(true)
 const error = ref(null)
@@ -200,22 +213,52 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Default gradient (purple) */
 .gradient-text {
-  background: linear-gradient(135deg, var(--gradient-primary-from), var(--gradient-primary-to));
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-bg {
-  background: linear-gradient(135deg, var(--gradient-primary-from), var(--gradient-primary-to));
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
 }
 
 .glass-card:hover .gradient-text {
-  background: linear-gradient(135deg, var(--gradient-primary-to), var(--gradient-primary-from));
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.btn-gradient {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  color: #fff;
+}
+
+/* When gradientPinkPurple is true - chỉ áp dụng trong component này */
+.gradient-pink-purple .gradient-text {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.gradient-pink-purple .gradient-bg {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%) !important;
+}
+
+.gradient-pink-purple .glass-card:hover .gradient-text {
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.gradient-pink-purple .btn-gradient {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%) !important;
+  color: #fff !important;
 }
 
 .hover-lift {
@@ -225,11 +268,6 @@ onMounted(() => {
 .hover-lift:hover {
   transform: translateY(-5px);
   box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15);
-}
-
-.btn-gradient {
-  background: linear-gradient(135deg, var(--gradient-primary-from), var(--gradient-primary-to));
-  color: #fff;
 }
 
 /* Custom styles for package description */
