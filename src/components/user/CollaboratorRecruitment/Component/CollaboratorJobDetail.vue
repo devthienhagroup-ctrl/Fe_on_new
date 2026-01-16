@@ -113,7 +113,7 @@ import QuickLink from './QuickLink.vue'
 
 const route = useRoute()
 const logoTHG = '/imgs/logoTHG.png'
-const ASSET_BASE_URL = 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'
+const ASSET_BASE_URL = 'https://s3.cloudfly.vn/thg-storage/uploads-public/'
 
 const jobData = ref({})
 const showApplyModal = ref(false)

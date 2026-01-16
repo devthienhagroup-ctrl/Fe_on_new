@@ -602,6 +602,10 @@ async function fetchStatsAppointments() {
   }
 }
 
+async function refreshAppointmentsAndStats() {
+  await Promise.all([fetchAppointments(), fetchStatsAppointments()])
+}
+
 function handleCalendarClick(cell) {
   if (!cell.currentMonth || !cell.iso) return
   if (!cell.enabled) return
@@ -701,7 +705,7 @@ async function handleDrop(e, targetTime) {
     }
 
     // ✅ CHỈ SAU KHI BE OK → reload
-    await fetchAppointments()
+    await refreshAppointmentsAndStats()
 
     updateAlertSuccess(
         'Đã dời giờ hẹn',
@@ -948,6 +952,7 @@ async function saveEditModal() {
 
     if (res.data.success) {
       updateAlertSuccess('✅ Cập nhật lịch hẹn thành công')
+      await refreshAppointmentsAndStats()
       closeEditModal()
       // reload list / calendar nếu cần
     } else {
@@ -1182,7 +1187,7 @@ async function saveNewAppointment() {
 
     updateAlertSuccess('Tạo lịch hẹn thành công', 'Lịch hẹn đã được tạo.')
 
-
+    await refreshAppointmentsAndStats()
     closeCreateModal()
   } catch (e) {
     console.error(e)
@@ -1287,7 +1292,6 @@ function initCharts() {
   const c3 = $('#successChart')
   const c4 = $('#successChartSecondary')
   const c5 = $('#revenueChart')
-  if (!c1 || !c2 || !c3 || !c4 || !c5) return
 
   destroyCharts()
 
@@ -1387,6 +1391,15 @@ function initCharts() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      // ✅ PADDING CHO NGUYÊN CHART
+      layout: {
+        padding: {
+          top: 16,
+          right: 18,
+          bottom: 22,
+          left: 18,
+        },
+      },
       cutout: '72%',
       interaction: {
         mode: 'nearest',
@@ -1441,6 +1454,14 @@ function initCharts() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 16,
+          right: 18,
+          bottom: 22,
+          left: 18,
+        },
+      },
       interaction: {
         mode: 'nearest',
         intersect: false,
@@ -1492,6 +1513,14 @@ function initCharts() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 16,
+          right: 18,
+          bottom: 22,
+          left: 18,
+        },
+      },
       interaction: {
         mode: 'nearest',
         intersect: false,
@@ -1914,7 +1943,7 @@ onBeforeUnmount(() => {
 
         <img
             v-if="info.avatarUrl"
-            :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+            :src="' https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
             alt="avatar"
             class="rounded-circle border"
             style="width: 36px; height: 36px; object-fit: cover;"
@@ -2004,8 +2033,10 @@ onBeforeUnmount(() => {
               <p class="sub">Biểu đồ kết quả (bản sao)</p>
             </div>
           </div>
+          <div class=" chart-container-wrapper">
           <div class="chart-container">
             <canvas id="successChartSecondary"></canvas>
+          </div>
           </div>
         </div>
 
@@ -2957,7 +2988,7 @@ onBeforeUnmount(() => {
   color:#0f172a;
   line-height:1.6;
   background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
-  zoom: 0.8;
+  zoom: 0.9;
 }
 /* ===== Revenue chart chiếm 2 cột ===== */
 .revenue-chart{
@@ -3123,12 +3154,23 @@ onBeforeUnmount(() => {
 .chart-head{ display:flex; gap:12px; align-items:center; margin-bottom:10px; }
 .chart-head h4{ margin:0; font-size:14px; font-weight:900; color:#0b1220; }
 .sub{ margin:2px 0 0; font-size:12.5px; color:#5b6576; font-weight:650; }
+
+.chart-container-wrapper{
+  width: 100%;
+  height: 80%;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
 .chart-container{
+  width: 100%;
   height: 240px;
   border-radius: 16px;
   overflow:hidden;
   background: linear-gradient(135deg, rgba(255,255,255,0.70), rgba(255,255,255,0.86));
   border: 1px solid rgba(20,22,30,0.06);
+
 }
 .chart-container canvas{
   width:100% !important;

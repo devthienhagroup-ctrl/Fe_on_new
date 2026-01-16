@@ -12,7 +12,7 @@
         :key="m.idE"
         class="member-item"
     >
-      <img :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + m.avatar" class="avatar" />
+      <img :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/' + m.avatar" class="avatar" />
 
       <div class="info">
         <div class="name">{{ m.fullName }}</div>

@@ -11,7 +11,7 @@
 
         <img
             v-if="info.avatarUrl"
-            :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+            :src="' https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
             alt="avatar"
             class="rounded-circle border"
             style="width: 36px; height: 36px; object-fit: cover;"
@@ -1067,6 +1067,39 @@ const initLineChart = () => {
 }
 
 // ====== SUMMARY CHART ======
+const doughnutTotalPlugin = {
+  id: 'doughnutTotal',
+
+  afterDraw(chart) {
+    const { ctx, chartArea } = chart
+    if (!chartArea) return
+
+    const dataset = chart.data.datasets?.[0]
+    if (!dataset || !Array.isArray(dataset.data)) return
+
+    const total = dataset.data.reduce((sum, v) => sum + Number(v || 0), 0)
+
+    const centerX = (chartArea.left + chartArea.right) / 2
+    const centerY = (chartArea.top + chartArea.bottom) / 2
+
+    ctx.save()
+
+    // ===== TEXT TỔNG =====
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillStyle = '#1f2937' // xám đậm
+    ctx.font = '700 22px Inter, Arial'
+    ctx.fillText(total, centerX, centerY - 6)
+
+    // ===== SUB LABEL =====
+    ctx.fillStyle = '#6b7280'
+    ctx.font = '500 12px Inter, Arial'
+    ctx.fillText('Tổng khách', centerX, centerY + 16)
+
+    ctx.restore()
+  }
+}
+
 const initSummaryChart = () => {
   const ctx = document.getElementById('summaryChart')
   if (!ctx) return
@@ -1095,8 +1128,10 @@ const initSummaryChart = () => {
           labels: { boxWidth: 12, font: { size: 12 } }
         }
       }
-    }
+    },
+    plugins: [doughnutTotalPlugin]
   })
+
 }
 
 // ====== Refresh all ======

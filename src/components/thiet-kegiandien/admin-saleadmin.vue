@@ -6,10 +6,21 @@
         <div class="container-fluid">
 
           <!-- ===== BRAND (BÊN TRÁI) ===== -->
-          <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+          <div class="d-flex align-items-center gap-2">
+            <button
+              type="button"
+              class="header-menu-toggle"
+              title="Ẩn/hiện menu"
+              @click="sidebar.toggle()"
+            >
+              <i class="fas fa-bars"></i>
+              <span class="d-none d-md-inline">Menu</span>
+            </button>
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
             <i class="fas fa-phone-alt"></i>
             <span class="fw-bold">ADMIN PRO</span>
-          </a>
+            </a>
+          </div>
 
           <!-- ===== USER INFO (BÊN PHẢI) ===== -->
           <div class="ms-auto d-flex align-items-center gap-2">
@@ -21,7 +32,7 @@
 
             <img
                 v-if="info.avatarUrl"
-                :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+                :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
                 alt="avatar"
                 class="rounded-circle border"
                 style="width: 36px; height: 36px; object-fit: cover;"
@@ -585,7 +596,7 @@
                             v-if="customer.nhanVienTaoTen"
                         >
                           <img
-                              :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+ customer.nhanVienTaoAvatar"
+                              :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/'+ customer.nhanVienTaoAvatar"
                               :alt="customer.nhanVienTaoTen"
                               class="member-avatar"
                           >
@@ -601,7 +612,7 @@
                             v-if="customer.nhanVienPhuTrachTen"
                         >
                           <img
-                              :src=" 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+ customer.nhanVienPhuTrachAvatar"
+                              :src=" 'https://s3.cloudfly.vn/thg-storage/uploads-public/'+ customer.nhanVienPhuTrachAvatar"
                               :alt="customer.nhanVienPhuTrachTen"
                               class="member-avatar"
                           >
@@ -976,6 +987,18 @@
                         <input type="tel" class="form-control form-control-custom" v-model="customerForm.phone" required>
                       </div>
                       <div class="info-item">
+                        <label class="info-label">Giá BĐS</label>
+                        <input
+                          type="text"
+                          class="form-control form-control-custom"
+                          inputmode="numeric"
+                          :value="editPriceDisplay"
+                          placeholder="0"
+                          @input="handleEditPriceInput"
+                          @blur="syncEditPriceDisplay"
+                        >
+                      </div>
+                      <div class="info-item">
                         <label class="info-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
                         <div class="province-search" :class="{ open: provinceDropdownOpen }">
                           <input
@@ -1262,7 +1285,7 @@
                       <div class="staff-item">
                         <div class="staff-avatar">
                           <div v-if="detailCustomer.nhanVienTaoAvatar" class="avatar-img">
-                            <img :src=" 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+  detailCustomer.nhanVienTaoAvatar" :alt="detailCustomer.nhanVienTaoTen">
+                            <img :src=" 'https://s3.cloudfly.vn/thg-storage/uploads-public/'+  detailCustomer.nhanVienTaoAvatar" :alt="detailCustomer.nhanVienTaoTen">
                           </div>
                           <div v-else class="avatar-placeholder small">
                             <i class="fas fa-user"></i>
@@ -1276,7 +1299,7 @@
                       <div class="staff-item">
                         <div class="staff-avatar">
                           <div v-if="detailCustomer.nhanVienPhuTrachAvatar" class="avatar-img">
-                            <img :src=" 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+  detailCustomer.nhanVienPhuTrachAvatar" :alt="detailCustomer.nhanVienPhuTrachTen">
+                            <img :src=" 'https://s3.cloudfly.vn/thg-storage/uploads-public/'+  detailCustomer.nhanVienPhuTrachAvatar" :alt="detailCustomer.nhanVienPhuTrachTen">
                           </div>
                           <div v-else class="avatar-placeholder small">
                             <i class="fas fa-user"></i>
@@ -1497,8 +1520,10 @@ const recentYears = computed(() => {
   return Array.from({ length: 5 }, (_, i) => currentYear - i)
 })
 import { useAuthStore } from "/src/stores/authStore.js";
+import { useSidebarStore } from "/src/stores/sidebarStore.js";
 const authStore = useAuthStore();
 const info = authStore.userInfo;
+const sidebar = useSidebarStore()
 const phanLoaiStats = ref([])
 watch([chartYear, chartType], async () => {
   // 🔥 LINE CHART (CHUNG)
@@ -1605,6 +1630,7 @@ const customerForm = reactive({
   updatedAt: '',
   creatorName: '',
   creatorAvatar: '',
+  giaBDS: '',
   assigneeId: null,
   assigneeName: '',
   assigneeAvatar: ''
@@ -1621,6 +1647,7 @@ const addCustomerForm = reactive({
 })
 
 const addPriceDisplay = ref('')
+const editPriceDisplay = ref('')
 const addPickedFileNames = ref([])
 
 const customerTypes = [
@@ -1858,7 +1885,7 @@ const resolveEmployeeAvatar = (avatar, name) => {
   if (avatar) {
     return avatar.startsWith('http')
       ? avatar
-      : `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${avatar}`
+      : `https://s3.cloudfly.vn/thg-storage/uploads-public/${avatar}`
   }
   return generateAvatarFromName(name || 'NV')
 }
@@ -1881,6 +1908,7 @@ const editCustomer = async (customer) => {
     type: customer.type ?? customer.phanLoaiKhach ?? customer.customerListItemDTO?.phanLoaiKhach ?? '',
     status: customer.status ?? customer.trangThai ?? customer.customerListItemDTO?.trangThai ?? 'NEW',
     avatar: customer.avatar ?? customer.avatarKhach ?? customer.customerListItemDTO?.avatarKhach ?? '',
+    giaBDS: customer.giaBDS ?? customer.customerListItemDTO?.giaBDS ?? '',
     notes: customer.notes ?? '',
     createdAt: customer.ngayTao ?? customer.customerListItemDTO?.ngayTao ?? '',
     updatedAt: customer.ngayCapNhat ?? customer.customerListItemDTO?.ngayCapNhat ?? '',
@@ -1916,10 +1944,15 @@ const editCustomer = async (customer) => {
     updatedAt: normalized.updatedAt,
     creatorName: normalized.creatorName,
     creatorAvatar: normalizedCreatorAvatar,
+    giaBDS: normalized.giaBDS,
     assigneeId: normalized.assigneeId,
     assigneeName: normalized.assigneeName,
     assigneeAvatar: normalizedAssigneeAvatar
   })
+
+  const normalizedGiaBds = normalizePriceInput(normalized.giaBDS)
+  customerForm.giaBDS = normalizedGiaBds ? Number(normalizedGiaBds) : ''
+  editPriceDisplay.value = formatPriceDisplay(normalizedGiaBds)
 
   selectedAssignee.value = normalized.assigneeId
     ? {
@@ -2035,10 +2068,12 @@ const resetCustomerForm = () => {
     updatedAt: '',
     creatorName: '',
     creatorAvatar: '',
+    giaBDS: '',
     assigneeId: null,
     assigneeName: '',
     assigneeAvatar: ''
   })
+  editPriceDisplay.value = ''
   selectedAssignee.value = null
   employeeSearch.value = ''
   employeeOptions.value = []
@@ -2090,6 +2125,18 @@ function syncAddPriceDisplay() {
   const raw = normalizePriceInput(addPriceDisplay.value)
   addPriceDisplay.value = formatPriceDisplay(raw)
   addCustomerForm.price = raw ? Number(raw) : ''
+}
+
+function handleEditPriceInput(event) {
+  const raw = normalizePriceInput(event.target.value)
+  editPriceDisplay.value = formatPriceDisplay(raw)
+  customerForm.giaBDS = raw ? Number(raw) : ''
+}
+
+function syncEditPriceDisplay() {
+  const raw = normalizePriceInput(editPriceDisplay.value)
+  editPriceDisplay.value = formatPriceDisplay(raw)
+  customerForm.giaBDS = raw ? Number(raw) : ''
 }
 
 function onPickAddFile(e) {
@@ -2193,6 +2240,10 @@ const submitAddCustomer = async () => {
 }
 
 const buildCustomerUpdateFormData = (assigneePayload) => {
+  const giaBDSValue = customerForm.giaBDS === '' || customerForm.giaBDS === null
+    ? null
+    : customerForm.giaBDS
+
   const dto = {
     id: customerForm.id,
     hoTen: customerForm.name,
@@ -2200,6 +2251,7 @@ const buildCustomerUpdateFormData = (assigneePayload) => {
     tinhThanhPho: customerForm.province,
     phanLoaiKhach: customerForm.type,
     trangThai: customerForm.status,
+    giaBDS: giaBDSValue,
     nhanVienPhuTrachId: assigneePayload.nhanVienPhuTrachId,
     nhanVienPhuTrachTen: assigneePayload.nhanVienPhuTrachTen,
     nhanVienPhuTrachAvatar: assigneePayload.nhanVienPhuTrachAvatar,
@@ -2795,7 +2847,7 @@ const fetchTeleSales = async () => {
       const avatarPath = staff.avatar
         ? (staff.avatar.startsWith('http')
           ? staff.avatar
-          : `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${staff.avatar}`)
+          : `https://s3.cloudfly.vn/thg-storage/uploads-public/${staff.avatar}`)
         : generateAvatarFromName(staff.tenNhanVien)
       return {
         id: staff.id,
@@ -3168,6 +3220,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   overflow: hidden;
 }
 
+
 /* Navbar */
 .navbar-custom {
   background: var(--dark-gradient);
@@ -3192,6 +3245,29 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   align-items: center;
   gap: 10px;
   line-height: 1;
+}
+
+.header-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: var(--transition-normal);
+}
+
+.header-menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.header-menu-toggle:active {
+  transform: scale(0.98);
 }
 
 .navbar-custom .navbar-brand i {

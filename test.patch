@@ -1,614 +1,217 @@
-diff --git a/src/components/thiet-kegiandien/admin-saleadmin.vue b/src/components/thiet-kegiandien/admin-saleadmin.vue
-index f8fd96a4b92a9bf904558f1de1f27f749ee5fbb8..3b57d3b64e929516dabe5d1f8c886039cf16e616 100644
---- a/src/components/thiet-kegiandien/admin-saleadmin.vue
-+++ b/src/components/thiet-kegiandien/admin-saleadmin.vue
-@@ -475,50 +475,52 @@
-                     <button class="btn-success-custom btn-custom" @click="openExcelPicker">
-                       <i class="fas fa-file-excel me-2"></i>Add Excel
-                     </button>
-                     <button class="btn-primary-custom btn-custom" @click="openAddCustomerModal()">
-                       <i class="fas fa-plus me-2"></i> Thêm khách hàng
-                     </button>
-                   </div>
-                 </div>
+diff --git a/src/components/thiet-kegiandien/AppointmentsPage.vue b/src/components/thiet-kegiandien/AppointmentsPage.vue
+index 18024581f4b2bd843a4186733ace63d05b670a47..28a1ffea59dceb31e10bceeea6051d378a4adc01 100644
+--- a/src/components/thiet-kegiandien/AppointmentsPage.vue
++++ b/src/components/thiet-kegiandien/AppointmentsPage.vue
+@@ -580,50 +580,54 @@ async function fetchAppointments() {
 
-                 <!-- Table -->
-                 <div class="table-container">
-                   <table class="table table-hover table-custom">
-                     <thead>
-                     <tr>
-                       <th style="width: 10px !important; padding-left: 15px !important;">
-                         <input
-                             type="checkbox"
-                             class="form-check-input checkbox-all"
-                             :checked="isAllSelected"
-                             @change="toggleSelectAll"
-                         >
-                       </th>
-                       <th style="width: 10px !important;">#</th>
-                       <th style="width: 220px!important;">Khách hàng</th>
-                       <th  style="width: 130px!important;">SĐT</th>
-+                      <th style="width: 140px!important;">Giá BĐS</th>
-+                      <th style="width: 120px!important;">Phí</th>
-                       <th style="width: 150px!important;">Tỉnh/TP</th>
-                       <th style="width: 135px!important;">Phân loại</th>
-                       <th style="width: 135px!important;">Trạng thái</th>
-                       <th style="width: 120px!important;">Ngày CN</th>
-                       <th style="width: 185px!important;">Người tạo</th>
-                       <th style="width: 185px!important;">NVPT</th>
-                       <th style="width: 120px!important;">Thao tác</th>
-                     </tr>
-                     </thead>
-                     <tbody>
-                     <tr
-                         v-for="(customer, index) in customers"
-                         :key="customer.id"
-                         class="table-row-clickable"
-                         @click="openCustomerDetail(customer)"
-                     >
-                       <!-- Checkbox -->
-                       <td style="width: 20px !important;">
-                         <input
-                             type="checkbox"
-                             class="form-check-input customer-checkbox"
-                             :checked="customer.selected"
-                             @click.stop
-                             @change="toggleCustomerSelection(customer.id)"
-                         >
-@@ -527,50 +529,58 @@
-                       <!-- ID -->
-                       <td style="width: 20px !important;">
-                         <span class="badge bg-light text-dark">{{ customer.index }}</span>
-                       </td>
-
-                       <!-- Khách hàng -->
-                       <td style="width: 220px!important;">
-                         <div class="d-flex align-items-center">
-                           <img
-                               :src="customer.avatarKhach || generateAvatarFromName(customer.hoTen)"
-                               :alt="customer.hoTen"
-                               class="customer-avatar me-3"
-                           />
-                           <div>
-                             <div class="fw-semibold">{{ shortenName( customer.hoTen, 15 )}}</div>
-                             <small class="text-muted">{{ customer.ngayTao }}</small>
-                           </div>
-                         </div>
-                       </td>
-
-                       <!-- SĐT -->
-                       <td class="fw-medium">
-                         {{ formatPhoneNumber(customer.soDienThoai) }}
-                       </td>
-
-+                      <td class="fw-medium">
-+                        {{ formatCurrency(customer.giaBDS) }}
-+                      </td>
-+
-+                      <td class="fw-medium">
-+                        {{ formatCurrency(customer.phi) }}
-+                      </td>
-+
-                       <!-- Tỉnh / TP -->
-                       <td>
-                         {{ getProvinceShortLabel(customer.tinhThanhPho) }}
-                       </td>
-
-                       <!-- Phân loại -->
-                       <td>
-     <span :class="`type-badge type-${customer.phanLoaiKhach}`">
-       {{ getTypeLabel(customer.phanLoaiKhach) }}
-     </span>
-                       </td>
-
-                       <!-- Trạng thái -->
-                       <td>
-     <span :class="`status-badge status-${customer.trangThai}`">
-       {{ getStatusLabel(customer.trangThai) }}
-     </span>
-                       </td>
-
-                       <!-- Ngày cập nhật -->
-                       <td style="width: 120px!important;">
-                           <span
-                               class="badge bg-light text-dark"
-                               style="font-size: 14px !important; font-weight: 500 !important;"
-                           >
-@@ -611,51 +621,51 @@
-                       </td>
-
-                       <!-- Thao tác -->
-                       <td>
-                         <div class="action-buttons">
-                           <button
-                               class="action-btn call-btn"
-                               @click.stop="editCustomer(customer)"
-                               title="Sửa"
-                               style="background: var(--success-gradient);"
-                           >
-                             <i class="fas fa-edit"></i>
-                           </button>
-                           <button
-                               class="action-btn delete-btn"
-                               @click.stop="deleteOne( customer.id )"
-                               title="Xóa"
-                               style="background: var(--danger-gradient);"
-                           >
-                             <i class="fas fa-trash"></i>
-                           </button>
-                         </div>
-                       </td>
-                     </tr>
-                     <tr v-if="customers.length === 0">
--                      <td colspan="12" class="text-center py-5">
-+                      <td colspan="14" class="text-center py-5">
-                         <div class="mb-3"><i class="fas fa-users fa-3x gradient-text"></i></div>
-                         <h5 class="text-muted mb-2">Không tìm thấy khách hàng nào</h5>
-                         <p class="text-muted mb-0">Hãy thử thay đổi bộ lọc hoặc thêm khách hàng mới</p>
-                       </td>
-                     </tr>
-                     </tbody>
-                   </table>
-                 </div>
-
-                 <!-- Pagination -->
-                 <nav class="mt-4" v-if="totalPages > 1">
-                   <ul class="pagination pagination-custom justify-content-center">
-
-                     <!-- Prev -->
-                     <li class="page-item" :class="{ disabled: page === 0 }">
-                       <a class="page-link" href="#" @click.prevent="prevPage">
-                         <i class="fas fa-chevron-left"></i>
-                       </a>
-                     </li>
-
-                     <!-- First page -->
-                     <li
-                         class="page-item"
-                         v-if="visiblePages[0] > 0"
-                         @click.prevent="goToPage(0)"
-@@ -1193,50 +1203,58 @@
-                     <span class="update-badge" style="font-size: 16px !important;">
-                   <i class="fas fa-sync-alt me-1"></i>Cập nhật: {{ detailCustomer.ngayCapNhat }}
-                 </span>
-                   </div>
-                 </div>
-               </div>
-
-               <!-- Main content - 2 cột -->
-               <div class="detail-main">
-                 <!-- Cột trái: Thông tin chi tiết -->
-                 <div class="detail-left-col">
-                   <div class="detail-section">
-                     <h6 class="section-title-detail">
-                       <i class="fas fa-user-circle me-2 icon-red"></i>
-                       Thông tin khách hàng
-                     </h6>
-                     <div class="info-grid">
-                       <div class="info-item">
-                         <div class="info-label">Họ và tên</div>
-                         <div class="info-value">{{ detailCustomer.hoTen }}</div>
-                       </div>
-                       <div class="info-item">
-                         <div class="info-label">Số điện thoại</div>
-                         <div class="info-value">{{ formatPhoneNumber(detailCustomer.soDienThoai) }}</div>
-                       </div>
-+                      <div class="info-item">
-+                        <div class="info-label">Giá BĐS</div>
-+                        <div class="info-value">{{ formatCurrency(detailCustomer.giaBDS) }}</div>
-+                      </div>
-+                      <div class="info-item">
-+                        <div class="info-label">Phí</div>
-+                        <div class="info-value">{{ formatCurrency(detailCustomer.phi) }}</div>
-+                      </div>
-                       <div class="info-item">
-                         <div class="info-label">Địa chỉ</div>
-                         <div class="info-value">{{ detailCustomer.tinhThanhPho }}</div>
-                       </div>
-                       <div class="info-item">
-                         <div class="info-label">Phân loại</div>
-                         <div class="info-value">
-                       <span :class="`type-label type-${detailCustomer.phanLoaiKhach}`" style=" font-size: 1rem !important;">
-                         {{ getTypeLabel(detailCustomer.phanLoaiKhach) }}
-                       </span>
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-
-                   <div class="detail-section">
-                     <h6 class="section-title-detail">
-                       <i class="fas fa-users me-2 icon-green"></i>
-                       Nhân sự phụ trách
-                     </h6>
-                     <div class="staff-grid">
-                       <div class="staff-item">
-                         <div class="staff-avatar">
-                           <div v-if="detailCustomer.nhanVienTaoAvatar" class="avatar-img">
-                             <img :src=" 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+  detailCustomer.nhanVienTaoAvatar" :alt="detailCustomer.nhanVienTaoTen">
-@@ -2448,50 +2466,57 @@ const getStatusLabel = (status) => {
- const getTypeLabel = (type) => {
-   const typeMap = { 'MOI_GIOI': 'Môi giới', 'CHINH_CHU': 'Chủ nhà', 'NGUOI_THAN': 'Người thân' }
-   return typeMap[type] || type
+   generateCalendar()
+   updateDaySchedule()
+   updateFilterOutputs()
  }
 
- const getProvinceLabel = (province) => {
-   if (!province) return '-'
-   if (province === 'Khác' || province === 'other') return 'Khác'
-   const provinceMatch = addressData.find(item => item.name === province)
-   if (provinceMatch) return provinceMatch.name
-   const legacyMap = {
-     'hanoi': 'Thành phố Hà Nội',
-     'hcm': 'Thành phố Hồ Chí Minh',
-     'danang': 'Thành phố Đà Nẵng',
-     'haiphong': 'Thành phố Hải Phòng',
-     'cantho': 'Thành phố Cần Thơ'
+ async function fetchStatsAppointments() {
+   const { startDate, endDate } = getFilterRange()
+   const payload = {
+     startDate,
+     endDate,
+     status: null,
+     search: null,
    }
-   return legacyMap[province] || province
- }
 
- const formatPhoneNumber = (phone) => {
-   if (!phone) return '-'
-   return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
- }
-
-+const formatCurrency = (value) => {
-+  if (value === null || value === undefined || value === '') return '-'
-+  const numericValue = Number(value)
-+  if (Number.isNaN(numericValue)) return value
-+  return `${new Intl.NumberFormat('vi-VN').format(numericValue)} ₫`
-+}
-+
- const formatDateTime = (value) => {
-   if (!value) return '-'
-   const date = new Date(value)
-   if (Number.isNaN(date.getTime())) return value
-   return date.toLocaleString('vi-VN')
- }
-
- const handleFileUpdate = (files) => {
-   fileForm.files = Array.isArray(files) ? files : []
-
-   const existingFiles = fileForm.files.filter(file => !file.file && file.id)
-   const newFiles = fileForm.files.filter(file => file.file instanceof File)
-
-   fileForm.newFiles = newFiles
-     .filter(file => !file.isIG)
-     .map(file => ({ file: file.file, isOnTop: file.isOnTop }))
-
-   fileForm.newLandBookFiles = newFiles
-     .filter(file => file.isIG)
-     .map(file => ({ file: file.file, isOnTop: file.isOnTop }))
-
-   const originalIds = (originalFiles.value || []).map(file => file.id)
-   const currentIds = existingFiles.map(file => file.id)
-
-   fileForm.deletedFileIds = originalIds.filter(id => {
-diff --git a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-index ba06f51f4848fb2252f9e2f154f9770426fb4888..7a9ee5ec5219711a40cbacafe65f5b39756199b6 100644
---- a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-+++ b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-@@ -217,50 +217,54 @@
-
-                   <span
-                       v-if="getLatestHistoryLabel(customer)"
-                       class="customer-history-status"
-                       :style="getLatestHistoryStyle(customer)"
-                   >
-                     {{ getLatestHistoryLabel(customer) }}
-                   </span>
-                 </h4>
-
-                 <p class="customer-phone">
-                   <i class="fas fa-phone"></i> {{ customer.phone }}
-                 </p>
-
-                 <p class="customer-received">
-                   <i class="fas fa-clock"></i> Tiếp nhận: {{ formatReceivedAt(customer.receivedAt) }}
-                 </p>
-
-                 <div class="customer-location">
-                   <span class="location-current">
-                     <i class="fas fa-map-marker-alt"></i> {{ customer.province }}
-                   </span>
-                   <span v-if="customer.oldProvince" class="location-old">(Cũ: {{ customer.oldProvince }})</span>
-                 </div>
-
-+                <p class="customer-price">
-+                  <i class="fas fa-coins"></i> Giá BĐS: {{ formatCurrency(customer.giaBDS) }}
-+                </p>
-+
-                 <div class="customer-tags" v-if="Array.isArray(customer.tags) && customer.tags.length">
-                   <span v-for="tag in customer.tags" :key="tag" class="customer-tag" :class="tag">
-                     {{ getTagLabel(tag) }}
-                   </span>
-                 </div>
-               </div>
-
-               <div class="customer-actions">
-                 <div class="contact-icons">
-                   <a class="contact-icon zalo" :href="`zalo:${customer.phone}`" title="Zalo" @click.stop>
-                     <i class="fas fa-comment-dots"></i> zalo: {{ customer.phone }}
-                   </a>
-                   <a class="contact-icon tel" :href="`tel:${customer.phone}`" title="Điện thoại" @click.stop>
-                     <i class="fas fa-phone"></i> tel: {{ customer.phone }}
-                   </a>
-                 </div>
-                 <div class="call-status" v-if="customer.lastCall">
-                   <i class="fas fa-clock"></i> {{ formatTime(customer.lastCall) }}
-                 </div>
-               </div>
-             </div>
-           </div>
-
-           <div class="pagination" v-if="activeTab === 'contacted' && totalPages > 1">
-             <button class="page-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
-@@ -329,50 +333,58 @@
-                 <h4>{{ selectedCustomer ? selectedCustomer.name : '' }}</h4>
-                 <p class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</p>
-                 <p class="detail-received">
-                   Tiếp nhận: {{ selectedCustomer ? formatReceivedAt(selectedCustomer.receivedAt) : '' }}
-                 </p>
-                 <p class="detail-type">
-                   <span :class="selectedCustomer ? `type-badge ${selectedCustomer.type}` : 'type-badge'">
-                     {{ selectedCustomer ? getCustomerTypeLabel(selectedCustomer.type) : '' }}
-                   </span>
-                 </p>
-               </div>
-             </div>
-
-             <div class="detail-section  mt-3">
-               <h5><i class="fas fa-map-marked-alt"></i> Thông tin địa chỉ</h5>
-               <div class="detail-row">
-                 <span class="detail-label">Tỉnh hiện tại:</span>
-                 <span class="detail-value">{{ selectedCustomer.province }}</span>
-               </div>
-               <div class="detail-row" v-if="selectedCustomer.oldProvince">
-                 <span class="detail-label">Tỉnh cũ:</span>
-                 <span class="detail-value">{{ selectedCustomer.oldProvince }}</span>
-               </div>
-             </div>
-
-+            <div class="detail-section">
-+              <h5><i class="fas fa-coins"></i> Thông tin BĐS</h5>
-+              <div class="detail-row">
-+                <span class="detail-label">Giá BĐS:</span>
-+                <span class="detail-value">{{ formatCurrency(selectedCustomer.giaBDS) }}</span>
-+              </div>
-+            </div>
-+
-             <div class="detail-section">
-               <h5><i class="fas fa-layer-group"></i> Phân loại khách</h5>
-               <div class="detail-row">
-                 <span class="detail-label">Loại khách:</span>
-                 <span class="detail-value">{{ getCustomerTypeLabel(selectedCustomer.type) || 'Chưa phân loại' }}</span>
-               </div>
-             </div>
-
-             <div class="detail-section">
-               <h5><i class="fas fa-tags"></i> Đánh dấu khách hàng</h5>
-               <div class="tag-selector">
-                 <button
-                     v-for="tag in availableTags"
-                     :key="tag.value"
-                     class="tag-option"
-                     :class="{ active: isTagActive(tag.value) }"
-                     :style="isTagActive(tag.value) ? { backgroundColor: tag.color, borderColor: tag.color, color: '#fff' } : {}"
-                     @click="toggleCustomerStatus(tag.value)"
-                 >
-                   {{ tag.label }}
-                 </button>
-               </div>
-             </div>
-
-             <div class="detail-section mt-3">
-@@ -676,50 +688,57 @@ const getAvatarColor = (name) => {
-   for (let i = 0; i < name.length; i += 1) {
-     hash = name.charCodeAt(i) + ((hash << 5) - hash)
-   }
-   const hue = Math.abs(hash) % 360
-   return `hsl(${hue}, 60%, 55%)`
- }
-
- const formatTime = (isoString) => {
-   if (!isoString) return 'Chưa gọi'
-   const date = new Date(isoString)
-   return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
- }
-
- const formatReceivedAt = (isoString) => {
-   if (!isoString) return '-'
-   const date = new Date(isoString)
-   return date.toLocaleString('vi-VN', {
-     hour: '2-digit',
-     minute: '2-digit',
-     day: '2-digit',
-     month: '2-digit',
-     year: 'numeric'
-   })
- }
-
-+const formatCurrency = (value) => {
-+  if (value === null || value === undefined || value === '') return '-'
-+  const numericValue = Number(value)
-+  if (Number.isNaN(numericValue)) return value
-+  return `${new Intl.NumberFormat('vi-VN').format(numericValue)} ₫`
-+}
-+
- // ====== Detail actions ======
- const selectCustomer = (customer) => {
-   selectedCustomer.value = customer
-   activeDetailTab.value = 'detail'
-   newNote.value = ''
-   resetFileForm(customer?.files)
- }
-
- const toggleCustomerStatus = (status) => {
-   if (!selectedCustomer.value) return
-   selectedCustomer.value.status = selectedCustomer.value.status === status ? null : status
- }
-
- const resetFileForm = (files) => {
-   const safeFiles = Array.isArray(files) ? JSON.parse(JSON.stringify(files)) : []
-   fileForm.value = {
-     files: safeFiles,
-     newFiles: [],
-     newLandBookFiles: [],
-     deletedFileIds: [],
-     deletedLandBookFileIds: []
-   }
-   originalFiles.value = JSON.parse(JSON.stringify(safeFiles))
- }
-
-@@ -861,88 +880,90 @@ const fetchThongKeTrangThaiTeleSales = async () => {
-   }
- }
-
- const fetchKhachMoiTiepNhan = async () => {
-   const res = await api.get('/customer-crm/telesales/khach-moi-tiep-nhan', {
-     params: {
-       type: typeFilter.value || null,
-       search: searchQuery.value || null
-     }
-   })
-   return res.data
- }
-
- const loadKhachMoiTiepNhan = async () => {
    try {
-     const data = await fetchKhachMoiTiepNhan()
-     newCustomers.value = (data || []).map((item) => ({
-       id: item.id,
-       name: item.hoTen,
-       phone: item.soDienThoai,
-       receivedAt: item.thoiGianTiepNhan,
-       province: item.tinhMoi,
-       oldProvince: item.tinhCu || null,
-       type: item.type || null, // CHINH_CHU / MOI_GIOI / NGUOI_THAN
-       note: item.ghiChu || '',
-+      giaBDS: item.giaBDS ?? null,
-       status: null,
-       tags: [],
-       lastCall: null,
-       files: Array.isArray(item.files) ? item.files : [],
-       lichSu: Array.isArray(item.lichSu) ? item.lichSu : [] // ✅ THÊM
-     }))
-   } catch (err) {
-     newCustomers.value = []
+     const res = await api.post('/customer-crm/admin/lich-hen/filter', payload)
+     const data = Array.isArray(res.data) ? res.data : []
+     statsAppointments.value = data.map(mapAppointmentFromApi)
+   } catch (e) {
+     statsAppointments.value = []
+     showToast('Lỗi tải thống kê', e?.response?.data?.message || 'Không thể tải dữ liệu.', 'error')
    }
  }
 
- const loadKhachDaLienHe = async () => {
-   try {
-     const res = await api.get('/customer-crm/telesales/khach-da-lien-he', {
-       params: {
-         page: Math.max(currentPage.value - 1, 0),
-         size: pageSize.value,
-         status: statusFilter.value || null,
-         type: typeFilter.value || null,
-         search: searchQuery.value?.trim() || null
-       }
-     })
-
-     const payload = res.data || {}
-     const content = Array.isArray(payload.content) ? payload.content : []
-     const page = payload.page || {}
-
-     contactedCustomers.value = content.map((item) => {
-       const status = item.status ?? statusFilter.value ?? null
-       return {
-         id: item.id,
-         name: item.hoTen,
-         phone: item.soDienThoai,
-         receivedAt: item.thoiGianTiepNhan,
-         province: item.tinhMoi,
-         oldProvince: item.tinhCu || null,
-         type: item.type || null,
-         note: item.ghiChu || '',
-+        giaBDS: item.giaBDS ?? null,
-         status,
-         tags: status ? [status] : [],
-         lastCall: item.thoiGianLienHe || null,
-         files: Array.isArray(item.files) ? item.files : [],
-         lichSu: Array.isArray(item.lichSu) ? item.lichSu : []
-       }
-     })
-
-     contactedPagination.value = {
-       size: page.size ?? pageSize.value,
-       number: page.number ?? Math.max(currentPage.value - 1, 0),
-       totalElements: page.totalElements ?? content.length,
-       totalPages: page.totalPages ?? 1
-     }
-
-     pageSize.value = contactedPagination.value.size
-     currentPage.value = contactedPagination.value.number + 1
-   } catch (err) {
-     contactedCustomers.value = []
-     contactedPagination.value = {
-       size: pageSize.value,
-       number: 0,
-       totalElements: 0,
-       totalPages: 1
-     }
-@@ -1629,50 +1650,60 @@ body {
-   color: #fff;
-   white-space: nowrap;
-   vertical-align: middle;
- }
-
-
- .customer-phone {
-   font-size: 14px;
-   color: #4daf36;
-   font-weight: 600;
-   margin-bottom: 4px;
-   display: flex;
-   align-items: center;
-   gap: 5px;
- }
-
- .customer-received {
-   font-size: 14px;
-   color: #444444;
-   margin-bottom: 6px;
-   display: flex;
-   align-items: center;
-   gap: 5px;
- }
-
-+.customer-price {
-+  font-size: 14px;
-+  color: #1d4ed8;
-+  font-weight: 600;
-+  margin-bottom: 6px;
-+  display: flex;
-+  align-items: center;
-+  gap: 5px;
++async function refreshAppointmentsAndStats() {
++  await Promise.all([fetchAppointments(), fetchStatsAppointments()])
 +}
 +
- .customer-location {
-   font-size: 14px;
-   font-weight: 600;
-   color: #c92222;
-   margin-bottom: 8px;
-   display: flex;
-   gap: 10px;
+ function handleCalendarClick(cell) {
+   if (!cell.currentMonth || !cell.iso) return
+   if (!cell.enabled) return
+
+   selectedDateISO.value = cell.iso
+   updateDaySchedule()
+   updateFilterOutputs()
+   generateCalendar()
  }
 
- .location-current {
-   display: flex;
-   align-items: center;
-   gap: 4px;
+ function handleMonthNav(dir) {
+   if (activeRange.value !== 'month') return
+   const y = calendarMonth.value.getFullYear()
+   const m = calendarMonth.value.getMonth()
+   const next = new Date(y, m + dir, 1)
+   calendarMonth.value = next
+   const nextISO = `${next.getFullYear()}-${pad2(next.getMonth() + 1)}-01`
+   selectedDateISO.value = nextISO
+   generateCalendar()
+   updateDaySchedule()
+   updateFilterOutputs()
  }
 
- .location-old {
-   font-style: italic;
+ // ===== Day schedule (ăn theo selectedDate + filter range disable) =====
+ function apptsForSelectedDay() {
+@@ -679,51 +683,51 @@ async function handleDrop(e, targetTime) {
+     return
+   }
+
+   // chỉ cho đổi trong ngày đang chọn
+   if (!isCellEnabled(selectedDateISO.value)) return
+
+   if (appt.date === selectedDateISO.value && appt.time === targetTime) return
+
+   try {
+     const payload = {
+       appointmentId: appt.id,
+       appointmentDate: selectedDateISO.value,
+       appointmentTime: targetTime, // String HH:mm
+     }
+
+     const res = await showLoading(
+         api.post('/customer-crm/admin/lich-hen/update-time', payload)
+     )
+
+     if (!res.data.success) {
+       updateAlertError('Không thể dời giờ', res.data.message)
+       return
+     }
+
+     // ✅ CHỈ SAU KHI BE OK → reload
+-    await fetchAppointments()
++    await refreshAppointmentsAndStats()
+
+     updateAlertSuccess(
+         'Đã dời giờ hẹn',
+         `${appt.customer}: ${formatVNDate(appt.date)} → ${targetTime}`
+     )
+   } catch (e) {
+     console.error(e)
+     showToast(
+         'Lỗi dời giờ',
+         e?.response?.data?.message || 'Không thể cập nhật giờ hẹn.',
+         'error'
+     )
+   }
  }
 
- .customer-notes-preview {
-   font-size: 13px;
-   color: #334155;
-   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-   border: 1px solid #e2e8f0;
-   padding: 5px 8px;
+ // ===== Customer search =====
+ // ===== Customer search (CALL API) =====
+ let suppressCustomerSearch = false
+ const customerSearchResults = ref([])
+ const customerSearchLoading = ref(false)
+ const customerSearchError = ref('')
+
+ let customerSearchTimer = null
+ let lastCustomerKeyword = ''
+
+@@ -926,50 +930,51 @@ async function saveEditModal() {
+
+   const payload = {
+     appointmentId: editId.value,
+     branchId: editForm.branch,
+     appointmentDate: editForm.date,
+     appointmentTime: editForm.time,
+     consultantId: editForm.consultantId,
+     status: editForm.status,
+     rating: editForm.rating,
+     consultStatus: editForm.consultStatus || null, // ✅ thêm
+     note: editForm.note?.trim(),
+     customerNote: editForm.customerNote?.trim(),
+     updateReason: editForm.updateReason?.trim(),
+   }
+
+   console.log('Update appointment payload', payload)
+
+   try {
+     const res = await showLoading( api.post(
+         '/customer-crm/admin/lich-hen/update',
+         payload
+     ));
+
+     if (res.data.success) {
+       updateAlertSuccess('✅ Cập nhật lịch hẹn thành công')
++      await refreshAppointmentsAndStats()
+       closeEditModal()
+       // reload list / calendar nếu cần
+     } else {
+       updateAlertError('❌ Cập nhật thất bại:', res.data.message)
+       alert(res.data.message)
+     }
+   } catch (e) {
+     console.error('❌ Lỗi gọi API update lịch hẹn', e)
+   }
+ }
+ // ===== Lấy tất cả chi nhánh =========
+ // ===== Branch options (API) =====
+ const BRANCHES = ref([])
+ const branchLoading = ref(false)
+
+ async function fetchBranchOptions() {
+   if (branchLoading.value) return
+
+   branchLoading.value = true
+   try {
+     const res = await api.get('/customer-crm/admin/lich-hen/options')
+
+     // BE trả: [{ id, address }]
+     BRANCHES.value = (Array.isArray(res.data) ? res.data : []).map(b => ({
+       key: Number(b.id),      // đảm bảo là number
+@@ -1160,51 +1165,51 @@ async function saveNewAppointment() {
+   if (!createForm.consultant) {
+     showCenterWarning('Thiếu thông tin', 'Vui lòng chọn NV tư vấn.', 'error')
+     return
+   }
+
+   const timeCheck = isValidAppointmentTime(
+       createForm.date,
+       createForm.time
+   )
+
+   if (!timeCheck.valid) {
+     showCenterWarning('Thời gian không hợp lệ', timeCheck.message, 'error')
+     return
+   }
+
+   try {
+     const res = await showLoading(createAppointmentApi());
+
+     if( !res.data.success) {
+       updateAlertError('Không thể tạo lịch hẹn', res.data.message || 'Có lỗi xảy ra, vui lòng thử lại.', 'error')
+       return
+     }
+
+     updateAlertSuccess('Tạo lịch hẹn thành công', 'Lịch hẹn đã được tạo.')
+
+-
++    await refreshAppointmentsAndStats()
+     closeCreateModal()
+   } catch (e) {
+     console.error(e)
+     showToast(
+         'Tạo lịch thất bại',
+         e?.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.',
+         'error'
+     )
+   }
+ }
+
+ // ===== Export (theo filter của table) =====
+ function exportCSV() {
+   const filtered = applyFilters(appointments.value)
+   const header = ['Khách hàng', 'SĐT', 'Chi nhánh', 'Ngày', 'Giờ', 'NV phụ trách', 'Tình trạng', 'KQ tư vấn', 'Phân loại', 'Đánh giá', 'Người tạo', 'Ghi chú']
+
+   const rows = filtered.map((a) => [
+     a.customer,
+     a.phone,
+     a.branch ? BRANCHES.find((b) => b.key === a.branch)?.label || a.branch : '-',
+     a.date,
+     a.time,
+     a.staff,
+     STATUS[a.status].label,
+     CONSULT_STATUS[a.consultStatus]?.label || '',
