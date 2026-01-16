@@ -1,825 +1,614 @@
-diff --git a/src/components/productAdmin/ProductCreate.vue b/src/components/productAdmin/ProductCreate.vue
-index 7b6b9f96064996fa4f57d1f3ed62a58d8b402a32..ba1b1189fd2e1cee01e5600da718a161bca400d4 100644
---- a/src/components/productAdmin/ProductCreate.vue
-+++ b/src/components/productAdmin/ProductCreate.vue
-@@ -1,64 +1,91 @@
- <template>
-   <div class="container-fluid px-4 py-3">
-     <!-- Header với Breadcrumb -->
-     <div class="d-flex align-items-center justify-content-between">
-       <div>
-         <nav aria-label="breadcrumb">
-           <ol class="breadcrumb mb-2">
-             <li class="breadcrumb-item">
-               <i class="fas fa-home me-1"></i><a href="/-thg/quan-ly-san-pham" class="text-decoration-none"> Quản lý sản phẩm</a>
-             </li>
-             <li class="breadcrumb-item active">Tạo mới sản phẩm</li>
-           </ol>
-         </nav>
-         <div class="d-flex align-items-center gap-3">
-           <div class="icon-circle-admin">
-             <i class="fas fa-city fs-4"></i>
-           </div>
-           <div>
-             <h1 class="h3 mb-1 fw-bold text-dark">Tạo mới sản phẩm</h1>
-             <p class="text-muted mb-0">Thêm tài sản mới vào hệ thống quản lý</p>
-           </div>
-         </div>
-       </div>
--      <div class="d-flex gap-2">
--        <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" @click="$router.back()">
--          <i class="fas fa-arrow-left"></i><span>Quay lại</span>
--        </button>
--        <button type="button" class="btn btn-outline-warning d-flex align-items-center gap-2" @click="resetForm">
--          <i class="fas fa-redo"></i><span>Đặt lại</span>
--        </button>
--        <button
--          v-if="isLastTab"
--          type="button"
--          class="btn btn-primary d-flex align-items-center gap-2 px-4"
--          :disabled="isSubmitting"
--          @click="submitForm"
--        >
--          <i class="fas fa-save"></i><span>{{ isSubmitting ? 'Đang xử lý...' : 'Lưu tài sản' }}</span>
--        </button>
-+      <div class="d-flex flex-column align-items-end gap-2">
-+        <div class="d-flex align-items-center justify-content-end gap-2">
-+          <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+          >
-+            <i class="fa-solid fa-bars"></i>
-+            <span class="d-none d-md-inline">Menu</span>
-+          </button>
-+          <NotificationBell />
-+          <div class="d-flex flex-column align-items-end text-end">
-+            <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-+          </div>
+diff --git a/src/components/thiet-kegiandien/admin-saleadmin.vue b/src/components/thiet-kegiandien/admin-saleadmin.vue
+index f8fd96a4b92a9bf904558f1de1f27f749ee5fbb8..3b57d3b64e929516dabe5d1f8c886039cf16e616 100644
+--- a/src/components/thiet-kegiandien/admin-saleadmin.vue
++++ b/src/components/thiet-kegiandien/admin-saleadmin.vue
+@@ -475,50 +475,52 @@
+                     <button class="btn-success-custom btn-custom" @click="openExcelPicker">
+                       <i class="fas fa-file-excel me-2"></i>Add Excel
+                     </button>
+                     <button class="btn-primary-custom btn-custom" @click="openAddCustomerModal()">
+                       <i class="fas fa-plus me-2"></i> Thêm khách hàng
+                     </button>
+                   </div>
+                 </div>
+
+                 <!-- Table -->
+                 <div class="table-container">
+                   <table class="table table-hover table-custom">
+                     <thead>
+                     <tr>
+                       <th style="width: 10px !important; padding-left: 15px !important;">
+                         <input
+                             type="checkbox"
+                             class="form-check-input checkbox-all"
+                             :checked="isAllSelected"
+                             @change="toggleSelectAll"
+                         >
+                       </th>
+                       <th style="width: 10px !important;">#</th>
+                       <th style="width: 220px!important;">Khách hàng</th>
+                       <th  style="width: 130px!important;">SĐT</th>
++                      <th style="width: 140px!important;">Giá BĐS</th>
++                      <th style="width: 120px!important;">Phí</th>
+                       <th style="width: 150px!important;">Tỉnh/TP</th>
+                       <th style="width: 135px!important;">Phân loại</th>
+                       <th style="width: 135px!important;">Trạng thái</th>
+                       <th style="width: 120px!important;">Ngày CN</th>
+                       <th style="width: 185px!important;">Người tạo</th>
+                       <th style="width: 185px!important;">NVPT</th>
+                       <th style="width: 120px!important;">Thao tác</th>
+                     </tr>
+                     </thead>
+                     <tbody>
+                     <tr
+                         v-for="(customer, index) in customers"
+                         :key="customer.id"
+                         class="table-row-clickable"
+                         @click="openCustomerDetail(customer)"
+                     >
+                       <!-- Checkbox -->
+                       <td style="width: 20px !important;">
+                         <input
+                             type="checkbox"
+                             class="form-check-input customer-checkbox"
+                             :checked="customer.selected"
+                             @click.stop
+                             @change="toggleCustomerSelection(customer.id)"
+                         >
+@@ -527,50 +529,58 @@
+                       <!-- ID -->
+                       <td style="width: 20px !important;">
+                         <span class="badge bg-light text-dark">{{ customer.index }}</span>
+                       </td>
+
+                       <!-- Khách hàng -->
+                       <td style="width: 220px!important;">
+                         <div class="d-flex align-items-center">
+                           <img
+                               :src="customer.avatarKhach || generateAvatarFromName(customer.hoTen)"
+                               :alt="customer.hoTen"
+                               class="customer-avatar me-3"
+                           />
+                           <div>
+                             <div class="fw-semibold">{{ shortenName( customer.hoTen, 15 )}}</div>
+                             <small class="text-muted">{{ customer.ngayTao }}</small>
+                           </div>
+                         </div>
+                       </td>
+
+                       <!-- SĐT -->
+                       <td class="fw-medium">
+                         {{ formatPhoneNumber(customer.soDienThoai) }}
+                       </td>
+
++                      <td class="fw-medium">
++                        {{ formatCurrency(customer.giaBDS) }}
++                      </td>
 +
-+          <img
-+            v-if="info.avatarUrl"
-+            :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-+            alt="avatar"
-+            class="rounded-circle border"
-+            style="width: 36px; height: 36px; object-fit: cover;"
-+          />
-+          <div v-else class="avatar-circle">
-+            {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-+          </div>
-+        </div>
-+        <div class="d-flex gap-2">
-+          <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" @click="$router.back()">
-+            <i class="fas fa-arrow-left"></i><span>Quay lại</span>
-+          </button>
-+          <button type="button" class="btn btn-outline-warning d-flex align-items-center gap-2" @click="resetForm">
-+            <i class="fas fa-redo"></i><span>Đặt lại</span>
-+          </button>
-+          <button
-+            v-if="isLastTab"
-+            type="button"
-+            class="btn btn-primary d-flex align-items-center gap-2 px-4"
-+            :disabled="isSubmitting"
-+            @click="submitForm"
-+          >
-+            <i class="fas fa-save"></i><span>{{ isSubmitting ? 'Đang xử lý...' : 'Lưu tài sản' }}</span>
-+          </button>
-+        </div>
-       </div>
-     </div>
-
-     <div class="card border-0 shadow-sm">
-       <div class="card-body p-4">
-         <form @submit.prevent>
-           <div class="tab-navigation">
-             <ul class="nav nav-tabs flex-wrap">
-               <li v-for="tab in tabs" :key="tab.id" class="nav-item">
-                 <button
-                   type="button"
-                   class="nav-link"
-                   :class="{
-                     active: activeTab === tab.id,
-                     completed: isTabCompleted(tab.id),
-                     pending: isTabPending(tab.id),
-                   }"
-                   @click="setActiveTab(tab.id)"
-                 >
-                   <i :class="tab.icon" class="me-2"></i>{{ tab.label }}
-                 </button>
-               </li>
-             </ul>
-           </div>
-
-@@ -1176,50 +1203,56 @@
-             <button
-                 v-else
-                 type="button"
-                 class="btn btn-primary d-flex align-items-center gap-2 px-4"
-                 :disabled="isSubmitting"
-                 @click="submitForm"
-             >
-               <i class="fas fa-save"></i><span>{{ isSubmitting ? 'Đang xử lý...' : 'Lưu sản phẩm' }}</span>
-             </button>
-           </div>
-         </form>
-       </div>
-     </div>
-   </div>
- </template>
-
- <script setup>
- import { computed, reactive, ref, watch } from 'vue'
- import api from '/src/api/api.js'
- import FileOrLand from './FileNew.vue'
- import addressData from '/src/assets/js/address.json'
- import {showLoading, updateAlertError, updateAlertSuccess} from "../../assets/js/alertService.js";
- import router from "../../router/index.js";
- import Address5 from "./Address5.vue";
- import {useAuthStore} from "../../stores/authStore.js";
-+import { useSidebarStore } from "../../stores/sidebarStore.js";
-+import NotificationBell from "../NotificationBell.vue";
++                      <td class="fw-medium">
++                        {{ formatCurrency(customer.phi) }}
++                      </td>
 +
-+const authStore = useAuthStore();
-+const info = authStore.userInfo;
-+const sidebar = useSidebarStore();
+                       <!-- Tỉnh / TP -->
+                       <td>
+                         {{ getProvinceShortLabel(customer.tinhThanhPho) }}
+                       </td>
 
- const handleNguoiBanLookup = async () => {
-   if (!form.nguoiBanSearch) {
-     errors.nguoiBanSearch = 'Nhập email hoặc số điện thoại'
-     return
+                       <!-- Phân loại -->
+                       <td>
+     <span :class="`type-badge type-${customer.phanLoaiKhach}`">
+       {{ getTypeLabel(customer.phanLoaiKhach) }}
+     </span>
+                       </td>
+
+                       <!-- Trạng thái -->
+                       <td>
+     <span :class="`status-badge status-${customer.trangThai}`">
+       {{ getStatusLabel(customer.trangThai) }}
+     </span>
+                       </td>
+
+                       <!-- Ngày cập nhật -->
+                       <td style="width: 120px!important;">
+                           <span
+                               class="badge bg-light text-dark"
+                               style="font-size: 14px !important; font-weight: 500 !important;"
+                           >
+@@ -611,51 +621,51 @@
+                       </td>
+
+                       <!-- Thao tác -->
+                       <td>
+                         <div class="action-buttons">
+                           <button
+                               class="action-btn call-btn"
+                               @click.stop="editCustomer(customer)"
+                               title="Sửa"
+                               style="background: var(--success-gradient);"
+                           >
+                             <i class="fas fa-edit"></i>
+                           </button>
+                           <button
+                               class="action-btn delete-btn"
+                               @click.stop="deleteOne( customer.id )"
+                               title="Xóa"
+                               style="background: var(--danger-gradient);"
+                           >
+                             <i class="fas fa-trash"></i>
+                           </button>
+                         </div>
+                       </td>
+                     </tr>
+                     <tr v-if="customers.length === 0">
+-                      <td colspan="12" class="text-center py-5">
++                      <td colspan="14" class="text-center py-5">
+                         <div class="mb-3"><i class="fas fa-users fa-3x gradient-text"></i></div>
+                         <h5 class="text-muted mb-2">Không tìm thấy khách hàng nào</h5>
+                         <p class="text-muted mb-0">Hãy thử thay đổi bộ lọc hoặc thêm khách hàng mới</p>
+                       </td>
+                     </tr>
+                     </tbody>
+                   </table>
+                 </div>
+
+                 <!-- Pagination -->
+                 <nav class="mt-4" v-if="totalPages > 1">
+                   <ul class="pagination pagination-custom justify-content-center">
+
+                     <!-- Prev -->
+                     <li class="page-item" :class="{ disabled: page === 0 }">
+                       <a class="page-link" href="#" @click.prevent="prevPage">
+                         <i class="fas fa-chevron-left"></i>
+                       </a>
+                     </li>
+
+                     <!-- First page -->
+                     <li
+                         class="page-item"
+                         v-if="visiblePages[0] > 0"
+                         @click.prevent="goToPage(0)"
+@@ -1193,50 +1203,58 @@
+                     <span class="update-badge" style="font-size: 16px !important;">
+                   <i class="fas fa-sync-alt me-1"></i>Cập nhật: {{ detailCustomer.ngayCapNhat }}
+                 </span>
+                   </div>
+                 </div>
+               </div>
+
+               <!-- Main content - 2 cột -->
+               <div class="detail-main">
+                 <!-- Cột trái: Thông tin chi tiết -->
+                 <div class="detail-left-col">
+                   <div class="detail-section">
+                     <h6 class="section-title-detail">
+                       <i class="fas fa-user-circle me-2 icon-red"></i>
+                       Thông tin khách hàng
+                     </h6>
+                     <div class="info-grid">
+                       <div class="info-item">
+                         <div class="info-label">Họ và tên</div>
+                         <div class="info-value">{{ detailCustomer.hoTen }}</div>
+                       </div>
+                       <div class="info-item">
+                         <div class="info-label">Số điện thoại</div>
+                         <div class="info-value">{{ formatPhoneNumber(detailCustomer.soDienThoai) }}</div>
+                       </div>
++                      <div class="info-item">
++                        <div class="info-label">Giá BĐS</div>
++                        <div class="info-value">{{ formatCurrency(detailCustomer.giaBDS) }}</div>
++                      </div>
++                      <div class="info-item">
++                        <div class="info-label">Phí</div>
++                        <div class="info-value">{{ formatCurrency(detailCustomer.phi) }}</div>
++                      </div>
+                       <div class="info-item">
+                         <div class="info-label">Địa chỉ</div>
+                         <div class="info-value">{{ detailCustomer.tinhThanhPho }}</div>
+                       </div>
+                       <div class="info-item">
+                         <div class="info-label">Phân loại</div>
+                         <div class="info-value">
+                       <span :class="`type-label type-${detailCustomer.phanLoaiKhach}`" style=" font-size: 1rem !important;">
+                         {{ getTypeLabel(detailCustomer.phanLoaiKhach) }}
+                       </span>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+
+                   <div class="detail-section">
+                     <h6 class="section-title-detail">
+                       <i class="fas fa-users me-2 icon-green"></i>
+                       Nhân sự phụ trách
+                     </h6>
+                     <div class="staff-grid">
+                       <div class="staff-item">
+                         <div class="staff-avatar">
+                           <div v-if="detailCustomer.nhanVienTaoAvatar" class="avatar-img">
+                             <img :src=" 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+  detailCustomer.nhanVienTaoAvatar" :alt="detailCustomer.nhanVienTaoTen">
+@@ -2448,50 +2466,57 @@ const getStatusLabel = (status) => {
+ const getTypeLabel = (type) => {
+   const typeMap = { 'MOI_GIOI': 'Môi giới', 'CHINH_CHU': 'Chủ nhà', 'NGUOI_THAN': 'Người thân' }
+   return typeMap[type] || type
+ }
+
+ const getProvinceLabel = (province) => {
+   if (!province) return '-'
+   if (province === 'Khác' || province === 'other') return 'Khác'
+   const provinceMatch = addressData.find(item => item.name === province)
+   if (provinceMatch) return provinceMatch.name
+   const legacyMap = {
+     'hanoi': 'Thành phố Hà Nội',
+     'hcm': 'Thành phố Hồ Chí Minh',
+     'danang': 'Thành phố Đà Nẵng',
+     'haiphong': 'Thành phố Hải Phòng',
+     'cantho': 'Thành phố Cần Thơ'
    }
+   return legacyMap[province] || province
+ }
 
-   errors.nguoiBanSearch = ''
+ const formatPhoneNumber = (phone) => {
+   if (!phone) return '-'
+   return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
+ }
 
++const formatCurrency = (value) => {
++  if (value === null || value === undefined || value === '') return '-'
++  const numericValue = Number(value)
++  if (Number.isNaN(numericValue)) return value
++  return `${new Intl.NumberFormat('vi-VN').format(numericValue)} ₫`
++}
++
+ const formatDateTime = (value) => {
+   if (!value) return '-'
+   const date = new Date(value)
+   if (Number.isNaN(date.getTime())) return value
+   return date.toLocaleString('vi-VN')
+ }
+
+ const handleFileUpdate = (files) => {
+   fileForm.files = Array.isArray(files) ? files : []
+
+   const existingFiles = fileForm.files.filter(file => !file.file && file.id)
+   const newFiles = fileForm.files.filter(file => file.file instanceof File)
+
+   fileForm.newFiles = newFiles
+     .filter(file => !file.isIG)
+     .map(file => ({ file: file.file, isOnTop: file.isOnTop }))
+
+   fileForm.newLandBookFiles = newFiles
+     .filter(file => file.isIG)
+     .map(file => ({ file: file.file, isOnTop: file.isOnTop }))
+
+   const originalIds = (originalFiles.value || []).map(file => file.id)
+   const currentIds = existingFiles.map(file => file.id)
+
+   fileForm.deletedFileIds = originalIds.filter(id => {
+diff --git a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
+index ba06f51f4848fb2252f9e2f154f9770426fb4888..7a9ee5ec5219711a40cbacafe65f5b39756199b6 100644
+--- a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
++++ b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
+@@ -217,50 +217,54 @@
+
+                   <span
+                       v-if="getLatestHistoryLabel(customer)"
+                       class="customer-history-status"
+                       :style="getLatestHistoryStyle(customer)"
+                   >
+                     {{ getLatestHistoryLabel(customer) }}
+                   </span>
+                 </h4>
+
+                 <p class="customer-phone">
+                   <i class="fas fa-phone"></i> {{ customer.phone }}
+                 </p>
+
+                 <p class="customer-received">
+                   <i class="fas fa-clock"></i> Tiếp nhận: {{ formatReceivedAt(customer.receivedAt) }}
+                 </p>
+
+                 <div class="customer-location">
+                   <span class="location-current">
+                     <i class="fas fa-map-marker-alt"></i> {{ customer.province }}
+                   </span>
+                   <span v-if="customer.oldProvince" class="location-old">(Cũ: {{ customer.oldProvince }})</span>
+                 </div>
+
++                <p class="customer-price">
++                  <i class="fas fa-coins"></i> Giá BĐS: {{ formatCurrency(customer.giaBDS) }}
++                </p>
++
+                 <div class="customer-tags" v-if="Array.isArray(customer.tags) && customer.tags.length">
+                   <span v-for="tag in customer.tags" :key="tag" class="customer-tag" :class="tag">
+                     {{ getTagLabel(tag) }}
+                   </span>
+                 </div>
+               </div>
+
+               <div class="customer-actions">
+                 <div class="contact-icons">
+                   <a class="contact-icon zalo" :href="`zalo:${customer.phone}`" title="Zalo" @click.stop>
+                     <i class="fas fa-comment-dots"></i> zalo: {{ customer.phone }}
+                   </a>
+                   <a class="contact-icon tel" :href="`tel:${customer.phone}`" title="Điện thoại" @click.stop>
+                     <i class="fas fa-phone"></i> tel: {{ customer.phone }}
+                   </a>
+                 </div>
+                 <div class="call-status" v-if="customer.lastCall">
+                   <i class="fas fa-clock"></i> {{ formatTime(customer.lastCall) }}
+                 </div>
+               </div>
+             </div>
+           </div>
+
+           <div class="pagination" v-if="activeTab === 'contacted' && totalPages > 1">
+             <button class="page-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
+@@ -329,50 +333,58 @@
+                 <h4>{{ selectedCustomer ? selectedCustomer.name : '' }}</h4>
+                 <p class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</p>
+                 <p class="detail-received">
+                   Tiếp nhận: {{ selectedCustomer ? formatReceivedAt(selectedCustomer.receivedAt) : '' }}
+                 </p>
+                 <p class="detail-type">
+                   <span :class="selectedCustomer ? `type-badge ${selectedCustomer.type}` : 'type-badge'">
+                     {{ selectedCustomer ? getCustomerTypeLabel(selectedCustomer.type) : '' }}
+                   </span>
+                 </p>
+               </div>
+             </div>
+
+             <div class="detail-section  mt-3">
+               <h5><i class="fas fa-map-marked-alt"></i> Thông tin địa chỉ</h5>
+               <div class="detail-row">
+                 <span class="detail-label">Tỉnh hiện tại:</span>
+                 <span class="detail-value">{{ selectedCustomer.province }}</span>
+               </div>
+               <div class="detail-row" v-if="selectedCustomer.oldProvince">
+                 <span class="detail-label">Tỉnh cũ:</span>
+                 <span class="detail-value">{{ selectedCustomer.oldProvince }}</span>
+               </div>
+             </div>
+
++            <div class="detail-section">
++              <h5><i class="fas fa-coins"></i> Thông tin BĐS</h5>
++              <div class="detail-row">
++                <span class="detail-label">Giá BĐS:</span>
++                <span class="detail-value">{{ formatCurrency(selectedCustomer.giaBDS) }}</span>
++              </div>
++            </div>
++
+             <div class="detail-section">
+               <h5><i class="fas fa-layer-group"></i> Phân loại khách</h5>
+               <div class="detail-row">
+                 <span class="detail-label">Loại khách:</span>
+                 <span class="detail-value">{{ getCustomerTypeLabel(selectedCustomer.type) || 'Chưa phân loại' }}</span>
+               </div>
+             </div>
+
+             <div class="detail-section">
+               <h5><i class="fas fa-tags"></i> Đánh dấu khách hàng</h5>
+               <div class="tag-selector">
+                 <button
+                     v-for="tag in availableTags"
+                     :key="tag.value"
+                     class="tag-option"
+                     :class="{ active: isTagActive(tag.value) }"
+                     :style="isTagActive(tag.value) ? { backgroundColor: tag.color, borderColor: tag.color, color: '#fff' } : {}"
+                     @click="toggleCustomerStatus(tag.value)"
+                 >
+                   {{ tag.label }}
+                 </button>
+               </div>
+             </div>
+
+             <div class="detail-section mt-3">
+@@ -676,50 +688,57 @@ const getAvatarColor = (name) => {
+   for (let i = 0; i < name.length; i += 1) {
+     hash = name.charCodeAt(i) + ((hash << 5) - hash)
+   }
+   const hue = Math.abs(hash) % 360
+   return `hsl(${hue}, 60%, 55%)`
+ }
+
+ const formatTime = (isoString) => {
+   if (!isoString) return 'Chưa gọi'
+   const date = new Date(isoString)
+   return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+ }
+
+ const formatReceivedAt = (isoString) => {
+   if (!isoString) return '-'
+   const date = new Date(isoString)
+   return date.toLocaleString('vi-VN', {
+     hour: '2-digit',
+     minute: '2-digit',
+     day: '2-digit',
+     month: '2-digit',
+     year: 'numeric'
+   })
+ }
+
++const formatCurrency = (value) => {
++  if (value === null || value === undefined || value === '') return '-'
++  const numericValue = Number(value)
++  if (Number.isNaN(numericValue)) return value
++  return `${new Intl.NumberFormat('vi-VN').format(numericValue)} ₫`
++}
++
+ // ====== Detail actions ======
+ const selectCustomer = (customer) => {
+   selectedCustomer.value = customer
+   activeDetailTab.value = 'detail'
+   newNote.value = ''
+   resetFileForm(customer?.files)
+ }
+
+ const toggleCustomerStatus = (status) => {
+   if (!selectedCustomer.value) return
+   selectedCustomer.value.status = selectedCustomer.value.status === status ? null : status
+ }
+
+ const resetFileForm = (files) => {
+   const safeFiles = Array.isArray(files) ? JSON.parse(JSON.stringify(files)) : []
+   fileForm.value = {
+     files: safeFiles,
+     newFiles: [],
+     newLandBookFiles: [],
+     deletedFileIds: [],
+     deletedLandBookFileIds: []
+   }
+   originalFiles.value = JSON.parse(JSON.stringify(safeFiles))
+ }
+
+@@ -861,88 +880,90 @@ const fetchThongKeTrangThaiTeleSales = async () => {
+   }
+ }
+
+ const fetchKhachMoiTiepNhan = async () => {
+   const res = await api.get('/customer-crm/telesales/khach-moi-tiep-nhan', {
+     params: {
+       type: typeFilter.value || null,
+       search: searchQuery.value || null
+     }
+   })
+   return res.data
+ }
+
+ const loadKhachMoiTiepNhan = async () => {
    try {
-     const { data } = await api.get(
-         '/admin.thg/product/admin/tim-nguoi',
-         {
-           params: { search: form.nguoiBanSearch }
-         }
-     )
-
-     if (data) {
-       form.nguoiBanId = data.id
-       form.nguoiBanTen = data.fullName || data.name
-     } else {
-       form.nguoiBanId = null
-       form.nguoiBanTen = ''
-       errors.nguoiBanSearch = 'Không tìm thấy người bán'
-     }
-@@ -2349,50 +2382,85 @@ const submitForm = async () => {
- }
-
- .form-label i {
-   min-width: 18px;
-   text-align: center;
- }
-
- /* Color coding for different field types */
- .text-primary { color: #4361ee !important; }
- .text-success { color: #28a745 !important; }
-
- .short-description-card {
-   background: #f7f9ff;
-   border: 1px solid rgba(67, 97, 238, 0.15);
-   border-radius: 12px;
-   padding: 16px;
-   box-shadow: 0 4px 12px rgba(67, 97, 238, 0.08);
- }
-
- .short-description-input {
-   border-radius: 10px;
-   border-color: rgba(67, 97, 238, 0.2);
-   resize: vertical;
-   min-height: 120px;
- }
-+.avatar-circle {
-+  width: 32px;
-+  height: 32px;
-+  border-radius: 50%;
-+  background: #3b82f6;
-+  color: white;
-+  display: flex;
-+  align-items: center;
-+  justify-content: center;
-+  font-weight: 600;
-+}
-+
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-+
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
-+
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
- .text-warning { color: #ffc107 !important; }
- .text-info { color: #17a2b8 !important; }
- .text-danger { color: #dc3545 !important; }
- .text-secondary { color: #6c757d !important; }
-
- /* Hover effects for interactive elements */
- .form-control:focus, .form-select:focus {
-   border-color: #4361ee;
-   box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
- }
-
- .btn-primary {
-   background: linear-gradient(135deg, #4361ee, #3a0ca3);
-   border: none;
- }
-
- .btn-primary:hover {
-   background: linear-gradient(135deg, #3a56d4, #2a0a7a);
-   transform: translateY(-1px);
- }
-
- /* Responsive adjustments */
- @media (max-width: 768px) {
-   .form-label {
-     font-size: 0.875rem;
-diff --git a/src/components/productAdmin/ProductDetail.vue b/src/components/productAdmin/ProductDetail.vue
-index ead058827826fa7ffbc9172d50fb3baccb505672..737ce4cfdab226a129001e2aa73680ef991cb070 100644
---- a/src/components/productAdmin/ProductDetail.vue
-+++ b/src/components/productAdmin/ProductDetail.vue
-@@ -59,55 +59,82 @@
-                 <span class="meta-item">
-                   <span class="meta-label"><i class="fa-solid fa-heart"></i> Số lượt thích:</span>
-                   <span class="price-internal">{{ formatMoneyVN(asset.luotThich) }}</span>
-                 </span>
-                 <div class="meta-divider"></div>
-
-                 <span class="meta-item">
-                   <span class="meta-label"><i class="fa-solid fa-lock-open"></i> Số lượt mở khóa:</span>
-                   <span class="price-internal">{{ formatMoneyVN(asset.luotMoKhoa) }}</span>
-                 </span>
-
-               </div>
-             </div>
-             <div class="description-card mt-2">
-               <div class="description-header">
-                 <i class="fa-solid fa-pen-nib text-primary"></i>
-                 <span>Mô tả ngắn</span>
-               </div>
-               <p class="description-content">
-                 {{ asset.moTaNgan ? asset.moTaNgan : 'Chưa cập nhật' }}
-               </p>
-             </div>
-
-           </div>
-
--          <div class="header-actions">
--            <button class="action-btn btn-edit" @click="$router.push(`/-thg/quan-ly-san-pham/cap-nhat/${asset.id}`)">
--              <i class="fa-solid fa-pen"></i>
--              <span>Cập nhật thông tin</span>
--            </button>
-+          <div class="header-right">
-+            <div class="header-user">
-+              <button
-+                class="header-menu-toggle"
-+                title="Ẩn/hiện menu"
-+                @click="sidebar.toggle()"
-+              >
-+                <i class="fa-solid fa-bars"></i>
-+                <span class="d-none d-md-inline">Menu</span>
-+              </button>
-+              <NotificationBell />
-+              <div class="d-flex flex-column align-items-end text-end">
-+                <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-+              </div>
-+
-+              <img
-+                v-if="info.avatarUrl"
-+                :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-+                alt="avatar"
-+                class="rounded-circle border"
-+                style="width: 36px; height: 36px; object-fit: cover;"
-+              />
-+              <div v-else class="avatar-circle">
-+                {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-+              </div>
-+            </div>
-+            <div class="header-actions">
-+              <button class="action-btn btn-edit" @click="$router.push(`/-thg/quan-ly-san-pham/cap-nhat/${asset.id}`)">
-+                <i class="fa-solid fa-pen"></i>
-+                <span>Cập nhật thông tin</span>
-+              </button>
-+            </div>
-           </div>
-         </div>
-       </div>
-
- <!--       TABS-->
-       <div class="asset-tabs">
-         <button
-             class="tab-btn"
-             :class="{ active: activeTab === 'DETAIL' }"
-             @click="activeTab = 'DETAIL'"
-         >
-           <i class="fa-solid fa-circle-info"></i>
-           Thông tin chi tiết
-         </button>
-
-         <button
-             class="tab-btn"
-             :class="{ active: activeTab === 'FILE' }"
-             @click="activeTab = 'FILE'"
-         >
-           <i class="fa-solid fa-handshake"></i>
-           Môi giới đã hợp tác
-         </button>
-       </div>
-
-@@ -574,54 +601,60 @@
-                     <span>{{ v.pdfFile.fileName }}</span>
-                   </button>
-                 </td>
-               </tr>
-               </tbody>
-             </table>
-           </div>
-         </div>
-       </div>
-       <!-- TAB 2 -->
-       <div v-if="activeTab === 'FILE'">
-         <HopTacMoiGioi />
-       </div>
-
-
-
-     </div>
-   </template>
-
-   <script setup>
-   import { ref, onMounted, computed } from "vue";
-   import { useRoute, useRouter } from "vue-router";
-   import FileOrLand from "./FileNew.vue";
-   import HopTacMoiGioi from "./HopTacMoiGioi.vue";
-   import { showCenterSuccess, showCenterError, showCenterWarning } from "/src/assets/js/alertService.js";
-+  import { useAuthStore } from "../../stores/authStore.js";
-+  import { useSidebarStore } from "../../stores/sidebarStore.js";
-+  import NotificationBell from "../NotificationBell.vue";
-
-   const activeTab = ref("DETAIL") // DETAIL | FILE
-   const route = useRoute();
-   const router = useRouter();
-+  const authStore = useAuthStore();
-+  const info = authStore.userInfo;
-+  const sidebar = useSidebarStore();
-   const id = route.params.id;
-   const asset = ref(null);
-   const rooms = ref([]);
-   const pdfUrl = ref(null);
-   const activeImage = ref(0);
-
-   onMounted(() => loadDetail(id));
-
-   import api from "/src/api/api.js"
-   import Spam from "./Spam.vue";
-
-   async function loadDetail(id) {
-     try {
-       const res = await api.get(`/admin.thg/product/admin/chi-tiet/${id}`);
-       const data = res.data;
-       asset.value = data;
-       console.log("Dữ liệu từ API:", data);
-     } catch (e) {
-       console.warn("API chưa có dữ liệu — fallback mock");
-     }
+     const data = await fetchKhachMoiTiepNhan()
+     newCustomers.value = (data || []).map((item) => ({
+       id: item.id,
+       name: item.hoTen,
+       phone: item.soDienThoai,
+       receivedAt: item.thoiGianTiepNhan,
+       province: item.tinhMoi,
+       oldProvince: item.tinhCu || null,
+       type: item.type || null, // CHINH_CHU / MOI_GIOI / NGUOI_THAN
+       note: item.ghiChu || '',
++      giaBDS: item.giaBDS ?? null,
+       status: null,
+       tags: [],
+       lastCall: null,
+       files: Array.isArray(item.files) ? item.files : [],
+       lichSu: Array.isArray(item.lichSu) ? item.lichSu : [] // ✅ THÊM
+     }))
+   } catch (err) {
+     newCustomers.value = []
    }
-
-   const approveRegister = async () => {
-     if (!asset.value?.id) {
-       showCenterWarning("Thiếu thông tin", "Không tìm thấy ID tài sản.");
-@@ -975,50 +1008,100 @@
-   background: #f8fafc;
-   min-height: 100vh;
  }
 
- /* ========= HEADER ========= */
- .executive-header {
-   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-   border-radius: 16px;
-   padding: 32px;
-   margin-bottom: 24px;
-   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-   border: 1px solid #e2e8f0;
+ const loadKhachDaLienHe = async () => {
+   try {
+     const res = await api.get('/customer-crm/telesales/khach-da-lien-he', {
+       params: {
+         page: Math.max(currentPage.value - 1, 0),
+         size: pageSize.value,
+         status: statusFilter.value || null,
+         type: typeFilter.value || null,
+         search: searchQuery.value?.trim() || null
+       }
+     })
+
+     const payload = res.data || {}
+     const content = Array.isArray(payload.content) ? payload.content : []
+     const page = payload.page || {}
+
+     contactedCustomers.value = content.map((item) => {
+       const status = item.status ?? statusFilter.value ?? null
+       return {
+         id: item.id,
+         name: item.hoTen,
+         phone: item.soDienThoai,
+         receivedAt: item.thoiGianTiepNhan,
+         province: item.tinhMoi,
+         oldProvince: item.tinhCu || null,
+         type: item.type || null,
+         note: item.ghiChu || '',
++        giaBDS: item.giaBDS ?? null,
+         status,
+         tags: status ? [status] : [],
+         lastCall: item.thoiGianLienHe || null,
+         files: Array.isArray(item.files) ? item.files : [],
+         lichSu: Array.isArray(item.lichSu) ? item.lichSu : []
+       }
+     })
+
+     contactedPagination.value = {
+       size: page.size ?? pageSize.value,
+       number: page.number ?? Math.max(currentPage.value - 1, 0),
+       totalElements: page.totalElements ?? content.length,
+       totalPages: page.totalPages ?? 1
+     }
+
+     pageSize.value = contactedPagination.value.size
+     currentPage.value = contactedPagination.value.number + 1
+   } catch (err) {
+     contactedCustomers.value = []
+     contactedPagination.value = {
+       size: pageSize.value,
+       number: 0,
+       totalElements: 0,
+       totalPages: 1
+     }
+@@ -1629,50 +1650,60 @@ body {
+   color: #fff;
+   white-space: nowrap;
+   vertical-align: middle;
  }
 
- .header-top {
-   display: flex;
-   justify-content: space-between;
-   align-items: flex-start;
-   gap: 24px;
- }
 
- .header-left {
-   flex: 1;
- }
-
-+.header-right {
-+  display: flex;
-+  flex-direction: column;
-+  align-items: flex-end;
-+  gap: 12px;
-+}
-+
-+.header-user {
-+  display: flex;
-+  align-items: center;
-+  justify-content: flex-end;
-+  gap: 10px;
-+}
-+
-+.avatar-circle {
-+  width: 32px;
-+  height: 32px;
-+  border-radius: 50%;
-+  background: #3b82f6;
-+  color: #fff;
-+  display: flex;
-+  align-items: center;
-+  justify-content: center;
-+  font-weight: 600;
-+}
-+
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-+
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
-+
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
-+
- .back-button {
-   display: inline-flex;
-   align-items: center;
-   gap: 8px;
-   padding: 8px 16px;
-   background: transparent;
-   border: 1px solid #cbd5e1;
-   border-radius: 8px;
-   color: #475569;
+ .customer-phone {
    font-size: 14px;
-   font-weight: 500;
-   cursor: pointer;
-   transition: all 0.2s;
-   margin-bottom: 20px;
+   color: #4daf36;
+   font-weight: 600;
+   margin-bottom: 4px;
+   display: flex;
+   align-items: center;
+   gap: 5px;
  }
 
- .back-button:hover {
-   background: #f1f5f9;
-   border-color: #94a3b8;
-   transform: translateX(-2px);
+ .customer-received {
+   font-size: 14px;
+   color: #444444;
+   margin-bottom: 6px;
+   display: flex;
+   align-items: center;
+   gap: 5px;
  }
 
- .property-title-section {
-   margin-top: 8px;
- }
-@@ -1800,50 +1883,61 @@
-
- /* ========= RESPONSIVE ========= */
- @media (max-width: 1200px) {
-   .content-grid {
-     grid-template-columns: 1fr;
-   }
-
-   .detail-grid {
-     grid-template-columns: repeat(2, 1fr);
-   }
- }
-
- @media (max-width: 768px) {
-   .executive-container {
-     padding: 16px;
-   }
-
-   .executive-header {
-     padding: 20px;
-   }
-
-   .header-top {
-     flex-direction: column;
-   }
-
-+  .header-right {
-+    width: 100%;
-+    align-items: stretch;
-+  }
-+
-+  .header-user {
-+    width: 100%;
-+    justify-content: space-between;
-+    flex-wrap: wrap;
-+  }
-+
-   .property-address {
-     font-size: 22px;
-   }
-
-   .header-actions {
-     width: 100%;
-     flex-direction: column;
-   }
-
-   .action-btn {
-     width: 100%;
-     justify-content: center;
-   }
-
-   .main-image-container {
-     height: 300px;
-   }
-
-   .detail-grid {
-     grid-template-columns: 1fr;
-   }
-
-   .detail-section {
-     padding: 20px;
-   }
-diff --git a/src/components/productAdmin/ProductUpdate.vue b/src/components/productAdmin/ProductUpdate.vue
-index 7d49d5063aa9056aa652082a7b3b14d41cf59b60..aac3903b9a8bc19814ff83beb6a49a74d57b985b 100644
---- a/src/components/productAdmin/ProductUpdate.vue
-+++ b/src/components/productAdmin/ProductUpdate.vue
-@@ -1,63 +1,90 @@
- <template>
-   <div class="container-fluid px-4 py-3">
-     <div class="d-flex align-items-center justify-content-between">
-       <div>
-         <nav aria-label="breadcrumb">
-           <ol class="breadcrumb mb-2">
-             <li class="breadcrumb-item">
-               <i class="fas fa-home me-1"></i><a href="/-thg/quan-ly-san-pham" class="text-decoration-none"> Quản lý sản phẩm</a>
-             </li>
-             <li class="breadcrumb-item active">Cập nhật sản phẩm</li>
-           </ol>
-         </nav>
-         <div class="d-flex align-items-center gap-3">
-           <div class="icon-circle-admin">
-             <i class="fas fa-city fs-4"></i>
-           </div>
-           <div>
-             <h1 class="h3 mb-1 fw-bold text-dark">Cập nhật sản phẩm</h1>
-             <p class="text-muted mb-0">Chỉnh sửa thông tin tài sản trong hệ thống</p>
-           </div>
-         </div>
-       </div>
--      <div class="d-flex gap-2">
--        <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" @click="$router.back()">
--          <i class="fas fa-arrow-left"></i><span>Quay lại</span>
--        </button>
--        <button type="button" class="btn btn-outline-warning d-flex align-items-center gap-2" @click="resetForm">
--          <i class="fas fa-redo"></i><span>Đặt lại</span>
--        </button>
--        <button
--          v-if="isLastTab"
--          type="button"
--          class="btn btn-primary d-flex align-items-center gap-2 px-4"
--          :disabled="isSubmitting"
--          @click="submitForm"
--        >
--          <i class="fas fa-save"></i><span>{{ isSubmitting ? 'Đang xử lý...' : 'Lưu thay đổi' }}</span>
--        </button>
-+      <div class="d-flex flex-column align-items-end gap-2">
-+        <div class="d-flex align-items-center justify-content-end gap-2">
-+          <button
-+            class="header-menu-toggle"
-+            title="Ẩn/hiện menu"
-+            @click="sidebar.toggle()"
-+          >
-+            <i class="fa-solid fa-bars"></i>
-+            <span class="d-none d-md-inline">Menu</span>
-+          </button>
-+          <NotificationBell />
-+          <div class="d-flex flex-column align-items-end text-end">
-+            <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-+          </div>
-+
-+          <img
-+            v-if="info.avatarUrl"
-+            :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-+            alt="avatar"
-+            class="rounded-circle border"
-+            style="width: 36px; height: 36px; object-fit: cover;"
-+          />
-+          <div v-else class="avatar-circle">
-+            {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-+          </div>
-+        </div>
-+        <div class="d-flex gap-2">
-+          <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" @click="$router.back()">
-+            <i class="fas fa-arrow-left"></i><span>Quay lại</span>
-+          </button>
-+          <button type="button" class="btn btn-outline-warning d-flex align-items-center gap-2" @click="resetForm">
-+            <i class="fas fa-redo"></i><span>Đặt lại</span>
-+          </button>
-+          <button
-+            v-if="isLastTab"
-+            type="button"
-+            class="btn btn-primary d-flex align-items-center gap-2 px-4"
-+            :disabled="isSubmitting"
-+            @click="submitForm"
-+          >
-+            <i class="fas fa-save"></i><span>{{ isSubmitting ? 'Đang xử lý...' : 'Lưu thay đổi' }}</span>
-+          </button>
-+        </div>
-       </div>
-     </div>
-
-     <div class="card border-0 shadow-sm">
-       <div class="card-body p-4">
-         <form @submit.prevent>
-           <div class="tab-navigation">
-             <ul class="nav nav-tabs flex-wrap">
-               <li v-for="tab in tabs" :key="tab.id" class="nav-item">
-                 <button
-                   type="button"
-                   class="nav-link"
-                   :class="{
-                     active: activeTab === tab.id,
-                     completed: isTabCompleted(tab.id),
-                     pending: isTabPending(tab.id),
-                   }"
-                   @click="setActiveTab(tab.id)"
-                 >
-                   <i :class="tab.icon" class="me-2"></i>{{ tab.label }}
-                 </button>
-               </li>
-             </ul>
-           </div>
-
-@@ -1177,50 +1204,56 @@
-             <button
-                 v-else
-                 type="button"
-                 class="btn btn-primary d-flex align-items-center gap-2 px-4"
-                 :disabled="isSubmitting"
-                 @click="submitForm"
-             >
-               <i class="fas fa-save"></i><span>{{ isSubmitting ? 'Đang xử lý...' : 'Lưu thay đổi' }}</span>
-             </button>
-           </div>
-         </form>
-       </div>
-     </div>
-   </div>
- </template>
-
- <script setup>
- import { computed, reactive, ref, watch, onMounted } from 'vue'
- import { useRoute } from 'vue-router'
- import api from '/src/api/api.js'
- import FileOrLand from './FileNew.vue'
- import { showLoading, updateAlertError, updateAlertSuccess } from '../../assets/js/alertService.js'
- import router from '../../router/index.js'
- import Address5 from './Address5.vue'
- import { useAuthStore } from '../../stores/authStore.js'
-+import { useSidebarStore } from '../../stores/sidebarStore.js'
-+import NotificationBell from '../NotificationBell.vue'
-+
-+const authStore = useAuthStore()
-+const info = authStore.userInfo
-+const sidebar = useSidebarStore()
-
- const route = useRoute()
- const assetId = Number(route.params.id)
- const asset = ref(null)
- const originalFiles = ref([])
- const isHydrating = ref(false)
-
- const defaultRoom = () => ({ loaiPhong: '', soLuong: null, dienTich: null, moTa: '' })
-
- const form = reactive({
-   address: '',
-   oldAddress: '',
-   plotNumber: '',
-   parcelNumber: '',
-   totalArea: null,
-   ownershipRelation: '',
-   landUseRight: '',
-   landPosition: '',
-   status: '',
-   desire: null,
-   show: true,
-   loaiTaiSan: '',
-   phanLoaiHang: '',
-   giaBan: null,
-   giaNoiBo: null,
-@@ -2450,50 +2483,85 @@ onMounted(async () => {
-   font-size: 0.75em;
- }
-
- .form-label i {
-   min-width: 18px;
-   text-align: center;
- }
-
- .text-primary { color: #4361ee !important; }
- .text-success { color: #28a745 !important; }
-
- .short-description-card {
-   background: #f7f9ff;
-   border: 1px solid rgba(67, 97, 238, 0.15);
-   border-radius: 12px;
-   padding: 16px;
-   box-shadow: 0 4px 12px rgba(67, 97, 238, 0.08);
- }
-
- .short-description-input {
-   border-radius: 10px;
-   border-color: rgba(67, 97, 238, 0.2);
-   resize: vertical;
-   min-height: 120px;
- }
-+.avatar-circle {
-+  width: 32px;
-+  height: 32px;
-+  border-radius: 50%;
-+  background: #3b82f6;
-+  color: white;
++.customer-price {
++  font-size: 14px;
++  color: #1d4ed8;
++  font-weight: 600;
++  margin-bottom: 6px;
 +  display: flex;
 +  align-items: center;
-+  justify-content: center;
-+  font-weight: 600;
++  gap: 5px;
 +}
 +
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px 12px;
-+  border-radius: 999px;
-+  border: 1px solid #cbd5f5;
-+  background: #f8fafc;
-+  color: #334155;
-+  font-size: 0.875rem;
-+  font-weight: 600;
-+  transition: all 0.2s ease;
-+}
-+
-+.header-menu-toggle:hover {
-+  background: #e2e8f0;
-+  border-color: #94a3b8;
-+  color: #1e293b;
-+}
-+
-+.header-menu-toggle:active {
-+  transform: scale(0.98);
-+}
- .text-warning { color: #ffc107 !important; }
- .text-info { color: #17a2b8 !important; }
- .text-danger { color: #dc3545 !important; }
- .text-secondary { color: #6c757d !important; }
-
- .form-control:focus, .form-select:focus {
-   border-color: #4361ee;
-   box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+ .customer-location {
+   font-size: 14px;
+   font-weight: 600;
+   color: #c92222;
+   margin-bottom: 8px;
+   display: flex;
+   gap: 10px;
  }
 
- .btn-primary {
-   background: linear-gradient(135deg, #4361ee, #3a0ca3);
-   border: none;
+ .location-current {
+   display: flex;
+   align-items: center;
+   gap: 4px;
  }
 
- .btn-primary:hover {
-   background: linear-gradient(135deg, #3a56d4, #2a0a7a);
-   transform: translateY(-1px);
+ .location-old {
+   font-style: italic;
  }
 
- @media (max-width: 768px) {
-   .form-label {
-     font-size: 0.875rem;
-   }
-
+ .customer-notes-preview {
+   font-size: 13px;
+   color: #334155;
+   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+   border: 1px solid #e2e8f0;
+   padding: 5px 8px;

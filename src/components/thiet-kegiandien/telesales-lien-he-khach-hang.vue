@@ -5,7 +5,6 @@
     <header class="app-header">
       <h1><i class="fas fa-phone-alt"></i> Hệ Thống Telesale</h1>
       <div class="d-flex align-items-center gap-2">
-        <NotificationBell />
         <div class="d-flex flex-column align-items-end text-end">
           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
         </div>
@@ -239,6 +238,10 @@
                   <span v-if="customer.oldProvince" class="location-old">(Cũ: {{ customer.oldProvince }})</span>
                 </div>
 
+                <p class="customer-price">
+                  <i class="fas fa-coins"></i> Giá BĐS: {{ formatCurrency(customer.giaBDS) }}
+                </p>
+
                 <div class="customer-tags" v-if="Array.isArray(customer.tags) && customer.tags.length">
                   <span v-for="tag in customer.tags" :key="tag" class="customer-tag" :class="tag">
                     {{ getTagLabel(tag) }}
@@ -348,6 +351,14 @@
               <div class="detail-row" v-if="selectedCustomer.oldProvince">
                 <span class="detail-label">Tỉnh cũ:</span>
                 <span class="detail-value">{{ selectedCustomer.oldProvince }}</span>
+              </div>
+            </div>
+
+            <div class="detail-section">
+              <h5><i class="fas fa-coins"></i> Thông tin BĐS</h5>
+              <div class="detail-row">
+                <span class="detail-label">Giá BĐS:</span>
+                <span class="detail-value">{{ formatCurrency(selectedCustomer.giaBDS) }}</span>
               </div>
             </div>
 
@@ -698,6 +709,13 @@ const formatReceivedAt = (isoString) => {
   })
 }
 
+const formatCurrency = (value) => {
+  if (value === null || value === undefined || value === '') return '-'
+  const numericValue = Number(value)
+  if (Number.isNaN(numericValue)) return value
+  return `${new Intl.NumberFormat('vi-VN').format(numericValue)} ₫`
+}
+
 // ====== Detail actions ======
 const selectCustomer = (customer) => {
   selectedCustomer.value = customer
@@ -883,6 +901,7 @@ const loadKhachMoiTiepNhan = async () => {
       oldProvince: item.tinhCu || null,
       type: item.type || null, // CHINH_CHU / MOI_GIOI / NGUOI_THAN
       note: item.ghiChu || '',
+      giaBDS: item.giaBDS ?? null,
       status: null,
       tags: [],
       lastCall: null,
@@ -921,6 +940,7 @@ const loadKhachDaLienHe = async () => {
         oldProvince: item.tinhCu || null,
         type: item.type || null,
         note: item.ghiChu || '',
+        giaBDS: item.giaBDS ?? null,
         status,
         tags: status ? [status] : [],
         lastCall: item.thoiGianLienHe || null,
@@ -1645,6 +1665,16 @@ body {
 .customer-received {
   font-size: 14px;
   color: #444444;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.customer-price {
+  font-size: 14px;
+  color: #1d4ed8;
+  font-weight: 600;
   margin-bottom: 6px;
   display: flex;
   align-items: center;

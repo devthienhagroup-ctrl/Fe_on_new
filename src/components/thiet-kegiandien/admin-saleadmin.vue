@@ -633,7 +633,7 @@
                       </td>
                     </tr>
                     <tr v-if="customers.length === 0">
-                      <td colspan="12" class="text-center py-5">
+                      <td colspan="14" class="text-center py-5">
                         <div class="mb-3"><i class="fas fa-users fa-3x gradient-text"></i></div>
                         <h5 class="text-muted mb-2">Không tìm thấy khách hàng nào</h5>
                         <p class="text-muted mb-0">Hãy thử thay đổi bộ lọc hoặc thêm khách hàng mới</p>
@@ -1016,19 +1016,34 @@
                           <option value="NGUOI_THAN">Người thân</option>
                         </select>
                       </div>
+
                       <div class="info-item">
                         <label class="info-label">Trạng thái <span class="text-danger">*</span></label>
-                        <select class="form-select form-select-custom" v-model="customerForm.status" required>
+                        <select
+                            class="form-select form-select-custom"
+                            v-model="customerForm.status"
+                            required
+                        >
                           <option value="NEW">Mới</option>
+
                           <option value="DC_TELESALES">Chưa gọi</option>
+                          <option value="CHAM_SOC">Chăm sóc</option>
+
                           <option value="TN_7NGAY">Tiềm năng 7 ngày</option>
                           <option value="TN_14NGAY">Tiềm năng 14 ngày</option>
+
                           <option value="THANH_CONG">Thành công</option>
+
+                          <!-- ===== BỔ SUNG ===== -->
+                          <option value="KHACH_HUY_HEN">Khách huỷ hẹn</option>
+                          <option value="BAN_NHANH">Bán nhanh</option>
+                          <option value="BAN_GP">Bán giải pháp (Đã lên VP)</option>
+
                           <option value="SAI_SO_LIEU">Sai số</option>
                           <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc được</option>
-                          <option value="CHAM_SOC">Chăm sóc</option>
                           <option value="THAT_BAI">Thất bại</option>
                         </select>
+
                       </div>
                     </div>
                   </div>
@@ -1214,6 +1229,14 @@
                       <div class="info-item">
                         <div class="info-label">Số điện thoại</div>
                         <div class="info-value">{{ formatPhoneNumber(detailCustomer.soDienThoai) }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Giá BĐS</div>
+                        <div class="info-value">{{ formatCurrency(detailCustomer.giaBDS) }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Phí</div>
+                        <div class="info-value">{{ formatCurrency(detailCustomer.phi) }}</div>
                       </div>
                       <div class="info-item">
                         <div class="info-label">Địa chỉ</div>
@@ -2468,6 +2491,13 @@ const getProvinceLabel = (province) => {
 const formatPhoneNumber = (phone) => {
   if (!phone) return '-'
   return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
+}
+
+const formatCurrency = (value) => {
+  if (value === null || value === undefined || value === '') return '-'
+  const numericValue = Number(value)
+  if (Number.isNaN(numericValue)) return value
+  return `${new Intl.NumberFormat('vi-VN').format(numericValue)} ₫`
 }
 
 const formatDateTime = (value) => {
