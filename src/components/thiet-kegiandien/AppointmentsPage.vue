@@ -24,7 +24,7 @@ const statUp = ref(0)
 const statPending = ref(0)
 const statCancelled = ref(0)
 // ===== Filter (CHỈ áp dụng cho Calendar + Day Schedule + Table) =====
-const activeFilterText = ref('Tuần này')
+const activeFilterText = ref('Tháng này')
 const activeFilterCount = ref(0)
 const filteredAppointments = ref([])
 
@@ -243,7 +243,7 @@ const selectedDateISO = ref(getTodayISO())
 const calendarMonth = ref(new Date())
 
 // ===== Filter controls =====
-const activeRange = ref('week') // today | week | month
+const activeRange = ref('month') // today | week | month
 const activeStatus = ref('ALL')
 const searchQuery = ref('')
 const searchKeyword = ref('')
@@ -1296,321 +1296,331 @@ function initCharts() {
   destroyCharts()
 
   // Chart 1 (Bar)
-  const ctx1 = c1.getContext('2d')
-  const barGrad = makeGrad(ctx1, [
-    [0, 'rgba(102,126,234,0.95)'],
-    [0.6, 'rgba(118,75,162,0.7)'],
-    [1, 'rgba(79,172,254,0.35)'],
-  ])
+  if (c1) {
+    const ctx1 = c1.getContext('2d')
+    const barGrad = makeGrad(ctx1, [
+      [0, 'rgba(102,126,234,0.95)'],
+      [0.6, 'rgba(118,75,162,0.7)'],
+      [1, 'rgba(79,172,254,0.35)'],
+    ])
 
-  chart1 = new Chart(ctx1, {
-    type: 'bar',
-    data: {
-      labels: [],
-      datasets: [
-        {
-          label: 'Số lịch hẹn',
-          data: [],
-          backgroundColor: barGrad,
-          borderWidth: 0,
-          borderRadius: 10,
-          borderSkipped: false,
-          barPercentage: 0.62,
-          categoryPercentage: 0.7,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        mode: 'index',
-        intersect: false,
+    chart1 = new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Số lịch hẹn',
+            data: [],
+            backgroundColor: barGrad,
+            borderWidth: 0,
+            borderRadius: 10,
+            borderSkipped: false,
+            barPercentage: 0.62,
+            categoryPercentage: 0.7,
+          },
+        ],
       },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          enabled: true,
-          backgroundColor: 'rgba(15,23,42,0.95)',
-          padding: 10,
-          titleColor: '#fff',
-          bodyColor: '#e8edf6',
-          displayColors: false,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            enabled: true,
+            backgroundColor: 'rgba(15,23,42,0.95)',
+            padding: 10,
+            titleColor: '#fff',
+            bodyColor: '#e8edf6',
+            displayColors: false,
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { color: '#5b6576', font: { weight: '600' } },
+            grid: { color: 'rgba(148,163,184,0.22)' },
+          },
+          x: {
+            ticks: { color: '#5b6576', font: { weight: '600' } },
+            grid: { display: false },
+          },
         },
       },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: { color: '#5b6576', font: { weight: '600' } },
-          grid: { color: 'rgba(148,163,184,0.22)' },
-        },
-        x: {
-          ticks: { color: '#5b6576', font: { weight: '600' } },
-          grid: { display: false },
-        },
-      },
-    },
-  })
+    })
+  }
 
   // Chart 2 (Doughnut)
-  const ctx2 = c2.getContext('2d')
-  const gWait = makeGrad(ctx2, [
-    [0, 'rgba(251,191,36,0.95)'],
-    [1, 'rgba(253,230,138,0.55)'],
-  ])
-  const gUp = makeGrad(ctx2, [
-    [0, 'rgba(67,233,123,0.95)'],
-    [1, 'rgba(56,249,215,0.55)'],
-  ])
-  const gNot = makeGrad(ctx2, [
-    [0, 'rgba(250,112,154,0.92)'],
-    [1, 'rgba(254,225,64,0.55)'],
-  ])
-  const gPost = makeGrad(ctx2, [
-    [0, 'rgba(79,172,254,0.95)'],
-    [1, 'rgba(0,242,254,0.55)'],
-  ])
-  const gCancel = makeGrad(ctx2, [
-    [0, 'rgba(255,88,88,0.9)'],
-    [1, 'rgba(240,152,25,0.55)'],
-  ])
-  chart2 = new Chart(ctx2, {
-    type: 'doughnut',
-    data: {
-      labels: [],
-      datasets: [
-        {
-          data: [],
-          backgroundColor: [gWait, gUp, gNot, gPost, gCancel],
-          borderWidth: 0,
-          hoverOffset: 6,
-          spacing: 3,
+  if (c2) {
+    const ctx2 = c2.getContext('2d')
+    const gWait = makeGrad(ctx2, [
+      [0, 'rgba(251,191,36,0.95)'],
+      [1, 'rgba(253,230,138,0.55)'],
+    ])
+    const gUp = makeGrad(ctx2, [
+      [0, 'rgba(67,233,123,0.95)'],
+      [1, 'rgba(56,249,215,0.55)'],
+    ])
+    const gNot = makeGrad(ctx2, [
+      [0, 'rgba(250,112,154,0.92)'],
+      [1, 'rgba(254,225,64,0.55)'],
+    ])
+    const gPost = makeGrad(ctx2, [
+      [0, 'rgba(79,172,254,0.95)'],
+      [1, 'rgba(0,242,254,0.55)'],
+    ])
+    const gCancel = makeGrad(ctx2, [
+      [0, 'rgba(255,88,88,0.9)'],
+      [1, 'rgba(240,152,25,0.55)'],
+    ])
+    chart2 = new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            data: [],
+            backgroundColor: [gWait, gUp, gNot, gPost, gCancel],
+            borderWidth: 0,
+            hoverOffset: 6,
+            spacing: 3,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        // ✅ PADDING CHO NGUYÊN CHART
+        layout: {
+          padding: {
+            top: 16,
+            right: 18,
+            bottom: 22,
+            left: 18,
+          },
         },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      // ✅ PADDING CHO NGUYÊN CHART
-      layout: {
-        padding: {
-          top: 16,
-          right: 18,
-          bottom: 22,
-          left: 18,
+        cutout: '72%',
+        interaction: {
+          mode: 'nearest',
+          intersect: false,
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#455064', boxWidth: 10, boxHeight: 10, font: { weight: '600' } },
+          },
+          tooltip: {
+            enabled: true,
+            backgroundColor: 'rgba(20,22,30,0.92)',
+            padding: 10,
+            titleColor: '#fff',
+            bodyColor: '#e8edf6',
+            displayColors: true,
+          },
         },
       },
-      cutout: '72%',
-      interaction: {
-        mode: 'nearest',
-        intersect: false,
-      },
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { color: '#455064', boxWidth: 10, boxHeight: 10, font: { weight: '600' } },
-        },
-        tooltip: {
-          enabled: true,
-          backgroundColor: 'rgba(20,22,30,0.92)',
-          padding: 10,
-          titleColor: '#fff',
-          bodyColor: '#e8edf6',
-          displayColors: true,
-        },
-      },
-    },
-    plugins: [doughnutCenterPlugin],
-  })
+      plugins: [doughnutCenterPlugin],
+    })
+  }
 
   // Chart 3 (Pie)
-  const ctx3 = c3.getContext('2d')
-  const gSuccess = makeGrad(ctx3, [
-    [0, 'rgba(67,233,123,0.95)'],
-    [1, 'rgba(56,249,215,0.55)'],
-  ])
-  const gFail = makeGrad(ctx3, [
-    [0, 'rgba(255,88,88,0.9)'],
-    [1, 'rgba(240,152,25,0.55)'],
-  ])
-  const gCare = makeGrad(ctx3, [
-    [0, 'rgba(79,172,254,0.95)'],
-    [1, 'rgba(0,242,254,0.55)'],
-  ])
-  chart3 = new Chart(ctx3, {
-    type: 'pie',
-    data: {
-      labels: ['Thành công', 'Thất bại', 'Chăm sóc'],
-      datasets: [
-        {
-          data: [0, 0, 0],
-          backgroundColor: [gSuccess, gFail, gCare],
-          borderWidth: 0,
-          hoverOffset: 6,
-          spacing: 2,
+  if (c3) {
+    const ctx3 = c3.getContext('2d')
+    const gSuccess = makeGrad(ctx3, [
+      [0, 'rgba(67,233,123,0.95)'],
+      [1, 'rgba(56,249,215,0.55)'],
+    ])
+    const gFail = makeGrad(ctx3, [
+      [0, 'rgba(255,88,88,0.9)'],
+      [1, 'rgba(240,152,25,0.55)'],
+    ])
+    const gCare = makeGrad(ctx3, [
+      [0, 'rgba(79,172,254,0.95)'],
+      [1, 'rgba(0,242,254,0.55)'],
+    ])
+    chart3 = new Chart(ctx3, {
+      type: 'pie',
+      data: {
+        labels: ['Thành công', 'Thất bại', 'Chăm sóc'],
+        datasets: [
+          {
+            data: [0, 0, 0],
+            backgroundColor: [gSuccess, gFail, gCare],
+            borderWidth: 0,
+            hoverOffset: 6,
+            spacing: 2,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            top: 16,
+            right: 18,
+            bottom: 22,
+            left: 18,
+          },
         },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: {
-        padding: {
-          top: 16,
-          right: 18,
-          bottom: 22,
-          left: 18,
+        interaction: {
+          mode: 'nearest',
+          intersect: false,
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#455064', boxWidth: 10, boxHeight: 10, font: { weight: '600' } },
+          },
+          tooltip: {
+            enabled: true,
+            backgroundColor: 'rgba(20,22,30,0.92)',
+            padding: 10,
+            titleColor: '#fff',
+            bodyColor: '#e8edf6',
+          },
         },
       },
-      interaction: {
-        mode: 'nearest',
-        intersect: false,
-      },
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { color: '#455064', boxWidth: 10, boxHeight: 10, font: { weight: '600' } },
-        },
-        tooltip: {
-          enabled: true,
-          backgroundColor: 'rgba(20,22,30,0.92)',
-          padding: 10,
-          titleColor: '#fff',
-          bodyColor: '#e8edf6',
-        },
-      },
-    },
-  })
+    })
+  }
 
   // Chart 4 (Pie - Secondary)
-  const ctx4 = c4.getContext('2d')
-  const gSuccess2 = makeGrad(ctx4, [
-    [0, 'rgba(67,233,123,0.95)'],
-    [1, 'rgba(56,249,215,0.55)'],
-  ])
-  const gFail2 = makeGrad(ctx4, [
-    [0, 'rgba(255,88,88,0.9)'],
-    [1, 'rgba(240,152,25,0.55)'],
-  ])
-  const gCare2 = makeGrad(ctx4, [
-    [0, 'rgba(79,172,254,0.95)'],
-    [1, 'rgba(0,242,254,0.55)'],
-  ])
-  chart4 = new Chart(ctx4, {
-    type: 'pie',
-    data: {
-      labels: ['Thành công', 'Thất bại', 'Chăm sóc'],
-      datasets: [
-        {
-          data: [0, 0, 0],
-          backgroundColor: [gSuccess2, gFail2, gCare2],
-          borderWidth: 0,
-          hoverOffset: 6,
-          spacing: 2,
+  if (c4) {
+    const ctx4 = c4.getContext('2d')
+    const gSuccess2 = makeGrad(ctx4, [
+      [0, 'rgba(67,233,123,0.95)'],
+      [1, 'rgba(56,249,215,0.55)'],
+    ])
+    const gFail2 = makeGrad(ctx4, [
+      [0, 'rgba(255,88,88,0.9)'],
+      [1, 'rgba(240,152,25,0.55)'],
+    ])
+    const gCare2 = makeGrad(ctx4, [
+      [0, 'rgba(79,172,254,0.95)'],
+      [1, 'rgba(0,242,254,0.55)'],
+    ])
+    chart4 = new Chart(ctx4, {
+      type: 'pie',
+      data: {
+        labels: ['Thành công', 'Thất bại', 'Chăm sóc'],
+        datasets: [
+          {
+            data: [0, 0, 0],
+            backgroundColor: [gSuccess2, gFail2, gCare2],
+            borderWidth: 0,
+            hoverOffset: 6,
+            spacing: 2,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            top: 16,
+            right: 18,
+            bottom: 22,
+            left: 18,
+          },
         },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: {
-        padding: {
-          top: 16,
-          right: 18,
-          bottom: 22,
-          left: 18,
+        interaction: {
+          mode: 'nearest',
+          intersect: false,
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#455064', boxWidth: 10, boxHeight: 10, font: { weight: '600' } },
+          },
+          tooltip: {
+            enabled: true,
+            backgroundColor: 'rgba(20,22,30,0.92)',
+            padding: 10,
+            titleColor: '#fff',
+            bodyColor: '#e8edf6',
+          },
         },
       },
-      interaction: {
-        mode: 'nearest',
-        intersect: false,
-      },
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { color: '#455064', boxWidth: 10, boxHeight: 10, font: { weight: '600' } },
-        },
-        tooltip: {
-          enabled: true,
-          backgroundColor: 'rgba(20,22,30,0.92)',
-          padding: 10,
-          titleColor: '#fff',
-          bodyColor: '#e8edf6',
-        },
-      },
-    },
-  })
+    })
+  }
 
   // Chart 5 (Revenue)
-  const ctx5 = c5.getContext('2d')
-  const revenueGrad = makeGrad(ctx5, [
-    [0, 'rgba(102,126,234,0.5)'],
-    [0.6, 'rgba(118,75,162,0.25)'],
-    [1, 'rgba(79,172,254,0.12)'],
-  ])
-  const revenueBorder = makeGrad(ctx5, [
-    [0, 'rgba(102,126,234,0.95)'],
-    [1, 'rgba(118,75,162,0.85)'],
-  ])
-  chart5 = new Chart(ctx5, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [
-        {
-          label: 'Doanh thu',
-          data: [],
-          backgroundColor: revenueGrad,
-          borderColor: revenueBorder,
-          borderWidth: 2,
-          fill: true,
-          tension: 0.35,
-          pointRadius: 3,
-          pointHoverRadius: 4,
-          pointBackgroundColor: '#fff',
-          pointBorderColor: '#667eea',
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        mode: 'index',
-        intersect: false,
+  if (c5) {
+    const ctx5 = c5.getContext('2d')
+    const revenueGrad = makeGrad(ctx5, [
+      [0, 'rgba(102,126,234,0.5)'],
+      [0.6, 'rgba(118,75,162,0.25)'],
+      [1, 'rgba(79,172,254,0.12)'],
+    ])
+    const revenueBorder = makeGrad(ctx5, [
+      [0, 'rgba(102,126,234,0.95)'],
+      [1, 'rgba(118,75,162,0.85)'],
+    ])
+    chart5 = new Chart(ctx5, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Doanh thu',
+            data: [],
+            backgroundColor: revenueGrad,
+            borderColor: revenueBorder,
+            borderWidth: 2,
+            fill: true,
+            tension: 0.35,
+            pointRadius: 3,
+            pointHoverRadius: 4,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: '#667eea',
+          },
+        ],
       },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          enabled: true,
-          backgroundColor: 'rgba(15,23,42,0.95)',
-          padding: 10,
-          titleColor: '#fff',
-          bodyColor: '#e8edf6',
-          callbacks: {
-            label(context) {
-              return `Doanh thu: ${formatCurrencyVND(context.parsed.y)}`
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            enabled: true,
+            backgroundColor: 'rgba(15,23,42,0.95)',
+            padding: 10,
+            titleColor: '#fff',
+            bodyColor: '#e8edf6',
+            callbacks: {
+              label(context) {
+                return `Doanh thu: ${formatCurrencyVND(context.parsed.y)}`
+              },
             },
           },
         },
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            color: '#5b6576',
-            font: { weight: '600' },
-            callback: (value) => formatCurrencyVND(value),
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: '#5b6576',
+              font: { weight: '600' },
+              callback: (value) => formatCurrencyVND(value),
+            },
+            grid: { color: 'rgba(148,163,184,0.22)' },
           },
-          grid: { color: 'rgba(148,163,184,0.22)' },
-        },
-        x: {
-          ticks: { color: '#5b6576', font: { weight: '600' } },
-          grid: { display: false },
+          x: {
+            ticks: { color: '#5b6576', font: { weight: '600' } },
+            grid: { display: false },
+          },
         },
       },
-    },
-  })
+    })
+  }
 }
 
 // ===== Action menu =====
