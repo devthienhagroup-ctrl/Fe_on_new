@@ -100,7 +100,7 @@ const allMenuItems = [
   { label: 'SERVICESYS', route: '/-thg/goi-he-thong', icon: 'fa-solid fa-boxes-stacked text-primary fs-5', title: 'Gói dịch vụ' },
   {
     label: 'APPOINTMENT',
-    route: '/-thg/lich-hen',
+    route: '/-thg/quan-ly-lich-hen',
     icon: 'fa-solid fa-calendar-check text-primary fs-5',
     title: 'Lịch hẹn'
   },

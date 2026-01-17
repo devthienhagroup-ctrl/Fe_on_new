@@ -20,22 +20,49 @@
           </div>
         </div>
       </div>
-      <div class="d-flex gap-2">
-        <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" @click="$router.back()">
-          <i class="fas fa-arrow-left"></i><span>Quay lại</span>
-        </button>
-        <button type="button" class="btn btn-outline-warning d-flex align-items-center gap-2" @click="resetForm">
-          <i class="fas fa-redo"></i><span>Đặt lại</span>
-        </button>
-        <button
-          v-if="isLastTab"
-          type="button"
-          class="btn btn-primary d-flex align-items-center gap-2 px-4"
-          :disabled="isSubmitting"
-          @click="submitForm"
-        >
-          <i class="fas fa-save"></i><span>{{ isSubmitting ? 'Đang xử lý...' : 'Lưu thay đổi' }}</span>
-        </button>
+      <div class="d-flex flex-column align-items-end gap-2">
+        <div class="d-flex align-items-center justify-content-end gap-2">
+          <button
+            class="header-menu-toggle"
+            title="Ẩn/hiện menu"
+            @click="sidebar.toggle()"
+          >
+            <i class="fa-solid fa-bars"></i>
+            <span class="d-none d-md-inline">Menu</span>
+          </button>
+          <NotificationBell />
+          <div class="d-flex flex-column align-items-end text-end">
+            <div class="fw-semibold text-dark">{{ info.fullName }}</div>
+          </div>
+
+          <img
+            v-if="info.avatarUrl"
+            :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+            alt="avatar"
+            class="rounded-circle border"
+            style="width: 36px; height: 36px; object-fit: cover;"
+          />
+          <div v-else class="avatar-circle">
+            {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" @click="$router.back()">
+            <i class="fas fa-arrow-left"></i><span>Quay lại</span>
+          </button>
+          <button type="button" class="btn btn-outline-warning d-flex align-items-center gap-2" @click="resetForm">
+            <i class="fas fa-redo"></i><span>Đặt lại</span>
+          </button>
+          <button
+            v-if="isLastTab"
+            type="button"
+            class="btn btn-primary d-flex align-items-center gap-2 px-4"
+            :disabled="isSubmitting"
+            @click="submitForm"
+          >
+            <i class="fas fa-save"></i><span>{{ isSubmitting ? 'Đang xử lý...' : 'Lưu thay đổi' }}</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -1199,6 +1226,12 @@ import { showLoading, updateAlertError, updateAlertSuccess } from '../../assets/
 import router from '../../router/index.js'
 import Address5 from './Address5.vue'
 import { useAuthStore } from '../../stores/authStore.js'
+import { useSidebarStore } from '../../stores/sidebarStore.js'
+import NotificationBell from '../NotificationBell.vue'
+
+const authStore = useAuthStore()
+const info = authStore.userInfo
+const sidebar = useSidebarStore()
 
 const route = useRoute()
 const assetId = Number(route.params.id)
@@ -2471,6 +2504,41 @@ onMounted(async () => {
   border-color: rgba(67, 97, 238, 0.2);
   resize: vertical;
   min-height: 120px;
+}
+.avatar-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.header-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #cbd5f5;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.header-menu-toggle:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.header-menu-toggle:active {
+  transform: scale(0.98);
 }
 .text-warning { color: #ffc107 !important; }
 .text-info { color: #17a2b8 !important; }

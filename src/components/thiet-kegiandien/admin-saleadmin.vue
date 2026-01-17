@@ -2,76 +2,53 @@
   <div class="app-scale">
     <div class="app-root">
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">
-          <i class="fas fa-phone-alt"></i>
-          <span>ADMIN PRO</span>
-        </a>
+      <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid">
 
-        <button class="navbar-toggler" type="button" @click="toggleMobileMenu">
-          <span class="navbar-toggler-icon"><i class="fas fa-bars text-white"></i></span>
-        </button>
+          <!-- ===== BRAND (BÊN TRÁI) ===== -->
+          <div class="d-flex align-items-center gap-2">
+            <button
+              type="button"
+              class="header-menu-toggle"
+              title="Ẩn/hiện menu"
+              @click="sidebar.toggle()"
+            >
+              <i class="fas fa-bars"></i>
+              <span class="d-none d-md-inline">Menu</span>
+            </button>
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+            <i class="fas fa-phone-alt"></i>
+            <span class="fw-bold">ADMIN PRO</span>
+            </a>
+          </div>
 
-        <div class="collapse navbar-collapse" :class="{ show: mobileMenuOpen }" id="navbarNav">
-          <ul class="navbar-nav mx-auto">
-            <li class="nav-item">
-              <a class="nav-link-custom active" href="#">
-                <i class="fas fa-home me-2"></i> Dashboard
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link-custom" href="#">
-                <i class="fas fa-users me-2"></i> Khách hàng
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link-custom" href="#">
-                <i class="fas fa-chart-bar me-2"></i> Báo cáo
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link-custom" href="#">
-                <i class="fas fa-cog me-2"></i> Cài đặt
-              </a>
-            </li>
-          </ul>
+          <!-- ===== USER INFO (BÊN PHẢI) ===== -->
+          <div class="ms-auto d-flex align-items-center gap-2">
 
-          <div class="d-flex align-items-center gap-3">
-            <div class="dropdown">
-              <button class="btn btn-outline-custom btn-custom" type="button" @click="toggleNotifications">
-                <i class="fas fa-bell"></i>
-                <span class="badge bg-danger rounded-pill">3</span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end" :class="{ show: notificationsOpen }">
-                <li><h6 class="dropdown-header">Thông báo mới</h6></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-user-check text-success me-2"></i> 5 khách hàng mới</a></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-chart-line text-primary me-2"></i> Báo cáo tuần đã sẵn sàng</a></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-exclamation-triangle text-warning me-2"></i> Còn 12 cuộc gọi</a></li>
-              </ul>
+            <div class="d-flex flex-column align-items-end text-end">
+              <div class="fw-semibold text-dark" style="color: white!important; font-size: 20px!important;">
+                {{ info.fullName }}
+              </div>
             </div>
 
-            <div class="dropdown">
-              <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" @click="toggleUserMenu">
-                <div class="user-avatar me-2">NV</div>
-                <div class="d-flex flex-column">
-                  <span class="text-white fw-medium">Nguyễn Văn A</span>
-                  <small class="text-white-50">Telesale Manager</small>
-                </div>
-              </a>
-              <ul class="dropdown-menu dropdown-menu-end" :class="{ show: userMenuOpen }">
-                <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2"></i> Hồ sơ</a></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Cài đặt</a></li>
-                <li><hr class="dropdown-divider" /></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
-              </ul>
+            <img
+                v-if="info.avatarUrl"
+                :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+                alt="avatar"
+                class="rounded-circle border"
+                style="width: 36px; height: 36px; object-fit: cover;"
+            />
+
+            <div v-else class="avatar-circle">
+              {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
             </div>
           </div>
-        </div>
-      </div>
-    </nav>
 
-    <!-- ✅ Shell: Sidebar đứng yên + Main cuộn riêng -->
+        </div>
+      </nav>
+
+
+      <!-- ✅ Shell: Sidebar đứng yên + Main cuộn riêng -->
     <div class="app-shell">
       <!-- Sidebar -->
       <aside class="sidebar-wrap">
@@ -668,7 +645,7 @@
                       </td>
                     </tr>
                     <tr v-if="customers.length === 0">
-                      <td colspan="12" class="text-center py-5">
+                      <td colspan="14" class="text-center py-5">
                         <div class="mb-3"><i class="fas fa-users fa-3x gradient-text"></i></div>
                         <h5 class="text-muted mb-2">Không tìm thấy khách hàng nào</h5>
                         <p class="text-muted mb-0">Hãy thử thay đổi bộ lọc hoặc thêm khách hàng mới</p>
@@ -1011,6 +988,18 @@
                         <input type="tel" class="form-control form-control-custom" v-model="customerForm.phone" required>
                       </div>
                       <div class="info-item">
+                        <label class="info-label">Giá BĐS</label>
+                        <input
+                          type="text"
+                          class="form-control form-control-custom"
+                          inputmode="numeric"
+                          :value="editPriceDisplay"
+                          placeholder="0"
+                          @input="handleEditPriceInput"
+                          @blur="syncEditPriceDisplay"
+                        >
+                      </div>
+                      <div class="info-item">
                         <label class="info-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
                         <div class="province-search" :class="{ open: provinceDropdownOpen }">
                           <input
@@ -1051,19 +1040,34 @@
                           <option value="NGUOI_THAN">Người thân</option>
                         </select>
                       </div>
+
                       <div class="info-item">
                         <label class="info-label">Trạng thái <span class="text-danger">*</span></label>
-                        <select class="form-select form-select-custom" v-model="customerForm.status" required>
+                        <select
+                            class="form-select form-select-custom"
+                            v-model="customerForm.status"
+                            required
+                        >
                           <option value="NEW">Mới</option>
+
                           <option value="DC_TELESALES">Chưa gọi</option>
+                          <option value="CHAM_SOC">Chăm sóc</option>
+
                           <option value="TN_7NGAY">Tiềm năng 7 ngày</option>
                           <option value="TN_14NGAY">Tiềm năng 14 ngày</option>
+
                           <option value="THANH_CONG">Thành công</option>
+
+                          <!-- ===== BỔ SUNG ===== -->
+                          <option value="KHACH_HUY_HEN">Khách huỷ hẹn</option>
+                          <option value="BAN_NHANH">Bán nhanh</option>
+                          <option value="BAN_GP">Bán giải pháp (Đã lên VP)</option>
+
                           <option value="SAI_SO_LIEU">Sai số</option>
                           <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc được</option>
-                          <option value="CHAM_SOC">Chăm sóc</option>
                           <option value="THAT_BAI">Thất bại</option>
                         </select>
+
                       </div>
                     </div>
                   </div>
@@ -1249,6 +1253,14 @@
                       <div class="info-item">
                         <div class="info-label">Số điện thoại</div>
                         <div class="info-value">{{ formatPhoneNumber(detailCustomer.soDienThoai) }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Giá BĐS</div>
+                        <div class="info-value">{{ formatCurrency(detailCustomer.giaBDS) }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Phí</div>
+                        <div class="info-value">{{ formatCurrency(detailCustomer.phi) }}</div>
                       </div>
                       <div class="info-item">
                         <div class="info-label">Địa chỉ</div>
@@ -1508,6 +1520,11 @@ const recentYears = computed(() => {
   const currentYear = new Date().getFullYear()
   return Array.from({ length: 5 }, (_, i) => currentYear - i)
 })
+import { useAuthStore } from "/src/stores/authStore.js";
+import { useSidebarStore } from "/src/stores/sidebarStore.js";
+const authStore = useAuthStore();
+const info = authStore.userInfo;
+const sidebar = useSidebarStore()
 const phanLoaiStats = ref([])
 watch([chartYear, chartType], async () => {
   // 🔥 LINE CHART (CHUNG)
@@ -1614,6 +1631,7 @@ const customerForm = reactive({
   updatedAt: '',
   creatorName: '',
   creatorAvatar: '',
+  giaBDS: '',
   assigneeId: null,
   assigneeName: '',
   assigneeAvatar: ''
@@ -1630,6 +1648,7 @@ const addCustomerForm = reactive({
 })
 
 const addPriceDisplay = ref('')
+const editPriceDisplay = ref('')
 const addPickedFileNames = ref([])
 
 const customerTypes = [
@@ -1890,6 +1909,7 @@ const editCustomer = async (customer) => {
     type: customer.type ?? customer.phanLoaiKhach ?? customer.customerListItemDTO?.phanLoaiKhach ?? '',
     status: customer.status ?? customer.trangThai ?? customer.customerListItemDTO?.trangThai ?? 'NEW',
     avatar: customer.avatar ?? customer.avatarKhach ?? customer.customerListItemDTO?.avatarKhach ?? '',
+    giaBDS: customer.giaBDS ?? customer.customerListItemDTO?.giaBDS ?? '',
     notes: customer.notes ?? '',
     createdAt: customer.ngayTao ?? customer.customerListItemDTO?.ngayTao ?? '',
     updatedAt: customer.ngayCapNhat ?? customer.customerListItemDTO?.ngayCapNhat ?? '',
@@ -1925,10 +1945,15 @@ const editCustomer = async (customer) => {
     updatedAt: normalized.updatedAt,
     creatorName: normalized.creatorName,
     creatorAvatar: normalizedCreatorAvatar,
+    giaBDS: normalized.giaBDS,
     assigneeId: normalized.assigneeId,
     assigneeName: normalized.assigneeName,
     assigneeAvatar: normalizedAssigneeAvatar
   })
+
+  const normalizedGiaBds = normalizePriceInput(normalized.giaBDS)
+  customerForm.giaBDS = normalizedGiaBds ? Number(normalizedGiaBds) : ''
+  editPriceDisplay.value = formatPriceDisplay(normalizedGiaBds)
 
   selectedAssignee.value = normalized.assigneeId
     ? {
@@ -2044,10 +2069,12 @@ const resetCustomerForm = () => {
     updatedAt: '',
     creatorName: '',
     creatorAvatar: '',
+    giaBDS: '',
     assigneeId: null,
     assigneeName: '',
     assigneeAvatar: ''
   })
+  editPriceDisplay.value = ''
   selectedAssignee.value = null
   employeeSearch.value = ''
   employeeOptions.value = []
@@ -2099,6 +2126,18 @@ function syncAddPriceDisplay() {
   const raw = normalizePriceInput(addPriceDisplay.value)
   addPriceDisplay.value = formatPriceDisplay(raw)
   addCustomerForm.price = raw ? Number(raw) : ''
+}
+
+function handleEditPriceInput(event) {
+  const raw = normalizePriceInput(event.target.value)
+  editPriceDisplay.value = formatPriceDisplay(raw)
+  customerForm.giaBDS = raw ? Number(raw) : ''
+}
+
+function syncEditPriceDisplay() {
+  const raw = normalizePriceInput(editPriceDisplay.value)
+  editPriceDisplay.value = formatPriceDisplay(raw)
+  customerForm.giaBDS = raw ? Number(raw) : ''
 }
 
 function onPickAddFile(e) {
@@ -2202,6 +2241,10 @@ const submitAddCustomer = async () => {
 }
 
 const buildCustomerUpdateFormData = (assigneePayload) => {
+  const giaBDSValue = customerForm.giaBDS === '' || customerForm.giaBDS === null
+    ? null
+    : customerForm.giaBDS
+
   const dto = {
     id: customerForm.id,
     hoTen: customerForm.name,
@@ -2209,6 +2252,7 @@ const buildCustomerUpdateFormData = (assigneePayload) => {
     tinhThanhPho: customerForm.province,
     phanLoaiKhach: customerForm.type,
     trangThai: customerForm.status,
+    giaBDS: giaBDSValue,
     nhanVienPhuTrachId: assigneePayload.nhanVienPhuTrachId,
     nhanVienPhuTrachTen: assigneePayload.nhanVienPhuTrachTen,
     nhanVienPhuTrachAvatar: assigneePayload.nhanVienPhuTrachAvatar,
@@ -2454,17 +2498,26 @@ const toDate = (value) => {
 
 const getStatusLabel = (status) => {
   const statusMap = {
-      'NEW': 'Mới',
-    'TN_7NGAY': 'TN 7 ngày',
-    'TN_14NGAY': 'TN 14 ngày',
-    'THANH_CONG': 'Thành công',
-    'SAI_SO': 'Sai số',
-    'SAI_SO_LIEU': 'Sai số',
-    'KHONG_LIEN_LAC_DUOC': 'KLLD',
-    'CHAM_SOC': 'Chăm sóc',
-    'DC_TELESALES': 'Chưa gọi',
-    'THAT_BAI': 'Thất bại'
+    NEW: 'Mới',
+
+    DC_TELESALES: 'Chưa gọi',
+    CHAM_SOC: 'Chăm sóc',
+    TN_7NGAY: 'TN 7 ngày',
+    TN_14NGAY: 'TN 14 ngày',
+
+    THANH_CONG: 'Thành công',
+
+    // ===== BỔ SUNG =====
+    KHACH_HUY_HEN: 'Huỷ hẹn',
+    BAN_NHANH: 'Bán nhanh',
+    BAN_GP: 'Bán GP',
+
+    THAT_BAI: 'Thất bại',
+    KHONG_LIEN_LAC_DUOC: 'KLLD',
+    SAI_SO: 'Sai số',
+    SAI_SO_LIEU: 'Sai số',
   }
+
   return statusMap[status] || status
 }
 
@@ -2491,6 +2544,13 @@ const getProvinceLabel = (province) => {
 const formatPhoneNumber = (phone) => {
   if (!phone) return '-'
   return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
+}
+
+const formatCurrency = (value) => {
+  if (value === null || value === undefined || value === '') return '-'
+  const numericValue = Number(value)
+  if (Number.isNaN(numericValue)) return value
+  return `${new Intl.NumberFormat('vi-VN').format(numericValue)} ₫`
 }
 
 const formatDateTime = (value) => {
@@ -2568,11 +2628,19 @@ const STATUS_META = {
   CHAM_SOC: { label: 'Đang chăm sóc', color: '#38bdf8' },
   TN_7NGAY: { label: 'Tiềm năng 7 ngày', color: '#0ea5e9' },
   TN_14NGAY: { label: 'Tiềm năng 14 ngày', color: '#0284c7' },
+
   THAT_BAI: { label: 'Thất bại', color: '#f43f5e' },
   KHONG_LIEN_LAC_DUOC: { label: 'Không liên lạc được', color: '#f97316' },
   SAI_SO_LIEU: { label: 'Sai số liệu', color: '#a855f7' },
-  THANH_CONG: { label: 'Thành công (Lên VP)', color: '#22c55e' }
+
+  THANH_CONG: { label: 'Thành công (Lên VP)', color: '#22c55e' },
+
+  // ===== BỔ SUNG =====
+  KHACH_HUY_HEN: { label: 'Khách huỷ hẹn', color: '#b45309' }, // huỷ – cam nâu
+  BAN_NHANH: { label: 'Bán nhanh', color: '#15803d' },        // bán nhanh – xanh đậm
+  BAN_GP: { label: 'Bán GP', color: '#0f766e' }               // đã lên VP – xanh ngọc
 }
+
 const PHAN_LOAI_META = {
   MOI_GIOI: {
     label: 'Môi giới',
@@ -2886,6 +2954,7 @@ import {
   updateAlertError,
   updateAlertSuccess
 } from "../../assets/js/alertService.js";
+import NotificationBell from "../NotificationBell.vue";
 const marketingoptions = ref([])
 
 
@@ -3132,15 +3201,15 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 
 /* ✅ SCALE 0.8 GIỮ NGUYÊN (KHÔNG SCALE HTML) */
 .app-scale {
-  transform: scale(0.8);
   transform-origin: 0 0;
-  width: 125%;
-  height: 125%;
+  zoom: 0.8;
 }
 
 /* ✅ App layout full height, chỉ main cuộn */
 .app-root {
-  height: 125vh;
+  position: relative;
+  top: -10px;
+  height: 122vh;
   display: flex;
   flex-direction: column;
 }
@@ -3148,9 +3217,10 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 .app-shell {
   display: flex;
   gap: var(--shell-pad);
-  padding: var(--shell-pad);
+  padding: 10px 0px;
   overflow: hidden;
 }
+
 
 /* Navbar */
 .navbar-custom {
@@ -3160,7 +3230,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   box-shadow: var(--shadow-medium);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: sticky;
-  top: 0;
+  top: -10px;
   z-index: 1030;
   height: var(--nav-h);
 }
@@ -3176,6 +3246,29 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   align-items: center;
   gap: 10px;
   line-height: 1;
+}
+
+.header-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: var(--transition-normal);
+}
+
+.header-menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.header-menu-toggle:active {
+  transform: scale(0.98);
 }
 
 .navbar-custom .navbar-brand i {
@@ -3482,11 +3575,12 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 .table-container {
   background: white;
   border-radius: var(--border-radius-md);
-  overflow: hidden;
+  overflow-x: auto !important;
   box-shadow: var(--shadow-soft);
 }
 
 .table-custom { margin-bottom: 0;  border-spacing: 0; border-collapse:collapse !important; background-clip: border-box !important;}
+
 .table-custom thead {
   background: linear-gradient(180deg, #7dd3fc 0%, #38bdf8 100%) !important;
 }
@@ -3801,6 +3895,23 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
 /* ===== Thành công (lên VP) ===== */
 .status-THANH_CONG {
   background: linear-gradient(135deg, #3CD3AD 0%, #4CB8C4 100%);
+  color: white;
+}
+/* ===== Khách huỷ hẹn ===== */
+.status-KHACH_HUY_HEN {
+  background: linear-gradient(135deg, #b45309 0%, #f59e0b 100%);
+  color: white;
+}
+
+/* ===== Bán nhanh ===== */
+.status-BAN_NHANH {
+  background: linear-gradient(135deg, #0f9b0f 0%, #38ef7d 100%);
+  color: white;
+}
+
+/* ===== Bán GP (đã lên VP) ===== */
+.status-BAN_GP {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
   color: white;
 }
 

@@ -161,20 +161,35 @@ const routes = [
     {
         path: "/-thg/nhap-lieu",
         name: "TeamCollaboration1",
-        component: test,
+        component: Menu,
         meta: {requiresAuth: false, enableTailwind: false},
+        children: [{
+            path: '',
+            name: "NHAP_LIEU",
+            component: test,
+    }]
     },
     {
         path: "/-thg/quan-tri-du-lieu",
         name: "TeamCollaboration",
-        component: test2,
-        meta: {requiresAuth: false, enableTailwind: false},
+        component: Menu,
+        meta: { requiresAuth: false, enableTailwind: false},
+        children: [{
+            path: '',
+            name: "QUAN_TRI_KHACH_HANG",
+            component: test2,
+        }]
     },
     {
         path: "/-thg/telesale-lien-he-khach-hang",
         name: "TELESALESetyui",
-        component: test1,
-        meta: {requiresAuth: false, enableTailwind: false},
+        component: Menu,
+        meta: { requiresAuth: false, enableTailwind: false},
+        children: [{
+            path: '',
+            name: "LIEN_HE",
+            component: test1,
+    }]
     },
 
     {

@@ -2,7 +2,7 @@
   <div id="refined-dashboard" class="refined-dashboard">
     <!-- Compact Header -->
     <div class="dashboard-header">
-      <div class="container">
+      <div>
         <div class="header-content">
           <div class="d-flex align-items-center gap-3">
             <div class="brand-icon">
@@ -13,20 +13,30 @@
               <p class="dashboard-subtitle">Nhập liệu & phân tích theo thời gian thực</p>
             </div>
           </div>
-          <div class="header-actions">
-            <button @click="generateSampleData" class="btn btn-sm btn-outline">
-              <i class="fas fa-sparkles"></i> Dữ liệu mẫu
-            </button>
-            <button @click="exportData" class="btn btn-sm btn-primary">
-              <i class="fas fa-download"></i> Xuất dữ liệu
-            </button>
+          <div class="d-flex align-items-center gap-2">
+            <NotificationBell />
+            <div class="d-flex flex-column align-items-end text-end">
+              <div class="fw-semibold text-dark">{{ info.fullName }}</div>
+            </div>
+
+            <img
+                v-if="info.avatarUrl"
+                :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+                alt="avatar"
+                class="rounded-circle border"
+                style="width: 36px; height: 36px; object-fit: cover;"
+            />
+            <div v-else class="avatar-circle">
+              {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
+            </div>
           </div>
+
         </div>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="container main-content">
+    <div style="max-width: 99%; padding-top: 20px; padding-left: 20px">
       <div class="row g-4">
         <!-- Left: Compact Form -->
         <div class="col-lg-5">
@@ -420,7 +430,10 @@ import {
   showCenterWarning,
   showWarning
 } from "../../assets/js/alertService.js";
-
+import NotificationBell from "../NotificationBell.vue";
+import { useAuthStore } from "/src/stores/authStore.js";
+const authStore = useAuthStore();
+const info = authStore.userInfo;
 const provinces = ref(addressData);
 
 const formData = reactive({
@@ -450,16 +463,25 @@ const distributionCanvas = ref(null);
 let distributionChart = null;
 
 const STATUS_META = {
-  NEW: { label: "Mới", color: "#94a3b8" },
-  DC_TELESALES: { label: "Đã cấp Telesales", color: "#6366f1" },
-  CHAM_SOC: { label: "Đang chăm sóc", color: "#38bdf8" },
+  NEW: { label: "Mới", color: "#94a3b8" },                 // xám
+  DC_TELESALES: { label: "Đã cấp Telesales", color: "#6366f1" }, // tím xanh
+  CHAM_SOC: { label: "Đang chăm sóc", color: "#38bdf8" },  // xanh trời
   TN_7NGAY: { label: "Theo dõi 7 ngày", color: "#0ea5e9" },
   TN_14NGAY: { label: "Theo dõi 14 ngày", color: "#0284c7" },
-  THAT_BAI: { label: "Thất bại", color: "#f43f5e" },
-  KHONG_LIEN_LAC_DUOC: { label: "Không liên lạc được", color: "#f97316" },
-  SAI_SO_LIEU: { label: "Sai số liệu", color: "#a855f7" },
-  THANH_CONG: { label: "Thành công (Lên VP)", color: "#22c55e" },
+
+  THAT_BAI: { label: "Thất bại", color: "#dc2626" },       // đỏ đậm
+  KHONG_LIEN_LAC_DUOC: { label: "Không liên lạc được", color: "#ea580c" }, // cam đậm
+  SAI_SO_LIEU: { label: "Sai số liệu", color: "#9333ea" }, // tím đậm
+
+  THANH_CONG: { label: "Lên VP (ĐK)", color: "#22c55e" },  // xanh lá tươi
+
+  // ===== BỔ SUNG (ĐỔI MÀU RÕ HƠN) =====
+  KHACH_HUY_HEN: { label: "Khách huỷ hẹn", color: "#b45309" }, // nâu cam (huỷ)
+  BAN_NHANH: { label: "Bán nhanh", color: "#15803d" },        // xanh lá đậm
+  BAN_GP: { label: "Bán GP (Đã lên VP)", color: "#0f766e" },  // xanh ngọc đậm (premium)
 };
+
+
 
 const statusChartData = ref([]); // [{label,value,color}]
 
@@ -983,9 +1005,6 @@ onBeforeUnmount(() => {
 </script>
 <style scoped>
 /* ===== MODERN DASHBOARD STYLES ===== */
-.container{
-  max-width: 1300px;
-}
 .refined-dashboard {
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -993,17 +1012,20 @@ onBeforeUnmount(() => {
   font-size: 14px;
   line-height: 1.5;
   color: #1e293b;
+  position: relative;
+  max-width: 100%;
+  top:-10px;
 }
 
 /* ===== HEADER ===== */
 .dashboard-header {
+  top:-10px;
   background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
-  padding: 1rem 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   position: sticky;
-  top: 0;
   z-index: 100;
+  padding: 10px 20px;
 }
 
 .header-content {
@@ -1140,6 +1162,7 @@ onBeforeUnmount(() => {
 /* ===== PANELS ===== */
 .main-content {
   padding: 1.5rem 0;
+  margin: 10px auto;
 }
 
 .form-panel,

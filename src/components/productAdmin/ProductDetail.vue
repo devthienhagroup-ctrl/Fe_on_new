@@ -81,11 +81,38 @@
 
           </div>
 
-          <div class="header-actions">
-            <button class="action-btn btn-edit" @click="$router.push(`/-thg/quan-ly-san-pham/cap-nhat/${asset.id}`)">
-              <i class="fa-solid fa-pen"></i>
-              <span>Cập nhật thông tin</span>
-            </button>
+          <div class="header-right">
+            <div class="header-user">
+              <button
+                class="header-menu-toggle"
+                title="Ẩn/hiện menu"
+                @click="sidebar.toggle()"
+              >
+                <i class="fa-solid fa-bars"></i>
+                <span class="d-none d-md-inline">Menu</span>
+              </button>
+              <NotificationBell />
+              <div class="d-flex flex-column align-items-end text-end">
+                <div class="fw-semibold text-dark">{{ info.fullName }}</div>
+              </div>
+
+              <img
+                v-if="info.avatarUrl"
+                :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+                alt="avatar"
+                class="rounded-circle border"
+                style="width: 36px; height: 36px; object-fit: cover;"
+              />
+              <div v-else class="avatar-circle">
+                {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
+              </div>
+            </div>
+            <div class="header-actions">
+              <button class="action-btn btn-edit" @click="$router.push(`/-thg/quan-ly-san-pham/cap-nhat/${asset.id}`)">
+                <i class="fa-solid fa-pen"></i>
+                <span>Cập nhật thông tin</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -596,10 +623,16 @@
   import FileOrLand from "./FileNew.vue";
   import HopTacMoiGioi from "./HopTacMoiGioi.vue";
   import { showCenterSuccess, showCenterError, showCenterWarning } from "/src/assets/js/alertService.js";
+  import { useAuthStore } from "../../stores/authStore.js";
+  import { useSidebarStore } from "../../stores/sidebarStore.js";
+  import NotificationBell from "../NotificationBell.vue";
 
   const activeTab = ref("DETAIL") // DETAIL | FILE
   const route = useRoute();
   const router = useRouter();
+  const authStore = useAuthStore();
+  const info = authStore.userInfo;
+  const sidebar = useSidebarStore();
   const id = route.params.id;
   const asset = ref(null);
   const rooms = ref([]);
@@ -995,6 +1028,56 @@
 
 .header-left {
   flex: 1;
+}
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.avatar-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.header-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #cbd5f5;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.header-menu-toggle:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.header-menu-toggle:active {
+  transform: scale(0.98);
 }
 
 .back-button {
@@ -1820,6 +1903,17 @@
 
   .header-top {
     flex-direction: column;
+  }
+
+  .header-right {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .header-user {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
   }
 
   .property-address {

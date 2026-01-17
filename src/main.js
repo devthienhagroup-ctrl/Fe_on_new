@@ -43,10 +43,10 @@ watch(
 )
 app.use(router)
 app.mount('#app')
-// document.addEventListener("contextmenu", (event) => {
-//     event.preventDefault();
-//     console.log("[Security] Right click disabled.");
-// });
+document.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    console.log("[Security] Right click disabled.");
+});
 
 
 // init 1 lần

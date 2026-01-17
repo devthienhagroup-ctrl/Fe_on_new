@@ -1,2005 +1,1110 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=0.8" />
-    <title>Telesale Pro | Hệ Thống Quản Lý Chuyên Nghiệp</title>
-
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- Animate CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Dịch Vụ | Service Management</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Animate CSS for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
+        /* Custom CSS với gradient và hiệu ứng */
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            --danger-gradient: linear-gradient(135deg, #ff5858 0%, #f09819 100%);
-            --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --dark-gradient: linear-gradient(135deg, #141e30 0%, #243b55 100%);
-            --light-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-
-            --primary-color: #667eea;
-            --secondary-color: #f093fb;
-            --success-color: #43e97b;
-            --warning-color: #fa709a;
-            --danger-color: #ff5858;
-            --info-color: #4facfe;
-            --dark-color: #141e30;
-            --light-color: #f8f9fa;
-
-            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
-            --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.12);
-            --shadow-hard: 0 15px 50px rgba(0, 0, 0, 0.2);
-
-            --border-radius-sm: 12px;
-            --border-radius-md: 16px;
-            --border-radius-lg: 20px;
-
-            --transition-fast: 0.2s ease;
-            --transition-normal: 0.3s ease;
-            --transition-slow: 0.5s ease;
-
-            --nav-h: 85px;
-            --shell-pad: 18px;
-            --sidebar-w: 340px;
+            --card-gradient: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            --sidebar-gradient: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        /* ✅ BODY KHÔNG SCROLL */
-        html, body { height: 100%; }
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
-            color: #333;
-            overflow: hidden; /* ✅ chặn scroll toàn trang */
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
         }
 
-        h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); }
-
-        /* ✅ SCALE 0.8 GIỮ NGUYÊN (KHÔNG SCALE HTML) */
-        .app-scale {
-            transform: scale(0.8);
-            transform-origin: 0 0;
-            width: 125%;
-            height: 125%;
-        }
-
-        /* ✅ App layout full height, chỉ main cuộn */
-        .app-root {
-            height: 125vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .app-shell {
-            display: flex;
-            gap: var(--shell-pad);
-            padding: var(--shell-pad);
-            overflow: hidden; /* ✅ không cho shell cuộn */
-        }
-
-        /* Navbar */
-        .navbar-custom {
-            background: var(--dark-gradient);
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
-            padding: 15px 0;
-            box-shadow: var(--shadow-medium);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1030;
-            height: var(--nav-h);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        .navbar-custom .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            line-height: 1;
-        }
-
-        .navbar-custom .navbar-brand i {
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-size: 1.8rem;
-        }
-
-        .nav-link-custom {
-            color: rgba(255, 255, 255, 0.8) !important;
-            font-weight: 500;
-            padding: 8px 16px !important;
-            border-radius: 10px;
-            transition: var(--transition-normal);
-            margin: 0 2px;
-            position: relative;
+        .service-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 18px;
             overflow: hidden;
+            background: var(--card-gradient);
+            position: relative;
+            z-index: 1;
         }
 
-        .nav-link-custom:hover, .nav-link-custom.active {
-            color: white !important;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .nav-link-custom::after {
+        .service-card::before {
             content: '';
             position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 2px;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
             background: var(--primary-gradient);
-            transition: var(--transition-normal);
+            z-index: 2;
+            border-radius: 18px 18px 0 0;
         }
 
-        .nav-link-custom:hover::after, .nav-link-custom.active::after { width: 80%; }
+        .service-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
 
-        .user-avatar {
-            width: 36px; height: 36px; border-radius: 50%;
+        .service-card:hover::before {
+            height: 6px;
+        }
+
+        .price-item {
+            border-bottom: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+            border-radius: 10px;
+            padding: 12px 16px;
+        }
+
+        .price-item:hover {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 51, 234, 0.05) 100%);
+            transform: translateX(5px);
+        }
+
+        .gradient-btn {
             background: var(--primary-gradient);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 600; color: white; font-size: 14px;
-        }
-
-        /* Sidebar (đứng yên) */
-        .sidebar-wrap {
-            width: var(--sidebar-w);
-            flex: 0 0 var(--sidebar-w);
-            overflow: hidden;
-        }
-
-        .sidebar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: var(--border-radius-lg);
-            padding: 25px;
-            box-shadow: 1px 0 1px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            height: 100%;
-            overflow-y: auto; /* sidebar có thể cuộn riêng nếu dài */
-        }
-
-        .sidebar-section { margin-bottom: 30px; }
-
-        .sidebar-title {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #6c757d;
-            margin-bottom: 15px;
+            color: white;
+            transition: all 0.3s ease;
+            border-radius: 12px;
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            letter-spacing: 0.5px;
         }
 
-        /* Filter Tabs */
-        .filter-tabs {
-            display: flex;
-            background: rgba(0, 0, 0, 0.03);
-            border-radius: var(--border-radius-sm);
-            padding: 5px;
-            margin-bottom: 20px;
+        .gradient-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
 
-        .filter-tab {
-            flex: 1;
-            padding: 10px 15px;
-            border: none;
-            background: transparent;
-            color: #6c757d;
-            font-weight: 500;
-            border-radius: var(--border-radius-sm);
-            transition: var(--transition-fast);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .filter-tab.active {
+        .gradient-btn-secondary {
+            background: var(--secondary-gradient);
             color: white;
-            background: var(--primary-gradient);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
-        .filter-tab:not(.active):hover {
-            color: var(--primary-color);
-            background: rgba(102, 126, 234, 0.1);
+        .gradient-btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(240, 147, 251, 0.3);
         }
 
-        /* Form Controls */
-        .form-control-custom, .form-select-custom {
-            border: 2px solid rgba(0, 0, 0, 0.08);
-            border-radius: var(--border-radius-sm);
-            padding: 12px 15px;
-            font-size: 14px;
-            transition: var(--transition-fast);
-            background: rgba(255, 255, 255, 0.9);
-        }
-
-        .form-control-custom:focus, .form-select-custom:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
-            background: white;
-        }
-
-        /* ✅ MAIN WRAP đứng yên, chỉ MAIN-SCROLL cuộn */
-        .main-wrap {
-            flex: 1 1 auto;
-            overflow: hidden;
-            border-radius: var(--border-radius-lg);
-        }
-
-        .main-scroll {
-            height: 100%;
-            overflow-y: auto;   /* ✅ cuộn riêng main */
-            overflow-x: hidden;
-            padding: 0;         /* giữ layout như bạn muốn */
-        }
-
-        /* Main Content inner padding giữ nguyên kiểu cũ */
-        .main-content {
-            min-height: 100%;
-        }
-
-        /* Stat Cards */
         .stat-card {
-            border-radius: var(--border-radius-md);
-            padding: 25px;
-            color: white;
-            margin-bottom: 25px;
-            transition: all var(--transition-normal);
+            background: var(--card-gradient);
+            border-radius: 18px;
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            box-shadow: var(--shadow-soft);
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
         }
 
         .stat-card::before {
             content: '';
             position: absolute;
-            inset: 0;
-            background: inherit;
-            opacity: 0.9;
-            z-index: 1;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--success-gradient);
+            border-radius: 18px 18px 0 0;
         }
 
-        .stat-card::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 100%;
-            height: 200%;
-            background: rgba(255, 255, 255, 0.1);
-            transform: rotate(30deg);
-            transition: var(--transition-normal);
-            z-index: 2;
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .stat-card:hover::after { transform: rotate(30deg) translateX(100px); }
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
 
-        .stat-card-content { position: relative; z-index: 3; }
+        .modal-content {
+            background: var(--card-gradient);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-        .stat-card h5 {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 10px;
-            font-weight: 500;
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .floating-action-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
             display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .stat-card .stat-number {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 5px;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .stat-card .stat-change {
-            font-size: 13px;
-            opacity: 0.9;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .stat-icon {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            font-size: 48px;
-            opacity: 0.3;
-            z-index: 3;
-            transition: var(--transition-normal);
-        }
-
-        .stat-card:hover .stat-icon {
-            transform: scale(1.1) rotate(5deg);
-            opacity: 0.4;
-        }
-
-        /* Card Custom */
-        .card-custom {
-            border-radius: var(--border-radius-lg);
-            border: none;
-            box-shadow: var(--shadow-soft);
-            transition: all var(--transition-normal);
-            margin-bottom: 25px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            overflow: hidden;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card-custom:hover { box-shadow: var(--shadow-medium); transform: translateY(-5px); }
-
-        .card-header-custom {
-            background: var(--light-gradient);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            padding: 20px 25px;
-            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0 !important;
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-header-custom h3 {
-            margin: 0;
-            font-size: 1.2rem;
-            background: var(--dark-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Buttons */
-        .btn-custom {
-            border-radius: var(--border-radius-sm);
-            padding: 10px 20px;
-            font-weight: 500;
-            transition: all var(--transition-normal);
-            border: none;
-            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-custom::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: var(--transition-normal);
-        }
-
-        .btn-custom:hover::before { left: 100%; }
-
-        .btn-primary-custom { background: var(--primary-gradient); color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
-        .btn-primary-custom:hover { color: white; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6); }
-        .btn-success-custom { background: var(--success-gradient); color: white; box-shadow: 0 4px 15px rgba(67, 233, 123, 0.4); }
-        .btn-danger-custom { background: var(--danger-gradient); color: white; box-shadow: 0 4px 15px rgba(255, 88, 88, 0.4); }
-        .btn-warning-custom { background: var(--warning-gradient); color: white; box-shadow: 0 4px 15px rgba(250, 112, 154, 0.4); }
-        .btn-info-custom { background: var(--info-gradient); color: white; box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4); }
-        .btn-outline-custom { background: transparent; border: 2px solid var(--primary-color); color: var(--primary-color); }
-        .btn-outline-custom:hover { background: var(--primary-gradient); color: white; border-color: transparent; }
-
-        /* Table */
-        .table-container {
-            background: white;
-            border-radius: var(--border-radius-md);
-            overflow: hidden;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .table-custom { margin-bottom: 0; border-collapse: separate; border-spacing: 0; }
-        .table-custom thead { background: var(--light-gradient); }
-        .table-custom th {
-            font-weight: 600;
-            border-top: none;
-            padding: 18px 15px;
-            border-bottom: 2px solid rgba(0, 0, 0, 0.05);
-            color: #495057;
-            font-size: 14px;
-        }
-        .table-custom td {
-            padding: 15px;
-            vertical-align: middle;
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
-            font-size: 14px;
-        }
-        .table-custom tbody tr { transition: var(--transition-fast); }
-        .table-custom tbody tr:hover { background: rgba(102, 126, 234, 0.03); transform: translateX(5px); }
-
-        .customer-avatar {
-            width: 42px; height: 42px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid white;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-            transition: var(--transition-normal);
-        }
-
-        .table-custom tbody tr:hover .customer-avatar {
-            transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Status Badges */
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-block;
-            text-align: center;
-            min-width: 100px;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .status-new { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
-        .status-contacted { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; }
-        .status-potential { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; }
-        .status-success { background: linear-gradient(135deg, #3CD3AD 0%, #4CB8C4 100%); color: white; }
-        .status-unreachable { background: linear-gradient(135deg, #FF5858 0%, #F09819 100%); color: white; }
-        .status-wrong_number { background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%); color: white; }
-        .status-care { background: linear-gradient(135deg, #FF5ACD 0%, #FBDA61 100%); color: white; }
-
-        /* Type Badges */
-        .type-badge {
-            padding: 5px 10px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: inline-block;
-        }
-        .type-broker { background: linear-gradient(135deg, rgba(67, 233, 123, 0.15) 0%, rgba(56, 249, 215, 0.15) 100%); color: #27ae60; border: 1px solid rgba(67, 233, 123, 0.3); }
-        .type-owner { background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); color: #667eea; border: 1px solid rgba(102, 126, 234, 0.3); }
-        .type-relative { background: linear-gradient(135deg, rgba(250, 112, 154, 0.15) 0%, rgba(254, 225, 64, 0.15) 100%); color: #fa709a; border: 1px solid rgba(250, 112, 154, 0.3); }
-
-        /* Action Buttons */
-        .action-buttons { display: flex; gap: 6px; }
-        .action-btn {
-            width: 34px; height: 34px;
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            border: none;
-            transition: all var(--transition-fast);
             color: white;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-        }
-        .action-btn:hover { transform: translateY(-2px) scale(1.1); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
-
-        /* Charts */
-        .chart-container { position: relative; height: 320px; width: 100%; padding: 15px; }
-        .chart-center-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            z-index: 10;
-        }
-        .chart-center-text .total-number {
             font-size: 28px;
-            font-weight: 700;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 5px;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
+            transition: all 0.3s ease;
+            z-index: 100;
         }
-        .chart-center-text .total-label { font-size: 12px; color: #6c757d; font-weight: 500; }
 
-        /* Bulk Actions */
-        .bulk-actions {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: var(--border-radius-md);
-            margin-bottom: 25px;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: none;
+        .floating-action-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: inline-block;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .service-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .service-1 {
+            background: var(--primary-gradient);
+        }
+
+        .service-2 {
+            background: var(--secondary-gradient);
+        }
+
+        .service-3 {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .service-4 {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+            }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #5a6fd8 0%, #6a4190 100%);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .price-badge {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            color: #667eea;
+            border-left: 4px solid #667eea;
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .input-field {
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            padding: 14px 18px;
+        }
+
+        .input-field:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            outline: none;
+        }
+
+        .color-input-container {
+            display: flex;
             align-items: center;
             gap: 15px;
-            animation: slideInDown 0.5s ease;
         }
-        .bulk-actions.show { display: flex; }
 
-        /* Progress */
-        .progress-custom {
-            height: 10px;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        .color-input {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            border: 3px solid white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s ease;
         }
-        .progress-custom .progress-bar {
-            border-radius: 10px;
-            transition: width 1s ease-in-out;
+
+        .color-input:hover {
+            transform: scale(1.1);
+        }
+
+        .color-input::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-input::-webkit-color-swatch {
+            border: none;
+            border-radius: 8px;
+        }
+
+        .wave-divider {
+            height: 100px;
+            width: 100%;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             position: relative;
             overflow: hidden;
         }
-        .progress-custom .progress-bar::after {
-            content: '';
+
+        .wave-divider::before {
+            content: "";
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            animation: shimmer 2s infinite;
-        }
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-
-        /* Search Box */
-        .search-box { position: relative; }
-        .search-box input {
-            padding-left: 45px;
-            border-radius: var(--border-radius-sm);
-            border: 2px solid rgba(0, 0, 0, 0.08);
-            background: rgba(255, 255, 255, 0.9);
-            transition: var(--transition-fast);
-        }
-        .search-box input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
-            background: white;
-        }
-        .search-box i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
-            z-index: 10;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' fill='%23ffffff'%3E%3C/path%3E%3C/svg%3E");
+            background-size: 1200px 100%;
         }
 
-        /* Pagination */
-        .pagination-custom .page-link {
-            border: none;
-            margin: 0 2px;
-            border-radius: 10px;
-            color: #6c757d;
-            font-weight: 500;
-            transition: var(--transition-fast);
-            padding: 8px 15px;
-        }
-        .pagination-custom .page-item.active .page-link {
-            background: var(--primary-gradient);
-            color: white;
-            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
-        }
-        .pagination-custom .page-link:hover:not(.active) { background: rgba(102, 126, 234, 0.1); color: var(--primary-color); }
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .floating-action-btn {
+                width: 60px;
+                height: 60px;
+                bottom: 20px;
+                right: 20px;
+                font-size: 24px;
+            }
 
-        /* Modals */
-        .modal-custom .modal-content {
-            border-radius: var(--border-radius-lg);
-            border: none;
-            overflow: hidden;
-            box-shadow: var(--shadow-hard);
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
-        .modal-custom .modal-header {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 25px;
-            border-bottom: none;
-        }
-        .modal-custom .modal-title { font-weight: 600; font-size: 1.3rem; }
-        .modal-custom .modal-body { padding: 25px; }
-        .modal-custom .modal-footer {
-            padding: 20px 25px;
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
-            background: rgba(0, 0, 0, 0.02);
-        }
-
-        /* Assign Data Modal */
-        .assign-data-modal .staff-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-        .assign-data-modal .staff-card {
-            background: white;
-            border-radius: var(--border-radius-sm);
-            padding: 15px;
-            text-align: center;
-            border: 2px solid transparent;
-            transition: all var(--transition-normal);
-            cursor: pointer;
-            box-shadow: var(--shadow-soft);
-        }
-        .assign-data-modal .staff-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary-color);
-            box-shadow: var(--shadow-medium);
-        }
-        .assign-data-modal .staff-card.selected {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-            border-color: var(--primary-color);
-        }
-        .assign-data-modal .staff-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 10px;
-            border: 3px solid #fff;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        }
-        .assign-data-modal .staff-name { font-weight: 600; margin-bottom: 5px; }
-        .assign-data-modal .staff-role { font-size: 12px; color: #6c757d; }
-
-        /* Call Modal */
-        .call-avatar {
-            width: 100px; height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 5px solid white;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            margin-bottom: 20px;
-        }
-        .call-timer {
-            font-size: 3.5rem;
-            font-weight: 700;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin: 20px 0;
-            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Glow + gradient text */
-        .glow { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
-        .gradient-text {
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* Equal height row */
-        .equal-height-row { display: flex; flex-wrap: wrap; }
-        .equal-height-row > [class*='col-'] { display: flex; flex-direction: column; }
-
-        /* ✅ Responsive */
-        @media (max-width: 992px) {
-            .app-shell { flex-direction: column; }
-            .sidebar-wrap { width: 100%; flex: 0 0 auto; height: 320px; }
-            .main-wrap { flex: 1 1 auto; }
+            .service-card:hover {
+                transform: translateY(-5px) scale(1.01);
+            }
         }
     </style>
 </head>
+<body class="text-gray-800">
+<!-- Header -->
+<header class="pt-10 pb-16 px-6 text-center">
+    <div class="container mx-auto max-w-6xl">
+        <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+            <i class="fas fa-cogs mr-4"></i>Quản Lý Dịch Vụ
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Quản lý và cấu hình các dịch vụ với giao diện trực quan, chuyên nghiệp
+        </p>
 
-<body>
-<div class="app-scale">
-    <div class="app-root">
-        <!-- Navigation -->
-        <nav class="navbar navbar-expand-lg navbar-custom">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="#">
-                    <i class="fas fa-phone-alt"></i>
-                    <span>Telesale Pro</span>
-                </a>
+        <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div class="stat-card p-6 text-center animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+                <div class="text-4xl font-bold text-purple-600 mb-2" id="totalServices">2</div>
+                <div class="text-gray-600 font-medium">Tổng dịch vụ</div>
+                <div class="mt-3 text-sm text-gray-500">
+                    <i class="fas fa-arrow-up text-green-500 mr-1"></i> Đang hoạt động
+                </div>
+            </div>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"><i class="fas fa-bars text-white"></i></span>
+            <div class="stat-card p-6 text-center animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                <div class="text-4xl font-bold text-blue-600 mb-2" id="totalPriceSegments">6</div>
+                <div class="text-gray-600 font-medium">Phân khúc giá</div>
+                <div class="mt-3 text-sm text-gray-500">
+                    <i class="fas fa-chart-line text-blue-500 mr-1"></i> Trung bình 3/dịch vụ
+                </div>
+            </div>
+
+            <div class="stat-card p-6 text-center animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
+                <div class="text-4xl font-bold text-green-600 mb-2" id="activeServices">2</div>
+                <div class="text-gray-600 font-medium">Đang hoạt động</div>
+                <div class="mt-3 text-sm text-gray-500">
+                    <i class="fas fa-check-circle text-green-500 mr-1"></i> 100% hoạt động
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Wave Divider -->
+<div class="wave-divider"></div>
+
+<!-- Main Content -->
+<main class="py-10 px-4 md:px-6 bg-gradient-to-b from-white to-gray-50">
+    <div class="container mx-auto max-w-6xl">
+        <!-- Services Section -->
+        <div class="mb-12">
+            <div class="flex justify-between items-center mb-10">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Danh sách dịch vụ</h2>
+                    <p class="text-gray-600">Quản lý tất cả dịch vụ và phân khúc giá của bạn</p>
+                </div>
+                <button id="filterBtn" class="gradient-btn-secondary px-6 py-3">
+                    <i class="fas fa-filter mr-2"></i>Lọc & Sắp xếp
                 </button>
-
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav mx-auto">
-                        <li class="nav-item">
-                            <a class="nav-link-custom active" href="#">
-                                <i class="fas fa-home me-2"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link-custom" href="#">
-                                <i class="fas fa-users me-2"></i> Khách hàng
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link-custom" href="#">
-                                <i class="fas fa-chart-bar me-2"></i> Báo cáo
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link-custom" href="#">
-                                <i class="fas fa-cog me-2"></i> Cài đặt
-                            </a>
-                        </li>
-                    </ul>
-
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="dropdown">
-                            <button class="btn btn-outline-custom btn-custom" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-bell"></i>
-                                <span class="badge bg-danger rounded-pill">3</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><h6 class="dropdown-header">Thông báo mới</h6></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-user-check text-success me-2"></i> 5 khách hàng mới</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-chart-line text-primary me-2"></i> Báo cáo tuần đã sẵn sàng</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-exclamation-triangle text-warning me-2"></i> Còn 12 cuộc gọi</a></li>
-                            </ul>
-                        </div>
-
-                        <div class="dropdown">
-                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
-                                <div class="user-avatar me-2">NV</div>
-                                <div class="d-flex flex-column">
-                                    <span class="text-white fw-medium">Nguyễn Văn A</span>
-                                    <small class="text-white-50">Telesale Manager</small>
-                                </div>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2"></i> Hồ sơ</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Cài đặt</a></li>
-                                <li><hr class="dropdown-divider" /></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </div>
-        </nav>
 
-        <!-- ✅ Shell: Sidebar đứng yên + Main cuộn riêng -->
-        <div class="app-shell">
-            <!-- Sidebar -->
-            <aside class="sidebar-wrap">
-                <div class="sidebar animate__animated animate__fadeInLeft">
-                    <div class="sidebar-section">
-                        <h6 class="sidebar-title"><i class="fas fa-filter"></i> Bộ lọc nâng cao</h6>
+            <!-- Services Grid -->
+            <div id="servicesContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Service cards will be loaded here dynamically -->
+            </div>
+        </div>
 
-                        <div class="filter-tabs" style="font-size: 14px!important;">
-                            <button class="filter-tab active" data-filter="all">Tất cả</button>
-                            <button class="filter-tab" data-filter="new">Mới</button>
-                            <button class="filter-tab" data-filter="contacted">Đã LH</button>
-                        </div>
+        <!-- Empty State (Hidden by default) -->
+        <div id="emptyState" class="text-center py-16 hidden">
+            <div class="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 mb-6 animate-float">
+                <i class="fas fa-box-open text-5xl text-purple-500"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-700 mb-3">Chưa có dịch vụ nào</h3>
+            <p class="text-gray-600 max-w-md mx-auto mb-8">Bắt đầu bằng cách thêm dịch vụ đầu tiên của bạn để quản lý phân khúc giá và cấu hình.</p>
+            <button id="addFirstServiceBtn" class="gradient-btn px-8 py-3 text-lg">
+                <i class="fas fa-plus mr-2"></i>Thêm dịch vụ đầu tiên
+            </button>
+        </div>
+    </div>
+</main>
 
-                        <div class="mb-3">
-                            <label class="form-label mb-2 fw-medium">Phân loại</label>
-                            <select class="form-select form-select-custom" id="typeFilter">
-                                <option value="all">Tất cả phân loại</option>
-                                <option value="broker">Môi giới</option>
-                                <option value="owner">Chủ nhà</option>
-                                <option value="relative">Người thân</option>
-                            </select>
-                        </div>
+<!-- Floating Action Button -->
+<button id="addServiceBtn" class="floating-action-btn pulse animate__animated animate__bounceIn" title="Thêm dịch vụ mới">
+    <i class="fas fa-plus"></i>
+</button>
 
-                        <div class="mb-3">
-                            <label class="form-label mb-2 fw-medium">Trạng thái</label>
-                            <select class="form-select form-select-custom" id="statusFilter">
-                                <option value="all">Tất cả trạng thái</option>
-                                <option value="potential_7">Tiềm năng 7 ngày</option>
-                                <option value="potential_14">Tiềm năng 14 ngày</option>
-                                <option value="success">Thành công</option>
-                                <option value="wrong_number">Sai số</option>
-                                <option value="unreachable">Không liên lạc</option>
-                                <option value="care">Chăm sóc</option>
-                            </select>
-                        </div>
+<!-- Modal thêm/sửa dịch vụ -->
+<div id="serviceModal" class="fixed inset-0 flex items-center justify-center z-50 hidden modal-overlay p-4">
+    <div class="modal-content w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div class="p-8 border-b border-gray-100">
+            <div class="flex justify-between items-center">
+                <h3 class="text-2xl font-bold text-gray-800" id="modalTitle">Thêm dịch vụ mới</h3>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <p class="text-gray-600 mt-2">Nhập thông tin chi tiết của dịch vụ và phân khúc giá</p>
+        </div>
 
-                        <div class="mb-4">
-                            <label class="form-label mb-2 fw-medium">Tỉnh/Thành phố</label>
-                            <select class="form-select form-select-custom" id="provinceFilter">
-                                <option value="all">Tất cả tỉnh thành</option>
-                                <option value="hanoi">Hà Nội</option>
-                                <option value="hcm">TP.HCM</option>
-                                <option value="danang">Đà Nẵng</option>
-                                <option value="haiphong">Hải Phòng</option>
-                                <option value="cantho">Cần Thơ</option>
-                            </select>
-                        </div>
+        <form id="serviceForm" class="p-8">
+            <div class="space-y-8">
+                <!-- Service Name -->
+                <div class="animate__animated animate__fadeIn">
+                    <label class="block text-gray-700 font-semibold mb-3 text-lg" for="serviceName">
+                        <i class="fas fa-heading mr-2 text-blue-500"></i>Tên dịch vụ *
+                    </label>
+                    <input type="text" id="serviceName" class="input-field w-full" placeholder="Nhập tên dịch vụ" required>
+                    <p class="text-gray-500 text-sm mt-2">Tên dịch vụ sẽ hiển thị trên giao diện khách hàng</p>
+                </div>
 
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-primary-custom btn-custom" id="applyFilter">
-                                <i class="fas fa-check me-2"></i> Áp dụng bộ lọc
-                            </button>
-                            <button class="btn btn-outline-custom btn-custom" id="resetFilter">
-                                <i class="fas fa-redo me-2"></i> Đặt lại
-                            </button>
-                        </div>
-                    </div>
+                <!-- Service Description -->
+                <div class="animate__animated animate__fadeIn" style="animation-delay: 0.1s">
+                    <label class="block text-gray-700 font-semibold mb-3 text-lg" for="serviceDescription">
+                        <i class="fas fa-align-left mr-2 text-green-500"></i>Mô tả dịch vụ
+                    </label>
+                    <textarea id="serviceDescription" rows="3" class="input-field w-full" placeholder="Mô tả chi tiết về dịch vụ, tính năng và lợi ích"></textarea>
+                </div>
 
-                    <div class="sidebar-section">
-                        <h6 class="sidebar-title"><i class="fas fa-tachometer-alt"></i> Tiến độ hôm nay</h6>
-
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="fw-medium">Cuộc gọi: <span class="text-primary">28/40</span></span>
-                                <span class="fw-bold gradient-text">70%</span>
-                            </div>
-                            <div class="progress progress-custom">
-                                <div class="progress-bar" style="width: 70%; background: var(--primary-gradient);"></div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="fw-medium">Thành công: <span class="text-success">12</span></span>
-                                <span class="fw-bold gradient-text">42.8%</span>
-                            </div>
-                            <div class="progress progress-custom">
-                                <div class="progress-bar" style="width: 42.8%; background: var(--success-gradient);"></div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="fw-medium">Tiềm năng: <span class="text-warning">8</span></span>
-                                <span class="fw-bold gradient-text">28.6%</span>
-                            </div>
-                            <div class="progress progress-custom">
-                                <div class="progress-bar" style="width: 28.6%; background: var(--warning-gradient);"></div>
-                            </div>
+                <!-- Service Color -->
+                <div class="animate__animated animate__fadeIn" style="animation-delay: 0.2s">
+                    <label class="block text-gray-700 font-semibold mb-3 text-lg">
+                        <i class="fas fa-palette mr-2 text-purple-500"></i>Màu phân loại *
+                    </label>
+                    <div class="color-input-container">
+                        <input type="color" id="serviceColor" name="serviceColor" value="#3b82f6" class="color-input">
+                        <div>
+                            <div class="font-medium text-gray-700 mb-1">Màu đã chọn: <span id="colorHexCode">#3b82f6</span></div>
+                            <p class="text-gray-500 text-sm">Màu này sẽ dùng để phân loại dịch vụ trong biểu mẫu</p>
                         </div>
                     </div>
                 </div>
-            </aside>
 
-            <!-- Main (cuộn riêng) -->
-            <section class="main-wrap">
-                <div class="main-scroll">
-                    <div class="main-content">
-                        <!-- Stat Cards -->
-                        <div class="row mb-4">
-                            <div class="col-md-6 col-lg-3">
-                                <div class="stat-card animate__animated animate__fadeInUp" style="background: var(--primary-gradient); animation-delay: 0.1s;">
-                                    <div class="stat-card-content">
-                                        <h5><i class="fas fa-users"></i> Tổng khách hàng</h5>
-                                        <div class="stat-number">1,248</div>
-                                        <div class="stat-change">
-                                            <i class="fas fa-arrow-up me-1"></i> 12% so với tháng trước
-                                        </div>
-                                    </div>
-                                    <i class="fas fa-user-friends stat-icon"></i>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-lg-3">
-                                <div class="stat-card animate__animated animate__fadeInUp" style="background: var(--success-gradient); animation-delay: 0.2s;">
-                                    <div class="stat-card-content">
-                                        <h5><i class="fas fa-phone-volume"></i> Cuộc gọi hôm nay</h5>
-                                        <div class="stat-number">28/40</div>
-                                        <div class="stat-change">
-                                            <i class="fas fa-check-circle me-1"></i> 70% hoàn thành
-                                        </div>
-                                    </div>
-                                    <i class="fas fa-phone-alt stat-icon"></i>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-lg-3">
-                                <div class="stat-card animate__animated animate__fadeInUp" style="background: var(--danger-gradient); animation-delay: 0.3s;">
-                                    <div class="stat-card-content">
-                                        <h5><i class="fas fa-chart-line"></i> Tỷ lệ thành công</h5>
-                                        <div class="stat-number">42.5%</div>
-                                        <div class="stat-change">
-                                            <i class="fas fa-arrow-up me-1"></i> 5.2% so với tuần trước
-                                        </div>
-                                    </div>
-                                    <i class="fas fa-chart-pie stat-icon"></i>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-lg-3">
-                                <div class="stat-card animate__animated animate__fadeInUp" style="background: var(--info-gradient); animation-delay: 0.4s;">
-                                    <div class="stat-card-content">
-                                        <h5><i class="fas fa-calendar-check"></i> Đặt lịch thành công</h5>
-                                        <div class="stat-number">156</div>
-                                        <div class="stat-change">
-                                            <i class="fas fa-arrow-up me-1"></i> 18% so với tháng trước
-                                        </div>
-                                    </div>
-                                    <i class="fas fa-calendar-alt stat-icon"></i>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Price List -->
+                <div class="animate__animated animate__fadeIn" style="animation-delay: 0.3s">
+                    <div class="flex justify-between items-center mb-6">
+                        <label class="block text-gray-700 font-semibold text-lg">
+                            <i class="fas fa-tags mr-2 text-yellow-500"></i>Phân khúc giá theo tài sản
+                        </label>
+                        <button type="button" id="addPriceBtn" class="gradient-btn-secondary px-5 py-2.5 text-sm">
+                            <i class="fas fa-plus mr-1"></i> Thêm phân khúc
+                        </button>
+                    </div>
 
-                        <!-- Charts -->
-                        <div class="row equal-height-row mb-4">
-                            <div class="col-lg-8">
-                                <div class="card-custom animate__animated animate__fadeInUp h-100">
-                                    <div class="card-header card-header-custom">
-                                        <h3><i class="fas fa-chart-line"></i> Thống kê cuộc gọi theo tháng</h3>
-                                        <div>
-                                            <select class="form-select form-select-custom form-select-sm w-auto d-inline-block" id="chartYear">
-                                                <option value="2023">2023</option>
-                                                <option value="2024" selected>2024</option>
-                                                <option value="2022">2022</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="card-body p-4">
-                                        <div class="chart-container">
-                                            <canvas id="monthlyChart"></canvas>
-                                        </div>
-                                    </div>
+                    <div id="priceList" class="space-y-4">
+                        <!-- Price items will be added here dynamically -->
+                        <div class="price-item-input glass-card p-5">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối thiểu (Min) *</label>
+                                    <input type="number" class="price-min input-field w-full" placeholder="0" min="0" required>
+                                    <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
                                 </div>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="card-custom animate__animated animate__fadeInUp h-100">
-                                    <div class="card-header card-header-custom">
-                                        <h3><i class="fas fa-chart-pie"></i> Phân bổ trạng thái</h3>
-                                    </div>
-                                    <div class="card-body p-4 position-relative">
-                                        <div class="chart-container">
-                                            <div class="chart-center-text">
-                                                <div class="total-number">570</div>
-                                                <div class="total-label">Tổng khách hàng</div>
-                                            </div>
-                                            <canvas id="statusChart"></canvas>
-                                        </div>
-                                    </div>
+                                <div>
+                                    <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối đa (Max) *</label>
+                                    <input type="number" class="price-max input-field w-full" placeholder="1,000,000,000" min="0" required>
+                                    <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Controls and Table -->
-                        <div class="row">
-                            <div class="col-12">
-                                <!-- Bulk Actions -->
-                                <div class="bulk-actions" id="bulkActions">
-                                    <span class="fw-medium" id="selectedCount">0 khách hàng được chọn</span>
-                                    <div class="d-flex gap-2 ms-auto">
-                                        <button class="btn btn-sm btn-danger-custom btn-custom" id="bulkDelete">
-                                            <i class="fas fa-trash me-1"></i> Xóa hàng loạt
-                                        </button>
-                                        <button class="btn btn-info-custom btn-custom" id="generateDataBtn" data-bs-toggle="modal" data-bs-target="#assignDataModal">
-                                            <i class="fas fa-database me-2"></i> Cấp dữ liệu
-                                        </button>
-
-                                        <div class="d-flex gap-2">
-                                            <button class="btn btn-success-custom btn-custom" id="exportExcel">
-                                                <i class="fas fa-file-excel me-2"></i> Excel
-                                            </button>
-                                            <button class="btn btn-danger-custom btn-custom" id="exportPDF">
-                                                <i class="fas fa-file-pdf me-2"></i> PDF
-                                            </button>
-                                        </div>
-                                        <button class="btn btn-sm btn-outline-custom btn-custom" id="clearSelection">
-                                            <i class="fas fa-times me-1"></i> Bỏ chọn
+                                <div>
+                                    <label class="block text-gray-600 font-medium mb-2">Giá dịch vụ *</label>
+                                    <input type="number" class="price-value input-field w-full" placeholder="500,000" min="0" required>
+                                    <div class="flex justify-between items-center mt-2">
+                                        <p class="text-gray-500 text-xs">Đơn vị: VNĐ</p>
+                                        <button type="button" class="remove-price-btn text-red-500 hover:text-red-700 text-sm">
+                                            <i class="fas fa-trash mr-1"></i>Xóa
                                         </button>
                                     </div>
                                 </div>
-
-                                <!-- Table Controls -->
-                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-                                    <div class="search-box" style="width: 100%; max-width: 350px;">
-                                        <i class="fas fa-search"></i>
-                                        <input type="text" class="form-control form-control-custom" id="searchInput" placeholder="Tìm kiếm khách hàng...">
-                                    </div>
-
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <button class="btn btn-primary-custom btn-custom" id="addCustomerBtn" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
-                                            <i class="fas fa-plus me-2"></i> Thêm khách hàng
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Table -->
-                                <div class="table-container animate__animated animate__fadeIn">
-                                    <table class="table table-hover table-custom">
-                                        <thead>
-                                        <tr>
-                                            <th width="50">
-                                                <input type="checkbox" class="form-check-input checkbox-all" id="selectAll">
-                                            </th>
-                                            <th width="60">#</th>
-                                            <th>Khách hàng</th>
-                                            <th>Số điện thoại</th>
-                                            <th>Tỉnh/TP</th>
-                                            <th>Tỉnh cũ</th>
-                                            <th>Phân loại</th>
-                                            <th>Trạng thái</th>
-                                            <th>Ghi chú</th>
-                                            <th>Ngày cập nhật</th>
-                                            <th>Thao tác</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="customerTableBody"></tbody>
-                                    </table>
-                                </div>
-
-                                <!-- Pagination -->
-                                <nav class="mt-4">
-                                    <ul class="pagination pagination-custom justify-content-center">
-                                        <li class="page-item disabled">
-                                            <a class="page-link" href="#" tabindex="-1"><i class="fas fa-chevron-left"></i></a>
-                                        </li>
-                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                        <li class="page-item">
-                                            <a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>
-                                        </li>
-                                    </ul>
-                                </nav>
                             </div>
                         </div>
-
                     </div>
-                </div>
-            </section>
-        </div>
-    </div>
 
-    <!-- ===== MODALS GIỮ NGUYÊN ===== -->
-
-    <!-- Add/Edit Customer Modal -->
-    <div class="modal fade modal-custom" id="addCustomerModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle"><i class="fas fa-user-plus me-2"></i> Thêm khách hàng mới</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="customerForm">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="customerName" class="form-label fw-medium">Họ và tên <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control form-control-custom" id="customerName" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="customerPhone" class="form-label fw-medium">Số điện thoại <span class="text-danger">*</span></label>
-                                <input type="tel" class="form-control form-control-custom" id="customerPhone" required>
+                    <div class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+                            <div>
+                                <p class="text-blue-800 font-medium">Thông tin phân khúc giá</p>
+                                <p class="text-blue-700 text-sm mt-1">Mỗi dịch vụ có thể có nhiều phân khúc giá khác nhau dựa trên giá trị tài sản. Hệ thống sẽ tự động áp dụng phân khúc phù hợp với giá trị tài sản của khách hàng.</p>
                             </div>
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="customerProvince" class="form-label fw-medium">Tỉnh/Thành phố <span class="text-danger">*</span></label>
-                                <select class="form-select form-select-custom" id="customerProvince" required>
-                                    <option value="">Chọn tỉnh/thành phố</option>
-                                    <option value="hanoi">Hà Nội</option>
-                                    <option value="hcm">TP. Hồ Chí Minh</option>
-                                    <option value="danang">Đà Nẵng</option>
-                                    <option value="haiphong">Hải Phòng</option>
-                                    <option value="cantho">Cần Thơ</option>
-                                    <option value="other">Khác</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="customerOldProvince" class="form-label fw-medium">Tỉnh cũ (nếu có)</label>
-                                <select class="form-select form-select-custom" id="customerOldProvince">
-                                    <option value="">Không có</option>
-                                    <option value="hanoi">Hà Nội</option>
-                                    <option value="hcm">TP. Hồ Chí Minh</option>
-                                    <option value="danang">Đà Nẵng</option>
-                                    <option value="haiphong">Hải Phòng</option>
-                                    <option value="cantho">Cần Thơ</option>
-                                    <option value="other">Khác</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="customerType" class="form-label fw-medium">Phân loại khách hàng <span class="text-danger">*</span></label>
-                                <select class="form-select form-select-custom" id="customerType" required>
-                                    <option value="">Chọn phân loại</option>
-                                    <option value="broker">Môi giới</option>
-                                    <option value="owner">Chủ nhà</option>
-                                    <option value="relative">Người thân</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="customerStatus" class="form-label fw-medium">Trạng thái <span class="text-danger">*</span></label>
-                                <select class="form-select form-select-custom" id="customerStatus" required>
-                                    <option value="new">Mới tiếp nhận</option>
-                                    <option value="potential_7">Tiềm năng 7 ngày</option>
-                                    <option value="potential_14">Tiềm năng 14 ngày</option>
-                                    <option value="success">Thành công (đặt lịch)</option>
-                                    <option value="wrong_number">Sai số</option>
-                                    <option value="unreachable">Không liên lạc được</option>
-                                    <option value="care">Chăm sóc</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="customerAvatar" class="form-label fw-medium">Ảnh đại diện (URL)</label>
-                            <input type="text" class="form-control form-control-custom" id="customerAvatar" placeholder="https://example.com/avatar.jpg">
-                            <small class="text-muted">Để trống để sử dụng ảnh mặc định</small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="customerNotes" class="form-label fw-medium">Ghi chú</label>
-                            <textarea class="form-control form-control-custom" id="customerNotes" rows="3" placeholder="Thêm ghi chú về khách hàng..."></textarea>
-                        </div>
-
-                        <input type="hidden" id="customerId" />
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-custom btn-custom" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-primary-custom btn-custom" id="saveCustomerBtn">
-                        <i class="fas fa-save me-2"></i> Lưu khách hàng
-                    </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Assign Data Modal -->
-    <div class="modal fade modal-custom assign-data-modal" id="assignDataModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-user-tag me-2"></i> Cấp dữ liệu cho Telesale</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-4">
-                        <h6 class="fw-medium mb-3">Chọn nhân viên Telesale</h6>
-                        <div class="staff-grid" id="staffGrid"></div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="dataQuantity" class="form-label fw-medium">Số lượng dữ liệu cấp</label>
-                            <input type="number" class="form-control form-control-custom" id="dataQuantity" min="1" max="1000" value="50">
-                            <small class="text-muted">Số khách hàng sẽ được cấp (1-1000)</small>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="dataType" class="form-label fw-medium">Loại dữ liệu</label>
-                            <select class="form-select form-select-custom" id="dataType">
-                                <option value="new">Khách hàng mới</option>
-                                <option value="potential">Khách tiềm năng</option>
-                                <option value="all">Tất cả loại khách</option>
-                                <option value="by_province">Theo tỉnh thành</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="assignNotes" class="form-label fw-medium">Ghi chú phân công</label>
-                        <textarea class="form-control form-control-custom" id="assignNotes" rows="2" placeholder="Ghi chú về việc phân công dữ liệu..."></textarea>
-                    </div>
-
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <span id="assignSummary">Chưa có nhân viên nào được chọn</span>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-custom btn-custom" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-primary-custom btn-custom" id="confirmAssignBtn">
-                        <i class="fas fa-check me-2"></i> Xác nhận cấp dữ liệu
-                    </button>
-                </div>
+            <!-- Form Actions -->
+            <div class="flex justify-end space-x-4 mt-10 pt-8 border-t border-gray-100">
+                <button type="button" id="cancelModalBtn" class="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-times mr-2"></i>Hủy bỏ
+                </button>
+                <button type="submit" class="gradient-btn px-8 py-3 font-semibold text-lg">
+                    <i class="fas fa-save mr-2"></i>Lưu dịch vụ
+                </button>
             </div>
-        </div>
+        </form>
     </div>
-
-    <!-- Call Modal -->
-    <div class="modal fade modal-custom" id="callModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-phone-volume me-2"></i> Đang gọi khách hàng</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <div class="mb-4">
-                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Avatar" class="call-avatar" id="callAvatar">
-                        <h4 id="callCustomerName" class="fw-bold gradient-text">Nguyễn Văn An</h4>
-                        <h3 class="fw-bold" id="callCustomerPhone">0912 345 678</h3>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="call-timer" id="callTimer">00:00</div>
-                        <small class="text-muted">Thời gian cuộc gọi</small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="callNote" class="form-label fw-medium">Ghi chú cuộc gọi</label>
-                        <textarea class="form-control form-control-custom" id="callNote" rows="3" placeholder="Ghi chú về cuộc gọi..."></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-medium">Kết quả cuộc gọi</label>
-                        <div class="d-flex flex-wrap gap-2 justify-content-center">
-                            <button class="btn btn-sm btn-success-custom btn-custom call-result" data-result="success">
-                                <i class="fas fa-check me-1"></i> Thành công
-                            </button>
-                            <button class="btn btn-sm btn-warning-custom btn-custom call-result" data-result="potential">
-                                <i class="fas fa-star me-1"></i> Tiềm năng
-                            </button>
-                            <button class="btn btn-sm btn-danger-custom btn-custom call-result" data-result="failed">
-                                <i class="fas fa-times me-1"></i> Thất bại
-                            </button>
-                            <button class="btn btn-sm btn-outline-custom btn-custom call-result" data-result="callback">
-                                <i class="fas fa-redo me-1"></i> Gọi lại
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-danger-custom btn-custom" id="endCallBtn">
-                        <i class="fas fa-phone-slash me-2"></i> Kết thúc cuộc gọi
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Confirm Delete Modal -->
-    <div class="modal fade modal-custom" id="confirmDeleteModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i> Xác nhận xóa</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="text-center mb-4">
-                        <div class="mb-3">
-                            <i class="fas fa-trash-alt fa-3x text-danger"></i>
-                        </div>
-                        <h4 class="fw-bold" id="deleteMessage">Bạn có chắc chắn muốn xóa?</h4>
-                        <p class="text-muted">Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn.</p>
-                    </div>
-                </div>
-                <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-outline-custom btn-custom" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-danger-custom btn-custom" id="confirmDeleteBtn">
-                        <i class="fas fa-trash me-2"></i> Xác nhận xóa
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
 
-<!-- Bootstrap JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- JavaScript Code (giữ nguyên code bạn gửi) -->
-<script>
-    // Dữ liệu mẫu chất lượng cao
-    let customers = [
-        { id: 1, name: "Nguyễn Văn An", phone: "0912345678", province: "hanoi", oldProvince: "haiphong", avatar: "https://randomuser.me/api/portraits/men/32.jpg", type: "owner", status: "potential_7", notes: "Khách hàng quan tâm đến chính sách ưu đãi, đã gửi báo giá qua email. Hẹn gọi lại vào chiều thứ 6 tuần sau.", lastUpdated: "2024-03-16", selected: false },
-        { id: 2, name: "Trần Thị Bình", phone: "0923456789", province: "hcm", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/44.jpg", type: "relative", status: "new", notes: "Khách hỏi về thời gian làm việc và chính sách thanh toán. Cần gọi lại vào sáng thứ 2 để tư vấn thêm.", lastUpdated: "2024-03-17", selected: false },
-        { id: 3, name: "Lê Văn Cường", phone: "0934567890", province: "danang", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/men/67.jpg", type: "broker", status: "care", notes: "Đã trao đổi về hợp đồng hợp tác dài hạn. Gửi email chi tiết các điều khoản và chính sách ưu đãi đặc biệt.", lastUpdated: "2024-03-15", selected: false },
-        { id: 4, name: "Phạm Thị Dung", phone: "0945678901", province: "haiphong", oldProvince: null, avatar: "https://randomuser.me/api/portraits/women/33.jpg", type: "owner", status: "potential_14", notes: "Khách hàng đang bận công việc gia đình, hẹn gọi lại sáng thứ 2 tuần sau. Để lại thông tin chi tiết về dự án.", lastUpdated: "2024-03-16", selected: false },
-        { id: 5, name: "Hoàng Văn Em", phone: "0956789012", province: "cantho", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/men/22.jpg", type: "relative", status: "success", notes: "Đã đặt lịch thành công ngày 25/3/2024 lúc 14:30. Gửi xác nhận qua SMS và email. Chuẩn bị tài liệu ký kết.", lastUpdated: "2024-03-14", selected: false },
-        { id: 6, name: "Vũ Thị Phương", phone: "0967890123", province: "hcm", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/women/55.jpg", type: "owner", status: "success", notes: "Đã đặt lịch thành công ngày 20/3, xác nhận lại lịch hẹn qua điện thoại. Khách hàng rất hài lòng với dịch vụ.", lastUpdated: "2024-03-15", selected: false },
-        { id: 7, name: "Đặng Văn Quân", phone: "0978901234", province: "hanoi", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/45.jpg", type: "broker", status: "unreachable", notes: "Số điện thoại không liên lạc được, đã thử 3 lần vào các khung giờ khác nhau. Để lại tin nhắn thoại.", lastUpdated: "2024-03-14", selected: false },
-        { id: 8, name: "Bùi Thị Hà", phone: "0989012345", province: "hcm", oldProvince: "other", avatar: "https://randomuser.me/api/portraits/women/25.jpg", type: "owner", status: "wrong_number", notes: "Sai số, không phải khách hàng. Đã xác minh thông tin và cập nhật lại cơ sở dữ liệu.", lastUpdated: "2024-03-12", selected: false },
-        { id: 9, name: "Ngô Minh Trí", phone: "0990123456", province: "danang", oldProvince: "hanoi", avatar: "https://randomuser.me/api/portraits/men/28.jpg", type: "broker", status: "potential_7", notes: "Khách hàng quan tâm đến gói đầu tư cao cấp. Hẹn gặp trực tiếp tuần sau để trình bày chi tiết.", lastUpdated: "2024-03-13", selected: false },
-        { id: 10, name: "Lý Thanh Tùng", phone: "0901234567", province: "haiphong", oldProvince: null, avatar: "https://randomuser.me/api/portraits/men/35.jpg", type: "owner", status: "care", notes: "Khách hàng cũ, cần chăm sóc định kỳ. Đã gửi quà tặng tri ân và thông tin ưu đãi mới.", lastUpdated: "2024-03-10", selected: false }
-    ];
-
-    const staffMembers = [
-        { id: 1, name: "Nguyễn Văn A", role: "Telesale Manager", avatar: "https://randomuser.me/api/portraits/men/1.jpg", selected: false },
-        { id: 2, name: "Trần Thị B", role: "Senior Telesale", avatar: "https://randomuser.me/api/portraits/women/2.jpg", selected: false },
-        { id: 3, name: "Lê Văn C", role: "Telesale Executive", avatar: "https://randomuser.me/api/portraits/men/3.jpg", selected: false },
-        { id: 4, name: "Phạm Thị D", role: "Junior Telesale", avatar: "https://randomuser.me/api/portraits/women/4.jpg", selected: false },
-        { id: 5, name: "Hoàng Văn E", role: "Telesale Team Lead", avatar: "https://randomuser.me/api/portraits/men/5.jpg", selected: false },
-        { id: 6, name: "Vũ Thị F", role: "Telesale Specialist", avatar: "https://randomuser.me/api/portraits/women/6.jpg", selected: false },
-        { id: 7, name: "Đặng Văn G", role: "Senior Telesale", avatar: "https://randomuser.me/api/portraits/men/7.jpg", selected: false },
-        { id: 8, name: "Bùi Thị H", role: "Telesale Executive", avatar: "https://randomuser.me/api/portraits/women/8.jpg", selected: false }
-    ];
-
-    let currentCustomerId = null;
-    let isEditing = false;
-    let callTimerInterval = null;
-    let callSeconds = 0;
-    let monthlyChart = null;
-    let statusChart = null;
-
-    document.addEventListener('DOMContentLoaded', function () {
-        initCharts();
-        renderCustomerTable();
-        renderStaffGrid();
-        setupEventListeners();
-        updateSelectedCount();
-        animateElements();
-    });
-
-    function initCharts() {
-        const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-        monthlyChart = new Chart(monthlyCtx, {
-            type: 'line',
-            data: {
-                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
-                datasets: [
-                    { label: 'Thành công', data: [65, 59, 80, 81, 56, 55, 70, 75, 82, 78, 85, 90], borderColor: '#43e97b', backgroundColor: 'rgba(67, 233, 123, 0.1)', tension: 0.4, fill: true, borderWidth: 3 },
-                    { label: 'Tiềm năng', data: [28, 48, 40, 19, 86, 27, 35, 42, 50, 45, 60, 55], borderColor: '#fa709a', backgroundColor: 'rgba(250, 112, 154, 0.1)', tension: 0.4, fill: true, borderWidth: 3 },
-                    { label: 'Không liên lạc', data: [18, 25, 22, 15, 30, 20, 18, 22, 25, 20, 28, 30], borderColor: '#ff5858', backgroundColor: 'rgba(255, 88, 88, 0.1)', tension: 0.4, fill: true, borderWidth: 3 },
-                    { label: 'Tổng cuộc gọi', data: [120, 140, 150, 130, 180, 110, 130, 145, 165, 150, 185, 190], borderColor: '#667eea', backgroundColor: 'rgba(102, 126, 234, 0.1)', tension: 0.4, fill: true, borderWidth: 3 }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'top', labels: { font: { family: 'Poppins', size: 12 }, padding: 20, usePointStyle: true } },
-                    tooltip: { backgroundColor: 'rgba(255, 255, 255, 0.9)', titleColor: '#333', bodyColor: '#666', borderColor: '#667eea', borderWidth: 1, cornerRadius: 10, padding: 12 }
-                },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { font: { family: 'Inter' } } },
-                    x: { grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { font: { family: 'Inter' } } }
-                }
-            }
-        });
-
-        const statusCtx = document.getElementById('statusChart').getContext('2d');
-        const statusData = [156, 85, 42, 78, 24, 65, 120];
-        const totalStatus = statusData.reduce((a, b) => a + b, 0);
-        document.querySelector('.total-number').textContent = totalStatus;
-
-        statusChart = new Chart(statusCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Thành công', 'Tiềm năng 7 ngày', 'Tiềm năng 14 ngày', 'Không liên lạc', 'Sai số', 'Chăm sóc', 'Mới'],
-                datasets: [{
-                    data: statusData,
-                    backgroundColor: ['#43e97b', '#fa709a', '#f09819', '#ff5858', '#8E2DE2', '#FF5ACD', '#4facfe'],
-                    borderWidth: 0,
-                    hoverOffset: 15
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Inter', size: 10 }, padding: 15 } },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                const label = context.label || '';
-                                const value = context.raw || 0;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = Math.round((value / total) * 100);
-                                return `${label}: ${value} (${percentage}%)`;
-                            }
-                        }
-                    }
-                },
-                cutout: '65%'
-            }
-        });
-    }
-
-    function renderCustomerTable(filteredCustomers = customers) {
-        const tableBody = document.getElementById('customerTableBody');
-        tableBody.innerHTML = '';
-
-        if (filteredCustomers.length === 0) {
-            tableBody.innerHTML = `
-          <tr>
-            <td colspan="11" class="text-center py-5">
-              <div class="mb-3"><i class="fas fa-users fa-3x gradient-text"></i></div>
-              <h5 class="text-muted mb-2">Không tìm thấy khách hàng nào</h5>
-              <p class="text-muted mb-0">Hãy thử thay đổi bộ lọc hoặc thêm khách hàng mới</p>
-            </td>
-          </tr>
-        `;
-            return;
-        }
-
-        filteredCustomers.forEach((customer, index) => {
-            const statusLabel = getStatusLabel(customer.status);
-            const typeLabel = getTypeLabel(customer.type);
-            const provinceLabel = getProvinceLabel(customer.province);
-            const oldProvinceLabel = customer.oldProvince ? getProvinceLabel(customer.oldProvince) : '-';
-
-            const row = document.createElement('tr');
-            row.className = `animate__animated animate__fadeInUp`;
-            row.style.animationDelay = `${index * 0.05}s`;
-
-            row.innerHTML = `
-          <td>
-            <input type="checkbox" class="form-check-input customer-checkbox" data-id="${customer.id}" ${customer.selected ? 'checked' : ''}>
-          </td>
-          <td><span class="badge bg-light text-dark">${customer.id}</span></td>
-          <td>
-            <div class="d-flex align-items-center">
-              <img src="${customer.avatar}" alt="${customer.name}" class="customer-avatar me-3">
-              <div>
-                <div class="fw-semibold">${customer.name}</div>
-                <small class="text-muted">ID: ${String(customer.id).padStart(4, '0')}</small>
-              </div>
+<!-- Success Notification -->
+<div id="successNotification" class="fixed top-6 right-6 z-50 hidden">
+    <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-5 rounded-2xl shadow-2xl max-w-md animate__animated animate__fadeInRight">
+        <div class="flex items-center">
+            <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mr-4">
+                <i class="fas fa-check text-2xl"></i>
             </div>
-          </td>
-          <td class="fw-medium">${formatPhoneNumber(customer.phone)}</td>
-          <td>${provinceLabel}</td>
-          <td>${oldProvinceLabel}</td>
-          <td><span class="type-badge type-${customer.type}">${typeLabel}</span></td>
-          <td><span class="status-badge status-${customer.status}">${statusLabel}</span></td>
-          <td>
-            <div class="text-truncate" style="max-width: 200px;" title="${customer.notes}">
-              <i class="fas fa-sticky-note text-warning me-1"></i>
-              ${customer.notes || 'Không có ghi chú'}
+            <div>
+                <p class="font-bold text-lg" id="notificationTitle">Thành công!</p>
+                <p id="notificationMessage" class="text-white/90">Dịch vụ đã được lưu thành công</p>
             </div>
-          </td>
-          <td><span class="badge bg-light text-dark">${customer.lastUpdated}</span></td>
-          <td>
-            <div class="action-buttons">
-              <button class="action-btn call-btn" data-id="${customer.id}" title="Gọi" style="background: var(--success-gradient);">
-                <i class="fas fa-phone"></i>
-              </button>
-              <button class="action-btn edit-btn" data-id="${customer.id}" title="Sửa" style="background: var(--warning-gradient);">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="action-btn delete-btn" data-id="${customer.id}" title="Xóa" style="background: var(--danger-gradient);">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </td>
-        `;
-            tableBody.appendChild(row);
-        });
-
-        updateCheckboxEvents();
-        updateButtonEvents();
-    }
-
-    function renderStaffGrid() {
-        const staffGrid = document.getElementById('staffGrid');
-        staffGrid.innerHTML = '';
-
-        staffMembers.forEach(staff => {
-            const card = document.createElement('div');
-            card.className = `staff-card ${staff.selected ? 'selected' : ''}`;
-            card.dataset.id = staff.id;
-            card.innerHTML = `
-          <img src="${staff.avatar}" alt="${staff.name}" class="staff-avatar">
-          <div class="staff-name">${staff.name}</div>
-          <div class="staff-role">${staff.role}</div>
-        `;
-            staffGrid.appendChild(card);
-        });
-
-        document.querySelectorAll('.staff-card').forEach(card => {
-            card.addEventListener('click', function () {
-                const staffId = parseInt(this.dataset.id);
-                const staff = staffMembers.find(s => s.id === staffId);
-                if (staff) {
-                    staff.selected = !staff.selected;
-                    this.classList.toggle('selected');
-                    updateAssignSummary();
-                }
-            });
-        });
-    }
-
-    function updateCheckboxEvents() {
-        document.getElementById('selectAll').addEventListener('change', function () {
-            const checkboxes = document.querySelectorAll('.customer-checkbox');
-            const isChecked = this.checked;
-
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = isChecked;
-                const customerId = parseInt(checkbox.dataset.id);
-                const customer = customers.find(c => c.id === customerId);
-                if (customer) customer.selected = isChecked;
-            });
-
-            updateSelectedCount();
-            animateBulkActions();
-        });
-
-        document.querySelectorAll('.customer-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function () {
-                const customerId = parseInt(this.dataset.id);
-                const customer = customers.find(c => c.id === customerId);
-                if (customer) customer.selected = this.checked;
-
-                const allCheckboxes = document.querySelectorAll('.customer-checkbox');
-                const checkedCount = document.querySelectorAll('.customer-checkbox:checked').length;
-                document.getElementById('selectAll').checked = checkedCount === allCheckboxes.length;
-
-                updateSelectedCount();
-                animateBulkActions();
-            });
-        });
-    }
-
-    function updateButtonEvents() {
-        document.querySelectorAll('.call-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const customerId = parseInt(this.dataset.id);
-                const customer = customers.find(c => c.id === customerId);
-                if (customer) startCall(customer);
-            });
-        });
-
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const customerId = parseInt(this.dataset.id);
-                editCustomer(customerId);
-            });
-        });
-
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const customerId = parseInt(this.dataset.id);
-                showDeleteConfirm(customerId);
-            });
-        });
-    }
-
-    function updateSelectedCount() {
-        const selectedCount = customers.filter(c => c.selected).length;
-        const bulkActions = document.getElementById('bulkActions');
-        const selectedCountElement = document.getElementById('selectedCount');
-
-        if (selectedCount > 0) {
-            bulkActions.classList.add('show');
-            selectedCountElement.textContent = `${selectedCount} khách hàng được chọn`;
-        } else {
-            bulkActions.classList.remove('show');
-        }
-    }
-
-    function updateAssignSummary() {
-        const selectedStaff = staffMembers.filter(s => s.selected);
-        const quantity = document.getElementById('dataQuantity').value;
-        const dataType = document.getElementById('dataType').value;
-
-        let typeText = '';
-        switch (dataType) {
-            case 'new': typeText = 'khách hàng mới'; break;
-            case 'potential': typeText = 'khách tiềm năng'; break;
-            case 'all': typeText = 'tất cả loại khách'; break;
-            case 'by_province': typeText = 'theo tỉnh thành'; break;
-        }
-
-        if (selectedStaff.length > 0) {
-            const staffNames = selectedStaff.map(s => s.name).join(', ');
-            document.getElementById('assignSummary').innerHTML =
-                `Sẽ cấp <strong>${quantity}</strong> ${typeText} cho <strong>${selectedStaff.length}</strong> nhân viên: ${staffNames}`;
-        } else {
-            document.getElementById('assignSummary').textContent = 'Chưa có nhân viên nào được chọn';
-        }
-    }
-
-    function animateBulkActions() {
-        const bulkActions = document.getElementById('bulkActions');
-        const selectedCount = customers.filter(c => c.selected).length;
-
-        if (selectedCount > 0) {
-            bulkActions.classList.add('animate__animated', 'animate__slideInDown');
-            setTimeout(() => { bulkActions.classList.remove('animate__slideInDown'); }, 500);
-        }
-    }
-
-    function setupEventListeners() {
-        document.getElementById('applyFilter').addEventListener('click', applyFilters);
-        document.getElementById('resetFilter').addEventListener('click', resetFilters);
-
-        document.querySelectorAll('.filter-tab').forEach(tab => {
-            tab.addEventListener('click', function () {
-                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                applyFilters();
-            });
-        });
-
-        document.getElementById('searchInput').addEventListener('input', function () { applyFilters(); });
-
-        document.getElementById('addCustomerBtn').addEventListener('click', function () {
-            resetCustomerForm();
-            isEditing = false;
-            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-plus me-2"></i> Thêm khách hàng mới';
-        });
-
-        document.getElementById('saveCustomerBtn').addEventListener('click', saveCustomer);
-
-        document.getElementById('exportExcel').addEventListener('click', function () {
-            showNotification('Xuất dữ liệu ra Excel thành công!', 'success');
-        });
-
-        document.getElementById('exportPDF').addEventListener('click', function () {
-            showNotification('Xuất dữ liệu ra PDF thành công!', 'success');
-        });
-
-        document.getElementById('bulkDelete').addEventListener('click', function () {
-            const selectedCustomers = customers.filter(c => c.selected);
-            if (selectedCustomers.length > 0) {
-                if (confirm(`Bạn có chắc chắn muốn xóa ${selectedCustomers.length} khách hàng đã chọn?`)) {
-                    customers = customers.filter(c => !c.selected);
-                    renderCustomerTable();
-                    updateSelectedCount();
-                    showNotification(`Đã xóa ${selectedCustomers.length} khách hàng thành công!`, 'success');
-                }
-            }
-        });
-
-        document.getElementById('clearSelection').addEventListener('click', function () {
-            customers.forEach(c => c.selected = false);
-            document.getElementById('selectAll').checked = false;
-            renderCustomerTable();
-            updateSelectedCount();
-        });
-
-        document.getElementById('dataQuantity').addEventListener('input', updateAssignSummary);
-        document.getElementById('dataType').addEventListener('change', updateAssignSummary);
-        document.getElementById('confirmAssignBtn').addEventListener('click', confirmDataAssign);
-
-        document.getElementById('endCallBtn').addEventListener('click', endCall);
-
-        document.querySelectorAll('.call-result').forEach(btn => {
-            btn.addEventListener('click', function () { saveCallResult(this.dataset.result); });
-        });
-
-        document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
-    }
-
-    function applyFilters() {
-        const searchText = document.getElementById('searchInput').value.toLowerCase();
-        const typeFilter = document.getElementById('typeFilter').value;
-        const statusFilter = document.getElementById('statusFilter').value;
-        const provinceFilter = document.getElementById('provinceFilter').value;
-
-        const activeTab = document.querySelector('.filter-tab.active');
-        const tabFilter = activeTab ? activeTab.dataset.filter : 'all';
-
-        let filtered = customers.filter(customer => {
-            if (tabFilter === 'new' && customer.status !== 'new') return false;
-            if (tabFilter === 'contacted' && customer.status === 'new') return false;
-
-            if (typeFilter !== 'all' && customer.type !== typeFilter) return false;
-            if (statusFilter !== 'all' && customer.status !== statusFilter) return false;
-            if (provinceFilter !== 'all' && customer.province !== provinceFilter) return false;
-
-            if (searchText) {
-                const searchFields = [
-                    customer.name,
-                    customer.phone,
-                    getProvinceLabel(customer.province),
-                    customer.notes
-                ].map(field => field ? field.toString().toLowerCase() : '');
-
-                return searchFields.some(field => field.includes(searchText));
-            }
-
-            return true;
-        });
-
-        renderCustomerTable(filtered);
-    }
-
-    function resetFilters() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('typeFilter').value = 'all';
-        document.getElementById('statusFilter').value = 'all';
-        document.getElementById('provinceFilter').value = 'all';
-
-        document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
-        document.querySelector('.filter-tab[data-filter="all"]').classList.add('active');
-
-        renderCustomerTable(customers);
-        showNotification('Đã đặt lại tất cả bộ lọc', 'info');
-    }
-
-    function startCall(customer) {
-        currentCustomerId = customer.id;
-        callSeconds = 0;
-
-        document.getElementById('callCustomerName').textContent = customer.name;
-        document.getElementById('callCustomerPhone').textContent = formatPhoneNumber(customer.phone);
-        document.getElementById('callAvatar').src = customer.avatar;
-        document.getElementById('callTimer').textContent = '00:00';
-        document.getElementById('callNote').value = '';
-
-        const callModal = new bootstrap.Modal(document.getElementById('callModal'));
-        callModal.show();
-
-        callTimerInterval = setInterval(() => {
-            callSeconds++;
-            const minutes = Math.floor(callSeconds / 60).toString().padStart(2, '0');
-            const seconds = (callSeconds % 60).toString().padStart(2, '0');
-            document.getElementById('callTimer').textContent = `${minutes}:${seconds}`;
-        }, 1000);
-
-        showNotification(`Bắt đầu cuộc gọi với ${customer.name}`, 'info');
-    }
-
-    function endCall() {
-        clearInterval(callTimerInterval);
-
-        const callNote = document.getElementById('callNote').value;
-        if (callNote.trim()) {
-            const customer = customers.find(c => c.id === currentCustomerId);
-            if (customer) {
-                customer.notes = customer.notes ? `${customer.notes}\n[${new Date().toLocaleDateString('vi-VN')}] ${callNote}` : callNote;
-                customer.lastUpdated = new Date().toISOString().split('T')[0];
-                renderCustomerTable();
-            }
-        }
-
-        const callModal = bootstrap.Modal.getInstance(document.getElementById('callModal'));
-        callModal.hide();
-
-        showNotification('Cuộc gọi đã kết thúc. Ghi chú đã được lưu.', 'success');
-    }
-
-    function saveCallResult(result) {
-        const customer = customers.find(c => c.id === currentCustomerId);
-        if (!customer) return;
-
-        let newStatus = customer.status;
-        let resultText = '';
-
-        switch (result) {
-            case 'success': newStatus = 'success'; resultText = 'Đã đặt lịch thành công'; break;
-            case 'potential': newStatus = 'potential_7'; resultText = 'Khách hàng tiềm năng'; break;
-            case 'failed': newStatus = 'unreachable'; resultText = 'Không liên lạc được'; break;
-            case 'callback': newStatus = 'care'; resultText = 'Cần gọi lại'; break;
-        }
-
-        customer.status = newStatus;
-        customer.lastUpdated = new Date().toISOString().split('T')[0];
-
-        const callNote = document.getElementById('callNote').value;
-        const autoNote = `[${new Date().toLocaleDateString('vi-VN')}] Kết quả: ${resultText}`;
-        customer.notes = customer.notes ? `${customer.notes}\n${autoNote}\n${callNote}` : `${autoNote}\n${callNote}`;
-
-        renderCustomerTable();
-        showNotification(`Đã cập nhật trạng thái khách hàng thành: ${getStatusLabel(newStatus)}`, 'success');
-    }
-
-    function resetCustomerForm() {
-        document.getElementById('customerForm').reset();
-        document.getElementById('customerId').value = '';
-        document.getElementById('customerAvatar').value = '';
-    }
-
-    function editCustomer(id) {
-        const customer = customers.find(c => c.id === id);
-        if (!customer) return;
-
-        currentCustomerId = id;
-        isEditing = true;
-
-        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i> Chỉnh sửa khách hàng';
-        document.getElementById('customerId').value = customer.id;
-        document.getElementById('customerName').value = customer.name;
-        document.getElementById('customerPhone').value = customer.phone;
-        document.getElementById('customerProvince').value = customer.province;
-        document.getElementById('customerOldProvince').value = customer.oldProvince || '';
-        document.getElementById('customerType').value = customer.type;
-        document.getElementById('customerStatus').value = customer.status;
-        document.getElementById('customerAvatar').value = customer.avatar || '';
-        document.getElementById('customerNotes').value = customer.notes || '';
-
-        const modal = new bootstrap.Modal(document.getElementById('addCustomerModal'));
-        modal.show();
-    }
-
-    function saveCustomer() {
-        const id = document.getElementById('customerId').value;
-        const name = document.getElementById('customerName').value;
-        const phone = document.getElementById('customerPhone').value;
-        const province = document.getElementById('customerProvince').value;
-        const oldProvince = document.getElementById('customerOldProvince').value || null;
-        const type = document.getElementById('customerType').value;
-        const status = document.getElementById('customerStatus').value;
-        const avatar = document.getElementById('customerAvatar').value
-            || `https://randomuser.me/api/portraits/${type === 'owner' || type === 'broker' ? 'men' : 'women'}/${Math.floor(Math.random() * 70) + 1}.jpg`;
-        const notes = document.getElementById('customerNotes').value;
-
-        if (!name || !phone || !province || !type || !status) {
-            showNotification('Vui lòng điền đầy đủ các trường bắt buộc!', 'warning');
-            return;
-        }
-
-        if (isEditing && id) {
-            const index = customers.findIndex(c => c.id === parseInt(id));
-            if (index !== -1) {
-                customers[index] = { ...customers[index], name, phone, province, oldProvince, type, status, avatar, notes, lastUpdated: new Date().toISOString().split('T')[0] };
-                showNotification('Cập nhật khách hàng thành công!', 'success');
-            }
-        } else {
-            const newId = customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1;
-            customers.push({ id: newId, name, phone, province, oldProvince, avatar, type, status, notes, lastUpdated: new Date().toISOString().split('T')[0], selected: false });
-            showNotification('Thêm khách hàng mới thành công!', 'success');
-        }
-
-        renderCustomerTable();
-        const modal = bootstrap.Modal.getInstance(document.getElementById('addCustomerModal'));
-        modal.hide();
-    }
-
-    function confirmDataAssign() {
-        const selectedStaff = staffMembers.filter(s => s.selected);
-        const quantity = parseInt(document.getElementById('dataQuantity').value);
-        const dataType = document.getElementById('dataType').value;
-        const assignNotes = document.getElementById('assignNotes').value;
-
-        if (selectedStaff.length === 0) { showNotification('Vui lòng chọn ít nhất một nhân viên!', 'warning'); return; }
-        if (quantity < 1 || quantity > 1000) { showNotification('Số lượng dữ liệu phải từ 1 đến 1000!', 'warning'); return; }
-
-        const dataPerStaff = Math.floor(quantity / selectedStaff.length);
-        const remainder = quantity % selectedStaff.length;
-
-        let assignedData = [];
-        selectedStaff.forEach((staff, index) => {
-            let staffQuantity = dataPerStaff;
-            if (index < remainder) staffQuantity++;
-            assignedData.push({ staff: staff.name, quantity: staffQuantity, type: dataType });
-        });
-
-        let resultMessage = `Đã cấp ${quantity} dữ liệu ${dataType} cho ${selectedStaff.length} nhân viên:\n`;
-        assignedData.forEach(item => { resultMessage += `- ${item.staff}: ${item.quantity} khách\n`; });
-        if (assignNotes) resultMessage += `\nGhi chú: ${assignNotes}`;
-
-        showNotification(resultMessage, 'success');
-
-        staffMembers.forEach(s => s.selected = false);
-        renderStaffGrid();
-        document.getElementById('dataQuantity').value = 50;
-        document.getElementById('dataType').value = 'new';
-        document.getElementById('assignNotes').value = '';
-        updateAssignSummary();
-
-        const modal = bootstrap.Modal.getInstance(document.getElementById('assignDataModal'));
-        modal.hide();
-    }
-
-    function showDeleteConfirm(id) {
-        const customer = customers.find(c => c.id === id);
-        if (!customer) return;
-
-        currentCustomerId = id;
-        document.getElementById('deleteMessage').textContent = `Bạn có chắc chắn muốn xóa khách hàng "${customer.name}"?`;
-
-        const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-        modal.show();
-    }
-
-    function confirmDelete() {
-        const index = customers.findIndex(c => c.id === currentCustomerId);
-        if (index !== -1) {
-            const customerName = customers[index].name;
-            customers.splice(index, 1);
-            renderCustomerTable();
-            updateSelectedCount();
-
-            const modal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
-            modal.hide();
-
-            showNotification(`Đã xóa khách hàng "${customerName}" thành công!`, 'success');
-        }
-    }
-
-    function showNotification(message, type = 'info') {
-        const alert = document.createElement('div');
-        alert.className = `alert alert-${type} position-fixed`;
-        alert.style.cssText = `
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        min-width: 300px;
-        max-width: 500px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        border-radius: 12px;
-        border: none;
-        animation: slideInRight 0.3s ease;
-        white-space: pre-line;
-      `;
-        alert.innerHTML = `
-        <div class="d-flex align-items-start">
-          <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2 mt-1"></i>
-          <span>${message}</span>
+            <button id="closeNotificationBtn" class="ml-auto text-white/70 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-      `;
+    </div>
+</div>
 
-        document.body.appendChild(alert);
+<script>
+    // Mock data cho dịch vụ
+    const mockServices = [
+        {
+            id: 1,
+            name: "Bán nhanh 30 ngày",
+            description: "Dịch vụ hỗ trợ bán tài sản nhanh chóng trong vòng 30 ngày với chiến lược marketing tối ưu và đội ngũ chuyên nghiệp.",
+            color: "#3b82f6",
+            prices: [
+                { min: 0, max: 500000000, value: 15000000 },
+                { min: 500000001, max: 2000000000, value: 30000000 },
+                { min: 2000000001, max: 5000000000, value: 70000000 }
+            ],
+            active: true,
+            createdAt: "2023-05-15",
+            icon: "fa-bolt"
+        },
+        {
+            id: 2,
+            name: "Bán giải pháp theo giá mong muốn",
+            description: "Dịch vụ tư vấn và thực hiện chiến lược bán tài sản đạt được mức giá mong muốn của khách hàng với tỷ lệ thành công cao.",
+            color: "#10b981",
+            prices: [
+                { min: 0, max: 1000000000, value: 20000000 },
+                { min: 1000000001, max: 5000000000, value: 50000000 },
+                { min: 5000000001, max: 10000000000, value: 100000000 }
+            ],
+            active: true,
+            createdAt: "2023-06-22",
+            icon: "fa-chart-line"
+        }
+    ];
 
+    // Biến lưu trữ tạm
+    let services = [...mockServices];
+    let editingServiceId = null;
+
+    // DOM Elements
+    const servicesContainer = document.getElementById('servicesContainer');
+    const serviceModal = document.getElementById('serviceModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const serviceForm = document.getElementById('serviceForm');
+    const serviceNameInput = document.getElementById('serviceName');
+    const serviceDescriptionInput = document.getElementById('serviceDescription');
+    const serviceColorInput = document.getElementById('serviceColor');
+    const colorHexCode = document.getElementById('colorHexCode');
+    const priceList = document.getElementById('priceList');
+    const addPriceBtn = document.getElementById('addPriceBtn');
+    const addServiceBtn = document.getElementById('addServiceBtn');
+    const addFirstServiceBtn = document.getElementById('addFirstServiceBtn');
+    const cancelModalBtn = document.getElementById('cancelModalBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const filterBtn = document.getElementById('filterBtn');
+    const emptyState = document.getElementById('emptyState');
+    const successNotification = document.getElementById('successNotification');
+    const notificationTitle = document.getElementById('notificationTitle');
+    const notificationMessage = document.getElementById('notificationMessage');
+    const closeNotificationBtn = document.getElementById('closeNotificationBtn');
+    const totalServices = document.getElementById('totalServices');
+    const totalPriceSegments = document.getElementById('totalPriceSegments');
+    const activeServices = document.getElementById('activeServices');
+
+    // Định dạng tiền tệ
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(amount);
+    };
+
+    // Hiển thị danh sách dịch vụ
+    function renderServices() {
+        servicesContainer.innerHTML = '';
+
+        // Cập nhật thống kê
+        totalServices.textContent = services.length;
+        totalPriceSegments.textContent = services.reduce((total, service) => total + service.prices.length, 0);
+        activeServices.textContent = services.filter(s => s.active).length;
+
+        if (services.length === 0) {
+            emptyState.classList.remove('hidden');
+            servicesContainer.classList.add('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+            servicesContainer.classList.remove('hidden');
+
+            services.forEach((service, index) => {
+                const serviceCard = document.createElement('div');
+                serviceCard.className = `service-card animate__animated animate__fadeInUp glass-card`;
+                serviceCard.style.animationDelay = `${index * 0.1}s`;
+
+                // Tính toán tổng số phân khúc giá
+                const totalPriceSegments = service.prices.length;
+
+                // Xác định icon class dựa trên service data
+                const iconClass = service.icon || (index % 4 === 0 ? 'fa-bolt' :
+                    index % 4 === 1 ? 'fa-chart-line' :
+                        index % 4 === 2 ? 'fa-gem' : 'fa-crown');
+
+                serviceCard.innerHTML = `
+                        <div class="p-7">
+                            <div class="flex justify-between items-start mb-6">
+                                <div class="flex items-start">
+                                    <div class="service-icon ${`service-${(index % 4) + 1}`} mr-5">
+                                        <i class="fas ${iconClass}"></i>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center mb-2">
+                                            <h3 class="text-2xl font-bold text-gray-800">${service.name}</h3>
+                                            ${service.active ?
+                    '<span class="badge bg-green-100 text-green-800 ml-4"><i class="fas fa-circle text-xs mr-1"></i> Đang hoạt động</span>' :
+                    '<span class="badge bg-red-100 text-red-800 ml-4"><i class="fas fa-circle text-xs mr-1"></i> Ngừng hoạt động</span>'}
+                                        </div>
+                                        <p class="text-gray-600 mb-4">${service.description}</p>
+                                        <div class="flex items-center text-gray-500 text-sm">
+                                            <div class="flex items-center mr-6">
+                                                <div class="color-preview mr-2" style="background-color: ${service.color};"></div>
+                                                <span>Màu phân loại</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <i class="far fa-calendar-alt mr-2"></i>
+                                                <span>Tạo ngày: ${service.createdAt}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="edit-service-btn px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-medium hover:bg-blue-100 transition-colors text-sm" data-id="${service.id}" title="Chỉnh sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="delete-service-btn px-4 py-2 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-colors text-sm" data-id="${service.id}" title="Xóa dịch vụ">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 pt-6 border-t border-gray-100">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h4 class="font-bold text-gray-700 text-lg">
+                                        <i class="fas fa-tags mr-2 text-yellow-500"></i>Bảng giá theo phân khúc tài sản
+                                    </h4>
+                                    <span class="badge price-badge">${totalPriceSegments} phân khúc</span>
+                                </div>
+                                <div class="space-y-4">
+                                    ${service.prices.map(price => `
+                                        <div class="price-item glass-card p-4">
+                                            <div class="flex justify-between items-center">
+                                                <div>
+                                                    <div class="font-bold text-gray-800 text-lg">${formatCurrency(price.value)}</div>
+                                                    <div class="text-gray-600 text-sm mt-1">
+                                                        Áp dụng cho tài sản từ ${formatCurrency(price.min)} đến ${formatCurrency(price.max)}
+                                                    </div>
+                                                </div>
+                                                <div class="text-right">
+                                                    <div class="text-sm text-gray-500">Phạm vi giá trị</div>
+                                                    <div class="font-semibold text-gray-700">${formatCurrency(price.min)} - ${formatCurrency(price.max)}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                servicesContainer.appendChild(serviceCard);
+            });
+
+            // Thêm sự kiện cho các nút chỉnh sửa và xóa
+            document.querySelectorAll('.edit-service-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const serviceId = parseInt(e.currentTarget.getAttribute('data-id'));
+                    openEditModal(serviceId);
+                });
+            });
+
+            document.querySelectorAll('.delete-service-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const serviceId = parseInt(e.currentTarget.getAttribute('data-id'));
+                    deleteService(serviceId);
+                });
+            });
+        }
+    }
+
+    // Mở modal thêm dịch vụ mới
+    function openAddModal() {
+        editingServiceId = null;
+        modalTitle.textContent = 'Thêm dịch vụ mới';
+        serviceForm.reset();
+
+        // Reset màu về mặc định
+        serviceColorInput.value = "#3b82f6";
+        colorHexCode.textContent = "#3b82f6";
+
+        // Reset danh sách giá
+        priceList.innerHTML = `
+                <div class="price-item-input glass-card p-5">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối thiểu (Min) *</label>
+                            <input type="number" class="price-min input-field w-full" placeholder="0" min="0" required>
+                            <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối đa (Max) *</label>
+                            <input type="number" class="price-max input-field w-full" placeholder="1,000,000,000" min="0" required>
+                            <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 font-medium mb-2">Giá dịch vụ *</label>
+                            <input type="number" class="price-value input-field w-full" placeholder="500,000" min="0" required>
+                            <div class="flex justify-between items-center mt-2">
+                                <p class="text-gray-500 text-xs">Đơn vị: VNĐ</p>
+                                <button type="button" class="remove-price-btn text-red-500 hover:text-red-700 text-sm">
+                                    <i class="fas fa-trash mr-1"></i>Xóa
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+        // Thêm sự kiện cho nút xóa giá
+        document.querySelectorAll('.remove-price-btn').forEach(btn => {
+            btn.addEventListener('click', removePriceItem);
+        });
+
+        serviceModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Mở modal chỉnh sửa dịch vụ
+    function openEditModal(serviceId) {
+        const service = services.find(s => s.id === serviceId);
+        if (!service) return;
+
+        editingServiceId = serviceId;
+        modalTitle.textContent = 'Chỉnh sửa dịch vụ';
+
+        // Điền thông tin dịch vụ vào form
+        serviceNameInput.value = service.name;
+        serviceDescriptionInput.value = service.description;
+        serviceColorInput.value = service.color;
+        colorHexCode.textContent = service.color;
+
+        // Hiển thị danh sách giá
+        priceList.innerHTML = '';
+        service.prices.forEach(price => {
+            addPriceItem(price.min, price.max, price.value);
+        });
+
+        serviceModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Đóng modal
+    function closeModal() {
+        serviceModal.classList.add('hidden');
+        editingServiceId = null;
+        document.body.style.overflow = 'auto';
+    }
+
+    // Thêm một dòng giá mới
+    function addPriceItem(min = '', max = '', value = '') {
+        const priceItem = document.createElement('div');
+        priceItem.className = 'price-item-input glass-card p-5';
+        priceItem.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối thiểu (Min) *</label>
+                        <input type="number" class="price-min input-field w-full" placeholder="0" min="0" value="${min}" required>
+                        <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối đa (Max) *</label>
+                        <input type="number" class="price-max input-field w-full" placeholder="1,000,000,000" min="0" value="${max}" required>
+                        <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 font-medium mb-2">Giá dịch vụ *</label>
+                        <input type="number" class="price-value input-field w-full" placeholder="500,000" min="0" value="${value}" required>
+                        <div class="flex justify-between items-center mt-2">
+                            <p class="text-gray-500 text-xs">Đơn vị: VNĐ</p>
+                            <button type="button" class="remove-price-btn text-red-500 hover:text-red-700 text-sm">
+                                <i class="fas fa-trash mr-1"></i>Xóa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+        priceList.appendChild(priceItem);
+
+        // Thêm sự kiện cho nút xóa
+        priceItem.querySelector('.remove-price-btn').addEventListener('click', removePriceItem);
+    }
+
+    // Xóa một dòng giá
+    function removePriceItem(e) {
+        // Chỉ cho phép xóa nếu còn nhiều hơn 1 dòng
+        if (priceList.children.length > 1) {
+            e.currentTarget.closest('.price-item-input').remove();
+        }
+    }
+
+    // Xử lý submit form
+    function handleSubmitForm(e) {
+        e.preventDefault();
+
+        // Lấy giá trị từ form
+        const name = serviceNameInput.value.trim();
+        const description = serviceDescriptionInput.value.trim();
+        const color = serviceColorInput.value;
+
+        // Lấy danh sách giá
+        const prices = [];
+        const priceItems = priceList.querySelectorAll('.price-item-input');
+
+        for (let item of priceItems) {
+            const min = parseInt(item.querySelector('.price-min').value) || 0;
+            const max = parseInt(item.querySelector('.price-max').value) || 0;
+            const value = parseInt(item.querySelector('.price-value').value) || 0;
+
+            if (min >= 0 && max >= min && value >= 0) {
+                prices.push({ min, max, value });
+            }
+        }
+
+        if (prices.length === 0) {
+            showNotification('Vui lòng thêm ít nhất một phân khúc giá hợp lệ!', 'error');
+            return;
+        }
+
+        // Xác định icon dựa trên tên dịch vụ
+        let icon = 'fa-cogs';
+        if (name.toLowerCase().includes('nhanh') || name.toLowerCase().includes('fast')) {
+            icon = 'fa-bolt';
+        } else if (name.toLowerCase().includes('giải pháp') || name.toLowerCase().includes('solution')) {
+            icon = 'fa-lightbulb';
+        } else if (name.toLowerCase().includes('premium') || name.toLowerCase().includes('cao cấp')) {
+            icon = 'fa-crown';
+        } else if (name.toLowerCase().includes('chiến lược') || name.toLowerCase().includes('strategy')) {
+            icon = 'fa-chess';
+        }
+
+        if (editingServiceId) {
+            // Cập nhật dịch vụ
+            const serviceIndex = services.findIndex(s => s.id === editingServiceId);
+            if (serviceIndex !== -1) {
+                services[serviceIndex] = {
+                    ...services[serviceIndex],
+                    name,
+                    description,
+                    color,
+                    prices,
+                    icon
+                };
+            }
+
+            showNotification(`Đã cập nhật dịch vụ "${name}" thành công!`, 'success');
+        } else {
+            // Thêm dịch vụ mới
+            const newId = services.length > 0 ? Math.max(...services.map(s => s.id)) + 1 : 1;
+            const newService = {
+                id: newId,
+                name,
+                description,
+                color,
+                prices,
+                active: true,
+                icon,
+                createdAt: new Date().toISOString().split('T')[0]
+            };
+
+            services.push(newService);
+            showNotification(`Đã thêm dịch vụ "${name}" thành công!`, 'success');
+        }
+
+        // Render lại danh sách và đóng modal
+        renderServices();
+        closeModal();
+    }
+
+    // Xóa dịch vụ
+    function deleteService(serviceId) {
+        const service = services.find(s => s.id === serviceId);
+        if (!service) return;
+
+        // Tạo modal xác nhận xóa
+        const confirmModal = document.createElement('div');
+        confirmModal.className = 'fixed inset-0 flex items-center justify-center z-50 modal-overlay p-4';
+        confirmModal.innerHTML = `
+                <div class="modal-content w-full max-w-md">
+                    <div class="p-8">
+                        <div class="flex items-center mb-6">
+                            <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mr-5">
+                                <i class="fas fa-exclamation-triangle text-red-500 text-3xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-800">Xác nhận xóa</h3>
+                                <p class="text-gray-600 mt-1">Bạn có chắc chắn muốn xóa dịch vụ này?</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-red-50 p-4 rounded-xl mb-6">
+                            <div class="flex items-center text-red-800">
+                                <i class="fas fa-info-circle mr-3"></i>
+                                <p class="font-medium">Hành động này không thể hoàn tác. Tất cả phân khúc giá của dịch vụ sẽ bị xóa.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end space-x-4">
+                            <button id="cancelDeleteBtn" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                                Hủy bỏ
+                            </button>
+                            <button id="confirmDeleteBtn" class="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all">
+                                <i class="fas fa-trash mr-2"></i>Xóa dịch vụ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+        document.body.appendChild(confirmModal);
+
+        // Xử lý sự kiện cho nút hủy
+        confirmModal.querySelector('#cancelDeleteBtn').addEventListener('click', () => {
+            document.body.removeChild(confirmModal);
+        });
+
+        // Xử lý sự kiện cho nút xác nhận xóa
+        confirmModal.querySelector('#confirmDeleteBtn').addEventListener('click', () => {
+            services = services.filter(s => s.id !== serviceId);
+            renderServices();
+            document.body.removeChild(confirmModal);
+            showNotification(`Đã xóa dịch vụ "${service.name}" thành công!`, 'info');
+        });
+
+        // Đóng modal khi click ra ngoài
+        confirmModal.addEventListener('click', (e) => {
+            if (e.target === confirmModal) {
+                document.body.removeChild(confirmModal);
+            }
+        });
+    }
+
+    // Hiển thị thông báo
+    function showNotification(message, type = 'success') {
+        notificationTitle.textContent = type === 'success' ? 'Thành công!' :
+            type === 'error' ? 'Lỗi!' : 'Thông tin';
+        notificationMessage.textContent = message;
+
+        // Đặt màu nền dựa trên loại thông báo
+        if (type === 'success') {
+            successNotification.className = successNotification.className.replace(/from-[\w-]+ to-[\w-]+/, 'from-green-500 to-emerald-500');
+        } else if (type === 'error') {
+            successNotification.className = successNotification.className.replace(/from-[\w-]+ to-[\w-]+/, 'from-red-500 to-pink-500');
+        } else {
+            successNotification.className = successNotification.className.replace(/from-[\w-]+ to-[\w-]+/, 'from-blue-500 to-cyan-500');
+        }
+
+        successNotification.classList.remove('hidden');
+        successNotification.classList.add('animate__animated', 'animate__fadeInRight');
+
+        // Tự động ẩn sau 5 giây
         setTimeout(() => {
-            alert.style.animation = 'slideOutRight 0.3s ease';
-            setTimeout(() => {
-                if (alert.parentNode) alert.parentNode.removeChild(alert);
-            }, 300);
+            hideNotification();
         }, 5000);
     }
 
-    function animateElements() {
-        const statCards = document.querySelectorAll('.stat-card');
-        statCards.forEach(card => {
-            card.addEventListener('mouseenter', () => { card.style.transform = 'translateY(-10px) scale(1.02)'; });
-            card.addEventListener('mouseleave', () => { card.style.transform = 'translateY(0) scale(1)'; });
+    // Ẩn thông báo
+    function hideNotification() {
+        successNotification.classList.add('animate__fadeOutRight');
+        setTimeout(() => {
+            successNotification.classList.remove('animate__fadeInRight', 'animate__fadeOutRight');
+            successNotification.classList.add('hidden');
+        }, 300);
+    }
+
+    // Khởi tạo sự kiện
+    function initEventListeners() {
+        // Nút thêm dịch vụ
+        addServiceBtn.addEventListener('click', openAddModal);
+        addFirstServiceBtn.addEventListener('click', openAddModal);
+
+        // Nút thêm phân khúc giá
+        addPriceBtn.addEventListener('click', () => addPriceItem());
+
+        // Nút hủy và đóng modal
+        cancelModalBtn.addEventListener('click', closeModal);
+        closeModalBtn.addEventListener('click', closeModal);
+
+        // Đóng modal khi click ra ngoài
+        serviceModal.addEventListener('click', (e) => {
+            if (e.target === serviceModal) {
+                closeModal();
+            }
+        });
+
+        // Xử lý submit form
+        serviceForm.addEventListener('submit', handleSubmitForm);
+
+        // Cập nhật mã màu hex khi chọn màu
+        serviceColorInput.addEventListener('input', () => {
+            colorHexCode.textContent = serviceColorInput.value;
+        });
+
+        // Nút lọc
+        filterBtn.addEventListener('click', () => {
+            showNotification('Tính năng lọc đang được phát triển', 'info');
+        });
+
+        // Đóng thông báo
+        closeNotificationBtn.addEventListener('click', hideNotification);
+
+        // Thêm hiệu ứng khi cuộn trang
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const header = document.querySelector('header');
+
+            if (scrollTop > 50) {
+                header.style.transform = 'translateY(-10px)';
+                header.style.opacity = '0.9';
+            } else {
+                header.style.transform = 'translateY(0)';
+                header.style.opacity = '1';
+            }
         });
     }
 
-    function getStatusLabel(status) {
-        const statusMap = {
-            'new': 'Mới',
-            'potential_7': 'Tiềm năng 7 ngày',
-            'potential_14': 'Tiềm năng 14 ngày',
-            'success': 'Thành công',
-            'wrong_number': 'Sai số',
-            'unreachable': 'Không liên lạc',
-            'care': 'Chăm sóc'
-        };
-        return statusMap[status] || status;
+    // Khởi tạo ứng dụng
+    function initApp() {
+        renderServices();
+        initEventListeners();
+
+        // Thêm hiệu ứng cho các phần tử khi trang tải
+        setTimeout(() => {
+            document.querySelectorAll('.animate__animated').forEach(el => {
+                el.classList.add('animate__faster');
+            });
+        }, 1000);
     }
 
-    function getTypeLabel(type) {
-        const typeMap = { 'broker': 'Môi giới', 'owner': 'Chủ nhà', 'relative': 'Người thân' };
-        return typeMap[type] || type;
-    }
-
-    function getProvinceLabel(province) {
-        const provinceMap = { 'hanoi': 'Hà Nội', 'hcm': 'TP.HCM', 'danang': 'Đà Nẵng', 'haiphong': 'Hải Phòng', 'cantho': 'Cần Thơ', 'other': 'Khác' };
-        return provinceMap[province] || province;
-    }
-
-    function formatPhoneNumber(phone) {
-        return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');
-    }
+    // Chạy ứng dụng khi trang đã tải xong
+    document.addEventListener('DOMContentLoaded', initApp);
 </script>
-
-<!-- Notification animations + gradient alerts -->
-<style>
-    @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-
-    .alert-success { background: var(--success-gradient); color: white; }
-    .alert-warning { background: var(--warning-gradient); color: white; }
-    .alert-info { background: var(--info-gradient); color: white; }
-    .alert-danger { background: var(--danger-gradient); color: white; }
-</style>
 </body>
 </html>

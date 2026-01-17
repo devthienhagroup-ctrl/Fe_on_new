@@ -388,34 +388,6 @@ function triggerBrowserDownload(url, name) {
   a.download = name;
   a.click();
 }
-
-const getKhachDaLienHe = async () => {
-  try {
-    const res = await api.get(
-        '/customer-crm/telesales/khach-da-lien-he',
-        {
-          params: {
-            page: 0,
-            size: 10,
-            status: 'DC_TELESALES', // hoặc null
-            type: null,             // VD: 'NONG', 'AM'
-            search: ''              // hoặc null
-          }
-        }
-    )
-
-    console.log('✅ Response full:', res)
-    console.log('📦 Page data:', res.data)
-    console.log('📋 Content:', res.data.content)
-    console.log('📄 Total elements:', res.data.totalElements)
-    console.log('📑 Total pages:', res.data.totalPages)
-
-  } catch (err) {
-    console.error('❌ Lỗi gọi API khach-da-lien-he:', err)
-  }
-}
-
-getKhachDaLienHe();
 </script>
 
 <style scoped>

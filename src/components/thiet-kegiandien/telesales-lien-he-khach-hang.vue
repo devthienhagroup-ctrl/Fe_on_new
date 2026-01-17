@@ -4,11 +4,21 @@
     <!-- Header -->
     <header class="app-header">
       <h1><i class="fas fa-phone-alt"></i> Hệ Thống Telesale</h1>
-      <div class="user-info">
-        <span>Nhân viên: Nguyễn Văn A</span>
-        <button class="logout-btn">
-          <i class="fas fa-sign-out-alt"></i> Đăng xuất
-        </button>
+      <div class="d-flex align-items-center gap-2">
+        <div class="d-flex flex-column align-items-end text-end">
+          <div class="fw-semibold text-dark">{{ info.fullName }}</div>
+        </div>
+
+        <img
+            v-if="info.avatarUrl"
+            :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+            alt="avatar"
+            class="rounded-circle border"
+            style="width: 36px; height: 36px; object-fit: cover;"
+        />
+        <div v-else class="avatar-circle">
+          {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
+        </div>
       </div>
     </header>
 
@@ -228,6 +238,10 @@
                   <span v-if="customer.oldProvince" class="location-old">(Cũ: {{ customer.oldProvince }})</span>
                 </div>
 
+                <p class="customer-price">
+                  <i class="fas fa-coins"></i> Giá BĐS: {{ formatCurrency(customer.giaBDS) }}
+                </p>
+
                 <div class="customer-tags" v-if="Array.isArray(customer.tags) && customer.tags.length">
                   <span v-for="tag in customer.tags" :key="tag" class="customer-tag" :class="tag">
                     {{ getTagLabel(tag) }}
@@ -341,6 +355,14 @@
             </div>
 
             <div class="detail-section">
+              <h5><i class="fas fa-coins"></i> Thông tin BĐS</h5>
+              <div class="detail-row">
+                <span class="detail-label">Giá BĐS:</span>
+                <span class="detail-value">{{ formatCurrency(selectedCustomer.giaBDS) }}</span>
+              </div>
+            </div>
+
+            <div class="detail-section">
               <h5><i class="fas fa-layer-group"></i> Phân loại khách</h5>
               <div class="detail-row">
                 <span class="detail-label">Loại khách:</span>
@@ -450,18 +472,31 @@ import Chart from 'chart.js/auto'
 import api from '/src/api/api.js'
 import FileNew from './File.vue'
 
+import NotificationBell from "../NotificationBell.vue";
+import { useAuthStore } from "/src/stores/authStore.js";
+const authStore = useAuthStore();
+const info = authStore.userInfo;
 // ====== META ======
 const STATUS_META = {
   NEW: { label: 'Mới', color: '#94a3b8' },
+
   DC_TELESALES: { label: 'Mới tiếp nhận', color: '#6366f1' },
   CHAM_SOC: { label: 'Đang chăm sóc', color: '#38bdf8' },
   TN_7NGAY: { label: 'Tiềm năng 7 ngày', color: '#0ea5e9' },
   TN_14NGAY: { label: 'Tiềm năng 14 ngày', color: '#0284c7' },
+
   THAT_BAI: { label: 'Thất bại', color: '#f43f5e' },
   KHONG_LIEN_LAC_DUOC: { label: 'Không liên lạc được', color: '#f97316' },
   SAI_SO_LIEU: { label: 'Sai số liệu', color: '#a855f7' },
-  THANH_CONG: { label: 'Thành công (Lên VP)', color: '#22c55e' }
+
+  THANH_CONG: { label: 'Thành công (Lên VP)', color: '#22c55e' },
+
+  // ===== BỔ SUNG =====
+  KHACH_HUY_HEN: { label: 'Khách huỷ hẹn', color: '#b45309' },   // cam nâu – huỷ
+  BAN_NHANH: { label: 'Bán nhanh', color: '#15803d' },          // xanh lá đậm
+  BAN_GP: { label: 'Bán GP (Đã lên VP)', color: '#0f766e' },    // xanh ngọc đậm
 }
+
 
 // ====== Reactive state ======
 const activeTab = ref('new')
@@ -674,6 +709,13 @@ const formatReceivedAt = (isoString) => {
   })
 }
 
+const formatCurrency = (value) => {
+  if (value === null || value === undefined || value === '') return '-'
+  const numericValue = Number(value)
+  if (Number.isNaN(numericValue)) return value
+  return `${new Intl.NumberFormat('vi-VN').format(numericValue)} ₫`
+}
+
 // ====== Detail actions ======
 const selectCustomer = (customer) => {
   selectedCustomer.value = customer
@@ -775,6 +817,7 @@ const moveToContacted = async () => {
   try {
     const targetId = selectedCustomer.value.id
     const payload = buildFilePayload()
+    const flag = selectedCustomer.value.status === 'THANH_CONG'
     await api.post('/customer-crm/telesales/journey-history/create', payload, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
@@ -794,6 +837,16 @@ const moveToContacted = async () => {
     } else {
       resetFileForm([])
     }
+
+    // ===== LƯU LOCAL STORAGE + CHUYỂN TRANG =====
+    if (flag) {
+      localStorage.setItem('flagDatLich', 'true')
+      localStorage.setItem('customerPhone', selectedCustomer.value.phone)
+
+      // chuyển qua trang đặt lịch
+      window.location.href = '/-thg/quan-ly-lich-hen'
+    }
+
 
     // reload thống kê
     await refreshData()
@@ -848,6 +901,7 @@ const loadKhachMoiTiepNhan = async () => {
       oldProvince: item.tinhCu || null,
       type: item.type || null, // CHINH_CHU / MOI_GIOI / NGUOI_THAN
       note: item.ghiChu || '',
+      giaBDS: item.giaBDS ?? null,
       status: null,
       tags: [],
       lastCall: null,
@@ -886,6 +940,7 @@ const loadKhachDaLienHe = async () => {
         oldProvince: item.tinhCu || null,
         type: item.type || null,
         note: item.ghiChu || '',
+        giaBDS: item.giaBDS ?? null,
         status,
         tags: status ? [status] : [],
         lastCall: item.thoiGianLienHe || null,
@@ -1012,6 +1067,39 @@ const initLineChart = () => {
 }
 
 // ====== SUMMARY CHART ======
+const doughnutTotalPlugin = {
+  id: 'doughnutTotal',
+
+  afterDraw(chart) {
+    const { ctx, chartArea } = chart
+    if (!chartArea) return
+
+    const dataset = chart.data.datasets?.[0]
+    if (!dataset || !Array.isArray(dataset.data)) return
+
+    const total = dataset.data.reduce((sum, v) => sum + Number(v || 0), 0)
+
+    const centerX = (chartArea.left + chartArea.right) / 2
+    const centerY = (chartArea.top + chartArea.bottom) / 2
+
+    ctx.save()
+
+    // ===== TEXT TỔNG =====
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillStyle = '#1f2937' // xám đậm
+    ctx.font = '700 22px Inter, Arial'
+    ctx.fillText(total, centerX, centerY - 6)
+
+    // ===== SUB LABEL =====
+    ctx.fillStyle = '#6b7280'
+    ctx.font = '500 12px Inter, Arial'
+    ctx.fillText('Tổng khách', centerX, centerY + 16)
+
+    ctx.restore()
+  }
+}
+
 const initSummaryChart = () => {
   const ctx = document.getElementById('summaryChart')
   if (!ctx) return
@@ -1040,8 +1128,10 @@ const initSummaryChart = () => {
           labels: { boxWidth: 12, font: { size: 12 } }
         }
       }
-    }
+    },
+    plugins: [doughnutTotalPlugin]
   })
+
 }
 
 // ====== Refresh all ======
@@ -1088,17 +1178,22 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f0f2f5;
   color: #333;
+
 }
 
 .telesale-app {
+  position: relative;
+  top: -10px!important;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 108vh;
   overflow: hidden;
+  zoom: 0.9;
 }
 
 /* Header */
 .app-header {
+  top: -10px!important;
   background: linear-gradient(135deg, #3f51b5, #2196f3);
   color: white;
   padding: 15px 25px;
@@ -1605,6 +1700,16 @@ body {
 .customer-received {
   font-size: 14px;
   color: #444444;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.customer-price {
+  font-size: 14px;
+  color: #1d4ed8;
+  font-weight: 600;
   margin-bottom: 6px;
   display: flex;
   align-items: center;

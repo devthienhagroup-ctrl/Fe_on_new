@@ -27,13 +27,13 @@ import ForgotPassword from "./components/user/Login/Modal/ForgotPassword.vue";
 
 const route = useRoute()
 
-const updateScroll = () => {
-  if (route.path === '/-thg/quan-tri-du-lieu') {
-    document.body.style.overflow = 'hidden'
-  } else {
-    document.body.style.overflow = ''
-  }
-}
+// const updateScroll = () => {
+//   if (route.path === '/-thg/quan-tri-du-lieu') {
+//     document.body.style.overflow = 'hidden'
+//   } else {
+//     document.body.style.overflow = ''
+//   }
+// }
 
 
 //Đăng nhập
@@ -53,13 +53,29 @@ window.addEventListener('forgotPassword', () => {
   showForgotPassword.value = true
 });
 
-watch(
-    () => route.path,
-    () => {
-      updateScroll()
-    },
-    { immediate: true }
-)
+// watch(
+//     () => route.path,
+//     () => {
+//       updateScroll()
+//     },
+//     { immediate: true }
+// )
+//
+// const updateScroll = () => {
+//   if (route.path === '/-thg/quan-tri-du-lieu/') {
+//     document.body.style.overflow = 'hidden'
+//   } else {
+//     document.body.style.overflow = ''
+//   }
+// }
+//
+// watch(
+//     () => route.path,
+//     () => {
+//       updateScroll()
+//     },
+//     { immediate: true }
+// )
 
 onBeforeUnmount(() => {
   document.body.style.overflow = ''

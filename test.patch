@@ -1,290 +1,225 @@
-diff --git a/src/components/thiet-kegiandien/AppointmentsPage.vue b/src/components/thiet-kegiandien/AppointmentsPage.vue
-index ac54ed4f513c618b2d4d4f1a7248d09b05c4b4b5..0444aa03fcb664610de439e10261791d815d3510 100644
---- a/src/components/thiet-kegiandien/AppointmentsPage.vue
-+++ b/src/components/thiet-kegiandien/AppointmentsPage.vue
-@@ -279,53 +279,53 @@ const appointments = ref([
-     note: 'Dời vì khách bận.',
-     history: [makeHistory('Lê Hiếu', 'CREATE', 'Tạo lịch hẹn.'), makeHistory('Lê Hiếu', 'STATUS', 'Đổi trạng thái: Tạm hoãn.')],
-   },
-   {
-     id: 5,
-     customer: 'Mai H.',
-     phone: '0901 111 222',
-     branch: 'CN_TD',
-     date: '2026-01-10',
-     time: '11:00',
-     staff: 'Phạm Văn C',
-     consultant: 'Tư vấn 2',
-     status: 'NOT_UP',
-     consultStatus: 'FAIL',
-     customerType: 'BROKER',
-     rating: 'NOT_POTENTIAL',
-     creator: 'Lê Hiếu',
-     createdByMe: true,
-     inCharge: false,
-     note: '',
-     history: [makeHistory('Lê Hiếu', 'CREATE', 'Tạo lịch hẹn.')],
-   },
- ])
+diff --git a/src/components/thiet-kegiandien/admin-saleadmin.vue b/src/components/thiet-kegiandien/admin-saleadmin.vue
+index 626825a9a678d02ced3f8161767ead1d46dd26e5..6b04f73e16012995c76517a050bf0366c1fd53a5 100644
+--- a/src/components/thiet-kegiandien/admin-saleadmin.vue
++++ b/src/components/thiet-kegiandien/admin-saleadmin.vue
+@@ -1,53 +1,57 @@
+ <template>
+   <div class="app-scale">
+     <div class="app-root">
+     <!-- Navigation -->
+       <nav class="navbar navbar-expand-lg navbar-custom">
+         <div class="container-fluid">
 
- function getRowMarker(appt) {
--  if (appt?.createdByMe) return { color: '#ffb347', glow: 'rgba(255,179,71,0.32)' } // ORANGE
--  if (appt?.inCharge) return { color: '#4facfe', glow: 'rgba(79,172,254,0.30)' } // BLUE
--  return { color: '#667eea', glow: 'rgba(102,126,234,0.28)' }
-+  if (appt?.createdByMe) return { color: '#f97316', glow: 'rgba(253, 230, 138, 0.75)' } // ORANGE
-+  if (appt?.inCharge) return { color: '#2563eb', glow: 'rgba(191, 219, 254, 0.78)' } // BLUE
-+  return { color: '#667eea', glow: 'rgba(224, 231, 255, 0.7)' }
- }
-
- function monthTitle(d) {
-   return `Tháng ${d.getMonth() + 1}, ${d.getFullYear()}`
- }
-
- // ===== Conflict =====
- function hasConflict({ id = null, date, time, staff }) {
-   return appointments.value.find((a) => a.id !== id && a.date === date && a.time === time && a.staff === staff && a.status !== 'CANCELLED')
- }
-
- // ===== Apply filters (Calendar + Day + Table) =====
- function applyFilters(list) {
-   let out = [...list]
-   const refDate = new Date(`${selectedDateISO.value}T00:00:00`)
-   const refISO = selectedDateISO.value
-
-   if (activeRange.value === 'today') {
-     out = out.filter((a) => a.date === refISO)
-   } else if (activeRange.value === 'week') {
-     const s = startOfWeek(refDate)
-     const e = endOfWeek(refDate)
-     out = out.filter((a) => {
-       const d = new Date(`${a.date}T00:00:00`)
-       return d >= s && d < e
-@@ -2727,97 +2727,90 @@ onBeforeUnmount(() => {
-   font-size:13px;
-   position:relative;
-   border:1px solid transparent;
-   user-select:none;
- }
- .cal-date.current{ color:#0b1220; }
- .cal-date.other{ color:#c7d2e0; cursor:default; }
- .cal-date:hover{ background: rgba(102,126,234,0.08); }
- .cal-date.today{
-   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-   color:#fff;
- }
- .cal-date.selected{
-   background: rgba(79,172,254,0.14);
-   color:#0b6ea8;
-   border:1px solid rgba(79,172,254,0.24);
-   box-shadow: 0 0 0 4px rgba(79,172,254,0.10);
- }
- .cal-date.disabled{
-   opacity:0.45;
-   cursor:not-allowed;
-   background: rgba(148,163,184,0.08);
- }
- .cal-date.disabled:hover{ background: rgba(148,163,184,0.08); }
-
--/* has appointment: DOT + blinking halo pastel outside */
-+/* has appointment: DOT + soft pastel halo */
- .cal-date.has-appt::before{
-   content:"";
-   position:absolute;
--  bottom:8px;
-   left:50%;
--  width:26px;
--  height:26px;
--  transform: translateX(-50%);
-+  top: calc(100% - 12px);
-+  width:22px;
-+  height:22px;
-+  transform: translate(-50%, -50%);
-   border-radius:50%;
-   background: var(--mkGlow, rgba(79,172,254,0.28));
--  animation: pulseHalo 1.25s ease-in-out infinite;
- }
-
- .cal-date.has-appt::after{
-   content:"";
-   position:absolute;
--  bottom:14px;
-   left:50%;
--  width:7px;
--  height:7px;
--  transform: translateX(-50%);
-+  top: calc(100% - 12px);
-+  width:8px;
-+  height:8px;
-+  transform: translate(-50%, -50%);
-   border-radius:50%;
-   background: var(--mk, #4facfe);
- }
-
--@keyframes pulseHalo{
--  0%{ opacity:0.35; transform: translateX(-50%) scale(0.90); }
--  50%{ opacity:0.75; transform: translateX(-50%) scale(1.08); }
--  100%{ opacity:0.35; transform: translateX(-50%) scale(0.90); }
--}
+           <!-- ===== BRAND (BÊN TRÁI) ===== -->
+           <div class="d-flex align-items-center gap-2">
++            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
++            <i class="fas fa-phone-alt"></i>
++            <span class="fw-bold">ADMIN PRO</span>
++            </a>
++          </div>
++
++          <!-- ===== USER INFO (BÊN PHẢI) ===== -->
++          <div class="ms-auto d-flex align-items-center gap-2">
++            <button type="button" class="header-notification" title="Thông báo">
++              <i class="fas fa-bell"></i>
++              <span class="notification-dot"></span>
++            </button>
+             <button
+               type="button"
+               class="header-menu-toggle"
+               title="Ẩn/hiện menu"
+               @click="sidebar.toggle()"
+             >
+               <i class="fas fa-bars"></i>
+               <span class="d-none d-md-inline">Menu</span>
+             </button>
+-            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+-            <i class="fas fa-phone-alt"></i>
+-            <span class="fw-bold">ADMIN PRO</span>
+-            </a>
+-          </div>
 -
- .legend{
-   margin-top:auto;
-   display:flex;
-   gap:14px;
-   align-items:center;
-   padding-top:12px;
-   border-top: 1px solid rgba(20,22,30,0.06);
- }
- .lg{ display:flex; gap:8px; align-items:center; font-weight:750; font-size:12.5px; color:#5b6576; }
- .mk{
-   width:10px; height:10px; border-radius: 50%;
--  box-shadow: 0 0 0 4px rgba(20,22,30,0.05);
-+  box-shadow: 0 0 0 6px var(--mkGlow, rgba(20,22,30,0.05));
- }
--.mk-orange{ background:#ffb347; }
--.mk-blue{ background:#4facfe; }
-+.mk-orange{ background:#f97316; --mkGlow: rgba(253, 230, 138, 0.75); }
-+.mk-blue{ background:#2563eb; --mkGlow: rgba(191, 219, 254, 0.78); }
+-          <!-- ===== USER INFO (BÊN PHẢI) ===== -->
+-          <div class="ms-auto d-flex align-items-center gap-2">
+             <div class="d-flex flex-column align-items-end text-end">
+-              <div class="fw-semibold text-dark">
++              <div class="fw-semibold user-name">
+                 {{ info.fullName }}
+               </div>
+             </div>
 
- /* Day schedule (scroll riêng) */
- .day-actions{ display:flex; gap:10px; flex-wrap:wrap; }
- .day-body{
-   flex:1;
-   min-height:0;
-   overflow:hidden;
- }
- .slots{
-   height:100%;
-   overflow:auto;
-   padding-right:4px;
-   display:flex;
-   flex-direction:column;
-   gap:10px;
- }
- .slot{ display:grid; grid-template-columns: 84px 1fr; gap:10px; align-items:stretch; }
- .slot-time{
-   border:1px solid rgba(20,22,30,0.10);
-   border-radius:14px;
-   background: rgba(255,255,255,0.86);
-   display:flex; align-items:center; justify-content:center;
-   font-weight:900;
-   color:#334155;
-   font-size:12.5px;
-@@ -2854,56 +2847,55 @@ onBeforeUnmount(() => {
-   cursor:grab;
-   user-select:none;
-   align-self: center;
-   min-width: 290px;
-   transition:0.15s ease;
- }
- .appt-card:hover{ transform: translateY(-1px); box-shadow: 0 18px 40px rgba(0,0,0,0.14); }
- .appt-card.disabled{ opacity:0.6; cursor:not-allowed; }
- .appt-card:active{ cursor:grabbing; }
+             <img
+                 v-if="info.avatarUrl"
+                 :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+                 alt="avatar"
+                 class="rounded-circle border"
+                 style="width: 36px; height: 36px; object-fit: cover;"
+             />
 
- .appt-dot{
-   width:10px;
-   height:10px;
-   border-radius:50%;
-   background: var(--mk, #4facfe);
-   position:relative;
-   flex:0 0 auto;
- }
+             <div v-else class="avatar-circle">
+               {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
+             </div>
+           </div>
 
- /* halo */
- .appt-dot::before{
-   content:"";
-   position:absolute;
-   left:50%;
-   top:50%;
--  width:26px;
--  height:26px;
-+  width:20px;
-+  height:20px;
-   transform: translate(-50%, -50%);
-   border-radius:50%;
-   background: var(--mkGlow, rgba(79,172,254,0.30));
--  animation: pulseHalo 1.2s ease-in-out infinite;
- }
+         </div>
+       </nav>
 
 
- .appt-main{ display:flex; flex-direction:column; gap:2px; min-width:0; }
- .appt-main .n{
-   font-weight:950;
-   font-size:13px;
-   color: #0a1630; /* xanh nước biển đậm đen */
- }
- .phone-line{
-   font-weight:750;
-   font-size:12px;
-   color:#159b7d; /* xanh lá */
- }
- .phone-line i{ color:#22c55e; }
- .appt-meta{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; align-items:center; }
+       <!-- ✅ Shell: Sidebar đứng yên + Main cuộn riêng -->
+     <div class="app-shell">
+       <!-- Sidebar -->
+       <aside class="sidebar-wrap">
+@@ -3176,61 +3180,62 @@ body {
+   --transition-fast: 0.2s ease;
+   --transition-normal: 0.3s ease;
+   --transition-slow: 0.5s ease;
 
- .pill-soft{
-   display:inline-flex;
-   gap:6px;
-   align-items:center;
-   padding:6px 10px;
-   border-radius:999px;
-   background: rgba(148,163,184,0.16);
-   border:1px solid rgba(20,22,30,0.06);
-@@ -3006,54 +2998,57 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
-   width:40px; height:40px;
-   border-radius:50%;
-   background: rgba(102,126,234,0.12);
-   color:#2f3aa8;
-   display:flex; align-items:center; justify-content:center;
-   font-weight:900;
-   border:1px solid rgba(102,126,234,0.18);
-   position:relative;
- }
- .customer-avatar.sm{ width:34px; height:34px; }
- .customer-name{ font-weight:950; margin-bottom:2px; color:#0a1630; }
- .customer-phone{ font-size:12px; color:#159b7d; font-weight:750; }
- .customer-phone i{ color:#22c55e; }
-
- .customer-avatar .ava-dot{
-   position:absolute;
-   right:-1px; top:-1px;
-   width:10px; height:10px;
-   border-radius:50%;
-   background: var(--mk, #4facfe);
-   box-shadow: 0 0 0 2px rgba(255,255,255,0.85);
- }
- .customer-avatar .ava-dot::before{
-   content:"";
-   position:absolute;
--  inset:-8px;
-+  left:50%;
-+  top:50%;
-+  width:20px;
-+  height:20px;
-+  transform: translate(-50%, -50%);
-   border-radius:999px;
-   background: var(--mkGlow, rgba(79,172,254,0.28));
--  animation: pulseHalo 1.25s ease-in-out infinite;
+   --nav-h: 85px;
+   --shell-pad: 18px;
+   --sidebar-w: 350px;
+   font-family: 'Inter', sans-serif;
+   background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+   color: #333;
  }
 
- /* Chips / consult */
- .chip{
-   display:inline-flex;
-   align-items:center;
-   gap:8px;
-   padding:6px 10px;
-   border-radius:999px;
-   font-weight:900;
-   font-size:12px;
-   border:1px solid rgba(20,22,30,0.06);
-   white-space:nowrap;
+ * { margin: 0; padding: 0; box-sizing: border-box; }
+
+ /* ✅ BODY KHÔNG SCROLL */
+ html, body { height: 100%; }
+
+ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
+
+ /* Custom Scrollbar */
+ ::-webkit-scrollbar { width: 8px; height: 8px; }
+ ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 10px; }
+ ::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 10px; }
+ ::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); }
+
+-/* ✅ SCALE 0.8 GIỮ NGUYÊN (KHÔNG SCALE HTML) */
++/* ✅ App full screen */
+ .app-scale {
+   transform-origin: 0 0;
+-  zoom: 0.8;
++  width: 100vw;
++  height: 100vh;
  }
- .ct-owner{ background: rgba(148,163,184,0.16); color:#334155; }
- .ct-broker{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
- .ct-relative{ background: rgba(250,112,154,0.16); color:#a43e73; }
 
- .rt-pot{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
- .rt-npot{ background: rgba(255,88,88,0.18); color:#b83b2c; }
- .rt-care{ background: rgba(79,172,254,0.18); color:#0b6ea8; }
+ /* ✅ App layout full height, chỉ main cuộn */
+ .app-root {
+   position: relative;
+-  top: -10px;
+-  height: 122vh;
++  top: 0;
++  min-height: 100vh;
+   display: flex;
+   flex-direction: column;
+ }
 
- .consult-badge{
-   padding:7px 12px;
-   border-radius:999px;
+ .app-shell {
+   display: flex;
+   gap: var(--shell-pad);
+   padding: 10px 0px;
+   overflow: hidden;
+ }
+
+
+ /* Navbar */
+ .navbar-custom {
+   background: var(--dark-gradient);
+   backdrop-filter: blur(10px);
+   padding: 15px 0;
+   box-shadow: var(--shadow-medium);
+   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+   position: sticky;
+   top: -10px;
+   z-index: 1030;
+   height: var(--nav-h);
+ }
+
+@@ -3239,50 +3244,86 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
+   font-size: 1.5rem;
+   background: var(--primary-gradient);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+   background-clip: text;
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   line-height: 1;
+ }
+
+ .header-menu-toggle {
+   display: inline-flex;
+   align-items: center;
+   gap: 6px;
+   padding: 6px 12px;
+   border-radius: 999px;
+   border: 1px solid rgba(255, 255, 255, 0.35);
+   background: rgba(255, 255, 255, 0.12);
+   color: #f8fafc;
+   font-size: 0.875rem;
+   font-weight: 600;
+   transition: var(--transition-normal);
+ }
+
++.header-notification {
++  position: relative;
++  display: inline-flex;
++  align-items: center;
++  justify-content: center;
++  width: 38px;
++  height: 38px;
++  border-radius: 50%;
++  border: 1px solid rgba(255, 255, 255, 0.35);
++  background: rgba(255, 255, 255, 0.12);
++  color: #f8fafc;
++  font-size: 1rem;
++  transition: var(--transition-normal);
++}
++
++.header-notification:hover {
++  background: rgba(255, 255, 255, 0.2);
++  color: #fff;
++}
++
++.notification-dot {
++  position: absolute;
++  top: 8px;
++  right: 8px;
++  width: 8px;
++  height: 8px;
++  border-radius: 50%;
++  background: #ff5b5b;
++  box-shadow: 0 0 0 2px rgba(20, 18, 38, 0.6);
++}
++
++.user-name {
++  color: #fff;
++  font-size: 1.1rem;
++}
++
+ .header-menu-toggle:hover {
+   background: rgba(255, 255, 255, 0.2);
+   color: #fff;
+ }
+
+ .header-menu-toggle:active {
+   transform: scale(0.98);
+ }
+
+ .navbar-custom .navbar-brand i {
+   background: var(--primary-gradient);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+   background-clip: text;
+   font-size: 1.8rem;
+ }
+
+ .nav-link-custom {
+   color: rgba(255, 255, 255, 0.8) !important;
+   font-weight: 500;
+   padding: 8px 16px !important;
+   border-radius: 10px;
+   transition: var(--transition-normal);
+   margin: 0 2px;
+   position: relative;
