@@ -1128,9 +1128,10 @@ const initSummaryChart = () => {
           labels: { boxWidth: 12, font: { size: 12 } }
         }
       }
-    }
+    },
+    plugins: [doughnutTotalPlugin]
   })
-  plugins: [doughnutTotalPlugin]
+
 }
 
 // ====== Refresh all ======
