@@ -2,7 +2,7 @@
   <div id="refined-dashboard" class="refined-dashboard">
     <!-- Compact Header -->
     <div class="dashboard-header">
-      <div class="container">
+      <div class="px-4 py-0">
         <div class="header-content">
           <div class="d-flex align-items-center gap-3">
             <div class="brand-icon">
@@ -13,20 +13,12 @@
               <p class="dashboard-subtitle">Nhập liệu & phân tích theo thời gian thực</p>
             </div>
           </div>
-          <div class="header-actions">
-            <button @click="generateSampleData" class="btn btn-sm btn-outline">
-              <i class="fas fa-sparkles"></i> Dữ liệu mẫu
-            </button>
-            <button @click="exportData" class="btn btn-sm btn-primary">
-              <i class="fas fa-download"></i> Xuất dữ liệu
-            </button>
-          </div>
         </div>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="container main-content">
+    <div class="px-4 py-4" style="padding-top: 100px!important;">
       <div class="row g-4">
         <!-- Left: Compact Form -->
         <div class="col-lg-5">
@@ -235,7 +227,7 @@
                 <span class="icon-label" style="background: linear-gradient(135deg, #3A7BD5, #00D2FF);">
                   <i class="fas fa-tachometer-alt"></i>
                 </span>
-                Thống kê nhanh
+                Thống kê nhanh hôm nay
               </h4>
             </div>
             <div class="mini-stats">
@@ -480,6 +472,14 @@ const totalDistributionValue = computed(() => {
 
 
 const STATUS_META = {
+  NEW: {
+    label: 'Mới',
+    color: '#94a3b8' // slate-400
+  },
+  DC_TELESALES: {
+    label: 'Đã cấp telesales',
+    color: '#60a5fa' // blue-400
+  },
   CHAM_SOC: {
     label: 'Đang chăm sóc',
     color: '#38bdf8' // sky-400
@@ -507,30 +507,50 @@ const STATUS_META = {
   THANH_CONG: {
     label: 'Thành công (Lên VP)',
     color: '#22c55e' // green-500
+  },
+  KHACH_HUY_HEN: {
+    label: 'Khách huỷ hẹn',
+    color: '#fb7185' // rose-400
+  },
+  BAN_NHANH: {
+    label: 'Bán nhanh',
+    color: '#14b8a6' // teal-500
+  },
+  BAN_GP: {
+    label: 'Bán GP',
+    color: '#0d9488' // teal-600
   }
 };
 
-async function fetchThongKeStatus() {
-  const res = await api.get(
-      "/customer-crm/marketing/thong-ke-status",
-      { withCredentials: true }
-  );
 
-}
 
 const statusChartData = ref([]);
-const statusChartColors = ["#3b82f6", "#f59e42", "#10b981", "#6366f1", "#f43f5e", "#0ea5e9", "#22d3ee", "#f87171"];
 
 async function fetchStatusData() {
   try {
-    const res = await api.get("/customer-crm/marketing/thong-ke-status", { withCredentials: true });
-    const data = res.data;
-    // Map dữ liệu trả về thành mảng cho biểu đồ
-    statusChartData.value = (Array.isArray(data) ? data : []).map((item, idx) => ({
-      label: item.label,
-      value: item.value,
-      color: statusChartColors[idx % statusChartColors.length]
-    }));
+    const res = await api.get(
+        "/customer-crm/marketing/thong-ke-status",
+        { withCredentials: true }
+    );
+
+    const data = Array.isArray(res.data) ? res.data : [];
+
+    statusChartData.value = data
+        .map(item => {
+          // ✅ API trả label = enum key
+          const meta = STATUS_META[item.label];
+
+          if (!meta) return null;
+
+          return {
+            key: item.label,
+            label: meta.label,
+            value: item.value,
+            color: meta.color
+          };
+        })
+        .filter(Boolean);
+
     renderDistributionChart();
   } catch (err) {
     console.error(err);
@@ -1114,9 +1134,9 @@ async function fetchThongKeSoBo() {
   border-bottom: 1px solid #e2e8f0;
   padding: 1rem 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  position: fixed;
+  width: 100%;
+  z-index: 5;
 }
 
 .header-content {

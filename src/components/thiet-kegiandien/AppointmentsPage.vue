@@ -3,9 +3,12 @@ import { ref, reactive, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import api from '/src/api/api.js'
 import FileNew from './File.vue'
+import NotificationBell from '/src/components/NotificationBell.vue'
 Chart.register(...registerables)
 import {useAuthStore} from "/src/stores/authStore.js";
+import { useSidebarStore } from "/src/stores/sidebarStore.js";
 const authStore = useAuthStore();
+const sidebar = useSidebarStore();
 const info = authStore.userInfo;
 // Trong script setup, thêm route
 const rootRef = ref(null)
@@ -1939,32 +1942,42 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <div class="header">
+    <div class="page-title">
+      <h2><i class="fa-solid fa-calendar-check me-2"></i>Quản lý lịch hẹn</h2>
+      <p>Tạo, theo dõi và cập nhật trạng thái • phân loại • đánh giá</p>
+    </div>
+    <div class="d-flex align-items-center gap-2 ">
+      <button
+          class="header-menu-toggle"
+          title="Ẩn/hiện menu"
+          @click="sidebar.toggle()"
+      >
+        <i class="fa-solid fa-bars"></i>
+        <span class="d-none d-md-inline ms-1">Menu</span>
+      </button>
+      <NotificationBell />
+      <div class="d-flex flex-column align-items-end text-end">
+        <div class="fw-semibold text-dark">{{ info.fullName }}</div>
+      </div>
+
+      <img
+          v-if="info.avatarUrl"
+          :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+          alt="avatar"
+          class="rounded-circle border"
+          style="width: 36px; height: 36px; object-fit: cover;"
+      />
+      <div v-else class="avatar-circle">
+        {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
+      </div>
+    </div>
+  </div>
   <div ref="rootRef" class="appointments-page">
     <div class="toast-wrap" id="toastWrap"></div>
 
     <main class="main-content">
-      <div class="header">
-        <div class="page-title">
-          <h2><i class="fa-solid fa-calendar-check me-2"></i>Quản lý lịch hẹn</h2>
-          <p>Tạo, theo dõi và cập nhật trạng thái • phân loại • đánh giá</p>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-        <div class="d-flex flex-column align-items-end text-end">
-          <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-        </div>
 
-        <img
-            v-if="info.avatarUrl"
-            :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-            alt="avatar"
-            class="rounded-circle border"
-            style="width: 36px; height: 36px; object-fit: cover;"
-        />
-        <div v-else class="avatar-circle">
-          {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-        </div>
-        </div>
-      </div>
 
       <!-- Stats (KHÔNG ăn filter) -->
       <section class="stats">
@@ -3058,14 +3071,14 @@ onBeforeUnmount(() => {
 .header{
   display:flex; justify-content:space-between; align-items:center;
   gap:16px; flex-wrap:wrap;
-  margin-bottom:14px;
+  padding: 0 25px;
 }
 .page-title h2{
   font-size:22px; font-weight:900;
   color:#0b1220;
   display:flex; align-items:center;
 }
-.page-title p{ font-size:13px; color:#5b6576; margin-top:4px; font-weight:600; }
+.page-title p{ font-size:13px; color:#5b6576;  font-weight:600; }
 
 .search-bar{ position:relative; width:420px; max-width:100%; }
 .search-bar input{
@@ -4378,6 +4391,39 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
 .reason-textarea:focus {
   border-color: #fb923c;
   box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.15);
+}
+.header-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  height: 40px;
+
+  border-radius: 15px;
+  border: 1px solid #e5e7eb;
+
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  color: #334155;
+
+  font-size: 18px;
+  cursor: pointer;
+
+  transition: all 0.2s ease-in-out;
+}
+
+.header-menu-toggle:hover {
+  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+  color: #0369a1;
+  border-color: #bae6fd;
+}
+
+.header-menu-toggle:active {
+  transform: scale(0.95);
+}
+
+.header-menu-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35);
 }
 
 </style>

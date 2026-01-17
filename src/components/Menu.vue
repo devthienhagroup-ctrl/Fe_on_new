@@ -59,7 +59,7 @@
     </aside>
 
     <!-- Main content -->
-    <main class="flex-grow-1 bg-white overflow-auto py-2">
+    <main class="flex-grow-1 bg-white overflow-auto">
       <router-view />
     </main>
   </div>

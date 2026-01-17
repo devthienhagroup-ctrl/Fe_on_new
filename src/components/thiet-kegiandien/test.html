@@ -3,332 +3,559 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Dịch Vụ - Service Management</title>
+    <title>Quản Lý Dịch Vụ | Service Management</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Animate CSS for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-        /* Custom CSS cho giao diện chuyên nghiệp */
+        /* Custom CSS với gradient và hiệu ứng */
         :root {
-            --primary-color: #3b82f6;
-            --primary-dark: #2563eb;
-            --secondary-color: #10b981;
-            --danger-color: #ef4444;
-            --warning-color: #f59e0b;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --card-gradient: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            --sidebar-gradient: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
         }
 
-        .sidebar-item.active {
-            background-color: rgba(59, 130, 246, 0.1);
-            border-right: 4px solid var(--primary-color);
-            color: var(--primary-color);
-            font-weight: 600;
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         .service-card {
-            transition: all 0.2s ease;
-            border-radius: 0.75rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 18px;
             overflow: hidden;
+            background: var(--card-gradient);
+            position: relative;
+            z-index: 1;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            z-index: 2;
+            border-radius: 18px 18px 0 0;
         }
 
         .service-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .service-card:hover::before {
+            height: 6px;
         }
 
         .price-item {
             border-bottom: 1px solid #e5e7eb;
-            transition: background-color 0.2s ease;
+            transition: all 0.2s ease;
+            border-radius: 10px;
+            padding: 12px 16px;
         }
 
         .price-item:hover {
-            background-color: #f9fafb;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 51, 234, 0.05) 100%);
+            transform: translateX(5px);
         }
 
-        .color-badge {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
+        .gradient-btn {
+            background: var(--primary-gradient);
+            color: white;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .gradient-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .gradient-btn-secondary {
+            background: var(--secondary-gradient);
+            color: white;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .gradient-btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(240, 147, 251, 0.3);
+        }
+
+        .stat-card {
+            background: var(--card-gradient);
+            border-radius: 18px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--success-gradient);
+            border-radius: 18px 18px 0 0;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--card-gradient);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .floating-action-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
-            margin-right: 8px;
-            vertical-align: middle;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
+            transition: all 0.3s ease;
+            z-index: 100;
         }
 
-        /* Custom scrollbar */
+        .floating-action-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: inline-block;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .service-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .service-1 {
+            background: var(--primary-gradient);
+        }
+
+        .service-2 {
+            background: var(--secondary-gradient);
+        }
+
+        .service-3 {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .service-4 {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+            }
+        }
+
         .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-track {
             background: #f1f1f1;
-            border-radius: 3px;
+            border-radius: 10px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 3px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #a1a1a1;
+            background: linear-gradient(180deg, #5a6fd8 0%, #6a4190 100%);
         }
 
-        /* Animation cho các phần tử */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
         }
 
-        .fade-in {
-            animation: fadeIn 0.3s ease-out;
+        .price-badge {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            color: #667eea;
+            border-left: 4px solid #667eea;
         }
 
-        /* Responsive adjustments */
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .input-field {
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            padding: 14px 18px;
+        }
+
+        .input-field:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            outline: none;
+        }
+
+        .color-input-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .color-input {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            border: 3px solid white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .color-input:hover {
+            transform: scale(1.1);
+        }
+
+        .color-input::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-input::-webkit-color-swatch {
+            border: none;
+            border-radius: 8px;
+        }
+
+        .wave-divider {
+            height: 100px;
+            width: 100%;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wave-divider::before {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' fill='%23ffffff'%3E%3C/path%3E%3C/svg%3E");
+            background-size: 1200px 100%;
+        }
+
+        /* Responsive design */
         @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                position: static;
+            .floating-action-btn {
+                width: 60px;
+                height: 60px;
+                bottom: 20px;
+                right: 20px;
+                font-size: 24px;
             }
 
-            .main-content {
-                margin-left: 0;
+            .service-card:hover {
+                transform: translateY(-5px) scale(1.01);
             }
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
-<div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <div class="sidebar w-64 bg-white shadow-lg fixed h-full overflow-y-auto custom-scrollbar">
-        <div class="p-6 border-b">
-            <h1 class="text-2xl font-bold text-gray-800">
-                <i class="fas fa-cogs text-blue-500 mr-2"></i>
-                Service Manager
-            </h1>
-            <p class="text-gray-500 text-sm mt-1">Quản lý dịch vụ chuyên nghiệp</p>
-        </div>
+<body class="text-gray-800">
+<!-- Header -->
+<header class="pt-10 pb-16 px-6 text-center">
+    <div class="container mx-auto max-w-6xl">
+        <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+            <i class="fas fa-cogs mr-4"></i>Quản Lý Dịch Vụ
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Quản lý và cấu hình các dịch vụ với giao diện trực quan, chuyên nghiệp
+        </p>
 
-        <nav class="mt-6">
-            <a href="#" class="sidebar-item active flex items-center p-4 text-gray-700 hover:bg-blue-50">
-                <i class="fas fa-list-alt mr-3 text-blue-500"></i>
-                <span>Danh sách dịch vụ</span>
-            </a>
-            <a href="#" class="flex items-center p-4 text-gray-700 hover:bg-blue-50">
-                <i class="fas fa-chart-line mr-3 text-green-500"></i>
-                <span>Báo cáo & Thống kê</span>
-            </a>
-            <a href="#" class="flex items-center p-4 text-gray-700 hover:bg-blue-50">
-                <i class="fas fa-cog mr-3 text-gray-500"></i>
-                <span>Cài đặt hệ thống</span>
-            </a>
-            <a href="#" class="flex items-center p-4 text-gray-700 hover:bg-blue-50">
-                <i class="fas fa-question-circle mr-3 text-purple-500"></i>
-                <span>Trợ giúp & Hỗ trợ</span>
-            </a>
-        </nav>
-
-        <div class="absolute bottom-0 w-full p-4 border-t bg-gray-50">
-            <div class="flex items-center">
-                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <i class="fas fa-user text-blue-600"></i>
+        <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div class="stat-card p-6 text-center animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+                <div class="text-4xl font-bold text-purple-600 mb-2" id="totalServices">2</div>
+                <div class="text-gray-600 font-medium">Tổng dịch vụ</div>
+                <div class="mt-3 text-sm text-gray-500">
+                    <i class="fas fa-arrow-up text-green-500 mr-1"></i> Đang hoạt động
                 </div>
-                <div class="ml-3">
-                    <p class="font-medium">Nguyễn Văn A</p>
-                    <p class="text-xs text-gray-500">Quản trị viên</p>
+            </div>
+
+            <div class="stat-card p-6 text-center animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                <div class="text-4xl font-bold text-blue-600 mb-2" id="totalPriceSegments">6</div>
+                <div class="text-gray-600 font-medium">Phân khúc giá</div>
+                <div class="mt-3 text-sm text-gray-500">
+                    <i class="fas fa-chart-line text-blue-500 mr-1"></i> Trung bình 3/dịch vụ
+                </div>
+            </div>
+
+            <div class="stat-card p-6 text-center animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
+                <div class="text-4xl font-bold text-green-600 mb-2" id="activeServices">2</div>
+                <div class="text-gray-600 font-medium">Đang hoạt động</div>
+                <div class="mt-3 text-sm text-gray-500">
+                    <i class="fas fa-check-circle text-green-500 mr-1"></i> 100% hoạt động
                 </div>
             </div>
         </div>
     </div>
+</header>
 
-    <!-- Main Content -->
-    <div class="main-content ml-64 flex-1 p-8 fade-in">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <h2 class="text-3xl font-bold text-gray-800">Quản lý dịch vụ</h2>
-                <p class="text-gray-600">Quản lý và cấu hình các dịch vụ của hệ thống</p>
+<!-- Wave Divider -->
+<div class="wave-divider"></div>
+
+<!-- Main Content -->
+<main class="py-10 px-4 md:px-6 bg-gradient-to-b from-white to-gray-50">
+    <div class="container mx-auto max-w-6xl">
+        <!-- Services Section -->
+        <div class="mb-12">
+            <div class="flex justify-between items-center mb-10">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Danh sách dịch vụ</h2>
+                    <p class="text-gray-600">Quản lý tất cả dịch vụ và phân khúc giá của bạn</p>
+                </div>
+                <button id="filterBtn" class="gradient-btn-secondary px-6 py-3">
+                    <i class="fas fa-filter mr-2"></i>Lọc & Sắp xếp
+                </button>
             </div>
-            <div class="flex space-x-3">
-                <button class="px-5 py-2.5 bg-blue-50 text-blue-600 rounded-lg font-medium hover:bg-blue-100 transition-colors">
-                    <i class="fas fa-filter mr-2"></i>Lọc dịch vụ
-                </button>
-                <button id="addServiceBtn" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                    <i class="fas fa-plus mr-2"></i>Thêm dịch vụ
-                </button>
+
+            <!-- Services Grid -->
+            <div id="servicesContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Service cards will be loaded here dynamically -->
             </div>
         </div>
 
-        <!-- Thông báo -->
-        <div class="mb-6 p-4 bg-green-50 text-green-700 rounded-lg border border-green-200 flex justify-between items-center">
-            <div class="flex items-center">
-                <i class="fas fa-check-circle mr-3"></i>
-                <span>Đã tải thành công <strong id="serviceCount">2</strong> dịch vụ từ hệ thống</span>
+        <!-- Empty State (Hidden by default) -->
+        <div id="emptyState" class="text-center py-16 hidden">
+            <div class="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 mb-6 animate-float">
+                <i class="fas fa-box-open text-5xl text-purple-500"></i>
             </div>
-            <button class="text-green-600 hover:text-green-800">
-                <i class="fas fa-times"></i>
+            <h3 class="text-2xl font-bold text-gray-700 mb-3">Chưa có dịch vụ nào</h3>
+            <p class="text-gray-600 max-w-md mx-auto mb-8">Bắt đầu bằng cách thêm dịch vụ đầu tiên của bạn để quản lý phân khúc giá và cấu hình.</p>
+            <button id="addFirstServiceBtn" class="gradient-btn px-8 py-3 text-lg">
+                <i class="fas fa-plus mr-2"></i>Thêm dịch vụ đầu tiên
             </button>
         </div>
-
-        <!-- Service Cards Container -->
-        <div id="servicesContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Service cards will be dynamically loaded here -->
-        </div>
-
-        <!-- Statistics Section -->
-        <div class="mt-12">
-            <h3 class="text-xl font-bold mb-6 text-gray-800">Tổng quan dịch vụ</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-xl shadow border">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-gray-500 text-sm">Tổng số dịch vụ</p>
-                            <p class="text-3xl font-bold mt-2">2</p>
-                        </div>
-                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                            <i class="fas fa-cogs text-blue-600 text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="mt-4 pt-4 border-t">
-                        <p class="text-green-600 text-sm">
-                            <i class="fas fa-arrow-up mr-1"></i> 0% so với tháng trước
-                        </p>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-xl shadow border">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-gray-500 text-sm">Tổng số phân khúc giá</p>
-                            <p class="text-3xl font-bold mt-2">6</p>
-                        </div>
-                        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                            <i class="fas fa-tags text-green-600 text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="mt-4 pt-4 border-t">
-                        <p class="text-green-600 text-sm">
-                            <i class="fas fa-arrow-up mr-1"></i> Trung bình 3 phân khúc/dịch vụ
-                        </p>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-xl shadow border">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-gray-500 text-sm">Dịch vụ đang hoạt động</p>
-                            <p class="text-3xl font-bold mt-2">2</p>
-                        </div>
-                        <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
-                            <i class="fas fa-check-circle text-purple-600 text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="mt-4 pt-4 border-t">
-                        <p class="text-green-600 text-sm">
-                            <i class="fas fa-check mr-1"></i> Tất cả dịch vụ đang hoạt động
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="mt-12 pt-8 border-t text-center text-gray-500 text-sm">
-            <p>© 2023 Service Management System. Phiên bản 2.1.0</p>
-            <p class="mt-1">Được thiết kế với <i class="fas fa-heart text-red-500"></i> để mang lại trải nghiệm tốt nhất</p>
-        </div>
     </div>
-</div>
+</main>
+
+<!-- Floating Action Button -->
+<button id="addServiceBtn" class="floating-action-btn pulse animate__animated animate__bounceIn" title="Thêm dịch vụ mới">
+    <i class="fas fa-plus"></i>
+</button>
 
 <!-- Modal thêm/sửa dịch vụ -->
-<div id="serviceModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
-        <div class="p-6 border-b">
-            <h3 class="text-2xl font-bold text-gray-800" id="modalTitle">Thêm dịch vụ mới</h3>
-            <p class="text-gray-600 mt-1">Nhập thông tin chi tiết của dịch vụ</p>
+<div id="serviceModal" class="fixed inset-0 flex items-center justify-center z-50 hidden modal-overlay p-4">
+    <div class="modal-content w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div class="p-8 border-b border-gray-100">
+            <div class="flex justify-between items-center">
+                <h3 class="text-2xl font-bold text-gray-800" id="modalTitle">Thêm dịch vụ mới</h3>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <p class="text-gray-600 mt-2">Nhập thông tin chi tiết của dịch vụ và phân khúc giá</p>
         </div>
 
-        <form id="serviceForm" class="p-6">
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2" for="serviceName">Tên dịch vụ *</label>
-                    <input type="text" id="serviceName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Nhập tên dịch vụ" required>
+        <form id="serviceForm" class="p-8">
+            <div class="space-y-8">
+                <!-- Service Name -->
+                <div class="animate__animated animate__fadeIn">
+                    <label class="block text-gray-700 font-semibold mb-3 text-lg" for="serviceName">
+                        <i class="fas fa-heading mr-2 text-blue-500"></i>Tên dịch vụ *
+                    </label>
+                    <input type="text" id="serviceName" class="input-field w-full" placeholder="Nhập tên dịch vụ" required>
+                    <p class="text-gray-500 text-sm mt-2">Tên dịch vụ sẽ hiển thị trên giao diện khách hàng</p>
                 </div>
 
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2" for="serviceDescription">Mô tả dịch vụ</label>
-                    <textarea id="serviceDescription" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Nhập mô tả chi tiết về dịch vụ"></textarea>
+                <!-- Service Description -->
+                <div class="animate__animated animate__fadeIn" style="animation-delay: 0.1s">
+                    <label class="block text-gray-700 font-semibold mb-3 text-lg" for="serviceDescription">
+                        <i class="fas fa-align-left mr-2 text-green-500"></i>Mô tả dịch vụ
+                    </label>
+                    <textarea id="serviceDescription" rows="3" class="input-field w-full" placeholder="Mô tả chi tiết về dịch vụ, tính năng và lợi ích"></textarea>
                 </div>
 
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2" for="serviceColor">Màu phân loại *</label>
-                    <div class="flex space-x-4">
-                        <div class="color-option flex items-center">
-                            <input type="radio" id="color-blue" name="serviceColor" value="#3b82f6" class="hidden" checked>
-                            <label for="color-blue" class="w-10 h-10 rounded-full bg-blue-500 cursor-pointer border-2 border-transparent hover:border-blue-700 color-sample"></label>
-                            <span class="ml-2 text-gray-700">Xanh dương</span>
-                        </div>
-                        <div class="color-option flex items-center">
-                            <input type="radio" id="color-green" name="serviceColor" value="#10b981" class="hidden">
-                            <label for="color-green" class="w-10 h-10 rounded-full bg-green-500 cursor-pointer border-2 border-transparent hover:border-green-700 color-sample"></label>
-                            <span class="ml-2 text-gray-700">Xanh lá</span>
-                        </div>
-                        <div class="color-option flex items-center">
-                            <input type="radio" id="color-purple" name="serviceColor" value="#8b5cf6" class="hidden">
-                            <label for="color-purple" class="w-10 h-10 rounded-full bg-purple-500 cursor-pointer border-2 border-transparent hover:border-purple-700 color-sample"></label>
-                            <span class="ml-2 text-gray-700">Tím</span>
-                        </div>
-                        <div class="color-option flex items-center">
-                            <input type="radio" id="color-orange" name="serviceColor" value="#f59e0b" class="hidden">
-                            <label for="color-orange" class="w-10 h-10 rounded-full bg-orange-500 cursor-pointer border-2 border-transparent hover:border-orange-700 color-sample"></label>
-                            <span class="ml-2 text-gray-700">Cam</span>
+                <!-- Service Color -->
+                <div class="animate__animated animate__fadeIn" style="animation-delay: 0.2s">
+                    <label class="block text-gray-700 font-semibold mb-3 text-lg">
+                        <i class="fas fa-palette mr-2 text-purple-500"></i>Màu phân loại *
+                    </label>
+                    <div class="color-input-container">
+                        <input type="color" id="serviceColor" name="serviceColor" value="#3b82f6" class="color-input">
+                        <div>
+                            <div class="font-medium text-gray-700 mb-1">Màu đã chọn: <span id="colorHexCode">#3b82f6</span></div>
+                            <p class="text-gray-500 text-sm">Màu này sẽ dùng để phân loại dịch vụ trong biểu mẫu</p>
                         </div>
                     </div>
                 </div>
 
-                <div>
-                    <div class="flex justify-between items-center mb-4">
-                        <label class="block text-gray-700 font-medium">Danh sách giá theo phân khúc tài sản</label>
-                        <button type="button" id="addPriceBtn" class="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg font-medium hover:bg-blue-200 transition-colors text-sm">
-                            <i class="fas fa-plus mr-1"></i> Thêm phân khúc giá
+                <!-- Price List -->
+                <div class="animate__animated animate__fadeIn" style="animation-delay: 0.3s">
+                    <div class="flex justify-between items-center mb-6">
+                        <label class="block text-gray-700 font-semibold text-lg">
+                            <i class="fas fa-tags mr-2 text-yellow-500"></i>Phân khúc giá theo tài sản
+                        </label>
+                        <button type="button" id="addPriceBtn" class="gradient-btn-secondary px-5 py-2.5 text-sm">
+                            <i class="fas fa-plus mr-1"></i> Thêm phân khúc
                         </button>
                     </div>
 
                     <div id="priceList" class="space-y-4">
                         <!-- Price items will be added here dynamically -->
-                        <div class="price-item-input flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                            <div class="flex-1">
-                                <label class="block text-gray-600 text-sm mb-1">Giá trị tài sản tối thiểu (Min)</label>
-                                <input type="number" class="price-min w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="0" min="0" required>
+                        <div class="price-item-input glass-card p-5">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối thiểu (Min) *</label>
+                                    <input type="number" class="price-min input-field w-full" placeholder="0" min="0" required>
+                                    <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối đa (Max) *</label>
+                                    <input type="number" class="price-max input-field w-full" placeholder="1,000,000,000" min="0" required>
+                                    <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-600 font-medium mb-2">Giá dịch vụ *</label>
+                                    <input type="number" class="price-value input-field w-full" placeholder="500,000" min="0" required>
+                                    <div class="flex justify-between items-center mt-2">
+                                        <p class="text-gray-500 text-xs">Đơn vị: VNĐ</p>
+                                        <button type="button" class="remove-price-btn text-red-500 hover:text-red-700 text-sm">
+                                            <i class="fas fa-trash mr-1"></i>Xóa
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex-1">
-                                <label class="block text-gray-600 text-sm mb-1">Giá trị tài sản tối đa (Max)</label>
-                                <input type="number" class="price-max w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="1000000" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+                            <div>
+                                <p class="text-blue-800 font-medium">Thông tin phân khúc giá</p>
+                                <p class="text-blue-700 text-sm mt-1">Mỗi dịch vụ có thể có nhiều phân khúc giá khác nhau dựa trên giá trị tài sản. Hệ thống sẽ tự động áp dụng phân khúc phù hợp với giá trị tài sản của khách hàng.</p>
                             </div>
-                            <div class="flex-1">
-                                <label class="block text-gray-600 text-sm mb-1">Giá dịch vụ</label>
-                                <input type="number" class="price-value w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="500000" min="0" required>
-                            </div>
-                            <button type="button" class="remove-price-btn text-red-500 hover:text-red-700 mt-6">
-                                <i class="fas fa-trash"></i>
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="flex justify-end space-x-4 mt-8 pt-6 border-t">
-                <button type="button" id="cancelModalBtn" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
-                    Hủy bỏ
+            <!-- Form Actions -->
+            <div class="flex justify-end space-x-4 mt-10 pt-8 border-t border-gray-100">
+                <button type="button" id="cancelModalBtn" class="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-times mr-2"></i>Hủy bỏ
                 </button>
-                <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                    Lưu dịch vụ
+                <button type="submit" class="gradient-btn px-8 py-3 font-semibold text-lg">
+                    <i class="fas fa-save mr-2"></i>Lưu dịch vụ
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Success Notification -->
+<div id="successNotification" class="fixed top-6 right-6 z-50 hidden">
+    <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-5 rounded-2xl shadow-2xl max-w-md animate__animated animate__fadeInRight">
+        <div class="flex items-center">
+            <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mr-4">
+                <i class="fas fa-check text-2xl"></i>
+            </div>
+            <div>
+                <p class="font-bold text-lg" id="notificationTitle">Thành công!</p>
+                <p id="notificationMessage" class="text-white/90">Dịch vụ đã được lưu thành công</p>
+            </div>
+            <button id="closeNotificationBtn" class="ml-auto text-white/70 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -346,7 +573,8 @@
                 { min: 2000000001, max: 5000000000, value: 70000000 }
             ],
             active: true,
-            createdAt: "2023-05-15"
+            createdAt: "2023-05-15",
+            icon: "fa-bolt"
         },
         {
             id: 2,
@@ -359,7 +587,8 @@
                 { min: 5000000001, max: 10000000000, value: 100000000 }
             ],
             active: true,
-            createdAt: "2023-06-22"
+            createdAt: "2023-06-22",
+            icon: "fa-chart-line"
         }
     ];
 
@@ -374,11 +603,23 @@
     const serviceForm = document.getElementById('serviceForm');
     const serviceNameInput = document.getElementById('serviceName');
     const serviceDescriptionInput = document.getElementById('serviceDescription');
+    const serviceColorInput = document.getElementById('serviceColor');
+    const colorHexCode = document.getElementById('colorHexCode');
     const priceList = document.getElementById('priceList');
     const addPriceBtn = document.getElementById('addPriceBtn');
     const addServiceBtn = document.getElementById('addServiceBtn');
+    const addFirstServiceBtn = document.getElementById('addFirstServiceBtn');
     const cancelModalBtn = document.getElementById('cancelModalBtn');
-    const serviceCount = document.getElementById('serviceCount');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const filterBtn = document.getElementById('filterBtn');
+    const emptyState = document.getElementById('emptyState');
+    const successNotification = document.getElementById('successNotification');
+    const notificationTitle = document.getElementById('notificationTitle');
+    const notificationMessage = document.getElementById('notificationMessage');
+    const closeNotificationBtn = document.getElementById('closeNotificationBtn');
+    const totalServices = document.getElementById('totalServices');
+    const totalPriceSegments = document.getElementById('totalPriceSegments');
+    const activeServices = document.getElementById('activeServices');
 
     // Định dạng tiền tệ
     const formatCurrency = (amount) => {
@@ -391,84 +632,116 @@
     // Hiển thị danh sách dịch vụ
     function renderServices() {
         servicesContainer.innerHTML = '';
-        serviceCount.textContent = services.length;
 
-        services.forEach(service => {
-            const serviceCard = document.createElement('div');
-            serviceCard.className = 'service-card bg-white rounded-xl shadow border overflow-hidden fade-in';
-            serviceCard.innerHTML = `
-                    <div class="p-6">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <div class="flex items-center mb-2">
-                                    <span class="color-badge" style="background-color: ${service.color}"></span>
-                                    <h3 class="text-xl font-bold text-gray-800">${service.name}</h3>
-                                    ${service.active ? '<span class="ml-3 px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Đang hoạt động</span>' : '<span class="ml-3 px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">Ngừng hoạt động</span>'}
+        // Cập nhật thống kê
+        totalServices.textContent = services.length;
+        totalPriceSegments.textContent = services.reduce((total, service) => total + service.prices.length, 0);
+        activeServices.textContent = services.filter(s => s.active).length;
+
+        if (services.length === 0) {
+            emptyState.classList.remove('hidden');
+            servicesContainer.classList.add('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+            servicesContainer.classList.remove('hidden');
+
+            services.forEach((service, index) => {
+                const serviceCard = document.createElement('div');
+                serviceCard.className = `service-card animate__animated animate__fadeInUp glass-card`;
+                serviceCard.style.animationDelay = `${index * 0.1}s`;
+
+                // Tính toán tổng số phân khúc giá
+                const totalPriceSegments = service.prices.length;
+
+                // Xác định icon class dựa trên service data
+                const iconClass = service.icon || (index % 4 === 0 ? 'fa-bolt' :
+                    index % 4 === 1 ? 'fa-chart-line' :
+                        index % 4 === 2 ? 'fa-gem' : 'fa-crown');
+
+                serviceCard.innerHTML = `
+                        <div class="p-7">
+                            <div class="flex justify-between items-start mb-6">
+                                <div class="flex items-start">
+                                    <div class="service-icon ${`service-${(index % 4) + 1}`} mr-5">
+                                        <i class="fas ${iconClass}"></i>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center mb-2">
+                                            <h3 class="text-2xl font-bold text-gray-800">${service.name}</h3>
+                                            ${service.active ?
+                    '<span class="badge bg-green-100 text-green-800 ml-4"><i class="fas fa-circle text-xs mr-1"></i> Đang hoạt động</span>' :
+                    '<span class="badge bg-red-100 text-red-800 ml-4"><i class="fas fa-circle text-xs mr-1"></i> Ngừng hoạt động</span>'}
+                                        </div>
+                                        <p class="text-gray-600 mb-4">${service.description}</p>
+                                        <div class="flex items-center text-gray-500 text-sm">
+                                            <div class="flex items-center mr-6">
+                                                <div class="color-preview mr-2" style="background-color: ${service.color};"></div>
+                                                <span>Màu phân loại</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <i class="far fa-calendar-alt mr-2"></i>
+                                                <span>Tạo ngày: ${service.createdAt}</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <p class="text-gray-600 mb-4">${service.description}</p>
-                                <div class="text-sm text-gray-500">
-                                    <i class="far fa-calendar-alt mr-1"></i> Tạo ngày: ${service.createdAt}
+                                <div class="flex space-x-2">
+                                    <button class="edit-service-btn px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-medium hover:bg-blue-100 transition-colors text-sm" data-id="${service.id}" title="Chỉnh sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="delete-service-btn px-4 py-2 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-colors text-sm" data-id="${service.id}" title="Xóa dịch vụ">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </div>
-                            <div class="flex space-x-2">
-                                <button class="edit-service-btn px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-medium hover:bg-blue-100 transition-colors text-sm" data-id="${service.id}">
-                                    <i class="fas fa-edit mr-1"></i> Sửa
-                                </button>
-                                <button class="delete-service-btn px-4 py-2 bg-red-50 text-red-600 rounded-lg font-medium hover:bg-red-100 transition-colors text-sm" data-id="${service.id}">
-                                    <i class="fas fa-trash mr-1"></i> Xóa
-                                </button>
+
+                            <div class="mt-8 pt-6 border-t border-gray-100">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h4 class="font-bold text-gray-700 text-lg">
+                                        <i class="fas fa-tags mr-2 text-yellow-500"></i>Bảng giá theo phân khúc tài sản
+                                    </h4>
+                                    <span class="badge price-badge">${totalPriceSegments} phân khúc</span>
+                                </div>
+                                <div class="space-y-4">
+                                    ${service.prices.map(price => `
+                                        <div class="price-item glass-card p-4">
+                                            <div class="flex justify-between items-center">
+                                                <div>
+                                                    <div class="font-bold text-gray-800 text-lg">${formatCurrency(price.value)}</div>
+                                                    <div class="text-gray-600 text-sm mt-1">
+                                                        Áp dụng cho tài sản từ ${formatCurrency(price.min)} đến ${formatCurrency(price.max)}
+                                                    </div>
+                                                </div>
+                                                <div class="text-right">
+                                                    <div class="text-sm text-gray-500">Phạm vi giá trị</div>
+                                                    <div class="font-semibold text-gray-700">${formatCurrency(price.min)} - ${formatCurrency(price.max)}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
                             </div>
                         </div>
+                    `;
 
-                        <div class="mt-6 pt-6 border-t">
-                            <h4 class="font-medium text-gray-700 mb-4">
-                                <i class="fas fa-tags mr-2"></i>Bảng giá theo phân khúc tài sản
-                            </h4>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-sm text-left text-gray-700">
-                                    <thead class="text-xs text-gray-500 uppercase bg-gray-50">
-                                        <tr>
-                                            <th class="px-4 py-3">Phân khúc tài sản</th>
-                                            <th class="px-4 py-3">Giá trị tài sản (Min - Max)</th>
-                                            <th class="px-4 py-3">Giá dịch vụ</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${service.prices.map(price => `
-                                            <tr class="price-item border-b hover:bg-gray-50">
-                                                <td class="px-4 py-3">
-                                                    <div class="font-medium">${formatCurrency(price.min)} - ${formatCurrency(price.max)}</div>
-                                                </td>
-                                                <td class="px-4 py-3">
-                                                    Từ ${formatCurrency(price.min)} đến ${formatCurrency(price.max)}
-                                                </td>
-                                                <td class="px-4 py-3 font-bold text-blue-600">${formatCurrency(price.value)}</td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-            servicesContainer.appendChild(serviceCard);
-        });
-
-        // Thêm sự kiện cho các nút chỉnh sửa và xóa
-        document.querySelectorAll('.edit-service-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const serviceId = parseInt(e.currentTarget.getAttribute('data-id'));
-                openEditModal(serviceId);
+                servicesContainer.appendChild(serviceCard);
             });
-        });
 
-        document.querySelectorAll('.delete-service-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const serviceId = parseInt(e.currentTarget.getAttribute('data-id'));
-                deleteService(serviceId);
+            // Thêm sự kiện cho các nút chỉnh sửa và xóa
+            document.querySelectorAll('.edit-service-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const serviceId = parseInt(e.currentTarget.getAttribute('data-id'));
+                    openEditModal(serviceId);
+                });
             });
-        });
+
+            document.querySelectorAll('.delete-service-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const serviceId = parseInt(e.currentTarget.getAttribute('data-id'));
+                    deleteService(serviceId);
+                });
+            });
+        }
     }
 
     // Mở modal thêm dịch vụ mới
@@ -478,26 +751,34 @@
         serviceForm.reset();
 
         // Reset màu về mặc định
-        document.getElementById('color-blue').checked = true;
+        serviceColorInput.value = "#3b82f6";
+        colorHexCode.textContent = "#3b82f6";
 
         // Reset danh sách giá
         priceList.innerHTML = `
-                <div class="price-item-input flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                    <div class="flex-1">
-                        <label class="block text-gray-600 text-sm mb-1">Giá trị tài sản tối thiểu (Min)</label>
-                        <input type="number" class="price-min w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="0" min="0" required>
+                <div class="price-item-input glass-card p-5">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối thiểu (Min) *</label>
+                            <input type="number" class="price-min input-field w-full" placeholder="0" min="0" required>
+                            <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối đa (Max) *</label>
+                            <input type="number" class="price-max input-field w-full" placeholder="1,000,000,000" min="0" required>
+                            <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 font-medium mb-2">Giá dịch vụ *</label>
+                            <input type="number" class="price-value input-field w-full" placeholder="500,000" min="0" required>
+                            <div class="flex justify-between items-center mt-2">
+                                <p class="text-gray-500 text-xs">Đơn vị: VNĐ</p>
+                                <button type="button" class="remove-price-btn text-red-500 hover:text-red-700 text-sm">
+                                    <i class="fas fa-trash mr-1"></i>Xóa
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex-1">
-                        <label class="block text-gray-600 text-sm mb-1">Giá trị tài sản tối đa (Max)</label>
-                        <input type="number" class="price-max w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="1000000" min="0" required>
-                    </div>
-                    <div class="flex-1">
-                        <label class="block text-gray-600 text-sm mb-1">Giá dịch vụ</label>
-                        <input type="number" class="price-value w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="500000" min="0" required>
-                    </div>
-                    <button type="button" class="remove-price-btn text-red-500 hover:text-red-700 mt-6">
-                        <i class="fas fa-trash"></i>
-                    </button>
                 </div>
             `;
 
@@ -507,6 +788,7 @@
         });
 
         serviceModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     }
 
     // Mở modal chỉnh sửa dịch vụ
@@ -520,12 +802,8 @@
         // Điền thông tin dịch vụ vào form
         serviceNameInput.value = service.name;
         serviceDescriptionInput.value = service.description;
-
-        // Chọn màu phù hợp
-        const colorInput = document.querySelector(`input[value="${service.color}"]`);
-        if (colorInput) {
-            colorInput.checked = true;
-        }
+        serviceColorInput.value = service.color;
+        colorHexCode.textContent = service.color;
 
         // Hiển thị danh sách giá
         priceList.innerHTML = '';
@@ -534,34 +812,43 @@
         });
 
         serviceModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     }
 
     // Đóng modal
     function closeModal() {
         serviceModal.classList.add('hidden');
         editingServiceId = null;
+        document.body.style.overflow = 'auto';
     }
 
     // Thêm một dòng giá mới
     function addPriceItem(min = '', max = '', value = '') {
         const priceItem = document.createElement('div');
-        priceItem.className = 'price-item-input flex items-center space-x-4 p-4 bg-gray-50 rounded-lg';
+        priceItem.className = 'price-item-input glass-card p-5';
         priceItem.innerHTML = `
-                <div class="flex-1">
-                    <label class="block text-gray-600 text-sm mb-1">Giá trị tài sản tối thiểu (Min)</label>
-                    <input type="number" class="price-min w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="0" min="0" value="${min}" required>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối thiểu (Min) *</label>
+                        <input type="number" class="price-min input-field w-full" placeholder="0" min="0" value="${min}" required>
+                        <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối đa (Max) *</label>
+                        <input type="number" class="price-max input-field w-full" placeholder="1,000,000,000" min="0" value="${max}" required>
+                        <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 font-medium mb-2">Giá dịch vụ *</label>
+                        <input type="number" class="price-value input-field w-full" placeholder="500,000" min="0" value="${value}" required>
+                        <div class="flex justify-between items-center mt-2">
+                            <p class="text-gray-500 text-xs">Đơn vị: VNĐ</p>
+                            <button type="button" class="remove-price-btn text-red-500 hover:text-red-700 text-sm">
+                                <i class="fas fa-trash mr-1"></i>Xóa
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex-1">
-                    <label class="block text-gray-600 text-sm mb-1">Giá trị tài sản tối đa (Max)</label>
-                    <input type="number" class="price-max w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="1000000" min="0" value="${max}" required>
-                </div>
-                <div class="flex-1">
-                    <label class="block text-gray-600 text-sm mb-1">Giá dịch vụ</label>
-                    <input type="number" class="price-value w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="500000" min="0" value="${value}" required>
-                </div>
-                <button type="button" class="remove-price-btn text-red-500 hover:text-red-700 mt-6">
-                    <i class="fas fa-trash"></i>
-                </button>
             `;
 
         priceList.appendChild(priceItem);
@@ -585,7 +872,7 @@
         // Lấy giá trị từ form
         const name = serviceNameInput.value.trim();
         const description = serviceDescriptionInput.value.trim();
-        const color = document.querySelector('input[name="serviceColor"]:checked').value;
+        const color = serviceColorInput.value;
 
         // Lấy danh sách giá
         const prices = [];
@@ -602,8 +889,20 @@
         }
 
         if (prices.length === 0) {
-            alert('Vui lòng thêm ít nhất một phân khúc giá hợp lệ!');
+            showNotification('Vui lòng thêm ít nhất một phân khúc giá hợp lệ!', 'error');
             return;
+        }
+
+        // Xác định icon dựa trên tên dịch vụ
+        let icon = 'fa-cogs';
+        if (name.toLowerCase().includes('nhanh') || name.toLowerCase().includes('fast')) {
+            icon = 'fa-bolt';
+        } else if (name.toLowerCase().includes('giải pháp') || name.toLowerCase().includes('solution')) {
+            icon = 'fa-lightbulb';
+        } else if (name.toLowerCase().includes('premium') || name.toLowerCase().includes('cao cấp')) {
+            icon = 'fa-crown';
+        } else if (name.toLowerCase().includes('chiến lược') || name.toLowerCase().includes('strategy')) {
+            icon = 'fa-chess';
         }
 
         if (editingServiceId) {
@@ -615,9 +914,12 @@
                     name,
                     description,
                     color,
-                    prices
+                    prices,
+                    icon
                 };
             }
+
+            showNotification(`Đã cập nhật dịch vụ "${name}" thành công!`, 'success');
         } else {
             // Thêm dịch vụ mới
             const newId = services.length > 0 ? Math.max(...services.map(s => s.id)) + 1 : 1;
@@ -628,63 +930,127 @@
                 color,
                 prices,
                 active: true,
+                icon,
                 createdAt: new Date().toISOString().split('T')[0]
             };
 
             services.push(newService);
+            showNotification(`Đã thêm dịch vụ "${name}" thành công!`, 'success');
         }
 
         // Render lại danh sách và đóng modal
         renderServices();
         closeModal();
-
-        // Hiển thị thông báo thành công
-        showNotification(`${editingServiceId ? 'Cập nhật' : 'Thêm'} dịch vụ "${name}" thành công!`, 'success');
     }
 
     // Xóa dịch vụ
     function deleteService(serviceId) {
-        if (confirm('Bạn có chắc chắn muốn xóa dịch vụ này không?')) {
-            const serviceName = services.find(s => s.id === serviceId)?.name || '';
-            services = services.filter(s => s.id !== serviceId);
-            renderServices();
-            showNotification(`Đã xóa dịch vụ "${serviceName}" thành công!`, 'info');
-        }
-    }
+        const service = services.find(s => s.id === serviceId);
+        if (!service) return;
 
-    // Hiển thị thông báo
-    function showNotification(message, type = 'info') {
-        // Tạo thông báo tạm thời
-        const notification = document.createElement('div');
-        notification.className = `fixed top-6 right-6 p-4 rounded-lg shadow-lg text-white z-50 fade-in ${type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500'}`;
-        notification.innerHTML = `
-                <div class="flex items-center">
-                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-3"></i>
-                    <span>${message}</span>
+        // Tạo modal xác nhận xóa
+        const confirmModal = document.createElement('div');
+        confirmModal.className = 'fixed inset-0 flex items-center justify-center z-50 modal-overlay p-4';
+        confirmModal.innerHTML = `
+                <div class="modal-content w-full max-w-md">
+                    <div class="p-8">
+                        <div class="flex items-center mb-6">
+                            <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mr-5">
+                                <i class="fas fa-exclamation-triangle text-red-500 text-3xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-800">Xác nhận xóa</h3>
+                                <p class="text-gray-600 mt-1">Bạn có chắc chắn muốn xóa dịch vụ này?</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-red-50 p-4 rounded-xl mb-6">
+                            <div class="flex items-center text-red-800">
+                                <i class="fas fa-info-circle mr-3"></i>
+                                <p class="font-medium">Hành động này không thể hoàn tác. Tất cả phân khúc giá của dịch vụ sẽ bị xóa.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end space-x-4">
+                            <button id="cancelDeleteBtn" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                                Hủy bỏ
+                            </button>
+                            <button id="confirmDeleteBtn" class="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all">
+                                <i class="fas fa-trash mr-2"></i>Xóa dịch vụ
+                            </button>
+                        </div>
+                    </div>
                 </div>
             `;
 
-        document.body.appendChild(notification);
+        document.body.appendChild(confirmModal);
 
-        // Tự động xóa sau 3 giây
+        // Xử lý sự kiện cho nút hủy
+        confirmModal.querySelector('#cancelDeleteBtn').addEventListener('click', () => {
+            document.body.removeChild(confirmModal);
+        });
+
+        // Xử lý sự kiện cho nút xác nhận xóa
+        confirmModal.querySelector('#confirmDeleteBtn').addEventListener('click', () => {
+            services = services.filter(s => s.id !== serviceId);
+            renderServices();
+            document.body.removeChild(confirmModal);
+            showNotification(`Đã xóa dịch vụ "${service.name}" thành công!`, 'info');
+        });
+
+        // Đóng modal khi click ra ngoài
+        confirmModal.addEventListener('click', (e) => {
+            if (e.target === confirmModal) {
+                document.body.removeChild(confirmModal);
+            }
+        });
+    }
+
+    // Hiển thị thông báo
+    function showNotification(message, type = 'success') {
+        notificationTitle.textContent = type === 'success' ? 'Thành công!' :
+            type === 'error' ? 'Lỗi!' : 'Thông tin';
+        notificationMessage.textContent = message;
+
+        // Đặt màu nền dựa trên loại thông báo
+        if (type === 'success') {
+            successNotification.className = successNotification.className.replace(/from-[\w-]+ to-[\w-]+/, 'from-green-500 to-emerald-500');
+        } else if (type === 'error') {
+            successNotification.className = successNotification.className.replace(/from-[\w-]+ to-[\w-]+/, 'from-red-500 to-pink-500');
+        } else {
+            successNotification.className = successNotification.className.replace(/from-[\w-]+ to-[\w-]+/, 'from-blue-500 to-cyan-500');
+        }
+
+        successNotification.classList.remove('hidden');
+        successNotification.classList.add('animate__animated', 'animate__fadeInRight');
+
+        // Tự động ẩn sau 5 giây
         setTimeout(() => {
-            notification.remove();
-        }, 3000);
+            hideNotification();
+        }, 5000);
+    }
+
+    // Ẩn thông báo
+    function hideNotification() {
+        successNotification.classList.add('animate__fadeOutRight');
+        setTimeout(() => {
+            successNotification.classList.remove('animate__fadeInRight', 'animate__fadeOutRight');
+            successNotification.classList.add('hidden');
+        }, 300);
     }
 
     // Khởi tạo sự kiện
     function initEventListeners() {
         // Nút thêm dịch vụ
         addServiceBtn.addEventListener('click', openAddModal);
+        addFirstServiceBtn.addEventListener('click', openAddModal);
 
         // Nút thêm phân khúc giá
         addPriceBtn.addEventListener('click', () => addPriceItem());
 
-        // Nút hủy modal
+        // Nút hủy và đóng modal
         cancelModalBtn.addEventListener('click', closeModal);
-
-        // Xử lý submit form
-        serviceForm.addEventListener('submit', handleSubmitForm);
+        closeModalBtn.addEventListener('click', closeModal);
 
         // Đóng modal khi click ra ngoài
         serviceModal.addEventListener('click', (e) => {
@@ -693,23 +1059,34 @@
             }
         });
 
-        // Thêm hiệu ứng cho các mẫu màu
-        document.querySelectorAll('.color-sample').forEach(sample => {
-            sample.addEventListener('click', function() {
-                // Xóa border của tất cả các mẫu màu
-                document.querySelectorAll('.color-sample').forEach(s => {
-                    s.classList.remove('border-blue-700', 'border-green-700', 'border-purple-700', 'border-orange-700');
-                    s.classList.add('border-transparent');
-                });
+        // Xử lý submit form
+        serviceForm.addEventListener('submit', handleSubmitForm);
 
-                // Thêm border cho mẫu màu được chọn
-                const colorClass = this.style.backgroundColor.includes('blue') ? 'border-blue-700' :
-                    this.style.backgroundColor.includes('green') ? 'border-green-700' :
-                        this.style.backgroundColor.includes('purple') ? 'border-purple-700' : 'border-orange-700';
+        // Cập nhật mã màu hex khi chọn màu
+        serviceColorInput.addEventListener('input', () => {
+            colorHexCode.textContent = serviceColorInput.value;
+        });
 
-                this.classList.remove('border-transparent');
-                this.classList.add(colorClass);
-            });
+        // Nút lọc
+        filterBtn.addEventListener('click', () => {
+            showNotification('Tính năng lọc đang được phát triển', 'info');
+        });
+
+        // Đóng thông báo
+        closeNotificationBtn.addEventListener('click', hideNotification);
+
+        // Thêm hiệu ứng khi cuộn trang
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const header = document.querySelector('header');
+
+            if (scrollTop > 50) {
+                header.style.transform = 'translateY(-10px)';
+                header.style.opacity = '0.9';
+            } else {
+                header.style.transform = 'translateY(0)';
+                header.style.opacity = '1';
+            }
         });
     }
 
@@ -717,6 +1094,13 @@
     function initApp() {
         renderServices();
         initEventListeners();
+
+        // Thêm hiệu ứng cho các phần tử khi trang tải
+        setTimeout(() => {
+            document.querySelectorAll('.animate__animated').forEach(el => {
+                el.classList.add('animate__faster');
+            });
+        }, 1000);
     }
 
     // Chạy ứng dụng khi trang đã tải xong
