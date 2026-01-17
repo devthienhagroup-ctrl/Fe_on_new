@@ -189,7 +189,7 @@ const currentUserId = computed(() => authStore.info?.id)
 const note = ref("")
 
 // URL helper
-const fileUrl = (fileName) => `https://s3.cloudfly.vn/thg-storage/uploads-public/${fileName}`
+const fileUrl = (fileName) => `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${fileName}`
 
 // ------------------ TIME FORMAT ------------------
 const formatDateAt = (str) => {

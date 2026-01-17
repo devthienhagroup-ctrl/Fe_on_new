@@ -159,7 +159,7 @@ const dropdownRef = ref(null)
 const fileInput = ref(null)
 
 const fileUrl = (path) =>
-    path ? `https://s3.cloudfly.vn/thg-storage/uploads-public/${path}` : ""
+    path ? `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${path}` : ""
 
 
 const filteredMembers = computed(() =>

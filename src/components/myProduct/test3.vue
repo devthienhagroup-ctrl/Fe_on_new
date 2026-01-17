@@ -4,7 +4,7 @@
       <!-- Bộ lọc nâng cao -->
       <div class="bg-white rounded-xl shadow-lg border border-slate-300 mb-4 p-4"
            style="
-            background-image: url('https://s3.cloudfly.vn/thg-storage/uploads-public/thienhagroup_filter_2.png');
+            background-image: url('https://s3.cloudfly.vn/thg-storage-dev/uploads-public/thienhagroup_filter_2.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -309,7 +309,7 @@
                   </td>
                   <td class="font-bold">
                     <img v-if="item.status === 'Đã kiểm duyệt'"
-                         src="https://s3.cloudfly.vn/thg-storage/uploads-public/icon-kiem-duỵet.png"
+                         src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png"
                          style="width: 27px"
                     />
                     <img v-else-if="item.status === 'Đã bán'" src="/imgs/sold-out.png" style="width: 29px"/>
@@ -550,7 +550,7 @@
                   </div>
                   <div v-else-if="'Đã kiểm duyệt' === item.status" class="absolute top-3  mr-0 ms-3 right-2 flex items-center gap-2" style="width: 60px
                     ; position: absolute; top: 7px; right: 3px">
-                    <img src="https://s3.cloudfly.vn/thg-storage/uploads-public/icon-kiem-duỵet.png"/>
+                    <img src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png"/>
                   </div>
                 </div>
 
@@ -1351,7 +1351,7 @@ async function fetchFilteredAssets() {
           ...item,
           imageUrl: item.imageUrl
               ? item.imageUrl
-              : "https://s3.cloudfly.vn/thg-storage/uploads-public/default.jpg"
+              : "https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg"
         }))
         : [];
 
