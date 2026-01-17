@@ -1056,12 +1056,12 @@
                           <option value="TN_7NGAY">Tiềm năng 7 ngày</option>
                           <option value="TN_14NGAY">Tiềm năng 14 ngày</option>
 
-                          <option value="THANH_CONG">Thành công</option>
+                          <option value="THANH_CONG">Thành công (Lên VP)</option>
 
                           <!-- ===== BỔ SUNG ===== -->
                           <option value="KHACH_HUY_HEN">Khách huỷ hẹn</option>
                           <option value="BAN_NHANH">Bán nhanh</option>
-                          <option value="BAN_GP">Bán giải pháp (Đã lên VP)</option>
+                          <option value="BAN_GP">Bán giải pháp</option>
 
                           <option value="SAI_SO_LIEU">Sai số</option>
                           <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc được</option>
