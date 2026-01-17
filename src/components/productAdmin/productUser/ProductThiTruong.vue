@@ -200,19 +200,24 @@ const itemsToShow = ref(8);
 const defaultImage = 'https://hoangphucphoto.com/wp-content/uploads/2024/11/anh-bds-1.jpg';
 
 const visibleItems = computed(() => {
-  return props.items.slice(0, itemsToShow.value);
+  return props.items
 });
 
-const showViewMore = computed(() => {
-  return itemsToShow.value < props.items.length && props.items.length < props.total;
-});
-
+// ProductThiTruong.vue - Sửa hàm loadMoreItems
 const loadMoreItems = () => {
-  itemsToShow.value += 8;
+  // Nếu đã hiển thị hết items hiện có VÀ vẫn còn items để tải
   if (itemsToShow.value >= props.items.length && props.items.length < props.total) {
-    emit('load-more');
+    emit('load-more'); // Gọi API tải thêm
+  } else {
+    // Chỉ tăng số lượng hiển thị từ dữ liệu đã có
+    itemsToShow.value = Math.min(itemsToShow.value + 8, props.items.length);
   }
 };
+
+// Hoặc tốt hơn: chỉ hiển thị nút "Xem thêm" khi còn items chưa hiển thị
+const showViewMore = computed(() => {
+  return itemsToShow.value < props.items.length || props.items.length < props.total;
+});
 
 const canRequestCollaboration = (item) => {
   if (item.status === 'Đã bán') return false;
@@ -467,8 +472,8 @@ const getAssetTypeIcon = (item) => {
 }
 
 .badge-image {
-  width: 27px;
-  height: 27px;
+  width: 32px;
+  height: auto;
   object-fit: contain;
 }
 

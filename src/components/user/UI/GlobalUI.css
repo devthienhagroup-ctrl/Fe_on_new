@@ -78,6 +78,9 @@
     position: relative;
     overflow: hidden;
     z-index: 1;
+
+    padding: 10px 20px;
+    border-radius: 10px;
 }
 
 .btn-gradient::before {
@@ -175,6 +178,7 @@
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.4s ease;
+    border-radius: 1rem;
 }
 .glass-card:hover {
     transform: translateY(-10px);

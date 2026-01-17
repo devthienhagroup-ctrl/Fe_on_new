@@ -56,7 +56,7 @@
           </button>
 
           <div class="text-end mt-2">
-            <a href="#" class="text-info small text-decoration-none">Quên mật khẩu?</a>
+            <a href="#" @click="openForgotPassword" class="text-info small text-decoration-none">Quên mật khẩu?</a>
           </div>
         </div>
 
@@ -96,7 +96,10 @@ const showPassword = ref(false)
 const loading = ref(false)
 const errorMsg = ref('')
 
-
+const openForgotPassword = () => {
+  // Phát sự kiện để mở modal quên mật khẩu
+  window.dispatchEvent(new Event('forgotPassword'));
+}
 
 // Khởi tạo store Pinia
 import { useRouter } from 'vue-router'

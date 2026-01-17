@@ -154,6 +154,63 @@ const activePage = ref(null)
 // Menu data - giữ nguyên cấu trúc của bạn
 const menuData = ref([
   {
+    id: 11,
+    name: 'Trang chủ mới',
+    slug: 'trang-chu-moi',
+    sections: {
+      'global-css': 'CSS toàn cục',
+      'noi-dung-chinh': 'Nội dung chính'
+    }
+  },
+  {
+    id: 12,
+    name: 'Bán nhanh - mới',
+    slug: 'ban-nhanh-moi',
+    sections: {
+      'noi-dung-chinh': 'Nội dung chính'
+    }
+  },
+  {
+    id: 13,
+    name: 'Định giá mới',
+    slug: 'dinh-gia-moi',
+    sections: {
+      'noi-dung-chinh': 'Nội dung chính'
+    }
+  },
+  {
+    id: 14,
+    name: 'Quản lý nhóm',
+    slug: 'quan-ly-nhom',
+    sections: {
+      'noi-dung-chinh': 'Nội dung chính'
+    }
+  },
+  {
+    id: 15,
+    name: 'Quản lý tài sản',
+    slug: 'quan-ly-tai-san',
+    sections: {
+      'noi-dung-chinh': 'Nội dung chính'
+    }
+  },
+  {
+    id: 16,
+    name: 'Quản lý dự án',
+    slug: 'quan-ly-du-an',
+    sections: {
+      'noi-dung-chinh': 'Nội dung chính'
+    }
+  },
+  {
+    id: 17,
+    name: 'Ứng tuyển cộng tác viên',
+    slug: 'ung-tuyen-ctv',
+    sections: {
+      'noi-dung-chinh': 'Nội dung chính'
+    }
+  },
+  {
     id: 1,
     name: 'Trang chủ',
     slug: 'trang-chu',
@@ -171,15 +228,6 @@ const menuData = ref([
       'truyen-thong': 'Truyền Thông',
       'tin-tuc': 'Tin tức',
       'lien-he': 'Liên hệ',
-    }
-  },
-  {
-    id: 11,
-    name: 'Trang chủ mới',
-    slug: 'trang-chu-moi',
-    sections: {
-      'global-css': 'CSS toàn cục',
-      'noi-dung-chinh': 'Nội dung chính'
     }
   },
   {
@@ -221,14 +269,6 @@ const menuData = ref([
     }
   },
   {
-    id: 12,
-    name: 'Bán nhanh - mới',
-    slug: 'ban-nhanh-moi',
-    sections: {
-      'noi-dung-chinh': 'Nội dung chính'
-    }
-  },
-  {
     id: 5,
     name: 'Định giá BĐS',
     slug: 'dinh-gia-bds',
@@ -241,14 +281,6 @@ const menuData = ref([
       'bang-phi': 'Bảng phí',
       'tinh-phi-nhanh': 'Tính phí nhanh',
       'cau-hoi-thuong-gap': 'Các câu hỏi thường gặp'
-    }
-  },
-  {
-    id: 13,
-    name: 'Định giá mới',
-    slug: 'dinh-gia-moi',
-    sections: {
-      'noi-dung-chinh': 'Nội dung chính'
     }
   },
   {
@@ -285,14 +317,6 @@ const menuData = ref([
     }
   },
   {
-    id: 14,
-    name: 'Quản lý nhóm',
-    slug: 'quan-ly-nhom',
-    sections: {
-      'noi-dung-chinh': 'Nội dung chính'
-    }
-  },
-  {
     id: 9,
     name: 'Quản lý tin tức',
     slug: 'quan-ly-tin-tuc'
@@ -318,7 +342,10 @@ const getMenuIcon = (slug) => {
     'dau-tu': 'fas fa-chart-line',
     'hop-tac': 'fa-solid fa-sack-dollar',
     'quan-ly-tin-tuc': 'fa-regular fa-folder-open',
-    'quan-ly-nhom': 'fas fa-users-cog'
+    'quan-ly-nhom': 'fas fa-users-cog',
+    'quan-ly-tai-san': 'fas fa-building',
+    'quan-ly-du-an': 'fas fa-project-diagram',
+    'ung-tuyen-cong-tac-vien': 'fas fa-user-plus'
   }
   return icons[slug] || 'fas fa-file'
 }

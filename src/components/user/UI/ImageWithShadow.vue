@@ -4,15 +4,18 @@
     <!-- Shadow/Glow Effect -->
     <div
         v-if="showShadow"
-        class="absolute -inset-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur-lg opacity-30"
+        :style="shadowStyle"
+        class="absolute -inset-4 rounded-2xl blur-lg opacity-30"
     ></div>
 
     <!-- Image -->
     <img
+        ref="imageRef"
         :src="src"
         :alt="alt"
         :class="imageClasses"
         class="relative rounded-2xl shadow-2xl border border-slate-700"
+        @load="extractColor"
     />
 
     <!-- Optional Badge -->
@@ -21,7 +24,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import ColorThief from 'colorthief'
 
 const props = defineProps({
   src: {
@@ -38,7 +42,7 @@ const props = defineProps({
   },
   rounded: {
     type: String,
-    default: '2xl', // 'none' | 'lg' | 'xl' | '2xl' | 'full'
+    default: '2xl',
     validator: (value) => ['none', 'lg', 'xl', '2xl', 'full'].includes(value)
   },
   border: {
@@ -48,6 +52,53 @@ const props = defineProps({
   hoverEffect: {
     type: Boolean,
     default: false
+  }
+})
+
+const imageRef = ref(null)
+const dominantColor = ref(null)
+const secondaryColor = ref(null)
+
+const extractColor = () => {
+  if (!imageRef.value) return
+
+  const colorThief = new ColorThief()
+
+  try {
+    // Lấy palette màu (mảng các màu chính)
+    const palette = colorThief.getPalette(imageRef.value, 2) // Lấy 2 màu chính
+
+    if (palette && palette.length >= 2) {
+      dominantColor.value = palette[0]
+      secondaryColor.value = palette[1]
+    } else {
+      // Fallback mặc định nếu không lấy được
+      dominantColor.value = [59, 130, 246] // blue-500
+      secondaryColor.value = [147, 51, 234] // purple-600
+    }
+  } catch (error) {
+    console.error('Error extracting color:', error)
+    // Fallback màu mặc định
+    dominantColor.value = [59, 130, 246]
+    secondaryColor.value = [147, 51, 234]
+  }
+}
+
+// Chuyển đổi mảng RGB thành chuỗi CSS
+const rgbToString = (rgbArray) => {
+  return `rgb(${rgbArray[0]}, ${rgbArray[1]}, ${rgbArray[2]})`
+}
+
+// Style cho shadow với màu động
+const shadowStyle = computed(() => {
+  if (!dominantColor.value || !secondaryColor.value) {
+    return {
+      background: 'linear-gradient(to right, rgb(59, 130, 246), rgb(147, 51, 234))'
+    }
+  }
+
+  return {
+    background: `linear-gradient(to right, ${rgbToString(dominantColor.value)}, ${rgbToString(secondaryColor.value)})`
   }
 })
 
@@ -61,5 +112,12 @@ const imageClasses = computed(() => {
 
 const containerClasses = computed(() => {
   return props.hoverEffect ? 'group' : ''
+})
+
+// Tự động extract màu khi component được mount
+onMounted(() => {
+  if (imageRef.value && imageRef.value.complete) {
+    extractColor()
+  }
 })
 </script>

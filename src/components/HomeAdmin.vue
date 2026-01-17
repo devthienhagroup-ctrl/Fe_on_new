@@ -23,7 +23,7 @@
         :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
         alt="Avatar"
             class="rounded-circle border border-light-subtle"
-         style="height: 46px; !important; width: 46px; !important;"
+         style="height: 46px !important; width: 46px !important;"
         />
       </div>
     </div>
