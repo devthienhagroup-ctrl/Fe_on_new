@@ -24,19 +24,6 @@
     ></FloatingContact>
   </div>
 
-  <!-- Modal đăng nhập/đăng ký -->
-  <AuthModal
-      v-if="auth.showLoginModal"
-      @close="closeLoginModal"
-      @open-forgot="showForgotPassword = true"
-  />
-
-  <!-- Modal quên mật khẩu -->
-  <ForgotPassword
-      v-if="showForgotPassword"
-      @close="showForgotPassword = false"
-      @back-to-login="backToLoginFromForgot"
-  />
 </template>
 
 <script setup>
@@ -215,10 +202,7 @@ onBeforeUnmount(() => {
   });
 })
 
-const backToLoginFromForgot = () => {
-  showForgotPassword.value = false
-  showAuthModal.value = true
-}
+
 </script>
 
 <style scoped>

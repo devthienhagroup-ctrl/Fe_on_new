@@ -158,7 +158,7 @@
 
             <img v-if="item.status === 'Đã kiểm duyệt'"
                  src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png"
-                 style="width: 27px"
+                 style="width: 32px"
                  alt="checked"
             />
           </div>
@@ -260,10 +260,16 @@
           </div>
 
           <!-- Lock badge -->
-          <div v-if="!item.moKhoa" class="lock-badge-grid-wrapper">
-            <div  class="lock-badge-grid">
+          <div class="lock-badge-grid-wrapper">
+            <div  v-if="!item.moKhoa" class="lock-badge-grid">
               <i class="fas fa-lock"></i>
             </div>
+
+            <img v-if="item.status === 'Đã kiểm duyệt'"
+                 src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png"
+                 style="width: 32px"
+                 alt="checked"
+            />
           </div>
 
           <div class="grid-item-image">
@@ -390,9 +396,17 @@ const isFeaturedHovered = ref(false);
 const gridHoverStates = ref({});
 
 const displayedMoreItems = computed(() => {
-  const startIndex = 5; // First 5 items shown in main layout
-  const endIndex = startIndex + itemsPerLoad * (loadCount.value + 1);
-  return props.items.slice(startIndex, endIndex);
+  // Xác định item nào đã hiển thị trong main layout
+  const itemsInMainLayout = 5;
+  const mainLayoutItems = props.items.slice(0, itemsInMainLayout);
+
+  // Lấy tất cả items trừ 5 item đầu (đã hiển thị)
+  const allOtherItems = props.items.slice(itemsInMainLayout);
+
+  // Giới hạn số lượng hiển thị theo loadCount
+  const itemsToShow = allOtherItems.slice(0, itemsPerLoad * (loadCount.value + 1));
+
+  return itemsToShow;
 });
 
 const hasMoreItems = computed(() => {
@@ -518,19 +532,20 @@ const getPropertyTypeClass = (item) => {
 };
 
 const getPropertyTypeIcon = (item) => {
-
   const dtcnValue = parseFloat(item.dtcn) || 0;
   const structure = (item.structure || "").toLowerCase();
 
+  // Ưu tiên loại tài sản từ backend
   if (item.loaiTaiSan) {
     const map = {
-      NHA: "Nhà",
-      DAT: "Đất",
-      DATLON: "Đất lớn"
+      NHA: "fas fa-house-chimney",       // Icon cho nhà
+      DAT: "fas fa-map-location-dot",    // Icon cho đất thường
+      DATLON: "fas fa-map-location-dot"  // Icon cho đất lớn (có thể dùng icon khác nếu muốn)
     };
     if (map[item.loaiTaiSan]) return map[item.loaiTaiSan];
   }
 
+  // Từ khóa nhận diện nhà
   const houseKeywords = [
     "lầu", "trệt", "tầng", "hầm", "gác",
     "nhà cấp", "cấp 1", "cấp 2", "cấp 3", "cấp 4",
@@ -540,9 +555,15 @@ const getPropertyTypeIcon = (item) => {
     "chung cu", "tower", "block"
   ];
 
-  if (houseKeywords.some(keyword => structure.includes(keyword))) return "fas fa-house-chimney";
-  if (dtcnValue > 10000) return "fas fa-map-location-dot";
-  return "fas fa-map-location-dot";
+  if (houseKeywords.some(keyword => structure.includes(keyword))) {
+    return "fas fa-house-chimney";
+  }
+
+  if (dtcnValue > 10000) {
+    return "fas fa-map-location-dot";  // Icon cho đất lớn
+  }
+
+  return "fas fa-map-location-dot";    // Icon cho đất thường
 };
 
 const getPropertyTypeText = (item) => {

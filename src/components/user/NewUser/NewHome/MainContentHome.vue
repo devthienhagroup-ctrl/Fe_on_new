@@ -65,7 +65,7 @@
               :src="baseImgaeUrl+config.about.image.src"
               :alt="config.about.image.alt"
               :show-shadow="config.about.image.showShadow"
-
+              :hover-effect="true"
               :duration="3.5"
               :delay-between="1.5"
           >

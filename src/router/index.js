@@ -150,24 +150,31 @@ import TeamManagement from "../components/user/NewUser/TeamManagement/TeamManage
 import TeamManagementCMS from "../components/cms/NewCms/TeamManagement/TeamManagementCMS.vue";
 import AppointmentPage from "../components/thiet-kegiandien/AppointmentsPage.vue";
 import AppointmentsPage from "../components/thiet-kegiandien/AppointmentsPage.vue";
+import PropertyManagement from "../components/user/NewUser/PropertyManagement/PropertyManagement.vue";
+import Projectmanagement from "../components/user/NewUser/ProjectManagement/Projectmanagement.vue";
+import CTVRecruit from "../components/user/NewUser/CTVRecruit/CTVRecruit.vue";
+import ProjectManagementCMS from "../components/cms/NewCms/ProjectMannagement/ProjectManagementCMS.vue";
+import PropertyManagementCMS from "../components/cms/NewCms/PropertyManagement/PropertyManagementCMS.vue";
+import CTVRecruitCMS from "../components/cms/NewCms/CTVRecruit/CTVRecruitCMS.vue";
+
 const routes = [
     {
         path: "/-thg/nhap-lieu",
         name: "TeamCollaboration1",
         component: test,
-        meta: { requiresAuth: false,     enableTailwind: false},
+        meta: {requiresAuth: false, enableTailwind: false},
     },
     {
         path: "/-thg/quan-tri-du-lieu",
         name: "TeamCollaboration",
         component: test2,
-        meta: { requiresAuth: false,     enableTailwind: false},
+        meta: {requiresAuth: false, enableTailwind: false},
     },
     {
         path: "/-thg/telesale-lien-he-khach-hang",
         name: "TELESALESetyui",
         component: test1,
-        meta: { requiresAuth: false, enableTailwind: false},
+        meta: {requiresAuth: false, enableTailwind: false},
     },
 
     {
@@ -611,6 +618,42 @@ const routes = [
                         component: TeamManagementCMS
                     }
                 ]
+            },
+            {
+                path: 'quan-ly-du-an',
+                name: 'projectmanagement-cms',
+                component: cms,
+                children: [
+                    {
+                        path: 'noi-dung-chinh',
+                        name: 'ProjectmanagementCMS',
+                        component: ProjectManagementCMS
+                    }
+                ]
+            },
+            {
+                path: 'quan-ly-tai-san',
+                name: 'propertymanagement-cms',
+                component: cms,
+                children: [
+                    {
+                        path: 'noi-dung-chinh',
+                        name: 'PropertyManagementCMS',
+                        component: PropertyManagementCMS
+                    }
+                ]
+            },
+            {
+                path: 'ung-tuyen-ctv',
+                name: 'CTV-recruit-cms',
+                component: cms,
+                children: [
+                    {
+                        path: 'noi-dung-chinh',
+                        name: 'CTVRecruitCMS',
+                        component: CTVRecruitCMS
+                    }
+                    ]
             },
             {
                 path: 'quan-ly-tin-tuc',
@@ -1460,6 +1503,21 @@ const routes = [
                 name: 'TeamManagement',
                 component: TeamManagement
             },
+            {
+                path: 'quan-ly-tai-san',
+                name: 'PropertyManagement',
+                component: PropertyManagement
+            },
+            {
+                path: 'quan-ly-du-an',
+                name: 'ProjectManagement',
+                component: Projectmanagement
+            },
+            {
+                path: 'ung-tuyen-cong-tac-vien',
+                name: 'CTVRecruitment',
+                component: CTVRecruit
+            }
         ]
     },
     {
@@ -1494,7 +1552,6 @@ const router = createRouter({
 });
 
 
-
 router.beforeEach((to, from, next) => {
     console.group(`=== Navigation từ "${from.fullPath || '/'}" đến "${to.fullPath}" ===`)
 
@@ -1520,7 +1577,7 @@ router.beforeEach((to, from, next) => {
             auth.openLoginModal()
 
             console.groupEnd()
-            return next('/') // chặn route, nhưng UI vẫn render
+            return next(false) // chặn route, nhưng UI vẫn render
         }
 
         console.log('3. Login dạng ADMIN → redirect page')

@@ -654,6 +654,23 @@ async function fetchSliderData() {
     bn30nPage.value = 0;
     hoptacPage.value = 0;
     httPage.value = 0;
+
+
+    console.log('BN30N data:', {
+      items: bn30nItems.value.length,
+      total: bn30nTotal.value,
+      pageSize: pageSizeSlider.value
+    });
+    console.log('HOPTAC data:', {
+      items: hoptacItems.value.length,
+      total: hoptacTotal.value,
+      pageSize: pageSizeSlider.value
+    });
+    console.log('HTT data:', {
+      items: httItems.value.length,
+      total: httTotal.value,
+      pageSize: pageSizeThiTruong.value
+    });
   } catch (e) {
     console.error(e);
   } finally {
@@ -668,33 +685,36 @@ async function loadMoreCategory(category) {
       items: bn30nItems,
       total: bn30nTotal,
       loading: bn30nLoading,
+      pageSize: pageSizeSlider.value
     },
     HOPTAC: {
       page: hoptacPage,
       items: hoptacItems,
       total: hoptacTotal,
       loading: hoptacLoading,
+      pageSize: pageSizeSlider.value
     },
     HTT: {
       page: httPage,
       items: httItems,
       total: httTotal,
       loading: httLoading,
+      pageSize: pageSizeThiTruong.value
     },
   };
 
   const c = config[category];
   if (!c) return;
 
-  if (c.items.value.length >= c.total.value) return;
+  // Kiểm tra nếu đang loading thì không làm gì
+  if (c.loading.value) return;
 
   c.loading.value = true;
-  c.page.value++;
 
   try {
     const res = await api.post("/user.thg/product/user/bang-du-lieu", {
-      trangSo: c.page.value,
-      soDong: pageSizeSlider.value,
+      trangSo: c.page.value + 1, // Tăng page trước
+      soDong: c.pageSize,
       loaiMH: category,
       tuKhoa: searchQuery.value || null,
       mucGia: filterGiaRange.value || null,
@@ -706,10 +726,32 @@ async function loadMoreCategory(category) {
       daThich: filterLove.value || null,
     });
 
-    c.items.value.push(...processItems(res.data.content || []));
+    const newItems = processItems(res.data.content || []);
+
+    // Kiểm tra xem có item mới không
+    if (newItems.length === 0) {
+      console.log(`Đã load hết ${category}, không có thêm dữ liệu`);
+      return;
+    }
+
+    // Kiểm tra trùng lặp
+    const existingIds = new Set(c.items.value.map(item => item.id));
+    const uniqueNewItems = newItems.filter(item => !existingIds.has(item.id));
+
+    if (uniqueNewItems.length > 0) {
+      c.items.value.push(...uniqueNewItems);
+      c.page.value++; // Chỉ tăng page khi có dữ liệu mới
+      console.log(`Đã tải thêm ${uniqueNewItems.length} item cho ${category}, tổng: ${c.items.value.length}/${c.total.value}`);
+    } else {
+      console.log(`Không có item mới cho ${category}`);
+    }
+
+    // Cập nhật tổng số từ API (nếu có)
+    const newTotal = res.data.page?.totalElements || c.total.value;
+    c.total.value = newTotal;
+
   } catch (e) {
-    c.page.value--;
-    console.error(e);
+    console.error(`Lỗi load more ${category}:`, e);
   } finally {
     c.loading.value = false;
   }

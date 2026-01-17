@@ -449,11 +449,14 @@
 
               <div class="form-group">
                 <label>Màu sắc</label>
-                <ColorInputWithGlobalColors
-                    v-model="card.color"
-                    placeholder="blue"
-                    return-type="key" :colors="globalColors"
-                />
+                <select v-model="card.color" class="color-select">
+                  <option value="blue">Blue</option>
+                  <option value="purple">Purple</option>
+                  <option value="emerald">Emerald</option>
+                  <option value="green">Green</option>
+                  <option value="amber">Amber</option>
+                  <option value="red">Red</option>
+                </select>
               </div>
               <div class="form-group">
                 <label>Biểu tượng</label>

@@ -16,16 +16,25 @@
       <div class="setting-section">
         <div class="section-header">
           <h3><i class="fas fa-palette"></i> Colors</h3>
-          <button class="btn btn-primary" @click="addColor">
-            <i class="fas fa-plus"></i> Thêm màu
-          </button>
+          <div class="add-color-control">
+            <input
+                type="text"
+                v-model="newColorName"
+                placeholder="Nhập tên biến CSS (vd: --color-primary)"
+                class="color-name-input"
+                @keyup.enter="addColorWithName"
+            />
+            <button class="btn btn-primary" @click="addColorWithName" :disabled="!newColorName.trim()">
+              <i class="fas fa-plus"></i> Thêm màu
+            </button>
+          </div>
         </div>
 
         <div class="colors-grid">
           <div v-for="(colorValue, colorName, index) in settings.colors" :key="colorName" class="color-item">
             <div class="color-header">
               <div class="color-name-display">
-                <span>{{ colorName }}</span>
+                <span class="color-name-text">{{ colorName }}</span>
                 <small>{{ colorValue }}</small>
               </div>
               <button
@@ -258,6 +267,7 @@ const settings = reactive({
 
 // UI State
 const isLoading = ref(false)
+const newColorName = ref('') // Biến lưu tên màu mới
 
 // File management (đồng bộ với Service.vue)
 const files = ref([])
@@ -544,13 +554,32 @@ const saveChanges = async () => {
 }
 
 // ========== COLOR MANAGEMENT ==========
-const addColor = () => {
-  const newColorName = `--color-new-${Object.keys(settings.colors).length + 1}`
-  const newColorValue = '#000000'
+const addColorWithName = () => {
+  const trimmedName = newColorName.value.trim()
 
-  // Using Vue's reactive methods
-  settings.colors[newColorName] = newColorValue
-  showToast('Đã thêm màu mới', 'success')
+  if (!trimmedName) {
+    showToast('Vui lòng nhập tên biến CSS', 'warning')
+    return
+  }
+
+  // Kiểm tra tên biến có hợp lệ không (bắt đầu với --)
+  if (!trimmedName.startsWith('--')) {
+    showToast('Tên biến CSS phải bắt đầu với "--" (vd: --color-primary)', 'warning')
+    return
+  }
+
+  // Kiểm tra xem tên màu đã tồn tại chưa
+  if (settings.colors[trimmedName]) {
+    showToast(`Tên màu "${trimmedName}" đã tồn tại`, 'warning')
+    return
+  }
+
+  // Thêm màu mới với tên đã nhập
+  settings.colors[trimmedName] = '#000000'
+  showToast(`Đã thêm màu "${trimmedName}"`, 'success')
+
+  // Reset input
+  newColorName.value = ''
 }
 
 const updateColorValue = (colorName, hexValue) => {
@@ -571,7 +600,7 @@ const updateColorValue = (colorName, hexValue) => {
     }
   }
 
-  // Otherwise, update wit  h hex value
+  // Otherwise, update with hex value
   settings.colors[colorName] = hexValue
 }
 
@@ -748,6 +777,34 @@ onMounted(() => {
   color: #4a6cf7;
 }
 
+/* Thêm style cho phần thêm màu mới */
+.add-color-control {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.color-name-input {
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: monospace;
+  min-width: 250px;
+  transition: all 0.3s ease;
+}
+
+.color-name-input:focus {
+  border-color: #4a6cf7;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
+}
+
+.color-name-input::placeholder {
+  color: #a0aec0;
+}
+
 /* Colors Grid */
 .colors-grid {
   display: grid;
@@ -781,13 +838,19 @@ onMounted(() => {
   flex: 1;
 }
 
-.color-name-display span {
+.color-name-text {
   display: block;
   font-family: monospace;
   font-weight: 600;
   color: #031358;
   font-size: 0.9rem;
   margin-bottom: 4px;
+  background-color: #f8fafc;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  user-select: none;
+  cursor: default;
 }
 
 .color-name-display small {
@@ -1103,6 +1166,26 @@ onMounted(() => {
     padding: 20px;
   }
 
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .add-color-control {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .color-name-input {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
   .colors-grid,
   .glass-grid,
   .map-grid {
@@ -1111,11 +1194,6 @@ onMounted(() => {
 
   .gradients-grid {
     grid-template-columns: 1fr;
-  }
-
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
   }
 
   .input-with-color,
