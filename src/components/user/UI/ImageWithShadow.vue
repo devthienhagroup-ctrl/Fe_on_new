@@ -25,7 +25,6 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import ColorThief from 'colorthief'
 
 const props = defineProps({
   src: {

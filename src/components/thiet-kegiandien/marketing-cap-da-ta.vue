@@ -89,6 +89,7 @@
                         type="tel"
                         class="form-control"
                         placeholder="09xxxxxxxx"
+                        @blur="formData.phone = normalizePhone(formData.phone)"
                         required
                     />
                   </div>
@@ -446,6 +447,10 @@ const authStore = useAuthStore();
 const info = authStore.userInfo;
 const sidebar = useSidebarStore();
 const provinces = ref(addressData);
+function normalizePhone(phone) {
+  if (!phone) return "";
+  return String(phone).trim().replace(/\s+/g, "");
+}
 
 const formData = reactive({
   name: "",
@@ -838,7 +843,8 @@ function isValidName(name) {
   return /^[A-Za-zÀ-ỹ\s]+$/u.test(normalized);
 }
 function isValidPhone(phone) {
-  return /^(0\d{9})$/.test(phone);
+  const normalized = normalizePhone(phone);
+  return /^(0\d{9})$/.test(normalized);
 }
 function validateForm() {
   if (!formData.name?.trim()) {
@@ -879,7 +885,7 @@ async function submitData() {
     const form = new FormData();
     const dto = {
       name: formData.name,
-      phone: formData.phone,
+      phone: normalizePhone(formData.phone),
       area: formData.area,
       oldArea: formData.oldArea,
       type: formData.type,

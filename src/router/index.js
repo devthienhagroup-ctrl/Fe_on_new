@@ -156,8 +156,16 @@ import CTVRecruit from "../components/user/NewUser/CTVRecruit/CTVRecruit.vue";
 import ProjectManagementCMS from "../components/cms/NewCms/ProjectMannagement/ProjectManagementCMS.vue";
 import PropertyManagementCMS from "../components/cms/NewCms/PropertyManagement/PropertyManagementCMS.vue";
 import CTVRecruitCMS from "../components/cms/NewCms/CTVRecruit/CTVRecruitCMS.vue";
+import DichVuSetting from "../components/dich-vu/Dich-vu-setting.vue";
 
 const routes = [
+
+    {
+        path: "/-thg/dich-vu",
+        name: "DichVuSetting",
+        component: DichVuSetting,
+        meta: {requiresAuth: false, enableTailwind: true}
+    },
     {
         path: "/-thg/nhap-lieu",
         name: "TeamCollaboration1",

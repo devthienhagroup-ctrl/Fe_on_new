@@ -454,7 +454,7 @@
                           class="form-control"
                           style="font-size: 18px !important;"
                           v-model="searchText"
-                          placeholder="Tìm kiếm khách hàng..."
+                          placeholder="Tên khách, người phụ trách..."
                           @input="applyFilters"
                       >
                     </div>
@@ -2315,6 +2315,7 @@ const updateCustomer = async () => {
     })
     showCenterSuccess('Cập nhật khách hàng thành công!', 'Dữ liệu đã được ghi nhận!')
     await fetchCustomers()
+    await fetchTeleSalesSummary()
     showEditCustomerModal.value = false
     isEditing.value = false
     resetCustomerForm()
@@ -2894,6 +2895,7 @@ const reloadAllData = async () => {
 watch(searchText, () => {
   page.value = 0
   fetchCustomers()
+fetchTeleSalesSummary()
 })
 watch(employeeSearch, (value) => {
   if (!showEditCustomerModal.value) return
@@ -2933,6 +2935,7 @@ watch(
     () => {
       page.value = 0
       fetchCustomers()
+fetchTeleSalesSummary()
     },
     { deep: true }
 )
@@ -2940,6 +2943,7 @@ const page = ref(0)
 const pageSize = ref(10)
 watch(page, () => {
   fetchCustomers()
+fetchTeleSalesSummary()
 })
 
 import api from '/src/api/api.js'
@@ -2973,6 +2977,21 @@ const buildFilterPayload = () => ({
 
   page: page.value,
   size: pageSize.value
+})
+
+
+const buildFilterPayloadDB = () => ({
+  search: searchText.value || null,
+
+  phanLoaiKhach: filters.type !== 'all' ? filters.type : null,
+  trangThai: filters.status !== 'all' ? filters.status : null,
+  tinhThanhPho: filters.province || null,
+  nguoiTaoId: filters.creator !== 'all' ? filters.creator : null,
+
+  ngayTaoTu: filters.createdFrom || null,
+  ngayTaoDen: filters.createdTo || null,
+  ngayCapNhatTu: filters.updatedFrom || null,
+  ngayCapNhatDen: filters.updatedTo || null
 })
 
 const fetchCustomers = async () => {
@@ -3025,6 +3044,7 @@ const nextPage = () => {
 watch(pageSize, () => {
   page.value = 0
   fetchCustomers()
+fetchTeleSalesSummary()
 })
 async function fetchCustomerDetail(customerId, { showModal = true } = {}) {
   if (!customerId) return
@@ -3129,7 +3149,7 @@ const summary = ref({
 })
 const fetchTeleSalesSummary = async () => {
   try {
-    const res = await api.get('/customer-crm/admin/dashboard/telesales/summary')
+    const res = await api.post('/customer-crm/admin/dashboard/telesales/summary', buildFilterPayloadDB())
     summary.value = res.data
   } catch (e) {
     console.error('❌ Không lấy được summary telesales', e)
