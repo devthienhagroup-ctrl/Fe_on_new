@@ -139,9 +139,9 @@ const subscriptionPlan = computed(() => {
 
 const avatarUrl = computed(() => {
   if (props.memberData.avatar) {
-    return 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + props.memberData.avatar
+    return 'https://s3.cloudfly.vn/thg-storage/uploads-public/' + props.memberData.avatar
   }
-  return 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/vat-default.jpg'
+  return 'https://s3.cloudfly.vn/thg-storage/uploads-public/vat-default.jpg'
 })
 
 const cardClass = computed(() => {

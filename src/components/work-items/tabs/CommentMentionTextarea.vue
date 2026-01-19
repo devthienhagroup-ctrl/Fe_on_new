@@ -323,7 +323,7 @@ function highlightMentions(value = "") {
 function buildAvatarUrl(avatar) {
   if (!avatar) return "";
   if (avatar.startsWith("http://") || avatar.startsWith("https://")) return avatar;
-  return ` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${avatar}`;
+  return ` https://s3.cloudfly.vn/thg-storage/uploads-public/${avatar}`;
 }
 
 function syncOverlayScroll(source) {

@@ -52,7 +52,7 @@ class SocketService {
   ensureClient() {
     if (!this.client) {
       this.client = new MinimalStompClient({
-        url: SOCKET_CONFIG.endpoint, // ví dụ: http://localhost:8084/apithienha/ws-thg
+        url: SOCKET_CONFIG.endpoint, // ví dụ: https://thienhagroup.vn/apithienha/ws-thg
         tokenProvider: () =>
             typeof this.tokenProvider === "function" ? this.tokenProvider() : null,
         reconnectDelay: 5000,

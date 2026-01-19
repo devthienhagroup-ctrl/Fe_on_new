@@ -305,7 +305,7 @@ watch([activeTab, page, pageSize], () => {
 watch(activeTab, () => {
   page.value = 1
 })
-const AVATAR_BASE = 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'
+const AVATAR_BASE = 'https://s3.cloudfly.vn/thg-storage/uploads-public/'
 
 const resolveAvatar = (avatar) => {
   if (!avatar) {

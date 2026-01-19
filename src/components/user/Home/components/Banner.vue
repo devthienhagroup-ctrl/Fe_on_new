@@ -156,7 +156,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import ParticleBackground from '../../ParticleBackground.vue'
 import Stats from "./Stats.vue";
 
-const baseUrlImg = 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/';
+const baseUrlImg = 'https://s3.cloudfly.vn/thg-storage/uploads-public/';
 
 // Props với giá trị mặc định
 const props = defineProps({

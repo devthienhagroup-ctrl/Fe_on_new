@@ -102,8 +102,8 @@ const loadGroups = async () => {
       name: g.tenNhom,
       totalMembers: g.tongThanhVien,
       avatar: g.avatar
-          ? `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${g.avatar}`
-          : 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/vat-default.jpg'
+          ? `https://s3.cloudfly.vn/thg-storage/uploads-public/${g.avatar}`
+          : 'https://s3.cloudfly.vn/thg-storage/uploads-public/vat-default.jpg'
     }))
   } catch (e) {
     console.error('Lỗi load nhóm', e)
