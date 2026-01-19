@@ -159,13 +159,13 @@ import CTVRecruitCMS from "../components/cms/NewCms/CTVRecruit/CTVRecruitCMS.vue
 import DichVuSetting from "../components/dich-vu/Dich-vu-setting.vue";
 
 const routes = [
-
-    {
-        path: "/-thg/dich-vu",
-        name: "DichVuSetting",
-        component: DichVuSetting,
-        meta: {requiresAuth: false, enableTailwind: true}
-    },
+    //
+    // {
+    //     path: "/-thg/dich-vu",
+    //     name: "DichVuSetting",
+    //     component: DichVuSetting,
+    //     meta: {requiresAuth: false, enableTailwind: true}
+    // },
     {
         path: "/-thg/nhap-lieu",
         name: "TeamCollaboration1",
