@@ -296,7 +296,7 @@
 
     <!-- SERVICE DETAIL MODAL -->
     <div v-if="serviceDetailOpen" class="svc3-modal" @click.self="closeServiceDetail()">
-      <div class="svc3-modal-card">
+      <div class="svc3-modal-card detail">
         <div class="svc3-modal-h">
           <div class="svc3-modal-title">
             <i class="fa-solid fa-circle-info"></i>
@@ -366,7 +366,7 @@
                     <b>{{ formatCurrency(seg.min) }} → {{ formatCurrency(seg.max) }}</b>
                   </div>
                   <div class="row">
-                    <span class="muted">Giá : <b class="p3" style="color: #0a2463">{{ formatCurrency(seg.price) }}</b></span>
+                    <span class="muted">Giá : <b class="p3 svc3-price-strong">{{ formatCurrency(seg.price) }}</b></span>
                   </div>
                 </div>
               </div>
@@ -1591,6 +1591,15 @@ watch(serviceQuery, async () => {
   overflow:hidden;
   animation: pop .16s ease;
 }
+.svc3-modal-card.detail{
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(255,214,214,.55), transparent 55%),
+    radial-gradient(120% 120% at 100% 0%, rgba(206,221,255,.55), transparent 60%),
+    radial-gradient(120% 120% at 100% 100%, rgba(210,255,238,.55), transparent 55%),
+    linear-gradient(160deg, rgba(255,255,255,.98), rgba(255,255,255,.92));
+  border: 1px solid rgba(168,185,255,.35);
+  box-shadow: 0 35px 80px rgba(88,116,255,.22);
+}
 .svc3-modal-card.wide{ width: min(1020px, 100%); }
 @keyframes pop{ from{ opacity:0; transform: translateY(10px) scale(.98);} to{ opacity:1; transform: translateY(0) scale(1);} }
 .svc3-modal-h{
@@ -1601,6 +1610,10 @@ watch(serviceQuery, async () => {
   gap:10px;
   border-bottom: 1px solid rgba(15,23,42,.08);
   background: rgba(15,23,42,.02);
+}
+.svc3-modal-card.detail .svc3-modal-h{
+  background: linear-gradient(90deg, rgba(255,224,235,.65), rgba(224,238,255,.65), rgba(226,255,244,.65));
+  border-bottom: 1px solid rgba(168,185,255,.35);
 }
 .svc3-modal-title{
   display:flex;
@@ -1615,6 +1628,10 @@ watch(serviceQuery, async () => {
   display:grid; place-items:center;
   background: var(--gd);
   color:#fff;
+}
+.svc3-modal-card.detail .svc3-modal-title i{
+  background: linear-gradient(135deg, #ffb7c5, #c9d7ff);
+  box-shadow: 0 12px 22px rgba(255, 183, 197, .35);
 }
 .svc3-x{
   width:36px; height:36px;
@@ -1634,6 +1651,19 @@ watch(serviceQuery, async () => {
   border-top: 1px solid rgba(15,23,42,.08);
   background: rgba(15,23,42,.02);
 }
+.svc3-modal-card.detail .svc3-modal-f{
+  background: linear-gradient(90deg, rgba(229,240,255,.6), rgba(255,236,246,.6));
+  border-top: 1px solid rgba(168,185,255,.35);
+}
+.svc3-modal-card.detail .svc3-detail-name span{
+  color: #2f3b66;
+}
+.svc3-modal-card.detail .svc3-detail-name i{
+  color: #5f79d6;
+}
+.svc3-modal-card.detail .svc3-svc-sub{
+  color: rgba(47,59,102,.65);
+}
 
 /* Detail blocks */
 .svc3-detail-head{
@@ -1644,6 +1674,9 @@ watch(serviceQuery, async () => {
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(15,23,42,.08);
 }
+.svc3-modal-card.detail .svc3-detail-head{
+  border-bottom: 1px solid rgba(168,185,255,.35);
+}
 .svc3-detail-name{ font-weight: 750; font-size: 14px; }
 .svc3-kpis{ display:flex; gap:10px; }
 .svc3-kpi{
@@ -1652,6 +1685,26 @@ watch(serviceQuery, async () => {
   border-radius: 14px;
   padding: 8px 10px;
   background: #fff;
+}
+.svc3-modal-card.detail .svc3-kpi{
+  background: linear-gradient(160deg, rgba(255,255,255,.95), rgba(235,248,255,.9));
+  border: 1px solid rgba(168,185,255,.4);
+  box-shadow: 0 12px 24px rgba(167,196,255,.22);
+}
+.svc3-modal-card.detail .svc3-kpi .k{
+  color: rgba(70,85,130,.75);
+}
+.svc3-modal-card.detail .svc3-kpi .v{
+  font-size: 14px;
+  letter-spacing: .2px;
+  background: none;
+  -webkit-text-fill-color: initial;
+}
+.svc3-modal-card.detail .svc3-kpi .v.p1{
+  color: #2f6f8f;
+}
+.svc3-modal-card.detail .svc3-kpi .v.p2{
+  color: #8a4f8c;
 }
 .svc3-kpi .k{ font-size: 11px; color: var(--muted); font-weight: 650; }
 .svc3-kpi .v{ margin-top:2px; font-weight: 750; font-size: 13px; }
@@ -1662,6 +1715,17 @@ watch(serviceQuery, async () => {
   border-radius: 14px;
   background: #fff;
   padding: 10px;
+}
+.svc3-modal-card.detail .svc3-box{
+  background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(255,239,247,.9));
+  border: 1px solid rgba(255,192,226,.45);
+  box-shadow: 0 14px 24px rgba(255,192,226,.2);
+}
+.svc3-modal-card.detail .svc3-box-k{
+  color: rgba(55,68,112,.82);
+}
+.svc3-modal-card.detail .svc3-box-k i{
+  color: #6b7fd9;
 }
 .svc3-box-k{ display:flex; align-items:center; gap:8px; font-size: 12px; font-weight: 700; color: rgba(11,18,32,.78); }
 .svc3-box-v{ margin-top: 6px; font-size: 13px; color: rgba(11,18,32,.80); line-height: 1.6; }
@@ -1681,12 +1745,35 @@ watch(serviceQuery, async () => {
   background: #fff;
   overflow:hidden;
 }
+.svc3-modal-card.detail .svc3-seg-card{
+  background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(232,244,255,.9));
+  border: 1px solid rgba(168,185,255,.4);
+  box-shadow: 0 14px 24px rgba(167,196,255,.2);
+}
 .svc3-seg-h{
   padding: 8px 10px;
   display:flex;
   align-items:center;
   justify-content:space-between;
   border-bottom: 1px solid rgba(15,23,42,.08);
+}
+.svc3-modal-card.detail .svc3-seg-h{
+  background: linear-gradient(90deg, rgba(255,238,247,.7), rgba(232,244,255,.7));
+  border-bottom: 1px solid rgba(168,185,255,.35);
+}
+.svc3-modal-card.detail .svc3-seg-h .t{
+  color: #3a4b7a;
+}
+.svc3-modal-card.detail .svc3-seg-h .t i{
+  color: #7a8fe6;
+}
+.svc3-modal-card.detail .svc3-seg-b b{
+  color: #2f4a74;
+}
+.svc3-modal-card.detail .svc3-price-strong{
+  color: #2f5f88;
+  background: none;
+  -webkit-text-fill-color: initial;
 }
 .svc3-seg-h .t{ display:flex; align-items:center; gap:8px; font-weight: 700; font-size: 12px; }
 .svc3-seg-b{ padding: 10px; display:grid; gap:8px; }

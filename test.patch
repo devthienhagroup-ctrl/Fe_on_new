@@ -1,365 +1,345 @@
-diff --git a/src/components/thiet-kegiandien/marketing-cap-da-ta.vue b/src/components/thiet-kegiandien/marketing-cap-da-ta.vue
-index f9f4a954f9ac1108a0e586752f0afe7239bde39e..a3ee08af9b32ea9c9f945cd33018e0fc59e53f77 100644
---- a/src/components/thiet-kegiandien/marketing-cap-da-ta.vue
-+++ b/src/components/thiet-kegiandien/marketing-cap-da-ta.vue
-@@ -1,32 +1,41 @@
- <template>
-   <div id="refined-dashboard" class="refined-dashboard">
-     <!-- Compact Header -->
-     <div class="dashboard-header">
-       <div>
-         <div class="header-content">
-           <div class="d-flex align-items-center gap-3">
-+            <button
-+              type="button"
-+              class="header-menu-toggle"
-+              title="Ẩn/hiện menu"
-+              @click="sidebar.toggle()"
-+            >
-+              <i class="fas fa-bars"></i>
-+              <span class="d-none d-md-inline">Menu</span>
-+            </button>
-             <div class="brand-icon">
-               <i class="fa-solid fa-chart-pie"></i>
-             </div>
-             <div>
-               <h1 class="dashboard-title">Bảng điều khiển Marketing</h1>
-               <p class="dashboard-subtitle">Nhập liệu & phân tích theo thời gian thực</p>
-             </div>
-           </div>
-           <div class="d-flex align-items-center gap-2">
-             <NotificationBell />
-             <div class="d-flex flex-column align-items-end text-end">
-               <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-             </div>
+diff --git a/src/components/dich-vu/Dich-vu-setting.vue b/src/components/dich-vu/Dich-vu-setting.vue
+index c03cadeb4c7d0a9cde45724215654da8219167ff..3311e090e9ebda1fe614a929a869fd71b43eb93e 100644
+--- a/src/components/dich-vu/Dich-vu-setting.vue
++++ b/src/components/dich-vu/Dich-vu-setting.vue
+@@ -274,51 +274,51 @@
+                   <td class="text-align-center">
+                     <div class="svc3-actions">
+                       <button class="svc3-icon warn" title="Sửa phân khúc" @click="openEditSegment(seg.id, seg.id)">
+                         <i class="fa-solid fa-pen"></i>
+                       </button>
+                       <button class="svc3-icon danger" title="Xóa phân khúc" @click="removeSegment(seg.id, seg.id)">
+                         <i class="fa-solid fa-trash"></i>
+                       </button>
+                     </div>
+                   </td>
+                 </tr>
+                 </tbody>
+               </table>
 
-             <img
-                 v-if="info.avatarUrl"
-                 :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-                 alt="avatar"
-                 class="rounded-circle border"
-                 style="width: 36px; height: 36px; object-fit: cover;"
-             />
-             <div v-else class="avatar-circle">
-               {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
+               <div class="svc3-footnote">
+                 Tip: Nhập “Giá trị tài sản” để auto lọc + highlight phân khúc phù hợp.
+               </div>
              </div>
            </div>
-@@ -410,52 +419,54 @@
-           </div>
-         </div>
+         </section>
        </div>
      </div>
 
-     <!-- Notification container injected by JS -->
-   </div>
- </template>
-
- <script setup>
- import { ref, reactive, computed, onMounted, watch, onBeforeUnmount, nextTick } from "vue";
- import Chart from "chart.js/auto";
- import addressData from "/src/assets/js/address.json";
-
- import api from "/src/api/api.js";
- import {
-   showLoading,
-   updateAlertError,
-   updateAlertSuccess,
-   showCenterError,
-   showCenterWarning,
-   showWarning
- } from "../../assets/js/alertService.js";
- import NotificationBell from "../NotificationBell.vue";
- import { useAuthStore } from "/src/stores/authStore.js";
-+import { useSidebarStore } from "/src/stores/sidebarStore.js";
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-+const sidebar = useSidebarStore();
- const provinces = ref(addressData);
-
- const formData = reactive({
-   name: "",
-   phone: "",
-   area: "",
-   oldArea: null,
-   type: "CHINH_CHU",
-   price: "",
-   note: "",
- });
-
- const submissionCount = ref(0);
- const totalValue = ref(2435000000);
- const priceDisplay = ref("");
-
- const customerTypes = [
-   { id: "CHINH_CHU", label: "Chủ nhà", icon: "fas fa-house-user" },
-   { id: "MOI_GIOI", label: "Môi giới", icon: "fas fa-handshake" },
-   { id: "NGUOI_THAN", label: "Người thân", icon: "fas fa-people-group" },
- ];
-
- /* =========================
-    STATUS DOUGHNUT (Chart.js)
- ========================= */
-@@ -1037,50 +1048,79 @@ onBeforeUnmount(() => {
- .brand-icon {
-   width: 40px;
-   height: 40px;
-   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-   border-radius: 10px;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   color: white;
-   font-size: 18px;
- }
-
- .dashboard-title {
-   font-size: 1.5rem;
-   font-weight: 700;
-   color: #0f172a;
-   margin: 0;
-   letter-spacing: -0.025em;
- }
-
- .dashboard-subtitle {
-   font-size: 0.875rem;
-   color: #64748b;
-   margin: 0;
- }
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  justify-content: center;
-+  padding: 5px 10px;
-+  height: 40px;
-+  border-radius: 15px;
-+  border: 1px solid #e5e7eb;
-+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-+  color: #334155;
-+  font-size: 18px;
-+  cursor: pointer;
-+  transition: all 0.2s ease-in-out;
-+}
-+
-+.header-menu-toggle:hover {
-+  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
-+  color: #0369a1;
-+  border-color: #bae6fd;
-+}
-+
-+.header-menu-toggle:active {
-+  transform: scale(0.95);
-+}
-+
-+.header-menu-toggle:focus {
-+  outline: none;
-+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35);
-+}
-
- .header-actions {
-   display: flex;
-   gap: 0.75rem;
- }
-
- /* ===== Icon Labels ===== */
- .icon-label {
-   display: inline-flex;
-   align-items: center;
-   justify-content: center;
-   width: 28px;
-   height: 28px;
-   border-radius: 8px;
-   margin-right: 8px;
-   color: white;
-   font-size: 14px;
- }
-
- .required {
-   color: #ef4444;
-   margin-left: 4px;
- }
-
- .select-like .form-control {
-diff --git a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-index a3c80173408bf32175e0cc6577c170aaeec55eae..4bb6b3d96571efe29219e2cda5fe93819f686ec7 100644
---- a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-+++ b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-@@ -1,31 +1,42 @@
- <!-- Save as: TeleSaleApp.vue -->
- <template>
-   <div id="app" class="telesale-app">
-     <!-- Header -->
-     <header class="app-header">
--      <h1><i class="fas fa-phone-alt"></i> Hệ Thống Telesale</h1>
-+      <div class="d-flex align-items-center gap-2">
-+        <button
-+          type="button"
-+          class="header-menu-toggle"
-+          title="Ẩn/hiện menu"
-+          @click="sidebar.toggle()"
-+        >
-+          <i class="fas fa-bars"></i>
-+          <span class="d-none d-md-inline">Menu</span>
-+        </button>
-+        <h1><i class="fas fa-phone-alt"></i> Hệ Thống Telesale</h1>
-+      </div>
-       <div class="d-flex align-items-center gap-2">
-         <div class="d-flex flex-column align-items-end text-end">
-           <div class="fw-semibold text-dark">{{ info.fullName }}</div>
+     <!-- SERVICE DETAIL MODAL -->
+     <div v-if="serviceDetailOpen" class="svc3-modal" @click.self="closeServiceDetail()">
+-      <div class="svc3-modal-card">
++      <div class="svc3-modal-card detail">
+         <div class="svc3-modal-h">
+           <div class="svc3-modal-title">
+             <i class="fa-solid fa-circle-info"></i>
+             <span>Chi tiết dịch vụ</span>
+           </div>
+           <button class="svc3-x" @click="closeServiceDetail()"><i class="fa-solid fa-xmark"></i></button>
          </div>
 
-         <img
-             v-if="info.avatarUrl"
-             :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-             alt="avatar"
-             class="rounded-circle border"
-             style="width: 36px; height: 36px; object-fit: cover;"
-         />
-         <div v-else class="avatar-circle">
-           {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-         </div>
-       </div>
-     </header>
+         <div class="svc3-modal-b" v-if="detailService">
+           <div class="svc3-detail-head">
+             <div class="svc3-svc">
+               <div class="svc3-dot big" :style="{background:detailService.color}"></div>
+               <div class="min-w-0">
+                 <div class="svc3-detail-name flex items-center gap-2">
+                   <span>{{ detailService.name }}</span>
 
-     <div class="main-container" :class="{ 'with-detail': selectedCustomer }">
-       <!-- Sidebar với thống kê -->
-       <aside class="sidebar">
-         <div class="stats-widget">
-           <h3 class="stat-title">
-             <i class="fas fa-chart-bar stat-icon"></i>
-             Thống kê hôm nay
-@@ -452,52 +463,54 @@
-                     {{ item.ghiChu }}
+                   <span
+                       class="svc3-status"
+                       :class="detailService.active ? 'on' : 'off'"
+                   >
+                   <i
+                       class="fa-solid"
+                       :class="detailService.active ? 'fa-circle-check' : 'fa-circle-pause'"
+                   ></i>
+                   {{ detailService.active ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
+@@ -344,51 +344,51 @@
+             </div>
+           </div>
+
+           <div class="svc3-box">
+             <div class="svc3-box-k">
+               <i class="fa-solid fa-file-lines"></i><span>Mô tả</span>
+             </div>
+             <div class="svc3-box-v">{{ detailService.description || "—" }}</div>
+           </div>
+
+           <div class="svc3-box mt-3">
+             <div class="svc3-box-k">
+               <i class="fa-solid fa-tags"></i><span>Phân khúc</span>
+             </div>
+
+             <div class="svc3-seg-grid" v-if="detailService.priceSegments.length">
+               <div v-for="seg in detailService.priceSegments" :key="seg.id" class="svc3-seg-card">
+                 <div class="svc3-seg-h">
+                   <div class="t"><i class="fa-solid fa-tag"></i><span>Phân khúc {{ formatMoneyShort(seg.min) }} đến nhỏ hơn {{ formatMoneyShort(seg.max)}}</span></div>
+                 </div>
+                 <div class="svc3-seg-b">
+                   <div class="row">
+                     <b>{{ formatCurrency(seg.min) }} → {{ formatCurrency(seg.max) }}</b>
                    </div>
-                   <div class="history-note muted" v-else>
-                     Không có mô tả
+                   <div class="row">
+-                    <span class="muted">Giá : <b class="p3" style="color: #0a2463">{{ formatCurrency(seg.price) }}</b></span>
++                    <span class="muted">Giá : <b class="p3 svc3-price-strong">{{ formatCurrency(seg.price) }}</b></span>
                    </div>
                  </div>
                </div>
+             </div>
 
-               <div v-else class="empty-history">Chưa có lịch sử.</div>
+             <div v-else class="svc3-empty small">
+               <div class="svc3-empty-title">Chưa có phân khúc</div>
+               <div class="svc3-empty-sub">Bấm Chỉnh sửa để thêm phân khúc.</div>
              </div>
            </div>
          </div>
+
+         <div class="svc3-modal-f">
+           <button class="svc3-btn ghost" @click="closeServiceDetail()">
+             <i class="fa-solid fa-xmark"></i><span>Đóng</span>
+           </button>
+           <button v-if="detailService" class="svc3-btn primary" @click="(closeServiceDetail(), openEditService(detailService.id))">
+             <i class="fa-solid fa-pen-to-square"></i><span>Chỉnh sửa</span>
+           </button>
+         </div>
        </div>
      </div>
-   </div>
- </template>
 
- <script setup>
- import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
- import Chart from 'chart.js/auto'
- import api from '/src/api/api.js'
- import FileNew from './File.vue'
-
- import NotificationBell from "../NotificationBell.vue";
- import { useAuthStore } from "/src/stores/authStore.js";
-+import { useSidebarStore } from "/src/stores/sidebarStore.js";
- const authStore = useAuthStore();
- const info = authStore.userInfo;
-+const sidebar = useSidebarStore();
- // ====== META ======
- const STATUS_META = {
-   NEW: { label: 'Mới', color: '#94a3b8' },
-
-   DC_TELESALES: { label: 'Mới tiếp nhận', color: '#6366f1' },
-   CHAM_SOC: { label: 'Đang chăm sóc', color: '#38bdf8' },
-   TN_7NGAY: { label: 'Tiềm năng 7 ngày', color: '#0ea5e9' },
-   TN_14NGAY: { label: 'Tiềm năng 14 ngày', color: '#0284c7' },
-
-   THAT_BAI: { label: 'Thất bại', color: '#f43f5e' },
-   KHONG_LIEN_LAC_DUOC: { label: 'Không liên lạc được', color: '#f97316' },
-   SAI_SO_LIEU: { label: 'Sai số liệu', color: '#a855f7' },
-
-   THANH_CONG: { label: 'Thành công (Lên VP)', color: '#22c55e' },
-
-   // ===== BỔ SUNG =====
-   KHACH_HUY_HEN: { label: 'Khách huỷ hẹn', color: '#b45309' },   // cam nâu – huỷ
-   BAN_NHANH: { label: 'Bán nhanh', color: '#15803d' },          // xanh lá đậm
-   BAN_GP: { label: 'Bán GP (Đã lên VP)', color: '#0f766e' },    // xanh ngọc đậm
+     <!-- SERVICE EDIT MODAL (create/edit) -->
+     <div v-if="serviceEditOpen" class="svc3-modal" @click.self="closeServiceEdit()">
+@@ -1569,147 +1569,234 @@ watch(serviceQuery, async () => {
  }
+ .svc3-empty-title{ font-weight: 700; font-size: 13px; }
+ .svc3-empty-sub{ margin-top: 6px; color: var(--muted); font-size: 12px; }
 
-
- // ====== Reactive state ======
- const activeTab = ref('new')
- const activeDetailTab = ref('detail')
-@@ -1190,50 +1203,80 @@ body {
-   overflow: hidden;
-   zoom: 0.9;
+ /* ===== MODAL ===== */
+ .svc3-modal{
+   position: fixed;
+   inset: 0;
+   background: rgba(0,0,0,.55);
+   backdrop-filter: blur(6px);
+   z-index: 80;
+   display:flex;
+   align-items:center;
+   justify-content:center;
+   padding: 16px;
  }
-
- /* Header */
- .app-header {
-   top: -10px!important;
-   background: linear-gradient(135deg, #3f51b5, #2196f3);
-   color: white;
-   padding: 15px 25px;
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+ .svc3-modal-card{
+   width: min(720px, 100%);
+   background: rgba(255,255,255,.96);
+   border: 1px solid rgba(255,255,255,.35);
+   border-radius: 18px;
+   box-shadow: 0 30px 70px rgba(0,0,0,.30);
+   overflow:hidden;
+   animation: pop .16s ease;
  }
-
- .app-header h1 {
-   font-size: 22px;
-   font-weight: 600;
- }
-
- .app-header h1 i {
-   margin-right: 10px;
- }
-
-+.header-menu-toggle {
-+  display: inline-flex;
-+  align-items: center;
-+  justify-content: center;
-+  padding: 5px 10px;
-+  height: 40px;
-+  border-radius: 15px;
-+  border: 1px solid #e5e7eb;
-+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-+  color: #334155;
-+  font-size: 18px;
-+  cursor: pointer;
-+  transition: all 0.2s ease-in-out;
++.svc3-modal-card.detail{
++  background:
++    radial-gradient(120% 120% at 0% 0%, rgba(255,214,214,.55), transparent 55%),
++    radial-gradient(120% 120% at 100% 0%, rgba(206,221,255,.55), transparent 60%),
++    radial-gradient(120% 120% at 100% 100%, rgba(210,255,238,.55), transparent 55%),
++    linear-gradient(160deg, rgba(255,255,255,.98), rgba(255,255,255,.92));
++  border: 1px solid rgba(168,185,255,.35);
++  box-shadow: 0 35px 80px rgba(88,116,255,.22);
 +}
-+
-+.header-menu-toggle:hover {
-+  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
-+  color: #0369a1;
-+  border-color: #bae6fd;
+ .svc3-modal-card.wide{ width: min(1020px, 100%); }
+ @keyframes pop{ from{ opacity:0; transform: translateY(10px) scale(.98);} to{ opacity:1; transform: translateY(0) scale(1);} }
+ .svc3-modal-h{
+   padding: 12px 12px;
+   display:flex;
+   align-items:center;
+   justify-content:space-between;
+   gap:10px;
+   border-bottom: 1px solid rgba(15,23,42,.08);
+   background: rgba(15,23,42,.02);
+ }
++.svc3-modal-card.detail .svc3-modal-h{
++  background: linear-gradient(90deg, rgba(255,224,235,.65), rgba(224,238,255,.65), rgba(226,255,244,.65));
++  border-bottom: 1px solid rgba(168,185,255,.35);
 +}
-+
-+.header-menu-toggle:active {
-+  transform: scale(0.95);
+ .svc3-modal-title{
+   display:flex;
+   align-items:center;
+   gap:10px;
+   font-weight: 700;
+   font-size: 13px;
+ }
+ .svc3-modal-title i{
+   width:30px; height:30px;
+   border-radius: 12px;
+   display:grid; place-items:center;
+   background: var(--gd);
+   color:#fff;
+ }
++.svc3-modal-card.detail .svc3-modal-title i{
++  background: linear-gradient(135deg, #ffb7c5, #c9d7ff);
++  box-shadow: 0 12px 22px rgba(255, 183, 197, .35);
 +}
-+
-+.header-menu-toggle:focus {
-+  outline: none;
-+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35);
+ .svc3-x{
+   width:36px; height:36px;
+   border-radius: 12px;
+   border: 1px solid rgba(15,23,42,.10);
+   background: rgba(15,23,42,.03);
+   cursor:pointer;
+   transition: var(--t);
+ }
+ .svc3-x:hover{ transform: translateY(-1px); background: rgba(102,126,234,.08); border-color: rgba(102,126,234,.22); }
+ .svc3-modal-b{ padding: 12px; }
+ .svc3-modal-f{
+   padding: 12px;
+   display:flex;
+   justify-content:flex-end;
+   gap:8px;
+   border-top: 1px solid rgba(15,23,42,.08);
+   background: rgba(15,23,42,.02);
+ }
++.svc3-modal-card.detail .svc3-modal-f{
++  background: linear-gradient(90deg, rgba(229,240,255,.6), rgba(255,236,246,.6));
++  border-top: 1px solid rgba(168,185,255,.35);
 +}
-+
- .user-info {
-   display: flex;
-   align-items: center;
-   gap: 20px;
- }
++.svc3-modal-card.detail .svc3-detail-name span{
++  color: #2f3b66;
++}
++.svc3-modal-card.detail .svc3-detail-name i{
++  color: #5f79d6;
++}
++.svc3-modal-card.detail .svc3-svc-sub{
++  color: rgba(47,59,102,.65);
++}
 
- .logout-btn {
-   background: rgba(255, 255, 255, 0.2);
-   border: none;
-   color: white;
-   padding: 8px 15px;
-   border-radius: 4px;
-   cursor: pointer;
-   font-size: 14px;
-   transition: background 0.3s;
+ /* Detail blocks */
+ .svc3-detail-head{
+   display:flex;
+   justify-content:space-between;
+   gap:10px;
+   flex-wrap:wrap;
+   padding-bottom: 10px;
+   border-bottom: 1px solid rgba(15,23,42,.08);
  }
-
- .logout-btn:hover {
-   background: rgba(255, 255, 255, 0.3);
++.svc3-modal-card.detail .svc3-detail-head{
++  border-bottom: 1px solid rgba(168,185,255,.35);
++}
+ .svc3-detail-name{ font-weight: 750; font-size: 14px; }
+ .svc3-kpis{ display:flex; gap:10px; }
+ .svc3-kpi{
+   min-width: 140px;
+   border: 1px solid rgba(15,23,42,.10);
+   border-radius: 14px;
+   padding: 8px 10px;
+   background: #fff;
  }
++.svc3-modal-card.detail .svc3-kpi{
++  background: linear-gradient(160deg, rgba(255,255,255,.95), rgba(235,248,255,.9));
++  border: 1px solid rgba(168,185,255,.4);
++  box-shadow: 0 12px 24px rgba(167,196,255,.22);
++}
++.svc3-modal-card.detail .svc3-kpi .k{
++  color: rgba(70,85,130,.75);
++}
++.svc3-modal-card.detail .svc3-kpi .v{
++  font-size: 14px;
++  letter-spacing: .2px;
++  background: none;
++  -webkit-text-fill-color: initial;
++}
++.svc3-modal-card.detail .svc3-kpi .v.p1{
++  color: #2f6f8f;
++}
++.svc3-modal-card.detail .svc3-kpi .v.p2{
++  color: #8a4f8c;
++}
+ .svc3-kpi .k{ font-size: 11px; color: var(--muted); font-weight: 650; }
+ .svc3-kpi .v{ margin-top:2px; font-weight: 750; font-size: 13px; }
 
- .logout-btn i {
-   margin-right: 5px;
+ .svc3-box{
+   margin-top: 10px;
+   border: 1px solid rgba(15,23,42,.10);
+   border-radius: 14px;
+   background: #fff;
+   padding: 10px;
  }
++.svc3-modal-card.detail .svc3-box{
++  background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(255,239,247,.9));
++  border: 1px solid rgba(255,192,226,.45);
++  box-shadow: 0 14px 24px rgba(255,192,226,.2);
++}
++.svc3-modal-card.detail .svc3-box-k{
++  color: rgba(55,68,112,.82);
++}
++.svc3-modal-card.detail .svc3-box-k i{
++  color: #6b7fd9;
++}
+ .svc3-box-k{ display:flex; align-items:center; gap:8px; font-size: 12px; font-weight: 700; color: rgba(11,18,32,.78); }
+ .svc3-box-v{ margin-top: 6px; font-size: 13px; color: rgba(11,18,32,.80); line-height: 1.6; }
 
+ .svc3-seg-grid{
+   margin-top: 10px;
+   display:grid;
+   grid-template-columns: repeat(2, minmax(0,1fr));
+   gap:10px;
+ }
+ @media (max-width: 900px){
+   .svc3-seg-grid{ grid-template-columns: 1fr; }
+ }
+ .svc3-seg-card{
+   border: 1px solid rgba(15,23,42,.10);
+   border-radius: 14px;
+   background: #fff;
+   overflow:hidden;
+ }
++.svc3-modal-card.detail .svc3-seg-card{
++  background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(232,244,255,.9));
++  border: 1px solid rgba(168,185,255,.4);
++  box-shadow: 0 14px 24px rgba(167,196,255,.2);
++}
+ .svc3-seg-h{
+   padding: 8px 10px;
+   display:flex;
+   align-items:center;
+   justify-content:space-between;
+   border-bottom: 1px solid rgba(15,23,42,.08);
+ }
++.svc3-modal-card.detail .svc3-seg-h{
++  background: linear-gradient(90deg, rgba(255,238,247,.7), rgba(232,244,255,.7));
++  border-bottom: 1px solid rgba(168,185,255,.35);
++}
++.svc3-modal-card.detail .svc3-seg-h .t{
++  color: #3a4b7a;
++}
++.svc3-modal-card.detail .svc3-seg-h .t i{
++  color: #7a8fe6;
++}
++.svc3-modal-card.detail .svc3-seg-b b{
++  color: #2f4a74;
++}
++.svc3-modal-card.detail .svc3-price-strong{
++  color: #2f5f88;
++  background: none;
++  -webkit-text-fill-color: initial;
++}
+ .svc3-seg-h .t{ display:flex; align-items:center; gap:8px; font-weight: 700; font-size: 12px; }
+ .svc3-seg-b{ padding: 10px; display:grid; gap:8px; }
+ .svc3-seg-b .row{ display:flex; justify-content:space-between; gap:10px; font-size: 13px; }
+
+ /* Form modal */
+ .svc3-form-grid{
+   display:grid;
+   grid-template-columns: 0.95fr 1.05fr;
+   gap: 12px;
+ }
+ @media (max-width: 1000px){
+   .svc3-form-grid{ grid-template-columns: 1fr; }
+ }
+ .svc3-form-card{
+   border: 1px solid rgba(15,23,42,.10);
+   border-radius: 16px;
+   background: rgba(255,255,255,.75);
+   box-shadow: var(--sh2);
+   overflow:hidden;
+ }
+ .svc3-form-title{
+   padding: 10px 12px;
+   display:flex;
+   align-items:center;
+   gap:10px;
