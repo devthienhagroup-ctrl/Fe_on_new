@@ -1,31 +1,44 @@
 <template>
-  <div class="svc3-page">
-    <div class="mx-auto max-w-[1440px] px-4 py-5">
-      <!-- Top bar -->
-      <div class="svc3-topbar">
-        <div class="svc3-brand">
-          <div class="svc3-brand-ico"><i class="fa-solid fa-grid-2-plus"></i></div>
-          <div class="min-w-0">
-            <div class="svc3-title">Quản trị Dịch vụ</div>
-            <div class="svc3-sub">Quản lý dịch vụ & phân khúc giá (compact, pro, nhất quán)</div>
-          </div>
-        </div>
 
-        <div class="svc3-top-actions">
-          <button class="svc3-btn ghost" @click="seedMock()">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <span class="hidden sm:inline">Mock</span>
-          </button>
+  <div class="svc3-topbar">
+    <div class="svc3-brand">
+      <div class="svc3-brand-ico"><i class="fa-solid fa-layer-group"></i></div>
+      <div class="min-w-0">
+        <div class="svc3-title">Quản trị Dịch vụ</div>
+      </div>
+    </div>
 
-          <button class="svc3-btn primary" @click="openCreateService()">
-            <i class="fa-solid fa-plus"></i>
-            <span>Thêm dịch vụ</span>
-          </button>
+    <div class="svc3-top-actions">
+
+<!--      <button class="svc3-btn primary" @click="openCreateService()">-->
+<!--        <i class="fa-solid fa-plus"></i>-->
+<!--        <span>Thêm dịch vụ</span>-->
+<!--      </button>-->
+      <div class="d-flex flex-column align-items-end text-end">
+        <div class="fw-semibold text-dark">
+          {{ info.fullName }}
         </div>
       </div>
 
+      <img
+          v-if="info.avatarUrl"
+          :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+          alt="avatar"
+          class="rounded-circle border"
+          style="width: 36px; height: 36px; object-fit: cover;"
+      />
+
+      <div v-else class="avatar-circle">
+        {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
+      </div>
+    </div>
+  </div>
+  <div class="svc3-page">
+    <div class="mx-auto max-w-[1440px] px-3 py-1">
+      <!-- Top bar -->
+
       <!-- Tabs (ONLY 2) - browser style -->
-      <div class="svc3-tabs-shell mt-4">
+      <div class="svc3-tabs-shell mt-2">
         <div class="svc3-tabs">
           <button class="svc3-tab" :class="{active: activeTab==='services'}" @click="activeTab='services'">
             <i class="fa-solid fa-list-check"></i>
@@ -46,12 +59,18 @@
         <section v-if="activeTab==='services'" class="svc3-panel attached">
           <div class="svc3-panel-h">
             <div class="svc3-panel-title">
-              <i class="fa-solid fa-concierge-bell"></i>
-              <span>Danh sách dịch vụ</span>
-              <span class="svc3-hint">
-                <i class="fa-regular fa-circle-question"></i>
-                Click <b>mắt</b> để xem, <b>bút</b> để sửa
-              </span>
+              <DotLottieVue
+                  src="https://lottie.host/5a73bb5b-1f82-4db1-b81b-32cc35cecd45/Hxy0beY7On.lottie"
+                  autoplay
+                  loop
+                  style="
+                            width: 40px;
+                            height: 46px;
+                            display: inline-block;
+                            vertical-align: bottom;
+                          "
+              />
+              <span class="fs-5">Danh sách dịch vụ</span>
             </div>
 
             <div class="svc3-tools">
@@ -84,10 +103,10 @@
                   <th style="min-width:300px">Dịch vụ</th>
                   <th style="width:180px">Màu</th>
                   <th>Mô tả</th>
-                  <th style="width:160px" class="text-right">Giá từ</th>
-                  <th style="width:160px" class="text-right">Giá đến</th>
-                  <th style="width:110px" class="text-center">Segments</th>
-                  <th style="width:170px" class="text-right">Thao tác</th>
+                  <th style="width:160px" class="text-left">Giá từ</th>
+                  <th style="width:160px" class="text-left">Giá đến</th>
+                  <th style="width:110px" class="text-center">SL Phân khúc</th>
+                  <th style="width:170px" class="text-center">Thao tác</th>
                 </tr>
                 </thead>
 
@@ -101,7 +120,7 @@
                         <div class="svc3-svc-sub">
                           <span class="mono">ID {{ pad3(s.id) }}</span>
                           <span class="muted">•</span>
-                          <span class="muted">{{ s.priceSegments.length }} phân khúc</span>
+                          <span class="muted">{{ s.segmentCount }} phân khúc</span>
                         </div>
                       </div>
                     </div>
@@ -118,20 +137,20 @@
                     <div class="svc3-ellipsis">{{ s.description || "—" }}</div>
                   </td>
 
-                  <td class="text-right">
-                    <span class="svc3-price p1">{{ formatCurrency(getMinPrice(s)) }}</span>
+                  <td class="text-left">
+                    <span class="svc3-price p1">{{ formatCurrency(s.minPrice) }}</span>
                   </td>
 
-                  <td class="text-right">
-                    <span class="svc3-price p2">{{ formatCurrency(getMaxPrice(s)) }}</span>
+                  <td class="text-left">
+                    <span class="svc3-price p2">{{ formatCurrency(s.maxPrice) }}</span>
                   </td>
 
                   <td class="text-center">
-                    <span class="svc3-badge">{{ s.priceSegments.length }}</span>
+                    <span class="svc3-badge">{{ s.segmentCount }}</span>
                   </td>
 
-                  <td class="text-right">
-                    <div class="svc3-actions justify-end">
+                  <td class="text-center">
+                    <div class="svc3-actions justify-content-center">
                       <button class="svc3-icon info" title="Chi tiết" @click="openServiceDetail(s.id)">
                         <i class="fa-solid fa-eye"></i>
                       </button>
@@ -146,10 +165,6 @@
                 </tr>
                 </tbody>
               </table>
-
-              <div class="svc3-footnote">
-                Header table set nền ở <b>thead</b> nên liền mạch, không “đứt” từng cột.
-              </div>
             </div>
           </div>
         </section>
@@ -213,7 +228,7 @@
                   <th style="min-width:280px">Dịch vụ</th>
                   <th>Khoảng giá trị tài sản</th>
                   <th style="width:180px" class="text-right">Giá dịch vụ</th>
-                  <th style="width:170px" class="text-right">Thao tác</th>
+                  <th style="width:170px" class="text-center">Thao tác</th>
                 </tr>
                 </thead>
 
@@ -256,12 +271,12 @@
                     <span class="svc3-price p3">{{ formatCurrency(seg.price) }}</span>
                   </td>
 
-                  <td class="text-right">
-                    <div class="svc3-actions justify-end">
-                      <button class="svc3-icon warn" title="Sửa phân khúc" @click="openEditSegment(seg.serviceId, seg.id)">
+                  <td class="text-align-center">
+                    <div class="svc3-actions">
+                      <button class="svc3-icon warn" title="Sửa phân khúc" @click="openEditSegment(seg.id, seg.id)">
                         <i class="fa-solid fa-pen"></i>
                       </button>
-                      <button class="svc3-icon danger" title="Xóa phân khúc" @click="removeSegment(seg.serviceId, seg.id)">
+                      <button class="svc3-icon danger" title="Xóa phân khúc" @click="removeSegment(seg.id, seg.id)">
                         <i class="fa-solid fa-trash"></i>
                       </button>
                     </div>
@@ -295,7 +310,20 @@
             <div class="svc3-svc">
               <div class="svc3-dot big" :style="{background:detailService.color}"></div>
               <div class="min-w-0">
-                <div class="svc3-detail-name">{{ detailService.name }}</div>
+                <div class="svc3-detail-name flex items-center gap-2">
+                  <span>{{ detailService.name }}</span>
+
+                  <span
+                      class="svc3-status"
+                      :class="detailService.active ? 'on' : 'off'"
+                  >
+                  <i
+                      class="fa-solid"
+                      :class="detailService.active ? 'fa-circle-check' : 'fa-circle-pause'"
+                  ></i>
+                  {{ detailService.active ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
+                </span>
+                </div>
                 <div class="svc3-svc-sub">
                   <span class="mono">ID {{ pad3(detailService.id) }}</span>
                   <span class="muted">•</span>
@@ -306,11 +334,11 @@
 
             <div class="svc3-kpis">
               <div class="svc3-kpi">
-                <div class="k">Min</div>
+                <div class="k">Giá thấp nhất</div>
                 <div class="v p1">{{ formatCurrency(getMinPrice(detailService)) }}</div>
               </div>
               <div class="svc3-kpi">
-                <div class="k">Max</div>
+                <div class="k">Giá cao nhất</div>
                 <div class="v p2">{{ formatCurrency(getMaxPrice(detailService)) }}</div>
               </div>
             </div>
@@ -331,24 +359,14 @@
             <div class="svc3-seg-grid" v-if="detailService.priceSegments.length">
               <div v-for="seg in detailService.priceSegments" :key="seg.id" class="svc3-seg-card">
                 <div class="svc3-seg-h">
-                  <div class="t"><i class="fa-solid fa-tag"></i><span>Segment #{{ seg.id }}</span></div>
-                  <div class="svc3-actions">
-                    <button class="svc3-icon warn" title="Sửa" @click="(closeServiceDetail(), openEditService(detailService.id))">
-                      <i class="fa-solid fa-pen"></i>
-                    </button>
-                    <button class="svc3-icon danger" title="Xóa" @click="removeSegment(detailService.id, seg.id)">
-                      <i class="fa-solid fa-trash"></i>
-                    </button>
-                  </div>
+                  <div class="t"><i class="fa-solid fa-tag"></i><span>Phân khúc {{ formatMoneyShort(seg.min) }} đến nhỏ hơn {{ formatMoneyShort(seg.max)}}</span></div>
                 </div>
                 <div class="svc3-seg-b">
                   <div class="row">
-                    <span class="muted">Khoảng</span>
                     <b>{{ formatCurrency(seg.min) }} → {{ formatCurrency(seg.max) }}</b>
                   </div>
                   <div class="row">
-                    <span class="muted">Giá</span>
-                    <b class="p3">{{ formatCurrency(seg.price) }}</b>
+                    <span class="muted">Giá : <b class="p3" style="color: #0a2463">{{ formatCurrency(seg.price) }}</b></span>
                   </div>
                 </div>
               </div>
@@ -591,43 +609,52 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from "vue";
-
+import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
+import { computed, reactive, ref, onMounted, watch } from "vue";
+import { useAuthStore } from "/src/stores/authStore.js";
+const authStore = useAuthStore();
+const info = authStore.userInfo;
 /* ===== DATA ===== */
-const services = ref([
-  {
-    id: 1,
-    name: "Thiết kế UI/UX",
-    color: "#667eea",
-    description: "Thiết kế giao diện và trải nghiệm người dùng chuyên nghiệp cho ứng dụng web và di động.",
-    priceSegments: [
-      { id: 1, min: 1000000, max: 5000000, price: 8000000 },
-      { id: 2, min: 5000000, max: 10000000, price: 7000000 },
-      { id: 3, min: 10000000, max: 20000000, price: 6000000 }
-    ]
-  },
-  {
-    id: 2,
-    name: "Phát triển Website",
-    color: "#4facfe",
-    description: "Phát triển website responsive với công nghệ hiện đại, tối ưu tốc độ và trải nghiệm.",
-    priceSegments: [
-      { id: 1, min: 1000000, max: 10000000, price: 15000000 },
-      { id: 2, min: 10000000, max: 50000000, price: 12000000 }
-    ]
-  },
-  {
-    id: 3,
-    name: "Marketing Digital",
-    color: "#f093fb",
-    description: "Chiến dịch marketing tổng thể trên các nền tảng digital, tăng trưởng doanh thu.",
-    priceSegments: [
-      { id: 1, min: 1000000, max: 3000000, price: 12000000 },
-      { id: 2, min: 3000000, max: 8000000, price: 10000000 },
-      { id: 3, min: 8000000, max: 15000000, price: 9000000 }
-    ]
+const services = ref([])
+
+function formatMoneyShort(amount) {
+  if (!amount || amount <= 0) return "0";
+
+  const billion = 1_000_000_000;
+  const million = 1_000_000;
+
+  if (amount >= billion) {
+    const v = amount / billion;
+    return `${v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)} tỷ`;
   }
-]);
+
+  if (amount >= million) {
+    const v = amount / million;
+    return `${v % 1 === 0 ? v.toFixed(0) : v.toFixed(0)} triệu`;
+  }
+
+  return `${amount.toLocaleString("vi-VN")} ₫`;
+}
+
+import api from '/src/api/api.js' // nếu bạn đang dùng axios wrapper
+
+const fetchServices = async () => {
+  try {
+    const res = await api.get('/dich-vu-thg/admin/', {
+      params: {
+        keyword: serviceQuery.value || null
+      }
+    })
+
+    // Map dữ liệu BE -> FE structure
+    services.value = (res.data || []);
+  } catch (e) {
+    console.error('❌ Lỗi fetch services', e)
+    services.value = []
+  }
+}
+
+
 
 /* ===== TABS ===== */
 const activeTab = ref("services");
@@ -690,7 +717,18 @@ const segmentEditOpen = ref(false);
 
 /* Service detail */
 const detailServiceId = ref(null);
-const detailService = computed(() => services.value.find(s => s.id === detailServiceId.value) || null);
+const detailService = ref(null)
+const fetchServiceDetail = async (id) => {
+  try {
+    const res = await api.get(`/dich-vu-thg/admin/${id}`)
+    detailService.value = res.data
+    serviceDetailOpen.value = true
+  } catch (e) {
+    console.error('❌ Lỗi fetch service detail', e)
+    toast('error', 'Không tải được chi tiết dịch vụ')
+  }
+}
+
 
 /* Service form modal (create/edit) */
 const serviceForm = reactive({
@@ -768,12 +806,17 @@ function onAssetMoneyBlur() {
 
 /* ===== SERVICES ACTIONS ===== */
 function openServiceDetail(id) {
-  detailServiceId.value = id;
-  serviceDetailOpen.value = true;
+  detailServiceId.value = id
+  fetchServiceDetail(id)
 }
+
 function closeServiceDetail() {
   serviceDetailOpen.value = false;
+  detailService.value = null;
+  segmentEditOpen.value = false;
 }
+
+
 
 function openCreateService() {
   serviceForm.id = null;
@@ -954,9 +997,10 @@ function removeSegment(serviceId, segmentId) {
 }
 
 function openEditSegment(serviceId, segmentId) {
-  const s = services.value.find(x => x.id === serviceId);
-  const seg = s?.priceSegments?.find(x => x.id === segmentId);
-  if (!s || !seg) return;
+  if (!detailService.value) return;
+
+  const seg = detailService.value.priceSegments.find(x => x.id === segmentId);
+  if (!seg) return;
 
   segmentForm.serviceId = serviceId;
   segmentForm.segmentId = segmentId;
@@ -966,6 +1010,7 @@ function openEditSegment(serviceId, segmentId) {
   segmentError.value = "";
   segmentEditOpen.value = true;
 }
+
 
 function closeSegmentEdit() {
   segmentEditOpen.value = false;
@@ -1027,11 +1072,19 @@ function saveSegmentFromModal() {
 function seedMock() {
   toast("info", "Đang dùng mock data trong component.");
 }
+onMounted(async () => {
+  await fetchServices()
+})
+watch(serviceQuery, async () => {
+  await fetchServices()
+})
 </script>
 
 <style scoped>
 /* ===== TOKENS (scoped-safe) ===== */
 .svc3-page{
+  position: relative;
+  top: -10px!important;
   --bg:
       radial-gradient(1200px 700px at 18% 8%, rgba(102,126,234,.16), transparent 60%),
       radial-gradient(900px 650px at 78% 0%, rgba(240,147,251,.12), transparent 58%),
@@ -1053,8 +1106,7 @@ function seedMock() {
   --sh: 0 14px 34px rgba(0,0,0,.10);
   --sh2: 0 10px 22px rgba(0,0,0,.08);
   --t: all .18s cubic-bezier(.4,0,.2,1);
-
-  min-height:100vh;
+  min-height:80vh;
   background: var(--bg);
   color: var(--text);
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -1066,7 +1118,8 @@ function seedMock() {
 
 /* ===== TOPBAR ===== */
 .svc3-topbar{
-  background: var(--card);
+  position: relative;
+  top: -10px!important;
   border: 1px solid var(--line);
   border-radius: var(--r);
   box-shadow: var(--sh2);
@@ -1076,24 +1129,30 @@ function seedMock() {
   justify-content:space-between;
   gap:12px;
   backdrop-filter: blur(10px);
+  border-bottom: solid 1px #bbbaba;
 }
 .svc3-brand{ display:flex; align-items:center; gap:10px; min-width:0; }
 .svc3-brand-ico{
   width:38px; height:38px;
-  border-radius: 14px;
+  border-radius:14px;
   display:grid; place-items:center;
-  background: var(--g1);
-  color:#fff;
-  box-shadow: 0 14px 26px rgba(102,126,234,.22);
+
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 55%, #a855f7 100%);
+  color: #ffffff;
+
+  box-shadow: 0 14px 26px rgba(37,99,235,.22);
 }
-.svc3-title{ font-size: 14px; font-weight: 750; letter-spacing:.2px; line-height:1.1; }
-.svc3-sub{
-  margin-top:2px;
-  font-size: 12px;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow:hidden;
-  text-overflow: ellipsis;
+.svc3-title{
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: .2px;
+  line-height: 1.1;
+
+  background: linear-gradient(90deg, #2563eb 0%, #7c3aed 55%, #a855f7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 .svc3-top-actions{ display:flex; align-items:center; gap:8px; }
 
@@ -1138,46 +1197,66 @@ function seedMock() {
 .svc3-tabs-shell{ position: relative; }
 .svc3-tabs{
   display:flex;
-  gap:8px;
   align-items:flex-end;
-  padding: 0 6px;
-}
-.svc3-tabs-fill{
-  flex: 1;
-  height: 1px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 8px;
+
 }
 .svc3-tab{
   flex: 0 0 auto;
   display:flex;
   align-items:center;
   gap:10px;
-  padding: 10px 12px;
-  border-radius: 14px 14px 0 0;
-  border: 1px solid rgba(15,23,42,.10);
+  padding: 8px 10px;
+  border-radius: 18px 18px 0 0;
   border-bottom: none;
-  background: rgba(255,255,255,.56);
-  box-shadow: 0 10px 22px rgba(0,0,0,.06);
   cursor:pointer;
   transition: var(--t);
   font-size: 13px;
   font-weight: 650;
   position: relative;
+  top:5px;
+  z-index: 10;
 }
 .svc3-tab i{
   width:30px; height:30px;
   border-radius: 12px;
   display:grid; place-items:center;
-  background: rgba(15,23,42,.06);
   color: rgba(15,23,42,.78);
   transition: var(--t);
 }
-.svc3-tab:hover{ transform: translateY(-1px); background: rgba(102,126,234,.06); border-color: rgba(102,126,234,.22); }
+.svc3-tab:hover{
+  transform: translateY(-1px);
+  border-color: rgba(102,126,234,.22);
+  color: #491eb7 !important;
+}
+.svc3-tab::after{
+   content:"";
+   position:absolute;
+   left: 18px;
+   right: 18px;
+   bottom: 6px;          /* chỉnh lên/xuống tùy ý */
+   height: 2px;
+   border-radius: 999px;
+   background: linear-gradient(90deg,#2563eb 0%, #7c3aed 55%, #a855f7 100%);
+   transform: scaleX(0);
+   transform-origin: center;
+   transition: transform .18s cubic-bezier(.4,0,.2,1);
+   opacity: .95;
+ }
+
+/* hover: lan ra từ giữa */
+.svc3-tab:hover::after{
+  transform: scaleX(1);
+}
+.svc3-tab:hover i{
+  transform: translateY(-1px);
+  border-color: rgba(102,126,234,.22);
+  color: #491eb7 !important;
+}
 .svc3-tab.active{
   background: var(--card);
-  border-color: rgba(102,126,234,.26);
-  transform: translateY(1px);
+  border-color: var(--line);
+  box-shadow: none;
+  position: relative;
 }
 .svc3-tab.active i{ background: var(--g1); color:#fff; }
 .svc3-pill{
@@ -1395,21 +1474,70 @@ function seedMock() {
 .svc3-price.p3{ background: var(--g3); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 
 .svc3-actions{ display:flex; gap:6px; align-items:center; }
+
+/* base */
 .svc3-icon{
   width:32px; height:32px;
-  border-radius: 12px;
-  border: none;
+  border-radius:12px;
   cursor:pointer;
   display:grid;
   place-items:center;
-  color:#fff;
+  position: relative;
   transition: var(--t);
-  box-shadow: 0 10px 16px rgba(0,0,0,.08);
+  box-shadow: 0 10px 16px rgba(0,0,0,.06);
+  border: 1px solid transparent;   /* quan trọng để hover viền mượt */
 }
-.svc3-icon:hover{ transform: translateY(-1px); filter: brightness(1.02); }
-.svc3-icon.info{ background: var(--g4); }
-.svc3-icon.warn{ background: linear-gradient(135deg,#fa709a 0%, #fee140 100%); }
-.svc3-icon.danger{ background: linear-gradient(135deg,#ff5858 0%, #f09819 100%); }
+
+/* icon gradient */
+.svc3-icon i{
+  background: var(--ig);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* bỏ viền gradient cũ */
+.svc3-icon::before{ display:none; }
+
+/* nền pastel mặc định + gradient icon theo loại */
+.svc3-icon.info{
+  --ig: linear-gradient(135deg,#22c55e 0%, #16a34a 45%, #34d399 100%);
+  background: linear-gradient(135deg, rgba(34,197,94,.16) 0%, rgba(52,211,153,.10) 100%);
+}
+.svc3-icon.warn{
+  --ig: linear-gradient(135deg,#0ea5e9 0%, #2563eb 55%, #60a5fa 100%);
+  background: linear-gradient(135deg, rgba(14,165,233,.16) 0%, rgba(96,165,250,.10) 100%);
+}
+.svc3-icon.danger{
+  --ig: linear-gradient(135deg,#ef4444 0%, #f97316 55%, #fb7185 100%);
+  background: linear-gradient(135deg, rgba(239,68,68,.16) 0%, rgba(251,113,133,.10) 100%);
+}
+
+/* hover chung */
+.svc3-icon:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+}
+
+/* hover: nền đậm hơn + viền trùng tông */
+.svc3-icon.info:hover{
+  background: linear-gradient(135deg, rgba(34,197,94,.22) 0%, rgba(52,211,153,.14) 100%);
+  box-shadow: 0 12px 20px rgba(34,197,94,.18);
+  border-color: rgba(34,197,94,.35);
+}
+.svc3-icon.warn:hover{
+  background: linear-gradient(135deg, rgba(14,165,233,.22) 0%, rgba(96,165,250,.14) 100%);
+  box-shadow: 0 12px 20px rgba(37,99,235,.18);
+  border-color: rgba(37,99,235,.35);
+}
+.svc3-icon.danger:hover{
+  background: linear-gradient(135deg, rgba(239,68,68,.22) 0%, rgba(251,113,133,.14) 100%);
+  box-shadow: 0 12px 20px rgba(239,68,68,.18);
+  border-color: rgba(239,68,68,.35);
+}
+
+
 .svc3-icon.mini{ width:32px; height:32px; border-radius: 12px; }
 
 /* ===== RANGE ===== */
@@ -1748,4 +1876,28 @@ function seedMock() {
   .svc3-toast{ width: calc(100vw - 28px); }
   .svc3-input{ min-width: 100%; }
 }
+.svc3-status{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+  line-height:1;
+  white-space:nowrap;
+}
+
+.svc3-status.on{
+  color:#16a34a;
+  background:rgba(34,197,94,.12);
+  border:1px solid rgba(34,197,94,.25);
+}
+
+.svc3-status.off{
+  color:#64748b;
+  background:rgba(148,163,184,.12);
+  border:1px solid rgba(148,163,184,.25);
+}
+
 </style>

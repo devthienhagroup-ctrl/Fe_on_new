@@ -163,8 +163,13 @@ const routes = [
     {
         path: "/-thg/dich-vu",
         name: "DichVuSetting",
-        component: DichVuSetting,
-        meta: {requiresAuth: false, enableTailwind: true}
+        component: Menu,
+        meta: {requiresAuth: false, enableTailwind: true},
+        children: [{
+            path: '',
+            name: "DichVuSetting1",
+            component: DichVuSetting,
+        }]
     },
     {
         path: "/-thg/nhap-lieu",
