@@ -365,7 +365,7 @@
         </div>
 
         <div class="text-center mt-16" data-aos="fade-up">
-          <button class="btn-primary">
+          <button class="btn-gradient">
             <i :class="config.timeline.button.icon" class="mr-2"></i> {{ config.timeline.button.text }}
           </button>
         </div>
@@ -412,7 +412,7 @@
 
             <!-- CTA Buttons -->
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-              <button class="btn-primary">
+              <button class="btn-gradient">
                 <i :class="config.cta.buttons.primary.icon" class="mr-2"></i> {{ config.cta.buttons.primary.text }}
               </button>
               <button class="btn-secondary">
@@ -435,16 +435,17 @@
 </template>
 
 <script setup>
-import {onMounted, ref, computed} from 'vue'
+import {onMounted, ref, computed, reactive} from 'vue'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
 import Glide from '@glidejs/glide'
 import '@glidejs/glide/dist/css/glide.core.min.css'
 import '@glidejs/glide/dist/css/glide.theme.min.css'
 import SimpleGlassCard from "../../UI/SimpleGlassCard.vue";
+import api from "../../../../api/api.js";
 
 // CONFIG OBJECT
-const config = {
+const config = reactive({
   // Colors and gradients
   colors: {
     blue400: 'var(--color-blue-400)',
@@ -888,7 +889,45 @@ const config = {
       text: 'Cam kết hoàn tiền 100% trong 14 ngày nếu không hài lòng'
     }
   }
-}
+});
+
+const loadConfig = async () => {
+  const response = await api.get('/thg/public/cms/contentSection/62');
+
+  if (response.status === 200) {
+    const apiConfig = JSON.parse(response.data.contentJson);
+
+    // Hàm đệ quy để xử lý toàn bộ object
+    const wrapCssVariables = (obj) => {
+      if (typeof obj !== 'object' || obj === null) return obj;
+
+      const result = {};
+
+      for (const [key, value] of Object.entries(obj)) {
+        if (typeof value === 'string' && value.startsWith('--')) {
+          // Nếu bắt đầu bằng -- thì bọc lại bằng var()
+          result[key] = `var(${value})`;
+        } else if (typeof value === 'object' && value !== null) {
+          // Đệ quy xử lý object lồng nhau
+          result[key] = wrapCssVariables(value);
+        } else {
+          // Giữ nguyên các giá trị khác
+          result[key] = value;
+        }
+      }
+
+      return result;
+    };
+
+    // Áp dụng cho toàn bộ config
+    const processedConfig = wrapCssVariables(apiConfig);
+
+    // Cập nhật config
+    Object.assign(config, processedConfig)
+
+    console.log('Config đã được xử lý:', processedConfig);
+  }
+};
 
 // CSS Variables computed from config
 const cssVars = computed(() => ({
@@ -1144,7 +1183,12 @@ const initGlideSlider = () => {
   glide.value.mount()
 }
 
-onMounted(() => {
+onMounted(async () => {
+
+  console.log("Chuẩn bị load config")
+  await loadConfig();
+  console.log("Đã load")
+
   // Initialize AOS
   AOS.init({
     duration: 1000,

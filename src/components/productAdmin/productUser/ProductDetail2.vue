@@ -14,6 +14,7 @@
           <div class="property-title-section">
             <h1 class="property-address">{{   buildSeoTitle( asset ) ?? 'Chưa cập nhật' }}</h1>
 
+            <div class="flex justify-between">
             <div class="property-meta">
                 <span class="meta-item">
                   <span class="meta-label">Loại mặt hàng:</span>
@@ -37,6 +38,8 @@
                        {{ asset.giaNoiBo === -1.1 ? '**********' : (formatMoneyVN(asset.giaNoiBo) ?? 'Chưa cập nhật') }}
                 </span>
                 </span>
+            </div>
+              <ReportProduct :listing-id="id"/>
             </div>
 
             <div class="press-hero">
@@ -618,7 +621,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import FileOrLand from "../land/FileOrLand.vue";
+import FileOrLand from "../../land/FileOrLand.vue";
 import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
 
 const route = useRoute();
@@ -633,7 +636,7 @@ const pdfUrl = ref(null);
 onMounted(() => loadDetail(id));
 
 import api from "/src/api/api.js"
-import Spam from "./Spam.vue";
+import Spam from "../Spam.vue";
 
 const tinhHoaHong = (asset) => {
   if (asset.phiMoiGioi == null) return null;
@@ -830,7 +833,8 @@ const formatWard = (addressDetail) => {
   return ward;
 };
 import { useAuthStore } from "/src/stores/authStore.js";
-import {handleServiceUsageResponse, showCenterSuccess} from "../../assets/js/alertService.js";
+import {handleServiceUsageResponse, showCenterSuccess} from "../../../assets/js/alertService.js";
+import ReportProduct from "./ReportProduct.vue";
 const authStore = useAuthStore();
 const auth = useAuthStore();
 
