@@ -284,7 +284,6 @@ const injectBaseImgUrl =(str)=> {
   return str.replace(/url\(\s*['"]?/g, match => match + baseImgaeUrl);
 }
 
-
 // Config object chứa tất cả dữ liệu và CSS properties
 const config = ref({
   hero: {

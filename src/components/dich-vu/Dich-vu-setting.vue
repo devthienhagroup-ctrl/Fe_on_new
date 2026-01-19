@@ -1,0 +1,1751 @@
+<template>
+  <div class="svc3-page">
+    <div class="mx-auto max-w-[1440px] px-4 py-5">
+      <!-- Top bar -->
+      <div class="svc3-topbar">
+        <div class="svc3-brand">
+          <div class="svc3-brand-ico"><i class="fa-solid fa-grid-2-plus"></i></div>
+          <div class="min-w-0">
+            <div class="svc3-title">Quản trị Dịch vụ</div>
+            <div class="svc3-sub">Quản lý dịch vụ & phân khúc giá (compact, pro, nhất quán)</div>
+          </div>
+        </div>
+
+        <div class="svc3-top-actions">
+          <button class="svc3-btn ghost" @click="seedMock()">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span class="hidden sm:inline">Mock</span>
+          </button>
+
+          <button class="svc3-btn primary" @click="openCreateService()">
+            <i class="fa-solid fa-plus"></i>
+            <span>Thêm dịch vụ</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabs (ONLY 2) - browser style -->
+      <div class="svc3-tabs-shell mt-4">
+        <div class="svc3-tabs">
+          <button class="svc3-tab" :class="{active: activeTab==='services'}" @click="activeTab='services'">
+            <i class="fa-solid fa-list-check"></i>
+            <span>Dịch vụ</span>
+            <span class="svc3-pill">{{ services.length }}</span>
+          </button>
+
+          <button class="svc3-tab" :class="{active: activeTab==='segments'}" @click="activeTab='segments'">
+            <i class="fa-solid fa-tags"></i>
+            <span>Phân khúc</span>
+            <span class="svc3-pill">{{ totalSegments }}</span>
+          </button>
+
+          <div class="svc3-tabs-fill"></div>
+        </div>
+
+        <!-- SERVICES TAB -->
+        <section v-if="activeTab==='services'" class="svc3-panel attached">
+          <div class="svc3-panel-h">
+            <div class="svc3-panel-title">
+              <i class="fa-solid fa-concierge-bell"></i>
+              <span>Danh sách dịch vụ</span>
+              <span class="svc3-hint">
+                <i class="fa-regular fa-circle-question"></i>
+                Click <b>mắt</b> để xem, <b>bút</b> để sửa
+              </span>
+            </div>
+
+            <div class="svc3-tools">
+              <div class="svc3-input">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input v-model.trim="serviceQuery" type="text" placeholder="Tìm theo tên hoặc mô tả..." />
+              </div>
+
+              <button class="svc3-btn ghost" @click="openCreateService()">
+                <i class="fa-solid fa-circle-plus"></i>
+                <span>New</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="svc3-panel-b">
+            <div v-if="filteredServices.length===0" class="svc3-empty">
+              <div class="svc3-empty-ico"><i class="fa-solid fa-box-open"></i></div>
+              <div class="svc3-empty-title">Chưa có dữ liệu phù hợp</div>
+              <div class="svc3-empty-sub">Thử từ khóa khác hoặc thêm dịch vụ mới.</div>
+              <button class="svc3-btn primary" @click="openCreateService()">
+                <i class="fa-solid fa-plus"></i><span>Tạo dịch vụ</span>
+              </button>
+            </div>
+
+            <div v-else class="svc3-table-wrap">
+              <table class="svc3-table">
+                <thead>
+                <tr>
+                  <th style="min-width:300px">Dịch vụ</th>
+                  <th style="width:180px">Màu</th>
+                  <th>Mô tả</th>
+                  <th style="width:160px" class="text-right">Giá từ</th>
+                  <th style="width:160px" class="text-right">Giá đến</th>
+                  <th style="width:110px" class="text-center">Segments</th>
+                  <th style="width:170px" class="text-right">Thao tác</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr v-for="s in filteredServices" :key="s.id">
+                  <td>
+                    <div class="svc3-svc">
+                      <div class="svc3-dot" :style="{background:s.color}"></div>
+                      <div class="min-w-0">
+                        <div class="svc3-svc-name">{{ s.name }}</div>
+                        <div class="svc3-svc-sub">
+                          <span class="mono">ID {{ pad3(s.id) }}</span>
+                          <span class="muted">•</span>
+                          <span class="muted">{{ s.priceSegments.length }} phân khúc</span>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="svc3-color">
+                      <div class="svc3-swatch" :style="{background:s.color}"></div>
+                      <span class="mono muted">{{ s.color }}</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="svc3-ellipsis">{{ s.description || "—" }}</div>
+                  </td>
+
+                  <td class="text-right">
+                    <span class="svc3-price p1">{{ formatCurrency(getMinPrice(s)) }}</span>
+                  </td>
+
+                  <td class="text-right">
+                    <span class="svc3-price p2">{{ formatCurrency(getMaxPrice(s)) }}</span>
+                  </td>
+
+                  <td class="text-center">
+                    <span class="svc3-badge">{{ s.priceSegments.length }}</span>
+                  </td>
+
+                  <td class="text-right">
+                    <div class="svc3-actions justify-end">
+                      <button class="svc3-icon info" title="Chi tiết" @click="openServiceDetail(s.id)">
+                        <i class="fa-solid fa-eye"></i>
+                      </button>
+                      <button class="svc3-icon warn" title="Sửa" @click="openEditService(s.id)">
+                        <i class="fa-solid fa-pen"></i>
+                      </button>
+                      <button class="svc3-icon danger" title="Xóa" @click="removeService(s.id)">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+
+              <div class="svc3-footnote">
+                Header table set nền ở <b>thead</b> nên liền mạch, không “đứt” từng cột.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SEGMENTS TAB -->
+        <section v-if="activeTab==='segments'" class="svc3-panel attached">
+          <div class="svc3-panel-h">
+            <div class="svc3-panel-title">
+              <i class="fa-solid fa-tags"></i>
+              <span>Phân khúc giá</span>
+              <span class="svc3-hint">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                Nhập <b>Giá trị tài sản</b> để highlight
+              </span>
+            </div>
+
+            <div class="svc3-tools">
+              <div class="svc3-select">
+                <label>Dịch vụ</label>
+                <select v-model="segmentFilterServiceId">
+                  <option value="all">Tất cả</option>
+                  <option v-for="s in services" :key="s.id" :value="String(s.id)">{{ s.name }}</option>
+                </select>
+              </div>
+
+              <div class="svc3-select">
+                <label>Sắp xếp</label>
+                <select v-model="segmentSort">
+                  <option value="low-high">Giá ↑</option>
+                  <option value="high-low">Giá ↓</option>
+                  <option value="range-low">Khoảng ↑</option>
+                  <option value="range-high">Khoảng ↓</option>
+                </select>
+              </div>
+
+              <div class="svc3-input narrow">
+                <i class="fa-solid fa-magnifying-glass-dollar"></i>
+                <input
+                    v-model="assetValueText"
+                    type="text"
+                    placeholder="Nhập giá trị tài sản..."
+                    @input="onAssetMoneyInput"
+                    @focus="onAssetMoneyFocus"
+                    @blur="onAssetMoneyBlur"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="svc3-panel-b">
+            <div v-if="computedSegments.length===0" class="svc3-empty small">
+              <div class="svc3-empty-ico"><i class="fa-solid fa-chart-line"></i></div>
+              <div class="svc3-empty-title">Không có phân khúc phù hợp</div>
+              <div class="svc3-empty-sub">Thử đổi bộ lọc hoặc nhập giá trị khác.</div>
+            </div>
+
+            <div v-else class="svc3-table-wrap">
+              <table class="svc3-table">
+                <thead>
+                <tr>
+                  <th style="min-width:280px">Dịch vụ</th>
+                  <th>Khoảng giá trị tài sản</th>
+                  <th style="width:180px" class="text-right">Giá dịch vụ</th>
+                  <th style="width:170px" class="text-right">Thao tác</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr
+                    v-for="seg in computedSegments"
+                    :key="`${seg.serviceId}-${seg.id}`"
+                    :class="{ hl: highlightKey === `${seg.serviceId}-${seg.id}` }"
+                >
+                  <td>
+                    <div class="svc3-svc">
+                      <div class="svc3-dot" :style="{background:seg.serviceColor}"></div>
+                      <div class="min-w-0">
+                        <div class="svc3-svc-name">{{ seg.serviceName }}</div>
+                        <div class="svc3-svc-sub">
+                          <span class="mono">ID {{ pad3(seg.serviceId) }}</span>
+                          <span class="muted">•</span>
+                          <span class="muted">Segment #{{ seg.id }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="svc3-range">
+                        <span class="svc3-pill2">
+                          <i class="fa-solid fa-arrow-up-short-wide"></i>
+                          {{ formatCurrency(seg.min) }}
+                        </span>
+                      <span class="muted">→</span>
+                      <span class="svc3-pill2">
+                          <i class="fa-solid fa-arrow-down-wide-short"></i>
+                          {{ formatCurrency(seg.max) }}
+                        </span>
+                      <span class="muted tiny ml-1">min ≤ x &lt; max</span>
+                    </div>
+                  </td>
+
+                  <td class="text-right">
+                    <span class="svc3-price p3">{{ formatCurrency(seg.price) }}</span>
+                  </td>
+
+                  <td class="text-right">
+                    <div class="svc3-actions justify-end">
+                      <button class="svc3-icon warn" title="Sửa phân khúc" @click="openEditSegment(seg.serviceId, seg.id)">
+                        <i class="fa-solid fa-pen"></i>
+                      </button>
+                      <button class="svc3-icon danger" title="Xóa phân khúc" @click="removeSegment(seg.serviceId, seg.id)">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+
+              <div class="svc3-footnote">
+                Tip: Nhập “Giá trị tài sản” để auto lọc + highlight phân khúc phù hợp.
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- SERVICE DETAIL MODAL -->
+    <div v-if="serviceDetailOpen" class="svc3-modal" @click.self="closeServiceDetail()">
+      <div class="svc3-modal-card">
+        <div class="svc3-modal-h">
+          <div class="svc3-modal-title">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Chi tiết dịch vụ</span>
+          </div>
+          <button class="svc3-x" @click="closeServiceDetail()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="svc3-modal-b" v-if="detailService">
+          <div class="svc3-detail-head">
+            <div class="svc3-svc">
+              <div class="svc3-dot big" :style="{background:detailService.color}"></div>
+              <div class="min-w-0">
+                <div class="svc3-detail-name">{{ detailService.name }}</div>
+                <div class="svc3-svc-sub">
+                  <span class="mono">ID {{ pad3(detailService.id) }}</span>
+                  <span class="muted">•</span>
+                  <span class="muted">{{ detailService.priceSegments.length }} phân khúc</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="svc3-kpis">
+              <div class="svc3-kpi">
+                <div class="k">Min</div>
+                <div class="v p1">{{ formatCurrency(getMinPrice(detailService)) }}</div>
+              </div>
+              <div class="svc3-kpi">
+                <div class="k">Max</div>
+                <div class="v p2">{{ formatCurrency(getMaxPrice(detailService)) }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="svc3-box">
+            <div class="svc3-box-k">
+              <i class="fa-solid fa-file-lines"></i><span>Mô tả</span>
+            </div>
+            <div class="svc3-box-v">{{ detailService.description || "—" }}</div>
+          </div>
+
+          <div class="svc3-box mt-3">
+            <div class="svc3-box-k">
+              <i class="fa-solid fa-tags"></i><span>Phân khúc</span>
+            </div>
+
+            <div class="svc3-seg-grid" v-if="detailService.priceSegments.length">
+              <div v-for="seg in detailService.priceSegments" :key="seg.id" class="svc3-seg-card">
+                <div class="svc3-seg-h">
+                  <div class="t"><i class="fa-solid fa-tag"></i><span>Segment #{{ seg.id }}</span></div>
+                  <div class="svc3-actions">
+                    <button class="svc3-icon warn" title="Sửa" @click="(closeServiceDetail(), openEditService(detailService.id))">
+                      <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="svc3-icon danger" title="Xóa" @click="removeSegment(detailService.id, seg.id)">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="svc3-seg-b">
+                  <div class="row">
+                    <span class="muted">Khoảng</span>
+                    <b>{{ formatCurrency(seg.min) }} → {{ formatCurrency(seg.max) }}</b>
+                  </div>
+                  <div class="row">
+                    <span class="muted">Giá</span>
+                    <b class="p3">{{ formatCurrency(seg.price) }}</b>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="svc3-empty small">
+              <div class="svc3-empty-title">Chưa có phân khúc</div>
+              <div class="svc3-empty-sub">Bấm Chỉnh sửa để thêm phân khúc.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="svc3-modal-f">
+          <button class="svc3-btn ghost" @click="closeServiceDetail()">
+            <i class="fa-solid fa-xmark"></i><span>Đóng</span>
+          </button>
+          <button v-if="detailService" class="svc3-btn primary" @click="(closeServiceDetail(), openEditService(detailService.id))">
+            <i class="fa-solid fa-pen-to-square"></i><span>Chỉnh sửa</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SERVICE EDIT MODAL (create/edit) -->
+    <div v-if="serviceEditOpen" class="svc3-modal" @click.self="closeServiceEdit()">
+      <div class="svc3-modal-card wide">
+        <div class="svc3-modal-h">
+          <div class="svc3-modal-title">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>{{ serviceForm.id ? "Chỉnh sửa dịch vụ" : "Thêm dịch vụ" }}</span>
+          </div>
+          <button class="svc3-x" @click="closeServiceEdit()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="svc3-modal-b">
+          <div class="svc3-form-grid">
+            <div class="svc3-form-card">
+              <div class="svc3-form-title"><i class="fa-solid fa-screwdriver-wrench"></i><span>Thông tin</span></div>
+
+              <div class="svc3-field">
+                <label><i class="fa-solid fa-tag"></i> Tên dịch vụ *</label>
+                <input v-model.trim="serviceForm.name" type="text" placeholder="Nhập tên dịch vụ..." />
+              </div>
+
+              <div class="svc3-field">
+                <label><i class="fa-solid fa-palette"></i> Màu phân loại *</label>
+                <div class="svc3-colorpick">
+                  <input v-model="serviceForm.color" class="svc3-colorinput" type="color" />
+                  <div class="svc3-swatch big" :style="{background: serviceForm.color}"></div>
+                  <span class="mono muted">{{ serviceForm.color }}</span>
+                </div>
+              </div>
+
+              <div class="svc3-field">
+                <label><i class="fa-solid fa-file-lines"></i> Mô tả</label>
+                <textarea v-model.trim="serviceForm.description" rows="4" placeholder="Mô tả chi tiết..."></textarea>
+              </div>
+            </div>
+
+            <div class="svc3-form-card">
+              <div class="svc3-form-title flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-tags"></i><span>Phân khúc</span>
+                </div>
+                <div class="flex gap-2">
+                  <button class="svc3-btn ghost" @click="normalizeServiceSegments()">
+                    <i class="fa-solid fa-broom"></i><span>Làm sạch</span>
+                  </button>
+                  <button class="svc3-btn primary" @click="addServiceSegment()">
+                    <i class="fa-solid fa-plus"></i><span>Thêm</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="svc3-note">
+                Quy tắc: <b>[min, max)</b> không được giao nhau và <b>min &lt; max</b>.
+              </div>
+
+              <!-- UPDATED: header columns, no per-row labels -->
+              <div class="svc3-seg-edit-list compact">
+                <div class="svc3-seg-cols">
+                  <div class="c">Min</div>
+                  <div class="c">Max</div>
+                  <div class="c">Giá</div>
+                  <div class="c act"></div>
+                </div>
+
+                <div
+                    v-for="(seg, idx) in serviceForm.segments"
+                    :key="seg._key"
+                    class="svc3-seg-row"
+                    :class="{ err: segErrors[idx] }"
+                >
+                  <input
+                      v-model="seg.minText"
+                      class="mono"
+                      type="text"
+                      placeholder="Min"
+                      @input="onSegMoneyInput(idx,'minText')"
+                      @focus="onSegMoneyFocus(idx,'minText')"
+                      @blur="onSegMoneyBlur(idx,'minText')"
+                  />
+
+                  <input
+                      v-model="seg.maxText"
+                      class="mono"
+                      type="text"
+                      placeholder="Max"
+                      @input="onSegMoneyInput(idx,'maxText')"
+                      @focus="onSegMoneyFocus(idx,'maxText')"
+                      @blur="onSegMoneyBlur(idx,'maxText')"
+                  />
+
+                  <input
+                      v-model="seg.priceText"
+                      class="mono"
+                      type="text"
+                      placeholder="Giá"
+                      @input="onSegMoneyInput(idx,'priceText')"
+                      @focus="onSegMoneyFocus(idx,'priceText')"
+                      @blur="onSegMoneyBlur(idx,'priceText')"
+                  />
+
+                  <button class="svc3-icon danger mini" title="Xóa segment" @click="removeServiceSegment(idx)">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+
+                  <div v-if="segErrors[idx]" class="svc3-err2">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>{{ segErrors[idx] }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="svc3-modal-f">
+          <button class="svc3-btn ghost" @click="closeServiceEdit()">
+            <i class="fa-solid fa-xmark"></i><span>Hủy</span>
+          </button>
+
+          <button v-if="serviceForm.id" class="svc3-btn danger" @click="removeService(serviceForm.id)">
+            <i class="fa-solid fa-trash"></i><span>Xóa dịch vụ</span>
+          </button>
+
+          <button class="svc3-btn primary" @click="saveServiceFromModal()">
+            <i class="fa-solid fa-floppy-disk"></i><span>Lưu</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEGMENT EDIT MODAL -->
+    <div v-if="segmentEditOpen" class="svc3-modal" @click.self="closeSegmentEdit()">
+      <div class="svc3-modal-card">
+        <div class="svc3-modal-h">
+          <div class="svc3-modal-title">
+            <i class="fa-solid fa-pen"></i>
+            <span>Chỉnh sửa phân khúc</span>
+          </div>
+          <button class="svc3-x" @click="closeSegmentEdit()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="svc3-modal-b">
+          <div class="svc3-note">
+            Quy tắc: <b>[min, max)</b> không được giao nhau.
+          </div>
+
+          <div class="svc3-field mt-3">
+            <label><i class="fa-solid fa-arrow-up-short-wide"></i> Min</label>
+            <input
+                v-model="segmentForm.minText"
+                class="mono"
+                type="text"
+                placeholder="min"
+                @input="onSegmentFormMoneyInput('minText')"
+                @focus="onSegmentFormMoneyFocus('minText')"
+                @blur="onSegmentFormMoneyBlur('minText')"
+            />
+          </div>
+
+          <div class="svc3-field">
+            <label><i class="fa-solid fa-arrow-down-wide-short"></i> Max</label>
+            <input
+                v-model="segmentForm.maxText"
+                class="mono"
+                type="text"
+                placeholder="max"
+                @input="onSegmentFormMoneyInput('maxText')"
+                @focus="onSegmentFormMoneyFocus('maxText')"
+                @blur="onSegmentFormMoneyBlur('maxText')"
+            />
+          </div>
+
+          <div class="svc3-field">
+            <label><i class="fa-solid fa-dollar-sign"></i> Giá dịch vụ</label>
+            <input
+                v-model="segmentForm.priceText"
+                class="mono"
+                type="text"
+                placeholder="price"
+                @input="onSegmentFormMoneyInput('priceText')"
+                @focus="onSegmentFormMoneyFocus('priceText')"
+                @blur="onSegmentFormMoneyBlur('priceText')"
+            />
+          </div>
+
+          <div v-if="segmentError" class="svc3-err mt-2">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>{{ segmentError }}</span>
+          </div>
+        </div>
+
+        <div class="svc3-modal-f">
+          <button class="svc3-btn ghost" @click="closeSegmentEdit()">
+            <i class="fa-solid fa-xmark"></i><span>Hủy</span>
+          </button>
+          <button class="svc3-btn primary" @click="saveSegmentFromModal()">
+            <i class="fa-solid fa-floppy-disk"></i><span>Lưu</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="svc3-toast-wrap" aria-live="polite">
+      <div v-for="t in toasts" :key="t.id" class="svc3-toast" :class="t.type">
+        <i
+            class="fa-solid"
+            :class="t.type==='success' ? 'fa-circle-check' : t.type==='error' ? 'fa-circle-xmark' : 'fa-circle-info'"
+        ></i>
+        <div class="min-w-0">
+          <div class="tt">{{ t.type==='success' ? 'Thành công' : t.type==='error' ? 'Lỗi' : 'Thông báo' }}</div>
+          <div class="tx">{{ t.message }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { computed, reactive, ref } from "vue";
+
+/* ===== DATA ===== */
+const services = ref([
+  {
+    id: 1,
+    name: "Thiết kế UI/UX",
+    color: "#667eea",
+    description: "Thiết kế giao diện và trải nghiệm người dùng chuyên nghiệp cho ứng dụng web và di động.",
+    priceSegments: [
+      { id: 1, min: 1000000, max: 5000000, price: 8000000 },
+      { id: 2, min: 5000000, max: 10000000, price: 7000000 },
+      { id: 3, min: 10000000, max: 20000000, price: 6000000 }
+    ]
+  },
+  {
+    id: 2,
+    name: "Phát triển Website",
+    color: "#4facfe",
+    description: "Phát triển website responsive với công nghệ hiện đại, tối ưu tốc độ và trải nghiệm.",
+    priceSegments: [
+      { id: 1, min: 1000000, max: 10000000, price: 15000000 },
+      { id: 2, min: 10000000, max: 50000000, price: 12000000 }
+    ]
+  },
+  {
+    id: 3,
+    name: "Marketing Digital",
+    color: "#f093fb",
+    description: "Chiến dịch marketing tổng thể trên các nền tảng digital, tăng trưởng doanh thu.",
+    priceSegments: [
+      { id: 1, min: 1000000, max: 3000000, price: 12000000 },
+      { id: 2, min: 3000000, max: 8000000, price: 10000000 },
+      { id: 3, min: 8000000, max: 15000000, price: 9000000 }
+    ]
+  }
+]);
+
+/* ===== TABS ===== */
+const activeTab = ref("services");
+
+/* ===== SERVICES FILTER ===== */
+const serviceQuery = ref("");
+const filteredServices = computed(() => {
+  const q = serviceQuery.value.trim().toLowerCase();
+  if (!q) return services.value;
+  return services.value.filter(s =>
+      (s.name || "").toLowerCase().includes(q) ||
+      (s.description || "").toLowerCase().includes(q)
+  );
+});
+
+/* ===== SEGMENTS ===== */
+const segmentFilterServiceId = ref("all");
+const segmentSort = ref("low-high");
+const assetValueText = ref("");
+const highlightKey = ref("");
+
+const assetValueNumber = computed(() => parseFormattedNumber(assetValueText.value));
+
+const totalSegments = computed(() => services.value.reduce((sum, s) => sum + (s.priceSegments?.length || 0), 0));
+
+const computedSegments = computed(() => {
+  let all = [];
+  for (const s of services.value) {
+    if (segmentFilterServiceId.value !== "all" && String(s.id) !== segmentFilterServiceId.value) continue;
+    for (const seg of s.priceSegments) {
+      all.push({ ...seg, serviceId: s.id, serviceName: s.name, serviceColor: s.color });
+    }
+  }
+
+  const x = assetValueNumber.value;
+  if (x > 0) {
+    all = all.filter(seg => x >= seg.min && x < seg.max);
+    highlightKey.value = all.length ? `${all[0].serviceId}-${all[0].id}` : "";
+  } else {
+    highlightKey.value = "";
+  }
+
+  all.sort((a, b) => {
+    switch (segmentSort.value) {
+      case "low-high": return a.price - b.price;
+      case "high-low": return b.price - a.price;
+      case "range-low": return (a.max - a.min) - (b.max - b.min);
+      case "range-high": return (b.max - b.min) - (a.max - a.min);
+      default: return 0;
+    }
+  });
+
+  return all;
+});
+
+/* ===== MODALS ===== */
+const serviceDetailOpen = ref(false);
+const serviceEditOpen = ref(false);
+const segmentEditOpen = ref(false);
+
+/* Service detail */
+const detailServiceId = ref(null);
+const detailService = computed(() => services.value.find(s => s.id === detailServiceId.value) || null);
+
+/* Service form modal (create/edit) */
+const serviceForm = reactive({
+  id: null,
+  name: "",
+  color: "#667eea",
+  description: "",
+  segments: []
+});
+const segErrors = ref([]);
+
+/* Segment edit modal */
+const segmentForm = reactive({
+  serviceId: null,
+  segmentId: null,
+  minText: "",
+  maxText: "",
+  priceText: ""
+});
+const segmentError = ref("");
+
+/* ===== TOAST ===== */
+const toasts = ref([]);
+function toast(type, message) {
+  const id = `${Date.now()}-${Math.random()}`;
+  toasts.value.push({ id, type, message });
+  setTimeout(() => (toasts.value = toasts.value.filter(t => t.id !== id)), 2600);
+}
+
+/* ===== HELPERS ===== */
+function pad3(n) { return String(n).padStart(3, "0"); }
+
+function formatNumberWithDots(num) {
+  if (num === null || num === undefined) return "";
+  const n = Number(num);
+  if (!Number.isFinite(n)) return "";
+  return Math.trunc(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function parseFormattedNumber(str) {
+  if (!str) return 0;
+  const v = String(str).replace(/[^\d]/g, "");
+  return v ? parseInt(v, 10) : 0;
+}
+
+function formatCurrency(amount) {
+  try {
+    return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(amount || 0);
+  } catch {
+    return `${formatNumberWithDots(amount || 0)} ₫`;
+  }
+}
+
+function getMinPrice(service) {
+  if (!service?.priceSegments?.length) return 0;
+  return Math.min(...service.priceSegments.map(x => x.price));
+}
+function getMaxPrice(service) {
+  if (!service?.priceSegments?.length) return 0;
+  return Math.max(...service.priceSegments.map(x => x.price));
+}
+
+/* ===== ASSET INPUT ===== */
+function onAssetMoneyInput() {
+  const v = assetValueText.value.replace(/[^\d]/g, "");
+  assetValueText.value = v ? formatNumberWithDots(parseInt(v, 10)) : "";
+}
+function onAssetMoneyFocus() {
+  assetValueText.value = assetValueText.value.replace(/\./g, "");
+}
+function onAssetMoneyBlur() {
+  const n = parseFormattedNumber(assetValueText.value);
+  assetValueText.value = n ? formatNumberWithDots(n) : "";
+}
+
+/* ===== SERVICES ACTIONS ===== */
+function openServiceDetail(id) {
+  detailServiceId.value = id;
+  serviceDetailOpen.value = true;
+}
+function closeServiceDetail() {
+  serviceDetailOpen.value = false;
+}
+
+function openCreateService() {
+  serviceForm.id = null;
+  serviceForm.name = "";
+  serviceForm.color = "#667eea";
+  serviceForm.description = "";
+  serviceForm.segments = [
+    { _key: `${Date.now()}-${Math.random()}`, minText: formatNumberWithDots(1000000), maxText: formatNumberWithDots(5000000), priceText: formatNumberWithDots(8000000) }
+  ];
+  segErrors.value = new Array(serviceForm.segments.length).fill("");
+  serviceEditOpen.value = true;
+}
+
+function openEditService(id) {
+  const s = services.value.find(x => x.id === id);
+  if (!s) return;
+  serviceForm.id = s.id;
+  serviceForm.name = s.name;
+  serviceForm.color = s.color;
+  serviceForm.description = s.description || "";
+  serviceForm.segments = (s.priceSegments || []).map(seg => ({
+    _key: `${Date.now()}-${Math.random()}`,
+    minText: formatNumberWithDots(seg.min),
+    maxText: formatNumberWithDots(seg.max),
+    priceText: formatNumberWithDots(seg.price)
+  }));
+  if (!serviceForm.segments.length) {
+    serviceForm.segments = [{ _key: `${Date.now()}-${Math.random()}`, minText: formatNumberWithDots(1000000), maxText: formatNumberWithDots(5000000), priceText: formatNumberWithDots(8000000) }];
+  }
+  segErrors.value = new Array(serviceForm.segments.length).fill("");
+  serviceEditOpen.value = true;
+}
+
+function closeServiceEdit() {
+  serviceEditOpen.value = false;
+}
+
+function addServiceSegment() {
+  serviceForm.segments.push({ _key: `${Date.now()}-${Math.random()}`, minText: formatNumberWithDots(1000000), maxText: formatNumberWithDots(5000000), priceText: formatNumberWithDots(8000000) });
+  segErrors.value.push("");
+}
+
+function removeServiceSegment(idx) {
+  if (serviceForm.segments.length <= 1) return toast("error", "Dịch vụ phải có ít nhất 1 phân khúc.");
+  serviceForm.segments.splice(idx, 1);
+  segErrors.value.splice(idx, 1);
+}
+
+function normalizeServiceSegments() {
+  const parsed = serviceForm.segments
+      .map(s => ({
+        _key: s._key,
+        min: parseFormattedNumber(s.minText),
+        max: parseFormattedNumber(s.maxText),
+        price: parseFormattedNumber(s.priceText)
+      }))
+      .sort((a, b) => a.min - b.min);
+
+  serviceForm.segments = parsed.map(p => ({
+    _key: p._key,
+    minText: formatNumberWithDots(p.min),
+    maxText: formatNumberWithDots(p.max),
+    priceText: formatNumberWithDots(p.price)
+  }));
+
+  segErrors.value = new Array(serviceForm.segments.length).fill("");
+  toast("info", "Đã sắp xếp và làm sạch phân khúc.");
+}
+
+function onSegMoneyInput(idx, field) {
+  const seg = serviceForm.segments[idx];
+  const v = String(seg[field] || "").replace(/[^\d]/g, "");
+  seg[field] = v ? formatNumberWithDots(parseInt(v, 10)) : "";
+}
+function onSegMoneyFocus(idx, field) {
+  const seg = serviceForm.segments[idx];
+  seg[field] = String(seg[field] || "").replace(/\./g, "");
+}
+function onSegMoneyBlur(idx, field) {
+  const seg = serviceForm.segments[idx];
+  const n = parseFormattedNumber(seg[field]);
+  seg[field] = n ? formatNumberWithDots(n) : "";
+}
+
+function validateServiceForm() {
+  if (!serviceForm.name.trim()) {
+    toast("error", "Vui lòng nhập tên dịch vụ.");
+    return false;
+  }
+
+  const segs = serviceForm.segments.map(s => ({
+    min: parseFormattedNumber(s.minText),
+    max: parseFormattedNumber(s.maxText),
+    price: parseFormattedNumber(s.priceText)
+  }));
+
+  segErrors.value = new Array(segs.length).fill("");
+
+  for (let i = 0; i < segs.length; i++) {
+    const { min, max, price } = segs[i];
+    if (!(min < max)) segErrors.value[i] = "Sai khoảng: min phải nhỏ hơn max.";
+    else if (!(price > 0)) segErrors.value[i] = "Giá phải > 0.";
+  }
+
+  const withIdx = segs.map((s, i) => ({ ...s, i })).sort((a, b) => a.min - b.min);
+  for (let k = 0; k < withIdx.length - 1; k++) {
+    const a = withIdx[k], b = withIdx[k + 1];
+    if (a.min < b.max && b.min < a.max) {
+      segErrors.value[a.i] = "Trùng khoảng (overlap).";
+      segErrors.value[b.i] = "Trùng khoảng (overlap).";
+    }
+  }
+
+  if (segErrors.value.some(Boolean)) {
+    toast("error", "Vui lòng sửa lỗi phân khúc trước khi lưu.");
+    return false;
+  }
+  return true;
+}
+
+function saveServiceFromModal() {
+  if (!validateServiceForm()) return;
+
+  const normalizedSegments = serviceForm.segments.map((s, i) => ({
+    id: i + 1,
+    min: parseFormattedNumber(s.minText),
+    max: parseFormattedNumber(s.maxText),
+    price: parseFormattedNumber(s.priceText)
+  }));
+
+  if (serviceForm.id) {
+    const idx = services.value.findIndex(x => x.id === serviceForm.id);
+    if (idx === -1) return toast("error", "Không tìm thấy dịch vụ.");
+    services.value[idx] = {
+      ...services.value[idx],
+      name: serviceForm.name.trim(),
+      color: serviceForm.color || "#667eea",
+      description: serviceForm.description.trim(),
+      priceSegments: normalizedSegments
+    };
+    toast("success", "Đã cập nhật dịch vụ.");
+  } else {
+    const newId = services.value.length ? Math.max(...services.value.map(s => s.id)) + 1 : 1;
+    services.value.unshift({
+      id: newId,
+      name: serviceForm.name.trim(),
+      color: serviceForm.color || "#667eea",
+      description: serviceForm.description.trim(),
+      priceSegments: normalizedSegments
+    });
+    toast("success", "Đã thêm dịch vụ mới.");
+  }
+
+  serviceEditOpen.value = false;
+}
+
+function removeService(id) {
+  if (!confirm("Bạn có chắc muốn xóa dịch vụ này?")) return;
+  services.value = services.value.filter(s => s.id !== id);
+  toast("success", "Đã xóa dịch vụ.");
+  if (detailServiceId.value === id) closeServiceDetail();
+  if (serviceForm.id === id) closeServiceEdit();
+}
+
+/* ===== SEGMENTS ACTIONS ===== */
+function removeSegment(serviceId, segmentId) {
+  const sIdx = services.value.findIndex(s => s.id === serviceId);
+  if (sIdx === -1) return;
+
+  if (!confirm("Bạn có chắc muốn xóa phân khúc này?")) return;
+
+  const segs = services.value[sIdx].priceSegments.filter(x => x.id !== segmentId);
+  if (segs.length === 0) return toast("error", "Dịch vụ phải có ít nhất 1 phân khúc.");
+
+  segs.forEach((x, i) => (x.id = i + 1));
+  services.value[sIdx].priceSegments = segs;
+  toast("success", "Đã xóa phân khúc.");
+}
+
+function openEditSegment(serviceId, segmentId) {
+  const s = services.value.find(x => x.id === serviceId);
+  const seg = s?.priceSegments?.find(x => x.id === segmentId);
+  if (!s || !seg) return;
+
+  segmentForm.serviceId = serviceId;
+  segmentForm.segmentId = segmentId;
+  segmentForm.minText = formatNumberWithDots(seg.min);
+  segmentForm.maxText = formatNumberWithDots(seg.max);
+  segmentForm.priceText = formatNumberWithDots(seg.price);
+  segmentError.value = "";
+  segmentEditOpen.value = true;
+}
+
+function closeSegmentEdit() {
+  segmentEditOpen.value = false;
+  segmentError.value = "";
+}
+
+function onSegmentFormMoneyInput(field) {
+  const v = String(segmentForm[field] || "").replace(/[^\d]/g, "");
+  segmentForm[field] = v ? formatNumberWithDots(parseInt(v, 10)) : "";
+}
+function onSegmentFormMoneyFocus(field) {
+  segmentForm[field] = String(segmentForm[field] || "").replace(/\./g, "");
+}
+function onSegmentFormMoneyBlur(field) {
+  const n = parseFormattedNumber(segmentForm[field]);
+  segmentForm[field] = n ? formatNumberWithDots(n) : "";
+}
+
+function overlaps(serviceId, min, max, excludeSegmentId) {
+  const s = services.value.find(x => x.id === serviceId);
+  if (!s) return true;
+  for (const seg of s.priceSegments) {
+    if (seg.id === excludeSegmentId) continue;
+    if (min < seg.max && seg.min < max) return true;
+  }
+  return false;
+}
+
+function saveSegmentFromModal() {
+  const serviceId = segmentForm.serviceId;
+  const segmentId = segmentForm.segmentId;
+
+  const min = parseFormattedNumber(segmentForm.minText);
+  const max = parseFormattedNumber(segmentForm.maxText);
+  const price = parseFormattedNumber(segmentForm.priceText);
+
+  if (!(min < max)) {
+    segmentError.value = "Sai khoảng: min phải nhỏ hơn max.";
+    return;
+  }
+  if (!(price > 0)) {
+    segmentError.value = "Giá phải > 0.";
+    return;
+  }
+  if (overlaps(serviceId, min, max, segmentId)) {
+    segmentError.value = "Khoảng bị trùng với phân khúc khác trong cùng dịch vụ.";
+    return;
+  }
+
+  const sIdx = services.value.findIndex(s => s.id === serviceId);
+  const segIdx = services.value[sIdx].priceSegments.findIndex(x => x.id === segmentId);
+  services.value[sIdx].priceSegments[segIdx] = { ...services.value[sIdx].priceSegments[segIdx], min, max, price };
+
+  toast("success", "Đã cập nhật phân khúc.");
+  segmentEditOpen.value = false;
+}
+
+/* ===== MISC ===== */
+function seedMock() {
+  toast("info", "Đang dùng mock data trong component.");
+}
+</script>
+
+<style scoped>
+/* ===== TOKENS (scoped-safe) ===== */
+.svc3-page{
+  --bg:
+      radial-gradient(1200px 700px at 18% 8%, rgba(102,126,234,.16), transparent 60%),
+      radial-gradient(900px 650px at 78% 0%, rgba(240,147,251,.12), transparent 58%),
+      linear-gradient(135deg, rgba(15,23,42,.05), rgba(15,23,42,.00));
+  --card: rgba(255,255,255,.92);
+  --line: rgba(15, 23, 42, .10);
+  --line2: rgba(15, 23, 42, .08);
+  --text: #0b1220;
+  --muted: rgba(11,18,32,.62);
+
+  --g1: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  --g2: linear-gradient(135deg,#f093fb 0%,#f5576c 100%);
+  --g3: linear-gradient(135deg,#43e97b 0%,#38f9d7 100%);
+  --g4: linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);
+  --gd: linear-gradient(135deg,#0f172a 0%,#1f2a44 100%);
+
+  --r: 16px;
+  --r2: 14px;
+  --sh: 0 14px 34px rgba(0,0,0,.10);
+  --sh2: 0 10px 22px rgba(0,0,0,.08);
+  --t: all .18s cubic-bezier(.4,0,.2,1);
+
+  min-height:100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+.muted{ color: var(--muted); }
+.mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+.tiny{ font-size: 12px; }
+
+/* ===== TOPBAR ===== */
+.svc3-topbar{
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow: var(--sh2);
+  padding: 12px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  backdrop-filter: blur(10px);
+}
+.svc3-brand{ display:flex; align-items:center; gap:10px; min-width:0; }
+.svc3-brand-ico{
+  width:38px; height:38px;
+  border-radius: 14px;
+  display:grid; place-items:center;
+  background: var(--g1);
+  color:#fff;
+  box-shadow: 0 14px 26px rgba(102,126,234,.22);
+}
+.svc3-title{ font-size: 14px; font-weight: 750; letter-spacing:.2px; line-height:1.1; }
+.svc3-sub{
+  margin-top:2px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow:hidden;
+  text-overflow: ellipsis;
+}
+.svc3-top-actions{ display:flex; align-items:center; gap:8px; }
+
+/* ===== BUTTONS ===== */
+.svc3-btn{
+  height:34px;
+  padding: 0 10px;
+  border-radius: 12px;
+  border: none;
+  cursor:pointer;
+  font-size: 13px;
+  font-weight: 650;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  transition: var(--t);
+  position:relative;
+  overflow:hidden;
+}
+.svc3-btn:hover{ transform: translateY(-1px); }
+.svc3-btn.primary{
+  background: var(--g1);
+  color:#fff;
+  box-shadow: 0 14px 28px rgba(102,126,234,.18);
+}
+.svc3-btn.ghost{
+  background: rgba(15,23,42,.04);
+  color: var(--text);
+  border: 1px solid rgba(15,23,42,.10);
+}
+.svc3-btn.ghost:hover{
+  border-color: rgba(102,126,234,.22);
+  background: rgba(102,126,234,.06);
+}
+.svc3-btn.danger{
+  background: linear-gradient(135deg,#ff5858 0%, #f09819 100%);
+  color:#fff;
+  box-shadow: 0 14px 28px rgba(255,88,88,.14);
+}
+
+/* ===== TABS (browser-like + attached panel) ===== */
+.svc3-tabs-shell{ position: relative; }
+.svc3-tabs{
+  display:flex;
+  gap:8px;
+  align-items:flex-end;
+  padding: 0 6px;
+}
+.svc3-tabs-fill{
+  flex: 1;
+  height: 1px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
+}
+.svc3-tab{
+  flex: 0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 10px 12px;
+  border-radius: 14px 14px 0 0;
+  border: 1px solid rgba(15,23,42,.10);
+  border-bottom: none;
+  background: rgba(255,255,255,.56);
+  box-shadow: 0 10px 22px rgba(0,0,0,.06);
+  cursor:pointer;
+  transition: var(--t);
+  font-size: 13px;
+  font-weight: 650;
+  position: relative;
+}
+.svc3-tab i{
+  width:30px; height:30px;
+  border-radius: 12px;
+  display:grid; place-items:center;
+  background: rgba(15,23,42,.06);
+  color: rgba(15,23,42,.78);
+  transition: var(--t);
+}
+.svc3-tab:hover{ transform: translateY(-1px); background: rgba(102,126,234,.06); border-color: rgba(102,126,234,.22); }
+.svc3-tab.active{
+  background: var(--card);
+  border-color: rgba(102,126,234,.26);
+  transform: translateY(1px);
+}
+.svc3-tab.active i{ background: var(--g1); color:#fff; }
+.svc3-pill{
+  margin-left: 2px;
+  min-width: 28px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(15,23,42,.06);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+/* ===== PANEL ===== */
+.svc3-panel{
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  overflow:hidden;
+  backdrop-filter: blur(10px);
+}
+.svc3-panel.attached{
+  border-radius: 0 16px 16px 16px; /* dính với tab */
+  margin-top: 0;
+}
+.svc3-panel-h{
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(15,23,42,.08);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.svc3-panel-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight: 700;
+  font-size: 13px;
+}
+.svc3-panel-title i{
+  width:30px; height:30px;
+  border-radius: 12px;
+  display:grid; place-items:center;
+  background: var(--gd);
+  color:#fff;
+}
+.svc3-hint{
+  margin-left: 10px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px dashed rgba(15,23,42,.14);
+  background: rgba(15,23,42,.02);
+  color: rgba(11,18,32,.72);
+  font-size: 12px;
+}
+.svc3-panel-b{ padding: 12px; }
+
+/* ===== TOOLS ===== */
+.svc3-tools{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.svc3-input{ position:relative; min-width: 280px; }
+.svc3-input.narrow{ min-width: 260px; max-width: 320px; }
+.svc3-input i{
+  position:absolute; left:10px; top:50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: rgba(15,23,42,.55);
+}
+.svc3-input input{
+  width:100%;
+  height: 34px;
+  padding: 0 10px 0 30px;
+  border-radius: 12px;
+  border: 1px solid rgba(15,23,42,.12);
+  background: #fff;
+  outline:none;
+  font-size: 13px;
+  font-weight: 550;
+  transition: var(--t);
+  color: #000;
+}
+.svc3-input input:focus{
+  border-color: rgba(102,126,234,.45);
+  box-shadow: 0 0 0 4px rgba(102,126,234,.12);
+}
+.svc3-select{ display:flex; flex-direction:column; gap:4px; }
+.svc3-select label{
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 650;
+}
+.svc3-select select{
+  height:34px;
+  padding: 0 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(15,23,42,.12);
+  background: #fff;
+  font-size: 13px;
+  font-weight: 550;
+  outline:none;
+  transition: var(--t);
+}
+.svc3-select select:focus{
+  border-color: rgba(102,126,234,.45);
+  box-shadow: 0 0 0 4px rgba(102,126,234,.12);
+}
+
+/* ===== TABLE ===== */
+.svc3-table-wrap{
+  border: 1px solid rgba(15,23,42,.10);
+  border-radius: var(--r2);
+  overflow:hidden;
+  background:#fff;
+}
+.svc3-table{
+  width:100%;
+  border-collapse: collapse;
+}
+.svc3-table thead{
+  background: var(--gd); /* nền LIỀN MẠCH */
+}
+.svc3-table thead th{
+  background: transparent;
+  color:#fff;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: .55px;
+  text-transform: uppercase;
+  padding: 10px 10px;
+  text-align:left;
+  white-space: nowrap;
+}
+.svc3-table tbody td{
+  padding: 10px 10px;
+  border-bottom: 1px solid rgba(15,23,42,.08);
+  font-size: 13px;
+  vertical-align: middle;
+}
+.svc3-table tbody tr:nth-child(even){ background: rgba(15,23,42,.012); }
+.svc3-table tbody tr:hover{ background: rgba(102,126,234,.06); }
+.svc3-table tbody tr.hl{
+  background: linear-gradient(135deg, rgba(67,233,123,.14), rgba(56,249,215,.12));
+}
+.svc3-footnote{
+  padding: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  background: rgba(15,23,42,.03);
+  border-top: 1px solid rgba(15,23,42,.06);
+}
+
+/* ===== CELLS ===== */
+.svc3-svc{ display:flex; align-items:center; gap:10px; }
+.svc3-dot{
+  width:12px; height:12px;
+  border-radius: 7px;
+  border: 2px solid #fff;
+  box-shadow: 0 10px 18px rgba(0,0,0,.10);
+}
+.svc3-dot.big{ width:16px; height:16px; border-radius:10px; }
+.svc3-svc-name{
+  font-weight: 650;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow:hidden;
+  text-overflow: ellipsis;
+  max-width: 520px;
+}
+.svc3-svc-sub{
+  margin-top:2px;
+  font-size: 12px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  color: var(--muted);
+}
+.svc3-color{ display:flex; align-items:center; gap:10px; }
+.svc3-swatch{
+  width:26px; height:26px;
+  border-radius: 12px;
+  border: 2px solid #fff;
+  box-shadow: 0 10px 18px rgba(0,0,0,.10);
+}
+.svc3-swatch.big{ width:34px; height:34px; border-radius:14px; }
+.svc3-ellipsis{
+  color: rgba(11,18,32,.78);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow:hidden;
+}
+.svc3-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width: 34px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(15,23,42,.06);
+  font-weight: 650;
+  font-size: 12px;
+}
+.svc3-price{ font-weight: 750; font-size: 13px; white-space: nowrap; }
+.svc3-price.p1{ background: var(--g1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.svc3-price.p2{ background: var(--g2); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.svc3-price.p3{ background: var(--g3); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+
+.svc3-actions{ display:flex; gap:6px; align-items:center; }
+.svc3-icon{
+  width:32px; height:32px;
+  border-radius: 12px;
+  border: none;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+  color:#fff;
+  transition: var(--t);
+  box-shadow: 0 10px 16px rgba(0,0,0,.08);
+}
+.svc3-icon:hover{ transform: translateY(-1px); filter: brightness(1.02); }
+.svc3-icon.info{ background: var(--g4); }
+.svc3-icon.warn{ background: linear-gradient(135deg,#fa709a 0%, #fee140 100%); }
+.svc3-icon.danger{ background: linear-gradient(135deg,#ff5858 0%, #f09819 100%); }
+.svc3-icon.mini{ width:32px; height:32px; border-radius: 12px; }
+
+/* ===== RANGE ===== */
+.svc3-range{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.svc3-pill2{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(15,23,42,.03);
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+/* ===== EMPTY ===== */
+.svc3-empty{ padding: 26px 10px; text-align:center; }
+.svc3-empty.small{ padding: 18px 10px; }
+.svc3-empty-ico{
+  width:48px; height:48px;
+  margin: 0 auto 10px;
+  border-radius: 16px;
+  display:grid; place-items:center;
+  background: var(--g1);
+  color:#fff;
+  box-shadow: 0 16px 28px rgba(102,126,234,.20);
+}
+.svc3-empty-title{ font-weight: 700; font-size: 13px; }
+.svc3-empty-sub{ margin-top: 6px; color: var(--muted); font-size: 12px; }
+
+/* ===== MODAL ===== */
+.svc3-modal{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(6px);
+  z-index: 80;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 16px;
+}
+.svc3-modal-card{
+  width: min(720px, 100%);
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 18px;
+  box-shadow: 0 30px 70px rgba(0,0,0,.30);
+  overflow:hidden;
+  animation: pop .16s ease;
+}
+.svc3-modal-card.wide{ width: min(1020px, 100%); }
+@keyframes pop{ from{ opacity:0; transform: translateY(10px) scale(.98);} to{ opacity:1; transform: translateY(0) scale(1);} }
+.svc3-modal-h{
+  padding: 12px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border-bottom: 1px solid rgba(15,23,42,.08);
+  background: rgba(15,23,42,.02);
+}
+.svc3-modal-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight: 700;
+  font-size: 13px;
+}
+.svc3-modal-title i{
+  width:30px; height:30px;
+  border-radius: 12px;
+  display:grid; place-items:center;
+  background: var(--gd);
+  color:#fff;
+}
+.svc3-x{
+  width:36px; height:36px;
+  border-radius: 12px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(15,23,42,.03);
+  cursor:pointer;
+  transition: var(--t);
+}
+.svc3-x:hover{ transform: translateY(-1px); background: rgba(102,126,234,.08); border-color: rgba(102,126,234,.22); }
+.svc3-modal-b{ padding: 12px; }
+.svc3-modal-f{
+  padding: 12px;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  border-top: 1px solid rgba(15,23,42,.08);
+  background: rgba(15,23,42,.02);
+}
+
+/* Detail blocks */
+.svc3-detail-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(15,23,42,.08);
+}
+.svc3-detail-name{ font-weight: 750; font-size: 14px; }
+.svc3-kpis{ display:flex; gap:10px; }
+.svc3-kpi{
+  min-width: 140px;
+  border: 1px solid rgba(15,23,42,.10);
+  border-radius: 14px;
+  padding: 8px 10px;
+  background: #fff;
+}
+.svc3-kpi .k{ font-size: 11px; color: var(--muted); font-weight: 650; }
+.svc3-kpi .v{ margin-top:2px; font-weight: 750; font-size: 13px; }
+
+.svc3-box{
+  margin-top: 10px;
+  border: 1px solid rgba(15,23,42,.10);
+  border-radius: 14px;
+  background: #fff;
+  padding: 10px;
+}
+.svc3-box-k{ display:flex; align-items:center; gap:8px; font-size: 12px; font-weight: 700; color: rgba(11,18,32,.78); }
+.svc3-box-v{ margin-top: 6px; font-size: 13px; color: rgba(11,18,32,.80); line-height: 1.6; }
+
+.svc3-seg-grid{
+  margin-top: 10px;
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:10px;
+}
+@media (max-width: 900px){
+  .svc3-seg-grid{ grid-template-columns: 1fr; }
+}
+.svc3-seg-card{
+  border: 1px solid rgba(15,23,42,.10);
+  border-radius: 14px;
+  background: #fff;
+  overflow:hidden;
+}
+.svc3-seg-h{
+  padding: 8px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom: 1px solid rgba(15,23,42,.08);
+}
+.svc3-seg-h .t{ display:flex; align-items:center; gap:8px; font-weight: 700; font-size: 12px; }
+.svc3-seg-b{ padding: 10px; display:grid; gap:8px; }
+.svc3-seg-b .row{ display:flex; justify-content:space-between; gap:10px; font-size: 13px; }
+
+/* Form modal */
+.svc3-form-grid{
+  display:grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 12px;
+}
+@media (max-width: 1000px){
+  .svc3-form-grid{ grid-template-columns: 1fr; }
+}
+.svc3-form-card{
+  border: 1px solid rgba(15,23,42,.10);
+  border-radius: 16px;
+  background: rgba(255,255,255,.75);
+  box-shadow: var(--sh2);
+  overflow:hidden;
+}
+.svc3-form-title{
+  padding: 10px 12px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight: 700;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(15,23,42,.08);
+  background: rgba(15,23,42,.02);
+}
+.svc3-form-title i{
+  width:28px; height:28px;
+  border-radius: 12px;
+  display:grid; place-items:center;
+  background: rgba(15,23,42,.06);
+}
+
+.svc3-field{ display:grid; gap:6px; margin: 10px 12px; }
+.svc3-field label{
+  font-size: 12px;
+  font-weight: 650;
+  color: rgba(11,18,32,.80);
+  display:flex; align-items:center; gap:8px;
+}
+.svc3-field input,
+.svc3-field textarea{
+  border: 1px solid rgba(15,23,42,.12);
+  border-radius: 12px;
+  background: #fff;
+  padding: 9px 10px;
+  font-size: 13px;
+  font-weight: 550;
+  outline:none;
+  transition: var(--t);
+  color: #000;
+}
+.svc3-field input:focus,
+.svc3-field textarea:focus{
+  border-color: rgba(102,126,234,.45);
+  box-shadow: 0 0 0 4px rgba(102,126,234,.12);
+}
+.svc3-colorpick{ display:flex; align-items:center; gap:10px; }
+.svc3-colorinput{
+  width:44px; height:34px;
+  border-radius: 12px;
+  border: 2px solid #fff;
+  padding:0;
+  background: transparent;
+  box-shadow: 0 10px 18px rgba(0,0,0,.10);
+}
+
+.svc3-note{
+  margin: 10px 12px 0;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(102,126,234,.16);
+  background: rgba(102,126,234,.06);
+  font-size: 12px;
+  color: rgba(11,18,32,.78);
+}
+
+/* ===== Segment edit (pro compact columns) ===== */
+.svc3-seg-edit-list.compact{
+  margin: 10px 12px 12px;
+  border: 1px solid rgba(15,23,42,.10);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+}
+.svc3-seg-cols{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr 44px;
+  gap: 8px;
+  padding: 10px 10px;
+  background: var(--gd);
+  color: rgba(255,255,255,.94);
+  font-size: 11px;
+  letter-spacing: .55px;
+  text-transform: uppercase;
+  font-weight: 650;
+}
+.svc3-seg-cols .act{ text-align:right; }
+
+.svc3-seg-row{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr 44px;
+  gap: 8px;
+  padding: 10px 10px;
+  border-top: 1px solid rgba(15,23,42,.08);
+  align-items:center;
+  position: relative;
+}
+.svc3-seg-row input{
+  height: 34px;
+  border: 1px solid rgba(15,23,42,.12);
+  border-radius: 12px;
+  padding: 0 10px;
+  font-size: 13px;
+  outline:none;
+  transition: var(--t);
+  background: #fff;
+}
+.svc3-seg-row input:focus{
+  border-color: rgba(102,126,234,.45);
+  box-shadow: 0 0 0 4px rgba(102,126,234,.12);
+}
+.svc3-seg-row.err{
+  background: rgba(255,88,88,.06);
+}
+.svc3-err2{
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255,88,88,.10);
+  border: 1px solid rgba(255,88,88,.20);
+  color: rgba(11,18,32,.86);
+  display:flex;
+  gap:8px;
+  align-items:center;
+  font-size: 12px;
+}
+
+@media (max-width: 900px){
+  .svc3-seg-cols,
+  .svc3-seg-row{
+    grid-template-columns: 1fr;
+  }
+  .svc3-seg-cols .act{ display:none; }
+}
+
+/* ===== TOAST ===== */
+.svc3-toast-wrap{
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 90;
+  display:grid;
+  gap:8px;
+}
+.svc3-toast{
+  width: 320px;
+  border-radius: 16px;
+  padding: 10px 12px;
+  display:flex;
+  gap:10px;
+  color:#fff;
+  border: 1px solid rgba(255,255,255,.20);
+  box-shadow: 0 18px 34px rgba(0,0,0,.22);
+  animation: in .18s ease;
+}
+@keyframes in{ from{ opacity:0; transform: translateX(14px);} to{ opacity:1; transform: translateX(0);} }
+.svc3-toast.success{ background: var(--g3); }
+.svc3-toast.error{ background: linear-gradient(135deg,#ff5858 0%, #f09819 100%); }
+.svc3-toast.info{ background: var(--g4); }
+.svc3-toast .tt{ font-weight: 750; font-size: 12px; }
+.svc3-toast .tx{
+  margin-top: 2px;
+  font-size: 12px;
+  opacity: .92;
+  white-space: nowrap;
+  overflow:hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 640px){
+  .svc3-toast{ width: calc(100vw - 28px); }
+  .svc3-input{ min-width: 100%; }
+}
+</style>

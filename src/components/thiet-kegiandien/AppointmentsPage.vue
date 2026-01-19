@@ -1098,26 +1098,13 @@ async function createAppointmentApi() {
 
 import {showCenterWarning, updateAlertError, updateAlertSuccess, showLoading} from "../../assets/js/alertService.js";
 function isValidAppointmentTime(dateStr, timeStr) {
-  // dateStr: yyyy-MM-dd
-  // timeStr: HH:mm
-
-  // parse ngày KHÔNG dính timezone
   const [y, m, d] = dateStr.split('-').map(Number)
   const date = new Date(y, m - 1, d)
 
-  // ❌ Chủ nhật
-  if (date.getDay() === 0) {
-    return {
-      valid: false,
-      message: 'Không thể tạo lịch hẹn vào Chủ nhật.'
-    }
-  }
-
-  // 👉 hôm nay (00:00)
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  // ❌ ngày quá khứ
+  // ❌ chỉ chặn ngày quá khứ (nếu muốn)
   if (date < today) {
     return {
       valid: false,
@@ -1125,31 +1112,10 @@ function isValidAppointmentTime(dateStr, timeStr) {
     }
   }
 
-  // ===== CHECK GIỜ =====
-  const [hour, minute] = timeStr.split(':').map(Number)
-  const totalMinutes = hour * 60 + minute
-
-  const MORNING_START = 8 * 60 + 30   // 08:30
-  const MORNING_END   = 12 * 60       // 12:00
-  const AFTERNOON_START = 13 * 60 + 30 // 13:30
-  const AFTERNOON_END   = 17 * 60      // 17:00
-
-  const isMorning =
-      totalMinutes >= MORNING_START && totalMinutes <= MORNING_END
-
-  const isAfternoon =
-      totalMinutes >= AFTERNOON_START && totalMinutes <= AFTERNOON_END
-
-  if (!isMorning && !isAfternoon) {
-    return {
-      valid: false,
-      message:
-          'Thời gian hẹn chỉ từ 08:30–12:00 hoặc 13:30–17:00.'
-    }
-  }
-
+  // ✅ không giới hạn giờ
   return { valid: true }
 }
+
 
 
 async function saveNewAppointment() {
