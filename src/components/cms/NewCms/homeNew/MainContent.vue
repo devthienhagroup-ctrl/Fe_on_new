@@ -380,7 +380,7 @@
                       v-if="service.color === 'custom'"
                       v-model="service.customColor"
                       placeholder="Nhập mã màu tùy chỉnh"
-                      return-type="hex"
+                      return-type="value"
                       :colors="globalColors"
                       class="mt-2"
                   />
@@ -631,7 +631,7 @@
                       v-if="testimonial.color === 'custom'"
                       v-model="testimonial.customColor"
                       placeholder="Nhập mã màu tùy chỉnh"
-                      return-type="hex"
+                      return-type="value"
                       :colors="globalColors"
                       class="mt-2"
                   />

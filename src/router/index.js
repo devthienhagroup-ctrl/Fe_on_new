@@ -52,7 +52,7 @@ import ProductList from "../components/productAdmin/ProductList.vue";
 import ProductDetail from "../components/productAdmin/ProductDetail.vue";
 import ProductUser from "../components/productAdmin/productUser/ProductUser.vue";
 import ProductUpdate from "../components/productAdmin/ProductUpdate.vue";
-import ProductDetail2 from "../components/productAdmin/ProductDetail2.vue";
+import ProductDetail2 from "../components/productAdmin/productUser/ProductDetail2.vue";
 import ProductCreate from "../components/productAdmin/ProductCreate.vue";
 import HostManager from "../components/host/HostManager.vue";
 

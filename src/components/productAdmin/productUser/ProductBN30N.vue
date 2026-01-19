@@ -390,26 +390,19 @@ const emit = defineEmits(['view-detail', 'open-collab', 'toggle-love', 'load-mor
 
 const authStore = useAuthStore();
 const defaultImage = 'https://hoangphucphoto.com/wp-content/uploads/2024/11/anh-bds-1.jpg';
-const loadCount = ref(0);
-const itemsPerLoad = 4;
+// const loadCount = ref(0);
+// const itemsPerLoad = 4;
 const isFeaturedHovered = ref(false);
 const gridHoverStates = ref({});
 
 const displayedMoreItems = computed(() => {
-  // Xác định item nào đã hiển thị trong main layout
-  const itemsInMainLayout = 5;
-  const mainLayoutItems = props.items.slice(0, itemsInMainLayout);
-
-  // Lấy tất cả items trừ 5 item đầu (đã hiển thị)
-  const allOtherItems = props.items.slice(itemsInMainLayout);
-
-  // Giới hạn số lượng hiển thị theo loadCount
-  const itemsToShow = allOtherItems.slice(0, itemsPerLoad * (loadCount.value + 1));
-
-  return itemsToShow;
+  // Luôn hiển thị tất cả items từ thứ 6 trở đi
+  return props.items.slice(5);
 });
 
+// Sửa hasMoreItems
 const hasMoreItems = computed(() => {
+  // Dựa trên total từ props thay vì items.length
   return props.items.length < props.total;
 });
 

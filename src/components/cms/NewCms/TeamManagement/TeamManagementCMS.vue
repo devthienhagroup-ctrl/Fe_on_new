@@ -322,7 +322,7 @@
                       v-if="feature.color === 'custom'"
                       v-model="feature.customColor"
                       placeholder="Nhập mã màu tùy chỉnh"
-                      return-type="hex" :colors="globalColors"
+                      return-type="value" :colors="globalColors"
                   />
                 </div>
                 <div class="form-group">
@@ -490,7 +490,7 @@
                       v-if="benefit.color === 'custom'"
                       v-model="benefit.customColor"
                       placeholder="Nhập mã màu tùy chỉnh"
-                      return-type="hex" :colors="globalColors"
+                      return-type="value" :colors="globalColors"
                   />
                 </div>
                 <div class="form-group">
@@ -588,7 +588,7 @@
                       v-if="testimonial.color === 'custom'"
                       v-model="testimonial.customColor"
                       placeholder="Nhập mã màu tùy chỉnh"
-                      return-type="hex" :colors="globalColors"
+                      return-type="value" :colors="globalColors"
                   />
                 </div>
                 <div class="form-group">
@@ -734,13 +734,13 @@
                 <ColorInputWithGlobalColors
                     v-model="gradient.color1"
                     :placeholder="'Màu 1'"
-                    return-type="hex"
+                    return-type="value"
                     :colors="globalColors"
                 />
                 <ColorInputWithGlobalColors
                     v-model="gradient.color2"
                     :placeholder="'Màu 2'"
-                    return-type="hex"
+                    return-type="value"
                     :colors="globalColors"
                 />
                 <div class="gradient-preview"

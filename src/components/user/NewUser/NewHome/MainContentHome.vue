@@ -697,10 +697,10 @@ const loadConfig = async () => {
 };
 
 // Lifecycle hooks
-onMounted(async () => {
-  console.log("Chuẩn bị load config")
+onMounted(async () => {  console.log("Chuẩn bị load config")
   await loadConfig();
   console.log("Đã load")
+
   // Load particles.js
   if (window.particlesJS) {
     particlesJS("particles-js", {

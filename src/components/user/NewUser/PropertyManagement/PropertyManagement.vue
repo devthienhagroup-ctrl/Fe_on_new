@@ -1,7 +1,7 @@
 <template>
   <!-- HERO SECTION (2 cột) -->
   <section id="hero" class="min-h-screen flex items-center relative overflow-hidden py-12 lg:py-0"
-           :style="`background: ${config.css.heroBackground}`">
+           :style="`background: ${injectBaseImgUrl(config.css.heroBackground)}`">
     <!-- Animated background elements -->
     <div class="light-effect top-10 left-10"></div>
     <div class="light-effect bottom-10 right-10"></div>
@@ -141,7 +141,7 @@
           <div class="relative">
             <ImageWithShadow
                 class="max-h-100"
-                :src="config.benefits.image.src"
+                :src="baseImgaeUrl+config.benefits.image.src"
                 :alt="config.benefits.image.alt"
                 :show-shadow="true"
                 :hover-effect="true"
@@ -278,6 +278,12 @@ import GlassCard from "../../UI/GlassCard.vue"
 import SimpleGlassCard from "../../UI/SimpleGlassCard.vue"
 import ImageWithShadow from "../../UI/ImageWithShadow.vue"
 import api from "../../../../api/api.js";
+import {baseImgaeUrl} from "../../../../assets/js/global.js";
+
+const injectBaseImgUrl =(str)=> {
+  return str.replace(/url\(\s*['"]?/g, match => match + baseImgaeUrl);
+}
+
 
 // Config object chứa tất cả dữ liệu và CSS properties
 const config = ref({
