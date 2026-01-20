@@ -1,389 +1,1321 @@
-diff --git a/src/components/dich-vu/Dich-vu-setting.vue b/src/components/dich-vu/Dich-vu-setting.vue
-index bc3c486ec6b3c266b8f2b4fbd62590eeb7a3efcc..d9512e6b95bdc74563fb97ca55c90cf528edc731 100644
---- a/src/components/dich-vu/Dich-vu-setting.vue
-+++ b/src/components/dich-vu/Dich-vu-setting.vue
-@@ -402,50 +402,61 @@
+diff --git a/src/components/dich-vu/Phi-dich-vu.vue b/src/components/dich-vu/Phi-dich-vu.vue
+index 0df09afb25f176aecf9ca81476c3ec16852415f0..de459142842f40e805861c289d47a7ef704cbddf 100644
+--- a/src/components/dich-vu/Phi-dich-vu.vue
++++ b/src/components/dich-vu/Phi-dich-vu.vue
+@@ -45,51 +45,51 @@
+           <i class="fa-solid fa-chart-line"></i>
+           Thống kê
+           <span class="pill">0</span>
          </div>
+       </div>
 
-         <div class="svc3-modal-b">
-           <div class="svc3-form-grid">
-             <div class="svc3-form-card">
-               <div class="svc3-form-title"><i class="fa-solid fa-screwdriver-wrench"></i><span>Thông tin</span></div>
+       <!-- PANEL TAB 1 -->
+       <div class="panel attached" v-show="activeTab === 1">
+         <div class="panel-h">
+           <div class="panel-title">
+             <i class="fa-solid fa-clipboard-list"></i>
+             Bảng hợp đồng
+             <span class="muted tiny">• Thực thu = Đóng - Hoàn • Giá điều chỉnh = Giá sau giảm + Điều chỉnh • Doanh thu = MIN(Giá ĐC, Thực thu)</span>
+           </div>
 
-               <div class="svc3-field">
-                 <label><i class="fa-solid fa-tag"></i> Tên dịch vụ *</label>
-                 <input v-model.trim="serviceForm.name" type="text" placeholder="Nhập tên dịch vụ..." />
-               </div>
-
-               <div class="svc3-field">
-                 <label><i class="fa-solid fa-palette"></i> Màu phân loại *</label>
-                 <div class="svc3-colorpick">
-                   <input v-model="serviceForm.color" class="svc3-colorinput" type="color" />
-                   <div class="svc3-swatch big" :style="{background: serviceForm.color}"></div>
-                   <span class="mono muted">{{ serviceForm.color }}</span>
-                 </div>
-               </div>
-
-               <div class="svc3-field">
-                 <label><i class="fa-solid fa-file-lines"></i> Mô tả</label>
-                 <textarea v-model.trim="serviceForm.description" rows="4" placeholder="Mô tả chi tiết..."></textarea>
-               </div>
-+
-+              <div class="svc3-field">
-+                <label><i class="fa-solid fa-toggle-on"></i> Trạng thái</label>
-+                <label class="svc3-switch">
-+                  <input v-model="serviceForm.active" type="checkbox" />
-+                  <span class="svc3-slider"></span>
-+                  <span class="svc3-switch-text" :class="{ on: serviceForm.active }">
-+                    {{ serviceForm.active ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
-+                  </span>
-+                </label>
-+              </div>
+           <div class="tools">
+             <div class="input">
+               <i class="fa-solid fa-magnifying-glass"></i>
+               <input v-model="searchQuery" type="text" placeholder="Tìm theo mã HĐ / khách / dịch vụ...">
              </div>
 
-             <div class="svc3-form-card">
-               <div class="svc3-form-title flex items-center justify-between gap-2">
-                 <div class="flex items-center gap-2">
-                   <i class="fa-solid fa-tags"></i><span>Phân khúc</span>
+             <div class="select">
+               <label>Dịch vụ</label>
+               <select v-model="filterService">
+                 <option value="">Tất cả</option>
+-                <option v-for="service in SERVICES" :key="service.name" :value="service.name">{{ service.name }}</option>
++                <option v-for="service in serviceOptions" :key="service.id || service.name" :value="service.name">{{ service.name }}</option>
+               </select>
+             </div>
+
+             <div class="select">
+               <label>Trạng thái</label>
+               <select v-model="filterStatus">
+                 <option value="">Tất cả</option>
+                 <option value="DANG_HIEU_LUC">DANG_HIEU_LUC</option>
+                 <option value="HOAN_TAT">HOAN_TAT</option>
+                 <option value="HUY">HUY</option>
+               </select>
+             </div>
+
+             <div class="tools-actions">
+               <button class="btn ghost" @click="resetFilters">
+                 <i class="fa-solid fa-rotate"></i>
+                 Reset lọc
+               </button>
+             </div>
+           </div>
+         </div>
+
+         <div class="panel-b">
+           <!-- KPIs -->
+           <div class="kpi-row">
+@@ -248,134 +248,197 @@
+         </div>
+         <div class="min-w-0">
+           <div class="tt">{{ toast.title }}</div>
+           <div class="tx">{{ toast.text }}</div>
+         </div>
+         <div class="x ml-auto">
+           <i class="fa-solid fa-xmark"></i>
+         </div>
+       </div>
+     </div>
+
+     <!-- MODAL: CREATE CONTRACT -->
+     <div class="modal" :class="{ show: showModal === 'modalContract' }" @click.self="closeModal('modalContract')">
+       <div class="modal-card detail">
+         <div class="modal-h">
+           <div class="modal-title">
+             <i class="fa-solid fa-file-circle-plus"></i>
+             <span>Thêm hợp đồng (không cho sửa)</span>
+           </div>
+           <button class="x" @click="closeModal('modalContract')" title="Đóng">
+             <i class="fa-solid fa-xmark"></i>
+           </button>
+         </div>
+
+         <div class="modal-b">
+-          <div class="form-grid">
++          <div class="form-grid form-grid--contract">
+             <div class="card">
+               <div class="card-h">
+-                <i class="fa-solid fa-user"></i>
++                <i class="fa-solid fa-user icon-tone tone-sky"></i>
+                 Thông tin khách
+               </div>
+
+-              <div class="field">
+-                <label><i class="fa-solid fa-signature"></i> Tên khách hàng</label>
+-                <input v-model="newContract.tenKhachHang" type="text" placeholder="VD: Nguyễn Văn A">
++              <div class="field customer-search">
++                <label><i class="fa-solid fa-magnifying-glass icon-tone tone-lilac"></i> Tìm khách theo tên</label>
++                <input v-model="customerSearch" type="text" placeholder="Nhập tên khách hàng để tìm...">
++
++                <div class="search-results" v-if="customerSearchResults.length">
++                  <div v-for="customer in customerSearchResults" :key="customer.id" class="customer-result" @click="selectCustomer(customer)">
++                    <div class="customer-avatar sm">{{ initials(customer.name) }}</div>
++                    <div class="cr-main">
++                      <div class="customer-name">{{ customer.name }}</div>
++                      <div class="customer-phone"><i class="fa-solid fa-phone me-1"></i>{{ customer.phone }}</div>
++                    </div>
++                  </div>
++                </div>
++                <div v-else-if="customerSearchLoading" class="search-results empty">
++                  <div class="customer-result muted">
++                    <div class="cr-main">
++                      <div class="customer-name">Đang tìm khách hàng...</div>
++                      <div class="customer-phone">Vui lòng chờ</div>
++                    </div>
++                  </div>
++                </div>
++                <div v-else-if="customerSearchError && customerSearch.trim()" class="search-results empty">
++                  <div class="customer-result muted">
++                    <div class="cr-main">
++                      <div class="customer-name">{{ customerSearchError }}</div>
++                      <div class="customer-phone">Thử nhập tên khác.</div>
++                    </div>
++                  </div>
++                </div>
++
++                <div v-if="selectedCustomer" class="selected-customer">
++                  <div class="customer-avatar">{{ initials(selectedCustomer.name) }}</div>
++                  <div class="min-w-0">
++                    <div class="customer-name">{{ selectedCustomer.name }}</div>
++                    <div class="customer-phone"><i class="fa-solid fa-phone me-1"></i>{{ selectedCustomer.phone }}</div>
++                  </div>
++                  <button class="clear-btn" type="button" @click="clearSelectedCustomer">
++                    <i class="fa-solid fa-xmark"></i>
++                  </button>
++                </div>
++              </div>
++
++              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 px-3 pb-2">
++                <div class="field !m-0">
++                  <label><i class="fa-solid fa-id-badge icon-tone tone-rose"></i> Mã khách hàng</label>
++                  <input :value="selectedCustomer?.id || ''" type="text" readonly>
++                </div>
++                <div class="field !m-0">
++                  <label><i class="fa-solid fa-phone icon-tone tone-emerald"></i> Số điện thoại</label>
++                  <input :value="selectedCustomer?.phone || ''" type="text" readonly>
++                </div>
+               </div>
+
+               <div class="field">
+-                <label><i class="fa-solid fa-calendar-check"></i> Ngày ký</label>
++                <label><i class="fa-solid fa-calendar-check icon-tone tone-amber"></i> Ngày ký</label>
+                 <input v-model="newContract.ngayKy" type="date">
+               </div>
+             </div>
+
+             <div class="card">
+               <div class="card-h">
+-                <i class="fa-solid fa-circle-check"></i>
++                <i class="fa-solid fa-circle-check icon-tone tone-mint"></i>
+                 Thông tin dịch vụ & thanh toán ban đầu
+               </div>
+               <div class="field">
+-                <label><i class="fa-solid fa-list"></i> Dịch vụ</label>
+-                <select v-model="newContract.tenDichVu" @change="updateServicePrice">
+-                  <option v-for="service in SERVICES" :key="service.name" :value="service.name">{{ service.name }}</option>
++                <label><i class="fa-solid fa-list icon-tone tone-indigo"></i> Dịch vụ</label>
++                <select v-model="newContract.serviceId">
++                  <option v-for="service in serviceOptions" :key="service.id || service.name" :value="service.id || service.name">
++                    {{ service.name }}
++                  </option>
+                 </select>
+-                <div class="muted tiny">Chọn dịch vụ sẽ random ra giá gốc theo khung giá demo.</div>
++                <div class="muted tiny">Dịch vụ lấy từ hệ thống, giá gốc dựa theo phân khúc.</div>
+               </div>
+
+-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 px-3 pb-2">
++              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 px-3 pb-2">
+                 <div class="field !m-0">
+-                  <label><i class="fa-solid fa-money-bill-wave"></i> Giá gốc</label>
++                  <label><i class="fa-solid fa-building icon-tone tone-teal"></i> Giá trị tài sản chấp nhận ký bán</label>
++                  <input v-model.number="newContract.giaTriTaiSan" type="number" min="0" placeholder="VD: 1500000000">
++                  <div class="muted tiny">Nhập giá trị tài sản để xác định phân khúc.</div>
++                </div>
++
++                <div class="field !m-0">
++                  <label><i class="fa-solid fa-money-bill-wave icon-tone tone-orange"></i> Giá gốc</label>
+                   <input :value="formatMoney(newContract.giaDichVuGoc)" type="text" readonly>
                  </div>
-                 <div class="flex gap-2">
-                   <button class="svc3-btn ghost" @click="normalizeServiceSegments()">
-                     <i class="fa-solid fa-broom"></i><span>Làm sạch</span>
-                   </button>
-                   <button class="svc3-btn primary" @click="addServiceSegment()">
-                     <i class="fa-solid fa-plus"></i><span>Thêm</span>
-                   </button>
++              </div>
+
++              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 px-3 pb-2">
+                 <div class="field !m-0">
+-                  <label><i class="fa-solid fa-tags"></i> Phí giảm (tiền)</label>
++                  <label><i class="fa-solid fa-tags icon-tone tone-pink"></i> Phí giảm (tiền)</label>
+                   <input v-model.number="newContract.phiGiam" type="number" placeholder="VD: 1000000" @input="updateGiaSauGiam">
+                 </div>
+
+                 <div class="field !m-0">
+-                  <label><i class="fa-solid fa-circle-dollar-to-slot"></i> Giá sau giảm</label>
++                  <label><i class="fa-solid fa-circle-dollar-to-slot icon-tone tone-purple"></i> Giá sau giảm</label>
+                   <input :value="formatMoney(newContract.giaSauGiam)" type="text" readonly>
                  </div>
                </div>
 
-               <div class="svc3-note">
-                 Quy tắc: <b>[min, max)</b> không được giao nhau và <b>min &lt; max</b>.
++              <div class="segment-hint" v-if="segmentHint">
++                <i class="fa-solid fa-circle-info"></i>
++                {{ segmentHint }}
++              </div>
++
+               <!-- Plan -->
+               <div class="px-3 pb-2">
+                 <div class="muted tiny font-semibold uppercase tracking-wide mb-2">Tuỳ chọn thanh toán ban đầu</div>
+
+                 <div class="plan" id="planWrap">
+                   <div class="plan-item" :class="{ active: newContract.initPlan === 'COC' }" @click="newContract.initPlan = 'COC'; updateFirstPayment()">
+                     <div class="plan-ico"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                     <div class="min-w-0">
+                       <div class="plan-tt">Cọc (%)</div>
+                     </div>
+                   </div>
+
+                   <div class="plan-item" :class="{ active: newContract.initPlan === 'FULL' }" @click="newContract.initPlan = 'FULL'; updateFirstPayment()">
+                     <div class="plan-ico"><i class="fa-solid fa-circle-check"></i></div>
+                     <div class="min-w-0">
+                       <div class="plan-tt">Đóng tất</div>
+                     </div>
+                   </div>
+                 </div>
+
+                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                   <div class="field !m-0">
+-                    <label><i class="fa-solid fa-percent"></i> % cọc</label>
++                    <label><i class="fa-solid fa-percent icon-tone tone-gold"></i> % cọc</label>
+                     <input v-model.number="newContract.tiLeCoc" type="number" min="0" max="100" placeholder="VD: 30"
+                            :disabled="newContract.initPlan === 'FULL'" @input="updateFirstPayment">
+                     <div class="muted tiny">Chỉ dùng khi chọn Cọc (%).</div>
+                   </div>
+
+                   <div class="field !m-0">
+-                    <label><i class="fa-solid fa-money-check-dollar"></i> Tiền thanh toán ban đầu</label>
++                    <label><i class="fa-solid fa-money-check-dollar icon-tone tone-cyan"></i> Tiền thanh toán ban đầu</label>
+                     <input :value="formatMoney(firstPaymentAmount)" type="text" readonly>
+                     <div class="muted tiny">Tự tính theo lựa chọn phía trên.</div>
+                   </div>
+
+                   <div class="field !m-0">
+-                    <label><i class="fa-solid fa-credit-card"></i> Hình thức</label>
++                    <label><i class="fa-solid fa-credit-card icon-tone tone-forest"></i> Hình thức</label>
+                     <select v-model="newContract.firstMethod">
+                       <option value="CHUYEN_KHOAN">CHUYEN_KHOAN</option>
+                       <option value="TIEN_MAT">TIEN_MAT</option>
+                       <option value="QR">QR</option>
+                       <option value="KHAC">KHAC</option>
+                     </select>
+                   </div>
+                 </div>
+
+                 <div class="note">
+                   <b>Lưu ý:</b> Khi bấm <b>Lưu hợp đồng</b>, hệ thống sẽ tự tạo 1 dòng <b>Đóng phí</b> theo "Cọc/Đóng tất".
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+
+         <div class="modal-f">
+           <button class="btn ghost" @click="closeModal('modalContract')">
+             <i class="fa-solid fa-ban"></i> Hủy
+           </button>
+           <button class="btn primary" @click="saveContract">
+             <i class="fa-solid fa-floppy-disk"></i> Lưu hợp đồng
+           </button>
+         </div>
+@@ -564,50 +627,58 @@
+                 <div class="muted tiny">Âm = giảm thêm • Dương = phụ thu / phạt</div>
                </div>
 
-               <!-- UPDATED: header columns, no per-row labels -->
-               <div class="svc3-seg-edit-list compact">
-                 <div class="svc3-seg-cols">
-                   <div class="c">Min</div>
-@@ -714,50 +725,51 @@ const computedSegments = computed(() => {
- const serviceDetailOpen = ref(false);
- const serviceEditOpen = ref(false);
- const segmentEditOpen = ref(false);
+               <div class="field">
+                 <label><i class="fa-solid fa-layer-group"></i> Loại điều chỉnh</label>
+                 <select v-model="adjustment.type">
+                   <option value="GIAM_GIA">GIAM_GIA</option>
+                   <option value="PHU_THU">PHU_THU</option>
+                   <option value="PHAT">PHAT</option>
+                 </select>
+               </div>
 
- /* Service detail */
- const detailServiceId = ref(null);
- const detailService = ref(null)
- const fetchServiceDetail = async (id) => {
-   try {
-     const res = await api.get(`/dich-vu-thg/admin/${id}`)
-     detailService.value = res.data
-     serviceDetailOpen.value = true
-   } catch (e) {
-     console.error('❌ Lỗi fetch service detail', e)
-     toast('error', 'Không tải được chi tiết dịch vụ')
+               <div class="field">
+                 <label><i class="fa-solid fa-clipboard"></i> Lý do</label>
+                 <textarea v-model="adjustment.reason" placeholder="VD: Phạt trễ tiến độ..."></textarea>
+               </div>
+             </div>
+
+             <div class="card">
+               <div class="card-h"><i class="fa-solid fa-circle-info"></i> Tác động sau điều chỉnh</div>
+               <div class="p-3">
+                 <div class="text-sm font-extrabold">{{ currentContract?.maHopDong }} • {{ currentContract?.tenKhachHang }}</div>
+                 <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày ký {{ currentContract?.ngayKy }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
+
+                 <div class="grid grid-cols-2 gap-2 mt-3">
++                  <div class="kpi">
++                    <div class="k"><span class="dot"></span>Giá trị tài sản</div>
++                    <div class="v price p4">{{ formatMoney(currentContract?.giaTriTaiSan || 0) }}</div>
++                  </div>
++                  <div class="kpi">
++                    <div class="k"><span class="dot"></span>Giá gốc</div>
++                    <div class="v price p2">{{ formatMoney(currentContract?.giaDichVuGoc || 0) }}</div>
++                  </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Giá chốt</div>
+                     <div class="v price p4">{{ formatMoney(currentContract?.giaSauGiam || 0) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
+                     <div class="v price p2">{{ formatMoney(calcTongDieuChinh(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Giá điều chỉnh</div>
+                     <div class="v price p2">{{ formatMoney(calcGiaDieuChinh(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Doanh thu (min)</div>
+                     <div class="v price p1">{{ formatMoney(calcDoanhThu(currentContract)) }}</div>
+                   </div>
+                 </div>
+
+                 <div class="note mt-3">
+                   <b>Gợi ý:</b> Nếu điều chỉnh âm làm "Giá điều chỉnh" thấp hơn "Thực thu", bạn đang thu dư → có thể cần hoàn.
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+@@ -804,84 +875,100 @@
+           </button>
+         </div>
+         <div class="modal-b">
+           <div class="p-2">
+             <div class="font-extrabold">Xóa hợp đồng {{ currentContract?.maHopDong }}?</div>
+             <div class="muted mt-2">{{ currentContract?.tenKhachHang }} • {{ currentContract?.tenDichVu }} • Doanh thu hiện tại: {{ formatMoney(calcDoanhThu(currentContract)) }}</div>
+             <div class="note mt-3">
+               Xóa sẽ mất cả các đợt <b>đóng phí</b>, <b>hoàn phí</b>, <b>điều chỉnh</b> của hợp đồng này.
+             </div>
+           </div>
+         </div>
+         <div class="modal-f">
+           <button class="btn ghost" @click="closeModal('modalDelete')">
+             <i class="fa-solid fa-ban"></i> Hủy
+           </button>
+           <button class="btn danger" @click="confirmDelete">
+             <i class="fa-solid fa-trash"></i> Xóa luôn
+           </button>
+         </div>
+       </div>
+     </div>
+   </div>
+ </template>
+
+ <script>
++import api from '/src/api/api.js'
++
+ export default {
+   name: 'ContractManagement',
+
+   data() {
+     return {
+       // Constants
+       SERVICES: [
+         { name: 'Thiết kế UI Website', min: 8000000, max: 25000000 },
+         { name: 'Landing Page Chuyển đổi', min: 4000000, max: 15000000 },
+         { name: 'SEO & Tối ưu Onpage', min: 5000000, max: 30000000 },
+         { name: 'Branding / Bộ nhận diện', min: 12000000, max: 60000000 },
+         { name: 'Quản trị nội dung Fanpage', min: 3000000, max: 18000000 },
+         { name: 'Chụp hình BĐS / Flycam', min: 2500000, max: 20000000 },
+       ],
+       ENUM_STATUS: ['DANG_HIEU_LUC', 'HOAN_TAT', 'HUY'],
+       ENUM_PAY: ['TIEN_MAT', 'CHUYEN_KHOAN', 'QR', 'KHAC'],
+       ENUM_ADJ: ['GIAM_GIA', 'PHU_THU', 'PHAT'],
+
+       // State
+       activeTab: 1,
+       contracts: [],
+       seq: 1,
++      services: [],
++      segments: [],
+
+       // Filters
+       searchQuery: '',
+       filterService: '',
+       filterStatus: '',
+
++      // Customer search
++      customerSearch: '',
++      selectedCustomer: null,
++      customerSearchResults: [],
++      customerSearchLoading: false,
++      customerSearchError: '',
++      customerSearchTimer: null,
++      lastCustomerKeyword: '',
++      suppressCustomerSearch: false,
++
+       // New contract form
+       newContract: {
+         maHopDong: '',
+         maKhachHang: '',
+         tenKhachHang: '',
+         tenDichVu: '',
++        serviceId: null,
++        giaTriTaiSan: null,
+         giaDichVuGoc: 0,
+         phiGiam: 0,
+         giaSauGiam: 0,
+         trangThaiHopDong: 'DANG_HIEU_LUC',
+         ngayKy: this.todayISO(),
+         initPlan: 'COC',
+         tiLeCoc: 30,
+         firstMethod: 'CHUYEN_KHOAN'
+       },
+
+       // Modals
+       showModal: null,
+       currentContract: null,
+
+       // Payment form
+       payment: {
+         amount: 0,
+         method: 'CHUYEN_KHOAN',
+         date: this.todayISO(),
+         note: ''
+       },
+
+       // Refund form
+       refund: {
+         amount: 0,
+@@ -908,101 +995,232 @@ export default {
+   },
+
+   computed: {
+     filteredContracts() {
+       return this.contracts.filter(contract => {
+         const hay = `${contract.maHopDong} ${contract.tenKhachHang} ${contract.tenDichVu}`.toLowerCase()
+         const okQ = !this.searchQuery || hay.includes(this.searchQuery.toLowerCase())
+         const okSvc = !this.filterService || contract.tenDichVu === this.filterService
+         const okSt = !this.filterStatus || contract.trangThaiHopDong === this.filterStatus
+         return okQ && okSvc && okSt
+       })
+     },
+
+     totalThucThu() {
+       return this.filteredContracts.reduce((sum, c) => sum + this.calcThucThu(c), 0)
+     },
+
+     totalDieuChinh() {
+       return this.filteredContracts.reduce((sum, c) => sum + this.calcTongDieuChinh(c), 0)
+     },
+
+     totalDoanhThu() {
+       return this.filteredContracts.reduce((sum, c) => sum + this.calcDoanhThu(c), 0)
+     },
+
++    serviceOptions() {
++      return this.services.length ? this.services : this.SERVICES
++    },
++
++    selectedService() {
++      if (!this.newContract.serviceId) return null
++      return this.serviceOptions.find(s => String(s.id || s.name) === String(this.newContract.serviceId)) || null
++    },
++
++    matchingSegment() {
++      const serviceId = this.newContract.serviceId
++      const assetValue = Number(this.newContract.giaTriTaiSan || 0)
++      if (!serviceId || assetValue <= 0) return null
++      return this.segments.find(seg =>
++          String(seg.serviceId) === String(serviceId) &&
++          assetValue >= Number(seg.min) &&
++          assetValue < Number(seg.max)
++      ) || null
++    },
++
++    segmentHint() {
++      if (!this.newContract.serviceId) {
++        return 'Vui lòng chọn dịch vụ để hiển thị phân khúc.'
++      }
++      if (!this.newContract.giaTriTaiSan) {
++        return 'Nhập giá trị tài sản để xác định mức giá gốc.'
++      }
++      if (!this.matchingSegment) {
++        return 'Chưa có phân khúc phù hợp với giá trị tài sản này.'
++      }
++      return `Phân khúc ${this.formatMoney(this.matchingSegment.min)} → ${this.formatMoney(this.matchingSegment.max)}`
++    },
++
+     firstPaymentAmount() {
+       if (this.newContract.initPlan === 'FULL') {
+         return this.newContract.giaSauGiam
+       } else {
+         const percent = Math.max(0, Math.min(100, this.newContract.tiLeCoc || 0))
+         return Math.round(this.newContract.giaSauGiam * (percent / 100))
+       }
+     }
+   },
+
++  watch: {
++    customerSearch(val) {
++      if (this.suppressCustomerSearch) return
++
++      if (this.selectedCustomer && (val || '').trim() === (this.selectedCustomer.name || '').trim()) {
++        this.customerSearchResults = []
++        this.customerSearchLoading = false
++        this.customerSearchError = ''
++        return
++      }
++
++      if (this.selectedCustomer && (val || '').trim() !== (this.selectedCustomer?.name || '').trim()) {
++        this.selectedCustomer = null
++        this.newContract.maKhachHang = ''
++        this.newContract.tenKhachHang = ''
++      }
++
++      this.clearCustomerSearchTimer()
++
++      const k = (val || '').trim()
++      if (!k) {
++        this.lastCustomerKeyword = ''
++        this.customerSearchResults = []
++        this.customerSearchError = ''
++        this.customerSearchLoading = false
++        return
++      }
++
++      this.customerSearchTimer = setTimeout(() => {
++        this.fetchCustomerSearch(k)
++      }, 250)
++    },
++
++    'newContract.serviceId'() {
++      this.updateServicePrice()
++    },
++
++    'newContract.giaTriTaiSan'() {
++      this.updateGiaGocFromAsset()
++    }
++  },
++
+   methods: {
+     // Helper functions
+     formatMoney(n) {
+       const x = Math.round(Number(n || 0))
+       const sign = x < 0 ? '-' : ''
+       const abs = Math.abs(x)
+       return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' ₫'
+     },
+
++    initials(name) {
++      const parts = String(name || '')
++          .trim()
++          .split(/\s+/)
++          .filter(Boolean)
++      if (parts.length === 0) return 'NA'
++      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
++      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
++    },
++
+     getStatusText(status) {
+       switch(status) {
+         case 'DANG_HIEU_LUC': return 'Đang hiệu lực'
+         case 'HOAN_TAT': return 'Hoàn tất'
+         case 'HUY': return 'Đã hủy'
+         default: return status
+       }
+     },
+
+     todayISO() {
+       const d = new Date()
+       const yyyy = d.getFullYear()
+       const mm = String(d.getMonth() + 1).padStart(2, '0')
+       const dd = String(d.getDate()).padStart(2, '0')
+       return `${yyyy}-${mm}-${dd}`
+     },
+
+     randInt(min, max) {
+       return Math.floor(Math.random() * (max - min + 1)) + min
+     },
+
+     randPriceForService(serviceName) {
+-      const svc = this.SERVICES.find(s => s.name === serviceName) || this.SERVICES[0]
++      const svc = this.serviceOptions.find(s => s.name === serviceName) || this.serviceOptions[0]
++      if (!svc) return 0
++      const min = Number(svc.minPrice ?? svc.min ?? 0)
++      const max = Number(svc.maxPrice ?? svc.max ?? min)
++      if (!min || !max) return 0
+       const step = 250000
+-      const raw = this.randInt(svc.min, svc.max)
++      const raw = this.randInt(min, max)
+       return Math.round(raw / step) * step
+     },
+
+     pad4(n) {
+       return String(n).padStart(4, '0')
+     },
+
++    async fetchServices() {
++      try {
++        const res = await api.get('/dich-vu-thg/admin', {
++          params: {
++            keyword: null
++          }
++        })
++        this.services = res.data || []
++      } catch (e) {
++        console.error('❌ Lỗi fetch services', e)
++        this.services = []
++      }
++    },
++
++    async fetchSegments() {
++      try {
++        const res = await api.get('/dich-vu-thg/admin/phan-khuc')
++        this.segments = res.data || []
++      } catch (e) {
++        console.error('❌ Lỗi fetch segments', e)
++        this.segments = []
++      }
++    },
++
++    getServiceById(serviceId) {
++      return this.serviceOptions.find(s => String(s.id || s.name) === String(serviceId)) || null
++    },
++
++    getSegmentsByService(serviceId) {
++      return this.segments
++          .filter(seg => String(seg.serviceId) === String(serviceId))
++          .sort((a, b) => Number(a.min) - Number(b.min))
++    },
++
++    findSegmentForAsset(serviceId, assetValue) {
++      if (!serviceId || !assetValue) return null
++      const segments = this.getSegmentsByService(serviceId)
++      return segments.find(seg =>
++          assetValue >= Number(seg.min) && assetValue < Number(seg.max)
++      ) || null
++    },
++
+     genContractCode() {
+       const y = new Date().getFullYear()
+       return `HD-${y}-${this.pad4(this.seq++)}`
+     },
+
+     // Calculation functions
+     calcTongDong(c) {
+       return (c?.dotDongTien || []).reduce((sum, x) => sum + (Number(x.soTienDong) || 0), 0)
+     },
+
+     calcTongHoan(c) {
+       return (c?.hoanTien || []).reduce((sum, x) => sum + (Number(x.soTienHoan) || 0), 0)
+     },
+
+     calcTongDieuChinh(c) {
+       return (c?.dieuChinh || []).reduce((sum, x) => sum + (Number(x.soTienDieuChinh) || 0), 0)
+     },
+
+     calcThucThu(c) {
+       return this.calcTongDong(c) - this.calcTongHoan(c)
+     },
+
+     calcGiaDieuChinh(c) {
+       return (Number(c?.giaSauGiam) || 0) + this.calcTongDieuChinh(c)
+     },
+@@ -1018,99 +1236,195 @@ export default {
+         title,
+         text,
+         icon: type === 'success' ? 'fa-solid fa-circle-check' :
+             type === 'error' ? 'fa-solid fa-triangle-exclamation' :
+                 'fa-solid fa-circle-info'
+       }
+       this.showToast = true
+       setTimeout(() => {
+         this.showToast = false
+       }, 3000)
+     },
+
+     // Modal control
+     openModal(modal) {
+       this.showModal = modal
+     },
+
+     closeModal(modal) {
+       if (this.showModal === modal) {
+         this.showModal = null
+       }
+     },
+
+     // Contract management
+     resetContractForm() {
++      const firstService = this.serviceOptions[0] || null
+       this.newContract = {
+         maHopDong: this.genContractCode(),
+         maKhachHang: '',
+         tenKhachHang: '',
+-        tenDichVu: this.SERVICES[0].name,
+-        giaDichVuGoc: this.randPriceForService(this.SERVICES[0].name),
++        tenDichVu: firstService?.name || '',
++        serviceId: firstService?.id || firstService?.name || null,
++        giaTriTaiSan: null,
++        giaDichVuGoc: 0,
+         phiGiam: 0,
+-        giaSauGiam: this.randPriceForService(this.SERVICES[0].name),
++        giaSauGiam: 0,
+         trangThaiHopDong: 'DANG_HIEU_LUC',
+         ngayKy: this.todayISO(),
+         initPlan: 'COC',
+         tiLeCoc: 30,
+         firstMethod: 'CHUYEN_KHOAN'
+       }
+-      this.updateGiaSauGiam()
++      this.customerSearch = ''
++      this.selectedCustomer = null
++      this.customerSearchResults = []
++      this.customerSearchError = ''
++      this.customerSearchLoading = false
++      this.updateServicePrice()
+       this.showToastMessage('info', 'Tạo mới form', 'Đã reset form hợp đồng.')
+     },
+
+     updateServicePrice() {
+-      this.newContract.giaDichVuGoc = this.randPriceForService(this.newContract.tenDichVu)
++      const service = this.getServiceById(this.newContract.serviceId)
++      this.newContract.tenDichVu = service?.name || ''
++      this.updateGiaGocFromAsset()
++    },
++
++    updateGiaGocFromAsset() {
++      const assetValue = Number(this.newContract.giaTriTaiSan || 0)
++      const segment = this.findSegmentForAsset(this.newContract.serviceId, assetValue)
++      if (segment) {
++        this.newContract.giaDichVuGoc = Number(segment.price || 0)
++      } else {
++        this.newContract.giaDichVuGoc = 0
++      }
+       this.updateGiaSauGiam()
+     },
+
+     updateGiaSauGiam() {
+       this.newContract.giaSauGiam = Math.max(0, this.newContract.giaDichVuGoc - (this.newContract.phiGiam || 0))
+       this.updateFirstPayment()
+     },
+
+     updateFirstPayment() {
+       // Handled by computed property
+     },
+
++    clearSelectedCustomer() {
++      this.selectedCustomer = null
++      this.customerSearch = ''
++      this.customerSearchResults = []
++      this.customerSearchError = ''
++      this.customerSearchLoading = false
++      this.newContract.maKhachHang = ''
++      this.newContract.tenKhachHang = ''
++    },
++
++    async fetchCustomerSearch(keyword) {
++      const k = (keyword || '').trim()
++      if (!k) {
++        this.customerSearchResults = []
++        this.customerSearchError = ''
++        return
++      }
++
++      if (k === this.lastCustomerKeyword) return
++      this.lastCustomerKeyword = k
++
++      this.customerSearchLoading = true
++      this.customerSearchError = ''
++
++      try {
++        const qs = new URLSearchParams({ keyword: k }).toString()
++        const res = await api.get(`/customer-crm/admin/lich-hen/search-customer?${qs}`)
++        const data = await res.data
++        this.customerSearchResults = (Array.isArray(data) ? data : []).slice(0, 8).map((x) => ({
++          id: x.customerId,
++          name: x.customerName,
++          phone: x.phone,
++          raw: x
++        }))
++      } catch (e) {
++        this.customerSearchResults = []
++        this.customerSearchError = 'Không tìm thấy hoặc lỗi tải dữ liệu.'
++      } finally {
++        this.customerSearchLoading = false
++      }
++    },
++
++    clearCustomerSearchTimer() {
++      if (this.customerSearchTimer) clearTimeout(this.customerSearchTimer)
++      this.customerSearchTimer = null
++    },
++
++    selectCustomer(customer) {
++      this.suppressCustomerSearch = true
++      this.clearCustomerSearchTimer()
++      this.customerSearchLoading = false
++      this.customerSearchError = ''
++      this.customerSearchResults = []
++
++      this.selectedCustomer = customer
++      this.customerSearch = customer.name
++      this.newContract.maKhachHang = customer.id
++      this.newContract.tenKhachHang = customer.name
++
++      setTimeout(() => {
++        this.suppressCustomerSearch = false
++      }, 0)
++    },
++
+     saveContract() {
+-      if (!this.newContract.maKhachHang || !this.newContract.tenKhachHang) {
+-        this.showToastMessage('error', 'Thiếu dữ liệu', 'Bạn cần nhập Mã KH và Tên KH.')
++      if (!this.selectedCustomer) {
++        this.showToastMessage('error', 'Thiếu dữ liệu', 'Bạn cần chọn khách hàng từ danh sách.')
+         return
+       }
+
+       if (!this.newContract.tenDichVu) {
+         this.showToastMessage('error', 'Thiếu dữ liệu', 'Bạn cần chọn Dịch vụ.')
+         return
+       }
+
++      if (!this.newContract.giaTriTaiSan) {
++        this.showToastMessage('error', 'Thiếu dữ liệu', 'Bạn cần nhập giá trị tài sản.')
++        return
++      }
++
++      if (!this.newContract.giaDichVuGoc) {
++        this.showToastMessage('error', 'Thiếu dữ liệu', 'Giá gốc chưa xác định theo phân khúc.')
++        return
++      }
++
+       const contract = {
+         id: crypto.randomUUID(),
+         maHopDong: this.newContract.maHopDong,
+         maKhachHang: this.newContract.maKhachHang,
+         tenKhachHang: this.newContract.tenKhachHang,
+         tenDichVu: this.newContract.tenDichVu,
++        serviceId: this.newContract.serviceId,
++        giaTriTaiSan: this.newContract.giaTriTaiSan,
+         giaDichVuGoc: this.newContract.giaDichVuGoc,
+         phiGiam: this.newContract.phiGiam || 0,
+         giaSauGiam: this.newContract.giaSauGiam,
+         trangThaiHopDong: this.newContract.trangThaiHopDong,
+         ngayKy: this.newContract.ngayKy || this.todayISO(),
+         ngayTao: new Date().toLocaleString('vi-VN'),
+         dotDongTien: [],
+         hoanTien: [],
+         dieuChinh: [],
+         initPlan: this.newContract.initPlan,
+         tiLeCoc: this.newContract.initPlan === 'COC' ? (this.newContract.tiLeCoc || 0) : null
+       }
+
+       // Add initial payment
+       if (this.firstPaymentAmount > 0) {
+         contract.dotDongTien.push({
+           id: crypto.randomUUID(),
+           soTienDong: this.firstPaymentAmount,
+           hinhThucThanhToan: this.newContract.firstMethod,
+           ngayDongTien: contract.ngayKy,
+           ghiChu: this.newContract.initPlan === 'FULL' ?
+               'Thanh toán đủ (tạo khi lập HĐ)' :
+               `Cọc ${this.newContract.tiLeCoc || 0}% (tạo khi lập HĐ)`,
+           nguoiGhiNhan: 'demo_admin',
+           ngayTao: new Date().toLocaleString('vi-VN')
+@@ -1246,68 +1560,83 @@ export default {
+     },
+
+     // Delete management
+     openDelete(contract) {
+       this.currentContract = contract
+       this.openModal('modalDelete')
+     },
+
+     confirmDelete() {
+       this.contracts = this.contracts.filter(c => c.id !== this.currentContract.id)
+       this.showToastMessage('success', 'Đã xóa', `Đã xóa ${this.currentContract.maHopDong}`)
+       this.closeModal('modalDelete')
+     },
+
+     // Filters
+     resetFilters() {
+       this.searchQuery = ''
+       this.filterService = ''
+       this.filterStatus = ''
+       this.showToastMessage('info', 'Đã reset lọc', 'Hiển thị toàn bộ hợp đồng.')
+     },
+
+     // Seed data
+     seedMock() {
+       const names = ['Nguyễn Văn A', 'Trần Thị B', 'Lê Hoàng C', 'Phạm Minh D', 'Võ Thúy E', 'Đặng Quốc F']
++      const serviceList = this.serviceOptions
++
++      if (!serviceList.length) {
++        this.showToastMessage('error', 'Thiếu dữ liệu', 'Chưa tải được danh sách dịch vụ.')
++        return
++      }
+
+       for (let i = 0; i < 5; i++) {
+-        const tenDv = this.SERVICES[this.randInt(0, this.SERVICES.length - 1)].name
+-        const giaGoc = this.randPriceForService(tenDv)
++        const service = serviceList[this.randInt(0, serviceList.length - 1)]
++        const segments = this.getSegmentsByService(service.id || service.name)
++        const pickedSegment = segments.length ? segments[this.randInt(0, segments.length - 1)] : null
++        const segmentMin = pickedSegment ? Number(pickedSegment.min) : 0
++        const segmentMax = pickedSegment ? Number(pickedSegment.max) : 0
++        const assetValue = pickedSegment
++            ? this.randInt(segmentMin, Math.max(segmentMin + 1, segmentMax - 1))
++            : this.randInt(500000000, 5000000000)
++        const giaGoc = pickedSegment ? Number(pickedSegment.price || 0) : this.randPriceForService(service.name)
+         const phiGiam = [0, 200000, 500000, 1000000, 1500000][this.randInt(0, 4)]
+         const giaSau = Math.max(0, giaGoc - phiGiam)
+
+         const st = this.ENUM_STATUS[this.randInt(0, 2)]
+         const ky = new Date()
+         ky.setDate(ky.getDate() - this.randInt(0, 25))
+         const ngayKy = ky.toISOString().slice(0, 10)
+
+         const contract = {
+           id: crypto.randomUUID(),
+           maHopDong: this.genContractCode(),
+           maKhachHang: this.randInt(1001, 2000),
+           tenKhachHang: names[this.randInt(0, names.length - 1)],
+-          tenDichVu: tenDv,
++          tenDichVu: service.name,
++          serviceId: service.id || service.name,
++          giaTriTaiSan: assetValue,
+           giaDichVuGoc: giaGoc,
+           phiGiam,
+           giaSauGiam: giaSau,
+           trangThaiHopDong: st,
+           ngayKy,
+           ngayTao: new Date().toLocaleString('vi-VN'),
+           dotDongTien: [],
+           hoanTien: [],
+           dieuChinh: [],
+           initPlan: 'COC',
+           tiLeCoc: 30
+         }
+
+         // Initial deposit
+         const deposit = Math.round(giaSau * 0.3)
+         contract.dotDongTien.push({
+           id: crypto.randomUUID(),
+           soTienDong: deposit,
+           hinhThucThanhToan: this.ENUM_PAY[this.randInt(0, 3)],
+           ngayDongTien: ngayKy,
+           ghiChu: 'Cọc 30% (mock)',
+           nguoiGhiNhan: 'demo_admin',
+           ngayTao: new Date().toLocaleString('vi-VN')
+         })
+
+@@ -1338,94 +1667,104 @@ export default {
+         }
+
+         // Random adjustment (25% chance)
+         if (Math.random() < 0.25) {
+           const sign = Math.random() < 0.55 ? -1 : 1
+           const amt = sign * this.randInt(200000, 1200000)
+           const type = sign < 0 ? 'GIAM_GIA' : (Math.random() < 0.5 ? 'PHU_THU' : 'PHAT')
+
+           contract.dieuChinh.push({
+             id: crypto.randomUUID(),
+             soTienDieuChinh: amt,
+             loaiDieuChinh: type,
+             lyDo: sign < 0 ? 'Giảm thêm (mock)' : 'Phụ thu/Phạt (mock)',
+             ngayTao: new Date().toLocaleString('vi-VN')
+           })
+         }
+
+         this.contracts.unshift(contract)
+       }
+
+       this.showToastMessage('success', 'Mock dữ liệu', 'Đã tạo thêm 5 hợp đồng mẫu.')
+     },
+
+     // Initialize sample data
+     init3Samples() {
++      const serviceList = this.serviceOptions
++      const findService = (name) => serviceList.find(s => s.name === name) || serviceList[0] || null
+       const base = [
+         {
+           maKhachHang: 1001,
+           tenKhachHang: 'Nguyễn Văn A',
+           tenDichVu: 'Thiết kế UI Website',
+           phiGiam: 1000000,
+           trangThaiHopDong: 'DANG_HIEU_LUC',
+           ngayKy: this.todayISO(),
+           initPlan: 'COC',
+           tiLeCoc: 30
+         },
+         {
+           maKhachHang: 1020,
+           tenKhachHang: 'Trần Thị B',
+           tenDichVu: 'SEO & Tối ưu Onpage',
+           phiGiam: 0,
+           trangThaiHopDong: 'HOAN_TAT',
+           ngayKy: this.todayISO(),
+           initPlan: 'FULL',
+           tiLeCoc: null
+         },
+         {
+           maKhachHang: 1108,
+           tenKhachHang: 'Lê Hoàng C',
+           tenDichVu: 'Branding / Bộ nhận diện',
+           phiGiam: 1500000,
+           trangThaiHopDong: 'DANG_HIEU_LUC',
+           ngayKy: this.todayISO(),
+           initPlan: 'COC',
+           tiLeCoc: 40
+         }
+       ]
+
+       this.contracts = base.map((x) => {
+-        const giaGoc = this.randPriceForService(x.tenDichVu)
++        const service = findService(x.tenDichVu)
++        const segments = service ? this.getSegmentsByService(service.id || service.name) : []
++        const pickedSegment = segments.length ? segments[0] : null
++        const assetValue = pickedSegment
++            ? Math.round((Number(pickedSegment.min) + Number(pickedSegment.max)) / 2)
++            : this.randInt(500000000, 5000000000)
++        const giaGoc = pickedSegment ? Number(pickedSegment.price || 0) : this.randPriceForService(x.tenDichVu)
+         const giaSau = Math.max(0, giaGoc - (x.phiGiam || 0))
+         const code = this.genContractCode()
+
+         const contract = {
+           id: crypto.randomUUID(),
+           maHopDong: code,
+           maKhachHang: x.maKhachHang,
+           tenKhachHang: x.tenKhachHang,
+-          tenDichVu: x.tenDichVu,
++          tenDichVu: service?.name || x.tenDichVu,
++          serviceId: service?.id || service?.name || null,
++          giaTriTaiSan: assetValue,
+           giaDichVuGoc: giaGoc,
+           phiGiam: x.phiGiam || 0,
+           giaSauGiam: giaSau,
+           trangThaiHopDong: x.trangThaiHopDong,
+           ngayKy: x.ngayKy,
+           ngayTao: new Date().toLocaleString('vi-VN'),
+           dotDongTien: [],
+           hoanTien: [],
+           dieuChinh: [],
+           initPlan: x.initPlan,
+           tiLeCoc: x.tiLeCoc
+         }
+
+         // Initial payment
+         let amount = 0
+         if (x.initPlan === 'FULL') amount = giaSau
+         else amount = Math.round(giaSau * ((x.tiLeCoc || 30) / 100))
+
+         contract.dotDongTien.push({
+           id: crypto.randomUUID(),
+           soTienDong: amount,
+           hinhThucThanhToan: 'CHUYEN_KHOAN',
+           ngayDongTien: x.ngayKy,
+           ghiChu: x.initPlan === 'FULL'
+               ? 'Thanh toán đủ (mẫu)'
+@@ -1433,51 +1772,52 @@ export default {
+           nguoiGhiNhan: 'demo_admin',
+           ngayTao: new Date().toLocaleString('vi-VN')
+         })
+
+         // Add extra payment if HOAN_TAT and not FULL
+         if (x.trangThaiHopDong === 'HOAN_TAT' && x.initPlan !== 'FULL') {
+           const remain = Math.max(0, giaSau - amount)
+           if (remain > 0) {
+             contract.dotDongTien.push({
+               id: crypto.randomUUID(),
+               soTienDong: remain,
+               hinhThucThanhToan: 'CHUYEN_KHOAN',
+               ngayDongTien: x.ngayKy,
+               ghiChu: 'Đóng nốt (mẫu)',
+               nguoiGhiNhan: 'demo_admin',
+               ngayTao: new Date().toLocaleString('vi-VN')
+             })
+           }
+         }
+
+         return contract
+       })
+     }
+   },
+
+-  mounted() {
++  async mounted() {
++    await Promise.all([this.fetchServices(), this.fetchSegments()])
+     this.init3Samples()
+     this.resetContractForm()
    }
  }
+ </script>
 
+ <style scoped>
+ /* CSS styles from original file - với chỉnh sửa cho 5 nút thao tác */
+ .ui-page{
+   --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+   --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+   --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+   --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+   --danger-gradient: linear-gradient(135deg, #ff5858 0%, #f09819 100%);
+   --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+   --dark-gradient: linear-gradient(135deg, #141e30 0%, #243b55 100%);
+   --light-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
 
- /* Service form modal (create/edit) */
- const serviceForm = reactive({
-   id: null,
-   name: "",
-   color: "#667eea",
-   description: "",
-+  active: true,
-   segments: []
- });
- const segErrors = ref([]);
-
- /* Segment edit modal */
- const segmentForm = reactive({
-   serviceId: null,
-   segmentId: null,
-   minText: "",
-   maxText: "",
-   priceText: ""
- });
- const segmentError = ref("");
-
- /* ===== TOAST ===== */
- const toasts = ref([]);
- function toast(type, message) {
-   const id = `${Date.now()}-${Math.random()}`;
-   toasts.value.push({ id, type, message });
-   setTimeout(() => (toasts.value = toasts.value.filter(t => t.id !== id)), 2600);
+   --primary-color: #667eea;
+   --secondary-color: #f093fb;
+   --success-color: #43e97b;
+   --warning-color: #fa709a;
+   --danger-color: #ff5858;
+   --info-color: #4facfe;
+   --dark-color: #141e30;
+@@ -2066,75 +2406,172 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
+ .modal-b{
+   padding: 12px;
+   overflow: auto;
+ }
+ .modal-f{
+   padding: 12px;
+   display:flex;
+   justify-content:flex-end;
+   gap:8px;
+   border-top: 1px solid rgba(20,30,48,.10);
+   background: rgba(20,30,48,.02);
+   flex-wrap: wrap;
+ }
+ @media (max-width: 520px){
+   .modal-f .btn{ width: 100%; justify-content:center; }
  }
 
- /* ===== HELPERS ===== */
- function pad3(n) { return String(n).padStart(3, "0"); }
-
-@@ -801,75 +813,95 @@ function onAssetMoneyFocus() {
+ /* =========================
+    FORM CARDS
+ ========================= */
+ .form-grid{
+   display:grid;
+   grid-template-columns: 1.15fr 1fr;
+   gap: 12px;
  }
- function onAssetMoneyBlur() {
-   const n = parseFormattedNumber(assetValueText.value);
-   assetValueText.value = n ? formatNumberWithDots(n) : "";
++.form-grid.form-grid--contract{
++  grid-template-columns: 1.05fr 1.2fr;
++  align-items: start;
++}
+ @media (max-width: 980px){ .form-grid{ grid-template-columns: 1fr; } }
+
+ .card{
+   border: 1px solid rgba(20,30,48,.12);
+   border-radius: 16px;
+   background: rgba(255,255,255,.86);
+   box-shadow: var(--sh2);
+   overflow:hidden;
  }
-
- /* ===== SERVICES ACTIONS ===== */
- function openServiceDetail(id) {
-   detailServiceId.value = id
-   fetchServiceDetail(id)
+ .card-h{
+   padding: 10px 12px;
+   display:flex;
+   align-items:center;
+   gap:10px;
+   font-weight: 950;
+   font-size: 13px;
+   border-bottom: 1px solid rgba(20,30,48,.10);
+   background: rgba(20,30,48,.03);
  }
-
- function closeServiceDetail() {
-   serviceDetailOpen.value = false;
-   detailService.value = null;
-   segmentEditOpen.value = false;
- }
-
-
-
- function openCreateService() {
-   serviceForm.id = null;
-   serviceForm.name = "";
-   serviceForm.color = "#667eea";
-   serviceForm.description = "";
-+  serviceForm.active = true;
-   serviceForm.segments = [
-     { _key: `${Date.now()}-${Math.random()}`, minText: formatNumberWithDots(1000000), maxText: formatNumberWithDots(5000000), priceText: formatNumberWithDots(8000000) }
-   ];
-   segErrors.value = new Array(serviceForm.segments.length).fill("");
-   serviceEditOpen.value = true;
- }
-
--function openEditService(id) {
--  const s = services.value.find(x => x.id === id);
--  if (!s) return;
--  serviceForm.id = s.id;
--  serviceForm.name = s.name;
--  serviceForm.color = s.color;
--  serviceForm.description = s.description || "";
--  serviceForm.segments = (s.priceSegments || []).map(seg => ({
--    _key: `${Date.now()}-${Math.random()}`,
--    minText: formatNumberWithDots(seg.min),
--    maxText: formatNumberWithDots(seg.max),
--    priceText: formatNumberWithDots(seg.price)
--  }));
-+async function openEditService(id) {
-+  const fallback = services.value.find(x => x.id === id);
-+  if (!fallback) return;
-+  serviceEditOpen.value = true;
-+  try {
-+    const res = await api.get(`/dich-vu-thg/admin/${id}`);
-+    const s = res.data || fallback;
-+    serviceForm.id = s.id;
-+    serviceForm.name = s.name;
-+    serviceForm.color = s.color;
-+    serviceForm.description = s.description || "";
-+    serviceForm.active = s.active ?? true;
-+    serviceForm.segments = (s.priceSegments || []).map(seg => ({
-+      _key: `${Date.now()}-${Math.random()}`,
-+      minText: formatNumberWithDots(seg.min),
-+      maxText: formatNumberWithDots(seg.max),
-+      priceText: formatNumberWithDots(seg.price)
-+    }));
-+  } catch (e) {
-+    console.error("❌ Lỗi fetch service detail", e);
-+    toast("error", "Không tải được chi tiết dịch vụ, dùng dữ liệu danh sách.");
-+    serviceForm.id = fallback.id;
-+    serviceForm.name = fallback.name;
-+    serviceForm.color = fallback.color;
-+    serviceForm.description = fallback.description || "";
-+    serviceForm.active = fallback.active ?? true;
-+    serviceForm.segments = (fallback.priceSegments || []).map(seg => ({
-+      _key: `${Date.now()}-${Math.random()}`,
-+      minText: formatNumberWithDots(seg.min),
-+      maxText: formatNumberWithDots(seg.max),
-+      priceText: formatNumberWithDots(seg.price)
-+    }));
-+  }
-   if (!serviceForm.segments.length) {
-     serviceForm.segments = [{ _key: `${Date.now()}-${Math.random()}`, minText: formatNumberWithDots(1000000), maxText: formatNumberWithDots(5000000), priceText: formatNumberWithDots(8000000) }];
-   }
-   segErrors.value = new Array(serviceForm.segments.length).fill("");
--  serviceEditOpen.value = true;
- }
-
- function closeServiceEdit() {
-   serviceEditOpen.value = false;
- }
-
- function addServiceSegment() {
-   serviceForm.segments.push({ _key: `${Date.now()}-${Math.random()}`, minText: formatNumberWithDots(1000000), maxText: formatNumberWithDots(5000000), priceText: formatNumberWithDots(8000000) });
-   segErrors.value.push("");
- }
-
- function removeServiceSegment(idx) {
-   if (serviceForm.segments.length <= 1) return toast("error", "Dịch vụ phải có ít nhất 1 phân khúc.");
-   serviceForm.segments.splice(idx, 1);
-   segErrors.value.splice(idx, 1);
- }
-
- function normalizeServiceSegments() {
-   const parsed = serviceForm.segments
-       .map(s => ({
-         _key: s._key,
-         min: parseFormattedNumber(s.minText),
-         max: parseFormattedNumber(s.maxText),
-         price: parseFormattedNumber(s.priceText)
-       }))
-@@ -933,60 +965,62 @@ function validateServiceForm() {
-   if (segErrors.value.some(Boolean)) {
-     toast("error", "Vui lòng sửa lỗi phân khúc trước khi lưu.");
-     return false;
-   }
-   return true;
- }
-
- function saveServiceFromModal() {
-   if (!validateServiceForm()) return;
-
-   const normalizedSegments = serviceForm.segments.map((s, i) => ({
-     id: i + 1,
-     min: parseFormattedNumber(s.minText),
-     max: parseFormattedNumber(s.maxText),
-     price: parseFormattedNumber(s.priceText)
-   }));
-
-   if (serviceForm.id) {
-     const idx = services.value.findIndex(x => x.id === serviceForm.id);
-     if (idx === -1) return toast("error", "Không tìm thấy dịch vụ.");
-     services.value[idx] = {
-       ...services.value[idx],
-       name: serviceForm.name.trim(),
-       color: serviceForm.color || "#667eea",
-       description: serviceForm.description.trim(),
-+      active: serviceForm.active,
-       priceSegments: normalizedSegments
-     };
-     toast("success", "Đã cập nhật dịch vụ.");
-   } else {
-     const newId = services.value.length ? Math.max(...services.value.map(s => s.id)) + 1 : 1;
-     services.value.unshift({
-       id: newId,
-       name: serviceForm.name.trim(),
-       color: serviceForm.color || "#667eea",
-       description: serviceForm.description.trim(),
-+      active: serviceForm.active,
-       priceSegments: normalizedSegments
-     });
-     toast("success", "Đã thêm dịch vụ mới.");
-   }
-
-   serviceEditOpen.value = false;
- }
-
- function removeService(id) {
-   if (!confirm("Bạn có chắc muốn xóa dịch vụ này?")) return;
-   services.value = services.value.filter(s => s.id !== id);
-   toast("success", "Đã xóa dịch vụ.");
-   if (detailServiceId.value === id) closeServiceDetail();
-   if (serviceForm.id === id) closeServiceEdit();
- }
-
- /* ===== SEGMENTS ACTIONS ===== */
- function removeSegment(serviceId, segmentId) {
-   const sIdx = services.value.findIndex(s => s.id === serviceId);
-   if (sIdx === -1) return;
-
-   if (!confirm("Bạn có chắc muốn xóa phân khúc này?")) return;
-
-   const segs = services.value[sIdx].priceSegments.filter(x => x.id !== segmentId);
-   if (segs.length === 0) return toast("error", "Dịch vụ phải có ít nhất 1 phân khúc.");
-@@ -1811,50 +1845,97 @@ watch(serviceQuery, async () => {
+ .card-h i{
    width:28px; height:28px;
    border-radius: 12px;
    display:grid; place-items:center;
-   background: rgba(15,23,42,.06);
+   background: rgba(20,30,48,.07);
  }
-
- .svc3-field{ display:grid; gap:6px; margin: 10px 12px; }
- .svc3-field label{
-   font-size: 12px;
-   font-weight: 650;
-   color: rgba(11,18,32,.80);
++.card-h .icon-tone{
++  color:#fff;
++  box-shadow: 0 10px 18px rgba(15,23,42,.15);
++}
++.icon-tone.tone-sky{ background: linear-gradient(135deg, #38bdf8, #818cf8); }
++.icon-tone.tone-lilac{ background: linear-gradient(135deg, #a78bfa, #f472b6); }
++.icon-tone.tone-rose{ background: linear-gradient(135deg, #fb7185, #f97316); }
++.icon-tone.tone-emerald{ background: linear-gradient(135deg, #22c55e, #14b8a6); }
++.icon-tone.tone-amber{ background: linear-gradient(135deg, #f59e0b, #f97316); }
++.icon-tone.tone-mint{ background: linear-gradient(135deg, #34d399, #06b6d4); }
++.icon-tone.tone-indigo{ background: linear-gradient(135deg, #6366f1, #2563eb); }
++.icon-tone.tone-teal{ background: linear-gradient(135deg, #14b8a6, #0ea5e9); }
++.icon-tone.tone-orange{ background: linear-gradient(135deg, #f97316, #fb7185); }
++.icon-tone.tone-pink{ background: linear-gradient(135deg, #ec4899, #f472b6); }
++.icon-tone.tone-purple{ background: linear-gradient(135deg, #8b5cf6, #6366f1); }
++.icon-tone.tone-gold{ background: linear-gradient(135deg, #facc15, #f59e0b); }
++.icon-tone.tone-cyan{ background: linear-gradient(135deg, #22d3ee, #38bdf8); }
++.icon-tone.tone-forest{ background: linear-gradient(135deg, #16a34a, #059669); }
++
++.segment-hint{
++  margin: 4px 12px 12px;
++  padding: 8px 10px;
++  border-radius: 12px;
++  background: rgba(79,172,254,.08);
++  border: 1px dashed rgba(79,172,254,.35);
++  font-size: 12px;
++  color: rgba(11,18,32,.78);
++  display:flex;
++  gap:8px;
++  align-items:center;
++}
++.segment-hint i{ color: #4facfe; }
++
++.customer-search{ position: relative; }
++.search-results{
++  margin-top: 8px;
++  border-radius: 12px;
++  border: 1px solid rgba(20,30,48,.12);
++  background: #fff;
++  box-shadow: 0 14px 26px rgba(15,23,42,.08);
++  max-height: 220px;
++  overflow: auto;
++}
++.search-results.empty{ background: rgba(20,30,48,.02); }
++.customer-result{
++  display:flex;
++  gap:10px;
++  align-items:center;
++  padding: 8px 10px;
++  cursor:pointer;
++  transition: var(--t);
++}
++.customer-result:hover{ background: rgba(102,126,234,.08); }
++.customer-result .cr-main{ flex: 1; }
++.customer-avatar{
++  width: 38px;
++  height: 38px;
++  border-radius: 12px;
++  display:grid;
++  place-items:center;
++  font-weight: 800;
++  color:#fff;
++  background: linear-gradient(135deg, #667eea, #764ba2);
++  flex: 0 0 auto;
++}
++.customer-avatar.sm{ width: 32px; height: 32px; font-size: 12px; }
++.customer-name{ font-weight: 800; color:#0b1220; }
++.customer-phone{ font-size: 12px; color:#159b7d; font-weight: 700; }
++.customer-phone i{ color:#22c55e; }
++.selected-customer{
++  margin-top: 10px;
++  padding: 10px 12px;
++  border-radius: 12px;
++  border: 1px dashed rgba(102,126,234,.35);
++  background: rgba(102,126,234,.08);
++  display:flex;
++  gap:10px;
++  align-items:center;
++}
++.clear-btn{
++  margin-left: auto;
++  width: 32px;
++  height: 32px;
++  border-radius: 10px;
++  border: none;
++  background: rgba(255,88,88,.12);
++  color: #ff5858;
++  display:grid;
++  place-items:center;
++  cursor:pointer;
++  transition: var(--t);
++}
++.clear-btn:hover{ transform: translateY(-1px); background: rgba(255,88,88,.2); }
+ .field{ display:grid; gap:6px; margin: 10px 12px; }
+ .field label{
+   font-size: 14px;
+   font-weight: 600;
+   color: rgba(11,18,32,.82);
    display:flex; align-items:center; gap:8px;
  }
- .svc3-field input,
- .svc3-field textarea{
-   border: 1px solid rgba(15,23,42,.12);
+ .field input, .field select, .field textarea{
+   border: 1px solid rgba(20,30,48,.14);
    border-radius: 12px;
    background: #fff;
    padding: 9px 10px;
-   font-size: 13px;
-   font-weight: 550;
+   font-size: 14px;
+   font-weight: 500;
    outline:none;
    transition: var(--t);
-   color: #000;
+   color:#000;
+   width: 100%;
+   min-width: 0;
  }
-+.svc3-switch{
-+  display:inline-flex;
-+  align-items:center;
-+  gap:10px;
-+  cursor:pointer;
-+  user-select:none;
-+}
-+.svc3-switch input{
-+  position:absolute;
-+  opacity:0;
-+  pointer-events:none;
-+}
-+.svc3-slider{
-+  width:46px;
-+  height:26px;
-+  border-radius:999px;
-+  background: rgba(15,23,42,.2);
-+  position:relative;
-+  transition: var(--t);
-+  box-shadow: inset 0 2px 6px rgba(15,23,42,.2);
-+}
-+.svc3-slider::after{
-+  content:"";
-+  position:absolute;
-+  top:3px;
-+  left:3px;
-+  width:20px;
-+  height:20px;
-+  border-radius:50%;
-+  background:#fff;
-+  box-shadow: 0 6px 12px rgba(0,0,0,.18);
-+  transition: var(--t);
-+}
-+.svc3-switch input:checked + .svc3-slider{
-+  background: linear-gradient(135deg,#22c55e 0%, #16a34a 100%);
-+}
-+.svc3-switch input:checked + .svc3-slider::after{
-+  transform: translateX(20px);
-+}
-+.svc3-switch-text{
-+  font-weight: 650;
-+  color: rgba(15,23,42,.7);
-+  transition: var(--t);
-+}
-+.svc3-switch-text.on{
-+  color: #0f172a;
-+}
- .svc3-field input:focus,
- .svc3-field textarea:focus{
-   border-color: rgba(102,126,234,.45);
-   box-shadow: 0 0 0 4px rgba(102,126,234,.12);
+ .field textarea{ min-height: 88px; resize: vertical; }
+ .field input:focus, .field select:focus, .field textarea:focus{
+   border-color: rgba(79,172,254,.55);
+   box-shadow: 0 0 0 4px rgba(79,172,254,.14);
  }
- .svc3-colorpick{ display:flex; align-items:center; gap:10px; }
- .svc3-colorinput{
-   width:44px; height:34px;
-   border-radius: 12px;
-   border: 2px solid #fff;
-   padding:0;
-   background: transparent;
-   box-shadow: 0 10px 18px rgba(0,0,0,.10);
+@@ -2192,26 +2629,26 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
+ }
+ .toast{
+   width: 340px;
+   border-radius: 16px;
+   padding: 10px 12px;
+   display:flex;
+   gap:10px;
+   color:#fff;
+   border: 1px solid rgba(255,255,255,.22);
+   box-shadow: 0 18px 34px rgba(0,0,0,.22);
+   animation: in .18s ease;
+   overflow:hidden;
+ }
+ @keyframes in{ from{ opacity:0; transform: translateX(14px);} to{ opacity:1; transform: translateX(0);} }
+ .toast.success{ background: var(--success-gradient); }
+ .toast.error{ background: var(--danger-gradient); }
+ .toast.info{ background: var(--info-gradient); }
+ .toast .tt{ font-weight: 950; font-size: 12px; }
+ .toast .tx{ margin-top: 2px; font-size: 12px; opacity: .92; white-space: nowrap; overflow:hidden; text-overflow: ellipsis; }
+
+ @media (max-width: 640px){
+   .toast{ width: calc(100vw - 28px); }
  }
 
- .svc3-note{
-   margin: 10px 12px 0;
-   padding: 10px;
-   border-radius: 14px;
-   border: 1px solid rgba(102,126,234,.16);
-   background: rgba(102,126,234,.06);
-   font-size: 12px;
-   color: rgba(11,18,32,.78);
- }
-
+ .hidden{ display:none !important; }
+-</style>
+\ No newline at end of file
++</style>
