@@ -1,345 +1,389 @@
 diff --git a/src/components/dich-vu/Dich-vu-setting.vue b/src/components/dich-vu/Dich-vu-setting.vue
-index c03cadeb4c7d0a9cde45724215654da8219167ff..3311e090e9ebda1fe614a929a869fd71b43eb93e 100644
+index bc3c486ec6b3c266b8f2b4fbd62590eeb7a3efcc..d9512e6b95bdc74563fb97ca55c90cf528edc731 100644
 --- a/src/components/dich-vu/Dich-vu-setting.vue
 +++ b/src/components/dich-vu/Dich-vu-setting.vue
-@@ -274,51 +274,51 @@
-                   <td class="text-align-center">
-                     <div class="svc3-actions">
-                       <button class="svc3-icon warn" title="Sửa phân khúc" @click="openEditSegment(seg.id, seg.id)">
-                         <i class="fa-solid fa-pen"></i>
-                       </button>
-                       <button class="svc3-icon danger" title="Xóa phân khúc" @click="removeSegment(seg.id, seg.id)">
-                         <i class="fa-solid fa-trash"></i>
-                       </button>
-                     </div>
-                   </td>
-                 </tr>
-                 </tbody>
-               </table>
-
-               <div class="svc3-footnote">
-                 Tip: Nhập “Giá trị tài sản” để auto lọc + highlight phân khúc phù hợp.
-               </div>
-             </div>
-           </div>
-         </section>
-       </div>
-     </div>
-
-     <!-- SERVICE DETAIL MODAL -->
-     <div v-if="serviceDetailOpen" class="svc3-modal" @click.self="closeServiceDetail()">
--      <div class="svc3-modal-card">
-+      <div class="svc3-modal-card detail">
-         <div class="svc3-modal-h">
-           <div class="svc3-modal-title">
-             <i class="fa-solid fa-circle-info"></i>
-             <span>Chi tiết dịch vụ</span>
-           </div>
-           <button class="svc3-x" @click="closeServiceDetail()"><i class="fa-solid fa-xmark"></i></button>
+@@ -402,50 +402,61 @@
          </div>
 
-         <div class="svc3-modal-b" v-if="detailService">
-           <div class="svc3-detail-head">
-             <div class="svc3-svc">
-               <div class="svc3-dot big" :style="{background:detailService.color}"></div>
-               <div class="min-w-0">
-                 <div class="svc3-detail-name flex items-center gap-2">
-                   <span>{{ detailService.name }}</span>
+         <div class="svc3-modal-b">
+           <div class="svc3-form-grid">
+             <div class="svc3-form-card">
+               <div class="svc3-form-title"><i class="fa-solid fa-screwdriver-wrench"></i><span>Thông tin</span></div>
 
-                   <span
-                       class="svc3-status"
-                       :class="detailService.active ? 'on' : 'off'"
-                   >
-                   <i
-                       class="fa-solid"
-                       :class="detailService.active ? 'fa-circle-check' : 'fa-circle-pause'"
-                   ></i>
-                   {{ detailService.active ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
-@@ -344,51 +344,51 @@
-             </div>
-           </div>
+               <div class="svc3-field">
+                 <label><i class="fa-solid fa-tag"></i> Tên dịch vụ *</label>
+                 <input v-model.trim="serviceForm.name" type="text" placeholder="Nhập tên dịch vụ..." />
+               </div>
 
-           <div class="svc3-box">
-             <div class="svc3-box-k">
-               <i class="fa-solid fa-file-lines"></i><span>Mô tả</span>
-             </div>
-             <div class="svc3-box-v">{{ detailService.description || "—" }}</div>
-           </div>
-
-           <div class="svc3-box mt-3">
-             <div class="svc3-box-k">
-               <i class="fa-solid fa-tags"></i><span>Phân khúc</span>
-             </div>
-
-             <div class="svc3-seg-grid" v-if="detailService.priceSegments.length">
-               <div v-for="seg in detailService.priceSegments" :key="seg.id" class="svc3-seg-card">
-                 <div class="svc3-seg-h">
-                   <div class="t"><i class="fa-solid fa-tag"></i><span>Phân khúc {{ formatMoneyShort(seg.min) }} đến nhỏ hơn {{ formatMoneyShort(seg.max)}}</span></div>
-                 </div>
-                 <div class="svc3-seg-b">
-                   <div class="row">
-                     <b>{{ formatCurrency(seg.min) }} → {{ formatCurrency(seg.max) }}</b>
-                   </div>
-                   <div class="row">
--                    <span class="muted">Giá : <b class="p3" style="color: #0a2463">{{ formatCurrency(seg.price) }}</b></span>
-+                    <span class="muted">Giá : <b class="p3 svc3-price-strong">{{ formatCurrency(seg.price) }}</b></span>
-                   </div>
+               <div class="svc3-field">
+                 <label><i class="fa-solid fa-palette"></i> Màu phân loại *</label>
+                 <div class="svc3-colorpick">
+                   <input v-model="serviceForm.color" class="svc3-colorinput" type="color" />
+                   <div class="svc3-swatch big" :style="{background: serviceForm.color}"></div>
+                   <span class="mono muted">{{ serviceForm.color }}</span>
                  </div>
                </div>
+
+               <div class="svc3-field">
+                 <label><i class="fa-solid fa-file-lines"></i> Mô tả</label>
+                 <textarea v-model.trim="serviceForm.description" rows="4" placeholder="Mô tả chi tiết..."></textarea>
+               </div>
++
++              <div class="svc3-field">
++                <label><i class="fa-solid fa-toggle-on"></i> Trạng thái</label>
++                <label class="svc3-switch">
++                  <input v-model="serviceForm.active" type="checkbox" />
++                  <span class="svc3-slider"></span>
++                  <span class="svc3-switch-text" :class="{ on: serviceForm.active }">
++                    {{ serviceForm.active ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
++                  </span>
++                </label>
++              </div>
              </div>
 
-             <div v-else class="svc3-empty small">
-               <div class="svc3-empty-title">Chưa có phân khúc</div>
-               <div class="svc3-empty-sub">Bấm Chỉnh sửa để thêm phân khúc.</div>
-             </div>
-           </div>
-         </div>
+             <div class="svc3-form-card">
+               <div class="svc3-form-title flex items-center justify-between gap-2">
+                 <div class="flex items-center gap-2">
+                   <i class="fa-solid fa-tags"></i><span>Phân khúc</span>
+                 </div>
+                 <div class="flex gap-2">
+                   <button class="svc3-btn ghost" @click="normalizeServiceSegments()">
+                     <i class="fa-solid fa-broom"></i><span>Làm sạch</span>
+                   </button>
+                   <button class="svc3-btn primary" @click="addServiceSegment()">
+                     <i class="fa-solid fa-plus"></i><span>Thêm</span>
+                   </button>
+                 </div>
+               </div>
 
-         <div class="svc3-modal-f">
-           <button class="svc3-btn ghost" @click="closeServiceDetail()">
-             <i class="fa-solid fa-xmark"></i><span>Đóng</span>
-           </button>
-           <button v-if="detailService" class="svc3-btn primary" @click="(closeServiceDetail(), openEditService(detailService.id))">
-             <i class="fa-solid fa-pen-to-square"></i><span>Chỉnh sửa</span>
-           </button>
-         </div>
-       </div>
-     </div>
+               <div class="svc3-note">
+                 Quy tắc: <b>[min, max)</b> không được giao nhau và <b>min &lt; max</b>.
+               </div>
 
-     <!-- SERVICE EDIT MODAL (create/edit) -->
-     <div v-if="serviceEditOpen" class="svc3-modal" @click.self="closeServiceEdit()">
-@@ -1569,147 +1569,234 @@ watch(serviceQuery, async () => {
- }
- .svc3-empty-title{ font-weight: 700; font-size: 13px; }
- .svc3-empty-sub{ margin-top: 6px; color: var(--muted); font-size: 12px; }
+               <!-- UPDATED: header columns, no per-row labels -->
+               <div class="svc3-seg-edit-list compact">
+                 <div class="svc3-seg-cols">
+                   <div class="c">Min</div>
+@@ -714,50 +725,51 @@ const computedSegments = computed(() => {
+ const serviceDetailOpen = ref(false);
+ const serviceEditOpen = ref(false);
+ const segmentEditOpen = ref(false);
 
- /* ===== MODAL ===== */
- .svc3-modal{
-   position: fixed;
-   inset: 0;
-   background: rgba(0,0,0,.55);
-   backdrop-filter: blur(6px);
-   z-index: 80;
-   display:flex;
-   align-items:center;
-   justify-content:center;
-   padding: 16px;
+ /* Service detail */
+ const detailServiceId = ref(null);
+ const detailService = ref(null)
+ const fetchServiceDetail = async (id) => {
+   try {
+     const res = await api.get(`/dich-vu-thg/admin/${id}`)
+     detailService.value = res.data
+     serviceDetailOpen.value = true
+   } catch (e) {
+     console.error('❌ Lỗi fetch service detail', e)
+     toast('error', 'Không tải được chi tiết dịch vụ')
+   }
  }
- .svc3-modal-card{
-   width: min(720px, 100%);
-   background: rgba(255,255,255,.96);
-   border: 1px solid rgba(255,255,255,.35);
-   border-radius: 18px;
-   box-shadow: 0 30px 70px rgba(0,0,0,.30);
-   overflow:hidden;
-   animation: pop .16s ease;
+
+
+ /* Service form modal (create/edit) */
+ const serviceForm = reactive({
+   id: null,
+   name: "",
+   color: "#667eea",
+   description: "",
++  active: true,
+   segments: []
+ });
+ const segErrors = ref([]);
+
+ /* Segment edit modal */
+ const segmentForm = reactive({
+   serviceId: null,
+   segmentId: null,
+   minText: "",
+   maxText: "",
+   priceText: ""
+ });
+ const segmentError = ref("");
+
+ /* ===== TOAST ===== */
+ const toasts = ref([]);
+ function toast(type, message) {
+   const id = `${Date.now()}-${Math.random()}`;
+   toasts.value.push({ id, type, message });
+   setTimeout(() => (toasts.value = toasts.value.filter(t => t.id !== id)), 2600);
  }
-+.svc3-modal-card.detail{
-+  background:
-+    radial-gradient(120% 120% at 0% 0%, rgba(255,214,214,.55), transparent 55%),
-+    radial-gradient(120% 120% at 100% 0%, rgba(206,221,255,.55), transparent 60%),
-+    radial-gradient(120% 120% at 100% 100%, rgba(210,255,238,.55), transparent 55%),
-+    linear-gradient(160deg, rgba(255,255,255,.98), rgba(255,255,255,.92));
-+  border: 1px solid rgba(168,185,255,.35);
-+  box-shadow: 0 35px 80px rgba(88,116,255,.22);
-+}
- .svc3-modal-card.wide{ width: min(1020px, 100%); }
- @keyframes pop{ from{ opacity:0; transform: translateY(10px) scale(.98);} to{ opacity:1; transform: translateY(0) scale(1);} }
- .svc3-modal-h{
-   padding: 12px 12px;
-   display:flex;
-   align-items:center;
-   justify-content:space-between;
-   gap:10px;
-   border-bottom: 1px solid rgba(15,23,42,.08);
-   background: rgba(15,23,42,.02);
+
+ /* ===== HELPERS ===== */
+ function pad3(n) { return String(n).padStart(3, "0"); }
+
+@@ -801,75 +813,95 @@ function onAssetMoneyFocus() {
  }
-+.svc3-modal-card.detail .svc3-modal-h{
-+  background: linear-gradient(90deg, rgba(255,224,235,.65), rgba(224,238,255,.65), rgba(226,255,244,.65));
-+  border-bottom: 1px solid rgba(168,185,255,.35);
-+}
- .svc3-modal-title{
-   display:flex;
-   align-items:center;
-   gap:10px;
-   font-weight: 700;
-   font-size: 13px;
+ function onAssetMoneyBlur() {
+   const n = parseFormattedNumber(assetValueText.value);
+   assetValueText.value = n ? formatNumberWithDots(n) : "";
  }
- .svc3-modal-title i{
-   width:30px; height:30px;
+
+ /* ===== SERVICES ACTIONS ===== */
+ function openServiceDetail(id) {
+   detailServiceId.value = id
+   fetchServiceDetail(id)
+ }
+
+ function closeServiceDetail() {
+   serviceDetailOpen.value = false;
+   detailService.value = null;
+   segmentEditOpen.value = false;
+ }
+
+
+
+ function openCreateService() {
+   serviceForm.id = null;
+   serviceForm.name = "";
+   serviceForm.color = "#667eea";
+   serviceForm.description = "";
++  serviceForm.active = true;
+   serviceForm.segments = [
+     { _key: `${Date.now()}-${Math.random()}`, minText: formatNumberWithDots(1000000), maxText: formatNumberWithDots(5000000), priceText: formatNumberWithDots(8000000) }
+   ];
+   segErrors.value = new Array(serviceForm.segments.length).fill("");
+   serviceEditOpen.value = true;
+ }
+
+-function openEditService(id) {
+-  const s = services.value.find(x => x.id === id);
+-  if (!s) return;
+-  serviceForm.id = s.id;
+-  serviceForm.name = s.name;
+-  serviceForm.color = s.color;
+-  serviceForm.description = s.description || "";
+-  serviceForm.segments = (s.priceSegments || []).map(seg => ({
+-    _key: `${Date.now()}-${Math.random()}`,
+-    minText: formatNumberWithDots(seg.min),
+-    maxText: formatNumberWithDots(seg.max),
+-    priceText: formatNumberWithDots(seg.price)
+-  }));
++async function openEditService(id) {
++  const fallback = services.value.find(x => x.id === id);
++  if (!fallback) return;
++  serviceEditOpen.value = true;
++  try {
++    const res = await api.get(`/dich-vu-thg/admin/${id}`);
++    const s = res.data || fallback;
++    serviceForm.id = s.id;
++    serviceForm.name = s.name;
++    serviceForm.color = s.color;
++    serviceForm.description = s.description || "";
++    serviceForm.active = s.active ?? true;
++    serviceForm.segments = (s.priceSegments || []).map(seg => ({
++      _key: `${Date.now()}-${Math.random()}`,
++      minText: formatNumberWithDots(seg.min),
++      maxText: formatNumberWithDots(seg.max),
++      priceText: formatNumberWithDots(seg.price)
++    }));
++  } catch (e) {
++    console.error("❌ Lỗi fetch service detail", e);
++    toast("error", "Không tải được chi tiết dịch vụ, dùng dữ liệu danh sách.");
++    serviceForm.id = fallback.id;
++    serviceForm.name = fallback.name;
++    serviceForm.color = fallback.color;
++    serviceForm.description = fallback.description || "";
++    serviceForm.active = fallback.active ?? true;
++    serviceForm.segments = (fallback.priceSegments || []).map(seg => ({
++      _key: `${Date.now()}-${Math.random()}`,
++      minText: formatNumberWithDots(seg.min),
++      maxText: formatNumberWithDots(seg.max),
++      priceText: formatNumberWithDots(seg.price)
++    }));
++  }
+   if (!serviceForm.segments.length) {
+     serviceForm.segments = [{ _key: `${Date.now()}-${Math.random()}`, minText: formatNumberWithDots(1000000), maxText: formatNumberWithDots(5000000), priceText: formatNumberWithDots(8000000) }];
+   }
+   segErrors.value = new Array(serviceForm.segments.length).fill("");
+-  serviceEditOpen.value = true;
+ }
+
+ function closeServiceEdit() {
+   serviceEditOpen.value = false;
+ }
+
+ function addServiceSegment() {
+   serviceForm.segments.push({ _key: `${Date.now()}-${Math.random()}`, minText: formatNumberWithDots(1000000), maxText: formatNumberWithDots(5000000), priceText: formatNumberWithDots(8000000) });
+   segErrors.value.push("");
+ }
+
+ function removeServiceSegment(idx) {
+   if (serviceForm.segments.length <= 1) return toast("error", "Dịch vụ phải có ít nhất 1 phân khúc.");
+   serviceForm.segments.splice(idx, 1);
+   segErrors.value.splice(idx, 1);
+ }
+
+ function normalizeServiceSegments() {
+   const parsed = serviceForm.segments
+       .map(s => ({
+         _key: s._key,
+         min: parseFormattedNumber(s.minText),
+         max: parseFormattedNumber(s.maxText),
+         price: parseFormattedNumber(s.priceText)
+       }))
+@@ -933,60 +965,62 @@ function validateServiceForm() {
+   if (segErrors.value.some(Boolean)) {
+     toast("error", "Vui lòng sửa lỗi phân khúc trước khi lưu.");
+     return false;
+   }
+   return true;
+ }
+
+ function saveServiceFromModal() {
+   if (!validateServiceForm()) return;
+
+   const normalizedSegments = serviceForm.segments.map((s, i) => ({
+     id: i + 1,
+     min: parseFormattedNumber(s.minText),
+     max: parseFormattedNumber(s.maxText),
+     price: parseFormattedNumber(s.priceText)
+   }));
+
+   if (serviceForm.id) {
+     const idx = services.value.findIndex(x => x.id === serviceForm.id);
+     if (idx === -1) return toast("error", "Không tìm thấy dịch vụ.");
+     services.value[idx] = {
+       ...services.value[idx],
+       name: serviceForm.name.trim(),
+       color: serviceForm.color || "#667eea",
+       description: serviceForm.description.trim(),
++      active: serviceForm.active,
+       priceSegments: normalizedSegments
+     };
+     toast("success", "Đã cập nhật dịch vụ.");
+   } else {
+     const newId = services.value.length ? Math.max(...services.value.map(s => s.id)) + 1 : 1;
+     services.value.unshift({
+       id: newId,
+       name: serviceForm.name.trim(),
+       color: serviceForm.color || "#667eea",
+       description: serviceForm.description.trim(),
++      active: serviceForm.active,
+       priceSegments: normalizedSegments
+     });
+     toast("success", "Đã thêm dịch vụ mới.");
+   }
+
+   serviceEditOpen.value = false;
+ }
+
+ function removeService(id) {
+   if (!confirm("Bạn có chắc muốn xóa dịch vụ này?")) return;
+   services.value = services.value.filter(s => s.id !== id);
+   toast("success", "Đã xóa dịch vụ.");
+   if (detailServiceId.value === id) closeServiceDetail();
+   if (serviceForm.id === id) closeServiceEdit();
+ }
+
+ /* ===== SEGMENTS ACTIONS ===== */
+ function removeSegment(serviceId, segmentId) {
+   const sIdx = services.value.findIndex(s => s.id === serviceId);
+   if (sIdx === -1) return;
+
+   if (!confirm("Bạn có chắc muốn xóa phân khúc này?")) return;
+
+   const segs = services.value[sIdx].priceSegments.filter(x => x.id !== segmentId);
+   if (segs.length === 0) return toast("error", "Dịch vụ phải có ít nhất 1 phân khúc.");
+@@ -1811,50 +1845,97 @@ watch(serviceQuery, async () => {
+   width:28px; height:28px;
    border-radius: 12px;
    display:grid; place-items:center;
-   background: var(--gd);
-   color:#fff;
+   background: rgba(15,23,42,.06);
  }
-+.svc3-modal-card.detail .svc3-modal-title i{
-+  background: linear-gradient(135deg, #ffb7c5, #c9d7ff);
-+  box-shadow: 0 12px 22px rgba(255, 183, 197, .35);
-+}
- .svc3-x{
-   width:36px; height:36px;
+
+ .svc3-field{ display:grid; gap:6px; margin: 10px 12px; }
+ .svc3-field label{
+   font-size: 12px;
+   font-weight: 650;
+   color: rgba(11,18,32,.80);
+   display:flex; align-items:center; gap:8px;
+ }
+ .svc3-field input,
+ .svc3-field textarea{
+   border: 1px solid rgba(15,23,42,.12);
    border-radius: 12px;
-   border: 1px solid rgba(15,23,42,.10);
-   background: rgba(15,23,42,.03);
-   cursor:pointer;
+   background: #fff;
+   padding: 9px 10px;
+   font-size: 13px;
+   font-weight: 550;
+   outline:none;
    transition: var(--t);
+   color: #000;
  }
- .svc3-x:hover{ transform: translateY(-1px); background: rgba(102,126,234,.08); border-color: rgba(102,126,234,.22); }
- .svc3-modal-b{ padding: 12px; }
- .svc3-modal-f{
-   padding: 12px;
-   display:flex;
-   justify-content:flex-end;
-   gap:8px;
-   border-top: 1px solid rgba(15,23,42,.08);
-   background: rgba(15,23,42,.02);
++.svc3-switch{
++  display:inline-flex;
++  align-items:center;
++  gap:10px;
++  cursor:pointer;
++  user-select:none;
++}
++.svc3-switch input{
++  position:absolute;
++  opacity:0;
++  pointer-events:none;
++}
++.svc3-slider{
++  width:46px;
++  height:26px;
++  border-radius:999px;
++  background: rgba(15,23,42,.2);
++  position:relative;
++  transition: var(--t);
++  box-shadow: inset 0 2px 6px rgba(15,23,42,.2);
++}
++.svc3-slider::after{
++  content:"";
++  position:absolute;
++  top:3px;
++  left:3px;
++  width:20px;
++  height:20px;
++  border-radius:50%;
++  background:#fff;
++  box-shadow: 0 6px 12px rgba(0,0,0,.18);
++  transition: var(--t);
++}
++.svc3-switch input:checked + .svc3-slider{
++  background: linear-gradient(135deg,#22c55e 0%, #16a34a 100%);
++}
++.svc3-switch input:checked + .svc3-slider::after{
++  transform: translateX(20px);
++}
++.svc3-switch-text{
++  font-weight: 650;
++  color: rgba(15,23,42,.7);
++  transition: var(--t);
++}
++.svc3-switch-text.on{
++  color: #0f172a;
++}
+ .svc3-field input:focus,
+ .svc3-field textarea:focus{
+   border-color: rgba(102,126,234,.45);
+   box-shadow: 0 0 0 4px rgba(102,126,234,.12);
  }
-+.svc3-modal-card.detail .svc3-modal-f{
-+  background: linear-gradient(90deg, rgba(229,240,255,.6), rgba(255,236,246,.6));
-+  border-top: 1px solid rgba(168,185,255,.35);
-+}
-+.svc3-modal-card.detail .svc3-detail-name span{
-+  color: #2f3b66;
-+}
-+.svc3-modal-card.detail .svc3-detail-name i{
-+  color: #5f79d6;
-+}
-+.svc3-modal-card.detail .svc3-svc-sub{
-+  color: rgba(47,59,102,.65);
-+}
+ .svc3-colorpick{ display:flex; align-items:center; gap:10px; }
+ .svc3-colorinput{
+   width:44px; height:34px;
+   border-radius: 12px;
+   border: 2px solid #fff;
+   padding:0;
+   background: transparent;
+   box-shadow: 0 10px 18px rgba(0,0,0,.10);
+ }
 
- /* Detail blocks */
- .svc3-detail-head{
-   display:flex;
-   justify-content:space-between;
-   gap:10px;
-   flex-wrap:wrap;
-   padding-bottom: 10px;
-   border-bottom: 1px solid rgba(15,23,42,.08);
- }
-+.svc3-modal-card.detail .svc3-detail-head{
-+  border-bottom: 1px solid rgba(168,185,255,.35);
-+}
- .svc3-detail-name{ font-weight: 750; font-size: 14px; }
- .svc3-kpis{ display:flex; gap:10px; }
- .svc3-kpi{
-   min-width: 140px;
-   border: 1px solid rgba(15,23,42,.10);
-   border-radius: 14px;
-   padding: 8px 10px;
-   background: #fff;
- }
-+.svc3-modal-card.detail .svc3-kpi{
-+  background: linear-gradient(160deg, rgba(255,255,255,.95), rgba(235,248,255,.9));
-+  border: 1px solid rgba(168,185,255,.4);
-+  box-shadow: 0 12px 24px rgba(167,196,255,.22);
-+}
-+.svc3-modal-card.detail .svc3-kpi .k{
-+  color: rgba(70,85,130,.75);
-+}
-+.svc3-modal-card.detail .svc3-kpi .v{
-+  font-size: 14px;
-+  letter-spacing: .2px;
-+  background: none;
-+  -webkit-text-fill-color: initial;
-+}
-+.svc3-modal-card.detail .svc3-kpi .v.p1{
-+  color: #2f6f8f;
-+}
-+.svc3-modal-card.detail .svc3-kpi .v.p2{
-+  color: #8a4f8c;
-+}
- .svc3-kpi .k{ font-size: 11px; color: var(--muted); font-weight: 650; }
- .svc3-kpi .v{ margin-top:2px; font-weight: 750; font-size: 13px; }
-
- .svc3-box{
-   margin-top: 10px;
-   border: 1px solid rgba(15,23,42,.10);
-   border-radius: 14px;
-   background: #fff;
+ .svc3-note{
+   margin: 10px 12px 0;
    padding: 10px;
- }
-+.svc3-modal-card.detail .svc3-box{
-+  background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(255,239,247,.9));
-+  border: 1px solid rgba(255,192,226,.45);
-+  box-shadow: 0 14px 24px rgba(255,192,226,.2);
-+}
-+.svc3-modal-card.detail .svc3-box-k{
-+  color: rgba(55,68,112,.82);
-+}
-+.svc3-modal-card.detail .svc3-box-k i{
-+  color: #6b7fd9;
-+}
- .svc3-box-k{ display:flex; align-items:center; gap:8px; font-size: 12px; font-weight: 700; color: rgba(11,18,32,.78); }
- .svc3-box-v{ margin-top: 6px; font-size: 13px; color: rgba(11,18,32,.80); line-height: 1.6; }
-
- .svc3-seg-grid{
-   margin-top: 10px;
-   display:grid;
-   grid-template-columns: repeat(2, minmax(0,1fr));
-   gap:10px;
- }
- @media (max-width: 900px){
-   .svc3-seg-grid{ grid-template-columns: 1fr; }
- }
- .svc3-seg-card{
-   border: 1px solid rgba(15,23,42,.10);
    border-radius: 14px;
-   background: #fff;
-   overflow:hidden;
+   border: 1px solid rgba(102,126,234,.16);
+   background: rgba(102,126,234,.06);
+   font-size: 12px;
+   color: rgba(11,18,32,.78);
  }
-+.svc3-modal-card.detail .svc3-seg-card{
-+  background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(232,244,255,.9));
-+  border: 1px solid rgba(168,185,255,.4);
-+  box-shadow: 0 14px 24px rgba(167,196,255,.2);
-+}
- .svc3-seg-h{
-   padding: 8px 10px;
-   display:flex;
-   align-items:center;
-   justify-content:space-between;
-   border-bottom: 1px solid rgba(15,23,42,.08);
- }
-+.svc3-modal-card.detail .svc3-seg-h{
-+  background: linear-gradient(90deg, rgba(255,238,247,.7), rgba(232,244,255,.7));
-+  border-bottom: 1px solid rgba(168,185,255,.35);
-+}
-+.svc3-modal-card.detail .svc3-seg-h .t{
-+  color: #3a4b7a;
-+}
-+.svc3-modal-card.detail .svc3-seg-h .t i{
-+  color: #7a8fe6;
-+}
-+.svc3-modal-card.detail .svc3-seg-b b{
-+  color: #2f4a74;
-+}
-+.svc3-modal-card.detail .svc3-price-strong{
-+  color: #2f5f88;
-+  background: none;
-+  -webkit-text-fill-color: initial;
-+}
- .svc3-seg-h .t{ display:flex; align-items:center; gap:8px; font-weight: 700; font-size: 12px; }
- .svc3-seg-b{ padding: 10px; display:grid; gap:8px; }
- .svc3-seg-b .row{ display:flex; justify-content:space-between; gap:10px; font-size: 13px; }
 
- /* Form modal */
- .svc3-form-grid{
-   display:grid;
-   grid-template-columns: 0.95fr 1.05fr;
-   gap: 12px;
- }
- @media (max-width: 1000px){
-   .svc3-form-grid{ grid-template-columns: 1fr; }
- }
- .svc3-form-card{
-   border: 1px solid rgba(15,23,42,.10);
-   border-radius: 16px;
-   background: rgba(255,255,255,.75);
-   box-shadow: var(--sh2);
-   overflow:hidden;
- }
- .svc3-form-title{
-   padding: 10px 12px;
-   display:flex;
-   align-items:center;
-   gap:10px;
