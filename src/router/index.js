@@ -156,7 +156,7 @@ import CTVRecruit from "../components/user/NewUser/CTVRecruit/CTVRecruit.vue";
 import ProjectManagementCMS from "../components/cms/NewCms/ProjectMannagement/ProjectManagementCMS.vue";
 import PropertyManagementCMS from "../components/cms/NewCms/PropertyManagement/PropertyManagementCMS.vue";
 import CTVRecruitCMS from "../components/cms/NewCms/CTVRecruit/CTVRecruitCMS.vue";
-import DichVuSetting from "../components/dich-vu/Dich-vu-setting.vue";
+import DichVuSetting from "../components/dich-vu/Phi-dich-vu.vue";
 
 const routes = [
 
