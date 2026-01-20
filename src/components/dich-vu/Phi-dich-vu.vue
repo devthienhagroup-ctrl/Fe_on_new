@@ -258,7 +258,7 @@
 
     <!-- MODAL: CREATE CONTRACT -->
     <div class="modal" :class="{ show: showModal === 'modalContract' }" @click.self="closeModal('modalContract')">
-      <div class="modal-card detail">
+      <div class="modal-card detail contract-modal">
         <div class="modal-h">
           <div class="modal-title">
             <i class="fa-solid fa-file-circle-plus"></i>
@@ -273,12 +273,21 @@
           <div class="form-grid form-grid--contract">
             <div class="card">
               <div class="card-h">
-                <i class="fa-solid fa-user icon-tone tone-sky"></i>
+                <i class="fa-solid fa-file-lines icon-tone tone-sky"></i>
+                Thông tin hợp đồng
+              </div>
+
+              <div class="section-title">
+                <i class="fa-solid fa-user"></i>
                 Thông tin khách
               </div>
 
-              <div class="field customer-search">
-                <label><i class="fa-solid fa-magnifying-glass icon-tone tone-lilac"></i> Tìm khách theo tên</label>
+              <div class="customer-search grid grid-cols-1 md:grid-cols-2 gap-3 px-3 pb-2">
+                <div class="field !m-0">
+                <label class="field-label">
+                  <span class="label-ico tone-lilac"><i class="fa-solid fa-magnifying-glass"></i></span>
+                  <span>Tìm khách theo tên</span>
+                </label>
                 <input v-model="customerSearch" type="text" placeholder="Nhập tên khách hàng để tìm...">
 
                 <div class="search-results" v-if="customerSearchResults.length">
@@ -318,31 +327,24 @@
                   </button>
                 </div>
               </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 px-3 pb-2">
                 <div class="field !m-0">
-                  <label><i class="fa-solid fa-id-badge icon-tone tone-rose"></i> Mã khách hàng</label>
-                  <input :value="selectedCustomer?.id || ''" type="text" readonly>
-                </div>
-                <div class="field !m-0">
-                  <label><i class="fa-solid fa-phone icon-tone tone-emerald"></i> Số điện thoại</label>
+                  <label class="field-label">
+                    <span class="label-ico tone-emerald"><i class="fa-solid fa-phone"></i></span>
+                    <span>Số điện thoại</span>
+                  </label>
                   <input :value="selectedCustomer?.phone || ''" type="text" readonly>
                 </div>
               </div>
+              <div class="section-title">
+                <i class="fa-solid fa-briefcase"></i>
+                Dịch vụ & giá trị
+              </div>
 
               <div class="field">
-                <label><i class="fa-solid fa-calendar-check icon-tone tone-amber"></i> Ngày ký</label>
-                <input v-model="newContract.ngayKy" type="date">
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-h">
-                <i class="fa-solid fa-circle-check icon-tone tone-mint"></i>
-                Thông tin dịch vụ & thanh toán ban đầu
-              </div>
-              <div class="field">
-                <label><i class="fa-solid fa-list icon-tone tone-indigo"></i> Dịch vụ</label>
+                <label class="field-label">
+                  <span class="label-ico tone-indigo"><i class="fa-solid fa-list"></i></span>
+                  <span>Dịch vụ</span>
+                </label>
                 <select v-model="newContract.serviceId">
                   <option v-for="service in serviceOptions" :key="service.id || service.name" :value="service.id || service.name">
                     {{ service.name }}
@@ -353,26 +355,66 @@
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3 px-3 pb-2">
                 <div class="field !m-0">
-                  <label><i class="fa-solid fa-building icon-tone tone-teal"></i> Giá trị tài sản chấp nhận ký bán</label>
+                  <label class="field-label">
+                    <span class="label-ico tone-teal"><i class="fa-solid fa-building"></i></span>
+                    <span>Giá trị tài sản chấp nhận ký bán</span>
+                  </label>
                   <input v-model.number="newContract.giaTriTaiSan" type="number" min="0" placeholder="VD: 1500000000">
                   <div class="muted tiny">Nhập giá trị tài sản để xác định phân khúc.</div>
                 </div>
 
                 <div class="field !m-0">
-                  <label><i class="fa-solid fa-money-bill-wave icon-tone tone-orange"></i> Giá gốc</label>
+                  <label class="field-label">
+                    <span class="label-ico tone-orange"><i class="fa-solid fa-money-bill-wave"></i></span>
+                    <span>Giá gốc</span>
+                  </label>
                   <input :value="formatMoney(newContract.giaDichVuGoc)" type="text" readonly>
+                  <div class="muted tiny">&nbsp;</div>
                 </div>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3 px-3 pb-2">
                 <div class="field !m-0">
-                  <label><i class="fa-solid fa-tags icon-tone tone-pink"></i> Phí giảm (tiền)</label>
-                  <input v-model.number="newContract.phiGiam" type="number" placeholder="VD: 1000000" @input="updateGiaSauGiam">
+                  <label class="field-label">
+                    <span class="label-ico tone-pink"><i class="fa-solid fa-tags"></i></span>
+                    <span>Giảm giá</span><div class="discount-toggle">
+                    <button type="button" :class="{ active: newContract.discountMode === 'MONEY' }" @click="setDiscountMode('MONEY')">
+                      <i class="fa-solid fa-money-bill-wave"></i>
+                      Tiền
+                    </button>
+                    <button type="button" :class="{ active: newContract.discountMode === 'PERCENT' }" @click="setDiscountMode('PERCENT')">
+                      <i class="fa-solid fa-percent"></i>
+                      %
+                    </button>
+                  </div>
+                  </label>
+                  <div class="discount-input">
+
+                    <div class="discount-value">
+                      <input
+                        v-model.number="newContract.discountValue"
+                        type="number"
+                        :min="newContract.discountMode === 'PERCENT' ? 0 : 1"
+                        :max="newContract.discountMode === 'PERCENT' ? 100 : (newContract.giaDichVuGoc || 0)"
+                        :placeholder="newContract.discountMode === 'PERCENT' ? 'VD: 10' : 'VD: 1000000'"
+                        @input="updateGiaSauGiam"
+                      >
+                      <span class="discount-suffix">{{ newContract.discountMode === 'PERCENT' ? '%' : '₫' }}</span>
+                    </div>
+                  </div>
+                  <div class="muted tiny">
+                    {{ newContract.discountMode === 'PERCENT'
+                      ? 'Giới hạn 0 - 100%.' : 'Giới hạn > 0 và không vượt quá giá gốc.' }}
+                  </div>
                 </div>
 
                 <div class="field !m-0">
-                  <label><i class="fa-solid fa-circle-dollar-to-slot icon-tone tone-purple"></i> Giá sau giảm</label>
+                  <label class="field-label">
+                    <span class="label-ico tone-purple"><i class="fa-solid fa-circle-dollar-to-slot"></i></span>
+                    <span>Giá sau giảm</span>
+                  </label>
                   <input :value="formatMoney(newContract.giaSauGiam)" type="text" readonly>
+                  <div class="muted tiny">&nbsp;</div>
                 </div>
               </div>
 
@@ -381,10 +423,12 @@
                 {{ segmentHint }}
               </div>
 
-              <!-- Plan -->
-              <div class="px-3 pb-2">
-                <div class="muted tiny font-semibold uppercase tracking-wide mb-2">Tuỳ chọn thanh toán ban đầu</div>
+              <div class="section-title">
+                <i class="fa-solid fa-wallet"></i>
+                Tuỳ chọn thanh toán ban đầu
+              </div>
 
+              <div class="px-3 pb-2">
                 <div class="plan" id="planWrap">
                   <div class="plan-item" :class="{ active: newContract.initPlan === 'COC' }" @click="newContract.initPlan = 'COC'; updateFirstPayment()">
                     <div class="plan-ico"><i class="fa-solid fa-hand-holding-dollar"></i></div>
@@ -403,31 +447,35 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div class="field !m-0">
-                    <label><i class="fa-solid fa-percent icon-tone tone-gold"></i> % cọc</label>
+                    <label class="field-label">
+                      <span class="label-ico tone-gold"><i class="fa-solid fa-percent"></i></span>
+                      <span>% cọc</span>
+                    </label>
                     <input v-model.number="newContract.tiLeCoc" type="number" min="0" max="100" placeholder="VD: 30"
                            :disabled="newContract.initPlan === 'FULL'" @input="updateFirstPayment">
                     <div class="muted tiny">Chỉ dùng khi chọn Cọc (%).</div>
                   </div>
 
                   <div class="field !m-0">
-                    <label><i class="fa-solid fa-money-check-dollar icon-tone tone-cyan"></i> Tiền thanh toán ban đầu</label>
+                    <label class="field-label">
+                      <span class="label-ico tone-cyan"><i class="fa-solid fa-money-check-dollar"></i></span>
+                      <span>Tiền thanh toán</span>
+                    </label>
                     <input :value="formatMoney(firstPaymentAmount)" type="text" readonly>
                     <div class="muted tiny">Tự tính theo lựa chọn phía trên.</div>
                   </div>
 
                   <div class="field !m-0">
-                    <label><i class="fa-solid fa-credit-card icon-tone tone-forest"></i> Hình thức</label>
+                    <label class="field-label">
+                      <span class="label-ico tone-forest"><i class="fa-solid fa-credit-card"></i></span>
+                      <span>Hình thức</span>
+                    </label>
                     <select v-model="newContract.firstMethod">
-                      <option value="CHUYEN_KHOAN">CHUYEN_KHOAN</option>
-                      <option value="TIEN_MAT">TIEN_MAT</option>
-                      <option value="QR">QR</option>
-                      <option value="KHAC">KHAC</option>
+                      <option value="CHUYEN_KHOAN">Chuyển khoản</option>
+                      <option value="TIEN_MAT">Tiền mặt</option>
                     </select>
+                    <div class="muted tiny">&nbsp;</div>
                   </div>
-                </div>
-
-                <div class="note">
-                  <b>Lưu ý:</b> Khi bấm <b>Lưu hợp đồng</b>, hệ thống sẽ tự tạo 1 dòng <b>Đóng phí</b> theo "Cọc/Đóng tất".
                 </div>
               </div>
             </div>
@@ -949,6 +997,8 @@ export default {
         giaTriTaiSan: null,
         giaDichVuGoc: 0,
         phiGiam: 0,
+        discountMode: 'PERCENT',
+        discountValue: 0,
         giaSauGiam: 0,
         trangThaiHopDong: 'DANG_HIEU_LUC',
         ngayKy: this.todayISO(),
@@ -1099,6 +1149,10 @@ export default {
 
     'newContract.giaTriTaiSan'() {
       this.updateGiaGocFromAsset()
+    },
+
+    'newContract.discountMode'() {
+      this.updateGiaSauGiam()
     }
   },
 
@@ -1268,6 +1322,8 @@ export default {
         giaTriTaiSan: null,
         giaDichVuGoc: 0,
         phiGiam: 0,
+        discountMode: 'PERCENT',
+        discountValue: 0,
         giaSauGiam: 0,
         trangThaiHopDong: 'DANG_HIEU_LUC',
         ngayKy: this.todayISO(),
@@ -1301,8 +1357,23 @@ export default {
       this.updateGiaSauGiam()
     },
 
+    setDiscountMode(mode) {
+      this.newContract.discountMode = mode
+    },
+
     updateGiaSauGiam() {
-      this.newContract.giaSauGiam = Math.max(0, this.newContract.giaDichVuGoc - (this.newContract.phiGiam || 0))
+      const giaGoc = Number(this.newContract.giaDichVuGoc || 0)
+      if (this.newContract.discountMode === 'PERCENT') {
+        const percent = Math.max(0, Math.min(100, Number(this.newContract.discountValue || 0)))
+        this.newContract.discountValue = percent
+        this.newContract.phiGiam = Math.round(giaGoc * (percent / 100))
+      } else {
+        const money = Number(this.newContract.discountValue || 0)
+        const clamped = Math.max(0, Math.min(giaGoc, money))
+        this.newContract.discountValue = clamped
+        this.newContract.phiGiam = clamped
+      }
+      this.newContract.giaSauGiam = Math.max(0, giaGoc - (this.newContract.phiGiam || 0))
       this.updateFirstPayment()
     },
 
@@ -1375,6 +1446,7 @@ export default {
     },
 
     saveContract() {
+      this.updateGiaSauGiam()
       if (!this.selectedCustomer) {
         this.showToastMessage('error', 'Thiếu dữ liệu', 'Bạn cần chọn khách hàng từ danh sách.')
         return
@@ -1392,6 +1464,11 @@ export default {
 
       if (!this.newContract.giaDichVuGoc) {
         this.showToastMessage('error', 'Thiếu dữ liệu', 'Giá gốc chưa xác định theo phân khúc.')
+        return
+      }
+
+      if (this.newContract.discountMode === 'MONEY' && this.newContract.discountValue <= 0) {
+        this.showToastMessage('error', 'Giảm giá không hợp lệ', 'Giảm giá tiền phải > 0 và không vượt quá giá gốc.')
         return
       }
 
@@ -1415,6 +1492,8 @@ export default {
         initPlan: this.newContract.initPlan,
         tiLeCoc: this.newContract.initPlan === 'COC' ? (this.newContract.tiLeCoc || 0) : null
       }
+
+      console.log('New contract payload', contract)
 
       // Add initial payment
       if (this.firstPaymentAmount > 0) {
@@ -2476,9 +2555,58 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
 .icon-tone.tone-cyan{ background: linear-gradient(135deg, #22d3ee, #38bdf8); }
 .icon-tone.tone-forest{ background: linear-gradient(135deg, #16a34a, #059669); }
 
+.contract-modal{
+  width: min(920px, 100%);
+}
+.contract-modal .modal-h{
+  padding: 10px 12px;
+  background: linear-gradient(90deg, rgba(255,224,235,.55), rgba(224,238,255,.55), rgba(226,255,244,.55));
+}
+.contract-modal .modal-b{
+  padding: 10px;
+}
+.contract-modal .modal-f{
+  padding: 10px 12px;
+}
+.contract-modal .form-grid{
+  gap: 10px;
+  grid-template-columns: 1fr;
+}
+.contract-modal .card{
+  border-radius: 14px;
+}
+.contract-modal .card-h{
+  padding: 8px 12px;
+  font-size: 12px;
+}
+.contract-modal .card-h i{
+  background: transparent;
+  box-shadow: none;
+  color: var(--tone-color, #64748b);
+}
+.contract-modal .icon-tone{
+  color: var(--tone-color, #64748b);
+  background: transparent;
+  box-shadow: none;
+}
+.contract-modal .tone-sky{ --tone-color: #38bdf8; }
+.contract-modal .tone-lilac{ --tone-color: #a78bfa; }
+.contract-modal .tone-rose{ --tone-color: #fb7185; }
+.contract-modal .tone-emerald{ --tone-color: #22c55e; }
+.contract-modal .tone-amber{ --tone-color: #f59e0b; }
+.contract-modal .tone-mint{ --tone-color: #34d399; }
+.contract-modal .tone-indigo{ --tone-color: #6366f1; }
+.contract-modal .tone-teal{ --tone-color: #14b8a6; }
+.contract-modal .tone-orange{ --tone-color: #f97316; }
+.contract-modal .tone-pink{ --tone-color: #ec4899; }
+.contract-modal .tone-purple{ --tone-color: #8b5cf6; }
+.contract-modal .tone-gold{ --tone-color: #f59e0b; }
+.contract-modal .tone-cyan{ --tone-color: #22d3ee; }
+.contract-modal .tone-forest{ --tone-color: #16a34a; }
+
 .segment-hint{
-  margin: 4px 12px 12px;
-  padding: 8px 10px;
+  margin: 4px 12px 10px;
+  padding: 6px 10px;
   border-radius: 12px;
   background: rgba(79,172,254,.08);
   border: 1px dashed rgba(79,172,254,.35);
@@ -2489,6 +2617,27 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
   align-items:center;
 }
 .segment-hint i{ color: #4facfe; }
+
+.section-title{
+  margin: 12px 12px 6px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(148,163,184,.5);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: rgba(11,18,32,.72);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.section-title i{
+  color: rgba(99,102,241,.8);
+}
+.section-title:first-of-type{
+  border-top: none;
+  padding-top: 0;
+}
 
 .customer-search{ position: relative; }
 .search-results{
@@ -2551,6 +2700,36 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
 }
 .clear-btn:hover{ transform: translateY(-1px); background: rgba(255,88,88,.2); }
 .field{ display:grid; gap:6px; margin: 10px 12px; }
+.contract-modal .field{
+  margin: 8px 12px;
+  gap: 5px;
+}
+.field-label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: rgba(11,18,32,.78);
+}
+.label-ico{
+  width: 20px;
+  height: 20px;
+  display:grid;
+  place-items:center;
+  border-radius: 8px;
+  color: var(--tone-color, #64748b);
+  background: rgba(15,23,42,.04);
+  font-size: 12px;
+}
+.contract-modal .label-ico{
+  background: transparent;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+}
 .field label{
   font-size: 14px;
   font-weight: 600;
@@ -2583,13 +2762,13 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
   display:grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin: 10px 12px 12px 12px;
+  margin: 8px 12px 10px 12px;
 }
 @media (max-width: 640px){ .plan{ grid-template-columns: 1fr; } }
 .plan-item{
   border: 1px solid rgba(20,30,48,.14);
   border-radius: 14px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   background: rgba(255,255,255,.86);
   display:flex;
   gap:10px;
@@ -2604,8 +2783,8 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
   box-shadow: 0 14px 26px rgba(102,126,234,.14);
 }
 .plan-ico{
-  width: 36px; height: 36px;
-  border-radius: 14px;
+  width: 32px; height: 32px;
+  border-radius: 12px;
   display:grid; place-items:center;
   color:#fff;
   background: var(--primary-gradient);
@@ -2613,8 +2792,54 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
   box-shadow: 0 14px 24px rgba(102,126,234,.18);
 }
 .plan-item:nth-child(2) .plan-ico{ background: var(--success-gradient); box-shadow: 0 14px 24px rgba(67,233,123,.16); }
-.plan-tt{ font-weight: 950; }
+.plan-tt{ margin-top: 5px; font-weight: 950; }
 .plan-tx{ margin-top:2px; font-size: 12px; color: rgba(11,18,32,.64); font-weight: 650; }
+
+.discount-input{
+  display:grid;
+  gap:8px;
+}
+.discount-toggle{
+  display:flex;
+  gap:6px;
+  background: rgba(15,23,42,.04);
+  border-radius: 999px;
+  padding: 4px;
+  width: fit-content;
+}
+.discount-toggle button{
+  border: none;
+  background: transparent;
+  color: rgba(11,18,32,.7);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 4px 10px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+  transition: var(--t);
+}
+.discount-toggle button.active{
+  background: rgba(102,126,234,.14);
+  color: #1d4ed8;
+}
+.discount-value{
+  position: relative;
+}
+.discount-value input{
+  padding-right: 34px;
+}
+.discount-suffix{
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(11,18,32,.6);
+}
 
 /* =========================
    TOAST
