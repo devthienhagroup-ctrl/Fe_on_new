@@ -327,7 +327,7 @@
                   </button>
                 </div>
               </div>
-                <div class="field !m-0">
+                <div class="field !m-0" style="max-height: 50px !important;">
                   <label class="field-label">
                     <span class="label-ico tone-emerald"><i class="fa-solid fa-phone"></i></span>
                     <span>Số điện thoại</span>
@@ -409,11 +409,11 @@
                 </div>
 
                 <div class="field !m-0">
-                  <label class="field-label">
+                  <label class="field-label" style="margin-top: 7px !important;">
                     <span class="label-ico tone-purple"><i class="fa-solid fa-circle-dollar-to-slot"></i></span>
                     <span>Giá sau giảm</span>
                   </label>
-                  <input :value="formatMoney(newContract.giaSauGiam)" type="text" readonly>
+                  <input style="margin-top: 6px !important;" :value="formatMoney(newContract.giaSauGiam)" type="text" readonly >
                   <div class="muted tiny">&nbsp;</div>
                 </div>
               </div>
@@ -445,8 +445,8 @@
                   </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div class="field !m-0">
+                <div class="grid grid-cols-1 gap-3" :class="newContract.initPlan === 'COC' ? 'md:grid-cols-3' : 'md:grid-cols-2'">
+                  <div v-if="newContract.initPlan === 'COC'" class="field !m-0">
                     <label class="field-label">
                       <span class="label-ico tone-gold"><i class="fa-solid fa-percent"></i></span>
                       <span>% cọc</span>
