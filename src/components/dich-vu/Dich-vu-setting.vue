@@ -1192,7 +1192,9 @@ watch(serviceQuery, async () => {
   color:#fff;
   box-shadow: 0 14px 28px rgba(255,88,88,.14);
 }
-
+.svc3-btn i{
+  background-color: rgba(255, 255, 255, 0) !important;
+}
 /* ===== TABS (browser-like + attached panel) ===== */
 .svc3-tabs-shell{ position: relative; }
 .svc3-tabs{
@@ -1782,7 +1784,7 @@ watch(serviceQuery, async () => {
 /* Form modal */
 .svc3-form-grid{
   display:grid;
-  grid-template-columns: 0.95fr 1.05fr;
+  grid-template-columns: 1.7fr 3fr;
   gap: 12px;
 }
 @media (max-width: 1000px){
