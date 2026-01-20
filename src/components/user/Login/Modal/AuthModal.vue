@@ -700,14 +700,15 @@ const handleRegisterSuccess = async (responseData) => {
     closeModal();
 
     // Chuyển hướng
-    setTimeout(() => {
-      const flag = localStorage.getItem("loginFrom");
-      if(flag === 'user'){
-        router.push("/");
-      }else{
-        router.push("/-thg/quan-ly")
-      }
-    }, 1000);
+    // setTimeout(() => {
+    //   const flag = localStorage.getItem("loginFrom");
+    //   if(flag === 'user'){
+    //     router.push("/");
+    //   }else{
+    //     router.push("/-thg/quan-ly")
+    //   }
+    // }, 1000);
+    showSuccessAlert("Đăng ký thành công!", "Đã tự động đăng nhập");
 
   } catch (loginError) {
     // Đóng loading nếu có lỗi

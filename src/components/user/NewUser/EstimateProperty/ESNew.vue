@@ -546,10 +546,16 @@
                         <i class="fas fa-download"></i>
                         Tải báo cáo
                       </button>
-                      <button class="flex-1 bg-white/10 text-slate-50 py-3 rounded-xl font-semibold hover:bg-white/15 transition border border-white/10 flex items-center justify-center gap-2 animate-bounce-in" style="animation-delay: 0.1s">
+                      <button
+                          type="button"
+                          class="flex-1 bg-white/10 text-slate-50 py-3 rounded-xl font-semibold hover:bg-white/15 transition border border-white/10 flex items-center justify-center gap-2 animate-bounce-in"
+                          style="animation-delay: 0.1s"
+                          @click="goBaoCaoDinhGia"
+                      >
                         <i class="fas fa-chart-line"></i>
                         Phân tích sâu
                       </button>
+
                     </div>
                   </div>
                 </div>
@@ -824,7 +830,13 @@ import Fuse from "fuse.js";
 import Swal from 'sweetalert2'
 import PackageService from "./PackageService.vue";
 import {useAuthStore} from "../../../../stores/authStore.js";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
+
+const goBaoCaoDinhGia = () => {
+  router.push("/bao-cao-dinh-gia");
+};
 function ensureArray(value) {
   if (!value) return [];
   if (Array.isArray(value)) return value;

@@ -342,25 +342,25 @@
             <div v-if="!selectedAsset.valuationReports || !selectedAsset.valuationReports.length" class="alert alert-light mb-0">
               Chưa có lần định giá nào.
             </div>
-            <div v-else class="accordion" id="valuationHistory">
-              <div class="accordion-item" v-for="report in selectedAsset.valuationReports" :key="report.valuationId">
-                <h2 class="accordion-header">
-                  <button
-                      class="accordion-button collapsed"
-                      type="button"
-                      data-bs-toggle="collapse"
-                      :data-bs-target="`#val-${report.valuationId}`"
-                  >
-                    Lần {{ report.valuationRound }} — {{ formatDate(report.effectiveDate) }} → {{ formatDate(report.expiryDate) }}
-                    <span class="ms-auto">{{ numberFormat(report.totalPrice) }} ₫</span>
-                  </button>
-                </h2>
-                <div
-                    :id="`val-${report.valuationId}`"
-                    class="accordion-collapse collapse"
-                    data-bs-parent="#valuationHistory"
+            <div v-else class="valuation-history space-y-3">
+              <div class="history-item" v-for="report in selectedAsset.valuationReports" :key="report.valuationId">
+                <button
+                    class="history-toggle w-full"
+                    type="button"
+                    @click="toggleHistory(report.valuationId)"
                 >
-                  <div class="accordion-body">
+                  <div class="history-toggle-content">
+                    <div class="history-toggle-title">
+                      Lần {{ report.valuationRound }} — {{ formatDate(report.effectiveDate) }} → {{ formatDate(report.expiryDate) }}
+                    </div>
+                    <div class="history-toggle-price">{{ numberFormat(report.totalPrice) }} ₫</div>
+                  </div>
+                  <span class="history-toggle-icon" :class="{ 'is-open': isHistoryOpen(report.valuationId) }">
+                    <i class="fa-solid fa-chevron-down"></i>
+                  </span>
+                </button>
+                <div class="history-panel" :class="{ 'is-open': isHistoryOpen(report.valuationId) }">
+                  <div class="history-panel-inner">
                     <div class="row small border-bottom pb-2 mb-2">
                       <div class="col-md-6">
                         <p><strong>Quy hoạch:</strong> {{ report.planning || '—' }}</p>
@@ -794,19 +794,24 @@
                 <tr v-for="(row, index) in valuationDraft.valuationLandTypes" :key="row._key">
                   <td>
                     <template v-if="!row.isCustom">
-                      <select
-                          class="form-select form-select-sm better-input"
-                          v-model="row.landType"
-                          @change="handleLandTypeChange(row, $event)"
-                      >
-                        <option disabled value="">-- Chọn loại đất --</option>
-                        <option>Đất ở tại đô thị</option>
-                        <option>Đất ở tại nông thôn</option>
-                        <option>Đất trồng cây lâu năm</option>
-                        <option>Đất trồng cây hàng năm</option>
-                        <option>Đất thương mại dịch vụ</option>
-                        <option value="__custom__">+ Tự nhập...</option>
-                      </select>
+                      <div class="dropdown-wrapper relative">
+                        <select
+                            class="valuation-select w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                            v-model="row.landType"
+                            @change="handleLandTypeChange(row, $event)"
+                        >
+                          <option disabled value="">-- Chọn loại đất --</option>
+                          <option>Đất ở tại đô thị</option>
+                          <option>Đất ở tại nông thôn</option>
+                          <option>Đất trồng cây lâu năm</option>
+                          <option>Đất trồng cây hàng năm</option>
+                          <option>Đất thương mại dịch vụ</option>
+                          <option value="__custom__">+ Tự nhập...</option>
+                        </select>
+                        <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400">
+                          <i class="fa-solid fa-chevron-down"></i>
+                        </span>
+                      </div>
                     </template>
 
                     <template v-else>
@@ -1062,6 +1067,16 @@ function switchTab(tab) {
   }
 }
 
+const openHistoryId = ref(null);
+
+function toggleHistory(id) {
+  openHistoryId.value = openHistoryId.value === id ? null : id;
+}
+
+function isHistoryOpen(id) {
+  return openHistoryId.value === id;
+}
+
 const editAssetMode = ref(false);
 const editAsset = ref({});
 
@@ -1135,6 +1150,12 @@ async function viewAssetDetailUpdate(asset){
 const galleryKey = ref(0);
 
 const selectedAsset = ref(null);
+watch(
+    () => selectedAsset.value?.id,
+    () => {
+      openHistoryId.value = null;
+    }
+);
 async function viewAssetDetail(asset) {
   try {
     const oldServiceRQID = selectedAsset.value?.serviceRQID;
@@ -2684,7 +2705,7 @@ async function deleteRequest(request) {
 .table td, .table th { vertical-align: middle !important; font-size: 13.5px; padding: 8px 12px; }
 .table-bordered > :not(caption) > * { border-width: 1px; }
 
-.form-control, .form-select {
+.form-control {
   min-height: 38px;
 }
 
@@ -2693,14 +2714,85 @@ async function deleteRequest(request) {
   padding: 4px 8px;
 }
 
-.accordion-button:not(.collapsed) {
-  background-color: #f8f9fa;
-  color: #0b5ed7;
+.valuation-history {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.accordion-button:focus {
-  border-color: #0b74ff;
-  box-shadow: 0 0 0 0.15rem rgba(11,116,255,.15);
+.history-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.history-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border: none;
+  text-align: left;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.history-toggle:hover {
+  background: #e2e8f0;
+}
+
+.history-toggle-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-toggle-title {
+  font-size: 0.95rem;
+}
+
+.history-toggle-price {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.history-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #475569;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.history-toggle-icon.is-open {
+  transform: rotate(180deg);
+  background: #cbd5f5;
+}
+
+.history-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+
+.history-panel.is-open {
+  max-height: 2000px;
+}
+
+.history-panel-inner {
+  padding: 16px;
 }
 
 .info-compact {
@@ -2892,6 +2984,13 @@ h6.fw-bold {
 .asset-detail .dropdown-wrapper {
   width: 100% !important;
   display: block;
+}
+.valuation-select:hover {
+  border-color: #94a3b8;
+}
+
+.valuation-select:focus-visible {
+  outline: none;
 }
 .asset-status-row {
   display: flex;
