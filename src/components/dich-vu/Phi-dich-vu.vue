@@ -678,7 +678,7 @@
                   type="text"
                   inputmode="numeric"
                   placeholder="VD: -500.000 hoặc 300.000"
-                  @input="adjustment.amount = parseNumberInput($event.target.value, true)"
+                  @input="handleAdjustmentAmountInput"
                 >
                 <div class="muted tiny">Âm = giảm thêm • Dương = phụ thu / phạt</div>
               </div>
@@ -699,40 +699,32 @@
             </div>
 
             <div class="card">
-              <div class="card-h"><i class="fa-solid fa-circle-info"></i> Tác động sau điều chỉnh</div>
+              <div class="card-h"><i class="fa-solid fa-circle-info"></i> Tóm tắt hợp đồng</div>
               <div class="p-3">
                 <div class="text-sm font-extrabold">{{ currentContract?.maHopDong }} • {{ currentContract?.tenKhachHang }}</div>
                 <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày tạo {{ formatCreatedAt(currentContract?.ngayTao) }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
 
                 <div class="grid grid-cols-2 gap-2 mt-3">
                   <div class="kpi">
-                    <div class="k"><span class="dot"></span>Giá trị tài sản</div>
-                    <div class="v price p4">{{ formatMoney(currentContract?.giaTriTaiSan || 0) }}</div>
-                  </div>
-                  <div class="kpi">
-                    <div class="k"><span class="dot"></span>Giá gốc</div>
-                    <div class="v price p2">{{ formatMoney(currentContract?.giaDichVuGoc || 0) }}</div>
-                  </div>
-                  <div class="kpi">
-                    <div class="k"><span class="dot"></span>Giá chốt</div>
+                    <div class="k"><span class="dot"></span>Giá sau giảm</div>
                     <div class="v price p4">{{ formatMoney(currentContract?.giaSauGiam || 0) }}</div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
-                    <div class="v price p2">{{ formatMoney(calcTongDieuChinh(currentContract)) }}</div>
+                    <div class="v price p2">{{ formatMoney(getTongDieuChinh(currentContract)) }}</div>
                   </div>
                   <div class="kpi">
-                    <div class="k"><span class="dot"></span>Giá điều chỉnh</div>
-                    <div class="v price p2">{{ formatMoney(calcGiaDieuChinh(currentContract)) }}</div>
+                    <div class="k"><span class="dot"></span>Doanh thu</div>
+                    <div class="v price p1">{{ formatMoney(getDoanhThuRow(currentContract)) }}</div>
                   </div>
                   <div class="kpi">
-                    <div class="k"><span class="dot"></span>Doanh thu (min)</div>
-                    <div class="v price p1">{{ formatMoney(calcDoanhThu(currentContract)) }}</div>
+                    <div class="k"><span class="dot"></span>Doanh số</div>
+                    <div class="v price p3">{{ formatMoney(getDoanhSoRow(currentContract)) }}</div>
                   </div>
                 </div>
 
                 <div class="note mt-3">
-                  <b>Gợi ý:</b> Nếu điều chỉnh âm làm "Giá điều chỉnh" thấp hơn "Thực thu", bạn đang thu dư → có thể cần hoàn.
+                  <b>Lưu ý:</b> Tóm tắt lấy trực tiếp từ dữ liệu hợp đồng hiện tại.
                 </div>
               </div>
             </div>
@@ -1315,6 +1307,10 @@ const getDoanhThuRow = (contract) => {
   return Number(contract?.doanhThu ?? 0)
 }
 
+const getDoanhSoRow = (contract) => {
+  return Number(contract?.doanhSo ?? 0)
+}
+
 const getDoanhThu = (contract) => {
   if (contract?.doanhThu !== undefined && contract?.doanhThu !== null) {
     return Number(contract.doanhThu || 0)
@@ -1855,7 +1851,16 @@ const openAdjust = (contract) => {
   openModal('modalAdjust')
 }
 
-const saveAdjustment = () => {
+const handleAdjustmentAmountInput = (event) => {
+  const value = parseNumberInput(event.target.value, true)
+  if (adjustment.value.type !== 'GIAM_GIA' && value < 0) {
+    adjustment.value.amount = Math.abs(value)
+    return
+  }
+  adjustment.value.amount = value
+}
+
+const saveAdjustment = async () => {
   if (adjustment.value.amount === 0) {
     showToastMessage('error', 'Số tiền không hợp lệ', 'Điều chỉnh phải khác 0 (âm hoặc dương).')
     return
@@ -1866,26 +1871,41 @@ const saveAdjustment = () => {
     return
   }
 
-  if (!adjustment.value.reason) {
+  if (adjustment.value.amount < 0 && adjustment.value.type !== 'GIAM_GIA') {
+    showToastMessage('error', 'Sai số tiền', 'Chỉ "Giảm thêm" mới được nhập số âm.')
+    return
+  }
+
+  const reason = (adjustment.value.reason || '').trim()
+  if (!reason) {
     showToastMessage('error', 'Thiếu lý do', 'Bạn cần nhập lý do điều chỉnh.')
     return
   }
 
-  const contractIndex = contracts.value.findIndex(c => c.id === currentContract.value.id)
-  if (contractIndex === -1) return
-
-  contracts.value[contractIndex].dieuChinh.push({
-    id: crypto.randomUUID(),
+  const payload = {
+    hopDongId: currentContract.value.id,
     soTienDieuChinh: adjustment.value.amount,
     loaiDieuChinh: adjustment.value.type,
-    lyDo: adjustment.value.reason,
-    ngayTao: new Date().toLocaleString('vi-VN')
-  })
+    lyDo: reason
+  }
 
-  showToastMessage('success', 'Điều chỉnh thành công',
-      `${adjustment.value.amount > 0 ? '+' : ''}${formatMoney(adjustment.value.amount)} (${adjustment.value.type})`)
-  closeModal('modalAdjust')
+  try {
+    await showLoading(api.post('/hop-dong/admin/dieu-chinh', payload))
+    updateAlertSuccess('Điều chỉnh thành công',
+        `${adjustment.value.amount > 0 ? '+' : ''}${formatMoney(adjustment.value.amount)} (${adjustment.value.type})`)
+    await fetchContracts()
+    closeModal('modalAdjust')
+  } catch (error) {
+    console.error('❌ Lỗi điều chỉnh', error)
+    updateAlertError('Điều chỉnh thất bại', 'Vui lòng thử lại sau.')
+  }
 }
+
+watch(() => adjustment.value.type, (nextType) => {
+  if (nextType !== 'GIAM_GIA' && adjustment.value.amount < 0) {
+    adjustment.value.amount = Math.abs(adjustment.value.amount)
+  }
+})
 
 // Detail view
 const openDetail = (contract) => {
@@ -2522,6 +2542,14 @@ onMounted(async () => {
   border: none;
   color: #fff;
   background: var(--primary-gradient);
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  transition: var(--t);
+}
+.kpi-row .kpi:hover{
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 18px 32px rgba(20,30,48,.18);
 }
 .kpi-row .kpi-total{ background: var(--primary-gradient); }
 .kpi-row .kpi-revenue{ background: var(--success-gradient); }
@@ -2535,6 +2563,8 @@ onMounted(async () => {
 }
 .kpi-row .kpi .v{
   color: #fff;
+  margin-top: auto;
+  font-size: 22px;
 }
 .kpi-row .kpi .v.price{
   background: none;
