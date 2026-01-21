@@ -54,7 +54,7 @@
           <div class="tools">
             <div class="input">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input v-model="searchQuery" type="text" placeholder="Tìm theo mã HĐ / khách / dịch vụ...">
+              <input v-model="searchQuery" type="text" placeholder="Tìm theo mã HĐ / khách / người tạo...">
             </div>
 
             <div class="select">
@@ -237,7 +237,7 @@
         <div class="modal-h">
           <div class="modal-title">
             <i class="fa-solid fa-file-circle-plus"></i>
-            <span>Thêm hợp đồng (không cho sửa)</span>
+            <span>Thêm hợp đồng</span>
           </div>
           <button class="x" @click="closeModal('modalContract')" title="Đóng">
             <i class="fa-solid fa-xmark"></i>
@@ -1273,6 +1273,7 @@ export default {
     },
 
     closeModal(modal) {
+      this.resetContractForm()
       if (this.showModal === modal) {
         this.showModal = null
       }
@@ -1407,6 +1408,9 @@ export default {
       this.customerSearch = customer.name
       this.newContract.maKhachHang = customer.id
       this.newContract.tenKhachHang = customer.name
+      if (customer?.raw?.giaTriTaiSan !== undefined && customer?.raw?.giaTriTaiSan !== null) {
+        this.newContract.giaTriTaiSan = Number(customer.raw.giaTriTaiSan || 0)
+      }
 
       setTimeout(() => {
         this.suppressCustomerSearch = false
@@ -1495,7 +1499,7 @@ export default {
         updateAlertSuccess('Đã tạo hợp đồng',
             `${contract.maHopDong} • ${this.newContract.initPlan === 'FULL' ? 'Đóng tất' : 'Cọc'}: ${this.formatMoney(this.firstPaymentAmount)}`)
         this.closeModal('modalContract')
-        this.resetContractForm()
+
       } catch (error) {
         console.error('❌ Lỗi tạo hợp đồng', error)
         updateAlertError('Tạo hợp đồng thất bại', 'Vui lòng thử lại sau.')
@@ -1909,7 +1913,9 @@ export default {
       radial-gradient(900px 650px at 88% 0%, rgba(240,147,251,.16), transparent 58%),
       radial-gradient(1000px 750px at 70% 100%, rgba(79,172,254,.14), transparent 55%),
       linear-gradient(135deg, rgba(20,30,48,.05), rgba(20,30,48,.00));
-  padding-bottom: 26px;
+  padding: 20px 25px;
+  position: relative;
+  top: -10px;
 }
 .muted{ color: var(--muted); }
 .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
@@ -2717,7 +2723,7 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
   border-radius: 6px;
 }
 .field label{
-  font-size: 14px;
+  font-size: 11.5px;
   font-weight: 600;
   color: rgba(11,18,32,.82);
   display:flex; align-items:center; gap:8px;
@@ -2749,12 +2755,14 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin: 8px 12px 10px 12px;
+  width: 260px;
 }
 @media (max-width: 640px){ .plan{ grid-template-columns: 1fr; } }
 .plan-item{
   border: 1px solid rgba(20,30,48,.14);
-  border-radius: 14px;
+  border-radius: 24px;
   padding: 8px 10px;
+  width: 120px;
   background: rgba(255,255,255,.86);
   display:flex;
   gap:10px;
@@ -2769,8 +2777,8 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
   box-shadow: 0 14px 26px rgba(102,126,234,.14);
 }
 .plan-ico{
-  width: 32px; height: 32px;
-  border-radius: 12px;
+  width: 24px; height: 24px;
+  border-radius: 8px;
   display:grid; place-items:center;
   color:#fff;
   background: var(--primary-gradient);
@@ -2778,7 +2786,7 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
   box-shadow: 0 14px 24px rgba(102,126,234,.18);
 }
 .plan-item:nth-child(2) .plan-ico{ background: var(--success-gradient); box-shadow: 0 14px 24px rgba(67,233,123,.16); }
-.plan-tt{ margin-top: 5px; font-weight: 950; }
+.plan-tt{ margin-top: 5px; font-weight: 600; font-size: 14px;}
 .plan-tx{ margin-top:2px; font-size: 12px; color: rgba(11,18,32,.64); font-weight: 650; }
 
 .discount-input{
