@@ -57,9 +57,9 @@
               <label>Trạng thái</label>
               <select v-model="filterStatus">
                 <option :value="null">Tất cả</option>
-                <option value="DANG_HIEU_LUC">DANG_HIEU_LUC</option>
-                <option value="HOAN_TAT">HOAN_TAT</option>
-                <option value="HUY">HUY</option>
+                <option value="DANG_HIEU_LUC">Đang hiệu lực</option>
+                <option value="HOAN_TAT">Hoàn tất</option>
+                <option value="HUY">Đã hủy</option>
               </select>
             </div>
           </div>
@@ -68,21 +68,25 @@
         <div class="panel-b">
           <!-- KPIs -->
           <div class="kpi-row">
-            <div class="kpi">
+            <div class="kpi kpi-total">
               <div class="k"><span class="dot"></span>Tổng hợp đồng</div>
               <div class="v price p4">{{ totalElements }}</div>
+              <div class="kpi-ico"><i class="fa-solid fa-file-signature"></i></div>
             </div>
-            <div class="kpi">
+            <div class="kpi kpi-revenue">
               <div class="k"><span class="dot"></span>Tổng doanh thu</div>
               <div class="v price p3">{{ formatMoney(totalDoanhThu) }}</div>
+              <div class="kpi-ico"><i class="fa-solid fa-chart-line"></i></div>
             </div>
-            <div class="kpi">
+            <div class="kpi kpi-adjust">
               <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
               <div class="v price p2">{{ formatMoney(totalDieuChinh) }}</div>
+              <div class="kpi-ico"><i class="fa-solid fa-sliders"></i></div>
             </div>
-            <div class="kpi">
+            <div class="kpi kpi-sales">
               <div class="k"><span class="dot"></span>Tổng doanh số</div>
               <div class="v price p1">{{ formatMoney(totalDoanhSo) }}</div>
+              <div class="kpi-ico"><i class="fa-solid fa-sack-dollar"></i></div>
             </div>
           </div>
 
@@ -478,7 +482,7 @@
 
     <!-- MODAL: PAY -->
     <div class="modal" :class="{ show: showModal === 'modalPay' }" @click.self="closeModal('modalPay')">
-      <div class="modal-card">
+      <div class="modal-card pay-modal">
         <div class="modal-h">
           <div class="modal-title">
             <i class="fa-solid fa-circle-dollar-to-slot"></i>
@@ -521,20 +525,20 @@
 
                 <div class="grid grid-cols-2 gap-2 mt-3">
                   <div class="kpi">
-                    <div class="k"><span class="dot"></span>Giá điều chỉnh</div>
-                    <div class="v price p2">{{ formatMoney(calcGiaDieuChinh(currentContract)) }}</div>
+                    <div class="k"><span class="dot"></span>Giá sau giảm</div>
+                    <div class="v price p4">{{ formatMoney(currentContract?.giaSauGiam || 0) }}</div>
                   </div>
                   <div class="kpi">
-                    <div class="k"><span class="dot"></span>Thực thu</div>
-                    <div class="v price p3">{{ formatMoney(calcThucThu(currentContract)) }}</div>
-                  </div>
-                  <div class="kpi">
-                    <div class="k"><span class="dot"></span>Doanh thu (min)</div>
-                    <div class="v price p1">{{ formatMoney(calcDoanhThu(currentContract)) }}</div>
+                    <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
+                    <div class="v price p2">{{ formatMoney(calcTongDieuChinh(currentContract)) }}</div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Còn thiếu</div>
-                    <div class="v price p4">{{ formatMoney(Math.max(0, calcGiaDieuChinh(currentContract) - calcThucThu(currentContract))) }}</div>
+                    <div class="v price p1">{{ formatMoney(Math.max(0, calcGiaDieuChinh(currentContract) - calcThucThu(currentContract))) }}</div>
+                  </div>
+                  <div class="kpi">
+                    <div class="k"><span class="dot"></span>Đã thu</div>
+                    <div class="v price p3">{{ formatMoney(calcThucThu(currentContract)) }}</div>
                   </div>
                 </div>
 
@@ -1644,7 +1648,7 @@ export default {
       this.openModal('modalPay')
     },
 
-    savePayment() {
+    async savePayment() {
       if (this.payment.amount <= 0) {
         this.showToastMessage('error', 'Số tiền không hợp lệ', 'Số tiền đóng phải > 0.')
         return
@@ -1653,18 +1657,32 @@ export default {
       const contractIndex = this.contracts.findIndex(c => c.id === this.currentContract.id)
       if (contractIndex === -1) return
 
-      this.contracts[contractIndex].dotDongTien.push({
-        id: crypto.randomUUID(),
+      const payload = {
+        hopDongId: this.currentContract.id,
         soTienDong: this.payment.amount,
         hinhThucThanhToan: this.payment.method,
         ngayDongTien: this.payment.date || this.todayISO(),
-        ghiChu: this.payment.note,
-        nguoiGhiNhan: 'demo_admin',
-        ngayTao: new Date().toLocaleString('vi-VN')
-      })
+        ghiChu: this.payment.note
+      }
 
-      this.showToastMessage('success', 'Đóng phí thành công', `+${this.formatMoney(this.payment.amount)} (${this.payment.method})`)
-      this.closeModal('modalPay')
+      try {
+        await showLoading(api.post('/hop-dong/admin/dong-phi', payload))
+        this.contracts[contractIndex].dotDongTien.push({
+          id: crypto.randomUUID(),
+          soTienDong: this.payment.amount,
+          hinhThucThanhToan: this.payment.method,
+          ngayDongTien: payload.ngayDongTien,
+          ghiChu: this.payment.note,
+          nguoiGhiNhan: 'demo_admin',
+          ngayTao: new Date().toLocaleString('vi-VN')
+        })
+        updateAlertSuccess('Đóng phí thành công', `+${this.formatMoney(this.payment.amount)} (${this.payment.method})`)
+        await this.fetchContracts()
+        this.closeModal('modalPay')
+      } catch (error) {
+        console.error('❌ Lỗi đóng phí', error)
+        updateAlertError('Đóng phí thất bại', 'Vui lòng thử lại sau.')
+      }
     },
 
     // Refund management
@@ -2379,6 +2397,36 @@ export default {
   box-shadow: 0 12px 24px rgba(20,30,48,.08);
   overflow:hidden;
 }
+.kpi-row .kpi{
+  position: relative;
+  border: none;
+  color: #fff;
+  background: var(--primary-gradient);
+}
+.kpi-row .kpi-total{ background: var(--primary-gradient); }
+.kpi-row .kpi-revenue{ background: var(--success-gradient); }
+.kpi-row .kpi-adjust{ background: var(--warning-gradient); }
+.kpi-row .kpi-sales{ background: var(--secondary-gradient); }
+.kpi-row .kpi .k{
+  color: rgba(255,255,255,.86);
+}
+.kpi-row .kpi .k .dot{
+  background: rgba(255,255,255,.75);
+}
+.kpi-row .kpi .v{
+  color: #fff;
+}
+.kpi-row .kpi .v.price{
+  background: none;
+  -webkit-text-fill-color: #fff;
+}
+.kpi-row .kpi-ico{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  opacity: 0.4;
+}
 .kpi .k{
   font-size: 11px;
   color: rgba(11,18,32,.60);
@@ -2396,7 +2444,7 @@ export default {
 }
 .kpi .v{
   margin-top: 4px;
-  font-weight: 950;
+  font-weight: 600;
   font-size: 16px;
   white-space: nowrap;
   overflow:hidden;
@@ -2603,6 +2651,9 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
   animation: pop .16s ease;
   display:flex;
   flex-direction: column;
+}
+.modal-card.pay-modal{
+  width: min(1120px, 100%);
 }
 .modal-card.detail{
   background:
