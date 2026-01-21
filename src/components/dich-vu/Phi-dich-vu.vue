@@ -1715,6 +1715,11 @@ const saveContract = async () => {
 
 // Payment management
 const openPay = (contract) => {
+  const conThieu = calcConThieu(contract)
+  if (conThieu <= 0) {
+    showCenterWarning('Phí đã đóng hoàn tất', 'Không thể đóng thêm phí.')
+    return
+  }
   currentContract.value = contract
   payment.value = {
     amount: 0,
