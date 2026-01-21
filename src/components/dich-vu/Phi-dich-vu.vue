@@ -13,18 +13,6 @@
       </div>
 
       <div class="top-actions">
-        <button class="btn ghost" @click="seedMock">
-          <i class="fa-solid fa-wand-magic-sparkles"></i>
-          <span class="hidden sm:inline">Tạo dữ liệu mẫu</span>
-          <span class="sm:hidden">Mock</span>
-        </button>
-
-        <button class="btn ghost" @click="resetContractForm">
-          <i class="fa-solid fa-broom"></i>
-          <span class="hidden sm:inline">Tạo mới form</span>
-          <span class="sm:hidden">Form</span>
-        </button>
-
         <button class="btn primary" @click="openModal('modalContract')">
           <i class="fa-solid fa-plus"></i>
           <span>Thêm hợp đồng</span>
@@ -74,13 +62,6 @@
                 <option value="HUY">HUY</option>
               </select>
             </div>
-
-            <div class="tools-actions">
-              <button class="btn ghost" @click="resetFilters">
-                <i class="fa-solid fa-rotate"></i>
-                Reset lọc
-              </button>
-            </div>
           </div>
         </div>
 
@@ -117,13 +98,14 @@
                   <th style="width:140px">Thực thu</th>
                   <th style="width:140px">Doanh thu</th>
                   <th style="width:120px">Trạng thái</th>
-                  <th style="width:120px">Ngày ký</th>
+                  <th style="width:160px">Nhân viên tạo</th>
+                  <th style="width:160px">Ngày tạo</th>
                   <th style="width:230px">Thao tác</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr v-if="filteredContracts.length === 0">
-                  <td colspan="9">
+                  <td colspan="10">
                     <div class="text-center py-10">
                       <div class="mx-auto w-12 h-12 rounded-2xl grid place-items-center text-white shadow-lg" style="background: var(--primary-gradient);">
                         <i class="fa-solid fa-face-smile"></i>
@@ -133,14 +115,13 @@
                     </div>
                   </td>
                 </tr>
-                <tr v-for="contract in filteredContracts" :key="contract.id">
+                <tr v-for="contract in paginatedContracts" :key="contract.id">
                   <td>
                     <div class="font-extrabold mono">{{ contract.maHopDong }}</div>
                     <div class="muted tiny">ID KH: {{ contract.maKhachHang }}</div>
                   </td>
                   <td>
                     <div class="font-bold">{{ contract.tenKhachHang }}</div>
-                    <div class="muted tiny">Tạo: {{ contract.ngayTao }}</div>
                   </td>
                   <td>
                     <div class="font-extrabold">{{ contract.tenDichVu }}</div>
@@ -166,7 +147,10 @@
                         <i class="fa-solid fa-circle"></i>Đã hủy
                       </span>
                   </td>
-                  <td class="mono">{{ contract.ngayKy }}</td>
+                  <td>
+                    <div class="font-semibold">{{ contract.nhanVienTao }}</div>
+                  </td>
+                  <td class="mono">{{ formatCreatedAt(contract.ngayTao) }}</td>
                   <td>
                     <div class="actions">
                       <div class="icon-btn icon-view" title="Xem chi tiết" @click="openDetail(contract)">
@@ -190,6 +174,24 @@
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+        <div class="pagination">
+          <div class="muted tiny">
+            Hiển thị {{ pageStart }}-{{ pageEnd }} / {{ filteredContracts.length }}
+          </div>
+          <div class="pager">
+            <button class="btn ghost btn-page" :disabled="currentPage === 1" @click="prevPage">Trước</button>
+            <button
+              v-for="page in totalPages"
+              :key="page"
+              class="btn ghost btn-page"
+              :class="{ active: currentPage === page }"
+              @click="goToPage(page)"
+            >
+              {{ page }}
+            </button>
+            <button class="btn ghost btn-page" :disabled="currentPage === totalPages" @click="nextPage">Sau</button>
           </div>
         </div>
       </div>
@@ -511,7 +513,7 @@
               <div class="card-h"><i class="fa-solid fa-circle-info"></i> Tóm tắt hợp đồng</div>
               <div class="p-3">
                 <div class="text-sm font-extrabold">{{ currentContract?.maHopDong }} • {{ currentContract?.tenKhachHang }}</div>
-                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày ký {{ currentContract?.ngayKy }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
+                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày tạo {{ formatCreatedAt(currentContract?.ngayTao) }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
 
                 <div class="grid grid-cols-2 gap-2 mt-3">
                   <div class="kpi">
@@ -586,7 +588,7 @@
               <div class="card-h"><i class="fa-solid fa-circle-info"></i> Tóm tắt hợp đồng</div>
               <div class="p-3">
                 <div class="text-sm font-extrabold">{{ currentContract?.maHopDong }} • {{ currentContract?.tenKhachHang }}</div>
-                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày ký {{ currentContract?.ngayKy }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
+                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày tạo {{ formatCreatedAt(currentContract?.ngayTao) }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
 
                 <div class="grid grid-cols-2 gap-2 mt-3">
                   <div class="kpi">
@@ -669,7 +671,7 @@
               <div class="card-h"><i class="fa-solid fa-circle-info"></i> Tác động sau điều chỉnh</div>
               <div class="p-3">
                 <div class="text-sm font-extrabold">{{ currentContract?.maHopDong }} • {{ currentContract?.tenKhachHang }}</div>
-                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày ký {{ currentContract?.ngayKy }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
+                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày tạo {{ formatCreatedAt(currentContract?.ngayTao) }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
 
                 <div class="grid grid-cols-2 gap-2 mt-3">
                   <div class="kpi">
@@ -737,7 +739,7 @@
 
               <div class="p-3">
                 <div class="text-sm font-extrabold">{{ currentContract?.maHopDong }} • {{ currentContract?.tenKhachHang }}</div>
-                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày ký {{ currentContract?.ngayKy }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
+                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày tạo {{ formatCreatedAt(currentContract?.ngayTao) }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
 
                 <div class="grid grid-cols-2 gap-2 mt-3">
                   <div class="kpi">
@@ -944,6 +946,9 @@ export default {
       searchQuery: '',
       filterService: '',
       filterStatus: '',
+      currentPage: 1,
+      pageSize: 2,
+      currentUserName: 'Nguyễn Minh',
 
       // Customer search
       customerSearch: '',
@@ -1015,12 +1020,30 @@ export default {
   computed: {
     filteredContracts() {
       return this.contracts.filter(contract => {
-        const hay = `${contract.maHopDong} ${contract.tenKhachHang} ${contract.tenDichVu}`.toLowerCase()
+        const hay = `${contract.maHopDong} ${contract.tenKhachHang} ${contract.tenDichVu} ${contract.nhanVienTao || ''}`.toLowerCase()
         const okQ = !this.searchQuery || hay.includes(this.searchQuery.toLowerCase())
         const okSvc = !this.filterService || contract.tenDichVu === this.filterService
         const okSt = !this.filterStatus || contract.trangThaiHopDong === this.filterStatus
         return okQ && okSvc && okSt
       })
+    },
+
+    totalPages() {
+      return Math.max(1, Math.ceil(this.filteredContracts.length / this.pageSize))
+    },
+
+    paginatedContracts() {
+      const start = (this.currentPage - 1) * this.pageSize
+      return this.filteredContracts.slice(start, start + this.pageSize)
+    },
+
+    pageStart() {
+      if (!this.filteredContracts.length) return 0
+      return (this.currentPage - 1) * this.pageSize + 1
+    },
+
+    pageEnd() {
+      return Math.min(this.currentPage * this.pageSize, this.filteredContracts.length)
     },
 
     totalThucThu() {
@@ -1079,6 +1102,22 @@ export default {
   },
 
   watch: {
+    filteredContracts() {
+      this.currentPage = Math.min(this.currentPage, this.totalPages)
+    },
+
+    searchQuery() {
+      this.currentPage = 1
+    },
+
+    filterService() {
+      this.currentPage = 1
+    },
+
+    filterStatus() {
+      this.currentPage = 1
+    },
+
     customerSearch(val) {
       if (this.suppressCustomerSearch) return
 
@@ -1158,6 +1197,26 @@ export default {
       const mm = String(d.getMonth() + 1).padStart(2, '0')
       const dd = String(d.getDate()).padStart(2, '0')
       return `${yyyy}-${mm}-${dd}`
+    },
+
+    formatCreatedAt(value) {
+      if (!value) return '-'
+      if (typeof value === 'string') {
+        const parts = value.split(',')
+        if (parts.length === 2) {
+          const datePart = parts[0].trim()
+          const timePart = parts[1].trim()
+          if (timePart && datePart) return `${timePart} ${datePart}`
+        }
+        if (/\d{1,2}:\d{2}:\d{2}/.test(value) && /\d{1,2}\/\d{1,2}\/\d{4}/.test(value)) {
+          return value
+        }
+      }
+      const parsed = value instanceof Date ? value : new Date(value)
+      if (!Number.isNaN(parsed.getTime())) {
+        return `${parsed.toLocaleTimeString('vi-VN')} ${parsed.toLocaleDateString('vi-VN')}`
+      }
+      return String(value)
     },
 
     randInt(min, max) {
@@ -1465,6 +1524,7 @@ export default {
           maHopDong: created.maHopDong || this.newContract.maHopDong,
           maKhachHang: created.maKhachHang ?? this.newContract.maKhachHang,
           tenKhachHang: created.tenKhachHang || this.newContract.tenKhachHang,
+          nhanVienTao: created.nhanVienTao || this.currentUserName,
           tenDichVu: created.tenDichVu || this.newContract.tenDichVu,
           serviceId: created.serviceId ?? this.newContract.serviceId,
           giaTriTaiSan: created.giaTriKyBan ?? created.giaTriTaiSan ?? this.newContract.giaTriTaiSan,
@@ -1645,12 +1705,27 @@ export default {
       this.searchQuery = ''
       this.filterService = ''
       this.filterStatus = ''
+      this.currentPage = 1
       this.showToastMessage('info', 'Đã reset lọc', 'Hiển thị toàn bộ hợp đồng.')
+    },
+
+    goToPage(page) {
+      const next = Math.min(this.totalPages, Math.max(1, page))
+      this.currentPage = next
+    },
+
+    nextPage() {
+      this.goToPage(this.currentPage + 1)
+    },
+
+    prevPage() {
+      this.goToPage(this.currentPage - 1)
     },
 
     // Seed data
     seedMock() {
       const names = ['Nguyễn Văn A', 'Trần Thị B', 'Lê Hoàng C', 'Phạm Minh D', 'Võ Thúy E', 'Đặng Quốc F']
+      const staffNames = ['Nguyễn Minh', 'Trần Hà', 'Phạm Quân', 'Lê Thu']
       const serviceList = this.serviceOptions
 
       if (!serviceList.length) {
@@ -1681,6 +1756,7 @@ export default {
           maHopDong: this.genContractCode(),
           maKhachHang: this.randInt(1001, 2000),
           tenKhachHang: names[this.randInt(0, names.length - 1)],
+          nhanVienTao: staffNames[this.randInt(0, staffNames.length - 1)],
           tenDichVu: service.name,
           serviceId: service.id || service.name,
           giaTriTaiSan: assetValue,
@@ -1809,6 +1885,7 @@ export default {
           maHopDong: code,
           maKhachHang: x.maKhachHang,
           tenKhachHang: x.tenKhachHang,
+          nhanVienTao: this.currentUserName,
           tenDichVu: service?.name || x.tenDichVu,
           serviceId: service?.id || service?.name || null,
           giaTriTaiSan: assetValue,
@@ -2306,6 +2383,31 @@ tbody td{
 }
 tbody tr:nth-child(even){ background: rgba(20,30,48,.012); }
 tbody tr:hover{ background: rgba(79,172,254,.08); }
+
+.pagination{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding: 12px 4px 0;
+  flex-wrap: wrap;
+}
+.pager{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap: wrap;
+}
+.btn-page{
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 10px;
+}
+.btn-page.active{
+  background: var(--primary-gradient);
+  color:#fff;
+  border-color: transparent;
+}
 
 .footnote{
   padding: 10px;

@@ -1,58 +1,921 @@
 diff --git a/src/components/dich-vu/Phi-dich-vu.vue b/src/components/dich-vu/Phi-dich-vu.vue
-index c53abc4c3971422c69a44f6ad5d9a5f5d2b1fb4b..bd2a25f3fdbac3680747350e0ebe8592bcb125de 100644
+index 4c5d0e3c50e2171bff724bee6d9c5daedde0d139..2efa3ec67a4a863de4d5952d96b24ca595a21585 100644
 --- a/src/components/dich-vu/Phi-dich-vu.vue
 +++ b/src/components/dich-vu/Phi-dich-vu.vue
-@@ -1385,50 +1385,53 @@ export default {
-         }))
-       } catch (e) {
-         this.customerSearchResults = []
-         this.customerSearchError = 'Không tìm thấy hoặc lỗi tải dữ liệu.'
-       } finally {
-         this.customerSearchLoading = false
+@@ -95,125 +95,146 @@
+               <div class="k"><span class="dot"></span>Tổng thực thu</div>
+               <div class="v price p3">{{ formatMoney(totalThucThu) }}</div>
+             </div>
+             <div class="kpi">
+               <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
+               <div class="v price p2">{{ formatMoney(totalDieuChinh) }}</div>
+             </div>
+             <div class="kpi">
+               <div class="k"><span class="dot"></span>Tổng doanh thu (min)</div>
+               <div class="v price p1">{{ formatMoney(totalDoanhThu) }}</div>
+             </div>
+           </div>
+
+           <div class="table-wrap">
+             <div class="table-scroll">
+               <table>
+                 <thead>
+                 <tr>
+                   <th style="width:150px">Mã HĐ</th>
+                   <th>Khách hàng</th>
+                   <th style="width:260px">Dịch vụ</th>
+                   <th style="width:140px">Giá sau giảm</th>
+                   <th style="width:140px">Thực thu</th>
+                   <th style="width:140px">Doanh thu</th>
+                   <th style="width:120px">Trạng thái</th>
+-                  <th style="width:120px">Ngày ký</th>
++                  <th style="width:160px">Nhân viên tạo</th>
++                  <th style="width:160px">Ngày tạo</th>
+                   <th style="width:230px">Thao tác</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 <tr v-if="filteredContracts.length === 0">
+-                  <td colspan="9">
++                  <td colspan="10">
+                     <div class="text-center py-10">
+                       <div class="mx-auto w-12 h-12 rounded-2xl grid place-items-center text-white shadow-lg" style="background: var(--primary-gradient);">
+                         <i class="fa-solid fa-face-smile"></i>
+                       </div>
+                       <div class="mt-3 font-extrabold">Chưa có dữ liệu</div>
+                       <div class="mt-2 muted">File upgrade đã có sẵn 3 hợp đồng mẫu. Nếu bạn xoá hết, hãy bấm "Tạo dữ liệu mẫu".</div>
+                     </div>
+                   </td>
+                 </tr>
+-                <tr v-for="contract in filteredContracts" :key="contract.id">
++                <tr v-for="contract in paginatedContracts" :key="contract.id">
+                   <td>
+                     <div class="font-extrabold mono">{{ contract.maHopDong }}</div>
+                     <div class="muted tiny">ID KH: {{ contract.maKhachHang }}</div>
+                   </td>
+                   <td>
+                     <div class="font-bold">{{ contract.tenKhachHang }}</div>
+-                    <div class="muted tiny">Tạo: {{ contract.ngayTao }}</div>
+                   </td>
+                   <td>
+                     <div class="font-extrabold">{{ contract.tenDichVu }}</div>
+                     <div class="muted tiny">Giá gốc: <span class="mono">{{ formatMoney(contract.giaDichVuGoc) }}</span></div>
+                   </td>
+                   <td>
+                     <div class="price p4">{{ formatMoney(contract.giaSauGiam) }}</div>
+                   </td>
+                   <td>
+                     <div class="price p3">{{ formatMoney(calcThucThu(contract)) }}</div>
+                   </td>
+                   <td>
+                     <div class="price p1">{{ formatMoney(calcDoanhThu(contract)) }}</div>
+                   </td>
+                   <td>
+                       <span v-if="contract.trangThaiHopDong === 'DANG_HIEU_LUC'" class="status st-on">
+                         <i class="fa-solid fa-circle"></i>Đang hiệu lực
+                       </span>
+                     <span v-else-if="contract.trangThaiHopDong === 'HOAN_TAT'" class="status st-done">
+                         <i class="fa-solid fa-circle"></i>Hoàn tất
+                       </span>
+                     <span v-else-if="contract.trangThaiHopDong === 'HUY'" class="status st-cancel">
+                         <i class="fa-solid fa-circle"></i>Đã hủy
+                       </span>
+                   </td>
+-                  <td class="mono">{{ contract.ngayKy }}</td>
++                  <td>
++                    <div class="font-semibold">{{ contract.nhanVienTao }}</div>
++                  </td>
++                  <td class="mono">{{ formatCreatedAt(contract.ngayTao) }}</td>
+                   <td>
+                     <div class="actions">
+                       <div class="icon-btn icon-view" title="Xem chi tiết" @click="openDetail(contract)">
+                         <i class="fa-solid fa-eye"></i>
+                       </div>
+                       <div class="icon-btn icon-pay" title="Đóng phí" @click="openPay(contract)">
+                         <i class="fa-solid fa-circle-dollar-to-slot"></i>
+                       </div>
+                       <div class="icon-btn icon-refund" title="Hoàn phí" @click="openRefund(contract)">
+                         <i class="fa-solid fa-arrow-rotate-left"></i>
+                       </div>
+                       <div class="icon-btn icon-adjust" title="Điều chỉnh" @click="openAdjust(contract)">
+                         <i class="fa-solid fa-sliders"></i>
+                       </div>
+                       <div class="icon-btn icon-del" title="Xóa" @click="openDelete(contract)">
+                         <i class="fa-solid fa-trash"></i>
+                       </div>
+                     </div>
+                   </td>
+                 </tr>
+                 </tbody>
+               </table>
+             </div>
+           </div>
+         </div>
++        <div class="pagination">
++          <div class="muted tiny">
++            Hiển thị {{ pageStart }}-{{ pageEnd }} / {{ filteredContracts.length }}
++          </div>
++          <div class="pager">
++            <button class="btn ghost btn-page" :disabled="currentPage === 1" @click="prevPage">Trước</button>
++            <button
++              v-for="page in totalPages"
++              :key="page"
++              class="btn ghost btn-page"
++              :class="{ active: currentPage === page }"
++              @click="goToPage(page)"
++            >
++              {{ page }}
++            </button>
++            <button class="btn ghost btn-page" :disabled="currentPage === totalPages" @click="nextPage">Sau</button>
++          </div>
++        </div>
+       </div>
+
+       <!-- PANEL TAB 2 -->
+       <div class="panel attached" v-show="activeTab === 2">
+         <div class="panel-h">
+           <div class="panel-title">
+             <i class="fa-solid fa-chart-simple"></i>
+             Thống kê (để trống)
+           </div>
+         </div>
+         <div class="panel-b">
+           <div class="text-center py-16">
+             <div class="mx-auto w-12 h-12 rounded-2xl grid place-items-center text-white shadow-lg"
+                  style="background: var(--info-gradient);">
+               <i class="fa-solid fa-chart-line"></i>
+             </div>
+             <div class="mt-3 font-extrabold">Tab thống kê</div>
+             <div class="mt-2 muted">Bạn yêu cầu để trống. Khi cần mình làm dashboard Chart.js sau.</div>
+           </div>
+         </div>
+       </div>
+     </div>
+
+     <!-- TOAST -->
+     <div class="toast-wrap">
+@@ -489,51 +510,51 @@
+                 <input v-model.number="payment.amount" type="number" placeholder="VD: 3000000">
+               </div>
+               <div class="field">
+                 <label><i class="fa-solid fa-credit-card"></i> Hình thức thanh toán</label>
+                 <select v-model="payment.method">
+                   <option value="TIEN_MAT">TIEN_MAT</option>
+                   <option value="CHUYEN_KHOAN">CHUYEN_KHOAN</option>
+                   <option value="QR">QR</option>
+                   <option value="KHAC">KHAC</option>
+                 </select>
+               </div>
+               <div class="field">
+                 <label><i class="fa-solid fa-calendar-day"></i> Ngày đóng tiền</label>
+                 <input v-model="payment.date" type="date">
+               </div>
+               <div class="field">
+                 <label><i class="fa-solid fa-note-sticky"></i> Ghi chú</label>
+                 <input v-model="payment.note" type="text" placeholder="VD: Đợt 2">
+               </div>
+             </div>
+
+             <div class="card">
+               <div class="card-h"><i class="fa-solid fa-circle-info"></i> Tóm tắt hợp đồng</div>
+               <div class="p-3">
+                 <div class="text-sm font-extrabold">{{ currentContract?.maHopDong }} • {{ currentContract?.tenKhachHang }}</div>
+-                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày ký {{ currentContract?.ngayKy }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
++                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày tạo {{ formatCreatedAt(currentContract?.ngayTao) }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
+
+                 <div class="grid grid-cols-2 gap-2 mt-3">
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Giá điều chỉnh</div>
+                     <div class="v price p2">{{ formatMoney(calcGiaDieuChinh(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Thực thu</div>
+                     <div class="v price p3">{{ formatMoney(calcThucThu(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Doanh thu (min)</div>
+                     <div class="v price p1">{{ formatMoney(calcDoanhThu(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Còn thiếu</div>
+                     <div class="v price p4">{{ formatMoney(Math.max(0, calcGiaDieuChinh(currentContract) - calcThucThu(currentContract))) }}</div>
+                   </div>
+                 </div>
+
+                 <div class="note mt-3">
+                   <b>Lưu ý:</b> Đóng phí sẽ làm tăng <span class="mono">Thực thu</span>.
+                 </div>
+               </div>
+             </div>
+@@ -564,51 +585,51 @@
+           </button>
+         </div>
+
+         <div class="modal-b">
+           <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+             <div class="card">
+               <div class="card-h"><i class="fa-solid fa-reply"></i> Thông tin hoàn</div>
+               <div class="field">
+                 <label><i class="fa-solid fa-money-bill-transfer"></i> Số tiền hoàn</label>
+                 <input v-model.number="refund.amount" type="number" placeholder="VD: 500000">
+               </div>
+               <div class="field">
+                 <label><i class="fa-solid fa-calendar-day"></i> Ngày hoàn</label>
+                 <input v-model="refund.date" type="date">
+               </div>
+               <div class="field">
+                 <label><i class="fa-solid fa-clipboard"></i> Lý do hoàn</label>
+                 <textarea v-model="refund.reason" placeholder="VD: Khách huỷ 1 phần..."></textarea>
+               </div>
+             </div>
+
+             <div class="card">
+               <div class="card-h"><i class="fa-solid fa-circle-info"></i> Tóm tắt hợp đồng</div>
+               <div class="p-3">
+                 <div class="text-sm font-extrabold">{{ currentContract?.maHopDong }} • {{ currentContract?.tenKhachHang }}</div>
+-                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày ký {{ currentContract?.ngayKy }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
++                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày tạo {{ formatCreatedAt(currentContract?.ngayTao) }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
+
+                 <div class="grid grid-cols-2 gap-2 mt-3">
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Giá điều chỉnh</div>
+                     <div class="v price p2">{{ formatMoney(calcGiaDieuChinh(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Thực thu</div>
+                     <div class="v price p3">{{ formatMoney(calcThucThu(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Doanh thu (min)</div>
+                     <div class="v price p1">{{ formatMoney(calcDoanhThu(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Còn thiếu</div>
+                     <div class="v price p4">{{ formatMoney(Math.max(0, calcGiaDieuChinh(currentContract) - calcThucThu(currentContract))) }}</div>
+                   </div>
+                 </div>
+
+                 <div class="note mt-3">
+                   <b>Lưu ý:</b> Hoàn phí sẽ làm giảm <span class="mono">Thực thu</span>.
+                 </div>
+               </div>
+             </div>
+@@ -647,51 +668,51 @@
+               <div class="field">
+                 <label><i class="fa-solid fa-coins"></i> Số tiền điều chỉnh</label>
+                 <input v-model.number="adjustment.amount" type="number" placeholder="VD: -500000 hoặc 300000">
+                 <div class="muted tiny">Âm = giảm thêm • Dương = phụ thu / phạt</div>
+               </div>
+
+               <div class="field">
+                 <label><i class="fa-solid fa-layer-group"></i> Loại điều chỉnh</label>
+                 <select v-model="adjustment.type">
+                   <option value="GIAM_GIA">GIAM_GIA</option>
+                   <option value="PHU_THU">PHU_THU</option>
+                   <option value="PHAT">PHAT</option>
+                 </select>
+               </div>
+
+               <div class="field">
+                 <label><i class="fa-solid fa-clipboard"></i> Lý do</label>
+                 <textarea v-model="adjustment.reason" placeholder="VD: Phạt trễ tiến độ..."></textarea>
+               </div>
+             </div>
+
+             <div class="card">
+               <div class="card-h"><i class="fa-solid fa-circle-info"></i> Tác động sau điều chỉnh</div>
+               <div class="p-3">
+                 <div class="text-sm font-extrabold">{{ currentContract?.maHopDong }} • {{ currentContract?.tenKhachHang }}</div>
+-                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày ký {{ currentContract?.ngayKy }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
++                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày tạo {{ formatCreatedAt(currentContract?.ngayTao) }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
+
+                 <div class="grid grid-cols-2 gap-2 mt-3">
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Giá trị tài sản</div>
+                     <div class="v price p4">{{ formatMoney(currentContract?.giaTriTaiSan || 0) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Giá gốc</div>
+                     <div class="v price p2">{{ formatMoney(currentContract?.giaDichVuGoc || 0) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Giá chốt</div>
+                     <div class="v price p4">{{ formatMoney(currentContract?.giaSauGiam || 0) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
+                     <div class="v price p2">{{ formatMoney(calcTongDieuChinh(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Giá điều chỉnh</div>
+                     <div class="v price p2">{{ formatMoney(calcGiaDieuChinh(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Doanh thu (min)</div>
+                     <div class="v price p1">{{ formatMoney(calcDoanhThu(currentContract)) }}</div>
+@@ -715,51 +736,51 @@
+           </button>
+         </div>
+       </div>
+     </div>
+
+     <!-- MODAL: DETAIL -->
+     <div class="modal" :class="{ show: showModal === 'modalDetail' }" @click.self="closeModal('modalDetail')">
+       <div class="modal-card detail">
+         <div class="modal-h">
+           <div class="modal-title">
+             <i class="fa-solid fa-file-lines"></i>
+             <span>Chi tiết hợp đồng {{ currentContract?.maHopDong }}</span>
+           </div>
+           <button class="x" @click="closeModal('modalDetail')">
+             <i class="fa-solid fa-xmark"></i>
+           </button>
+         </div>
+
+         <div class="modal-b">
+           <div class="grid grid-cols-1 xl:grid-cols-3 gap-3">
+             <div class="card xl:col-span-1">
+               <div class="card-h"><i class="fa-solid fa-circle-info"></i> Thông tin hợp đồng</div>
+
+               <div class="p-3">
+                 <div class="text-sm font-extrabold">{{ currentContract?.maHopDong }} • {{ currentContract?.tenKhachHang }}</div>
+-                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày ký {{ currentContract?.ngayKy }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
++                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày tạo {{ formatCreatedAt(currentContract?.ngayTao) }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
+
+                 <div class="grid grid-cols-2 gap-2 mt-3">
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Giá chốt</div>
+                     <div class="v price p4">{{ formatMoney(currentContract?.giaSauGiam || 0) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Giá điều chỉnh</div>
+                     <div class="v price p2">{{ formatMoney(calcGiaDieuChinh(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Thực thu</div>
+                     <div class="v price p3">{{ formatMoney(calcThucThu(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Doanh thu</div>
+                     <div class="v price p1">{{ formatMoney(calcDoanhThu(currentContract)) }}</div>
+                   </div>
+                 </div>
+
+                 <div class="note mt-3">
+                   <b>Lưu ý:</b> Đây là màn hình chỉ xem. Muốn thao tác thì dùng các nút ở bảng.
+                 </div>
+               </div>
+             </div>
+@@ -922,50 +943,53 @@
+ <script>
+ import api from '/src/api/api.js'
+ import { showError, showLoading, updateAlertError, updateAlertSuccess } from '/src/assets/js/alertService.js'
+
+ export default {
+   name: 'ContractManagement',
+
+   data() {
+     return {
+       // Constants
+       ENUM_STATUS: ['DANG_HIEU_LUC', 'HOAN_TAT', 'HUY'],
+       ENUM_PAY: ['TIEN_MAT', 'CHUYEN_KHOAN', 'QR', 'KHAC'],
+       ENUM_ADJ: ['GIAM_GIA', 'PHU_THU', 'PHAT'],
+
+       // State
+       activeTab: 1,
+       contracts: [],
+       seq: 1,
+       services: [],
+       segments: [],
+
+       // Filters
+       searchQuery: '',
+       filterService: '',
+       filterStatus: '',
++      currentPage: 1,
++      pageSize: 2,
++      currentUserName: 'Nguyễn Minh',
+
+       // Customer search
+       customerSearch: '',
+       selectedCustomer: null,
+       customerSearchResults: [],
+       customerSearchLoading: false,
+       customerSearchError: '',
+       customerSearchTimer: null,
+       lastCustomerKeyword: '',
+       suppressCustomerSearch: false,
+
+       // New contract form
+       newContract: {
+         maHopDong: '',
+         maKhachHang: '',
+         tenKhachHang: '',
+         tenDichVu: '',
+         serviceId: null,
+         giaTriTaiSan: null,
+         giaDichVuGoc: 0,
+         phiGiam: 0,
+         discountMode: 'PERCENT',
+         discountValue: 0,
+         giaSauGiam: 0,
+         trangThaiHopDong: 'DANG_HIEU_LUC',
+@@ -993,58 +1017,76 @@ export default {
+         date: this.todayISO(),
+         reason: ''
+       },
+
+       // Adjustment form
+       adjustment: {
+         amount: 0,
+         type: 'GIAM_GIA',
+         reason: ''
+       },
+
+       // Toast
+       showToast: false,
+       toast: {
+         type: 'info',
+         title: '',
+         text: '',
+         icon: 'fa-solid fa-circle-info'
        }
+     }
+   },
+
+   computed: {
+     filteredContracts() {
+       return this.contracts.filter(contract => {
+-        const hay = `${contract.maHopDong} ${contract.tenKhachHang} ${contract.tenDichVu}`.toLowerCase()
++        const hay = `${contract.maHopDong} ${contract.tenKhachHang} ${contract.tenDichVu} ${contract.nhanVienTao || ''}`.toLowerCase()
+         const okQ = !this.searchQuery || hay.includes(this.searchQuery.toLowerCase())
+         const okSvc = !this.filterService || contract.tenDichVu === this.filterService
+         const okSt = !this.filterStatus || contract.trangThaiHopDong === this.filterStatus
+         return okQ && okSvc && okSt
+       })
      },
 
-     clearCustomerSearchTimer() {
-       if (this.customerSearchTimer) clearTimeout(this.customerSearchTimer)
-       this.customerSearchTimer = null
++    totalPages() {
++      return Math.max(1, Math.ceil(this.filteredContracts.length / this.pageSize))
++    },
++
++    paginatedContracts() {
++      const start = (this.currentPage - 1) * this.pageSize
++      return this.filteredContracts.slice(start, start + this.pageSize)
++    },
++
++    pageStart() {
++      if (!this.filteredContracts.length) return 0
++      return (this.currentPage - 1) * this.pageSize + 1
++    },
++
++    pageEnd() {
++      return Math.min(this.currentPage * this.pageSize, this.filteredContracts.length)
++    },
++
+     totalThucThu() {
+       return this.filteredContracts.reduce((sum, c) => sum + this.calcThucThu(c), 0)
      },
 
-     selectCustomer(customer) {
-       this.suppressCustomerSearch = true
-       this.clearCustomerSearchTimer()
-       this.customerSearchLoading = false
-       this.customerSearchError = ''
-       this.customerSearchResults = []
-
-       this.selectedCustomer = customer
-       this.customerSearch = customer.name
-       this.newContract.maKhachHang = customer.id
-       this.newContract.tenKhachHang = customer.name
-+      if (customer?.raw?.giaTriTaiSan !== undefined && customer?.raw?.giaTriTaiSan !== null) {
-+        this.newContract.giaTriTaiSan = Number(customer.raw.giaTriTaiSan || 0)
-+      }
-
-       setTimeout(() => {
-         this.suppressCustomerSearch = false
-       }, 0)
+     totalDieuChinh() {
+       return this.filteredContracts.reduce((sum, c) => sum + this.calcTongDieuChinh(c), 0)
      },
 
-     async saveContract() {
-       this.updateGiaSauGiam()
-       if (!this.selectedCustomer) {
-         showError('Thiếu dữ liệu', 'Bạn cần chọn khách hàng từ danh sách.')
-         return
-       }
+     totalDoanhThu() {
+       return this.filteredContracts.reduce((sum, c) => sum + this.calcDoanhThu(c), 0)
+     },
 
-       if (!this.newContract.tenDichVu) {
-         showError('Thiếu dữ liệu', 'Bạn cần chọn Dịch vụ.')
-         return
-       }
+     serviceOptions() {
+       return this.services
+     },
 
+     selectedService() {
+       if (!this.newContract.serviceId) return null
+       return this.serviceOptions.find(s => String(s.id || s.name) === String(this.newContract.serviceId)) || null
+     },
+
+     matchingSegment() {
+       const serviceId = this.newContract.serviceId
+       const assetValue = Number(this.newContract.giaTriTaiSan || 0)
+       if (!serviceId || assetValue <= 0) return null
+@@ -1057,50 +1099,66 @@ export default {
+
+     segmentHint() {
+       if (!this.newContract.serviceId) {
+         return 'Vui lòng chọn dịch vụ để hiển thị phân khúc.'
+       }
        if (!this.newContract.giaTriTaiSan) {
-         showError('Thiếu dữ liệu', 'Bạn cần nhập giá trị tài sản.')
+         return 'Nhập giá trị tài sản để xác định mức giá gốc.'
+       }
+       if (!this.matchingSegment) {
+         return 'Chưa có phân khúc phù hợp với giá trị tài sản này.'
+       }
+       return `Phân khúc ${this.formatMoney(this.matchingSegment.min)} → ${this.formatMoney(this.matchingSegment.max)}`
+     },
+
+     firstPaymentAmount() {
+       if (this.newContract.initPlan === 'FULL') {
+         return this.newContract.giaSauGiam
+       } else {
+         const percent = Math.max(0, Math.min(100, this.newContract.tiLeCoc || 0))
+         return Math.round(this.newContract.giaSauGiam * (percent / 100))
+       }
+     }
+   },
+
+   watch: {
++    filteredContracts() {
++      this.currentPage = Math.min(this.currentPage, this.totalPages)
++    },
++
++    searchQuery() {
++      this.currentPage = 1
++    },
++
++    filterService() {
++      this.currentPage = 1
++    },
++
++    filterStatus() {
++      this.currentPage = 1
++    },
++
+     customerSearch(val) {
+       if (this.suppressCustomerSearch) return
+
+       if (this.selectedCustomer && (val || '').trim() === (this.selectedCustomer.name || '').trim()) {
+         this.customerSearchResults = []
+         this.customerSearchLoading = false
+         this.customerSearchError = ''
          return
        }
 
-       if (!this.newContract.giaDichVuGoc) {
-         showError('Thiếu dữ liệu', 'Giá gốc chưa xác định theo phân khúc.')
+       if (this.selectedCustomer && (val || '').trim() !== (this.selectedCustomer?.name || '').trim()) {
+         this.selectedCustomer = null
+         this.newContract.maKhachHang = ''
+         this.newContract.tenKhachHang = ''
+       }
+
+       this.clearCustomerSearchTimer()
+
+       const k = (val || '').trim()
+       if (!k) {
+         this.lastCustomerKeyword = ''
+         this.customerSearchResults = []
+         this.customerSearchError = ''
+         this.customerSearchLoading = false
+         return
+@@ -1138,50 +1196,70 @@ export default {
+           .trim()
+           .split(/\s+/)
+           .filter(Boolean)
+       if (parts.length === 0) return 'NA'
+       if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+     },
+
+     getStatusText(status) {
+       switch(status) {
+         case 'DANG_HIEU_LUC': return 'Đang hiệu lực'
+         case 'HOAN_TAT': return 'Hoàn tất'
+         case 'HUY': return 'Đã hủy'
+         default: return status
+       }
+     },
+
+     todayISO() {
+       const d = new Date()
+       const yyyy = d.getFullYear()
+       const mm = String(d.getMonth() + 1).padStart(2, '0')
+       const dd = String(d.getDate()).padStart(2, '0')
+       return `${yyyy}-${mm}-${dd}`
+     },
+
++    formatCreatedAt(value) {
++      if (!value) return '-'
++      if (typeof value === 'string') {
++        const parts = value.split(',')
++        if (parts.length === 2) {
++          const datePart = parts[0].trim()
++          const timePart = parts[1].trim()
++          if (timePart && datePart) return `${timePart} ${datePart}`
++        }
++        if (/\d{1,2}:\d{2}:\d{2}/.test(value) && /\d{1,2}\/\d{1,2}\/\d{4}/.test(value)) {
++          return value
++        }
++      }
++      const parsed = value instanceof Date ? value : new Date(value)
++      if (!Number.isNaN(parsed.getTime())) {
++        return `${parsed.toLocaleTimeString('vi-VN')} ${parsed.toLocaleDateString('vi-VN')}`
++      }
++      return String(value)
++    },
++
+     randInt(min, max) {
+       return Math.floor(Math.random() * (max - min + 1)) + min
+     },
+
+     randPriceForService(serviceName) {
+       const svc = this.serviceOptions.find(s => s.name === serviceName) || this.serviceOptions[0]
+       if (!svc) return 0
+       const min = Number(svc.minPrice ?? svc.min ?? 0)
+       const max = Number(svc.maxPrice ?? svc.max ?? min)
+       if (!min || !max) return 0
+       const step = 250000
+       const raw = this.randInt(min, max)
+       return Math.round(raw / step) * step
+     },
+
+     pad4(n) {
+       return String(n).padStart(4, '0')
+     },
+
+     async fetchServices() {
+       try {
+         const res = await api.get('/dich-vu-thg/admin', {
+           params: {
+             keyword: null
+           }
+@@ -1443,50 +1521,51 @@ export default {
+         showError('Giảm giá không hợp lệ', 'Giảm giá tiền phải > 0 và không vượt quá giá gốc.')
+         return
+       }
+
+       const payload = {
+         maKhachHang: this.newContract.maKhachHang,
+         giaTriKyBan: this.newContract.giaTriTaiSan,
+         giaDichVuGoc: this.newContract.giaDichVuGoc,
+         phiGiam: this.newContract.phiGiam || 0,
+         giaSauGiam: this.newContract.giaSauGiam,
+         hinhThucThanhToan: this.newContract.firstMethod,
+         serviceId: this.newContract.serviceId,
+         soTienThanhToan: this.firstPaymentAmount,
+         initPlan: this.newContract.initPlan
+       }
+
+       try {
+         const res = await showLoading(api.post('/hop-dong/admin/create', payload))
+         const created = res?.data || {}
+         const hasPayments = Array.isArray(created.dotDongTien) && created.dotDongTien.length > 0
+         const contract = {
+           id: created.id || crypto.randomUUID(),
+           maHopDong: created.maHopDong || this.newContract.maHopDong,
+           maKhachHang: created.maKhachHang ?? this.newContract.maKhachHang,
+           tenKhachHang: created.tenKhachHang || this.newContract.tenKhachHang,
++          nhanVienTao: created.nhanVienTao || this.currentUserName,
+           tenDichVu: created.tenDichVu || this.newContract.tenDichVu,
+           serviceId: created.serviceId ?? this.newContract.serviceId,
+           giaTriTaiSan: created.giaTriKyBan ?? created.giaTriTaiSan ?? this.newContract.giaTriTaiSan,
+           giaDichVuGoc: created.giaDichVuGoc ?? this.newContract.giaDichVuGoc,
+           phiGiam: created.phiGiam ?? this.newContract.phiGiam ?? 0,
+           giaSauGiam: created.giaSauGiam ?? this.newContract.giaSauGiam,
+           trangThaiHopDong: created.trangThaiHopDong ?? this.newContract.trangThaiHopDong,
+           ngayKy: created.ngayKy ?? this.newContract.ngayKy ?? this.todayISO(),
+           ngayTao: created.ngayTao ?? new Date().toLocaleString('vi-VN'),
+           dotDongTien: hasPayments ? created.dotDongTien : [],
+           hoanTien: created.hoanTien || [],
+           dieuChinh: created.dieuChinh || [],
+           initPlan: created.initPlan ?? this.newContract.initPlan,
+           tiLeCoc: created.tiLeCoc ?? (this.newContract.initPlan === 'COC' ? (this.newContract.tiLeCoc || 0) : null)
+         }
+
+         if (!hasPayments && this.firstPaymentAmount > 0) {
+           contract.dotDongTien.push({
+             id: crypto.randomUUID(),
+             soTienDong: this.firstPaymentAmount,
+             hinhThucThanhToan: this.newContract.firstMethod,
+             ngayDongTien: contract.ngayKy,
+             ghiChu: this.newContract.initPlan === 'FULL' ?
+                 'Thanh toán đủ (tạo khi lập HĐ)' :
+                 `Cọc ${this.newContract.tiLeCoc || 0}% (tạo khi lập HĐ)`,
+@@ -1623,86 +1702,102 @@ export default {
+     },
+
+     // Detail view
+     openDetail(contract) {
+       this.currentContract = contract
+       this.openModal('modalDetail')
+     },
+
+     // Delete management
+     openDelete(contract) {
+       this.currentContract = contract
+       this.openModal('modalDelete')
+     },
+
+     confirmDelete() {
+       this.contracts = this.contracts.filter(c => c.id !== this.currentContract.id)
+       this.showToastMessage('success', 'Đã xóa', `Đã xóa ${this.currentContract.maHopDong}`)
+       this.closeModal('modalDelete')
+     },
+
+     // Filters
+     resetFilters() {
+       this.searchQuery = ''
+       this.filterService = ''
+       this.filterStatus = ''
++      this.currentPage = 1
+       this.showToastMessage('info', 'Đã reset lọc', 'Hiển thị toàn bộ hợp đồng.')
+     },
+
++    goToPage(page) {
++      const next = Math.min(this.totalPages, Math.max(1, page))
++      this.currentPage = next
++    },
++
++    nextPage() {
++      this.goToPage(this.currentPage + 1)
++    },
++
++    prevPage() {
++      this.goToPage(this.currentPage - 1)
++    },
++
+     // Seed data
+     seedMock() {
+       const names = ['Nguyễn Văn A', 'Trần Thị B', 'Lê Hoàng C', 'Phạm Minh D', 'Võ Thúy E', 'Đặng Quốc F']
++      const staffNames = ['Nguyễn Minh', 'Trần Hà', 'Phạm Quân', 'Lê Thu']
+       const serviceList = this.serviceOptions
+
+       if (!serviceList.length) {
+         this.showToastMessage('error', 'Thiếu dữ liệu', 'Chưa tải được danh sách dịch vụ.')
+         return
+       }
+
+       for (let i = 0; i < 5; i++) {
+         const service = serviceList[this.randInt(0, serviceList.length - 1)]
+         const segments = this.getSegmentsByService(service.id || service.name)
+         const pickedSegment = segments.length ? segments[this.randInt(0, segments.length - 1)] : null
+         const segmentMin = pickedSegment ? Number(pickedSegment.min) : 0
+         const segmentMax = pickedSegment ? Number(pickedSegment.max) : 0
+         const assetValue = pickedSegment
+             ? this.randInt(segmentMin, Math.max(segmentMin + 1, segmentMax - 1))
+             : this.randInt(500000000, 5000000000)
+         const giaGoc = pickedSegment ? Number(pickedSegment.price || 0) : this.randPriceForService(service.name)
+         const phiGiam = [0, 200000, 500000, 1000000, 1500000][this.randInt(0, 4)]
+         const giaSau = Math.max(0, giaGoc - phiGiam)
+
+         const st = this.ENUM_STATUS[this.randInt(0, 2)]
+         const ky = new Date()
+         ky.setDate(ky.getDate() - this.randInt(0, 25))
+         const ngayKy = ky.toISOString().slice(0, 10)
+
+         const contract = {
+           id: crypto.randomUUID(),
+           maHopDong: this.genContractCode(),
+           maKhachHang: this.randInt(1001, 2000),
+           tenKhachHang: names[this.randInt(0, names.length - 1)],
++          nhanVienTao: staffNames[this.randInt(0, staffNames.length - 1)],
+           tenDichVu: service.name,
+           serviceId: service.id || service.name,
+           giaTriTaiSan: assetValue,
+           giaDichVuGoc: giaGoc,
+           phiGiam,
+           giaSauGiam: giaSau,
+           trangThaiHopDong: st,
+           ngayKy,
+           ngayTao: new Date().toLocaleString('vi-VN'),
+           dotDongTien: [],
+           hoanTien: [],
+           dieuChinh: [],
+           initPlan: 'COC',
+           tiLeCoc: 30
+         }
+
+         // Initial deposit
+         const deposit = Math.round(giaSau * 0.3)
+         contract.dotDongTien.push({
+           id: crypto.randomUUID(),
+           soTienDong: deposit,
+           hinhThucThanhToan: this.ENUM_PAY[this.randInt(0, 3)],
+           ngayDongTien: ngayKy,
+           ghiChu: 'Cọc 30% (mock)',
+           nguoiGhiNhan: 'demo_admin',
+@@ -1787,50 +1882,51 @@ export default {
+           tenDichVu: 'Branding / Bộ nhận diện',
+           phiGiam: 1500000,
+           trangThaiHopDong: 'DANG_HIEU_LUC',
+           ngayKy: this.todayISO(),
+           initPlan: 'COC',
+           tiLeCoc: 40
+         }
+       ]
+
+       this.contracts = base.map((x) => {
+         const service = findService(x.tenDichVu)
+         const segments = service ? this.getSegmentsByService(service.id || service.name) : []
+         const pickedSegment = segments.length ? segments[0] : null
+         const assetValue = pickedSegment
+             ? Math.round((Number(pickedSegment.min) + Number(pickedSegment.max)) / 2)
+             : this.randInt(500000000, 5000000000)
+         const giaGoc = pickedSegment ? Number(pickedSegment.price || 0) : this.randPriceForService(x.tenDichVu)
+         const giaSau = Math.max(0, giaGoc - (x.phiGiam || 0))
+         const code = this.genContractCode()
+
+         const contract = {
+           id: crypto.randomUUID(),
+           maHopDong: code,
+           maKhachHang: x.maKhachHang,
+           tenKhachHang: x.tenKhachHang,
++          nhanVienTao: this.currentUserName,
+           tenDichVu: service?.name || x.tenDichVu,
+           serviceId: service?.id || service?.name || null,
+           giaTriTaiSan: assetValue,
+           giaDichVuGoc: giaGoc,
+           phiGiam: x.phiGiam || 0,
+           giaSauGiam: giaSau,
+           trangThaiHopDong: x.trangThaiHopDong,
+           ngayKy: x.ngayKy,
+           ngayTao: new Date().toLocaleString('vi-VN'),
+           dotDongTien: [],
+           hoanTien: [],
+           dieuChinh: [],
+           initPlan: x.initPlan,
+           tiLeCoc: x.tiLeCoc
+         }
+
+         // Initial payment
+         let amount = 0
+         if (x.initPlan === 'FULL') amount = giaSau
+         else amount = Math.round(giaSau * ((x.tiLeCoc || 30) / 100))
+
+         contract.dotDongTien.push({
+           id: crypto.randomUUID(),
+           soTienDong: amount,
+           hinhThucThanhToan: 'CHUYEN_KHOAN',
+@@ -2285,50 +2381,75 @@ table{
+   min-width: 1100px; /* Tăng độ rộng tối thiểu cho 5 nút */
+ }
+ thead{ background: var(--dark-gradient); }
+ thead th{
+   color:#fff;
+   font-size: 11px;
+   font-weight: 900;
+   letter-spacing: .55px;
+   text-transform: uppercase;
+   padding: 10px 10px;
+   text-align:left;
+   white-space: nowrap;
+   position: sticky;
+   top: 0;
+   z-index: 5;
+ }
+ tbody td{
+   padding: 10px 10px;
+   border-bottom: 1px solid rgba(20,30,48,.08);
+   font-size: 13px;
+   vertical-align: middle;
+ }
+ tbody tr:nth-child(even){ background: rgba(20,30,48,.012); }
+ tbody tr:hover{ background: rgba(79,172,254,.08); }
+
++.pagination{
++  display:flex;
++  align-items:center;
++  justify-content:space-between;
++  gap:12px;
++  padding: 12px 4px 0;
++  flex-wrap: wrap;
++}
++.pager{
++  display:flex;
++  align-items:center;
++  gap:6px;
++  flex-wrap: wrap;
++}
++.btn-page{
++  height: 32px;
++  padding: 0 10px;
++  border-radius: 10px;
++}
++.btn-page.active{
++  background: var(--primary-gradient);
++  color:#fff;
++  border-color: transparent;
++}
++
+ .footnote{
+   padding: 10px;
+   font-size: 12px;
+   color: var(--muted);
+   background: rgba(20,30,48,.03);
+   border-top: 1px solid rgba(20,30,48,.06);
+   display:flex;
+   justify-content:space-between;
+   gap:10px;
+   flex-wrap:wrap;
+ }
+
+ /* =========================
+    BADGES
+ ========================= */
+ .status{
+   display:inline-flex;
+   align-items:center;
+   gap:6px;
+   padding:4px 10px;
+   border-radius:999px;
+   font-size:12px;
+   font-weight:850;
+   line-height:1;
+   white-space:nowrap;
