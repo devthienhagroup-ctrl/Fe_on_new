@@ -1474,22 +1474,6 @@ const getMaxRefundAmount = (c) => {
   return Math.max(0, getDoanhThuRow(c))
 }
 
-// Toast
-const showToastMessage = (type, title, text) => {
-  toast.value = {
-    type,
-    title,
-    text,
-    icon: type === 'success' ? 'fa-solid fa-circle-check' :
-        type === 'error' ? 'fa-solid fa-triangle-exclamation' :
-            'fa-solid fa-circle-info'
-  }
-  showToast.value = true
-  setTimeout(() => {
-    showToast.value = false
-  }, 3000)
-}
-
 // Modal control
 const openModal = (modal) => {
   showModal.value = modal
@@ -1529,7 +1513,6 @@ const resetContractForm = () => {
   customerSearchError.value = ''
   customerSearchLoading.value = false
   updateServicePrice()
-  showToastMessage('info', 'Tạo mới form', 'Đã reset form hợp đồng.')
 }
 
 const updateServicePrice = () => {
@@ -1866,12 +1849,12 @@ const handleAdjustmentAmountInput = (event) => {
 
 const saveAdjustment = async () => {
   if (adjustment.value.amount <= 0) {
-    showToastMessage('error', 'Số tiền không hợp lệ', 'Điều chỉnh phải lớn hơn 0.')
+    showCenterWarning('Số tiền không hợp lệ', 'Điều chỉnh phải lớn hơn 0.')
     return
   }
 
   if (!ENUM_ADJ.includes(adjustment.value.type)) {
-    showToastMessage('error', 'Loại điều chỉnh sai', 'Chọn GIAM_GIA/PHU_THU/PHAT.')
+    showCenterWarning('Loại điều chỉnh sai', 'Chọn GIAM_GIA/PHU_THU/PHAT.')
     return
   }
 
@@ -1890,7 +1873,7 @@ const saveAdjustment = async () => {
 
   const reason = (adjustment.value.reason || '').trim()
   if (!reason) {
-    showToastMessage('error', 'Thiếu lý do', 'Bạn cần nhập lý do điều chỉnh.')
+    showCenterWarning('Thiếu lý do', 'Bạn cần nhập lý do điều chỉnh.')
     return
   }
 
@@ -1955,7 +1938,7 @@ const resetFilters = () => {
   filterStatus.value = null
   currentPage.value = 1
   fetchContracts()
-  showToastMessage('info', 'Đã reset lọc', 'Hiển thị toàn bộ hợp đồng.')
+  showCenterWarning('Đã reset lọc', 'Hiển thị toàn bộ hợp đồng.')
 }
 
 const goToPage = (page) => {
@@ -1978,7 +1961,7 @@ const seedMock = () => {
   const serviceList = serviceOptions.value
 
   if (!serviceList.length) {
-    showToastMessage('error', 'Thiếu dữ liệu', 'Chưa tải được danh sách dịch vụ.')
+    showCenterWarning('Thiếu dữ liệu', 'Chưa tải được danh sách dịch vụ.')
     return
   }
 
@@ -2078,7 +2061,7 @@ const seedMock = () => {
     contracts.value.unshift(contract)
   }
 
-  showToastMessage('success', 'Mock dữ liệu', 'Đã tạo thêm 5 hợp đồng mẫu.')
+  showCenterWarning('Mock dữ liệu', 'Đã tạo thêm 5 hợp đồng mẫu.')
 }
 
 // Initialize sample data
