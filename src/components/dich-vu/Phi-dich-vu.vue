@@ -346,7 +346,13 @@
                     <span class="label-ico tone-teal"><i class="fa-solid fa-building"></i></span>
                     <span>Giá trị tài sản chấp nhận ký bán</span>
                   </label>
-                  <input v-model.number="newContract.giaTriTaiSan" type="number" min="0" placeholder="VD: 1500000000">
+                  <input
+                    :value="formatNumberInput(newContract.giaTriTaiSan)"
+                    type="text"
+                    inputmode="numeric"
+                    placeholder="VD: 1.500.000.000"
+                    @input="newContract.giaTriTaiSan = parseNumberInput($event.target.value)"
+                  >
                   <div class="muted tiny">Nhập giá trị tài sản để xác định phân khúc.</div>
                 </div>
 
@@ -379,12 +385,11 @@
 
                     <div class="discount-value">
                       <input
-                        v-model.number="newContract.discountValue"
-                        type="number"
-                        :min="newContract.discountMode === 'PERCENT' ? 0 : 1"
-                        :max="newContract.discountMode === 'PERCENT' ? 100 : (newContract.giaDichVuGoc || 0)"
-                        :placeholder="newContract.discountMode === 'PERCENT' ? 'VD: 10' : 'VD: 1000000'"
-                        @input="updateGiaSauGiam"
+                        :value="newContract.discountMode === 'PERCENT' ? newContract.discountValue : formatNumberInput(newContract.discountValue)"
+                        type="text"
+                        inputmode="numeric"
+                        :placeholder="newContract.discountMode === 'PERCENT' ? 'VD: 10' : 'VD: 1.000.000'"
+                        @input="setDiscountValueFromInput($event.target.value)"
                       >
                       <span class="discount-suffix">{{ newContract.discountMode === 'PERCENT' ? '%' : '₫' }}</span>
                     </div>
@@ -498,7 +503,13 @@
               <div class="card-h"><i class="fa-solid fa-receipt"></i> Thông tin đợt đóng</div>
               <div class="field">
                 <label><i class="fa-solid fa-money-bill"></i> Số tiền đóng</label>
-                <input v-model.number="payment.amount" type="number" placeholder="VD: 3000000">
+                <input
+                  :value="formatNumberInput(payment.amount)"
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="VD: 3.000.000"
+                  @input="setPaymentAmountFromInput($event.target.value)"
+                >
               </div>
               <div class="field">
                 <label><i class="fa-solid fa-credit-card"></i> Hình thức thanh toán</label>
@@ -533,13 +544,13 @@
                     <div class="v price p2">{{ formatMoney(calcTongDieuChinh(currentContract)) }}</div>
                   </div>
                   <div class="kpi">
-                    <div class="k"><span class="dot"></span>Còn thiếu</div>
-                    <div class="v price p1">{{ formatMoney(Math.max(0, calcGiaDieuChinh(currentContract) - calcThucThu(currentContract))) }}</div>
-                  </div>
-                  <div class="kpi">
-                    <div class="k"><span class="dot"></span>Đã thu</div>
-                    <div class="v price p3">{{ formatMoney(calcThucThu(currentContract)) }}</div>
-                  </div>
+                  <div class="k"><span class="dot"></span>Còn thiếu</div>
+                  <div class="v price p1">{{ formatMoney(calcConThieu(currentContract)) }}</div>
+                </div>
+                <div class="kpi">
+                  <div class="k"><span class="dot"></span>Đã thu</div>
+                  <div class="v price p3">{{ formatMoney(getDoanhThuRow(currentContract)) }}</div>
+                </div>
                 </div>
 
                 <div class="note mt-3">
@@ -580,7 +591,13 @@
               <div class="card-h"><i class="fa-solid fa-reply"></i> Thông tin hoàn</div>
               <div class="field">
                 <label><i class="fa-solid fa-money-bill-transfer"></i> Số tiền hoàn</label>
-                <input v-model.number="refund.amount" type="number" placeholder="VD: 500000">
+                <input
+                  :value="formatNumberInput(refund.amount)"
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="VD: 500.000"
+                  @input="refund.amount = parseNumberInput($event.target.value)"
+                >
               </div>
               <div class="field">
                 <label><i class="fa-solid fa-calendar-day"></i> Ngày hoàn</label>
@@ -656,7 +673,13 @@
 
               <div class="field">
                 <label><i class="fa-solid fa-coins"></i> Số tiền điều chỉnh</label>
-                <input v-model.number="adjustment.amount" type="number" placeholder="VD: -500000 hoặc 300000">
+                <input
+                  :value="formatNumberInput(adjustment.amount)"
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="VD: -500.000 hoặc 300.000"
+                  @input="adjustment.amount = parseNumberInput($event.target.value, true)"
+                >
                 <div class="muted tiny">Âm = giảm thêm • Dương = phụ thu / phạt</div>
               </div>
 
@@ -929,1108 +952,1158 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
 import api from '/src/api/api.js'
-import { showError, showLoading, updateAlertError, updateAlertSuccess } from '/src/assets/js/alertService.js'
+import {
+  showCenterWarning,
+  showError,
+  showLoading,
+  updateAlertError,
+  updateAlertSuccess
+} from '/src/assets/js/alertService.js'
+const todayISO = () => {
+  const d = new Date()
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+// Constants
+const ENUM_STATUS = ['DANG_HIEU_LUC', 'HOAN_TAT', 'HUY']
+const ENUM_PAY = ['TIEN_MAT', 'CHUYEN_KHOAN', 'QR', 'KHAC']
+const ENUM_ADJ = ['GIAM_GIA', 'PHU_THU', 'PHAT']
 
-export default {
-  name: 'ContractManagement',
+// State
+const activeTab = ref(1)
+const contracts = ref([])
+const totalElements = ref(0)
+const totalPages = ref(1)
+const seq = ref(1)
+const services = ref([])
+const segments = ref([])
 
-  data() {
-    return {
-      // Constants
-      ENUM_STATUS: ['DANG_HIEU_LUC', 'HOAN_TAT', 'HUY'],
-      ENUM_PAY: ['TIEN_MAT', 'CHUYEN_KHOAN', 'QR', 'KHAC'],
-      ENUM_ADJ: ['GIAM_GIA', 'PHU_THU', 'PHAT'],
+// Filters
+const searchQuery = ref('')
+const filterService = ref(null)
+const filterStatus = ref(null)
+const currentPage = ref(1)
+const pageSize = ref(2)
+const currentUserName = ref('Nguyễn Minh')
+const searchTimer = ref(null)
 
-      // State
-      activeTab: 1,
-      contracts: [],
-      totalElements: 0,
-      totalPages: 1,
-      seq: 1,
-      services: [],
-      segments: [],
+// Customer search
+const customerSearch = ref('')
+const selectedCustomer = ref(null)
+const customerSearchResults = ref([])
+const customerSearchLoading = ref(false)
+const customerSearchError = ref('')
+const customerSearchTimer = ref(null)
+const lastCustomerKeyword = ref('')
+const suppressCustomerSearch = ref(false)
 
-      // Filters
-      searchQuery: '',
-      filterService: null,
-      filterStatus: null,
-      currentPage: 1,
-      pageSize: 2,
-      currentUserName: 'Nguyễn Minh',
-      searchTimer: null,
+// New contract form
+const newContract = ref({
+  maHopDong: '',
+  maKhachHang: '',
+  tenKhachHang: '',
+  tenDichVu: '',
+  serviceId: null,
+  giaTriTaiSan: null,
+  giaDichVuGoc: 0,
+  phiGiam: 0,
+  discountMode: 'PERCENT',
+  discountValue: 0,
+  giaSauGiam: 0,
+  trangThaiHopDong: 'DANG_HIEU_LUC',
+  ngayKy: todayISO(),
+  initPlan: 'COC',
+  tiLeCoc: 30,
+  firstMethod: 'CHUYEN_KHOAN'
+})
 
-      // Customer search
-      customerSearch: '',
-      selectedCustomer: null,
-      customerSearchResults: [],
-      customerSearchLoading: false,
-      customerSearchError: '',
-      customerSearchTimer: null,
-      lastCustomerKeyword: '',
-      suppressCustomerSearch: false,
+// Modals
+const showModal = ref(null)
+const currentContract = ref(null)
 
-      // New contract form
-      newContract: {
-        maHopDong: '',
-        maKhachHang: '',
-        tenKhachHang: '',
-        tenDichVu: '',
-        serviceId: null,
-        giaTriTaiSan: null,
-        giaDichVuGoc: 0,
-        phiGiam: 0,
-        discountMode: 'PERCENT',
-        discountValue: 0,
-        giaSauGiam: 0,
-        trangThaiHopDong: 'DANG_HIEU_LUC',
-        ngayKy: this.todayISO(),
-        initPlan: 'COC',
-        tiLeCoc: 30,
-        firstMethod: 'CHUYEN_KHOAN'
-      },
+// Payment form
+const payment = ref({
+  amount: 0,
+  method: 'CHUYEN_KHOAN',
+  date: todayISO(),
+  note: ''
+})
 
-      // Modals
-      showModal: null,
-      currentContract: null,
+// Refund form
+const refund = ref({
+  amount: 0,
+  date: todayISO(),
+  reason: ''
+})
 
-      // Payment form
-      payment: {
-        amount: 0,
-        method: 'CHUYEN_KHOAN',
-        date: this.todayISO(),
-        note: ''
-      },
+// Adjustment form
+const adjustment = ref({
+  amount: 0,
+  type: 'GIAM_GIA',
+  reason: ''
+})
 
-      // Refund form
-      refund: {
-        amount: 0,
-        date: this.todayISO(),
-        reason: ''
-      },
+// Toast
+const showToast = ref(false)
+const toast = ref({
+  type: 'info',
+  title: '',
+  text: '',
+  icon: 'fa-solid fa-circle-info'
+})
 
-      // Adjustment form
-      adjustment: {
-        amount: 0,
-        type: 'GIAM_GIA',
-        reason: ''
-      },
+// Computed properties
+const pageStart = computed(() => {
+  if (!totalElements.value) return 0
+  return (currentPage.value - 1) * pageSize.value + 1
+})
 
-      // Toast
-      showToast: false,
-      toast: {
-        type: 'info',
-        title: '',
-        text: '',
-        icon: 'fa-solid fa-circle-info'
-      }
+const pageEnd = computed(() => {
+  return Math.min(currentPage.value * pageSize.value, totalElements.value)
+})
+
+const totalDoanhThu = computed(() => {
+  return contracts.value.reduce((sum, c) => sum + getDoanhThu(c), 0)
+})
+
+const totalDieuChinh = computed(() => {
+  return contracts.value.reduce((sum, c) => sum + getTongDieuChinh(c), 0)
+})
+
+const totalDoanhSo = computed(() => {
+  return contracts.value.reduce((sum, c) => sum + getDoanhSo(c), 0)
+})
+
+const serviceOptions = computed(() => {
+  return services.value
+})
+
+const selectedService = computed(() => {
+  if (!newContract.value.serviceId) return null
+  return serviceOptions.value.find(s => String(s.id || s.name) === String(newContract.value.serviceId)) || null
+})
+
+const matchingSegment = computed(() => {
+  const serviceId = newContract.value.serviceId
+  const assetValue = Number(newContract.value.giaTriTaiSan || 0)
+  if (!serviceId || assetValue <= 0) return null
+  return segments.value.find(seg =>
+      String(seg.serviceId) === String(serviceId) &&
+      assetValue >= Number(seg.min) &&
+      assetValue < Number(seg.max)
+  ) || null
+})
+
+const segmentHint = computed(() => {
+  if (!newContract.value.serviceId) {
+    return 'Vui lòng chọn dịch vụ để hiển thị phân khúc.'
+  }
+  if (!newContract.value.giaTriTaiSan) {
+    return 'Nhập giá trị tài sản để xác định mức giá gốc.'
+  }
+  if (!matchingSegment.value) {
+    return 'Chưa có phân khúc phù hợp với giá trị tài sản này.'
+  }
+  return `Phân khúc ${formatMoney(matchingSegment.value.min)} → ${formatMoney(matchingSegment.value.max)}`
+})
+
+const firstPaymentAmount = computed(() => {
+  if (newContract.value.initPlan === 'FULL') {
+    return newContract.value.giaSauGiam
+  } else {
+    const percent = Math.max(0, Math.min(100, newContract.value.tiLeCoc || 0))
+    return Math.round(newContract.value.giaSauGiam * (percent / 100))
+  }
+})
+
+// Watchers
+watch(searchQuery, () => {
+  currentPage.value = 1
+  queueSearch()
+})
+
+watch(filterService, () => {
+  currentPage.value = 1
+  fetchContracts()
+})
+
+watch(filterStatus, () => {
+  currentPage.value = 1
+  fetchContracts()
+})
+
+watch(currentPage, () => {
+  fetchContracts()
+})
+
+watch(pageSize, () => {
+  currentPage.value = 1
+  fetchContracts()
+})
+
+watch(customerSearch, (val) => {
+  if (suppressCustomerSearch.value) return
+
+  if (selectedCustomer.value && (val || '').trim() === (selectedCustomer.value.name || '').trim()) {
+    customerSearchResults.value = []
+    customerSearchLoading.value = false
+    customerSearchError.value = ''
+    return
+  }
+
+  if (selectedCustomer.value && (val || '').trim() !== (selectedCustomer.value?.name || '').trim()) {
+    selectedCustomer.value = null
+    newContract.value.maKhachHang = ''
+    newContract.value.tenKhachHang = ''
+  }
+
+  clearCustomerSearchTimer()
+
+  const k = (val || '').trim()
+  if (!k) {
+    lastCustomerKeyword.value = ''
+    customerSearchResults.value = []
+    customerSearchError.value = ''
+    customerSearchLoading.value = false
+    return
+  }
+
+  customerSearchTimer.value = setTimeout(() => {
+    fetchCustomerSearch(k)
+  }, 250)
+})
+
+watch(() => newContract.value.serviceId, () => {
+  updateServicePrice()
+})
+
+watch(() => newContract.value.giaTriTaiSan, () => {
+  updateGiaGocFromAsset()
+})
+
+watch(() => newContract.value.discountMode, () => {
+  updateGiaSauGiam()
+})
+
+watch(() => payment.value.amount, (val) => {
+  if (!currentContract.value) return
+
+  const maxAmount = calcConThieu(currentContract.value)
+
+  // 🔑 Parse → ÉP SỐ NGUYÊN
+  let num = Math.floor(parseNumberInput(val))
+
+  if (num > maxAmount) num = maxAmount
+  if (num < 0) num = 0
+
+  if (num !== payment.value.amount) {
+    payment.value.amount = num
+  }
+})
+
+// Methods
+// Helper functions
+const formatMoney = (n) => {
+  const x = Math.round(Number(n || 0))
+  const sign = x < 0 ? '-' : ''
+  const abs = Math.abs(x)
+  return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' ₫'
+}
+
+const formatNumberInput = (n) => {
+  if (n === null || n === undefined || n === '') return ''
+  const x = Math.round(Number(n || 0))
+  const sign = x < 0 ? '-' : ''
+  const abs = Math.abs(x)
+  return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
+const parseNumberInput = (value, allowNegative = false) => {
+  const raw = String(value || '').trim()
+  if (!raw) return 0
+  const noDots = raw.replace(/\./g, '')
+  const cleaned = allowNegative ? noDots.replace(/[^0-9-]/g, '') : noDots.replace(/[^0-9]/g, '')
+  let parsed = Number(cleaned)
+  if (Number.isNaN(parsed)) parsed = 0
+  if (!allowNegative) return Math.max(0, parsed)
+  return parsed
+}
+
+const initials = (name) => {
+  const parts = String(name || '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+  if (parts.length === 0) return 'NA'
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
+const getStatusText = (status) => {
+  switch(status) {
+    case 'DANG_HIEU_LUC': return 'Đang hiệu lực'
+    case 'HOAN_TAT': return 'Hoàn tất'
+    case 'HUY': return 'Đã hủy'
+    default: return status
+  }
+}
+
+
+
+const formatCreatedAt = (value) => {
+  if (!value) return '-'
+  if (typeof value === 'string') {
+    const parts = value.split(',')
+    if (parts.length === 2) {
+      const datePart = parts[0].trim()
+      const timePart = parts[1].trim()
+      if (timePart && datePart) return `${timePart} ${datePart}`
     }
-  },
-
-  computed: {
-    pageStart() {
-      if (!this.totalElements) return 0
-      return (this.currentPage - 1) * this.pageSize + 1
-    },
-
-    pageEnd() {
-      return Math.min(this.currentPage * this.pageSize, this.totalElements)
-    },
-
-    totalDoanhThu() {
-      return this.contracts.reduce((sum, c) => sum + this.getDoanhThu(c), 0)
-    },
-
-    totalDieuChinh() {
-      return this.contracts.reduce((sum, c) => sum + this.getTongDieuChinh(c), 0)
-    },
-
-    totalDoanhSo() {
-      return this.contracts.reduce((sum, c) => sum + this.getDoanhSo(c), 0)
-    },
-
-    serviceOptions() {
-      return this.services
-    },
-
-    selectedService() {
-      if (!this.newContract.serviceId) return null
-      return this.serviceOptions.find(s => String(s.id || s.name) === String(this.newContract.serviceId)) || null
-    },
-
-    matchingSegment() {
-      const serviceId = this.newContract.serviceId
-      const assetValue = Number(this.newContract.giaTriTaiSan || 0)
-      if (!serviceId || assetValue <= 0) return null
-      return this.segments.find(seg =>
-          String(seg.serviceId) === String(serviceId) &&
-          assetValue >= Number(seg.min) &&
-          assetValue < Number(seg.max)
-      ) || null
-    },
-
-    segmentHint() {
-      if (!this.newContract.serviceId) {
-        return 'Vui lòng chọn dịch vụ để hiển thị phân khúc.'
-      }
-      if (!this.newContract.giaTriTaiSan) {
-        return 'Nhập giá trị tài sản để xác định mức giá gốc.'
-      }
-      if (!this.matchingSegment) {
-        return 'Chưa có phân khúc phù hợp với giá trị tài sản này.'
-      }
-      return `Phân khúc ${this.formatMoney(this.matchingSegment.min)} → ${this.formatMoney(this.matchingSegment.max)}`
-    },
-
-    firstPaymentAmount() {
-      if (this.newContract.initPlan === 'FULL') {
-        return this.newContract.giaSauGiam
-      } else {
-        const percent = Math.max(0, Math.min(100, this.newContract.tiLeCoc || 0))
-        return Math.round(this.newContract.giaSauGiam * (percent / 100))
-      }
+    if (/\d{1,2}:\d{2}:\d{2}/.test(value) && /\d{1,2}\/\d{1,2}\/\d{4}/.test(value)) {
+      return value
     }
-  },
+  }
+  const parsed = value instanceof Date ? value : new Date(value)
+  if (!Number.isNaN(parsed.getTime())) {
+    return `${parsed.toLocaleTimeString('vi-VN')} ${parsed.toLocaleDateString('vi-VN')}`
+  }
+  return String(value)
+}
 
-  watch: {
-    searchQuery() {
-      this.currentPage = 1
-      this.queueSearch()
-    },
+const getGiaGiam = (contract) => {
+  return Number(contract?.giaGiam ?? contract?.phiGiam ?? 0)
+}
 
-    filterService() {
-      this.currentPage = 1
-      this.fetchContracts()
-    },
+const getGiaTaiSanKy = (contract) => {
+  return Number(contract?.giaTaiSanKyGoc ?? contract?.giaTriTaiSan ?? contract?.giaTriKyBan ?? 0)
+}
 
-    filterStatus() {
-      this.currentPage = 1
-      this.fetchContracts()
-    },
+const getTongHoan = (contract) => {
+  if (contract?.giaHoanTien !== undefined && contract?.giaHoanTien !== null) {
+    return Number(contract.giaHoanTien || 0)
+  }
+  return calcTongHoan(contract)
+}
 
-    currentPage() {
-      this.fetchContracts()
-    },
+const getTongDieuChinh = (contract) => {
+  if (contract?.tongDC !== undefined && contract?.tongDC !== null) {
+    return Number(contract.tongDC || 0)
+  }
+  return calcTongDieuChinh(contract)
+}
 
-    pageSize() {
-      this.currentPage = 1
-      this.fetchContracts()
-    },
+const getDoanhThuRow = (contract) => {
+  return Number(contract?.doanhThu ?? 0)
+}
 
-    customerSearch(val) {
-      if (this.suppressCustomerSearch) return
+const getDoanhThu = (contract) => {
+  if (contract?.doanhThu !== undefined && contract?.doanhThu !== null) {
+    return Number(contract.doanhThu || 0)
+  }
+  return calcThucThu(contract)
+}
 
-      if (this.selectedCustomer && (val || '').trim() === (this.selectedCustomer.name || '').trim()) {
-        this.customerSearchResults = []
-        this.customerSearchLoading = false
-        this.customerSearchError = ''
-        return
+const getDoanhSo = (contract) => {
+  if (contract?.doanhSo !== undefined && contract?.doanhSo !== null) {
+    return Number(contract.doanhSo || 0)
+  }
+  return calcDoanhThu(contract)
+}
+
+const randInt = (min, max) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+const randPriceForService = (serviceName) => {
+  const svc = serviceOptions.value.find(s => s.name === serviceName) || serviceOptions.value[0]
+  if (!svc) return 0
+  const min = Number(svc.minPrice ?? svc.min ?? 0)
+  const max = Number(svc.maxPrice ?? svc.max ?? min)
+  if (!min || !max) return 0
+  const step = 250000
+  const raw = randInt(min, max)
+  return Math.round(raw / step) * step
+}
+
+const pad4 = (n) => {
+  return String(n).padStart(4, '0')
+}
+
+const fetchServices = async () => {
+  try {
+    const res = await api.get('/dich-vu-thg/admin', {
+      params: {
+        keyword: null
       }
+    })
+    services.value = res.data || []
+  } catch (e) {
+    console.error('❌ Lỗi fetch services', e)
+    services.value = []
+  }
+}
 
-      if (this.selectedCustomer && (val || '').trim() !== (this.selectedCustomer?.name || '').trim()) {
-        this.selectedCustomer = null
-        this.newContract.maKhachHang = ''
-        this.newContract.tenKhachHang = ''
-      }
+const fetchSegments = async () => {
+  try {
+    const res = await api.get('/dich-vu-thg/admin/phan-khuc')
+    segments.value = res.data || []
+  } catch (e) {
+    console.error('❌ Lỗi fetch segments', e)
+    segments.value = []
+  }
+}
 
-      this.clearCustomerSearchTimer()
+const queueSearch = () => {
+  if (searchTimer.value) clearTimeout(searchTimer.value)
+  searchTimer.value = setTimeout(() => {
+    fetchContracts()
+  }, 300)
+}
 
-      const k = (val || '').trim()
-      if (!k) {
-        this.lastCustomerKeyword = ''
-        this.customerSearchResults = []
-        this.customerSearchError = ''
-        this.customerSearchLoading = false
-        return
-      }
+const fetchContracts = async () => {
+  const payload = {
+    keyword: searchQuery.value || null,
+    serviceId: filterService.value || null,
+    trangThaiHopDong: filterStatus.value || null,
+    page: currentPage.value,
+    size: pageSize.value
+  }
 
-      this.customerSearchTimer = setTimeout(() => {
-        this.fetchCustomerSearch(k)
-      }, 250)
-    },
-
-    'newContract.serviceId'() {
-      this.updateServicePrice()
-    },
-
-    'newContract.giaTriTaiSan'() {
-      this.updateGiaGocFromAsset()
-    },
-
-    'newContract.discountMode'() {
-      this.updateGiaSauGiam()
+  try {
+    const res = await api.post('/hop-dong/admin/search', payload)
+    const page = res?.data || {}
+    const items = Array.isArray(page.content) ? page.content : []
+    contracts.value = items
+    totalElements.value = Number(page.totalElements ?? items.length)
+    totalPages.value = Number(page.totalPages ?? Math.max(1, Math.ceil(totalElements.value / pageSize.value)))
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value || 1
     }
-  },
-
-  methods: {
-    // Helper functions
-    formatMoney(n) {
-      const x = Math.round(Number(n || 0))
-      const sign = x < 0 ? '-' : ''
-      const abs = Math.abs(x)
-      return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' ₫'
-    },
-
-    initials(name) {
-      const parts = String(name || '')
-          .trim()
-          .split(/\s+/)
-          .filter(Boolean)
-      if (parts.length === 0) return 'NA'
-      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-    },
-
-    getStatusText(status) {
-      switch(status) {
-        case 'DANG_HIEU_LUC': return 'Đang hiệu lực'
-        case 'HOAN_TAT': return 'Hoàn tất'
-        case 'HUY': return 'Đã hủy'
-        default: return status
-      }
-    },
-
-    todayISO() {
-      const d = new Date()
-      const yyyy = d.getFullYear()
-      const mm = String(d.getMonth() + 1).padStart(2, '0')
-      const dd = String(d.getDate()).padStart(2, '0')
-      return `${yyyy}-${mm}-${dd}`
-    },
-
-    formatCreatedAt(value) {
-      if (!value) return '-'
-      if (typeof value === 'string') {
-        const parts = value.split(',')
-        if (parts.length === 2) {
-          const datePart = parts[0].trim()
-          const timePart = parts[1].trim()
-          if (timePart && datePart) return `${timePart} ${datePart}`
-        }
-        if (/\d{1,2}:\d{2}:\d{2}/.test(value) && /\d{1,2}\/\d{1,2}\/\d{4}/.test(value)) {
-          return value
-        }
-      }
-      const parsed = value instanceof Date ? value : new Date(value)
-      if (!Number.isNaN(parsed.getTime())) {
-        return `${parsed.toLocaleTimeString('vi-VN')} ${parsed.toLocaleDateString('vi-VN')}`
-      }
-      return String(value)
-    },
-
-    getGiaGiam(contract) {
-      return Number(contract?.giaGiam ?? contract?.phiGiam ?? 0)
-    },
-
-    getGiaTaiSanKy(contract) {
-      return Number(contract?.giaTaiSanKyGoc ?? contract?.giaTriTaiSan ?? contract?.giaTriKyBan ?? 0)
-    },
-
-    getTongHoan(contract) {
-      if (contract?.giaHoanTien !== undefined && contract?.giaHoanTien !== null) {
-        return Number(contract.giaHoanTien || 0)
-      }
-      return this.calcTongHoan(contract)
-    },
-
-    getTongDieuChinh(contract) {
-      if (contract?.tongDC !== undefined && contract?.tongDC !== null) {
-        return Number(contract.tongDC || 0)
-      }
-      return this.calcTongDieuChinh(contract)
-    },
-
-    getDoanhThu(contract) {
-      if (contract?.doanhThu !== undefined && contract?.doanhThu !== null) {
-        return Number(contract.doanhThu || 0)
-      }
-      return this.calcThucThu(contract)
-    },
-
-    getDoanhSo(contract) {
-      if (contract?.doanhSo !== undefined && contract?.doanhSo !== null) {
-        return Number(contract.doanhSo || 0)
-      }
-      return this.calcDoanhThu(contract)
-    },
-
-    randInt(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min
-    },
-
-    randPriceForService(serviceName) {
-      const svc = this.serviceOptions.find(s => s.name === serviceName) || this.serviceOptions[0]
-      if (!svc) return 0
-      const min = Number(svc.minPrice ?? svc.min ?? 0)
-      const max = Number(svc.maxPrice ?? svc.max ?? min)
-      if (!min || !max) return 0
-      const step = 250000
-      const raw = this.randInt(min, max)
-      return Math.round(raw / step) * step
-    },
-
-    pad4(n) {
-      return String(n).padStart(4, '0')
-    },
-
-    async fetchServices() {
-      try {
-        const res = await api.get('/dich-vu-thg/admin', {
-          params: {
-            keyword: null
-          }
-        })
-        this.services = res.data || []
-      } catch (e) {
-        console.error('❌ Lỗi fetch services', e)
-        this.services = []
-      }
-    },
-
-    async fetchSegments() {
-      try {
-        const res = await api.get('/dich-vu-thg/admin/phan-khuc')
-        this.segments = res.data || []
-      } catch (e) {
-        console.error('❌ Lỗi fetch segments', e)
-        this.segments = []
-      }
-    },
-
-    queueSearch() {
-      if (this.searchTimer) clearTimeout(this.searchTimer)
-      this.searchTimer = setTimeout(() => {
-        this.fetchContracts()
-      }, 300)
-    },
-
-    async fetchContracts() {
-      const payload = {
-        keyword: this.searchQuery || null,
-        serviceId: this.filterService || null,
-        trangThaiHopDong: this.filterStatus || null,
-        page: this.currentPage,
-        size: this.pageSize
-      }
-
-      try {
-        const res = await api.post('/hop-dong/admin/search', payload)
-        const page = res?.data || {}
-        const items = Array.isArray(page.content) ? page.content : []
-        this.contracts = items
-        this.totalElements = Number(page.totalElements ?? items.length)
-        this.totalPages = Number(page.totalPages ?? Math.max(1, Math.ceil(this.totalElements / this.pageSize)))
-        if (this.currentPage > this.totalPages) {
-          this.currentPage = this.totalPages || 1
-        }
-      } catch (e) {
-        console.error('❌ Lỗi fetch contracts', e)
-        this.contracts = []
-        this.totalElements = 0
-        this.totalPages = 1
-      }
-    },
-
-    getServiceById(serviceId) {
-      return this.serviceOptions.find(s => String(s.id || s.name) === String(serviceId)) || null
-    },
-
-    getSegmentsByService(serviceId) {
-      return this.segments
-          .filter(seg => String(seg.serviceId) === String(serviceId))
-          .sort((a, b) => Number(a.min) - Number(b.min))
-    },
-
-    findSegmentForAsset(serviceId, assetValue) {
-      if (!serviceId || !assetValue) return null
-      const segments = this.getSegmentsByService(serviceId)
-      return segments.find(seg =>
-          assetValue >= Number(seg.min) && assetValue < Number(seg.max)
-      ) || null
-    },
-
-    genContractCode() {
-      const y = new Date().getFullYear()
-      return `HD-${y}-${this.pad4(this.seq++)}`
-    },
-
-    // Calculation functions
-    calcTongDong(c) {
-      return (c?.dotDongTien || []).reduce((sum, x) => sum + (Number(x.soTienDong) || 0), 0)
-    },
-
-    calcTongHoan(c) {
-      return (c?.hoanTien || []).reduce((sum, x) => sum + (Number(x.soTienHoan) || 0), 0)
-    },
-
-    calcTongDieuChinh(c) {
-      return (c?.dieuChinh || []).reduce((sum, x) => sum + (Number(x.soTienDieuChinh) || 0), 0)
-    },
-
-    calcThucThu(c) {
-      return this.calcTongDong(c) - this.calcTongHoan(c)
-    },
-
-    calcGiaDieuChinh(c) {
-      return (Number(c?.giaSauGiam) || 0) + this.calcTongDieuChinh(c)
-    },
-
-    calcDoanhThu(c) {
-      return Math.min(this.calcGiaDieuChinh(c), this.calcThucThu(c))
-    },
-
-    // Toast
-    showToastMessage(type, title, text) {
-      this.toast = {
-        type,
-        title,
-        text,
-        icon: type === 'success' ? 'fa-solid fa-circle-check' :
-            type === 'error' ? 'fa-solid fa-triangle-exclamation' :
-                'fa-solid fa-circle-info'
-      }
-      this.showToast = true
-      setTimeout(() => {
-        this.showToast = false
-      }, 3000)
-    },
-
-    // Modal control
-    openModal(modal) {
-      this.showModal = modal
-    },
-
-    closeModal(modal) {
-      this.resetContractForm()
-      if (this.showModal === modal) {
-        this.showModal = null
-      }
-    },
-
-    // Contract management
-    resetContractForm() {
-      const firstService = this.serviceOptions[0] || null
-      this.newContract = {
-        maHopDong: this.genContractCode(),
-        maKhachHang: '',
-        tenKhachHang: '',
-        tenDichVu: firstService?.name || '',
-        serviceId: firstService?.id || firstService?.name || null,
-        giaTriTaiSan: null,
-        giaDichVuGoc: 0,
-        phiGiam: 0,
-        discountMode: 'PERCENT',
-        discountValue: 0,
-        giaSauGiam: 0,
-        trangThaiHopDong: 'DANG_HIEU_LUC',
-        ngayKy: this.todayISO(),
-        initPlan: 'COC',
-        tiLeCoc: 30,
-        firstMethod: 'CHUYEN_KHOAN'
-      }
-      this.customerSearch = ''
-      this.selectedCustomer = null
-      this.customerSearchResults = []
-      this.customerSearchError = ''
-      this.customerSearchLoading = false
-      this.updateServicePrice()
-      this.showToastMessage('info', 'Tạo mới form', 'Đã reset form hợp đồng.')
-    },
-
-    updateServicePrice() {
-      const service = this.getServiceById(this.newContract.serviceId)
-      this.newContract.tenDichVu = service?.name || ''
-      this.updateGiaGocFromAsset()
-    },
-
-    updateGiaGocFromAsset() {
-      const assetValue = Number(this.newContract.giaTriTaiSan || 0)
-      const segment = this.findSegmentForAsset(this.newContract.serviceId, assetValue)
-      if (segment) {
-        this.newContract.giaDichVuGoc = Number(segment.price || 0)
-      } else {
-        this.newContract.giaDichVuGoc = 0
-      }
-      this.updateGiaSauGiam()
-    },
-
-    setDiscountMode(mode) {
-      this.newContract.discountMode = mode
-    },
-
-    updateGiaSauGiam() {
-      const giaGoc = Number(this.newContract.giaDichVuGoc || 0)
-      if (this.newContract.discountMode === 'PERCENT') {
-        const percent = Math.max(0, Math.min(100, Number(this.newContract.discountValue || 0)))
-        this.newContract.discountValue = percent
-        this.newContract.phiGiam = Math.round(giaGoc * (percent / 100))
-      } else {
-        const money = Number(this.newContract.discountValue || 0)
-        const clamped = Math.max(0, Math.min(giaGoc, money))
-        this.newContract.discountValue = clamped
-        this.newContract.phiGiam = clamped
-      }
-      this.newContract.giaSauGiam = Math.max(0, giaGoc - (this.newContract.phiGiam || 0))
-      this.updateFirstPayment()
-    },
-
-    updateFirstPayment() {
-      // Handled by computed property
-    },
-
-    clearSelectedCustomer() {
-      this.selectedCustomer = null
-      this.customerSearch = ''
-      this.customerSearchResults = []
-      this.customerSearchError = ''
-      this.customerSearchLoading = false
-      this.newContract.maKhachHang = ''
-      this.newContract.tenKhachHang = ''
-    },
-
-    async fetchCustomerSearch(keyword) {
-      const k = (keyword || '').trim()
-      if (!k) {
-        this.customerSearchResults = []
-        this.customerSearchError = ''
-        return
-      }
-
-      if (k === this.lastCustomerKeyword) return
-      this.lastCustomerKeyword = k
-
-      this.customerSearchLoading = true
-      this.customerSearchError = ''
-
-      try {
-        const qs = new URLSearchParams({ keyword: k }).toString()
-        const res = await api.get(`/customer-crm/admin/lich-hen/search-customer?${qs}`)
-        const data = await res.data
-        this.customerSearchResults = (Array.isArray(data) ? data : []).slice(0, 8).map((x) => ({
-          id: x.customerId,
-          name: x.customerName,
-          phone: x.phone,
-          raw: x
-        }))
-      } catch (e) {
-        this.customerSearchResults = []
-        this.customerSearchError = 'Không tìm thấy hoặc lỗi tải dữ liệu.'
-      } finally {
-        this.customerSearchLoading = false
-      }
-    },
-
-    clearCustomerSearchTimer() {
-      if (this.customerSearchTimer) clearTimeout(this.customerSearchTimer)
-      this.customerSearchTimer = null
-    },
-
-    selectCustomer(customer) {
-      this.suppressCustomerSearch = true
-      this.clearCustomerSearchTimer()
-      this.customerSearchLoading = false
-      this.customerSearchError = ''
-      this.customerSearchResults = []
-
-      this.selectedCustomer = customer
-      this.customerSearch = customer.name
-      this.newContract.maKhachHang = customer.id
-      this.newContract.tenKhachHang = customer.name
-      if (customer?.raw?.giaTriTaiSan !== undefined && customer?.raw?.giaTriTaiSan !== null) {
-        this.newContract.giaTriTaiSan = Number(customer.raw.giaTriTaiSan || 0)
-      }
-
-      setTimeout(() => {
-        this.suppressCustomerSearch = false
-      }, 0)
-    },
-
-    async saveContract() {
-      this.updateGiaSauGiam()
-      if (!this.selectedCustomer) {
-        showError('Thiếu dữ liệu', 'Bạn cần chọn khách hàng từ danh sách.')
-        return
-      }
-
-      if (!this.newContract.tenDichVu) {
-        showError('Thiếu dữ liệu', 'Bạn cần chọn Dịch vụ.')
-        return
-      }
-
-      if (!this.newContract.giaTriTaiSan) {
-        showError('Thiếu dữ liệu', 'Bạn cần nhập giá trị tài sản.')
-        return
-      }
-
-      if (!this.newContract.giaDichVuGoc) {
-        showError('Thiếu dữ liệu', 'Giá gốc chưa xác định theo phân khúc.')
-        return
-      }
-
-      if (this.newContract.discountMode === 'MONEY' && this.newContract.discountValue <= 0) {
-        showError('Giảm giá không hợp lệ', 'Giảm giá tiền phải > 0 và không vượt quá giá gốc.')
-        return
-      }
-
-      const payload = {
-        maKhachHang: this.newContract.maKhachHang,
-        giaTriKyBan: this.newContract.giaTriTaiSan,
-        giaDichVuGoc: this.newContract.giaDichVuGoc,
-        phiGiam: this.newContract.phiGiam || 0,
-        giaSauGiam: this.newContract.giaSauGiam,
-        hinhThucThanhToan: this.newContract.firstMethod,
-        serviceId: this.newContract.serviceId,
-        soTienThanhToan: this.firstPaymentAmount,
-        initPlan: this.newContract.initPlan
-      }
-
-      try {
-        const res = await showLoading(api.post('/hop-dong/admin/create', payload))
-        const created = res?.data || {}
-        const hasPayments = Array.isArray(created.dotDongTien) && created.dotDongTien.length > 0
-        const contract = {
-          id: created.id || crypto.randomUUID(),
-          maHopDong: created.maHopDong || this.newContract.maHopDong,
-          maKhachHang: created.maKhachHang ?? this.newContract.maKhachHang,
-          tenKhachHang: created.tenKhachHang || this.newContract.tenKhachHang,
-          nhanVienTao: created.nhanVienTao || this.currentUserName,
-          tenDichVu: created.tenDichVu || this.newContract.tenDichVu,
-          serviceId: created.serviceId ?? this.newContract.serviceId,
-          giaTriTaiSan: created.giaTriKyBan ?? created.giaTriTaiSan ?? this.newContract.giaTriTaiSan,
-          giaDichVuGoc: created.giaDichVuGoc ?? this.newContract.giaDichVuGoc,
-          phiGiam: created.phiGiam ?? this.newContract.phiGiam ?? 0,
-          giaSauGiam: created.giaSauGiam ?? this.newContract.giaSauGiam,
-          trangThaiHopDong: created.trangThaiHopDong ?? this.newContract.trangThaiHopDong,
-          ngayKy: created.ngayKy ?? this.newContract.ngayKy ?? this.todayISO(),
-          ngayTao: created.ngayTao ?? new Date().toLocaleString('vi-VN'),
-          dotDongTien: hasPayments ? created.dotDongTien : [],
-          hoanTien: created.hoanTien || [],
-          dieuChinh: created.dieuChinh || [],
-          initPlan: created.initPlan ?? this.newContract.initPlan,
-          tiLeCoc: created.tiLeCoc ?? (this.newContract.initPlan === 'COC' ? (this.newContract.tiLeCoc || 0) : null)
-        }
-
-        if (!hasPayments && this.firstPaymentAmount > 0) {
-          contract.dotDongTien.push({
-            id: crypto.randomUUID(),
-            soTienDong: this.firstPaymentAmount,
-            hinhThucThanhToan: this.newContract.firstMethod,
-            ngayDongTien: contract.ngayKy,
-            ghiChu: this.newContract.initPlan === 'FULL' ?
-                'Thanh toán đủ (tạo khi lập HĐ)' :
-                `Cọc ${this.newContract.tiLeCoc || 0}% (tạo khi lập HĐ)`,
-            nguoiGhiNhan: 'demo_admin',
-            ngayTao: new Date().toLocaleString('vi-VN')
-          })
-        }
-
-        await this.fetchContracts()
-        updateAlertSuccess('Đã tạo hợp đồng',
-            `${contract.maHopDong} • ${this.newContract.initPlan === 'FULL' ? 'Đóng tất' : 'Cọc'}: ${this.formatMoney(this.firstPaymentAmount)}`)
-        this.closeModal('modalContract')
-
-      } catch (error) {
-        console.error('❌ Lỗi tạo hợp đồng', error)
-        updateAlertError('Tạo hợp đồng thất bại', 'Vui lòng thử lại sau.')
-      }
-    },
-
-    // Payment management
-    openPay(contract) {
-      this.currentContract = contract
-      this.payment = {
-        amount: 0,
-        method: 'CHUYEN_KHOAN',
-        date: this.todayISO(),
-        note: ''
-      }
-      this.openModal('modalPay')
-    },
-
-    async savePayment() {
-      if (this.payment.amount <= 0) {
-        this.showToastMessage('error', 'Số tiền không hợp lệ', 'Số tiền đóng phải > 0.')
-        return
-      }
-
-      const contractIndex = this.contracts.findIndex(c => c.id === this.currentContract.id)
-      if (contractIndex === -1) return
-
-      const payload = {
-        hopDongId: this.currentContract.id,
-        soTienDong: this.payment.amount,
-        hinhThucThanhToan: this.payment.method,
-        ngayDongTien: this.payment.date || this.todayISO(),
-        ghiChu: this.payment.note
-      }
-
-      try {
-        await showLoading(api.post('/hop-dong/admin/dong-phi', payload))
-        this.contracts[contractIndex].dotDongTien.push({
-          id: crypto.randomUUID(),
-          soTienDong: this.payment.amount,
-          hinhThucThanhToan: this.payment.method,
-          ngayDongTien: payload.ngayDongTien,
-          ghiChu: this.payment.note,
-          nguoiGhiNhan: 'demo_admin',
-          ngayTao: new Date().toLocaleString('vi-VN')
-        })
-        updateAlertSuccess('Đóng phí thành công', `+${this.formatMoney(this.payment.amount)} (${this.payment.method})`)
-        await this.fetchContracts()
-        this.closeModal('modalPay')
-      } catch (error) {
-        console.error('❌ Lỗi đóng phí', error)
-        updateAlertError('Đóng phí thất bại', 'Vui lòng thử lại sau.')
-      }
-    },
-
-    // Refund management
-    openRefund(contract) {
-      this.currentContract = contract
-      this.refund = {
-        amount: 0,
-        date: this.todayISO(),
-        reason: ''
-      }
-      this.openModal('modalRefund')
-    },
-
-    saveRefund() {
-      if (this.refund.amount <= 0) {
-        this.showToastMessage('error', 'Số tiền không hợp lệ', 'Số tiền hoàn phải > 0.')
-        return
-      }
-
-      if (!this.refund.reason) {
-        this.showToastMessage('error', 'Thiếu lý do', 'Bạn cần nhập lý do hoàn.')
-        return
-      }
-
-      const contractIndex = this.contracts.findIndex(c => c.id === this.currentContract.id)
-      if (contractIndex === -1) return
-
-      this.contracts[contractIndex].hoanTien.push({
+  } catch (e) {
+    console.error('❌ Lỗi fetch contracts', e)
+    contracts.value = []
+    totalElements.value = 0
+    totalPages.value = 1
+  }
+}
+
+const getServiceById = (serviceId) => {
+  return serviceOptions.value.find(s => String(s.id || s.name) === String(serviceId)) || null
+}
+
+const getSegmentsByService = (serviceId) => {
+  return segments.value
+      .filter(seg => String(seg.serviceId) === String(serviceId))
+      .sort((a, b) => Number(a.min) - Number(b.min))
+}
+
+const findSegmentForAsset = (serviceId, assetValue) => {
+  if (!serviceId || !assetValue) return null
+  const segments = getSegmentsByService(serviceId)
+  return segments.find(seg =>
+      assetValue >= Number(seg.min) && assetValue < Number(seg.max)
+  ) || null
+}
+
+const genContractCode = () => {
+  const y = new Date().getFullYear()
+  return `HD-${y}-${pad4(seq.value++)}`
+}
+
+// Calculation functions
+const calcTongDong = (c) => {
+  return (c?.dotDongTien || []).reduce((sum, x) => sum + (Number(x.soTienDong) || 0), 0)
+}
+
+const calcTongHoan = (c) => {
+  return (c?.hoanTien || []).reduce((sum, x) => sum + (Number(x.soTienHoan) || 0), 0)
+}
+
+const calcTongDieuChinh = (c) => {
+  return (c?.dieuChinh || []).reduce((sum, x) => sum + (Number(x.soTienDieuChinh) || 0), 0)
+}
+
+const calcThucThu = (c) => {
+  return calcTongDong(c) - calcTongHoan(c)
+}
+
+const calcGiaDieuChinh = (c) => {
+  return (Number(c?.giaSauGiam) || 0) + calcTongDieuChinh(c)
+}
+
+const calcDoanhThu = (c) => {
+  return Math.min(calcGiaDieuChinh(c), calcThucThu(c))
+}
+
+const calcConThieu = (c) => {
+  const giaSauGiam = Number(c?.giaSauGiam || 0)
+  const tongDieuChinh = getTongDieuChinh(c)
+  const doanhThu = getDoanhThuRow(c)
+  return Math.max(0, giaSauGiam + tongDieuChinh - doanhThu)
+}
+
+// Toast
+const showToastMessage = (type, title, text) => {
+  toast.value = {
+    type,
+    title,
+    text,
+    icon: type === 'success' ? 'fa-solid fa-circle-check' :
+        type === 'error' ? 'fa-solid fa-triangle-exclamation' :
+            'fa-solid fa-circle-info'
+  }
+  showToast.value = true
+  setTimeout(() => {
+    showToast.value = false
+  }, 3000)
+}
+
+// Modal control
+const openModal = (modal) => {
+  showModal.value = modal
+}
+
+const closeModal = (modal) => {
+  resetContractForm()
+  if (showModal.value === modal) {
+    showModal.value = null
+  }
+}
+
+// Contract management
+const resetContractForm = () => {
+  const firstService = serviceOptions.value[0] || null
+  newContract.value = {
+    maHopDong: genContractCode(),
+    maKhachHang: '',
+    tenKhachHang: '',
+    tenDichVu: firstService?.name || '',
+    serviceId: firstService?.id || firstService?.name || null,
+    giaTriTaiSan: null,
+    giaDichVuGoc: 0,
+    phiGiam: 0,
+    discountMode: 'PERCENT',
+    discountValue: 0,
+    giaSauGiam: 0,
+    trangThaiHopDong: 'DANG_HIEU_LUC',
+    ngayKy: todayISO(),
+    initPlan: 'COC',
+    tiLeCoc: 30,
+    firstMethod: 'CHUYEN_KHOAN'
+  }
+  customerSearch.value = ''
+  selectedCustomer.value = null
+  customerSearchResults.value = []
+  customerSearchError.value = ''
+  customerSearchLoading.value = false
+  updateServicePrice()
+  showToastMessage('info', 'Tạo mới form', 'Đã reset form hợp đồng.')
+}
+
+const updateServicePrice = () => {
+  const service = getServiceById(newContract.value.serviceId)
+  newContract.value.tenDichVu = service?.name || ''
+  updateGiaGocFromAsset()
+}
+
+const updateGiaGocFromAsset = () => {
+  const assetValue = Number(newContract.value.giaTriTaiSan || 0)
+  const segment = findSegmentForAsset(newContract.value.serviceId, assetValue)
+  if (segment) {
+    newContract.value.giaDichVuGoc = Number(segment.price || 0)
+  } else {
+    newContract.value.giaDichVuGoc = 0
+  }
+  updateGiaSauGiam()
+}
+
+const setDiscountMode = (mode) => {
+  newContract.value.discountMode = mode
+}
+
+const updateGiaSauGiam = () => {
+  const giaGoc = Number(newContract.value.giaDichVuGoc || 0)
+  if (newContract.value.discountMode === 'PERCENT') {
+    const percent = Math.max(0, Math.min(100, Number(newContract.value.discountValue || 0)))
+    newContract.value.discountValue = percent
+    newContract.value.phiGiam = Math.round(giaGoc * (percent / 100))
+  } else {
+    const money = Number(newContract.value.discountValue || 0)
+    const clamped = Math.max(0, Math.min(giaGoc, money))
+    newContract.value.discountValue = clamped
+    newContract.value.phiGiam = clamped
+  }
+  newContract.value.giaSauGiam = Math.max(0, giaGoc - (newContract.value.phiGiam || 0))
+}
+
+const setDiscountValueFromInput = (value) => {
+  if (newContract.value.discountMode === 'PERCENT') {
+    newContract.value.discountValue = parseNumberInput(value)
+  } else {
+    newContract.value.discountValue = parseNumberInput(value)
+  }
+  updateGiaSauGiam()
+}
+
+const setPaymentAmountFromInput = (value) => {
+  const parsed = parseNumberInput(value)
+  const maxAmount = calcConThieu(currentContract.value)
+  payment.value.amount = Math.min(parsed, maxAmount)
+}
+
+const clearSelectedCustomer = () => {
+  selectedCustomer.value = null
+  customerSearch.value = ''
+  customerSearchResults.value = []
+  customerSearchError.value = ''
+  customerSearchLoading.value = false
+  newContract.value.maKhachHang = ''
+  newContract.value.tenKhachHang = ''
+}
+
+const fetchCustomerSearch = async (keyword) => {
+  const k = (keyword || '').trim()
+  if (!k) {
+    customerSearchResults.value = []
+    customerSearchError.value = ''
+    return
+  }
+
+  if (k === lastCustomerKeyword.value) return
+  lastCustomerKeyword.value = k
+
+  customerSearchLoading.value = true
+  customerSearchError.value = ''
+
+  try {
+    const qs = new URLSearchParams({ keyword: k }).toString()
+    const res = await api.get(`/customer-crm/admin/lich-hen/search-customer?${qs}`)
+    const data = await res.data
+    customerSearchResults.value = (Array.isArray(data) ? data : []).slice(0, 8).map((x) => ({
+      id: x.customerId,
+      name: x.customerName,
+      phone: x.phone,
+      raw: x
+    }))
+  } catch (e) {
+    customerSearchResults.value = []
+    customerSearchError.value = 'Không tìm thấy hoặc lỗi tải dữ liệu.'
+  } finally {
+    customerSearchLoading.value = false
+  }
+}
+
+const clearCustomerSearchTimer = () => {
+  if (customerSearchTimer.value) clearTimeout(customerSearchTimer.value)
+  customerSearchTimer.value = null
+}
+
+const selectCustomer = (customer) => {
+  suppressCustomerSearch.value = true
+  clearCustomerSearchTimer()
+  customerSearchLoading.value = false
+  customerSearchError.value = ''
+  customerSearchResults.value = []
+
+  selectedCustomer.value = customer
+  customerSearch.value = customer.name
+  newContract.value.maKhachHang = customer.id
+  newContract.value.tenKhachHang = customer.name
+  if (customer?.raw?.giaTriTaiSan !== undefined && customer?.raw?.giaTriTaiSan !== null) {
+    newContract.value.giaTriTaiSan = Number(customer.raw.giaTriTaiSan || 0)
+  }
+
+  setTimeout(() => {
+    suppressCustomerSearch.value = false
+  }, 0)
+}
+
+const saveContract = async () => {
+  updateGiaSauGiam()
+  if (!selectedCustomer.value) {
+    showError('Thiếu dữ liệu', 'Bạn cần chọn khách hàng từ danh sách.')
+    return
+  }
+
+  if (!newContract.value.tenDichVu) {
+    showError('Thiếu dữ liệu', 'Bạn cần chọn Dịch vụ.')
+    return
+  }
+
+  if (!newContract.value.giaTriTaiSan) {
+    showError('Thiếu dữ liệu', 'Bạn cần nhập giá trị tài sản.')
+    return
+  }
+
+  if (!newContract.value.giaDichVuGoc) {
+    showError('Thiếu dữ liệu', 'Giá gốc chưa xác định theo phân khúc.')
+    return
+  }
+
+  if (newContract.value.discountMode === 'MONEY' && newContract.value.discountValue <= 0) {
+    showError('Giảm giá không hợp lệ', 'Giảm giá tiền phải > 0 và không vượt quá giá gốc.')
+    return
+  }
+
+  const payload = {
+    maKhachHang: newContract.value.maKhachHang,
+    giaTriKyBan: newContract.value.giaTriTaiSan,
+    giaDichVuGoc: newContract.value.giaDichVuGoc,
+    phiGiam: newContract.value.phiGiam || 0,
+    giaSauGiam: newContract.value.giaSauGiam,
+    hinhThucThanhToan: newContract.value.firstMethod,
+    serviceId: newContract.value.serviceId,
+    soTienThanhToan: firstPaymentAmount.value,
+    initPlan: newContract.value.initPlan
+  }
+
+  try {
+    const res = await showLoading(api.post('/hop-dong/admin/create', payload))
+    const created = res?.data || {}
+    const hasPayments = Array.isArray(created.dotDongTien) && created.dotDongTien.length > 0
+    const contract = {
+      id: created.id || crypto.randomUUID(),
+      maHopDong: created.maHopDong || newContract.value.maHopDong,
+      maKhachHang: created.maKhachHang ?? newContract.value.maKhachHang,
+      tenKhachHang: created.tenKhachHang || newContract.value.tenKhachHang,
+      nhanVienTao: created.nhanVienTao || currentUserName.value,
+      tenDichVu: created.tenDichVu || newContract.value.tenDichVu,
+      serviceId: created.serviceId ?? newContract.value.serviceId,
+      giaTriTaiSan: created.giaTriKyBan ?? created.giaTriTaiSan ?? newContract.value.giaTriTaiSan,
+      giaDichVuGoc: created.giaDichVuGoc ?? newContract.value.giaDichVuGoc,
+      phiGiam: created.phiGiam ?? newContract.value.phiGiam ?? 0,
+      giaSauGiam: created.giaSauGiam ?? newContract.value.giaSauGiam,
+      trangThaiHopDong: created.trangThaiHopDong ?? newContract.value.trangThaiHopDong,
+      ngayKy: created.ngayKy ?? newContract.value.ngayKy ?? todayISO(),
+      ngayTao: created.ngayTao ?? new Date().toLocaleString('vi-VN'),
+      dotDongTien: hasPayments ? created.dotDongTien : [],
+      hoanTien: created.hoanTien || [],
+      dieuChinh: created.dieuChinh || [],
+      initPlan: created.initPlan ?? newContract.value.initPlan,
+      tiLeCoc: created.tiLeCoc ?? (newContract.value.initPlan === 'COC' ? (newContract.value.tiLeCoc || 0) : null)
+    }
+
+    if (!hasPayments && firstPaymentAmount.value > 0) {
+      contract.dotDongTien.push({
         id: crypto.randomUUID(),
-        soTienHoan: this.refund.amount,
-        lyDoHoan: this.refund.reason,
-        ngayHoan: this.refund.date || this.todayISO(),
+        soTienDong: firstPaymentAmount.value,
+        hinhThucThanhToan: newContract.value.firstMethod,
+        ngayDongTien: contract.ngayKy,
+        ghiChu: newContract.value.initPlan === 'FULL' ?
+            'Thanh toán đủ (tạo khi lập HĐ)' :
+            `Cọc ${newContract.value.tiLeCoc || 0}% (tạo khi lập HĐ)`,
+        nguoiGhiNhan: 'demo_admin',
+        ngayTao: new Date().toLocaleString('vi-VN')
+      })
+    }
+
+    await fetchContracts()
+    updateAlertSuccess('Đã tạo hợp đồng',
+        `${contract.maHopDong} • ${newContract.value.initPlan === 'FULL' ? 'Đóng tất' : 'Cọc'}: ${formatMoney(firstPaymentAmount.value)}`)
+    closeModal('modalContract')
+
+  } catch (error) {
+    console.error('❌ Lỗi tạo hợp đồng', error)
+    updateAlertError('Tạo hợp đồng thất bại', 'Vui lòng thử lại sau.')
+  }
+}
+
+// Payment management
+const openPay = (contract) => {
+  currentContract.value = contract
+  payment.value = {
+    amount: 0,
+    method: 'CHUYEN_KHOAN',
+    date: todayISO(),
+    note: ''
+  }
+  openModal('modalPay')
+}
+
+const savePayment = async () => {
+  if (payment.value.amount <= 0) {
+    showCenterWarning('Số tiền không hợp lệ', 'Số tiền đóng phải > 0.')
+    return
+  }
+
+  const maxAmount = calcConThieu(currentContract.value)
+  if (payment.value.amount > maxAmount) {
+    showCenterWarning('Số tiền vượt quá còn thiếu', `Tối đa còn thiếu: ${formatMoney(maxAmount)}.`)
+    return
+  }
+
+  const contractIndex = contracts.value.findIndex(c => c.id === currentContract.value.id)
+  if (contractIndex === -1) return
+
+  const payload = {
+    hopDongId: currentContract.value.id,
+    soTienDong: payment.value.amount,
+    hinhThucThanhToan: payment.value.method,
+    ngayDongTien: payment.value.date || todayISO(),
+    ghiChu: payment.value.note
+  }
+
+  try {
+    await showLoading(api.post('/hop-dong/admin/dong-phi', payload))
+    updateAlertSuccess('Đóng phí thành công', `+${formatMoney(payment.value.amount)} (${payment.value.method})`)
+    await fetchContracts()
+    closeModal('modalPay')
+  } catch (error) {
+    console.error('❌ Lỗi đóng phí', error)
+    updateAlertError('Đóng phí thất bại', 'Vui lòng thử lại sau.')
+  }
+}
+
+// Refund management
+const openRefund = (contract) => {
+  currentContract.value = contract
+  refund.value = {
+    amount: 0,
+    date: todayISO(),
+    reason: ''
+  }
+  openModal('modalRefund')
+}
+
+const saveRefund = () => {
+  if (refund.value.amount <= 0) {
+    showToastMessage('error', 'Số tiền không hợp lệ', 'Số tiền hoàn phải > 0.')
+    return
+  }
+
+  if (!refund.value.reason) {
+    showToastMessage('error', 'Thiếu lý do', 'Bạn cần nhập lý do hoàn.')
+    return
+  }
+
+  const contractIndex = contracts.value.findIndex(c => c.id === currentContract.value.id)
+  if (contractIndex === -1) return
+
+  contracts.value[contractIndex].hoanTien.push({
+    id: crypto.randomUUID(),
+    soTienHoan: refund.value.amount,
+    lyDoHoan: refund.value.reason,
+    ngayHoan: refund.value.date || todayISO(),
+    nguoiDuyet: 'demo_ke_toan',
+    ngayTao: new Date().toLocaleString('vi-VN')
+  })
+
+  showToastMessage('success', 'Hoàn phí thành công', `-${formatMoney(refund.value.amount)}`)
+  closeModal('modalRefund')
+}
+
+// Adjustment management
+const openAdjust = (contract) => {
+  currentContract.value = contract
+  adjustment.value = {
+    amount: 0,
+    type: 'GIAM_GIA',
+    reason: ''
+  }
+  openModal('modalAdjust')
+}
+
+const saveAdjustment = () => {
+  if (adjustment.value.amount === 0) {
+    showToastMessage('error', 'Số tiền không hợp lệ', 'Điều chỉnh phải khác 0 (âm hoặc dương).')
+    return
+  }
+
+  if (!ENUM_ADJ.includes(adjustment.value.type)) {
+    showToastMessage('error', 'Loại điều chỉnh sai', 'Chọn GIAM_GIA/PHU_THU/PHAT.')
+    return
+  }
+
+  if (!adjustment.value.reason) {
+    showToastMessage('error', 'Thiếu lý do', 'Bạn cần nhập lý do điều chỉnh.')
+    return
+  }
+
+  const contractIndex = contracts.value.findIndex(c => c.id === currentContract.value.id)
+  if (contractIndex === -1) return
+
+  contracts.value[contractIndex].dieuChinh.push({
+    id: crypto.randomUUID(),
+    soTienDieuChinh: adjustment.value.amount,
+    loaiDieuChinh: adjustment.value.type,
+    lyDo: adjustment.value.reason,
+    ngayTao: new Date().toLocaleString('vi-VN')
+  })
+
+  showToastMessage('success', 'Điều chỉnh thành công',
+      `${adjustment.value.amount > 0 ? '+' : ''}${formatMoney(adjustment.value.amount)} (${adjustment.value.type})`)
+  closeModal('modalAdjust')
+}
+
+// Detail view
+const openDetail = (contract) => {
+  currentContract.value = contract
+  openModal('modalDetail')
+}
+
+// Delete management
+const openDelete = (contract) => {
+  currentContract.value = contract
+  openModal('modalDelete')
+}
+
+const confirmDelete = () => {
+  contracts.value = contracts.value.filter(c => c.id !== currentContract.value.id)
+  showToastMessage('success', 'Đã xóa', `Đã xóa ${currentContract.value.maHopDong}`)
+  closeModal('modalDelete')
+}
+
+// Filters
+const resetFilters = () => {
+  searchQuery.value = ''
+  filterService.value = null
+  filterStatus.value = null
+  currentPage.value = 1
+  fetchContracts()
+  showToastMessage('info', 'Đã reset lọc', 'Hiển thị toàn bộ hợp đồng.')
+}
+
+const goToPage = (page) => {
+  const next = Math.min(totalPages.value, Math.max(1, page))
+  currentPage.value = next
+}
+
+const nextPage = () => {
+  goToPage(currentPage.value + 1)
+}
+
+const prevPage = () => {
+  goToPage(currentPage.value - 1)
+}
+
+// Seed data
+const seedMock = () => {
+  const names = ['Nguyễn Văn A', 'Trần Thị B', 'Lê Hoàng C', 'Phạm Minh D', 'Võ Thúy E', 'Đặng Quốc F']
+  const staffNames = ['Nguyễn Minh', 'Trần Hà', 'Phạm Quân', 'Lê Thu']
+  const serviceList = serviceOptions.value
+
+  if (!serviceList.length) {
+    showToastMessage('error', 'Thiếu dữ liệu', 'Chưa tải được danh sách dịch vụ.')
+    return
+  }
+
+  for (let i = 0; i < 5; i++) {
+    const service = serviceList[randInt(0, serviceList.length - 1)]
+    const segments = getSegmentsByService(service.id || service.name)
+    const pickedSegment = segments.length ? segments[randInt(0, segments.length - 1)] : null
+    const segmentMin = pickedSegment ? Number(pickedSegment.min) : 0
+    const segmentMax = pickedSegment ? Number(pickedSegment.max) : 0
+    const assetValue = pickedSegment
+        ? randInt(segmentMin, Math.max(segmentMin + 1, segmentMax - 1))
+        : randInt(500000000, 5000000000)
+    const giaGoc = pickedSegment ? Number(pickedSegment.price || 0) : randPriceForService(service.name)
+    const phiGiam = [0, 200000, 500000, 1000000, 1500000][randInt(0, 4)]
+    const giaSau = Math.max(0, giaGoc - phiGiam)
+
+    const st = ENUM_STATUS[randInt(0, 2)]
+    const ky = new Date()
+    ky.setDate(ky.getDate() - randInt(0, 25))
+    const ngayKy = ky.toISOString().slice(0, 10)
+
+    const contract = {
+      id: crypto.randomUUID(),
+      maHopDong: genContractCode(),
+      maKhachHang: randInt(1001, 2000),
+      tenKhachHang: names[randInt(0, names.length - 1)],
+      nhanVienTao: staffNames[randInt(0, staffNames.length - 1)],
+      tenDichVu: service.name,
+      serviceId: service.id || service.name,
+      giaTriTaiSan: assetValue,
+      giaDichVuGoc: giaGoc,
+      phiGiam,
+      giaSauGiam: giaSau,
+      trangThaiHopDong: st,
+      ngayKy,
+      ngayTao: new Date().toLocaleString('vi-VN'),
+      dotDongTien: [],
+      hoanTien: [],
+      dieuChinh: [],
+      initPlan: 'COC',
+      tiLeCoc: 30
+    }
+
+    // Initial deposit
+    const deposit = Math.round(giaSau * 0.3)
+    contract.dotDongTien.push({
+      id: crypto.randomUUID(),
+      soTienDong: deposit,
+      hinhThucThanhToan: ENUM_PAY[randInt(0, 3)],
+      ngayDongTien: ngayKy,
+      ghiChu: 'Cọc 30% (mock)',
+      nguoiGhiNhan: 'demo_admin',
+      ngayTao: new Date().toLocaleString('vi-VN')
+    })
+
+    // Random extra payments
+    const extraPay = randInt(0, 2)
+    for (let k = 0; k < extraPay; k++) {
+      contract.dotDongTien.push({
+        id: crypto.randomUUID(),
+        soTienDong: randInt(200000, Math.max(300000, Math.round(giaSau * 0.35))),
+        hinhThucThanhToan: ENUM_PAY[randInt(0, 3)],
+        ngayDongTien: todayISO(),
+        ghiChu: `Đợt ${k + 2} (mock)`,
+        nguoiGhiNhan: 'demo_admin',
+        ngayTao: new Date().toLocaleString('vi-VN')
+      })
+    }
+
+    // Random refund (10% chance)
+    if (Math.random() < 0.10) {
+      contract.hoanTien.push({
+        id: crypto.randomUUID(),
+        soTienHoan: randInt(100000, 800000),
+        lyDoHoan: 'Hoàn một phần (mock)',
+        ngayHoan: todayISO(),
         nguoiDuyet: 'demo_ke_toan',
         ngayTao: new Date().toLocaleString('vi-VN')
       })
+    }
 
-      this.showToastMessage('success', 'Hoàn phí thành công', `-${this.formatMoney(this.refund.amount)}`)
-      this.closeModal('modalRefund')
-    },
+    // Random adjustment (25% chance)
+    if (Math.random() < 0.25) {
+      const sign = Math.random() < 0.55 ? -1 : 1
+      const amt = sign * randInt(200000, 1200000)
+      const type = sign < 0 ? 'GIAM_GIA' : (Math.random() < 0.5 ? 'PHU_THU' : 'PHAT')
 
-    // Adjustment management
-    openAdjust(contract) {
-      this.currentContract = contract
-      this.adjustment = {
-        amount: 0,
-        type: 'GIAM_GIA',
-        reason: ''
-      }
-      this.openModal('modalAdjust')
-    },
-
-    saveAdjustment() {
-      if (this.adjustment.amount === 0) {
-        this.showToastMessage('error', 'Số tiền không hợp lệ', 'Điều chỉnh phải khác 0 (âm hoặc dương).')
-        return
-      }
-
-      if (!this.ENUM_ADJ.includes(this.adjustment.type)) {
-        this.showToastMessage('error', 'Loại điều chỉnh sai', 'Chọn GIAM_GIA/PHU_THU/PHAT.')
-        return
-      }
-
-      if (!this.adjustment.reason) {
-        this.showToastMessage('error', 'Thiếu lý do', 'Bạn cần nhập lý do điều chỉnh.')
-        return
-      }
-
-      const contractIndex = this.contracts.findIndex(c => c.id === this.currentContract.id)
-      if (contractIndex === -1) return
-
-      this.contracts[contractIndex].dieuChinh.push({
+      contract.dieuChinh.push({
         id: crypto.randomUUID(),
-        soTienDieuChinh: this.adjustment.amount,
-        loaiDieuChinh: this.adjustment.type,
-        lyDo: this.adjustment.reason,
+        soTienDieuChinh: amt,
+        loaiDieuChinh: type,
+        lyDo: sign < 0 ? 'Giảm thêm (mock)' : 'Phụ thu/Phạt (mock)',
         ngayTao: new Date().toLocaleString('vi-VN')
       })
+    }
 
-      this.showToastMessage('success', 'Điều chỉnh thành công',
-          `${this.adjustment.amount > 0 ? '+' : ''}${this.formatMoney(this.adjustment.amount)} (${this.adjustment.type})`)
-      this.closeModal('modalAdjust')
+    contracts.value.unshift(contract)
+  }
+
+  showToastMessage('success', 'Mock dữ liệu', 'Đã tạo thêm 5 hợp đồng mẫu.')
+}
+
+// Initialize sample data
+const init3Samples = () => {
+  const serviceList = serviceOptions.value
+  const findService = (name) => serviceList.find(s => s.name === name) || serviceList[0] || null
+  const base = [
+    {
+      maKhachHang: 1001,
+      tenKhachHang: 'Nguyễn Văn A',
+      tenDichVu: 'Thiết kế UI Website',
+      phiGiam: 1000000,
+      trangThaiHopDong: 'DANG_HIEU_LUC',
+      ngayKy: todayISO(),
+      initPlan: 'COC',
+      tiLeCoc: 30
     },
-
-    // Detail view
-    openDetail(contract) {
-      this.currentContract = contract
-      this.openModal('modalDetail')
+    {
+      maKhachHang: 1020,
+      tenKhachHang: 'Trần Thị B',
+      tenDichVu: 'SEO & Tối ưu Onpage',
+      phiGiam: 0,
+      trangThaiHopDong: 'HOAN_TAT',
+      ngayKy: todayISO(),
+      initPlan: 'FULL',
+      tiLeCoc: null
     },
+    {
+      maKhachHang: 1108,
+      tenKhachHang: 'Lê Hoàng C',
+      tenDichVu: 'Branding / Bộ nhận diện',
+      phiGiam: 1500000,
+      trangThaiHopDong: 'DANG_HIEU_LUC',
+      ngayKy: todayISO(),
+      initPlan: 'COC',
+      tiLeCoc: 40
+    }
+  ]
 
-    // Delete management
-    openDelete(contract) {
-      this.currentContract = contract
-      this.openModal('modalDelete')
-    },
+  contracts.value = base.map((x) => {
+    const service = findService(x.tenDichVu)
+    const segments = service ? getSegmentsByService(service.id || service.name) : []
+    const pickedSegment = segments.length ? segments[0] : null
+    const assetValue = pickedSegment
+        ? Math.round((Number(pickedSegment.min) + Number(pickedSegment.max)) / 2)
+        : randInt(500000000, 5000000000)
+    const giaGoc = pickedSegment ? Number(pickedSegment.price || 0) : randPriceForService(x.tenDichVu)
+    const giaSau = Math.max(0, giaGoc - (x.phiGiam || 0))
+    const code = genContractCode()
 
-    confirmDelete() {
-      this.contracts = this.contracts.filter(c => c.id !== this.currentContract.id)
-      this.showToastMessage('success', 'Đã xóa', `Đã xóa ${this.currentContract.maHopDong}`)
-      this.closeModal('modalDelete')
-    },
+    const contract = {
+      id: crypto.randomUUID(),
+      maHopDong: code,
+      maKhachHang: x.maKhachHang,
+      tenKhachHang: x.tenKhachHang,
+      nhanVienTao: currentUserName.value,
+      tenDichVu: service?.name || x.tenDichVu,
+      serviceId: service?.id || service?.name || null,
+      giaTriTaiSan: assetValue,
+      giaDichVuGoc: giaGoc,
+      phiGiam: x.phiGiam || 0,
+      giaSauGiam: giaSau,
+      trangThaiHopDong: x.trangThaiHopDong,
+      ngayKy: x.ngayKy,
+      ngayTao: new Date().toLocaleString('vi-VN'),
+      dotDongTien: [],
+      hoanTien: [],
+      dieuChinh: [],
+      initPlan: x.initPlan,
+      tiLeCoc: x.tiLeCoc
+    }
 
-    // Filters
-    resetFilters() {
-      this.searchQuery = ''
-      this.filterService = null
-      this.filterStatus = null
-      this.currentPage = 1
-      this.fetchContracts()
-      this.showToastMessage('info', 'Đã reset lọc', 'Hiển thị toàn bộ hợp đồng.')
-    },
+    // Initial payment
+    let amount = 0
+    if (x.initPlan === 'FULL') amount = giaSau
+    else amount = Math.round(giaSau * ((x.tiLeCoc || 30) / 100))
 
-    goToPage(page) {
-      const next = Math.min(this.totalPages, Math.max(1, page))
-      this.currentPage = next
-    },
+    contract.dotDongTien.push({
+      id: crypto.randomUUID(),
+      soTienDong: amount,
+      hinhThucThanhToan: 'CHUYEN_KHOAN',
+      ngayDongTien: x.ngayKy,
+      ghiChu: x.initPlan === 'FULL'
+          ? 'Thanh toán đủ (mẫu)'
+          : `Cọc ${x.tiLeCoc || 30}% (mẫu)`,
+      nguoiGhiNhan: 'demo_admin',
+      ngayTao: new Date().toLocaleString('vi-VN')
+    })
 
-    nextPage() {
-      this.goToPage(this.currentPage + 1)
-    },
-
-    prevPage() {
-      this.goToPage(this.currentPage - 1)
-    },
-
-    // Seed data
-    seedMock() {
-      const names = ['Nguyễn Văn A', 'Trần Thị B', 'Lê Hoàng C', 'Phạm Minh D', 'Võ Thúy E', 'Đặng Quốc F']
-      const staffNames = ['Nguyễn Minh', 'Trần Hà', 'Phạm Quân', 'Lê Thu']
-      const serviceList = this.serviceOptions
-
-      if (!serviceList.length) {
-        this.showToastMessage('error', 'Thiếu dữ liệu', 'Chưa tải được danh sách dịch vụ.')
-        return
-      }
-
-      for (let i = 0; i < 5; i++) {
-        const service = serviceList[this.randInt(0, serviceList.length - 1)]
-        const segments = this.getSegmentsByService(service.id || service.name)
-        const pickedSegment = segments.length ? segments[this.randInt(0, segments.length - 1)] : null
-        const segmentMin = pickedSegment ? Number(pickedSegment.min) : 0
-        const segmentMax = pickedSegment ? Number(pickedSegment.max) : 0
-        const assetValue = pickedSegment
-            ? this.randInt(segmentMin, Math.max(segmentMin + 1, segmentMax - 1))
-            : this.randInt(500000000, 5000000000)
-        const giaGoc = pickedSegment ? Number(pickedSegment.price || 0) : this.randPriceForService(service.name)
-        const phiGiam = [0, 200000, 500000, 1000000, 1500000][this.randInt(0, 4)]
-        const giaSau = Math.max(0, giaGoc - phiGiam)
-
-        const st = this.ENUM_STATUS[this.randInt(0, 2)]
-        const ky = new Date()
-        ky.setDate(ky.getDate() - this.randInt(0, 25))
-        const ngayKy = ky.toISOString().slice(0, 10)
-
-        const contract = {
-          id: crypto.randomUUID(),
-          maHopDong: this.genContractCode(),
-          maKhachHang: this.randInt(1001, 2000),
-          tenKhachHang: names[this.randInt(0, names.length - 1)],
-          nhanVienTao: staffNames[this.randInt(0, staffNames.length - 1)],
-          tenDichVu: service.name,
-          serviceId: service.id || service.name,
-          giaTriTaiSan: assetValue,
-          giaDichVuGoc: giaGoc,
-          phiGiam,
-          giaSauGiam: giaSau,
-          trangThaiHopDong: st,
-          ngayKy,
-          ngayTao: new Date().toLocaleString('vi-VN'),
-          dotDongTien: [],
-          hoanTien: [],
-          dieuChinh: [],
-          initPlan: 'COC',
-          tiLeCoc: 30
-        }
-
-        // Initial deposit
-        const deposit = Math.round(giaSau * 0.3)
+    // Add extra payment if HOAN_TAT and not FULL
+    if (x.trangThaiHopDong === 'HOAN_TAT' && x.initPlan !== 'FULL') {
+      const remain = Math.max(0, giaSau - amount)
+      if (remain > 0) {
         contract.dotDongTien.push({
           id: crypto.randomUUID(),
-          soTienDong: deposit,
-          hinhThucThanhToan: this.ENUM_PAY[this.randInt(0, 3)],
-          ngayDongTien: ngayKy,
-          ghiChu: 'Cọc 30% (mock)',
-          nguoiGhiNhan: 'demo_admin',
-          ngayTao: new Date().toLocaleString('vi-VN')
-        })
-
-        // Random extra payments
-        const extraPay = this.randInt(0, 2)
-        for (let k = 0; k < extraPay; k++) {
-          contract.dotDongTien.push({
-            id: crypto.randomUUID(),
-            soTienDong: this.randInt(200000, Math.max(300000, Math.round(giaSau * 0.35))),
-            hinhThucThanhToan: this.ENUM_PAY[this.randInt(0, 3)],
-            ngayDongTien: this.todayISO(),
-            ghiChu: `Đợt ${k + 2} (mock)`,
-            nguoiGhiNhan: 'demo_admin',
-            ngayTao: new Date().toLocaleString('vi-VN')
-          })
-        }
-
-        // Random refund (10% chance)
-        if (Math.random() < 0.10) {
-          contract.hoanTien.push({
-            id: crypto.randomUUID(),
-            soTienHoan: this.randInt(100000, 800000),
-            lyDoHoan: 'Hoàn một phần (mock)',
-            ngayHoan: this.todayISO(),
-            nguoiDuyet: 'demo_ke_toan',
-            ngayTao: new Date().toLocaleString('vi-VN')
-          })
-        }
-
-        // Random adjustment (25% chance)
-        if (Math.random() < 0.25) {
-          const sign = Math.random() < 0.55 ? -1 : 1
-          const amt = sign * this.randInt(200000, 1200000)
-          const type = sign < 0 ? 'GIAM_GIA' : (Math.random() < 0.5 ? 'PHU_THU' : 'PHAT')
-
-          contract.dieuChinh.push({
-            id: crypto.randomUUID(),
-            soTienDieuChinh: amt,
-            loaiDieuChinh: type,
-            lyDo: sign < 0 ? 'Giảm thêm (mock)' : 'Phụ thu/Phạt (mock)',
-            ngayTao: new Date().toLocaleString('vi-VN')
-          })
-        }
-
-        this.contracts.unshift(contract)
-      }
-
-      this.showToastMessage('success', 'Mock dữ liệu', 'Đã tạo thêm 5 hợp đồng mẫu.')
-    },
-
-    // Initialize sample data
-    init3Samples() {
-      const serviceList = this.serviceOptions
-      const findService = (name) => serviceList.find(s => s.name === name) || serviceList[0] || null
-      const base = [
-        {
-          maKhachHang: 1001,
-          tenKhachHang: 'Nguyễn Văn A',
-          tenDichVu: 'Thiết kế UI Website',
-          phiGiam: 1000000,
-          trangThaiHopDong: 'DANG_HIEU_LUC',
-          ngayKy: this.todayISO(),
-          initPlan: 'COC',
-          tiLeCoc: 30
-        },
-        {
-          maKhachHang: 1020,
-          tenKhachHang: 'Trần Thị B',
-          tenDichVu: 'SEO & Tối ưu Onpage',
-          phiGiam: 0,
-          trangThaiHopDong: 'HOAN_TAT',
-          ngayKy: this.todayISO(),
-          initPlan: 'FULL',
-          tiLeCoc: null
-        },
-        {
-          maKhachHang: 1108,
-          tenKhachHang: 'Lê Hoàng C',
-          tenDichVu: 'Branding / Bộ nhận diện',
-          phiGiam: 1500000,
-          trangThaiHopDong: 'DANG_HIEU_LUC',
-          ngayKy: this.todayISO(),
-          initPlan: 'COC',
-          tiLeCoc: 40
-        }
-      ]
-
-      this.contracts = base.map((x) => {
-        const service = findService(x.tenDichVu)
-        const segments = service ? this.getSegmentsByService(service.id || service.name) : []
-        const pickedSegment = segments.length ? segments[0] : null
-        const assetValue = pickedSegment
-            ? Math.round((Number(pickedSegment.min) + Number(pickedSegment.max)) / 2)
-            : this.randInt(500000000, 5000000000)
-        const giaGoc = pickedSegment ? Number(pickedSegment.price || 0) : this.randPriceForService(x.tenDichVu)
-        const giaSau = Math.max(0, giaGoc - (x.phiGiam || 0))
-        const code = this.genContractCode()
-
-        const contract = {
-          id: crypto.randomUUID(),
-          maHopDong: code,
-          maKhachHang: x.maKhachHang,
-          tenKhachHang: x.tenKhachHang,
-          nhanVienTao: this.currentUserName,
-          tenDichVu: service?.name || x.tenDichVu,
-          serviceId: service?.id || service?.name || null,
-          giaTriTaiSan: assetValue,
-          giaDichVuGoc: giaGoc,
-          phiGiam: x.phiGiam || 0,
-          giaSauGiam: giaSau,
-          trangThaiHopDong: x.trangThaiHopDong,
-          ngayKy: x.ngayKy,
-          ngayTao: new Date().toLocaleString('vi-VN'),
-          dotDongTien: [],
-          hoanTien: [],
-          dieuChinh: [],
-          initPlan: x.initPlan,
-          tiLeCoc: x.tiLeCoc
-        }
-
-        // Initial payment
-        let amount = 0
-        if (x.initPlan === 'FULL') amount = giaSau
-        else amount = Math.round(giaSau * ((x.tiLeCoc || 30) / 100))
-
-        contract.dotDongTien.push({
-          id: crypto.randomUUID(),
-          soTienDong: amount,
+          soTienDong: remain,
           hinhThucThanhToan: 'CHUYEN_KHOAN',
           ngayDongTien: x.ngayKy,
-          ghiChu: x.initPlan === 'FULL'
-              ? 'Thanh toán đủ (mẫu)'
-              : `Cọc ${x.tiLeCoc || 30}% (mẫu)`,
+          ghiChu: 'Đóng nốt (mẫu)',
           nguoiGhiNhan: 'demo_admin',
           ngayTao: new Date().toLocaleString('vi-VN')
         })
-
-        // Add extra payment if HOAN_TAT and not FULL
-        if (x.trangThaiHopDong === 'HOAN_TAT' && x.initPlan !== 'FULL') {
-          const remain = Math.max(0, giaSau - amount)
-          if (remain > 0) {
-            contract.dotDongTien.push({
-              id: crypto.randomUUID(),
-              soTienDong: remain,
-              hinhThucThanhToan: 'CHUYEN_KHOAN',
-              ngayDongTien: x.ngayKy,
-              ghiChu: 'Đóng nốt (mẫu)',
-              nguoiGhiNhan: 'demo_admin',
-              ngayTao: new Date().toLocaleString('vi-VN')
-            })
-          }
-        }
-
-        return contract
-      })
+      }
     }
-  },
 
-  async mounted() {
-    await Promise.all([this.fetchServices(), this.fetchSegments()])
-    await this.fetchContracts()
-    this.resetContractForm()
-  }
+    return contract
+  })
 }
+
+// Lifecycle
+onMounted(async () => {
+  await Promise.all([fetchServices(), fetchSegments()])
+  await fetchContracts()
+  resetContractForm()
+})
 </script>
 
 <style scoped>
@@ -2515,7 +2588,7 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
   align-items:center;
   justify-content:space-between;
   gap:12px;
-  padding: 12px 4px 0;
+  padding: 12px 12px;
   flex-wrap: wrap;
 }
 .pager{
