@@ -26,7 +26,7 @@
         <div class="tab" :class="{ active: activeTab === 1 }" @click="activeTab = 1">
           <i class="fa-solid fa-layer-group"></i>
           Danh sách & thao tác
-          <span class="pill">{{ filteredContracts.length }}</span>
+          <span class="pill">{{ totalElements }}</span>
         </div>
 
         <div class="tab" :class="{ active: activeTab === 2 }" @click="activeTab = 2">
@@ -40,23 +40,23 @@
       <div class="panel attached" v-show="activeTab === 1">
         <div class="panel-h">
           <div class="tools">
-            <div class="input">
+            <div class="input filter-item filter-search" :class="{ active: searchQuery }">
               <i class="fa-solid fa-magnifying-glass"></i>
               <input v-model="searchQuery" type="text" placeholder="Tìm theo mã HĐ / khách / người tạo...">
             </div>
 
-            <div class="select">
+            <div class="select filter-item filter-service" :class="{ active: filterService }">
               <label>Dịch vụ</label>
               <select v-model="filterService">
-                <option value="">Tất cả</option>
-                <option v-for="service in serviceOptions" :key="service.id || service.name" :value="service.name">{{ service.name }}</option>
+                <option :value="null">Tất cả</option>
+                <option v-for="service in serviceOptions" :key="service.id || service.name" :value="service.id || service.name">{{ service.name }}</option>
               </select>
             </div>
 
-            <div class="select">
+            <div class="select filter-item filter-status" :class="{ active: filterStatus }">
               <label>Trạng thái</label>
               <select v-model="filterStatus">
-                <option value="">Tất cả</option>
+                <option :value="null">Tất cả</option>
                 <option value="DANG_HIEU_LUC">DANG_HIEU_LUC</option>
                 <option value="HOAN_TAT">HOAN_TAT</option>
                 <option value="HUY">HUY</option>
@@ -70,19 +70,19 @@
           <div class="kpi-row">
             <div class="kpi">
               <div class="k"><span class="dot"></span>Tổng hợp đồng</div>
-              <div class="v price p4">{{ filteredContracts.length }}</div>
+              <div class="v price p4">{{ totalElements }}</div>
             </div>
             <div class="kpi">
-              <div class="k"><span class="dot"></span>Tổng thực thu</div>
-              <div class="v price p3">{{ formatMoney(totalThucThu) }}</div>
+              <div class="k"><span class="dot"></span>Tổng doanh thu</div>
+              <div class="v price p3">{{ formatMoney(totalDoanhThu) }}</div>
             </div>
             <div class="kpi">
               <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
               <div class="v price p2">{{ formatMoney(totalDieuChinh) }}</div>
             </div>
             <div class="kpi">
-              <div class="k"><span class="dot"></span>Tổng doanh thu (min)</div>
-              <div class="v price p1">{{ formatMoney(totalDoanhThu) }}</div>
+              <div class="k"><span class="dot"></span>Tổng doanh số</div>
+              <div class="v price p1">{{ formatMoney(totalDoanhSo) }}</div>
             </div>
           </div>
 
@@ -94,9 +94,10 @@
                   <th style="width:150px">Mã HĐ</th>
                   <th>Khách hàng</th>
                   <th style="width:260px">Dịch vụ</th>
+                  <th style="width:160px">Giá tài sản</th>
                   <th style="width:140px">Giá sau giảm</th>
-                  <th style="width:140px">Thực thu</th>
                   <th style="width:140px">Doanh thu</th>
+                  <th style="width:140px">Doanh số</th>
                   <th style="width:120px">Trạng thái</th>
                   <th style="width:160px">Nhân viên tạo</th>
                   <th style="width:160px">Ngày tạo</th>
@@ -104,8 +105,8 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-if="filteredContracts.length === 0">
-                  <td colspan="10">
+                <tr v-if="contracts.length === 0">
+                  <td colspan="11">
                     <div class="text-center py-10">
                       <div class="mx-auto w-12 h-12 rounded-2xl grid place-items-center text-white shadow-lg" style="background: var(--primary-gradient);">
                         <i class="fa-solid fa-face-smile"></i>
@@ -115,10 +116,9 @@
                     </div>
                   </td>
                 </tr>
-                <tr v-for="contract in paginatedContracts" :key="contract.id">
+                <tr v-for="contract in contracts" :key="contract.id">
                   <td>
                     <div class="font-extrabold mono">{{ contract.maHopDong }}</div>
-                    <div class="muted tiny">ID KH: {{ contract.maKhachHang }}</div>
                   </td>
                   <td>
                     <div class="font-bold">{{ contract.tenKhachHang }}</div>
@@ -128,13 +128,19 @@
                     <div class="muted tiny">Giá gốc: <span class="mono">{{ formatMoney(contract.giaDichVuGoc) }}</span></div>
                   </td>
                   <td>
+                    <div class="price p2">{{ formatMoney(getGiaTaiSanKy(contract)) }}</div>
+                  </td>
+                  <td>
                     <div class="price p4">{{ formatMoney(contract.giaSauGiam) }}</div>
+                    <div class="muted tiny">Giảm: <span class="mono">{{ formatMoney(getGiaGiam(contract)) }}</span></div>
                   </td>
                   <td>
-                    <div class="price p3">{{ formatMoney(calcThucThu(contract)) }}</div>
+                    <div class="price p3">{{ formatMoney(getDoanhThu(contract)) }}</div>
+                    <div class="muted tiny">Hoàn: <span class="mono">{{ formatMoney(getTongHoan(contract)) }}</span></div>
                   </td>
                   <td>
-                    <div class="price p1">{{ formatMoney(calcDoanhThu(contract)) }}</div>
+                    <div class="price p1">{{ formatMoney(getDoanhSo(contract)) }}</div>
+                    <div class="muted tiny">ĐC: <span class="mono">{{ formatMoney(getTongDieuChinh(contract)) }}</span></div>
                   </td>
                   <td>
                       <span v-if="contract.trangThaiHopDong === 'DANG_HIEU_LUC'" class="status st-on">
@@ -178,7 +184,7 @@
         </div>
         <div class="pagination">
           <div class="muted tiny">
-            Hiển thị {{ pageStart }}-{{ pageEnd }} / {{ filteredContracts.length }}
+            Hiển thị {{ pageStart }}-{{ pageEnd }} / {{ totalElements }}
           </div>
           <div class="pager">
             <button class="btn ghost btn-page" :disabled="currentPage === 1" @click="prevPage">Trước</button>
@@ -493,10 +499,8 @@
               <div class="field">
                 <label><i class="fa-solid fa-credit-card"></i> Hình thức thanh toán</label>
                 <select v-model="payment.method">
-                  <option value="TIEN_MAT">TIEN_MAT</option>
-                  <option value="CHUYEN_KHOAN">CHUYEN_KHOAN</option>
-                  <option value="QR">QR</option>
-                  <option value="KHAC">KHAC</option>
+                  <option value="TIEN_MAT">Tiền mặt</option>
+                  <option value="CHUYEN_KHOAN">Chuyển khoản</option>
                 </select>
               </div>
               <div class="field">
@@ -902,7 +906,7 @@
         <div class="modal-b">
           <div class="p-2">
             <div class="font-extrabold">Xóa hợp đồng {{ currentContract?.maHopDong }}?</div>
-            <div class="muted mt-2">{{ currentContract?.tenKhachHang }} • {{ currentContract?.tenDichVu }} • Doanh thu hiện tại: {{ formatMoney(calcDoanhThu(currentContract)) }}</div>
+            <div class="muted mt-2">{{ currentContract?.tenKhachHang }} • {{ currentContract?.tenDichVu }} • Doanh thu hiện tại: {{ formatMoney(getDoanhThu(currentContract)) }}</div>
             <div class="note mt-3">
               Xóa sẽ mất cả các đợt <b>đóng phí</b>, <b>hoàn phí</b>, <b>điều chỉnh</b> của hợp đồng này.
             </div>
@@ -938,17 +942,20 @@ export default {
       // State
       activeTab: 1,
       contracts: [],
+      totalElements: 0,
+      totalPages: 1,
       seq: 1,
       services: [],
       segments: [],
 
       // Filters
       searchQuery: '',
-      filterService: '',
-      filterStatus: '',
+      filterService: null,
+      filterStatus: null,
       currentPage: 1,
       pageSize: 2,
       currentUserName: 'Nguyễn Minh',
+      searchTimer: null,
 
       // Customer search
       customerSearch: '',
@@ -1018,44 +1025,25 @@ export default {
   },
 
   computed: {
-    filteredContracts() {
-      return this.contracts.filter(contract => {
-        const hay = `${contract.maHopDong} ${contract.tenKhachHang} ${contract.tenDichVu} ${contract.nhanVienTao || ''}`.toLowerCase()
-        const okQ = !this.searchQuery || hay.includes(this.searchQuery.toLowerCase())
-        const okSvc = !this.filterService || contract.tenDichVu === this.filterService
-        const okSt = !this.filterStatus || contract.trangThaiHopDong === this.filterStatus
-        return okQ && okSvc && okSt
-      })
-    },
-
-    totalPages() {
-      return Math.max(1, Math.ceil(this.filteredContracts.length / this.pageSize))
-    },
-
-    paginatedContracts() {
-      const start = (this.currentPage - 1) * this.pageSize
-      return this.filteredContracts.slice(start, start + this.pageSize)
-    },
-
     pageStart() {
-      if (!this.filteredContracts.length) return 0
+      if (!this.totalElements) return 0
       return (this.currentPage - 1) * this.pageSize + 1
     },
 
     pageEnd() {
-      return Math.min(this.currentPage * this.pageSize, this.filteredContracts.length)
-    },
-
-    totalThucThu() {
-      return this.filteredContracts.reduce((sum, c) => sum + this.calcThucThu(c), 0)
-    },
-
-    totalDieuChinh() {
-      return this.filteredContracts.reduce((sum, c) => sum + this.calcTongDieuChinh(c), 0)
+      return Math.min(this.currentPage * this.pageSize, this.totalElements)
     },
 
     totalDoanhThu() {
-      return this.filteredContracts.reduce((sum, c) => sum + this.calcDoanhThu(c), 0)
+      return this.contracts.reduce((sum, c) => sum + this.getDoanhThu(c), 0)
+    },
+
+    totalDieuChinh() {
+      return this.contracts.reduce((sum, c) => sum + this.getTongDieuChinh(c), 0)
+    },
+
+    totalDoanhSo() {
+      return this.contracts.reduce((sum, c) => sum + this.getDoanhSo(c), 0)
     },
 
     serviceOptions() {
@@ -1102,20 +1090,28 @@ export default {
   },
 
   watch: {
-    filteredContracts() {
-      this.currentPage = Math.min(this.currentPage, this.totalPages)
-    },
-
     searchQuery() {
       this.currentPage = 1
+      this.queueSearch()
     },
 
     filterService() {
       this.currentPage = 1
+      this.fetchContracts()
     },
 
     filterStatus() {
       this.currentPage = 1
+      this.fetchContracts()
+    },
+
+    currentPage() {
+      this.fetchContracts()
+    },
+
+    pageSize() {
+      this.currentPage = 1
+      this.fetchContracts()
     },
 
     customerSearch(val) {
@@ -1219,6 +1215,42 @@ export default {
       return String(value)
     },
 
+    getGiaGiam(contract) {
+      return Number(contract?.giaGiam ?? contract?.phiGiam ?? 0)
+    },
+
+    getGiaTaiSanKy(contract) {
+      return Number(contract?.giaTaiSanKyGoc ?? contract?.giaTriTaiSan ?? contract?.giaTriKyBan ?? 0)
+    },
+
+    getTongHoan(contract) {
+      if (contract?.giaHoanTien !== undefined && contract?.giaHoanTien !== null) {
+        return Number(contract.giaHoanTien || 0)
+      }
+      return this.calcTongHoan(contract)
+    },
+
+    getTongDieuChinh(contract) {
+      if (contract?.tongDC !== undefined && contract?.tongDC !== null) {
+        return Number(contract.tongDC || 0)
+      }
+      return this.calcTongDieuChinh(contract)
+    },
+
+    getDoanhThu(contract) {
+      if (contract?.doanhThu !== undefined && contract?.doanhThu !== null) {
+        return Number(contract.doanhThu || 0)
+      }
+      return this.calcThucThu(contract)
+    },
+
+    getDoanhSo(contract) {
+      if (contract?.doanhSo !== undefined && contract?.doanhSo !== null) {
+        return Number(contract.doanhSo || 0)
+      }
+      return this.calcDoanhThu(contract)
+    },
+
     randInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min
     },
@@ -1259,6 +1291,40 @@ export default {
       } catch (e) {
         console.error('❌ Lỗi fetch segments', e)
         this.segments = []
+      }
+    },
+
+    queueSearch() {
+      if (this.searchTimer) clearTimeout(this.searchTimer)
+      this.searchTimer = setTimeout(() => {
+        this.fetchContracts()
+      }, 300)
+    },
+
+    async fetchContracts() {
+      const payload = {
+        keyword: this.searchQuery || null,
+        serviceId: this.filterService || null,
+        trangThaiHopDong: this.filterStatus || null,
+        page: this.currentPage,
+        size: this.pageSize
+      }
+
+      try {
+        const res = await api.post('/hop-dong/admin/search', payload)
+        const page = res?.data || {}
+        const items = Array.isArray(page.content) ? page.content : []
+        this.contracts = items
+        this.totalElements = Number(page.totalElements ?? items.length)
+        this.totalPages = Number(page.totalPages ?? Math.max(1, Math.ceil(this.totalElements / this.pageSize)))
+        if (this.currentPage > this.totalPages) {
+          this.currentPage = this.totalPages || 1
+        }
+      } catch (e) {
+        console.error('❌ Lỗi fetch contracts', e)
+        this.contracts = []
+        this.totalElements = 0
+        this.totalPages = 1
       }
     },
 
@@ -1555,7 +1621,7 @@ export default {
           })
         }
 
-        this.contracts.unshift(contract)
+        await this.fetchContracts()
         updateAlertSuccess('Đã tạo hợp đồng',
             `${contract.maHopDong} • ${this.newContract.initPlan === 'FULL' ? 'Đóng tất' : 'Cọc'}: ${this.formatMoney(this.firstPaymentAmount)}`)
         this.closeModal('modalContract')
@@ -1703,9 +1769,10 @@ export default {
     // Filters
     resetFilters() {
       this.searchQuery = ''
-      this.filterService = ''
-      this.filterStatus = ''
+      this.filterService = null
+      this.filterStatus = null
       this.currentPage = 1
+      this.fetchContracts()
       this.showToastMessage('info', 'Đã reset lọc', 'Hiển thị toàn bộ hợp đồng.')
     },
 
@@ -1942,7 +2009,7 @@ export default {
 
   async mounted() {
     await Promise.all([this.fetchServices(), this.fetchSegments()])
-    this.init3Samples()
+    await this.fetchContracts()
     this.resetContractForm()
   }
 }
@@ -2222,6 +2289,17 @@ export default {
   position:relative;
   width: 100%;
   min-width: 0;
+}
+.filter-item input,
+.filter-item select{
+  background: linear-gradient(135deg, rgba(102,126,234,.08), rgba(79,172,254,.06)) !important;
+}
+.filter-search input{ border-color: rgba(79,172,254,.35); }
+.filter-service select{ border-color: rgba(240,147,251,.35); }
+.filter-status select{ border-color: rgba(67,233,123,.35); }
+.filter-item.active input,
+.filter-item.active select{
+  box-shadow: 0 0 0 4px rgba(102,126,234,.16);
 }
 .input i{
   position:absolute;
