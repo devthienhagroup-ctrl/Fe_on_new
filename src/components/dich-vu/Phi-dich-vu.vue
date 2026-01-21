@@ -21,25 +21,33 @@
     </div>
     <!-- KPIs -->
     <div class="kpi-row mt-3">
-      <div class="kpi kpi-total">
-        <div class="k"><span class="dot"></span>Tổng hợp đồng</div>
-        <div class="v price p4">{{ totalElements }}</div>
-        <div class="kpi-ico"><i class="fa-solid fa-file-signature"></i></div>
+      <div class="stat-card kpi-total">
+        <div class="stat-card-content">
+          <h5><i class="fa-solid fa-file-signature"></i> Tổng hợp đồng</h5>
+          <div class="stat-number">{{ totalElements }}</div>
+        </div>
+        <i class="fa-solid fa-file-signature stat-icon"></i>
       </div>
-      <div class="kpi kpi-revenue">
-        <div class="k"><span class="dot"></span>Tổng doanh thu</div>
-        <div class="v price p3">{{ formatMoney(totalDoanhThu) }}</div>
-        <div class="kpi-ico"><i class="fa-solid fa-chart-line"></i></div>
+      <div class="stat-card kpi-revenue">
+        <div class="stat-card-content">
+          <h5><i class="fa-solid fa-chart-line"></i> Tổng doanh thu</h5>
+          <div class="stat-number">{{ formatMoney(totalDoanhThu) }}</div>
+        </div>
+        <i class="fa-solid fa-chart-line stat-icon"></i>
       </div>
-      <div class="kpi kpi-adjust">
-        <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
-        <div class="v price p2">{{ formatMoney(totalDieuChinh) }}</div>
-        <div class="kpi-ico"><i class="fa-solid fa-sliders"></i></div>
+      <div class="stat-card kpi-adjust">
+        <div class="stat-card-content">
+          <h5><i class="fa-solid fa-sliders"></i> Tổng điều chỉnh</h5>
+          <div class="stat-number">{{ formatMoney(totalDieuChinh) }}</div>
+        </div>
+        <i class="fa-solid fa-sliders stat-icon"></i>
       </div>
-      <div class="kpi kpi-sales">
-        <div class="k"><span class="dot"></span>Tổng doanh số</div>
-        <div class="v price p1">{{ formatMoney(totalDoanhSo) }}</div>
-        <div class="kpi-ico"><i class="fa-solid fa-sack-dollar"></i></div>
+      <div class="stat-card kpi-sales">
+        <div class="stat-card-content">
+          <h5><i class="fa-solid fa-sack-dollar"></i> Tổng doanh số</h5>
+          <div class="stat-number">{{ formatMoney(totalDoanhSo) }}</div>
+        </div>
+        <i class="fa-solid fa-sack-dollar stat-icon"></i>
       </div>
     </div>
     <!-- TABS -->
@@ -677,10 +685,10 @@
                   :value="formatNumberInput(adjustment.amount)"
                   type="text"
                   inputmode="numeric"
-                  placeholder="VD: -500.000 hoặc 300.000"
+                  placeholder="VD: 300.000"
                   @input="handleAdjustmentAmountInput"
                 >
-                <div class="muted tiny">Âm = giảm thêm • Dương = phụ thu / phạt</div>
+                <div class="muted tiny">Chỉ nhập số dương cho điều chỉnh.</div>
               </div>
 
               <div class="field">
@@ -948,6 +956,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import api from '/src/api/api.js'
 import {
+  confirmWithInput,
   showCenterWarning,
   showError,
   showLoading,
@@ -1852,17 +1861,12 @@ const openAdjust = (contract) => {
 }
 
 const handleAdjustmentAmountInput = (event) => {
-  const value = parseNumberInput(event.target.value, true)
-  if (adjustment.value.type !== 'GIAM_GIA' && value < 0) {
-    adjustment.value.amount = Math.abs(value)
-    return
-  }
-  adjustment.value.amount = value
+  adjustment.value.amount = parseNumberInput(event.target.value)
 }
 
 const saveAdjustment = async () => {
-  if (adjustment.value.amount === 0) {
-    showToastMessage('error', 'Số tiền không hợp lệ', 'Điều chỉnh phải khác 0 (âm hoặc dương).')
+  if (adjustment.value.amount <= 0) {
+    showToastMessage('error', 'Số tiền không hợp lệ', 'Điều chỉnh phải lớn hơn 0.')
     return
   }
 
@@ -1871,9 +1875,17 @@ const saveAdjustment = async () => {
     return
   }
 
-  if (adjustment.value.amount < 0 && adjustment.value.type !== 'GIAM_GIA') {
-    showToastMessage('error', 'Sai số tiền', 'Chỉ "Giảm thêm" mới được nhập số âm.')
-    return
+  if (adjustment.value.type === 'GIAM_GIA') {
+    const giaSauGiam = Number(currentContract.value?.giaSauGiam || 0)
+    const tongDieuChinh = getTongDieuChinh(currentContract.value)
+    const maxGiam = giaSauGiam + tongDieuChinh
+    if (adjustment.value.amount > maxGiam) {
+      showCenterWarning(
+        'Số tiền giảm vượt mức',
+        `Tối đa được giảm: ${formatMoney(maxGiam)}.`
+      )
+      return
+    }
   }
 
   const reason = (adjustment.value.reason || '').trim()
@@ -1892,7 +1904,7 @@ const saveAdjustment = async () => {
   try {
     await showLoading(api.post('/hop-dong/admin/dieu-chinh', payload))
     updateAlertSuccess('Điều chỉnh thành công',
-        `${adjustment.value.amount > 0 ? '+' : ''}${formatMoney(adjustment.value.amount)} (${adjustment.value.type})`)
+        `${adjustment.value.type === 'GIAM_GIA' ? '-' : '+'}${formatMoney(adjustment.value.amount)} (${adjustment.value.type})`)
     await fetchContracts()
     closeModal('modalAdjust')
   } catch (error) {
@@ -1900,12 +1912,6 @@ const saveAdjustment = async () => {
     updateAlertError('Điều chỉnh thất bại', 'Vui lòng thử lại sau.')
   }
 }
-
-watch(() => adjustment.value.type, (nextType) => {
-  if (nextType !== 'GIAM_GIA' && adjustment.value.amount < 0) {
-    adjustment.value.amount = Math.abs(adjustment.value.amount)
-  }
-})
 
 // Detail view
 const openDetail = (contract) => {
@@ -1919,10 +1925,27 @@ const openDelete = (contract) => {
   openModal('modalDelete')
 }
 
-const confirmDelete = () => {
-  contracts.value = contracts.value.filter(c => c.id !== currentContract.value.id)
-  showToastMessage('success', 'Đã xóa', `Đã xóa ${currentContract.value.maHopDong}`)
+const confirmDelete = async () => {
+  const contract = currentContract.value
+  if (!contract) return
+
   closeModal('modalDelete')
+
+  await confirmWithInput(
+    'Xác nhận xóa hợp đồng',
+    `Nhập mã hợp đồng ${contract.maHopDong} để xác nhận xóa.`,
+    contract.maHopDong,
+    async () => {
+      try {
+        await showLoading(api.delete(`/hop-dong/admin/${contract.id}`))
+        updateAlertSuccess('Đã xóa hợp đồng', `Đã xóa ${contract.maHopDong}`)
+        await fetchContracts()
+      } catch (error) {
+        console.error('❌ Lỗi xóa hợp đồng', error)
+        updateAlertError('Xóa hợp đồng thất bại', 'Vui lòng thử lại sau.')
+      }
+    }
+  )
 }
 
 // Filters
@@ -2537,46 +2560,73 @@ onMounted(async () => {
   box-shadow: 0 12px 24px rgba(20,30,48,.08);
   overflow:hidden;
 }
-.kpi-row .kpi{
-  position: relative;
-  border: none;
+
+.stat-card{
+  border-radius: 16px;
+  padding: 18px 20px;
   color: #fff;
-  background: var(--primary-gradient);
+  transition: var(--t);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 24px rgba(20,30,48,.16);
   min-height: 120px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+}
+.stat-card::before{
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  opacity: 0.9;
+  z-index: 1;
+}
+.stat-card::after{
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: rotate(30deg);
+  transition: var(--t);
+  z-index: 2;
+}
+.stat-card:hover::after{ transform: rotate(30deg) translateX(100px); }
+.stat-card-content{ position: relative; z-index: 3; }
+.stat-card h5{
+  font-size: 16px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.stat-card .stat-number{
+  font-size: 24px;
+  font-weight: 800;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+.stat-icon{
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  font-size: 36px;
+  opacity: 0.3;
+  z-index: 3;
   transition: var(--t);
 }
-.kpi-row .kpi:hover{
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 18px 32px rgba(20,30,48,.18);
-}
-.kpi-row .kpi-total{ background: var(--primary-gradient); }
-.kpi-row .kpi-revenue{ background: var(--success-gradient); }
-.kpi-row .kpi-adjust{ background: var(--warning-gradient); }
-.kpi-row .kpi-sales{ background: var(--secondary-gradient); }
-.kpi-row .kpi .k{
-  color: rgba(255,255,255,.86);
-}
-.kpi-row .kpi .k .dot{
-  background: rgba(255,255,255,.75);
-}
-.kpi-row .kpi .v{
-  color: #fff;
-  margin-top: auto;
-  font-size: 22px;
-}
-.kpi-row .kpi .v.price{
-  background: none;
-  -webkit-text-fill-color: #fff;
-}
-.kpi-row .kpi-ico{
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 24px;
+.stat-card:hover .stat-icon{
+  transform: scale(1.05) rotate(5deg);
   opacity: 0.4;
 }
+.kpi-total{ background: var(--primary-gradient); }
+.kpi-revenue{ background: var(--success-gradient); }
+.kpi-adjust{ background: var(--warning-gradient); }
+.kpi-sales{ background: var(--secondary-gradient); }
 .kpi .k{
   font-size: 11px;
   color: rgba(11,18,32,.60);
