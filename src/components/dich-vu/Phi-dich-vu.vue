@@ -70,8 +70,9 @@
       <div class="panel attached" v-show="activeTab === 1">
         <div class="panel-h">
           <div class="tools">
-            <div class="input filter-item filter-search" :class="{ active: searchQuery }">
-              <i class="fa-solid fa-magnifying-glass"></i>
+            <div class="input select filter-item filter-search" :class="{ active: searchQuery }">
+              <label>Tiềm kiếm</label>
+              <i class="fa-solid fa-magnifying-glass mt-3"></i>
               <input v-model="searchQuery" type="text" placeholder="Tìm theo mã HĐ / khách / người tạo...">
             </div>
 
@@ -91,6 +92,16 @@
                 <option value="HOAN_TAT">Hoàn tất</option>
                 <option value="HUY">Đã hủy</option>
               </select>
+            </div>
+
+            <div class="input select filter-item filter-item filter-date" :class="{ active: tuNgay }">
+              <label>Từ ngày</label>
+              <input v-model="tuNgay" type="date">
+            </div>
+
+            <div class="input select filter-item filter-date" :class="{ active: denNgay }">
+              <label>Đến ngày</label>
+              <input v-model="denNgay" type="date">
             </div>
           </div>
         </div>
@@ -756,7 +767,7 @@
         <div class="modal-h">
           <div class="modal-title">
             <i class="fa-solid fa-file-lines"></i>
-            <span>Chi tiết hợp đồng {{ currentContract?.maHopDong }}</span>
+            <span>Chi tiết hợp đồng {{ detailContract?.maHopDong }}</span>
           </div>
           <button class="x" @click="closeModal('modalDetail')">
             <i class="fa-solid fa-xmark"></i>
@@ -769,25 +780,33 @@
               <div class="card-h"><i class="fa-solid fa-circle-info"></i> Thông tin hợp đồng</div>
 
               <div class="p-3">
-                <div class="text-sm font-extrabold">{{ currentContract?.maHopDong }} • {{ currentContract?.tenKhachHang }}</div>
-                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày tạo {{ formatCreatedAt(currentContract?.ngayTao) }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
+                <div class="text-sm font-extrabold">{{ detailContract?.maHopDong }} • {{ detailContract?.tenKhachHang }}</div>
+                <div class="muted tiny mt-1">{{ detailContract?.tenDichVu }} • Ngày tạo {{ formatDateValue(detailContract?.ngayTao) }} • Trạng thái {{ getStatusText(detailContract?.trangThaiHopDong) }}</div>
 
                 <div class="grid grid-cols-2 gap-2 mt-3">
                   <div class="kpi">
-                    <div class="k"><span class="dot"></span>Giá chốt</div>
-                    <div class="v price p4">{{ formatMoney(currentContract?.giaSauGiam || 0) }}</div>
+                    <div class="k"><span class="dot"></span>Giá gốc</div>
+                    <div class="v price p2">{{ formatMoney(detailContract?.giaDichVuGoc || 0) }}</div>
                   </div>
                   <div class="kpi">
-                    <div class="k"><span class="dot"></span>Giá điều chỉnh</div>
-                    <div class="v price p2">{{ formatMoney(calcGiaDieuChinh(currentContract)) }}</div>
+                    <div class="k"><span class="dot"></span>Phí giảm</div>
+                    <div class="v price p4">{{ formatMoney(detailContract?.phiGiam || 0) }}</div>
                   </div>
                   <div class="kpi">
-                    <div class="k"><span class="dot"></span>Thực thu</div>
-                    <div class="v price p3">{{ formatMoney(calcThucThu(currentContract)) }}</div>
+                    <div class="k"><span class="dot"></span>Giá sau giảm</div>
+                    <div class="v price p1">{{ formatMoney(detailContract?.giaSauGiam || 0) }}</div>
                   </div>
                   <div class="kpi">
-                    <div class="k"><span class="dot"></span>Doanh thu</div>
-                    <div class="v price p1">{{ formatMoney(calcDoanhThu(currentContract)) }}</div>
+                    <div class="k"><span class="dot"></span>Giá tài sản ký</div>
+                    <div class="v price p3">{{ formatMoney(detailContract?.giaTaiSanKy || 0) }}</div>
+                  </div>
+                  <div class="kpi">
+                    <div class="k"><span class="dot"></span>Ngày ký</div>
+                    <div class="v mono">{{ formatDateValue(detailContract?.ngayKy) }}</div>
+                  </div>
+                  <div class="kpi">
+                    <div class="k"><span class="dot"></span>Người tạo</div>
+                    <div class="v">{{ detailContract?.nguoiTaoFullName || '-' }}</div>
                   </div>
                 </div>
 
@@ -819,17 +838,17 @@
                       </tr>
                       </thead>
                       <tbody>
-                      <tr v-if="!currentContract?.dotDongTien?.length">
+                      <tr v-if="!detailContract?.dotDongTiens?.length">
                         <td colspan="5">
                           <div class="text-center py-6 muted">Chưa có đợt đóng phí.</div>
                         </td>
                       </tr>
-                      <tr v-for="payment in currentContract?.dotDongTien || []" :key="payment.id">
-                        <td class="mono">{{ payment.ngayDongTien || '-' }}</td>
+                      <tr v-for="payment in detailContract?.dotDongTiens || []" :key="payment.id">
+                        <td class="mono">{{ formatDateValue(payment.ngayDongTien) }}</td>
                         <td class="mono">{{ formatMoney(payment.soTienDong) }}</td>
                         <td class="mono">{{ payment.hinhThucThanhToan || '-' }}</td>
                         <td>{{ payment.ghiChu || '' }}</td>
-                        <td class="mono">{{ payment.nguoiGhiNhan || '-' }}</td>
+                        <td class="mono">{{ payment.nguoiGhiNhanFullName || '-' }}</td>
                       </tr>
                       </tbody>
                     </table>
@@ -853,16 +872,16 @@
                       </tr>
                       </thead>
                       <tbody>
-                      <tr v-if="!currentContract?.hoanTien?.length">
+                      <tr v-if="!detailContract?.hoanTiens?.length">
                         <td colspan="4">
                           <div class="text-center py-6 muted">Chưa có đợt hoàn phí.</div>
                         </td>
                       </tr>
-                      <tr v-for="refund in currentContract?.hoanTien || []" :key="refund.id">
-                        <td class="mono">{{ refund.ngayHoan || '-' }}</td>
+                      <tr v-for="refund in detailContract?.hoanTiens || []" :key="refund.id">
+                        <td class="mono">{{ formatDateValue(refund.ngayHoan) }}</td>
                         <td class="mono">{{ formatMoney(refund.soTienHoan) }}</td>
                         <td>{{ refund.lyDoHoan || '' }}</td>
-                        <td class="mono">{{ refund.nguoiDuyet || '-' }}</td>
+                        <td class="mono">{{ refund.nguoiDuyetFullName || '-' }}</td>
                       </tr>
                       </tbody>
                     </table>
@@ -886,13 +905,13 @@
                       </tr>
                       </thead>
                       <tbody>
-                      <tr v-if="!currentContract?.dieuChinh?.length">
+                      <tr v-if="!detailContract?.dieuChinhHopDongs?.length">
                         <td colspan="4">
                           <div class="text-center py-6 muted">Chưa có điều chỉnh.</div>
                         </td>
                       </tr>
-                      <tr v-for="adj in currentContract?.dieuChinh || []" :key="adj.id">
-                        <td class="mono">{{ adj.ngayTao || '-' }}</td>
+                      <tr v-for="adj in detailContract?.dieuChinhHopDongs || []" :key="adj.id">
+                        <td class="mono">{{ formatDateValue(adj.ngayTao) }}</td>
                         <td class="mono">{{ formatMoney(adj.soTienDieuChinh) }}</td>
                         <td class="mono">{{ adj.loaiDieuChinh || '-' }}</td>
                         <td>{{ adj.lyDo || '' }}</td>
@@ -911,6 +930,13 @@
         </div>
 
         <div class="modal-f">
+          <button
+            v-if="detailContract?.trangThaiHopDong === 'DANG_HIEU_LUC'"
+            class="btn danger"
+            @click="cancelContract"
+          >
+            <i class="fa-solid fa-ban"></i> Hủy hợp đồng
+          </button>
           <button class="btn ghost" @click="closeModal('modalDetail')">
             <i class="fa-solid fa-xmark"></i> Đóng
           </button>
@@ -988,6 +1014,8 @@ const segments = ref([])
 const searchQuery = ref('')
 const filterService = ref(null)
 const filterStatus = ref(null)
+const tuNgay = ref(null)
+const denNgay = ref(null)
 const currentPage = ref(1)
 const pageSize = ref(2)
 const currentUserName = ref('Nguyễn Minh')
@@ -1026,6 +1054,7 @@ const newContract = ref({
 // Modals
 const showModal = ref(null)
 const currentContract = ref(null)
+const detailContract = ref(null)
 
 // Payment form
 const payment = ref({
@@ -1134,6 +1163,11 @@ watch(filterService, () => {
 })
 
 watch(filterStatus, () => {
+  currentPage.value = 1
+  fetchContracts()
+})
+
+watch([tuNgay, denNgay], () => {
   currentPage.value = 1
   fetchContracts()
 })
@@ -1290,6 +1324,14 @@ const formatCreatedAt = (value) => {
   return String(value)
 }
 
+const formatDateValue = (value) => {
+  if (!value) return '-'
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value
+  }
+  return formatCreatedAt(value)
+}
+
 const getGiaGiam = (contract) => {
   return Number(contract?.giaGiam ?? contract?.phiGiam ?? 0)
 }
@@ -1389,6 +1431,8 @@ const fetchContracts = async () => {
     keyword: searchQuery.value || null,
     serviceId: filterService.value || null,
     trangThaiHopDong: filterStatus.value || null,
+    tuNgay: tuNgay.value || null,
+    denNgay: denNgay.value || null,
     page: currentPage.value,
     size: pageSize.value
   }
@@ -1483,6 +1527,9 @@ const closeModal = (modal) => {
   resetContractForm()
   if (showModal.value === modal) {
     showModal.value = null
+  }
+  if (modal === 'modalDetail') {
+    detailContract.value = null
   }
 }
 
@@ -1899,7 +1946,52 @@ const saveAdjustment = async () => {
 // Detail view
 const openDetail = (contract) => {
   currentContract.value = contract
+  detailContract.value = {
+    ...contract,
+    dotDongTiens: contract?.dotDongTien || [],
+    hoanTiens: contract?.hoanTien || [],
+    dieuChinhHopDongs: contract?.dieuChinh || []
+  }
   openModal('modalDetail')
+  fetchDetailContract(contract.id)
+}
+
+const fetchDetailContract = async (contractId) => {
+  if (!contractId) return
+  try {
+    const res = await showLoading(api.get(`/hop-dong/admin/${contractId}/detail`))
+    detailContract.value = res?.data || detailContract.value
+  } catch (error) {
+    console.error('❌ Lỗi tải chi tiết hợp đồng', error)
+    updateAlertError('Tải chi tiết thất bại', 'Vui lòng thử lại sau.')
+  }
+}
+
+const cancelContract = async () => {
+  const contract = detailContract.value || currentContract.value
+  if (!contract?.id) return
+
+  await confirmWithInput(
+    'Xác nhận hủy hợp đồng',
+    `Nhập mã hợp đồng ${contract.maHopDong} để xác nhận hủy.`,
+    contract.maHopDong,
+    async () => {
+      try {
+        await showLoading(api.patch(`/hop-dong/admin/${contract.id}/trang-thai/HUY`))
+        updateAlertSuccess('Đã hủy hợp đồng', `${contract.maHopDong} đã chuyển sang trạng thái HUY.`)
+        if (detailContract.value) {
+          detailContract.value.trangThaiHopDong = 'HUY'
+        }
+        if (currentContract.value) {
+          currentContract.value.trangThaiHopDong = 'HUY'
+        }
+        await fetchContracts()
+      } catch (error) {
+        console.error('❌ Lỗi hủy hợp đồng', error)
+        updateAlertError('Hủy hợp đồng thất bại', 'Vui lòng thử lại sau.')
+      }
+    }
+  )
 }
 
 // Delete management
@@ -1936,6 +2028,8 @@ const resetFilters = () => {
   searchQuery.value = ''
   filterService.value = null
   filterStatus.value = null
+  tuNgay.value = null
+  denNgay.value = null
   currentPage.value = 1
   fetchContracts()
   showCenterWarning('Đã reset lọc', 'Hiển thị toàn bộ hợp đồng.')
@@ -2432,11 +2526,11 @@ onMounted(async () => {
 ========================= */
 .tools{
   display:grid;
-  grid-template-columns: 1.2fr 220px 190px auto;
+  grid-template-columns: 4.2fr 220px 190px  190px auto;
   gap: 10px;
   align-items:end;
   width: 100%;
-  max-width: 980px;
+  max-width: 1280px;
   margin-left: auto;
 }
 @media (max-width: 1100px){
