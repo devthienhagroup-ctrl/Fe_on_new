@@ -1,59 +1,302 @@
 diff --git a/src/components/dich-vu/Phi-dich-vu.vue b/src/components/dich-vu/Phi-dich-vu.vue
-index 6e7f76fb8acd9e9e6bb9a63969076d9d7c25554d..ae63b56be1c389912adf5426ddf539dbedb24c44 100644
+index b31fbba02e1de1a253d48ba2079110205a5f5c6d..1a8e4f6c7f6f23c71fc5467f4d5109a405821179 100644
 --- a/src/components/dich-vu/Phi-dich-vu.vue
 +++ b/src/components/dich-vu/Phi-dich-vu.vue
-@@ -423,52 +423,52 @@
-                 {{ segmentHint }}
-               </div>
+@@ -924,65 +924,58 @@
+         </div>
+         <div class="modal-b">
+           <div class="p-2">
+             <div class="font-extrabold">Xóa hợp đồng {{ currentContract?.maHopDong }}?</div>
+             <div class="muted mt-2">{{ currentContract?.tenKhachHang }} • {{ currentContract?.tenDichVu }} • Doanh thu hiện tại: {{ formatMoney(calcDoanhThu(currentContract)) }}</div>
+             <div class="note mt-3">
+               Xóa sẽ mất cả các đợt <b>đóng phí</b>, <b>hoàn phí</b>, <b>điều chỉnh</b> của hợp đồng này.
+             </div>
+           </div>
+         </div>
+         <div class="modal-f">
+           <button class="btn ghost" @click="closeModal('modalDelete')">
+             <i class="fa-solid fa-ban"></i> Hủy
+           </button>
+           <button class="btn danger" @click="confirmDelete">
+             <i class="fa-solid fa-trash"></i> Xóa luôn
+           </button>
+         </div>
+       </div>
+     </div>
+   </div>
+ </template>
 
-               <div class="section-title">
-                 <i class="fa-solid fa-wallet"></i>
-                 Tuỳ chọn thanh toán ban đầu
-               </div>
+ <script>
+ import api from '/src/api/api.js'
++import { showError, showLoading, updateAlertError, updateAlertSuccess } from '/src/assets/js/alertService.js'
 
-               <div class="px-3 pb-2">
-                 <div class="plan" id="planWrap">
-                   <div class="plan-item" :class="{ active: newContract.initPlan === 'COC' }" @click="newContract.initPlan = 'COC'; updateFirstPayment()">
-                     <div class="plan-ico"><i class="fa-solid fa-hand-holding-dollar"></i></div>
-                     <div class="min-w-0">
-                       <div class="plan-tt">Cọc (%)</div>
-                     </div>
-                   </div>
+ export default {
+   name: 'ContractManagement',
 
-                   <div class="plan-item" :class="{ active: newContract.initPlan === 'FULL' }" @click="newContract.initPlan = 'FULL'; updateFirstPayment()">
-                     <div class="plan-ico"><i class="fa-solid fa-circle-check"></i></div>
-                     <div class="min-w-0">
-                       <div class="plan-tt">Đóng tất</div>
-                     </div>
-                   </div>
-                 </div>
+   data() {
+     return {
+       // Constants
+-      SERVICES: [
+-        { name: 'Thiết kế UI Website', min: 8000000, max: 25000000 },
+-        { name: 'Landing Page Chuyển đổi', min: 4000000, max: 15000000 },
+-        { name: 'SEO & Tối ưu Onpage', min: 5000000, max: 30000000 },
+-        { name: 'Branding / Bộ nhận diện', min: 12000000, max: 60000000 },
+-        { name: 'Quản trị nội dung Fanpage', min: 3000000, max: 18000000 },
+-        { name: 'Chụp hình BĐS / Flycam', min: 2500000, max: 20000000 },
+-      ],
+       ENUM_STATUS: ['DANG_HIEU_LUC', 'HOAN_TAT', 'HUY'],
+       ENUM_PAY: ['TIEN_MAT', 'CHUYEN_KHOAN', 'QR', 'KHAC'],
+       ENUM_ADJ: ['GIAM_GIA', 'PHU_THU', 'PHAT'],
 
--                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
--                  <div class="field !m-0">
-+                <div class="grid grid-cols-1 gap-3" :class="newContract.initPlan === 'COC' ? 'md:grid-cols-3' : 'md:grid-cols-2'">
-+                  <div v-if="newContract.initPlan === 'COC'" class="field !m-0">
-                     <label class="field-label">
-                       <span class="label-ico tone-gold"><i class="fa-solid fa-percent"></i></span>
-                       <span>% cọc</span>
-                     </label>
-                     <input v-model.number="newContract.tiLeCoc" type="number" min="0" max="100" placeholder="VD: 30"
-                            :disabled="newContract.initPlan === 'FULL'" @input="updateFirstPayment">
-                     <div class="muted tiny">Chỉ dùng khi chọn Cọc (%).</div>
-                   </div>
+       // State
+       activeTab: 1,
+       contracts: [],
+       seq: 1,
+       services: [],
+       segments: [],
 
-                   <div class="field !m-0">
-                     <label class="field-label">
-                       <span class="label-ico tone-cyan"><i class="fa-solid fa-money-check-dollar"></i></span>
-                       <span>Tiền thanh toán</span>
-                     </label>
-                     <input :value="formatMoney(firstPaymentAmount)" type="text" readonly>
-                     <div class="muted tiny">Tự tính theo lựa chọn phía trên.</div>
-                   </div>
+       // Filters
+       searchQuery: '',
+       filterService: '',
+       filterStatus: '',
 
-                   <div class="field !m-0">
-                     <label class="field-label">
-                       <span class="label-ico tone-forest"><i class="fa-solid fa-credit-card"></i></span>
-                       <span>Hình thức</span>
-                     </label>
-                     <select v-model="newContract.firstMethod">
-                       <option value="CHUYEN_KHOAN">Chuyển khoản</option>
+       // Customer search
+       customerSearch: '',
+       selectedCustomer: null,
+       customerSearchResults: [],
+       customerSearchLoading: false,
+       customerSearchError: '',
+       customerSearchTimer: null,
+       lastCustomerKeyword: '',
+       suppressCustomerSearch: false,
+@@ -1046,51 +1039,51 @@ export default {
+
+   computed: {
+     filteredContracts() {
+       return this.contracts.filter(contract => {
+         const hay = `${contract.maHopDong} ${contract.tenKhachHang} ${contract.tenDichVu}`.toLowerCase()
+         const okQ = !this.searchQuery || hay.includes(this.searchQuery.toLowerCase())
+         const okSvc = !this.filterService || contract.tenDichVu === this.filterService
+         const okSt = !this.filterStatus || contract.trangThaiHopDong === this.filterStatus
+         return okQ && okSvc && okSt
+       })
+     },
+
+     totalThucThu() {
+       return this.filteredContracts.reduce((sum, c) => sum + this.calcThucThu(c), 0)
+     },
+
+     totalDieuChinh() {
+       return this.filteredContracts.reduce((sum, c) => sum + this.calcTongDieuChinh(c), 0)
+     },
+
+     totalDoanhThu() {
+       return this.filteredContracts.reduce((sum, c) => sum + this.calcDoanhThu(c), 0)
+     },
+
+     serviceOptions() {
+-      return this.services.length ? this.services : this.SERVICES
++      return this.services
+     },
+
+     selectedService() {
+       if (!this.newContract.serviceId) return null
+       return this.serviceOptions.find(s => String(s.id || s.name) === String(this.newContract.serviceId)) || null
+     },
+
+     matchingSegment() {
+       const serviceId = this.newContract.serviceId
+       const assetValue = Number(this.newContract.giaTriTaiSan || 0)
+       if (!serviceId || assetValue <= 0) return null
+       return this.segments.find(seg =>
+           String(seg.serviceId) === String(serviceId) &&
+           assetValue >= Number(seg.min) &&
+           assetValue < Number(seg.max)
+       ) || null
+     },
+
+     segmentHint() {
+       if (!this.newContract.serviceId) {
+         return 'Vui lòng chọn dịch vụ để hiển thị phân khúc.'
+       }
+       if (!this.newContract.giaTriTaiSan) {
+         return 'Nhập giá trị tài sản để xác định mức giá gốc.'
+       }
+@@ -1423,119 +1416,137 @@ export default {
+       }
+     },
+
+     clearCustomerSearchTimer() {
+       if (this.customerSearchTimer) clearTimeout(this.customerSearchTimer)
+       this.customerSearchTimer = null
+     },
+
+     selectCustomer(customer) {
+       this.suppressCustomerSearch = true
+       this.clearCustomerSearchTimer()
+       this.customerSearchLoading = false
+       this.customerSearchError = ''
+       this.customerSearchResults = []
+
+       this.selectedCustomer = customer
+       this.customerSearch = customer.name
+       this.newContract.maKhachHang = customer.id
+       this.newContract.tenKhachHang = customer.name
+
+       setTimeout(() => {
+         this.suppressCustomerSearch = false
+       }, 0)
+     },
+
+-    saveContract() {
++    async saveContract() {
+       this.updateGiaSauGiam()
+       if (!this.selectedCustomer) {
+-        this.showToastMessage('error', 'Thiếu dữ liệu', 'Bạn cần chọn khách hàng từ danh sách.')
++        showError('Thiếu dữ liệu', 'Bạn cần chọn khách hàng từ danh sách.')
+         return
+       }
+
+       if (!this.newContract.tenDichVu) {
+-        this.showToastMessage('error', 'Thiếu dữ liệu', 'Bạn cần chọn Dịch vụ.')
++        showError('Thiếu dữ liệu', 'Bạn cần chọn Dịch vụ.')
+         return
+       }
+
+       if (!this.newContract.giaTriTaiSan) {
+-        this.showToastMessage('error', 'Thiếu dữ liệu', 'Bạn cần nhập giá trị tài sản.')
++        showError('Thiếu dữ liệu', 'Bạn cần nhập giá trị tài sản.')
+         return
+       }
+
+       if (!this.newContract.giaDichVuGoc) {
+-        this.showToastMessage('error', 'Thiếu dữ liệu', 'Giá gốc chưa xác định theo phân khúc.')
++        showError('Thiếu dữ liệu', 'Giá gốc chưa xác định theo phân khúc.')
+         return
+       }
+
+       if (this.newContract.discountMode === 'MONEY' && this.newContract.discountValue <= 0) {
+-        this.showToastMessage('error', 'Giảm giá không hợp lệ', 'Giảm giá tiền phải > 0 và không vượt quá giá gốc.')
++        showError('Giảm giá không hợp lệ', 'Giảm giá tiền phải > 0 và không vượt quá giá gốc.')
+         return
+       }
+
+-      const contract = {
+-        id: crypto.randomUUID(),
+-        maHopDong: this.newContract.maHopDong,
++      const payload = {
+         maKhachHang: this.newContract.maKhachHang,
+-        tenKhachHang: this.newContract.tenKhachHang,
+-        tenDichVu: this.newContract.tenDichVu,
+-        serviceId: this.newContract.serviceId,
+-        giaTriTaiSan: this.newContract.giaTriTaiSan,
++        giaTriKyBan: this.newContract.giaTriTaiSan,
+         giaDichVuGoc: this.newContract.giaDichVuGoc,
+         phiGiam: this.newContract.phiGiam || 0,
+         giaSauGiam: this.newContract.giaSauGiam,
+-        trangThaiHopDong: this.newContract.trangThaiHopDong,
+-        ngayKy: this.newContract.ngayKy || this.todayISO(),
+-        ngayTao: new Date().toLocaleString('vi-VN'),
+-        dotDongTien: [],
+-        hoanTien: [],
+-        dieuChinh: [],
+-        initPlan: this.newContract.initPlan,
+-        tiLeCoc: this.newContract.initPlan === 'COC' ? (this.newContract.tiLeCoc || 0) : null
++        hinhThucThanhToan: this.newContract.firstMethod,
++        serviceId: this.newContract.serviceId,
++        soTienThanhToan: this.firstPaymentAmount,
++        initPlan: this.newContract.initPlan
+       }
+
+-      console.log('New contract payload', contract)
++      try {
++        const res = await showLoading(api.post('/hop-dong/admin/create', payload))
++        const created = res?.data || {}
++        const hasPayments = Array.isArray(created.dotDongTien) && created.dotDongTien.length > 0
++        const contract = {
++          id: created.id || crypto.randomUUID(),
++          maHopDong: created.maHopDong || this.newContract.maHopDong,
++          maKhachHang: created.maKhachHang ?? this.newContract.maKhachHang,
++          tenKhachHang: created.tenKhachHang || this.newContract.tenKhachHang,
++          tenDichVu: created.tenDichVu || this.newContract.tenDichVu,
++          serviceId: created.serviceId ?? this.newContract.serviceId,
++          giaTriTaiSan: created.giaTriKyBan ?? created.giaTriTaiSan ?? this.newContract.giaTriTaiSan,
++          giaDichVuGoc: created.giaDichVuGoc ?? this.newContract.giaDichVuGoc,
++          phiGiam: created.phiGiam ?? this.newContract.phiGiam ?? 0,
++          giaSauGiam: created.giaSauGiam ?? this.newContract.giaSauGiam,
++          trangThaiHopDong: created.trangThaiHopDong ?? this.newContract.trangThaiHopDong,
++          ngayKy: created.ngayKy ?? this.newContract.ngayKy ?? this.todayISO(),
++          ngayTao: created.ngayTao ?? new Date().toLocaleString('vi-VN'),
++          dotDongTien: hasPayments ? created.dotDongTien : [],
++          hoanTien: created.hoanTien || [],
++          dieuChinh: created.dieuChinh || [],
++          initPlan: created.initPlan ?? this.newContract.initPlan,
++          tiLeCoc: created.tiLeCoc ?? (this.newContract.initPlan === 'COC' ? (this.newContract.tiLeCoc || 0) : null)
++        }
+
+-      // Add initial payment
+-      if (this.firstPaymentAmount > 0) {
+-        contract.dotDongTien.push({
+-          id: crypto.randomUUID(),
+-          soTienDong: this.firstPaymentAmount,
+-          hinhThucThanhToan: this.newContract.firstMethod,
+-          ngayDongTien: contract.ngayKy,
+-          ghiChu: this.newContract.initPlan === 'FULL' ?
+-              'Thanh toán đủ (tạo khi lập HĐ)' :
+-              `Cọc ${this.newContract.tiLeCoc || 0}% (tạo khi lập HĐ)`,
+-          nguoiGhiNhan: 'demo_admin',
+-          ngayTao: new Date().toLocaleString('vi-VN')
+-        })
+-      }
++        if (!hasPayments && this.firstPaymentAmount > 0) {
++          contract.dotDongTien.push({
++            id: crypto.randomUUID(),
++            soTienDong: this.firstPaymentAmount,
++            hinhThucThanhToan: this.newContract.firstMethod,
++            ngayDongTien: contract.ngayKy,
++            ghiChu: this.newContract.initPlan === 'FULL' ?
++                'Thanh toán đủ (tạo khi lập HĐ)' :
++                `Cọc ${this.newContract.tiLeCoc || 0}% (tạo khi lập HĐ)`,
++            nguoiGhiNhan: 'demo_admin',
++            ngayTao: new Date().toLocaleString('vi-VN')
++          })
++        }
+
+-      this.contracts.unshift(contract)
+-      this.showToastMessage('success', 'Đã tạo hợp đồng',
+-          `${contract.maHopDong} • ${this.newContract.initPlan === 'FULL' ? 'Đóng tất' : 'Cọc'}: ${this.formatMoney(this.firstPaymentAmount)}`)
+-      this.closeModal('modalContract')
++        this.contracts.unshift(contract)
++        updateAlertSuccess('Đã tạo hợp đồng',
++            `${contract.maHopDong} • ${this.newContract.initPlan === 'FULL' ? 'Đóng tất' : 'Cọc'}: ${this.formatMoney(this.firstPaymentAmount)}`)
++        this.closeModal('modalContract')
++        this.resetContractForm()
++      } catch (error) {
++        console.error('❌ Lỗi tạo hợp đồng', error)
++        updateAlertError('Tạo hợp đồng thất bại', 'Vui lòng thử lại sau.')
++      }
+     },
+
+     // Payment management
+     openPay(contract) {
+       this.currentContract = contract
+       this.payment = {
+         amount: 0,
+         method: 'CHUYEN_KHOAN',
+         date: this.todayISO(),
+         note: ''
+       }
+       this.openModal('modalPay')
+     },
+
+     savePayment() {
+       if (this.payment.amount <= 0) {
+         this.showToastMessage('error', 'Số tiền không hợp lệ', 'Số tiền đóng phải > 0.')
+         return
+       }
+
+       const contractIndex = this.contracts.findIndex(c => c.id === this.currentContract.id)
+       if (contractIndex === -1) return
+
+       this.contracts[contractIndex].dotDongTien.push({
+         id: crypto.randomUUID(),

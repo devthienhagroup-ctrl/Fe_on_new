@@ -51,12 +51,6 @@
       <!-- PANEL TAB 1 -->
       <div class="panel attached" v-show="activeTab === 1">
         <div class="panel-h">
-          <div class="panel-title">
-            <i class="fa-solid fa-clipboard-list"></i>
-            Bảng hợp đồng
-            <span class="muted tiny">• Thực thu = Đóng - Hoàn • Giá điều chỉnh = Giá sau giảm + Điều chỉnh • Doanh thu = MIN(Giá ĐC, Thực thu)</span>
-          </div>
-
           <div class="tools">
             <div class="input">
               <i class="fa-solid fa-magnifying-glass"></i>
@@ -196,25 +190,6 @@
                 </tbody>
               </table>
             </div>
-
-            <div class="footnote">
-              <div class="muted">
-                Gợi ý: bấm <b>Xem</b> để xem chi tiết tất cả đợt • bấm <b>Đóng phí/Hoàn phí/Điều chỉnh</b> để phát sinh nhiều dòng.
-              </div>
-              <div class="muted">
-                Doanh thu = <b>MIN</b>(Giá điều chỉnh, Thực thu)
-              </div>
-            </div>
-          </div>
-
-          <div class="note">
-            <b>Enum</b>:
-            <span class="mono">TRẠNG_THÁI_HỢP_ĐỒNG</span> =
-            <span class="mono">DANG_HIEU_LUC</span>, <span class="mono">HOAN_TAT</span>, <span class="mono">HUY</span> •
-            <span class="mono">HÌNH_THỨC</span> =
-            <span class="mono">TIEN_MAT</span>, <span class="mono">CHUYEN_KHOAN</span>, <span class="mono">QR</span>, <span class="mono">KHAC</span> •
-            <span class="mono">LOẠI_ĐIỀU_CHỈNH</span> =
-            <span class="mono">GIAM_GIA</span>, <span class="mono">PHU_THU</span>, <span class="mono">PHAT</span>
           </div>
         </div>
       </div>
@@ -946,6 +921,7 @@
 
 <script>
 import api from '/src/api/api.js'
+import { showError, showLoading, updateAlertError, updateAlertSuccess } from '/src/assets/js/alertService.js'
 
 export default {
   name: 'ContractManagement',
@@ -953,14 +929,6 @@ export default {
   data() {
     return {
       // Constants
-      SERVICES: [
-        { name: 'Thiết kế UI Website', min: 8000000, max: 25000000 },
-        { name: 'Landing Page Chuyển đổi', min: 4000000, max: 15000000 },
-        { name: 'SEO & Tối ưu Onpage', min: 5000000, max: 30000000 },
-        { name: 'Branding / Bộ nhận diện', min: 12000000, max: 60000000 },
-        { name: 'Quản trị nội dung Fanpage', min: 3000000, max: 18000000 },
-        { name: 'Chụp hình BĐS / Flycam', min: 2500000, max: 20000000 },
-      ],
       ENUM_STATUS: ['DANG_HIEU_LUC', 'HOAN_TAT', 'HUY'],
       ENUM_PAY: ['TIEN_MAT', 'CHUYEN_KHOAN', 'QR', 'KHAC'],
       ENUM_ADJ: ['GIAM_GIA', 'PHU_THU', 'PHAT'],
@@ -1068,7 +1036,7 @@ export default {
     },
 
     serviceOptions() {
-      return this.services.length ? this.services : this.SERVICES
+      return this.services
     },
 
     selectedService() {
@@ -1445,75 +1413,93 @@ export default {
       }, 0)
     },
 
-    saveContract() {
+    async saveContract() {
       this.updateGiaSauGiam()
       if (!this.selectedCustomer) {
-        this.showToastMessage('error', 'Thiếu dữ liệu', 'Bạn cần chọn khách hàng từ danh sách.')
+        showError('Thiếu dữ liệu', 'Bạn cần chọn khách hàng từ danh sách.')
         return
       }
 
       if (!this.newContract.tenDichVu) {
-        this.showToastMessage('error', 'Thiếu dữ liệu', 'Bạn cần chọn Dịch vụ.')
+        showError('Thiếu dữ liệu', 'Bạn cần chọn Dịch vụ.')
         return
       }
 
       if (!this.newContract.giaTriTaiSan) {
-        this.showToastMessage('error', 'Thiếu dữ liệu', 'Bạn cần nhập giá trị tài sản.')
+        showError('Thiếu dữ liệu', 'Bạn cần nhập giá trị tài sản.')
         return
       }
 
       if (!this.newContract.giaDichVuGoc) {
-        this.showToastMessage('error', 'Thiếu dữ liệu', 'Giá gốc chưa xác định theo phân khúc.')
+        showError('Thiếu dữ liệu', 'Giá gốc chưa xác định theo phân khúc.')
         return
       }
 
       if (this.newContract.discountMode === 'MONEY' && this.newContract.discountValue <= 0) {
-        this.showToastMessage('error', 'Giảm giá không hợp lệ', 'Giảm giá tiền phải > 0 và không vượt quá giá gốc.')
+        showError('Giảm giá không hợp lệ', 'Giảm giá tiền phải > 0 và không vượt quá giá gốc.')
         return
       }
 
-      const contract = {
-        id: crypto.randomUUID(),
-        maHopDong: this.newContract.maHopDong,
+      const payload = {
         maKhachHang: this.newContract.maKhachHang,
-        tenKhachHang: this.newContract.tenKhachHang,
-        tenDichVu: this.newContract.tenDichVu,
-        serviceId: this.newContract.serviceId,
-        giaTriTaiSan: this.newContract.giaTriTaiSan,
+        giaTriKyBan: this.newContract.giaTriTaiSan,
         giaDichVuGoc: this.newContract.giaDichVuGoc,
         phiGiam: this.newContract.phiGiam || 0,
         giaSauGiam: this.newContract.giaSauGiam,
-        trangThaiHopDong: this.newContract.trangThaiHopDong,
-        ngayKy: this.newContract.ngayKy || this.todayISO(),
-        ngayTao: new Date().toLocaleString('vi-VN'),
-        dotDongTien: [],
-        hoanTien: [],
-        dieuChinh: [],
-        initPlan: this.newContract.initPlan,
-        tiLeCoc: this.newContract.initPlan === 'COC' ? (this.newContract.tiLeCoc || 0) : null
+        hinhThucThanhToan: this.newContract.firstMethod,
+        serviceId: this.newContract.serviceId,
+        soTienThanhToan: this.firstPaymentAmount,
+        initPlan: this.newContract.initPlan
       }
 
-      console.log('New contract payload', contract)
+      try {
+        const res = await showLoading(api.post('/hop-dong/admin/create', payload))
+        const created = res?.data || {}
+        const hasPayments = Array.isArray(created.dotDongTien) && created.dotDongTien.length > 0
+        const contract = {
+          id: created.id || crypto.randomUUID(),
+          maHopDong: created.maHopDong || this.newContract.maHopDong,
+          maKhachHang: created.maKhachHang ?? this.newContract.maKhachHang,
+          tenKhachHang: created.tenKhachHang || this.newContract.tenKhachHang,
+          tenDichVu: created.tenDichVu || this.newContract.tenDichVu,
+          serviceId: created.serviceId ?? this.newContract.serviceId,
+          giaTriTaiSan: created.giaTriKyBan ?? created.giaTriTaiSan ?? this.newContract.giaTriTaiSan,
+          giaDichVuGoc: created.giaDichVuGoc ?? this.newContract.giaDichVuGoc,
+          phiGiam: created.phiGiam ?? this.newContract.phiGiam ?? 0,
+          giaSauGiam: created.giaSauGiam ?? this.newContract.giaSauGiam,
+          trangThaiHopDong: created.trangThaiHopDong ?? this.newContract.trangThaiHopDong,
+          ngayKy: created.ngayKy ?? this.newContract.ngayKy ?? this.todayISO(),
+          ngayTao: created.ngayTao ?? new Date().toLocaleString('vi-VN'),
+          dotDongTien: hasPayments ? created.dotDongTien : [],
+          hoanTien: created.hoanTien || [],
+          dieuChinh: created.dieuChinh || [],
+          initPlan: created.initPlan ?? this.newContract.initPlan,
+          tiLeCoc: created.tiLeCoc ?? (this.newContract.initPlan === 'COC' ? (this.newContract.tiLeCoc || 0) : null)
+        }
 
-      // Add initial payment
-      if (this.firstPaymentAmount > 0) {
-        contract.dotDongTien.push({
-          id: crypto.randomUUID(),
-          soTienDong: this.firstPaymentAmount,
-          hinhThucThanhToan: this.newContract.firstMethod,
-          ngayDongTien: contract.ngayKy,
-          ghiChu: this.newContract.initPlan === 'FULL' ?
-              'Thanh toán đủ (tạo khi lập HĐ)' :
-              `Cọc ${this.newContract.tiLeCoc || 0}% (tạo khi lập HĐ)`,
-          nguoiGhiNhan: 'demo_admin',
-          ngayTao: new Date().toLocaleString('vi-VN')
-        })
+        if (!hasPayments && this.firstPaymentAmount > 0) {
+          contract.dotDongTien.push({
+            id: crypto.randomUUID(),
+            soTienDong: this.firstPaymentAmount,
+            hinhThucThanhToan: this.newContract.firstMethod,
+            ngayDongTien: contract.ngayKy,
+            ghiChu: this.newContract.initPlan === 'FULL' ?
+                'Thanh toán đủ (tạo khi lập HĐ)' :
+                `Cọc ${this.newContract.tiLeCoc || 0}% (tạo khi lập HĐ)`,
+            nguoiGhiNhan: 'demo_admin',
+            ngayTao: new Date().toLocaleString('vi-VN')
+          })
+        }
+
+        this.contracts.unshift(contract)
+        updateAlertSuccess('Đã tạo hợp đồng',
+            `${contract.maHopDong} • ${this.newContract.initPlan === 'FULL' ? 'Đóng tất' : 'Cọc'}: ${this.formatMoney(this.firstPaymentAmount)}`)
+        this.closeModal('modalContract')
+        this.resetContractForm()
+      } catch (error) {
+        console.error('❌ Lỗi tạo hợp đồng', error)
+        updateAlertError('Tạo hợp đồng thất bại', 'Vui lòng thử lại sau.')
       }
-
-      this.contracts.unshift(contract)
-      this.showToastMessage('success', 'Đã tạo hợp đồng',
-          `${contract.maHopDong} • ${this.newContract.initPlan === 'FULL' ? 'Đóng tất' : 'Cọc'}: ${this.formatMoney(this.firstPaymentAmount)}`)
-      this.closeModal('modalContract')
     },
 
     // Payment management
