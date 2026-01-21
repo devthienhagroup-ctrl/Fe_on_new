@@ -19,7 +19,29 @@
         </button>
       </div>
     </div>
-
+    <!-- KPIs -->
+    <div class="kpi-row mt-3">
+      <div class="kpi kpi-total">
+        <div class="k"><span class="dot"></span>Tổng hợp đồng</div>
+        <div class="v price p4">{{ totalElements }}</div>
+        <div class="kpi-ico"><i class="fa-solid fa-file-signature"></i></div>
+      </div>
+      <div class="kpi kpi-revenue">
+        <div class="k"><span class="dot"></span>Tổng doanh thu</div>
+        <div class="v price p3">{{ formatMoney(totalDoanhThu) }}</div>
+        <div class="kpi-ico"><i class="fa-solid fa-chart-line"></i></div>
+      </div>
+      <div class="kpi kpi-adjust">
+        <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
+        <div class="v price p2">{{ formatMoney(totalDieuChinh) }}</div>
+        <div class="kpi-ico"><i class="fa-solid fa-sliders"></i></div>
+      </div>
+      <div class="kpi kpi-sales">
+        <div class="k"><span class="dot"></span>Tổng doanh số</div>
+        <div class="v price p1">{{ formatMoney(totalDoanhSo) }}</div>
+        <div class="kpi-ico"><i class="fa-solid fa-sack-dollar"></i></div>
+      </div>
+    </div>
     <!-- TABS -->
     <div class="tabs-shell">
       <div class="tabs">
@@ -66,29 +88,7 @@
         </div>
 
         <div class="panel-b">
-          <!-- KPIs -->
-          <div class="kpi-row">
-            <div class="kpi kpi-total">
-              <div class="k"><span class="dot"></span>Tổng hợp đồng</div>
-              <div class="v price p4">{{ totalElements }}</div>
-              <div class="kpi-ico"><i class="fa-solid fa-file-signature"></i></div>
-            </div>
-            <div class="kpi kpi-revenue">
-              <div class="k"><span class="dot"></span>Tổng doanh thu</div>
-              <div class="v price p3">{{ formatMoney(totalDoanhThu) }}</div>
-              <div class="kpi-ico"><i class="fa-solid fa-chart-line"></i></div>
-            </div>
-            <div class="kpi kpi-adjust">
-              <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
-              <div class="v price p2">{{ formatMoney(totalDieuChinh) }}</div>
-              <div class="kpi-ico"><i class="fa-solid fa-sliders"></i></div>
-            </div>
-            <div class="kpi kpi-sales">
-              <div class="k"><span class="dot"></span>Tổng doanh số</div>
-              <div class="v price p1">{{ formatMoney(totalDoanhSo) }}</div>
-              <div class="kpi-ico"><i class="fa-solid fa-sack-dollar"></i></div>
-            </div>
-          </div>
+
 
           <div class="table-wrap">
             <div class="table-scroll">
@@ -541,11 +541,11 @@
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
-                    <div class="v price p2">{{ formatMoney(calcTongDieuChinh(currentContract)) }}</div>
+                    <div class="v price p2">{{ formatMoney(getTongDieuChinh(currentContract)) }}</div>
                   </div>
                   <div class="kpi">
                   <div class="k"><span class="dot"></span>Còn thiếu</div>
-                  <div class="v price p1">{{ formatMoney(calcConThieu(currentContract)) }}</div>
+                  <div class="v price p1">{{ formatMoney(getConThieu(currentContract)) }}</div>
                 </div>
                 <div class="kpi">
                   <div class="k"><span class="dot"></span>Đã thu</div>
@@ -596,7 +596,7 @@
                   type="text"
                   inputmode="numeric"
                   placeholder="VD: 500.000"
-                  @input="refund.amount = parseNumberInput($event.target.value)"
+                  @input="setRefundAmountFromInput($event.target.value)"
                 >
               </div>
               <div class="field">
@@ -617,20 +617,20 @@
 
                 <div class="grid grid-cols-2 gap-2 mt-3">
                   <div class="kpi">
-                    <div class="k"><span class="dot"></span>Giá điều chỉnh</div>
-                    <div class="v price p2">{{ formatMoney(calcGiaDieuChinh(currentContract)) }}</div>
+                    <div class="k"><span class="dot"></span>Giá sau giảm</div>
+                    <div class="v price p4">{{ formatMoney(currentContract?.giaSauGiam || 0) }}</div>
                   </div>
                   <div class="kpi">
-                    <div class="k"><span class="dot"></span>Thực thu</div>
-                    <div class="v price p3">{{ formatMoney(calcThucThu(currentContract)) }}</div>
-                  </div>
-                  <div class="kpi">
-                    <div class="k"><span class="dot"></span>Doanh thu (min)</div>
-                    <div class="v price p1">{{ formatMoney(calcDoanhThu(currentContract)) }}</div>
+                    <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
+                    <div class="v price p2">{{ formatMoney(getTongDieuChinh(currentContract)) }}</div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Còn thiếu</div>
-                    <div class="v price p4">{{ formatMoney(Math.max(0, calcGiaDieuChinh(currentContract) - calcThucThu(currentContract))) }}</div>
+                    <div class="v price p1">{{ formatMoney(getConThieu(currentContract)) }}</div>
+                  </div>
+                  <div class="kpi">
+                    <div class="k"><span class="dot"></span>Đã thu</div>
+                    <div class="v price p3">{{ formatMoney(getDoanhThuRow(currentContract)) }}</div>
                   </div>
                 </div>
 
@@ -686,9 +686,9 @@
               <div class="field">
                 <label><i class="fa-solid fa-layer-group"></i> Loại điều chỉnh</label>
                 <select v-model="adjustment.type">
-                  <option value="GIAM_GIA">GIAM_GIA</option>
-                  <option value="PHU_THU">PHU_THU</option>
-                  <option value="PHAT">PHAT</option>
+                  <option value="GIAM_GIA">Giảm thêm</option>
+                  <option value="PHU_THU">Phụ thu</option>
+                  <option value="PHAT">Phạt</option>
                 </select>
               </div>
 
@@ -1206,6 +1206,20 @@ watch(() => payment.value.amount, (val) => {
   }
 })
 
+watch(() => refund.value.amount, (val) => {
+  if (!currentContract.value) return
+
+  const maxAmount = getMaxRefundAmount(currentContract.value)
+  let num = Math.floor(parseNumberInput(val))
+
+  if (num > maxAmount) num = maxAmount
+  if (num < 0) num = 0
+
+  if (num !== refund.value.amount) {
+    refund.value.amount = num
+  }
+})
+
 // Methods
 // Helper functions
 const formatMoney = (n) => {
@@ -1294,7 +1308,7 @@ const getTongDieuChinh = (contract) => {
   if (contract?.tongDC !== undefined && contract?.tongDC !== null) {
     return Number(contract.tongDC || 0)
   }
-  return calcTongDieuChinh(contract)
+  return 0
 }
 
 const getDoanhThuRow = (contract) => {
@@ -1440,11 +1454,19 @@ const calcDoanhThu = (c) => {
   return Math.min(calcGiaDieuChinh(c), calcThucThu(c))
 }
 
-const calcConThieu = (c) => {
+const getConThieu = (c) => {
   const giaSauGiam = Number(c?.giaSauGiam || 0)
   const tongDieuChinh = getTongDieuChinh(c)
   const doanhThu = getDoanhThuRow(c)
   return Math.max(0, giaSauGiam + tongDieuChinh - doanhThu)
+}
+
+const calcConThieu = (c) => {
+  return getConThieu(c)
+}
+
+const getMaxRefundAmount = (c) => {
+  return Math.max(0, getDoanhThuRow(c))
 }
 
 // Toast
@@ -1554,6 +1576,12 @@ const setPaymentAmountFromInput = (value) => {
   const parsed = parseNumberInput(value)
   const maxAmount = calcConThieu(currentContract.value)
   payment.value.amount = Math.min(parsed, maxAmount)
+}
+
+const setRefundAmountFromInput = (value) => {
+  const parsed = parseNumberInput(value)
+  const maxAmount = getMaxRefundAmount(currentContract.value)
+  refund.value.amount = Math.min(parsed, maxAmount)
 }
 
 const clearSelectedCustomer = () => {
@@ -1766,6 +1794,11 @@ const savePayment = async () => {
 
 // Refund management
 const openRefund = (contract) => {
+  const maxRefund = getMaxRefundAmount(contract)
+  if (maxRefund <= 0) {
+    showCenterWarning('Chưa có phí đã thu', 'Không thể hoàn phí khi hợp đồng chưa thu tiền.')
+    return
+  }
   currentContract.value = contract
   refund.value = {
     amount: 0,
@@ -1775,31 +1808,40 @@ const openRefund = (contract) => {
   openModal('modalRefund')
 }
 
-const saveRefund = () => {
+const saveRefund = async () => {
   if (refund.value.amount <= 0) {
-    showToastMessage('error', 'Số tiền không hợp lệ', 'Số tiền hoàn phải > 0.')
+    showCenterWarning('Số tiền không hợp lệ', 'Số tiền hoàn phải > 0.')
     return
   }
 
-  if (!refund.value.reason) {
-    showToastMessage('error', 'Thiếu lý do', 'Bạn cần nhập lý do hoàn.')
+  const reason = (refund.value.reason || '').trim()
+  if (reason.length < 10) {
+    showCenterWarning('Thiếu lý do', 'Lý do hoàn tối thiểu 10 ký tự.')
     return
   }
 
-  const contractIndex = contracts.value.findIndex(c => c.id === currentContract.value.id)
-  if (contractIndex === -1) return
+  const maxRefund = getMaxRefundAmount(currentContract.value)
+  if (refund.value.amount > maxRefund) {
+    showCenterWarning('Số tiền vượt quá đã thu', `Tối đa đã thu: ${formatMoney(maxRefund)}.`)
+    return
+  }
 
-  contracts.value[contractIndex].hoanTien.push({
-    id: crypto.randomUUID(),
+  const payload = {
+    hopDongId: currentContract.value.id,
     soTienHoan: refund.value.amount,
-    lyDoHoan: refund.value.reason,
     ngayHoan: refund.value.date || todayISO(),
-    nguoiDuyet: 'demo_ke_toan',
-    ngayTao: new Date().toLocaleString('vi-VN')
-  })
+    lyDoHoan: reason
+  }
 
-  showToastMessage('success', 'Hoàn phí thành công', `-${formatMoney(refund.value.amount)}`)
-  closeModal('modalRefund')
+  try {
+    await showLoading(api.post('/hop-dong/admin/hoan-phi', payload))
+    updateAlertSuccess('Hoàn phí thành công', `-${formatMoney(refund.value.amount)}`)
+    await fetchContracts()
+    closeModal('modalRefund')
+  } catch (error) {
+    console.error('❌ Lỗi hoàn phí', error)
+    updateAlertError('Hoàn phí thất bại', 'Vui lòng thử lại sau.')
+  }
 }
 
 // Adjustment management

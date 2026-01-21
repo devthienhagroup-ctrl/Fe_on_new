@@ -1,60 +1,511 @@
 diff --git a/src/components/dich-vu/Phi-dich-vu.vue b/src/components/dich-vu/Phi-dich-vu.vue
-index 9705847171d00fee55601a156d9bf131a638933a..ef57120ed6c6b693239cfb9784cb6f5687019efe 100644
+index ef57120ed6c6b693239cfb9784cb6f5687019efe..981620fc50e40dcd52deb15c53177a3a0f13a984 100644
 --- a/src/components/dich-vu/Phi-dich-vu.vue
 +++ b/src/components/dich-vu/Phi-dich-vu.vue
-@@ -1693,50 +1693,55 @@ const saveContract = async () => {
-         id: crypto.randomUUID(),
-         soTienDong: firstPaymentAmount.value,
-         hinhThucThanhToan: newContract.value.firstMethod,
-         ngayDongTien: contract.ngayKy,
-         ghiChu: newContract.value.initPlan === 'FULL' ?
-             'Thanh toán đủ (tạo khi lập HĐ)' :
-             `Cọc ${newContract.value.tiLeCoc || 0}% (tạo khi lập HĐ)`,
-         nguoiGhiNhan: 'demo_admin',
-         ngayTao: new Date().toLocaleString('vi-VN')
-       })
-     }
+@@ -519,140 +519,140 @@
+                 </select>
+               </div>
+               <div class="field">
+                 <label><i class="fa-solid fa-calendar-day"></i> Ngày đóng tiền</label>
+                 <input v-model="payment.date" type="date">
+               </div>
+               <div class="field">
+                 <label><i class="fa-solid fa-note-sticky"></i> Ghi chú</label>
+                 <input v-model="payment.note" type="text" placeholder="VD: Đợt 2">
+               </div>
+             </div>
 
-     await fetchContracts()
-     updateAlertSuccess('Đã tạo hợp đồng',
-         `${contract.maHopDong} • ${newContract.value.initPlan === 'FULL' ? 'Đóng tất' : 'Cọc'}: ${formatMoney(firstPaymentAmount.value)}`)
-     closeModal('modalContract')
+             <div class="card">
+               <div class="card-h"><i class="fa-solid fa-circle-info"></i> Tóm tắt hợp đồng</div>
+               <div class="p-3">
+                 <div class="text-sm font-extrabold">{{ currentContract?.maHopDong }} • {{ currentContract?.tenKhachHang }}</div>
+                 <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày tạo {{ formatCreatedAt(currentContract?.ngayTao) }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
 
-   } catch (error) {
-     console.error('❌ Lỗi tạo hợp đồng', error)
-     updateAlertError('Tạo hợp đồng thất bại', 'Vui lòng thử lại sau.')
-   }
- }
+                 <div class="grid grid-cols-2 gap-2 mt-3">
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Giá sau giảm</div>
+                     <div class="v price p4">{{ formatMoney(currentContract?.giaSauGiam || 0) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
+-                    <div class="v price p2">{{ formatMoney(calcTongDieuChinh(currentContract)) }}</div>
++                    <div class="v price p2">{{ formatMoney(getTongDieuChinh(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                   <div class="k"><span class="dot"></span>Còn thiếu</div>
+-                  <div class="v price p1">{{ formatMoney(calcConThieu(currentContract)) }}</div>
++                  <div class="v price p1">{{ formatMoney(getConThieu(currentContract)) }}</div>
+                 </div>
+                 <div class="kpi">
+                   <div class="k"><span class="dot"></span>Đã thu</div>
+                   <div class="v price p3">{{ formatMoney(getDoanhThuRow(currentContract)) }}</div>
+                 </div>
+                 </div>
 
- // Payment management
- const openPay = (contract) => {
-+  const conThieu = calcConThieu(contract)
-+  if (conThieu <= 0) {
-+    showCenterWarning('Phí đã đóng hoàn tất', 'Không thể đóng thêm phí.')
-+    return
-+  }
-   currentContract.value = contract
-   payment.value = {
-     amount: 0,
-     method: 'CHUYEN_KHOAN',
-     date: todayISO(),
-     note: ''
-   }
-   openModal('modalPay')
- }
+                 <div class="note mt-3">
+                   <b>Lưu ý:</b> Đóng phí sẽ làm tăng <span class="mono">Thực thu</span>.
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
 
- const savePayment = async () => {
-   if (payment.value.amount <= 0) {
-     showCenterWarning('Số tiền không hợp lệ', 'Số tiền đóng phải > 0.')
-     return
-   }
+         <div class="modal-f">
+           <button class="btn ghost" @click="closeModal('modalPay')">
+             <i class="fa-solid fa-ban"></i> Hủy
+           </button>
+           <button class="btn primary" @click="savePayment">
+             <i class="fa-solid fa-check"></i> Xác nhận đóng
+           </button>
+         </div>
+       </div>
+     </div>
+
+     <!-- MODAL: REFUND -->
+     <div class="modal" :class="{ show: showModal === 'modalRefund' }" @click.self="closeModal('modalRefund')">
+       <div class="modal-card">
+         <div class="modal-h">
+           <div class="modal-title">
+             <i class="fa-solid fa-arrow-rotate-left"></i>
+             Hoàn phí
+           </div>
+           <button class="x" @click="closeModal('modalRefund')">
+             <i class="fa-solid fa-xmark"></i>
+           </button>
+         </div>
+
+         <div class="modal-b">
+           <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+             <div class="card">
+               <div class="card-h"><i class="fa-solid fa-reply"></i> Thông tin hoàn</div>
+               <div class="field">
+                 <label><i class="fa-solid fa-money-bill-transfer"></i> Số tiền hoàn</label>
+                 <input
+                   :value="formatNumberInput(refund.amount)"
+                   type="text"
+                   inputmode="numeric"
+                   placeholder="VD: 500.000"
+-                  @input="refund.amount = parseNumberInput($event.target.value)"
++                  @input="setRefundAmountFromInput($event.target.value)"
+                 >
+               </div>
+               <div class="field">
+                 <label><i class="fa-solid fa-calendar-day"></i> Ngày hoàn</label>
+                 <input v-model="refund.date" type="date">
+               </div>
+               <div class="field">
+                 <label><i class="fa-solid fa-clipboard"></i> Lý do hoàn</label>
+                 <textarea v-model="refund.reason" placeholder="VD: Khách huỷ 1 phần..."></textarea>
+               </div>
+             </div>
+
+             <div class="card">
+               <div class="card-h"><i class="fa-solid fa-circle-info"></i> Tóm tắt hợp đồng</div>
+               <div class="p-3">
+                 <div class="text-sm font-extrabold">{{ currentContract?.maHopDong }} • {{ currentContract?.tenKhachHang }}</div>
+                 <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày tạo {{ formatCreatedAt(currentContract?.ngayTao) }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
+
+                 <div class="grid grid-cols-2 gap-2 mt-3">
+                   <div class="kpi">
+-                    <div class="k"><span class="dot"></span>Giá điều chỉnh</div>
+-                    <div class="v price p2">{{ formatMoney(calcGiaDieuChinh(currentContract)) }}</div>
++                    <div class="k"><span class="dot"></span>Giá sau giảm</div>
++                    <div class="v price p4">{{ formatMoney(currentContract?.giaSauGiam || 0) }}</div>
+                   </div>
+                   <div class="kpi">
+-                    <div class="k"><span class="dot"></span>Thực thu</div>
+-                    <div class="v price p3">{{ formatMoney(calcThucThu(currentContract)) }}</div>
++                    <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
++                    <div class="v price p2">{{ formatMoney(getTongDieuChinh(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+-                    <div class="k"><span class="dot"></span>Doanh thu (min)</div>
+-                    <div class="v price p1">{{ formatMoney(calcDoanhThu(currentContract)) }}</div>
++                    <div class="k"><span class="dot"></span>Còn thiếu</div>
++                    <div class="v price p1">{{ formatMoney(getConThieu(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+-                    <div class="k"><span class="dot"></span>Còn thiếu</div>
+-                    <div class="v price p4">{{ formatMoney(Math.max(0, calcGiaDieuChinh(currentContract) - calcThucThu(currentContract))) }}</div>
++                    <div class="k"><span class="dot"></span>Đã thu</div>
++                    <div class="v price p3">{{ formatMoney(getDoanhThuRow(currentContract)) }}</div>
+                   </div>
+                 </div>
+
+                 <div class="note mt-3">
+                   <b>Lưu ý:</b> Hoàn phí sẽ làm giảm <span class="mono">Thực thu</span>.
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+
+         <div class="modal-f">
+           <button class="btn ghost" @click="closeModal('modalRefund')">
+             <i class="fa-solid fa-ban"></i> Hủy
+           </button>
+           <button class="btn primary" @click="saveRefund">
+             <i class="fa-solid fa-check"></i> Xác nhận hoàn
+           </button>
+         </div>
+       </div>
+     </div>
+
+     <!-- MODAL: ADJUST -->
+     <div class="modal" :class="{ show: showModal === 'modalAdjust' }" @click.self="closeModal('modalAdjust')">
+       <div class="modal-card">
+@@ -1184,50 +1184,64 @@ watch(() => newContract.value.serviceId, () => {
+
+ watch(() => newContract.value.giaTriTaiSan, () => {
+   updateGiaGocFromAsset()
+ })
+
+ watch(() => newContract.value.discountMode, () => {
+   updateGiaSauGiam()
+ })
+
+ watch(() => payment.value.amount, (val) => {
+   if (!currentContract.value) return
 
    const maxAmount = calcConThieu(currentContract.value)
-   if (payment.value.amount > maxAmount) {
-     showCenterWarning('Số tiền vượt quá còn thiếu', `Tối đa còn thiếu: ${formatMoney(maxAmount)}.`)
+
+   // 🔑 Parse → ÉP SỐ NGUYÊN
+   let num = Math.floor(parseNumberInput(val))
+
+   if (num > maxAmount) num = maxAmount
+   if (num < 0) num = 0
+
+   if (num !== payment.value.amount) {
+     payment.value.amount = num
+   }
+ })
+
++watch(() => refund.value.amount, (val) => {
++  if (!currentContract.value) return
++
++  const maxAmount = getMaxRefundAmount(currentContract.value)
++  let num = Math.floor(parseNumberInput(val))
++
++  if (num > maxAmount) num = maxAmount
++  if (num < 0) num = 0
++
++  if (num !== refund.value.amount) {
++    refund.value.amount = num
++  }
++})
++
+ // Methods
+ // Helper functions
+ const formatMoney = (n) => {
+   const x = Math.round(Number(n || 0))
+   const sign = x < 0 ? '-' : ''
+   const abs = Math.abs(x)
+   return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' ₫'
+ }
+
+ const formatNumberInput = (n) => {
+   if (n === null || n === undefined || n === '') return ''
+   const x = Math.round(Number(n || 0))
+   const sign = x < 0 ? '-' : ''
+   const abs = Math.abs(x)
+   return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+ }
+
+ const parseNumberInput = (value, allowNegative = false) => {
+   const raw = String(value || '').trim()
+   if (!raw) return 0
+   const noDots = raw.replace(/\./g, '')
+   const cleaned = allowNegative ? noDots.replace(/[^0-9-]/g, '') : noDots.replace(/[^0-9]/g, '')
+   let parsed = Number(cleaned)
+   if (Number.isNaN(parsed)) parsed = 0
+   if (!allowNegative) return Math.max(0, parsed)
+@@ -1272,51 +1286,51 @@ const formatCreatedAt = (value) => {
+   if (!Number.isNaN(parsed.getTime())) {
+     return `${parsed.toLocaleTimeString('vi-VN')} ${parsed.toLocaleDateString('vi-VN')}`
+   }
+   return String(value)
+ }
+
+ const getGiaGiam = (contract) => {
+   return Number(contract?.giaGiam ?? contract?.phiGiam ?? 0)
+ }
+
+ const getGiaTaiSanKy = (contract) => {
+   return Number(contract?.giaTaiSanKyGoc ?? contract?.giaTriTaiSan ?? contract?.giaTriKyBan ?? 0)
+ }
+
+ const getTongHoan = (contract) => {
+   if (contract?.giaHoanTien !== undefined && contract?.giaHoanTien !== null) {
+     return Number(contract.giaHoanTien || 0)
+   }
+   return calcTongHoan(contract)
+ }
+
+ const getTongDieuChinh = (contract) => {
+   if (contract?.tongDC !== undefined && contract?.tongDC !== null) {
+     return Number(contract.tongDC || 0)
+   }
+-  return calcTongDieuChinh(contract)
++  return 0
+ }
+
+ const getDoanhThuRow = (contract) => {
+   return Number(contract?.doanhThu ?? 0)
+ }
+
+ const getDoanhThu = (contract) => {
+   if (contract?.doanhThu !== undefined && contract?.doanhThu !== null) {
+     return Number(contract.doanhThu || 0)
+   }
+   return calcThucThu(contract)
+ }
+
+ const getDoanhSo = (contract) => {
+   if (contract?.doanhSo !== undefined && contract?.doanhSo !== null) {
+     return Number(contract.doanhSo || 0)
+   }
+   return calcDoanhThu(contract)
+ }
+
+ const randInt = (min, max) => {
+   return Math.floor(Math.random() * (max - min + 1)) + min
+ }
+
+ const randPriceForService = (serviceName) => {
+@@ -1418,57 +1432,65 @@ const genContractCode = () => {
+ // Calculation functions
+ const calcTongDong = (c) => {
+   return (c?.dotDongTien || []).reduce((sum, x) => sum + (Number(x.soTienDong) || 0), 0)
+ }
+
+ const calcTongHoan = (c) => {
+   return (c?.hoanTien || []).reduce((sum, x) => sum + (Number(x.soTienHoan) || 0), 0)
+ }
+
+ const calcTongDieuChinh = (c) => {
+   return (c?.dieuChinh || []).reduce((sum, x) => sum + (Number(x.soTienDieuChinh) || 0), 0)
+ }
+
+ const calcThucThu = (c) => {
+   return calcTongDong(c) - calcTongHoan(c)
+ }
+
+ const calcGiaDieuChinh = (c) => {
+   return (Number(c?.giaSauGiam) || 0) + calcTongDieuChinh(c)
+ }
+
+ const calcDoanhThu = (c) => {
+   return Math.min(calcGiaDieuChinh(c), calcThucThu(c))
+ }
+
+-const calcConThieu = (c) => {
++const getConThieu = (c) => {
+   const giaSauGiam = Number(c?.giaSauGiam || 0)
+   const tongDieuChinh = getTongDieuChinh(c)
+   const doanhThu = getDoanhThuRow(c)
+   return Math.max(0, giaSauGiam + tongDieuChinh - doanhThu)
+ }
+
++const calcConThieu = (c) => {
++  return getConThieu(c)
++}
++
++const getMaxRefundAmount = (c) => {
++  return Math.max(0, getDoanhThuRow(c))
++}
++
+ // Toast
+ const showToastMessage = (type, title, text) => {
+   toast.value = {
+     type,
+     title,
+     text,
+     icon: type === 'success' ? 'fa-solid fa-circle-check' :
+         type === 'error' ? 'fa-solid fa-triangle-exclamation' :
+             'fa-solid fa-circle-info'
+   }
+   showToast.value = true
+   setTimeout(() => {
+     showToast.value = false
+   }, 3000)
+ }
+
+ // Modal control
+ const openModal = (modal) => {
+   showModal.value = modal
+ }
+
+ const closeModal = (modal) => {
+   resetContractForm()
+   if (showModal.value === modal) {
+     showModal.value = null
+@@ -1534,50 +1556,56 @@ const updateGiaSauGiam = () => {
+     newContract.value.phiGiam = Math.round(giaGoc * (percent / 100))
+   } else {
+     const money = Number(newContract.value.discountValue || 0)
+     const clamped = Math.max(0, Math.min(giaGoc, money))
+     newContract.value.discountValue = clamped
+     newContract.value.phiGiam = clamped
+   }
+   newContract.value.giaSauGiam = Math.max(0, giaGoc - (newContract.value.phiGiam || 0))
+ }
+
+ const setDiscountValueFromInput = (value) => {
+   if (newContract.value.discountMode === 'PERCENT') {
+     newContract.value.discountValue = parseNumberInput(value)
+   } else {
+     newContract.value.discountValue = parseNumberInput(value)
+   }
+   updateGiaSauGiam()
+ }
+
+ const setPaymentAmountFromInput = (value) => {
+   const parsed = parseNumberInput(value)
+   const maxAmount = calcConThieu(currentContract.value)
+   payment.value.amount = Math.min(parsed, maxAmount)
+ }
+
++const setRefundAmountFromInput = (value) => {
++  const parsed = parseNumberInput(value)
++  const maxAmount = getMaxRefundAmount(currentContract.value)
++  refund.value.amount = Math.min(parsed, maxAmount)
++}
++
+ const clearSelectedCustomer = () => {
+   selectedCustomer.value = null
+   customerSearch.value = ''
+   customerSearchResults.value = []
+   customerSearchError.value = ''
+   customerSearchLoading.value = false
+   newContract.value.maKhachHang = ''
+   newContract.value.tenKhachHang = ''
+ }
+
+ const fetchCustomerSearch = async (keyword) => {
+   const k = (keyword || '').trim()
+   if (!k) {
+     customerSearchResults.value = []
+     customerSearchError.value = ''
      return
    }
+
+   if (k === lastCustomerKeyword.value) return
+   lastCustomerKeyword.value = k
+
+   customerSearchLoading.value = true
+   customerSearchError.value = ''
+
+   try {
+@@ -1744,84 +1772,98 @@ const savePayment = async () => {
 
    const contractIndex = contracts.value.findIndex(c => c.id === currentContract.value.id)
    if (contractIndex === -1) return
 
+   const payload = {
+     hopDongId: currentContract.value.id,
+     soTienDong: payment.value.amount,
+     hinhThucThanhToan: payment.value.method,
+     ngayDongTien: payment.value.date || todayISO(),
+     ghiChu: payment.value.note
+   }
+
+   try {
+     await showLoading(api.post('/hop-dong/admin/dong-phi', payload))
+     updateAlertSuccess('Đóng phí thành công', `+${formatMoney(payment.value.amount)} (${payment.value.method})`)
+     await fetchContracts()
+     closeModal('modalPay')
+   } catch (error) {
+     console.error('❌ Lỗi đóng phí', error)
+     updateAlertError('Đóng phí thất bại', 'Vui lòng thử lại sau.')
+   }
+ }
+
+ // Refund management
+ const openRefund = (contract) => {
++  const maxRefund = getMaxRefundAmount(contract)
++  if (maxRefund <= 0) {
++    showCenterWarning('Chưa có phí đã thu', 'Không thể hoàn phí khi hợp đồng chưa thu tiền.')
++    return
++  }
+   currentContract.value = contract
+   refund.value = {
+     amount: 0,
+     date: todayISO(),
+     reason: ''
+   }
+   openModal('modalRefund')
+ }
+
+-const saveRefund = () => {
++const saveRefund = async () => {
+   if (refund.value.amount <= 0) {
+-    showToastMessage('error', 'Số tiền không hợp lệ', 'Số tiền hoàn phải > 0.')
++    showCenterWarning('Số tiền không hợp lệ', 'Số tiền hoàn phải > 0.')
+     return
+   }
+
+-  if (!refund.value.reason) {
+-    showToastMessage('error', 'Thiếu lý do', 'Bạn cần nhập lý do hoàn.')
++  const reason = (refund.value.reason || '').trim()
++  if (reason.length < 10) {
++    showCenterWarning('Thiếu lý do', 'Lý do hoàn tối thiểu 10 ký tự.')
+     return
+   }
+
+-  const contractIndex = contracts.value.findIndex(c => c.id === currentContract.value.id)
+-  if (contractIndex === -1) return
++  const maxRefund = getMaxRefundAmount(currentContract.value)
++  if (refund.value.amount > maxRefund) {
++    showCenterWarning('Số tiền vượt quá đã thu', `Tối đa đã thu: ${formatMoney(maxRefund)}.`)
++    return
++  }
+
+-  contracts.value[contractIndex].hoanTien.push({
+-    id: crypto.randomUUID(),
++  const payload = {
++    hopDongId: currentContract.value.id,
+     soTienHoan: refund.value.amount,
+-    lyDoHoan: refund.value.reason,
+     ngayHoan: refund.value.date || todayISO(),
+-    nguoiDuyet: 'demo_ke_toan',
+-    ngayTao: new Date().toLocaleString('vi-VN')
+-  })
++    lyDoHoan: reason
++  }
+
+-  showToastMessage('success', 'Hoàn phí thành công', `-${formatMoney(refund.value.amount)}`)
+-  closeModal('modalRefund')
++  try {
++    await showLoading(api.post('/hop-dong/admin/hoan-phi', payload))
++    updateAlertSuccess('Hoàn phí thành công', `-${formatMoney(refund.value.amount)}`)
++    await fetchContracts()
++    closeModal('modalRefund')
++  } catch (error) {
++    console.error('❌ Lỗi hoàn phí', error)
++    updateAlertError('Hoàn phí thất bại', 'Vui lòng thử lại sau.')
++  }
+ }
+
+ // Adjustment management
+ const openAdjust = (contract) => {
+   currentContract.value = contract
+   adjustment.value = {
+     amount: 0,
+     type: 'GIAM_GIA',
+     reason: ''
+   }
+   openModal('modalAdjust')
+ }
+
+ const saveAdjustment = () => {
+   if (adjustment.value.amount === 0) {
+     showToastMessage('error', 'Số tiền không hợp lệ', 'Điều chỉnh phải khác 0 (âm hoặc dương).')
+     return
+   }
+
+   if (!ENUM_ADJ.includes(adjustment.value.type)) {
+     showToastMessage('error', 'Loại điều chỉnh sai', 'Chọn GIAM_GIA/PHU_THU/PHAT.')
+     return
+   }
+
+   if (!adjustment.value.reason) {
