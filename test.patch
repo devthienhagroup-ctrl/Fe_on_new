@@ -1,853 +1,114 @@
 diff --git a/src/components/dich-vu/Phi-dich-vu.vue b/src/components/dich-vu/Phi-dich-vu.vue
-index 0c02dc889b9fc24df04079ea361b732a5f8e4edb..a6a01dd6413576627548a8e5cbd262214acaa799 100644
+index 9d4adc8877735712a865b3a6b4c12f53c963118f..80237b6097ebee10e7d3b737b7af70012f1c301b 100644
 --- a/src/components/dich-vu/Phi-dich-vu.vue
 +++ b/src/components/dich-vu/Phi-dich-vu.vue
-@@ -178,87 +178,87 @@
-                   </td>
-                   <td>
-                     <div class="font-semibold">{{ contract.nhanVienTao }}</div>
-                   </td>
-                   <td class="mono">{{ formatCreatedAt(contract.ngayTao) }}</td>
-                   <td>
-                     <div class="actions" @click.stop>
-                       <div class="icon-btn icon-menu" title="Tác vụ" @click.stop="toggleActionMenu(contract.id, $event)">
-                         <i class="fa-solid fa-ellipsis"></i>
-                       </div>
-                     </div>
-                   </td>
-                 </tr>
-                 </tbody>
-               </table>
-             </div>
-           </div>
-         </div>
-         <teleport to="body">
-           <div
-             v-if="openActionMenu && activeActionContract"
-             class="action-menu action-menu--floating"
-             :style="actionMenuPositionStyle"
-             @click.stop
-           >
--            <div class="action-item" @click="closeActionMenu(); openDetail(activeActionContract)">
-+            <div class="action-item" @click="openDetail(activeActionContract); closeActionMenu()">
-               <span class="icon-btn icon-view" aria-hidden="true">
-                 <i class="fa-solid fa-eye"></i>
-               </span>
-               <span class="action-label">Chi tiết</span>
-             </div>
-             <div
-               class="action-item"
-               :class="{ disabled: !isActiveContract(activeActionContract) }"
--              @click="isActiveContract(activeActionContract) && (closeActionMenu(), openPay(activeActionContract))"
-+              @click="isActiveContract(activeActionContract) && (openPay(activeActionContract), closeActionMenu())"
-             >
-               <span class="icon-btn icon-pay" aria-hidden="true">
-                 <i class="fa-solid fa-circle-dollar-to-slot"></i>
-               </span>
-               <span class="action-label">Đóng phí</span>
-             </div>
-             <div
-               class="action-item"
-               :class="{ disabled: !isActiveContract(activeActionContract) }"
--              @click="isActiveContract(activeActionContract) && (closeActionMenu(), openRefund(activeActionContract))"
-+              @click="isActiveContract(activeActionContract) && (openRefund(activeActionContract), closeActionMenu())"
-             >
-               <span class="icon-btn icon-refund" aria-hidden="true">
-                 <i class="fa-solid fa-arrow-rotate-left"></i>
-               </span>
-               <span class="action-label">Hoàn phí</span>
-             </div>
-             <div
-               class="action-item"
-               :class="{ disabled: !isActiveContract(activeActionContract) }"
--              @click="isActiveContract(activeActionContract) && (closeActionMenu(), openAdjust(activeActionContract))"
-+              @click="isActiveContract(activeActionContract) && (openAdjust(activeActionContract), closeActionMenu())"
-             >
-               <span class="icon-btn icon-adjust" aria-hidden="true">
-                 <i class="fa-solid fa-sliders"></i>
-               </span>
-               <span class="action-label">Điều chỉnh</span>
-             </div>
--            <div class="action-item" @click="closeActionMenu(); openDelete(activeActionContract)">
-+            <div class="action-item" @click="openDelete(activeActionContract); closeActionMenu()">
-               <span class="icon-btn icon-del" aria-hidden="true">
-                 <i class="fa-solid fa-trash"></i>
-               </span>
-               <span class="action-label">Xóa</span>
-             </div>
-           </div>
-         </teleport>
-         <div class="pagination">
-           <div class="muted tiny">
-             Hiển thị {{ pageStart }}-{{ pageEnd }} / {{ totalElements }}
-           </div>
-           <div class="pager">
-             <button class="btn ghost btn-page" :disabled="currentPage === 1" @click="prevPage">Trước</button>
-             <button
-               v-for="page in totalPages"
-               :key="page"
-               class="btn ghost btn-page"
-               :class="{ active: currentPage === page }"
-               @click="goToPage(page)"
-             >
-               {{ page }}
-             </button>
-             <button class="btn ghost btn-page" :disabled="currentPage === totalPages" @click="nextPage">Sau</button>
-           </div>
-         </div>
-@@ -695,72 +695,215 @@
-         </div>
-       </div>
+@@ -925,51 +925,51 @@
      </div>
 
-     <!-- MODAL: ADJUST -->
-     <div class="modal" :class="{ show: showModal === 'modalAdjust' }" @click.self="closeModal('modalAdjust')">
-       <div class="modal-card">
+     <!-- MODAL: DETAIL -->
+     <div class="modal" :class="{ show: showModal === 'modalDetail' }" @click.self="closeModal('modalDetail')">
+       <div class="modal-card detail">
          <div class="modal-h">
-           <div class="modal-title">
-             <i class="fa-solid fa-sliders"></i>
-             Điều chỉnh hợp đồng
+           <div class="modal-title flex items-center gap-2">
+             <i class="fa-solid fa-file-lines"></i>
+             <span>Chi tiết hợp đồng {{ detailContract?.maHopDong }}</span>
+             <span v-if="detailContract?.trangThaiHopDong === 'DANG_HIEU_LUC'" class="status st-on">
+               Đang hiệu lực
+                       </span>
+             <span v-else-if="detailContract?.trangThaiHopDong === 'HOAN_TAT'" class="status st-done">
+               Hoàn tất
+                       </span>
+             <span v-else-if="detailContract?.trangThaiHopDong === 'HUY'" class="status st-cancel">
+               Đã hủy
+             </span>
            </div>
-           <button class="x" @click="closeModal('modalAdjust')">
+           <button class="x" @click="closeModal('modalDetail')">
              <i class="fa-solid fa-xmark"></i>
            </button>
          </div>
 
          <div class="modal-b">
-           <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-             <div class="card">
-               <div class="card-h"><i class="fa-solid fa-pen-to-square"></i> Thông tin điều chỉnh</div>
+-          <div class="grid grid-cols-1 xl:grid-cols-3 gap-3">
++          <div class="detail-grid grid grid-cols-1 xl:grid-cols-3 gap-3">
+             <div class="card xl:col-span-1">
+               <div class="card-h"><i class="fa-solid fa-circle-info"></i> Thông tin hợp đồng</div>
 
-               <div class="field">
-                 <label><i class="fa-solid fa-coins"></i> Số tiền điều chỉnh</label>
-                 <input
-+                  v-if="adjustment.type !== 'CHUYEN_DOI_DV'"
-                   :value="formatNumberInput(adjustment.amount)"
-                   type="text"
-                   inputmode="numeric"
-                   placeholder="VD: 300.000"
-                   @input="handleAdjustmentAmountInput"
-                 >
-+                <input
-+                  v-else
-+                  type="text"
-+                  value="Theo dịch vụ chuyển đổi"
-+                  readonly
-+                >
-                 <div class="muted tiny">Chỉ nhập số dương cho điều chỉnh.</div>
-               </div>
-
-               <div class="field">
-                 <label><i class="fa-solid fa-layer-group"></i> Loại điều chỉnh</label>
-                 <select v-model="adjustment.type">
-                   <option value="GIAM_GIA">Giảm thêm</option>
-                   <option value="PHU_THU">Phụ thu</option>
-                   <option value="PHAT">Phạt</option>
-+                  <option value="CHUYEN_DOI_DV">Chuyển đổi dịch vụ</option>
-                 </select>
-               </div>
-
-               <div class="field">
-                 <label><i class="fa-solid fa-clipboard"></i> Lý do</label>
-                 <textarea v-model="adjustment.reason" placeholder="VD: Phạt trễ tiến độ..."></textarea>
-               </div>
-+
-+              <template v-if="adjustment.type === 'CHUYEN_DOI_DV'">
-+                <div class="section-title">
-+                  <i class="fa-solid fa-briefcase"></i>
-+                  Dịch vụ & giá trị
-+                </div>
-+
-+                <div class="field">
-+                  <label class="field-label">
-+                    <span class="label-ico tone-indigo"><i class="fa-solid fa-list"></i></span>
-+                    <span>Dịch vụ</span>
-+                  </label>
-+                  <select v-model="adjustment.serviceId">
-+                    <option v-for="service in serviceOptions" :key="service.id || service.name" :value="service.id || service.name">
-+                      {{ service.name }}
-+                    </option>
-+                  </select>
-+                </div>
-+
-+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 px-3 pb-2">
-+                  <div class="field !m-0">
-+                    <label class="field-label">
-+                      <span class="label-ico tone-teal"><i class="fa-solid fa-building"></i></span>
-+                      <span>Giá trị tài sản ký bán</span>
-+                    </label>
-+                    <input
-+                      :value="formatNumberInput(adjustment.giaTriTaiSan)"
-+                      type="text"
-+                      inputmode="numeric"
-+                      placeholder="VD: 1.500.000.000"
-+                      @input="adjustment.giaTriTaiSan = parseNumberInput($event.target.value)"
-+                    >
-+                  </div>
-+
-+                  <div class="field !m-0">
-+                    <label class="field-label">
-+                      <span class="label-ico tone-orange"><i class="fa-solid fa-money-bill-wave"></i></span>
-+                      <span>Giá gốc</span>
-+                    </label>
-+                    <input :value="formatMoney(adjustment.giaDichVuGoc)" type="text" readonly>
-+                  </div>
-+                </div>
-+
-+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 px-3 pb-2">
-+                  <div class="field !m-0">
-+                    <label class="field-label">
-+                      <span class="label-ico tone-pink"><i class="fa-solid fa-tags"></i></span>
-+                      <span>Giảm giá</span>
-+                      <div class="discount-toggle">
-+                        <button type="button" :class="{ active: adjustment.discountMode === 'MONEY' }" @click="setAdjustmentDiscountMode('MONEY')">
-+                          <i class="fa-solid fa-money-bill-wave"></i>
-+                          Tiền
-+                        </button>
-+                        <button type="button" :class="{ active: adjustment.discountMode === 'PERCENT' }" @click="setAdjustmentDiscountMode('PERCENT')">
-+                          <i class="fa-solid fa-percent"></i>
-+                          %
-+                        </button>
-+                      </div>
-+                    </label>
-+                    <div class="discount-input">
-+                      <div class="discount-value">
-+                        <input
-+                          :value="adjustment.discountMode === 'PERCENT' ? adjustment.discountValue : formatNumberInput(adjustment.discountValue)"
-+                          type="text"
-+                          inputmode="numeric"
-+                          :placeholder="adjustment.discountMode === 'PERCENT' ? 'VD: 10' : 'VD: 1.000.000'"
-+                          @input="setAdjustmentDiscountValueFromInput($event.target.value)"
-+                        >
-+                        <span class="discount-suffix">{{ adjustment.discountMode === 'PERCENT' ? '%' : '₫' }}</span>
-+                      </div>
-+                    </div>
-+                  </div>
-+
-+                  <div class="field !m-0">
-+                    <label class="field-label">
-+                      <span class="label-ico tone-purple"><i class="fa-solid fa-circle-dollar-to-slot"></i></span>
-+                      <span>Giá sau giảm</span>
-+                    </label>
-+                    <input :value="formatMoney(adjustment.giaSauGiam)" type="text" readonly>
-+                  </div>
-+                </div>
-+
-+                <div class="section-title">
-+                  <i class="fa-solid fa-wallet"></i>
-+                  Tuỳ chọn thanh toán ban đầu
-+                </div>
-+
-+                <div class="px-3 pb-2">
-+                  <div class="plan" id="planAdjustWrap">
-+                    <div class="plan-item" :class="{ active: adjustment.initPlan === 'COC' }" @click="adjustment.initPlan = 'COC'">
-+                      <div class="plan-ico"><i class="fa-solid fa-hand-holding-dollar"></i></div>
-+                      <div class="min-w-0">
-+                        <div class="plan-tt">Cọc (%)</div>
-+                      </div>
-+                    </div>
-+
-+                    <div class="plan-item" :class="{ active: adjustment.initPlan === 'FULL' }" @click="adjustment.initPlan = 'FULL'">
-+                      <div class="plan-ico"><i class="fa-solid fa-circle-check"></i></div>
-+                      <div class="min-w-0">
-+                        <div class="plan-tt">Đóng tất</div>
-+                      </div>
-+                    </div>
-+                  </div>
-+
-+                  <div class="grid grid-cols-1 gap-3" :class="adjustment.initPlan === 'COC' ? 'md:grid-cols-3' : 'md:grid-cols-2'">
-+                    <div v-if="adjustment.initPlan === 'COC'" class="field !m-0">
-+                      <label class="field-label">
-+                        <span class="label-ico tone-gold"><i class="fa-solid fa-percent"></i></span>
-+                        <span>% cọc</span>
-+                      </label>
-+                      <input v-model.number="adjustment.tiLeCoc" type="number" min="0" max="100" placeholder="VD: 30"
-+                             :disabled="adjustment.initPlan === 'FULL'">
-+                    </div>
-+
-+                    <div class="field !m-0">
-+                      <label class="field-label">
-+                        <span class="label-ico tone-cyan"><i class="fa-solid fa-money-check-dollar"></i></span>
-+                        <span>Tiền thanh toán</span>
-+                      </label>
-+                      <input :value="formatMoney(adjustmentFirstPaymentAmount)" type="text" readonly>
-+                    </div>
-+
-+                    <div class="field !m-0">
-+                      <label class="field-label">
-+                        <span class="label-ico tone-forest"><i class="fa-solid fa-credit-card"></i></span>
-+                        <span>Hình thức</span>
-+                      </label>
-+                      <select v-model="adjustment.firstMethod">
-+                        <option value="CHUYEN_KHOAN">Chuyển khoản</option>
-+                        <option value="TIEN_MAT">Tiền mặt</option>
-+                      </select>
-+                    </div>
-+                  </div>
-+                </div>
-+              </template>
-             </div>
-
-             <div class="card">
-               <div class="card-h"><i class="fa-solid fa-circle-info"></i> Tóm tắt hợp đồng</div>
                <div class="p-3">
-                 <div class="text-sm font-extrabold">{{ currentContract?.maHopDong }} • {{ currentContract?.tenKhachHang }}</div>
-                 <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày tạo {{ formatCreatedAt(currentContract?.ngayTao) }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
+                 <div class="text-sm font-extrabold">{{ detailContract?.maHopDong }} • {{ detailContract?.tenKhachHang }}</div>
+                 <div class="muted tiny mt-1">{{ detailContract?.tenDichVu }} • Ngày tạo {{ formatDateValue(detailContract?.ngayTao) }}</div>
 
-                 <div class="grid grid-cols-2 gap-2 mt-3">
+                   <div class="grid grid-cols-3 gap-2 mt-3">
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Giá gốc</div>
+                     <div class="v price p2 font-extrabold">{{ formatMoney(detailContract?.giaDichVuGoc || 0) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Phí giảm</div>
+                     <div class="v price p4 font-extrabold">{{ formatMoney(detailContract?.phiGiam || 0) }}</div>
+                   </div>
                    <div class="kpi">
                      <div class="k"><span class="dot"></span>Giá sau giảm</div>
-                     <div class="v price p4">{{ formatMoney(currentContract?.giaSauGiam || 0) }}</div>
+                     <div class="v price p1 font-extrabold">{{ formatMoney(detailContract?.giaSauGiam || 0) }}</div>
                    </div>
                    <div class="kpi">
-                     <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
-                     <div class="v price p2">{{ formatMoney(getTongDieuChinh(currentContract)) }}</div>
+                     <div class="k"><span class="dot"></span>Giá tài sản ký</div>
+                     <div class="v price p3 font-extrabold">{{ formatMoney(detailContract?.giaTaiSanKy || 0) }}</div>
                    </div>
                    <div class="kpi">
-                     <div class="k"><span class="dot"></span>Doanh thu</div>
-                     <div class="v price p1">{{ formatMoney(getDoanhThuRow(currentContract)) }}</div>
-                   </div>
-                   <div class="kpi">
-                     <div class="k"><span class="dot"></span>Doanh số</div>
-                     <div class="v price p3">{{ formatMoney(getDoanhSoRow(currentContract)) }}</div>
-                   </div>
-@@ -1019,51 +1162,51 @@
-   </div>
- </template>
-
- <script setup>
- import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
- import api from '/src/api/api.js'
- import {
-   confirmWithInput,
-   showCenterWarning,
-   showError,
-   showLoading,
-   updateAlertError,
-   updateAlertSuccess
- } from '/src/assets/js/alertService.js'
- import ContractStatsDashboard from "../thiet-kegiandien/ContractStatsDashboard.vue";
- const todayISO = () => {
-   const d = new Date()
-   const yyyy = d.getFullYear()
-   const mm = String(d.getMonth() + 1).padStart(2, '0')
-   const dd = String(d.getDate()).padStart(2, '0')
-   return `${yyyy}-${mm}-${dd}`
+@@ -3381,50 +3381,56 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
+   width:32px; height:32px;
+   border-radius: 12px;
+   display:grid; place-items:center;
+   background: var(--primary-gradient);
+   color:#fff;
+   box-shadow: 0 12px 22px rgba(102,126,234,.22);
+   flex: 0 0 auto;
  }
- // Constants
- const ENUM_STATUS = ['DANG_HIEU_LUC', 'HOAN_TAT', 'HUY']
- const ENUM_PAY = ['TIEN_MAT', 'CHUYEN_KHOAN', 'QR', 'KHAC']
--const ENUM_ADJ = ['GIAM_GIA', 'PHU_THU', 'PHAT']
-+const ENUM_ADJ = ['GIAM_GIA', 'PHU_THU', 'PHAT', 'CHUYEN_DOI_DV']
-
- // State
- const activeTab = ref(1)
- const contracts = ref([])
- const totalElements = ref(0)
- const totalPages = ref(1)
- const seq = ref(1)
- const services = ref([])
- const segments = ref([])
-
- // Filters
- const searchQuery = ref('')
- const filterService = ref(null)
- const filterStatus = ref(null)
- const tuNgay = ref(null)
- const denNgay = ref(null)
- const currentPage = ref(1)
- const pageSize = ref(2)
- const currentUserName = ref('Nguyễn Minh')
- const searchTimer = ref(null)
-
- // Customer search
- const customerSearch = ref('')
- const selectedCustomer = ref(null)
- const customerSearchResults = ref([])
-@@ -1097,51 +1240,62 @@ const newContract = ref({
- const showModal = ref(null)
- const currentContract = ref(null)
- const detailContract = ref(null)
- const openActionMenu = ref(null)
- const actionMenuPosition = ref({ top: 0, left: 0 })
-
- // Payment form
- const payment = ref({
-   amount: 0,
-   method: 'CHUYEN_KHOAN',
-   date: todayISO(),
-   note: ''
- })
-
- // Refund form
- const refund = ref({
-   amount: 0,
-   date: todayISO(),
-   reason: ''
- })
-
- // Adjustment form
- const adjustment = ref({
-   amount: 0,
-   type: 'GIAM_GIA',
--  reason: ''
-+  reason: '',
-+  tenDichVu: '',
-+  serviceId: null,
-+  giaTriTaiSan: null,
-+  giaDichVuGoc: 0,
-+  phiGiam: 0,
-+  discountMode: 'PERCENT',
-+  discountValue: 0,
-+  giaSauGiam: 0,
-+  initPlan: 'COC',
-+  tiLeCoc: 30,
-+  firstMethod: 'CHUYEN_KHOAN'
- })
-
- // Toast
- const showToast = ref(false)
- const toast = ref({
-   type: 'info',
-   title: '',
-   text: '',
-   icon: 'fa-solid fa-circle-info'
- })
-
- // Computed properties
- const pageStart = computed(() => {
-   if (!totalElements.value) return 0
-   return (currentPage.value - 1) * pageSize.value + 1
- })
-
- const pageEnd = computed(() => {
-   return Math.min(currentPage.value * pageSize.value, totalElements.value)
- })
-
- const totalDoanhThu = computed(() => {
-   return contracts.value.reduce((sum, c) => sum + getDoanhThu(c), 0)
- })
-
-@@ -1173,50 +1327,58 @@ const matchingSegment = computed(() => {
-   ) || null
- })
-
- const segmentHint = computed(() => {
-   if (!newContract.value.serviceId) {
-     return 'Vui lòng chọn dịch vụ để hiển thị phân khúc.'
-   }
-   if (!newContract.value.giaTriTaiSan) {
-     return 'Nhập giá trị tài sản để xác định mức giá gốc.'
-   }
-   if (!matchingSegment.value) {
-     return 'Chưa có phân khúc phù hợp với giá trị tài sản này.'
-   }
-   return `Phân khúc ${formatMoney(matchingSegment.value.min)} → ${formatMoney(matchingSegment.value.max)}`
- })
-
- const firstPaymentAmount = computed(() => {
-   if (newContract.value.initPlan === 'FULL') {
-     return newContract.value.giaSauGiam
-   } else {
-     const percent = Math.max(0, Math.min(100, newContract.value.tiLeCoc || 0))
-     return Math.round(newContract.value.giaSauGiam * (percent / 100))
-   }
- })
-
-+const adjustmentFirstPaymentAmount = computed(() => {
-+  if (adjustment.value.initPlan === 'FULL') {
-+    return adjustment.value.giaSauGiam
-+  }
-+  const percent = Math.max(0, Math.min(100, adjustment.value.tiLeCoc || 0))
-+  return Math.round((adjustment.value.giaSauGiam || 0) * (percent / 100))
-+})
-+
- // Watchers
- watch(searchQuery, () => {
-   currentPage.value = 1
-   queueSearch()
- })
-
- watch(filterService, () => {
-   currentPage.value = 1
-   fetchContracts()
- })
-
- watch(filterStatus, () => {
-   currentPage.value = 1
-   fetchContracts()
- })
-
- watch([tuNgay, denNgay], () => {
-   currentPage.value = 1
-   fetchContracts()
- })
-
- watch(currentPage, () => {
-   fetchContracts()
- })
-
-@@ -1247,50 +1409,62 @@ watch(customerSearch, (val) => {
-   if (!k) {
-     lastCustomerKeyword.value = ''
-     customerSearchResults.value = []
-     customerSearchError.value = ''
-     customerSearchLoading.value = false
-     return
-   }
-
-   customerSearchTimer.value = setTimeout(() => {
-     fetchCustomerSearch(k)
-   }, 250)
- })
-
- watch(() => newContract.value.serviceId, () => {
-   updateServicePrice()
- })
-
- watch(() => newContract.value.giaTriTaiSan, () => {
-   updateGiaGocFromAsset()
- })
-
- watch(() => newContract.value.discountMode, () => {
-   updateGiaSauGiam()
- })
-
-+watch(() => adjustment.value.serviceId, () => {
-+  updateAdjustmentServicePrice()
-+})
-+
-+watch(() => adjustment.value.giaTriTaiSan, () => {
-+  updateAdjustmentGiaGocFromAsset()
-+})
-+
-+watch(() => adjustment.value.discountMode, () => {
-+  updateAdjustmentGiaSauGiam()
-+})
-+
- watch(() => payment.value.amount, (val) => {
-   if (!currentContract.value) return
-
-   const maxAmount = calcConThieu(currentContract.value)
-
-   // 🔑 Parse → ÉP SỐ NGUYÊN
-   let num = Math.floor(parseNumberInput(val))
-
-   if (num > maxAmount) num = maxAmount
-   if (num < 0) num = 0
-
-   if (num !== payment.value.amount) {
-     payment.value.amount = num
-   }
- })
-
- watch(() => refund.value.amount, (val) => {
-   if (!currentContract.value) return
-
-   const maxAmount = getMaxRefundAmount(currentContract.value)
-   let num = Math.floor(parseNumberInput(val))
-
-   if (num > maxAmount) num = maxAmount
-   if (num < 0) num = 0
-
-@@ -1629,50 +1803,91 @@ const setDiscountMode = (mode) => {
-
- const updateGiaSauGiam = () => {
-   const giaGoc = Number(newContract.value.giaDichVuGoc || 0)
-   if (newContract.value.discountMode === 'PERCENT') {
-     const percent = Math.max(0, Math.min(100, Number(newContract.value.discountValue || 0)))
-     newContract.value.discountValue = percent
-     newContract.value.phiGiam = Math.round(giaGoc * (percent / 100))
-   } else {
-     const money = Number(newContract.value.discountValue || 0)
-     const clamped = Math.max(0, Math.min(giaGoc, money))
-     newContract.value.discountValue = clamped
-     newContract.value.phiGiam = clamped
-   }
-   newContract.value.giaSauGiam = Math.max(0, giaGoc - (newContract.value.phiGiam || 0))
+ .x{
+   width: 38px; height: 38px;
+   border-radius: 12px;
+   border: 1px solid rgba(20,30,48,.12);
+   background: rgba(20,30,48,.04);
+   cursor:pointer;
+   transition: var(--t);
+   flex: 0 0 auto;
+   display: grid;
+   place-items: center;
  }
+ .x:hover{ transform: translateY(-1px); background: rgba(102,126,234,.10); border-color: rgba(102,126,234,.26); }
 
- const setDiscountValueFromInput = (value) => {
-   if (newContract.value.discountMode === 'PERCENT') {
-     newContract.value.discountValue = parseNumberInput(value)
-   } else {
-     newContract.value.discountValue = parseNumberInput(value)
-   }
-   updateGiaSauGiam()
+ .modal-b{
+   padding: 12px;
+   overflow: auto;
  }
-
-+const updateAdjustmentServicePrice = () => {
-+  const service = getServiceById(adjustment.value.serviceId)
-+  adjustment.value.tenDichVu = service?.name || ''
-+  updateAdjustmentGiaGocFromAsset()
++.detail-grid{
++  grid-template-columns: 1fr !important;
 +}
-+
-+const updateAdjustmentGiaGocFromAsset = () => {
-+  const assetValue = Number(adjustment.value.giaTriTaiSan || 0)
-+  const segment = findSegmentForAsset(adjustment.value.serviceId, assetValue)
-+  if (segment) {
-+    adjustment.value.giaDichVuGoc = Number(segment.price || 0)
-+  } else {
-+    adjustment.value.giaDichVuGoc = 0
-+  }
-+  updateAdjustmentGiaSauGiam()
++.detail-grid > .card{
++  grid-column: 1 / -1;
 +}
-+
-+const setAdjustmentDiscountMode = (mode) => {
-+  adjustment.value.discountMode = mode
-+}
-+
-+const updateAdjustmentGiaSauGiam = () => {
-+  const giaGoc = Number(adjustment.value.giaDichVuGoc || 0)
-+  if (adjustment.value.discountMode === 'PERCENT') {
-+    const percent = Math.max(0, Math.min(100, Number(adjustment.value.discountValue || 0)))
-+    adjustment.value.discountValue = percent
-+    adjustment.value.phiGiam = Math.round(giaGoc * (percent / 100))
-+  } else {
-+    const money = Number(adjustment.value.discountValue || 0)
-+    const clamped = Math.max(0, Math.min(giaGoc, money))
-+    adjustment.value.discountValue = clamped
-+    adjustment.value.phiGiam = clamped
-+  }
-+  adjustment.value.giaSauGiam = Math.max(0, giaGoc - (adjustment.value.phiGiam || 0))
-+}
-+
-+const setAdjustmentDiscountValueFromInput = (value) => {
-+  adjustment.value.discountValue = parseNumberInput(value)
-+  updateAdjustmentGiaSauGiam()
-+}
-+
- const setPaymentAmountFromInput = (value) => {
-   const parsed = parseNumberInput(value)
-   const maxAmount = calcConThieu(currentContract.value)
-   payment.value.amount = Math.min(parsed, maxAmount)
+ .modal-f{
+   padding: 12px;
+   display:flex;
+   justify-content:flex-end;
+   gap:8px;
+   border-top: 1px solid rgba(20,30,48,.10);
+   background: rgba(20,30,48,.02);
+   flex-wrap: wrap;
+ }
+ @media (max-width: 520px){
+   .modal-f .btn{ width: 100%; justify-content:center; }
  }
 
- const setRefundAmountFromInput = (value) => {
-   const parsed = parseNumberInput(value)
-   const maxAmount = getMaxRefundAmount(currentContract.value)
-   refund.value.amount = Math.min(parsed, maxAmount)
+ /* =========================
+    FORM CARDS
+ ========================= */
+ .form-grid{
+   display:grid;
+   grid-template-columns: 1fr;
+   gap: 12px;
  }
-
- const clearSelectedCustomer = () => {
-   selectedCustomer.value = null
-   customerSearch.value = ''
-   customerSearchResults.value = []
-   customerSearchError.value = ''
-   customerSearchLoading.value = false
-   newContract.value.maKhachHang = ''
-   newContract.value.tenKhachHang = ''
+ .form-grid.form-grid--contract{
+   grid-template-columns: 1.05fr 1.2fr;
+   align-items: start;
  }
-
- const fetchCustomerSearch = async (keyword) => {
-   const k = (keyword || '').trim()
-   if (!k) {
-@@ -1907,149 +2122,203 @@ const saveRefund = async () => {
-
-   const payload = {
-     hopDongId: currentContract.value.id,
-     soTienHoan: refund.value.amount,
-     ngayHoan: refund.value.date || todayISO(),
-     lyDoHoan: reason
-   }
-
-   try {
-     await showLoading(api.post('/hop-dong/admin/hoan-phi', payload))
-     updateAlertSuccess('Hoàn phí thành công', `-${formatMoney(refund.value.amount)}`)
-     await fetchContracts()
-     closeModal('modalRefund')
-   } catch (error) {
-     console.error('❌ Lỗi hoàn phí', error)
-     updateAlertError('Hoàn phí thất bại', 'Vui lòng thử lại sau.')
-   }
- }
-
- // Adjustment management
- const openAdjust = (contract) => {
-   currentContract.value = contract
-   adjustment.value = {
-     amount: 0,
-     type: 'GIAM_GIA',
--    reason: ''
-+    reason: '',
-+    tenDichVu: contract?.tenDichVu || '',
-+    serviceId: contract?.serviceId || null,
-+    giaTriTaiSan: getGiaTaiSanKy(contract),
-+    giaDichVuGoc: Number(contract?.giaDichVuGoc || 0),
-+    phiGiam: Number(contract?.phiGiam || 0),
-+    discountMode: 'PERCENT',
-+    discountValue: 0,
-+    giaSauGiam: Number(contract?.giaSauGiam || 0),
-+    initPlan: 'COC',
-+    tiLeCoc: 30,
-+    firstMethod: 'CHUYEN_KHOAN'
-   }
-+  updateAdjustmentGiaGocFromAsset()
-   openModal('modalAdjust')
- }
-
- const handleAdjustmentAmountInput = (event) => {
-   adjustment.value.amount = parseNumberInput(event.target.value)
- }
-
- const saveAdjustment = async () => {
--  if (adjustment.value.amount <= 0) {
--    showCenterWarning('Số tiền không hợp lệ', 'Điều chỉnh phải lớn hơn 0.')
-+  if (!ENUM_ADJ.includes(adjustment.value.type)) {
-+    showCenterWarning('Loại điều chỉnh sai', 'Chọn GIAM_GIA/PHU_THU/PHAT/CHUYEN_DOI_DV.')
-     return
-   }
-
--  if (!ENUM_ADJ.includes(adjustment.value.type)) {
--    showCenterWarning('Loại điều chỉnh sai', 'Chọn GIAM_GIA/PHU_THU/PHAT.')
-+  if (adjustment.value.type !== 'CHUYEN_DOI_DV' && adjustment.value.amount <= 0) {
-+    showCenterWarning('Số tiền không hợp lệ', 'Điều chỉnh phải lớn hơn 0.')
-     return
-   }
-
-   if (adjustment.value.type === 'GIAM_GIA') {
-     const giaSauGiam = Number(currentContract.value?.giaSauGiam || 0)
-     const tongDieuChinh = getTongDieuChinh(currentContract.value)
-     const maxGiam = giaSauGiam + tongDieuChinh
-     if (adjustment.value.amount > maxGiam) {
-       showCenterWarning(
-         'Số tiền giảm vượt mức',
-         `Tối đa được giảm: ${formatMoney(maxGiam)}.`
-       )
-       return
-     }
-   }
-
-   const reason = (adjustment.value.reason || '').trim()
-   if (!reason) {
-     showCenterWarning('Thiếu lý do', 'Bạn cần nhập lý do điều chỉnh.')
-     return
-   }
-
-+  if (adjustment.value.type === 'CHUYEN_DOI_DV') {
-+    updateAdjustmentGiaSauGiam()
-+    if (!adjustment.value.serviceId) {
-+      showCenterWarning('Thiếu dữ liệu', 'Bạn cần chọn dịch vụ chuyển đổi.')
-+      return
-+    }
-+    if (!adjustment.value.giaTriTaiSan) {
-+      showCenterWarning('Thiếu dữ liệu', 'Bạn cần nhập giá trị tài sản ký bán.')
-+      return
-+    }
-+    if (!adjustment.value.giaDichVuGoc) {
-+      showCenterWarning('Thiếu dữ liệu', 'Giá gốc chưa xác định theo phân khúc.')
-+      return
-+    }
-+    if (adjustment.value.discountMode === 'MONEY' && adjustment.value.discountValue <= 0) {
-+      showCenterWarning('Giảm giá không hợp lệ', 'Giảm giá tiền phải > 0 và không vượt quá giá gốc.')
-+      return
-+    }
-+    logServiceSwitchAdjustment({
-+      hopDongId: currentContract.value?.id,
-+      reason,
-+      serviceId: adjustment.value.serviceId,
-+      giaTriKyBan: adjustment.value.giaTriTaiSan,
-+      giaDichVuGoc: adjustment.value.giaDichVuGoc,
-+      phiGiam: adjustment.value.phiGiam,
-+      giaSauGiam: adjustment.value.giaSauGiam,
-+      initPlan: adjustment.value.initPlan,
-+      tiLeCoc: adjustment.value.initPlan === 'COC' ? adjustment.value.tiLeCoc : null,
-+      soTienThanhToan: adjustmentFirstPaymentAmount.value,
-+      hinhThucThanhToan: adjustment.value.firstMethod
-+    })
-+    closeModal('modalAdjust')
-+    return
-+  }
-+
-   const payload = {
-     hopDongId: currentContract.value.id,
-     soTienDieuChinh: adjustment.value.amount,
-     loaiDieuChinh: adjustment.value.type,
-     lyDo: reason
-   }
-
-   try {
-     await showLoading(api.post('/hop-dong/admin/dieu-chinh', payload))
-     updateAlertSuccess('Điều chỉnh thành công',
-         `${adjustment.value.type === 'GIAM_GIA' ? '-' : '+'}${formatMoney(adjustment.value.amount)} (${adjustment.value.type})`)
-     await fetchContracts()
-     closeModal('modalAdjust')
-   } catch (error) {
-     console.error('❌ Lỗi điều chỉnh', error)
-     updateAlertError('Điều chỉnh thất bại', 'Vui lòng thử lại sau.')
-   }
- }
-
-+const logServiceSwitchAdjustment = (payload) => {
-+  console.log('CHUYEN_DOI_DV payload', payload)
-+}
-+
- const isActiveContract = (contract) => contract?.trangThaiHopDong === 'DANG_HIEU_LUC'
-
- const activeActionContract = computed(() =>
-   contracts.value.find((contract) => contract.id === openActionMenu.value)
- )
-
- const actionMenuPositionStyle = computed(() => ({
-   top: `${actionMenuPosition.value.top}px`,
-   left: `${actionMenuPosition.value.left}px`
- }))
-
- const toggleActionMenu = (contractId, event) => {
-   if (openActionMenu.value === contractId) {
-     openActionMenu.value = null
-     return
-   }
-   const target = event?.currentTarget
-   if (target) {
-     const rect = target.getBoundingClientRect()
-     const menuWidth = 200
-     const gap = 12
-     const left = Math.max(12, rect.left - menuWidth - gap)
-     const top = Math.min(
-       window.innerHeight - 12,
-       Math.max(12, rect.top + rect.height / 2)
-     )
-     actionMenuPosition.value = { top, left }
-   }
-   openActionMenu.value = contractId
- }
-
- const closeActionMenu = () => {
-   openActionMenu.value = null
- }
-
- const handleDocumentClick = () => {
-   openActionMenu.value = null
- }
-
- // Detail view
- const openDetail = (contract) => {
-+  if (!contract) {
-+    return
-+  }
-   currentContract.value = contract
-   detailContract.value = {
-     ...contract,
-     dotDongTiens: contract?.dotDongTien || [],
-     hoanTiens: contract?.hoanTien || [],
-     dieuChinhHopDongs: contract?.dieuChinh || []
-   }
-   openModal('modalDetail')
-   console.log(contract)
-   fetchDetailContract(contract.id)
- }
-
- const fetchDetailContract = async (contractId) => {
-   if (!contractId) return
-   try {
-       const res = await api.get(`/hop-dong/admin/${contractId}/detail`)
-     detailContract.value = res?.data || detailContract.value
-   } catch (error) {
-     console.error('❌ Lỗi tải chi tiết hợp đồng', error)
-     updateAlertError('Tải chi tiết thất bại', 'Vui lòng thử lại sau.')
-   }
- }
-
- const cancelContract = async () => {
-   const contract = detailContract.value || currentContract.value

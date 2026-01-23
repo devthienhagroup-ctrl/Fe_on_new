@@ -1,23 +1,17 @@
 <template>
-  <div class="ui-page">
-    <!-- TOPBAR -->
-    <div class="topbar">
-      <div class="brand">
-        <div class="brand-ico">
-          <i class="fa-solid fa-file-signature"></i>
-        </div>
-        <div class="min-w-0">
-          <div class="brand-title">Quản lý Hợp đồng</div>
-        </div>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-ico">
+        <i class="fa-solid fa-file-signature"></i>
       </div>
-
-      <div class="top-actions">
-        <button class="btn primary" @click="openModal('modalContract')">
-          <i class="fa-solid fa-plus"></i>
-          <span>Thêm hợp đồng</span>
-        </button>
+      <div class="min-w-0">
+        <div class="brand-title">Quản lý Hợp đồng</div>
       </div>
     </div>
+
+  </div>
+
+  <div class="ui-page">
     <!-- KPIs -->
 
     <!-- TABS -->
@@ -103,6 +97,12 @@
               <label>Đến ngày</label>
               <input v-model="denNgay" type="date">
             </div>
+            <div class="input select filter-item filter-date" :class="{ active: denNgay }">
+              <button class="btn primary" @click="openModal('modalContract')">
+                <i class="fa-solid fa-plus"></i>
+                <span>Thêm hợp đồng</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -135,7 +135,6 @@
                         <i class="fa-solid fa-face-smile"></i>
                       </div>
                       <div class="mt-3 font-extrabold">Chưa có dữ liệu</div>
-                      <div class="mt-2 muted">File upgrade đã có sẵn 3 hợp đồng mẫu. Nếu bạn xoá hết, hãy bấm "Tạo dữ liệu mẫu".</div>
                     </div>
                   </td>
                 </tr>
@@ -177,7 +176,7 @@
                       </span>
                   </td>
                   <td>
-                    <div class="font-semibold">{{ contract.nhanVienTao }}</div>
+                    <div class="font-semibold">{{ shortenName(contract.nhanVienTao) }}</div>
                   </td>
                   <td class="mono">{{ formatCreatedAt(contract.ngayTao) }}</td>
                   <td>
@@ -947,7 +946,7 @@
         </div>
 
         <div class="modal-b">
-          <div class="grid grid-cols-1 xl:grid-cols-3 gap-3">
+          <div class="detail-grid grid grid-cols-1 xl:grid-cols-3 gap-3">
             <div class="card xl:col-span-1">
               <div class="card-h"><i class="fa-solid fa-circle-info"></i> Thông tin hợp đồng</div>
 
@@ -1170,6 +1169,7 @@ import {
   updateAlertSuccess
 } from '/src/assets/js/alertService.js'
 import ContractStatsDashboard from "../thiet-kegiandien/ContractStatsDashboard.vue";
+import {shortenName} from "../../assets/js/global.js";
 const todayISO = () => {
   const d = new Date()
   const yyyy = d.getFullYear()
@@ -2680,7 +2680,7 @@ onUnmounted(() => {
       radial-gradient(900px 650px at 88% 0%, rgba(240,147,251,.16), transparent 58%),
       radial-gradient(1000px 750px at 70% 100%, rgba(79,172,254,.14), transparent 55%),
       linear-gradient(135deg, rgba(20,30,48,.05), rgba(20,30,48,.00));
-  padding: 20px 25px;
+  padding: 5px 20px;
   position: relative;
   top: -10px;
 }
@@ -2698,7 +2698,7 @@ onUnmounted(() => {
   box-shadow: var(--sh2);
   background: rgba(255,255,255,.66);
   backdrop-filter: blur(10px);
-  padding: 12px 14px;
+  padding: 10px 22px 26px;
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -2891,12 +2891,11 @@ onUnmounted(() => {
 ========================= */
 .tools{
   display:grid;
-  grid-template-columns: 4.2fr 220px 190px  190px auto;
+  grid-template-columns: 4.2fr 220px 190px  190px 190px 150px;
   gap: 10px;
   align-items:start;
   width: 100%;
   max-width: 1280px;
-  margin-right: auto;
 }
 @media (max-width: 1100px){
   .tools{ grid-template-columns: 1fr 220px 190px; }
@@ -3402,6 +3401,12 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
 .modal-b{
   padding: 12px;
   overflow: auto;
+}
+.detail-grid{
+  grid-template-columns: 1fr !important;
+}
+.detail-grid > .card{
+  grid-column: 1 / -1;
 }
 .modal-f{
   padding: 12px;
