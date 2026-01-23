@@ -1,11 +1,11 @@
 <template>
   <div class="page">
-    <div class="container">
+    <div>
       <!-- Header -->
       <header class="header">
         <div class="header__title">
           <span class="header__icon">
-            <i class="fa-solid fa-chart-network"></i>
+            <i class="fa-solid fa-chart-column"></i>
           </span>
           <div>
             <h1>Thống kê hợp đồng</h1>
@@ -14,25 +14,25 @@
         </div>
 
         <div class="filter glass">
-          <div class="filter__row">
+          <div class="filter__row" :class="{ 'filter__row--year': timeRange === 'year' }">
             <div class="field">
-              <label>Thời gian</label>
+              <label>Chế độ</label>
               <select v-model="timeRange">
-                <option value="month">Tháng này</option>
-                <option value="quarter">Quý này</option>
-                <option value="year">Năm nay</option>
-                <option value="all">Tất cả</option>
+                <option value="month">Theo tháng</option>
+                <option value="year">Theo năm</option>
+              </select>
+            </div>
+
+            <div v-if="timeRange === 'month'" class="field">
+              <label>Tháng</label>
+              <select v-model.number="selectedMonth">
+                <option v-for="m in monthOptions" :key="m" :value="m">Tháng {{ m }}</option>
               </select>
             </div>
 
             <div class="field">
-              <label>Từ</label>
-              <input type="date" v-model="startDate" />
-            </div>
-
-            <div class="field">
-              <label>Đến</label>
-              <input type="date" v-model="endDate" />
+              <label>Năm</label>
+              <input v-model.number="selectedYear" type="number" min="1" placeholder="2026" />
             </div>
 
             <button class="btn" :disabled="loading" @click="applyFilter">
@@ -211,9 +211,11 @@ const COLORS = {
 
 // ===== State =====
 const loading = ref(false);
-const timeRange = ref("year");
-const startDate = ref("2026-01-01");
-const endDate = ref("2026-12-31");
+const timeRange = ref("month");
+const selectedMonth = ref(new Date().getMonth() + 1);
+const selectedYear = ref(new Date().getFullYear());
+const startDate = ref("");
+const endDate = ref("");
 
 // Stats base (giống file gốc)
 const baseStats = {
@@ -234,18 +236,14 @@ const toISODate = (d) => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-const dateText = computed(() => {
-  const start = new Date(startDate.value);
-  const end = new Date(endDate.value);
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return "—";
+const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1);
 
-  if (timeRange.value === "month") return `Tháng ${start.getMonth() + 1}/${start.getFullYear()}`;
-  if (timeRange.value === "quarter") {
-    const q = Math.floor(start.getMonth() / 3) + 1;
-    return `Quý ${q}/${start.getFullYear()}`;
+const dateText = computed(() => {
+  if (!selectedYear.value || selectedYear.value < 1) return "—";
+  if (timeRange.value === "month") {
+    return `Tháng ${selectedMonth.value}/${selectedYear.value}`;
   }
-  if (timeRange.value === "year") return `Năm ${start.getFullYear()}`;
-  return `${start.toLocaleDateString("vi-VN")} - ${end.toLocaleDateString("vi-VN")}`;
+  return `Năm ${selectedYear.value}`;
 });
 
 const statCards = computed(() => [
@@ -538,31 +536,27 @@ function destroyCharts() {
 }
 
 // ===== Filter logic =====
-watch(timeRange, (val) => {
-  // Giữ logic tương tự file gốc nhưng dùng "today" cố định để demo.
-  const today = new Date("2026-06-15");
+const normalizeYear = () => {
+  const safeYear = Math.floor(Number(selectedYear.value) || 0);
+  selectedYear.value = safeYear > 0 ? safeYear : 1;
+};
 
-  let s;
-  let e;
-
-  if (val === "month") {
-    s = new Date(today.getFullYear(), today.getMonth(), 1);
-    e = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  } else if (val === "quarter") {
-    const q = Math.floor(today.getMonth() / 3);
-    s = new Date(today.getFullYear(), q * 3, 1);
-    e = new Date(today.getFullYear(), (q + 1) * 3, 0);
-  } else if (val === "year") {
-    s = new Date(today.getFullYear(), 0, 1);
-    e = new Date(today.getFullYear(), 11, 31);
+const updateDateRange = () => {
+  normalizeYear();
+  if (timeRange.value === "month") {
+    const s = new Date(selectedYear.value, selectedMonth.value - 1, 1);
+    const e = new Date(selectedYear.value, selectedMonth.value, 0);
+    startDate.value = toISODate(s);
+    endDate.value = toISODate(e);
   } else {
-    s = new Date("2026-01-01");
-    e = new Date("2026-12-31");
+    const s = new Date(selectedYear.value, 0, 1);
+    const e = new Date(selectedYear.value, 11, 31);
+    startDate.value = toISODate(s);
+    endDate.value = toISODate(e);
   }
+};
 
-  startDate.value = toISODate(s);
-  endDate.value = toISODate(e);
-});
+watch([timeRange, selectedMonth, selectedYear], updateDateRange, { immediate: true });
 
 function multiplierByRange(r) {
   return r === "month" ? 0.3 : r === "quarter" ? 0.7 : r === "year" ? 1 : 1.2;
@@ -677,10 +671,6 @@ onBeforeUnmount(() => {
     linear-gradient(180deg, #f8fafc 0%, #eef2ff 55%, #f1f5f9 100%);
 }
 
-.container{
-  max-width: 1380px;
-  margin: 0 auto;
-}
 
 .muted{ color: var(--muted); }
 
@@ -762,9 +752,12 @@ onBeforeUnmount(() => {
 
 .filter__row{
   display: grid;
-  grid-template-columns: 1.1fr 1fr 1fr auto;
+  grid-template-columns: 1.1fr 140px 140px auto;
   gap: 10px;
   align-items: end;
+}
+.filter__row--year{
+  grid-template-columns: 1.1fr 160px auto;
 }
 
 .field label{

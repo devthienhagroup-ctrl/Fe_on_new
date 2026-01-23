@@ -97,7 +97,7 @@
               <label>Đến ngày</label>
               <input v-model="denNgay" type="date">
             </div>
-            <div class="input select filter-item filter-date" :class="{ active: denNgay }">
+            <div class="tools-actions">
               <button class="btn primary" @click="openModal('modalContract')">
                 <i class="fa-solid fa-plus"></i>
                 <span>Thêm hợp đồng</span>
@@ -116,13 +116,13 @@
                 <tr>
                   <th style="width:150px">Mã HĐ</th>
                   <th>Khách hàng</th>
-                  <th style="width:240px">Dịch vụ</th>
-                  <th style="width:140px">Giá tài sản</th>
-                  <th style="width:140px">Giá sau giảm</th>
-                  <th style="width:140px">Doanh thu</th>
-                  <th style="width:140px">Doanh số</th>
+                  <th style="width:220px">Dịch vụ</th>
+                  <th style="width:120px">Giá tài sản</th>
+                  <th style="width:160px">Giá sau giảm</th>
+                  <th style="width:160px">Doanh thu</th>
+                  <th style="width:180px">Doanh số</th>
                   <th style="width:120px">Trạng thái</th>
-                  <th style="width:160px">Nhân viên tạo</th>
+                  <th style="width:130px">Nhân viên tạo</th>
                   <th style="width:100px">Ngày tạo</th>
                   <th style="width:80px">Thao tác</th>
                 </tr>
@@ -2893,7 +2893,7 @@ onUnmounted(() => {
   display:grid;
   grid-template-columns: 4.2fr 220px 190px  190px 190px 150px;
   gap: 10px;
-  align-items:start;
+  align-items:end;
   width: 100%;
   max-width: 1280px;
 }

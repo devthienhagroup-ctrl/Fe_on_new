@@ -1,114 +1,436 @@
 diff --git a/src/components/dich-vu/Phi-dich-vu.vue b/src/components/dich-vu/Phi-dich-vu.vue
-index 9d4adc8877735712a865b3a6b4c12f53c963118f..80237b6097ebee10e7d3b737b7af70012f1c301b 100644
+index 1c21942d2ed2cc46937e3553b6b8c3fb01c15f12..74c6aec2c699a9de74906e62650497c6f4613421 100644
 --- a/src/components/dich-vu/Phi-dich-vu.vue
 +++ b/src/components/dich-vu/Phi-dich-vu.vue
-@@ -925,51 +925,51 @@
-     </div>
+@@ -75,51 +75,51 @@
+               <select v-model="filterService">
+                 <option :value="null">Tất cả</option>
+                 <option v-for="service in serviceOptions" :key="service.id || service.name" :value="service.id || service.name">{{ service.name }}</option>
+               </select>
+             </div>
 
-     <!-- MODAL: DETAIL -->
-     <div class="modal" :class="{ show: showModal === 'modalDetail' }" @click.self="closeModal('modalDetail')">
-       <div class="modal-card detail">
-         <div class="modal-h">
-           <div class="modal-title flex items-center gap-2">
-             <i class="fa-solid fa-file-lines"></i>
-             <span>Chi tiết hợp đồng {{ detailContract?.maHopDong }}</span>
-             <span v-if="detailContract?.trangThaiHopDong === 'DANG_HIEU_LUC'" class="status st-on">
-               Đang hiệu lực
-                       </span>
-             <span v-else-if="detailContract?.trangThaiHopDong === 'HOAN_TAT'" class="status st-done">
-               Hoàn tất
-                       </span>
-             <span v-else-if="detailContract?.trangThaiHopDong === 'HUY'" class="status st-cancel">
-               Đã hủy
-             </span>
+             <div class="select filter-item filter-status" :class="{ active: filterStatus }">
+               <label>Trạng thái</label>
+               <select v-model="filterStatus">
+                 <option :value="null">Tất cả</option>
+                 <option value="DANG_HIEU_LUC">Đang hiệu lực</option>
+                 <option value="HOAN_TAT">Hoàn tất</option>
+                 <option value="HUY">Đã hủy</option>
+               </select>
+             </div>
+
+             <div class="input select filter-item filter-item filter-date" :class="{ active: tuNgay }">
+               <label>Từ ngày</label>
+               <input v-model="tuNgay" type="date">
+             </div>
+
+             <div class="input select filter-item filter-date" :class="{ active: denNgay }">
+               <label>Đến ngày</label>
+               <input v-model="denNgay" type="date">
+             </div>
+-            <div class="input select filter-item filter-date" :class="{ active: denNgay }">
++            <div class="tools-actions">
+               <button class="btn primary" @click="openModal('modalContract')">
+                 <i class="fa-solid fa-plus"></i>
+                 <span>Thêm hợp đồng</span>
+               </button>
+             </div>
            </div>
-           <button class="x" @click="closeModal('modalDetail')">
-             <i class="fa-solid fa-xmark"></i>
-           </button>
          </div>
 
-         <div class="modal-b">
--          <div class="grid grid-cols-1 xl:grid-cols-3 gap-3">
-+          <div class="detail-grid grid grid-cols-1 xl:grid-cols-3 gap-3">
-             <div class="card xl:col-span-1">
-               <div class="card-h"><i class="fa-solid fa-circle-info"></i> Thông tin hợp đồng</div>
+         <div class="panel-b">
 
-               <div class="p-3">
-                 <div class="text-sm font-extrabold">{{ detailContract?.maHopDong }} • {{ detailContract?.tenKhachHang }}</div>
-                 <div class="muted tiny mt-1">{{ detailContract?.tenDichVu }} • Ngày tạo {{ formatDateValue(detailContract?.ngayTao) }}</div>
 
-                   <div class="grid grid-cols-3 gap-2 mt-3">
-                   <div class="kpi">
-                     <div class="k"><span class="dot"></span>Giá gốc</div>
-                     <div class="v price p2 font-extrabold">{{ formatMoney(detailContract?.giaDichVuGoc || 0) }}</div>
-                   </div>
-                   <div class="kpi">
-                     <div class="k"><span class="dot"></span>Phí giảm</div>
-                     <div class="v price p4 font-extrabold">{{ formatMoney(detailContract?.phiGiam || 0) }}</div>
-                   </div>
-                   <div class="kpi">
-                     <div class="k"><span class="dot"></span>Giá sau giảm</div>
-                     <div class="v price p1 font-extrabold">{{ formatMoney(detailContract?.giaSauGiam || 0) }}</div>
-                   </div>
-                   <div class="kpi">
-                     <div class="k"><span class="dot"></span>Giá tài sản ký</div>
-                     <div class="v price p3 font-extrabold">{{ formatMoney(detailContract?.giaTaiSanKy || 0) }}</div>
-                   </div>
-                   <div class="kpi">
-@@ -3381,50 +3381,56 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
+           <div class="table-wrap">
+             <div class="table-scroll">
+               <table>
+                 <thead>
+                 <tr>
+                   <th style="width:150px">Mã HĐ</th>
+                   <th>Khách hàng</th>
+                   <th style="width:240px">Dịch vụ</th>
+                   <th style="width:140px">Giá tài sản</th>
+                   <th style="width:140px">Giá sau giảm</th>
+                   <th style="width:140px">Doanh thu</th>
+                   <th style="width:140px">Doanh số</th>
+                   <th style="width:120px">Trạng thái</th>
+                   <th style="width:160px">Nhân viên tạo</th>
+@@ -2871,51 +2871,51 @@ onUnmounted(() => {
+   display:flex;
+   align-items:center;
+   gap:10px;
+   font-weight: 900;
+   font-size: 13px;
+   min-width: 240px;
+ }
+ .panel-title i{
    width:32px; height:32px;
    border-radius: 12px;
    display:grid; place-items:center;
-   background: var(--primary-gradient);
+   background: var(--dark-gradient);
    color:#fff;
-   box-shadow: 0 12px 22px rgba(102,126,234,.22);
+   box-shadow: 0 14px 26px rgba(20,30,48,.18);
    flex: 0 0 auto;
  }
- .x{
-   width: 38px; height: 38px;
-   border-radius: 12px;
-   border: 1px solid rgba(20,30,48,.12);
-   background: rgba(20,30,48,.04);
-   cursor:pointer;
-   transition: var(--t);
-   flex: 0 0 auto;
-   display: grid;
-   place-items: center;
- }
- .x:hover{ transform: translateY(-1px); background: rgba(102,126,234,.10); border-color: rgba(102,126,234,.26); }
-
- .modal-b{
-   padding: 12px;
-   overflow: auto;
- }
-+.detail-grid{
-+  grid-template-columns: 1fr !important;
-+}
-+.detail-grid > .card{
-+  grid-column: 1 / -1;
-+}
- .modal-f{
-   padding: 12px;
-   display:flex;
-   justify-content:flex-end;
-   gap:8px;
-   border-top: 1px solid rgba(20,30,48,.10);
-   background: rgba(20,30,48,.02);
-   flex-wrap: wrap;
- }
- @media (max-width: 520px){
-   .modal-f .btn{ width: 100%; justify-content:center; }
- }
+ .panel-b{ padding: 12px; }
 
  /* =========================
-    FORM CARDS
+    TOOLS / FILTERS (responsive, không tràn)
  ========================= */
- .form-grid{
+ .tools{
    display:grid;
-   grid-template-columns: 1fr;
-   gap: 12px;
+   grid-template-columns: 4.2fr 220px 190px  190px 190px 150px;
+   gap: 10px;
+-  align-items:start;
++  align-items:end;
+   width: 100%;
+   max-width: 1280px;
  }
- .form-grid.form-grid--contract{
-   grid-template-columns: 1.05fr 1.2fr;
-   align-items: start;
+ @media (max-width: 1100px){
+   .tools{ grid-template-columns: 1fr 220px 190px; }
+   .tools .tools-actions{ grid-column: 1 / -1; justify-content:flex-start; }
  }
+ @media (max-width: 720px){
+   .tools{ grid-template-columns: 1fr; max-width: 100%; }
+   .tools .tools-actions{ justify-content: stretch; }
+   .tools .tools-actions .btn{ width: 100%; justify-content:center; }
+ }
+
+ .input{
+   position:relative;
+   width: 100%;
+   min-width: 0;
+ }
+ .filter-item input,
+ .filter-item select{
+   background: linear-gradient(135deg, rgba(102,126,234,.08), rgba(79,172,254,.06)) !important;
+ }
+ .filter-search input{ border-color: rgba(79,172,254,.35); }
+ .filter-service select{ border-color: rgba(240,147,251,.35); }
+ .filter-status select{ border-color: rgba(67,233,123,.35); }
+diff --git a/src/components/thiet-kegiandien/ContractStatsDashboard.vue b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
+index fe2b386286ae6d00e7813054f3131b72070e88cf..44bbe4ec735c09505d8f967a5a7ef6561d1f4b67 100644
+--- a/src/components/thiet-kegiandien/ContractStatsDashboard.vue
++++ b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
+@@ -1,60 +1,60 @@
+ <template>
+   <div class="page">
+     <div class="container">
+       <!-- Header -->
+       <header class="header">
+         <div class="header__title">
+           <span class="header__icon">
+             <i class="fa-solid fa-chart-network"></i>
+           </span>
+           <div>
+             <h1>Thống kê hợp đồng</h1>
+             <p class="muted">Dashboard thống kê nâng cao</p>
+           </div>
+         </div>
+
+         <div class="filter glass">
+-          <div class="filter__row">
++          <div class="filter__row" :class="{ 'filter__row--year': timeRange === 'year' }">
+             <div class="field">
+-              <label>Thời gian</label>
++              <label>Chế độ</label>
+               <select v-model="timeRange">
+-                <option value="month">Tháng này</option>
+-                <option value="quarter">Quý này</option>
+-                <option value="year">Năm nay</option>
+-                <option value="all">Tất cả</option>
++                <option value="month">Theo tháng</option>
++                <option value="year">Theo năm</option>
+               </select>
+             </div>
+
+-            <div class="field">
+-              <label>Từ</label>
+-              <input type="date" v-model="startDate" />
++            <div v-if="timeRange === 'month'" class="field">
++              <label>Tháng</label>
++              <select v-model.number="selectedMonth">
++                <option v-for="m in monthOptions" :key="m" :value="m">Tháng {{ m }}</option>
++              </select>
+             </div>
+
+             <div class="field">
+-              <label>Đến</label>
+-              <input type="date" v-model="endDate" />
++              <label>Năm</label>
++              <input v-model.number="selectedYear" type="number" min="1" placeholder="2026" />
+             </div>
+
+             <button class="btn" :disabled="loading" @click="applyFilter">
+               <i v-if="loading" class="fa-solid fa-spinner fa-spin"></i>
+               <i v-else class="fa-solid fa-filter"></i>
+               <span>{{ loading ? "Đang tải..." : "Áp dụng" }}</span>
+             </button>
+           </div>
+
+           <div class="filter__hint">
+             <i class="fa-regular fa-calendar"></i>
+             <span>{{ dateText }}</span>
+           </div>
+         </div>
+       </header>
+
+       <!-- Stats -->
+       <section class="stats">
+         <article v-for="(s, idx) in statCards" :key="s.key" class="stat" :class="`stat--${s.tone}`">
+           <div class="stat__top">
+             <div class="stat__icon" :class="`bg--${s.tone}`">
+               <i :class="s.icon"></i>
+             </div>
+             <div class="stat__badge" :class="`chip--${s.tone}`">
+               <i class="fa-solid fa-sparkles"></i>
+@@ -189,85 +189,83 @@ import Chart from "chart.js/auto";
+
+ /**
+  * Lưu ý:
+  * - Component này chuyển từ HTML thuần sang Vue SFC.
+  * - Yêu cầu FontAwesome đã được load global (như bạn đang làm ở app).
+  */
+
+ // ===== Colors (pastel + linear gradients) =====
+ const COLORS = {
+   NEW: "#94a3b8",
+   DC_TELESALES: "#7c83ff",
+   CHAM_SOC: "#60c8ff",
+   TN_7NGAY: "#44b7ff",
+   TN_14NGAY: "#2ea2ff",
+   THAT_BAI: "#ff6b8a",
+   KHONG_LIEN_LAC_DUOC: "#ffb86b",
+   SAI_SO_LIEU: "#c39bff",
+   THANH_CONG: "#55e6a5",
+   KHACH_HUY_HEN: "#fbbf24",
+   BAN_NHANH: "#34d399",
+   BAN_GP: "#2dd4bf",
+ };
+
+ // ===== State =====
+ const loading = ref(false);
+-const timeRange = ref("year");
+-const startDate = ref("2026-01-01");
+-const endDate = ref("2026-12-31");
++const timeRange = ref("month");
++const selectedMonth = ref(new Date().getMonth() + 1);
++const selectedYear = ref(new Date().getFullYear());
++const startDate = ref("");
++const endDate = ref("");
+
+ // Stats base (giống file gốc)
+ const baseStats = {
+   totalContracts: 48,
+   activeContracts: 32,
+   completedContracts: 12,
+   cancelledContracts: 4,
+   totalRevenue: 1245, // triệu VNĐ
+ };
+ const stats = ref({ ...baseStats });
+
+ // ===== Helpers =====
+ const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+ const toISODate = (d) => {
+   const yyyy = d.getFullYear();
+   const mm = String(d.getMonth() + 1).padStart(2, "0");
+   const dd = String(d.getDate()).padStart(2, "0");
+   return `${yyyy}-${mm}-${dd}`;
+ };
+
++const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1);
++
+ const dateText = computed(() => {
+-  const start = new Date(startDate.value);
+-  const end = new Date(endDate.value);
+-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return "—";
+-
+-  if (timeRange.value === "month") return `Tháng ${start.getMonth() + 1}/${start.getFullYear()}`;
+-  if (timeRange.value === "quarter") {
+-    const q = Math.floor(start.getMonth() / 3) + 1;
+-    return `Quý ${q}/${start.getFullYear()}`;
++  if (!selectedYear.value || selectedYear.value < 1) return "—";
++  if (timeRange.value === "month") {
++    return `Tháng ${selectedMonth.value}/${selectedYear.value}`;
+   }
+-  if (timeRange.value === "year") return `Năm ${start.getFullYear()}`;
+-  return `${start.toLocaleDateString("vi-VN")} - ${end.toLocaleDateString("vi-VN")}`;
++  return `Năm ${selectedYear.value}`;
+ });
+
+ const statCards = computed(() => [
+   {
+     key: "totalContracts",
+     icon: "fa-solid fa-file-contract",
+     label: "Tổng hợp đồng",
+     value: stats.value.totalContracts.toLocaleString("vi-VN"),
+     tone: "indigo",
+     badge: "Tổng quan",
+   },
+   {
+     key: "activeContracts",
+     icon: "fa-solid fa-handshake",
+     label: "Hợp đồng đang hiệu lực",
+     value: stats.value.activeContracts.toLocaleString("vi-VN"),
+     tone: "sky",
+     badge: "Đang chạy",
+   },
+   {
+     key: "completedContracts",
+     icon: "fa-solid fa-circle-check",
+     label: "Hợp đồng hoàn tất",
+     value: stats.value.completedContracts.toLocaleString("vi-VN"),
+     tone: "emerald",
+@@ -516,75 +514,71 @@ function createCharts() {
+       responsive: true,
+       maintainAspectRatio: false,
+       cutout: "72%",
+       plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 10 } },
+     },
+   });
+
+   serviceTypeChart = new Chart(serviceTypeEl.value.getContext("2d"), {
+     type: "doughnut",
+     data: structuredClone(serviceTypeData),
+     options: {
+       responsive: true,
+       maintainAspectRatio: false,
+       cutout: "72%",
+       plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 10 } },
+     },
+   });
+ }
+
+ function destroyCharts() {
+   [trendChart1, trendChart2, statusChart, customerTypeChart, serviceTypeChart].forEach((c) => c?.destroy());
+   trendChart1 = trendChart2 = statusChart = customerTypeChart = serviceTypeChart = null;
+ }
+
+ // ===== Filter logic =====
+-watch(timeRange, (val) => {
+-  // Giữ logic tương tự file gốc nhưng dùng "today" cố định để demo.
+-  const today = new Date("2026-06-15");
+-
+-  let s;
+-  let e;
+-
+-  if (val === "month") {
+-    s = new Date(today.getFullYear(), today.getMonth(), 1);
+-    e = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+-  } else if (val === "quarter") {
+-    const q = Math.floor(today.getMonth() / 3);
+-    s = new Date(today.getFullYear(), q * 3, 1);
+-    e = new Date(today.getFullYear(), (q + 1) * 3, 0);
+-  } else if (val === "year") {
+-    s = new Date(today.getFullYear(), 0, 1);
+-    e = new Date(today.getFullYear(), 11, 31);
++const normalizeYear = () => {
++  const safeYear = Math.floor(Number(selectedYear.value) || 0);
++  selectedYear.value = safeYear > 0 ? safeYear : 1;
++};
++
++const updateDateRange = () => {
++  normalizeYear();
++  if (timeRange.value === "month") {
++    const s = new Date(selectedYear.value, selectedMonth.value - 1, 1);
++    const e = new Date(selectedYear.value, selectedMonth.value, 0);
++    startDate.value = toISODate(s);
++    endDate.value = toISODate(e);
+   } else {
+-    s = new Date("2026-01-01");
+-    e = new Date("2026-12-31");
++    const s = new Date(selectedYear.value, 0, 1);
++    const e = new Date(selectedYear.value, 11, 31);
++    startDate.value = toISODate(s);
++    endDate.value = toISODate(e);
+   }
++};
+
+-  startDate.value = toISODate(s);
+-  endDate.value = toISODate(e);
+-});
++watch([timeRange, selectedMonth, selectedYear], updateDateRange, { immediate: true });
+
+ function multiplierByRange(r) {
+   return r === "month" ? 0.3 : r === "quarter" ? 0.7 : r === "year" ? 1 : 1.2;
+ }
+
+ function generateFilteredLineData(currentDatasets, range) {
+   const m = multiplierByRange(range);
+   return currentDatasets.map((ds) =>
+     ds.data.map((v) => Math.round(v * m + (Math.random() * 10 - 5)))
+   );
+ }
+
+ function generateRandomData(count, range) {
+   const base = range === "month" ? 10 : range === "quarter" ? 30 : range === "year" ? 100 : 150;
+   const arr = [];
+   for (let i = 0; i < count; i++) arr.push(Math.round(base + Math.random() * 50 - 25));
+   return arr.map((x) => clamp(x, 0, 9999));
+ }
+
+ function updateStatistics(range) {
+   const m = multiplierByRange(range);
+   stats.value = {
+     totalContracts: Math.round(baseStats.totalContracts * m),
+     activeContracts: Math.round(baseStats.activeContracts * m),
+     completedContracts: Math.round(baseStats.completedContracts * m),
+@@ -740,54 +734,57 @@ onBeforeUnmount(() => {
+ .header p{
+   margin: 6px 0 0;
+   z-index: 1;
+   opacity: .9;
+ }
+
+ /* ========= Filter ========= */
+ .glass{
+   background: rgba(255,255,255,.72);
+   border: 1px solid var(--stroke);
+   box-shadow: var(--shadow-sm);
+   backdrop-filter: blur(14px);
+ }
+
+ .filter{
+   border-radius: 18px;
+   padding: 14px;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   gap: 10px;
+ }
+
+ .filter__row{
+   display: grid;
+-  grid-template-columns: 1.1fr 1fr 1fr auto;
++  grid-template-columns: 1.1fr 140px 140px auto;
+   gap: 10px;
+   align-items: end;
+ }
++.filter__row--year{
++  grid-template-columns: 1.1fr 160px auto;
++}
+
+ .field label{
+   font-size: 12px;
+   font-weight: 700;
+   color: rgba(15,23,42,.7);
+   display: block;
+   margin-bottom: 6px;
+ }
+
+ .field input,
+ .field select{
+   width: 100%;
+   padding: 10px 12px;
+   border-radius: 12px;
+   border: 1px solid rgba(15,23,42,.10);
+   background: rgba(255,255,255,.9);
+   color: var(--text);
+   outline: none;
+   transition: box-shadow .2s, border-color .2s, transform .2s;
+ }
+
+ .field input:focus,
+ .field select:focus{
+   border-color: rgba(99,102,241,.35);
+   box-shadow: 0 0 0 4px rgba(99,102,241,.12);
