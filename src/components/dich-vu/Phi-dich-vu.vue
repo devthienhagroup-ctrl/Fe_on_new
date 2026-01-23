@@ -741,10 +741,6 @@
                     <div class="v price p3">{{ formatMoney(getDoanhSoRow(currentContract)) }}</div>
                   </div>
                 </div>
-
-                <div class="note mt-3">
-                  <b>Lưu ý:</b> Tóm tắt lấy trực tiếp từ dữ liệu hợp đồng hiện tại.
-                </div>
               </div>
             </div>
           </div>
@@ -808,10 +804,6 @@
                     <div class="k"><span class="dot"></span>Người tạo</div>
                     <div class="v">{{ detailContract?.nguoiTaoFullName || '-' }}</div>
                   </div>
-                </div>
-
-                <div class="note mt-3">
-                  <b>Lưu ý:</b> Đây là màn hình chỉ xem. Muốn thao tác thì dùng các nút ở bảng.
                 </div>
               </div>
             </div>
@@ -919,10 +911,6 @@
                       </tbody>
                     </table>
                   </div>
-                </div>
-
-                <div class="note mt-3">
-                  <b>Mẹo:</b> Nếu bạn muốn hiển thị "đợt" theo thứ tự, cứ sort theo ngày hoặc theo index trong mảng.
                 </div>
               </div>
             </div>
@@ -1959,7 +1947,7 @@ const openDetail = (contract) => {
 const fetchDetailContract = async (contractId) => {
   if (!contractId) return
   try {
-    const res = await showLoading(api.get(`/hop-dong/admin/${contractId}/detail`))
+      const res = await api.get(`/hop-dong/admin/${contractId}/detail`)
     detailContract.value = res?.data || detailContract.value
   } catch (error) {
     console.error('❌ Lỗi tải chi tiết hợp đồng', error)
@@ -1977,7 +1965,7 @@ const cancelContract = async () => {
     contract.maHopDong,
     async () => {
       try {
-        await showLoading(api.patch(`/hop-dong/admin/${contract.id}/trang-thai/HUY`))
+        await showLoading(api.get(`/hop-dong/admin/${contract.id}/trang-thai/HUY`))
         updateAlertSuccess('Đã hủy hợp đồng', `${contract.maHopDong} đã chuyển sang trạng thái HUY.`)
         if (detailContract.value) {
           detailContract.value.trangThaiHopDong = 'HUY'
