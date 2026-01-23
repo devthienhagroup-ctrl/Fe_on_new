@@ -34,12 +34,6 @@
               <label>Năm</label>
               <input v-model.number="selectedYear" type="number" min="1" placeholder="2026" />
             </div>
-
-            <button class="btn" :disabled="loading" @click="applyFilter">
-              <i v-if="loading" class="fa-solid fa-spinner fa-spin"></i>
-              <i v-else class="fa-solid fa-filter"></i>
-              <span>{{ loading ? "Đang tải..." : "Áp dụng" }}</span>
-            </button>
           </div>
 
           <div class="filter__hint">
@@ -89,8 +83,18 @@
         <div class="card__title">
           <span class="card__titleIcon bg--emerald"><i class="fa-solid fa-money-bill-trend-up"></i></span>
           <div>
-            <h3>Doanh thu theo tháng (2026)</h3>
-            <p class="muted">Tổng doanh thu & doanh thu bán nhanh</p>
+            <h3>{{ revenueTitle }}</h3>
+            <p class="muted">{{ revenueSubtitle }}</p>
+          </div>
+          <div class="card__actions">
+            <div class="field field--compact">
+              <label>Dịch vụ</label>
+              <select v-model="selectedService">
+                <option v-for="service in serviceOptions" :key="service.id" :value="service.id">
+                  {{ service.name }}
+                </option>
+              </select>
+            </div>
           </div>
         </div>
         <div class="chartWrap chartWrap--lg">
@@ -170,6 +174,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import Chart from "chart.js/auto";
+import api from "../../api/api.js";
 
 /**
  * Lưu ý:
@@ -198,8 +203,12 @@ const loading = ref(false);
 const timeRange = ref("month");
 const selectedMonth = ref(new Date().getMonth() + 1);
 const selectedYear = ref(new Date().getFullYear());
+const selectedService = ref("all");
+const chartsReady = ref(false);
 const startDate = ref("");
 const endDate = ref("");
+const services = ref([]);
+const segments = ref([]);
 
 // Stats base (giống file gốc)
 const baseStats = {
@@ -291,6 +300,33 @@ const serviceLegend = [
   { label: "Đã lên VP", color: COLORS.BAN_GP },
 ];
 
+const serviceOptions = computed(() => [
+  { id: "all", name: "Tất cả dịch vụ" },
+  ...services.value.map((service) => ({ id: service.id, name: service.name })),
+]);
+
+const revenueTitle = computed(() => {
+  const selected = serviceOptions.value.find((option) => option.id === selectedService.value);
+  const suffix = timeRange.value === "month" ? "theo tháng" : "theo năm";
+  return `Doanh thu ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
+});
+
+const revenueSubtitle = computed(() => {
+  if (selectedService.value === "all") {
+    return "Phân loại theo dịch vụ";
+  }
+  const serviceSegments = segments.value.filter(
+    (segment) => String(segment.serviceId) === String(selectedService.value)
+  );
+  if (!serviceSegments.length) {
+    return "Phân loại theo phân khúc dịch vụ";
+  }
+  const segmentNames = serviceSegments
+    .map((segment, index) => segment.name || segment.ten || `Phân khúc ${index + 1}`)
+    .join(" / ");
+  return `Phân loại theo phân khúc: ${segmentNames}`;
+});
+
 // ===== Chart refs =====
 const trend1El = ref(null);
 const trend2El = ref(null);
@@ -350,32 +386,63 @@ const trendData1 = {
   ],
 };
 
+const revenuePalette = [
+  COLORS.BAN_NHANH,
+  COLORS.BAN_GP,
+  COLORS.DC_TELESALES,
+  COLORS.CHAM_SOC,
+  COLORS.TN_7NGAY,
+  COLORS.TN_14NGAY,
+  COLORS.SAI_SO_LIEU,
+  COLORS.THANH_CONG,
+];
+
+const revenueBaseSeries = [85, 105, 92, 125, 145, 160, 180, 165, 155, 135, 120, 140];
+
+const buildServiceSeries = (index) => {
+  const multiplier = 1 - Math.min(index * 0.08, 0.4);
+  return revenueBaseSeries.map((value) => Math.round(value * multiplier));
+};
+
+const buildSegmentSeries = (index) => {
+  const ratio = 0.55 - Math.min(index * 0.08, 0.35);
+  return revenueBaseSeries.map((value) => Math.max(0, Math.round(value * ratio)));
+};
+
+const buildRevenueDatasets = (range, serviceId) => {
+  const datasetSource =
+    serviceId === "all"
+      ? services.value.map((service, index) => ({
+          label: service.name,
+          data: buildServiceSeries(index),
+        }))
+      : segments.value
+          .filter((segment) => String(segment.serviceId) === String(serviceId))
+          .map((segment, index) => ({
+            label: segment.name || segment.ten || `Phân khúc ${index + 1}`,
+            data: buildSegmentSeries(index),
+          }));
+
+  const fallback = datasetSource.length
+    ? datasetSource
+    : [{ label: "Doanh thu", data: revenueBaseSeries }];
+
+  return fallback.map((item, index) => ({
+    label: item.label,
+    data: generateFilteredLineData([{ data: item.data }], range)[0],
+    borderColor: revenuePalette[index % revenuePalette.length],
+    backgroundColor: `${revenuePalette[index % revenuePalette.length]}22`,
+    borderWidth: 3,
+    fill: true,
+    tension: 0.4,
+    pointRadius: 2,
+    pointHoverRadius: 5,
+  }));
+};
+
 const trendData2 = {
   labels: monthLabels,
-  datasets: [
-    {
-      label: "Doanh thu (triệu VNĐ)",
-      data: [85, 105, 92, 125, 145, 160, 180, 165, 155, 135, 120, 140],
-      borderColor: COLORS.BAN_NHANH,
-      backgroundColor: `${COLORS.BAN_NHANH}22`,
-      borderWidth: 3,
-      fill: true,
-      tension: 0.4,
-      pointRadius: 2,
-      pointHoverRadius: 5,
-    },
-    {
-      label: "Doanh thu bán nhanh",
-      data: [25, 30, 28, 35, 45, 50, 60, 55, 50, 40, 35, 42],
-      borderColor: COLORS.BAN_GP,
-      backgroundColor: `${COLORS.BAN_GP}22`,
-      borderWidth: 3,
-      fill: true,
-      tension: 0.4,
-      pointRadius: 2,
-      pointHoverRadius: 5,
-    },
-  ],
+  datasets: buildRevenueDatasets("month", "all"),
 };
 
 const statusData = {
@@ -542,6 +609,29 @@ const updateDateRange = () => {
 
 watch([timeRange, selectedMonth, selectedYear], updateDateRange, { immediate: true });
 
+watch(
+  [timeRange, selectedMonth, selectedYear, selectedService, chartsReady],
+  ([, , , , ready]) => {
+    if (!ready) return;
+    fetchStats();
+  },
+  { immediate: true }
+);
+
+watch(
+  services,
+  (nextServices) => {
+    if (selectedService.value === "all") return;
+    const exists = nextServices.some(
+      (service) => String(service.id) === String(selectedService.value)
+    );
+    if (!exists) {
+      selectedService.value = "all";
+    }
+  },
+  { deep: true }
+);
+
 function multiplierByRange(r) {
   return r === "month" ? 0.3 : r === "quarter" ? 0.7 : r === "year" ? 1 : 1.2;
 }
@@ -571,15 +661,14 @@ function updateStatistics(range) {
   };
 }
 
-function updateAllCharts(range) {
+function updateAllCharts(range, serviceId) {
   // Trend 1
   const newT1 = generateFilteredLineData(trendChart1.data.datasets, range);
   trendChart1.data.datasets.forEach((ds, idx) => (ds.data = newT1[idx]));
   trendChart1.update();
 
   // Trend 2
-  const newT2 = generateFilteredLineData(trendChart2.data.datasets, range);
-  trendChart2.data.datasets.forEach((ds, idx) => (ds.data = newT2[idx]));
+  trendChart2.data.datasets = buildRevenueDatasets(range, serviceId);
   trendChart2.update();
 
   // Bar
@@ -597,21 +686,59 @@ function updateAllCharts(range) {
   updateStatistics(range);
 }
 
-async function applyFilter() {
+const buildRequestParams = () => ({
+  nam: selectedYear.value,
+  thang: timeRange.value === "month" ? selectedMonth.value : null,
+  theo: timeRange.value,
+  tuNgay: startDate.value,
+  denNgay: endDate.value,
+  dichVu: selectedService.value === "all" ? "all" : selectedService.value,
+});
+
+async function fetchStats() {
   if (loading.value) return;
   loading.value = true;
 
-  // giả lập API call
-  await new Promise((r) => setTimeout(r, 650));
-
-  updateAllCharts(timeRange.value);
-  loading.value = false;
+  try {
+    await api.get("/hop-dong/admin/thong-ke", {
+      params: buildRequestParams(),
+    });
+  } catch (error) {
+    console.error("Không thể tải thống kê hợp đồng", error);
+  } finally {
+    updateAllCharts(timeRange.value, selectedService.value);
+    loading.value = false;
+  }
 }
 
-onMounted(() => {
+const fetchServices = async () => {
+  try {
+    const res = await api.get("/dich-vu-thg/admin", {
+      params: {
+        keyword: null,
+      },
+    });
+    services.value = Array.isArray(res?.data) ? res.data : [];
+  } catch (error) {
+    console.error("Không thể tải danh sách dịch vụ", error);
+    services.value = [];
+  }
+};
+
+const fetchSegments = async () => {
+  try {
+    const res = await api.get("/dich-vu-thg/admin/phan-khuc");
+    segments.value = Array.isArray(res?.data) ? res.data : [];
+  } catch (error) {
+    console.error("Không thể tải phân khúc dịch vụ", error);
+    segments.value = [];
+  }
+};
+
+onMounted(async () => {
   createCharts();
-  // Đếm số lúc đầu: ở Vue, mình set trực tiếp (nhẹ). Nếu cần animate count như file gốc, mình nâng cấp thêm sau.
-  updateStatistics(timeRange.value);
+  await Promise.all([fetchServices(), fetchSegments()]);
+  chartsReady.value = true;
 });
 
 onBeforeUnmount(() => {
@@ -738,12 +865,12 @@ h1{
 
 .filter__row{
   display: grid;
-  grid-template-columns: 1.1fr 140px 140px auto;
+  grid-template-columns: 1.1fr 140px 140px;
   gap: 10px;
   align-items: end;
 }
 .filter__row--year{
-  grid-template-columns: 1.1fr 160px auto;
+  grid-template-columns: 1.1fr 160px;
 }
 
 .field label{
@@ -930,6 +1057,20 @@ h1{
   margin-bottom: 12px;
 }
 
+.card__actions{
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.field--compact label{
+  margin-bottom: 4px;
+}
+
+.field--compact select{
+  min-width: 180px;
+}
+
 .card__titleIcon{
   width: 44px;
   height: 44px;
@@ -1052,13 +1193,12 @@ h1{
 /* ========= Responsive ========= */
 @media (max-width: 1160px){
   .header{ grid-template-columns: 1fr; }
-  .filter__row{ grid-template-columns: 1fr 1fr 1fr auto; }
+  .filter__row{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .stats{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 820px){
   .filter__row{ grid-template-columns: 1fr 1fr; }
-  .btn{ width: 100%; grid-column: 1 / -1; }
   .stats{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .grid3{ grid-template-columns: 1fr; }
   .chartWrap--lg{ height: 320px; }
