@@ -194,6 +194,22 @@
               </div>
 
               <div class="form-group">
+                <label>Nguồn <span class="required">*</span></label>
+                <div class="source-buttons">
+                  <button
+                      v-for="source in customerSources"
+                      :key="source.id"
+                      type="button"
+                      :class="['type-btn', source.id, { active: formData.source === source.id }]"
+                      @click="formData.source = source.id"
+                  >
+                    <i :class="source.icon"></i>
+                    {{ source.label }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
                 <label>Ghi chú</label>
                 <div class="input-icon">
                   <span class="icon-chip" style="background: linear-gradient(135deg, #FF9966, #FF5E62); color: white;">
@@ -458,6 +474,7 @@ const formData = reactive({
   area: "",
   oldArea: null,
   type: "CHINH_CHU",
+  source: "ADS",
   price: "",
   note: "",
 });
@@ -470,6 +487,14 @@ const customerTypes = [
   { id: "CHINH_CHU", label: "Chủ nhà", icon: "fas fa-house-user" },
   { id: "MOI_GIOI", label: "Môi giới", icon: "fas fa-handshake" },
   { id: "NGUOI_THAN", label: "Người thân", icon: "fas fa-people-group" },
+];
+
+const customerSources = [
+  { id: "ADS", label: "Quảng cáo", icon: "fas fa-bullhorn" },
+  { id: "FORUM", label: "Diễn đàn", icon: "fas fa-comments" },
+  { id: "RAO_VAT", label: "Rao vặt", icon: "fas fa-tags" },
+  { id: "FB", label: "Facebook", icon: "fab fa-facebook" },
+  { id: "SEO", label: "SEO", icon: "fas fa-magnifying-glass-chart" },
 ];
 
 /* =========================
@@ -875,6 +900,10 @@ function validateForm() {
     showWarning("Vui lòng chọn phân loại.");
     return false;
   }
+  if (!formData.source) {
+    showWarning("Vui lòng chọn nguồn khách hàng.");
+    return false;
+  }
   return true;
 }
 
@@ -889,6 +918,7 @@ async function submitData() {
       area: formData.area,
       oldArea: formData.oldArea,
       type: formData.type,
+      source: formData.source,
       price: formData.price,
       note: formData.note,
     };
@@ -933,6 +963,7 @@ function clearForm() {
   formData.area = "";
   formData.oldArea = "";
   formData.type = "CHINH_CHU";
+  formData.source = "ADS";
   formData.price = "";
   formData.note = "";
   priceDisplay.value = "";
@@ -943,10 +974,12 @@ function clearForm() {
 function generateSampleData() {
   const names = ["Lê Minh Anh", "Trần Quốc Bảo", "Phạm Thị Cẩm", "Nguyễn Đức Duy"];
   const types = ["CHINH_CHU", "MOI_GIOI", "NGUOI_THAN"];
+  const sources = ["ADS", "FORUM", "RAO_VAT", "FB", "SEO"];
 
   formData.name = names[Math.floor(Math.random() * names.length)];
   formData.phone = `09${Math.floor(Math.random() * 90000000 + 10000000)}`;
   formData.type = types[Math.floor(Math.random() * types.length)];
+  formData.source = sources[Math.floor(Math.random() * sources.length)];
   const samplePrice = Math.floor(Math.random() * 5000 + 500) * 100000;
   formData.price = samplePrice;
   priceDisplay.value = formatPriceDisplay(String(samplePrice));
@@ -1389,6 +1422,12 @@ onBeforeUnmount(() => {
   gap: 0.5rem;
 }
 
+.source-buttons {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
 .type-btn {
   padding: 0.7rem 0.55rem;
   background: rgba(248, 250, 252, 0.9);
@@ -1803,6 +1842,10 @@ onBeforeUnmount(() => {
 
   .type-buttons {
     grid-template-columns: 1fr;
+  }
+
+  .source-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .activity-filter {
