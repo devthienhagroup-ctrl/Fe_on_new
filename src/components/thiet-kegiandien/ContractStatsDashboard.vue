@@ -9,7 +9,7 @@
           </span>
           <div>
             <h1>Thống kê hợp đồng</h1>
-            <p class="muted">Dashboard thống kê nâng cao</p>
+            <p class="muted">Thống kê hợp đồng và doanh thu nâng cao</p>
           </div>
         </div>
 
@@ -163,22 +163,6 @@
           </div>
         </article>
       </section>
-
-      <!-- Footer -->
-      <footer class="footer">
-        <div class="footer__left">
-          <span class="footer__dot"></span>
-          <div>
-            <div class="footer__title">Hệ thống Quản lý Hợp Đồng © 2026</div>
-            <div class="footer__sub">Dữ liệu được cập nhật tự động · phiên bản thống kê nâng cao v4.1</div>
-          </div>
-        </div>
-
-        <div class="footer__right">
-          <span class="pill"><i class="fa-solid fa-shield-heart"></i> Pastel · Gradient</span>
-          <span class="pill"><i class="fa-solid fa-bolt"></i> Chart.js</span>
-        </div>
-      </footer>
     </div>
   </div>
 </template>
@@ -636,6 +620,12 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+h1{
+  color: #0e0f4f;
+  font-weight: 800;
+  z-index: 1;
+}
+
 /* ========= Pastel gradient tokens ========= */
 .page{
   --bg-0: #f8fafc;
@@ -690,7 +680,6 @@ onBeforeUnmount(() => {
   padding: 18px 18px;
   border-radius: 18px;
   background: var(--g-indigo);
-  color: #fff;
   box-shadow: 0 14px 34px rgba(99, 102, 241, 0.22);
   position: relative;
   overflow: hidden;
@@ -700,9 +689,6 @@ onBeforeUnmount(() => {
   content:"";
   position: absolute;
   inset: -40%;
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), transparent 45%),
-    radial-gradient(circle at 70% 70%, rgba(255,255,255,.25), transparent 45%);
   transform: rotate(18deg);
   pointer-events: none;
 }
