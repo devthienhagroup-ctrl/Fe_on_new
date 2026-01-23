@@ -89,7 +89,7 @@
                         type="tel"
                         class="form-control"
                         placeholder="09xxxxxxxx"
-                        @blur="formData.phone = normalizePhone(formData.phone)"
+                        @blur="handlePhoneBlur"
                         required
                     />
                   </div>
@@ -995,6 +995,8 @@ const pickedFileLabel = computed(() => {
   if (pickedFileNames.value.length === 1) return pickedFileNames.value[0];
   return `${pickedFileNames.value.length} tệp: ${pickedFileNames.value.join(", ")}`;
 });
+const lastCheckedPhone = ref("");
+const isCheckingPhone = ref(false);
 function onPickFile(e) {
   const files = Array.from(e?.target?.files || []);
   pickedFileNames.value = files.map(file => file.name);
@@ -1017,6 +1019,44 @@ function isValidPhone(phone) {
   const normalized = normalizePhone(phone);
   return /^(0\d{9})$/.test(normalized);
 }
+async function handlePhoneBlur() {
+  const normalized = normalizePhone(formData.phone);
+  formData.phone = normalized;
+
+  if (!normalized) return;
+
+  if (!isValidPhone(normalized)) {
+    showCenterWarning("Số điện thoại không đúng định dạng (ví dụ: 09xxxxxxxx).");
+    return;
+  }
+
+  if (normalized === lastCheckedPhone.value || isCheckingPhone.value) return;
+
+  isCheckingPhone.value = true;
+  try {
+    const res = await api.get("/customer-crm/marketing/check-phone", {
+      withCredentials: true,
+      params: { phone: normalized },
+    });
+
+    // ❌ KHÔNG return khi success = false nữa
+    // success = true  => đã tồn tại
+    // success = false => chưa tồn tại (OK)
+
+    if (res?.data?.success === true) {
+      showCenterWarning("Số điện thoại đã tồn tại trong hệ thống.");
+    }
+
+    lastCheckedPhone.value = normalized;
+
+  } catch (err) {
+    console.error(err);
+    showCenterError("Không thể kiểm tra số điện thoại. Vui lòng thử lại!");
+  } finally {
+    isCheckingPhone.value = false;
+  }
+}
+
 function validateForm() {
   if (!formData.name?.trim()) {
     showCenterWarning("Vui lòng nhập họ tên.");

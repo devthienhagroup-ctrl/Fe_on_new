@@ -1,553 +1,176 @@
 diff --git a/src/components/thiet-kegiandien/marketing-cap-da-ta.vue b/src/components/thiet-kegiandien/marketing-cap-da-ta.vue
-index 740f5d97f35105e4e04df2bd28203e8884a8326c..da963d0a86c81c357c28e9a21b8ea2e5080b7511 100644
+index 2810a5dd38c4629699efc83ece210c5fcd919962..fa7b208659e039b32af8809b3f5b0d352dca1004 100644
 --- a/src/components/thiet-kegiandien/marketing-cap-da-ta.vue
 +++ b/src/components/thiet-kegiandien/marketing-cap-da-ta.vue
-@@ -278,106 +278,124 @@
-                 </span>
-                 Thống kê nhanh
-               </h4>
-             </div>
-             <div class="mini-stats">
-               <div class="mini-stat stat-a">
-                 <div class="stat-value sm">{{ thongKe.slHomNay }}</div>
-                 <div class="stat-label">Hôm nay</div>
-               </div>
-               <div class="mini-stat stat-b">
-                 <div class="stat-value sm">{{ thongKe.phanTramLienLacDuocHomNay }}%</div>
-                 <div class="stat-label">Liên lạc được</div>
-               </div>
-               <div class="mini-stat stat-c">
-                 <div class="stat-value sm">{{ formatCurrency(thongKe.giaTBSHomNay) }}</div>
-                 <div class="stat-label">Giá trị TB</div>
-               </div>
-             </div>
-           </div>
-         </div>
-
-         <!-- Right: Analytics Panels -->
-         <div class="col-lg-7">
-           <!-- Performance Metrics -->
-           <div class="row g-4">
--            <div class="col-md-6">
-+            <div class="col-lg-4 col-md-6">
-               <div class="metric-card metric-card-call">
-                 <div class="metric-header">
-                   <h4>
-                     <span class="icon-label" style="background: linear-gradient(135deg, #00C9FF, #92FE9D);">
-                       <i class="fas fa-phone-volume"></i>
+@@ -67,51 +67,51 @@
+                   <div class="input-icon">
+                     <span class="icon-chip" style="background: linear-gradient(135deg, #36D1DC, #5B86E5); color: white;">
+                       <i class="fas fa-user"></i>
                      </span>
-                     Hiệu suất cuộc gọi
-                   </h4>
-                 </div>
-                 <div class="metric-content">
-                   <div class="metric-value">{{ thongKe.tongPhanTramLLD }} %</div>
-                   <div class="progress-bar">
-                     <div class="progress-fill" :style="{ width: thongKe.tongPhanTramLLD + '%' }"></div>
-                   </div>
-                   <div class="metric-details">
-                     <span>Kết nối:{{ thongKe.slKhachLenDuoc }}</span>
-                     <span>Không kết nối: {{ thongKe.slKhackKongLienLac }}</span>
+                     <input
+                         v-model="formData.name"
+                         type="text"
+                         class="form-control"
+                         placeholder="Nguyễn Văn A"
+                         required
+                     />
                    </div>
                  </div>
-               </div>
-             </div>
 
--            <div class="col-md-6">
-+            <div class="col-lg-4 col-md-6">
-               <div class="metric-card metric-card-revenue">
-                 <div class="metric-header">
-                   <h4>
-                     <span class="icon-label" style="background: linear-gradient(135deg, #FF8A00, #FFC837);">
-                       <i class="fas fa-money-bill-wave"></i>
+                 <div class="form-group">
+                   <label>Số điện thoại <span class="required">*</span></label>
+                   <div class="input-icon">
+                     <span class="icon-chip" style="background: linear-gradient(135deg, #FF416C, #FF4B2B); color: white;">
+                       <i class="fas fa-phone"></i>
                      </span>
-                     Tổng dữ liệu đã nhập
-                   </h4>
-                 </div>
-                 <div class="metric-content">
-                   <div class="row align-items-center">
-                     <div class="col-7">
-                       <div class="metric-main">
-                         <div class="metric-value metric-value-sm" style="font-size: 16px">
-                           {{ formatCurrency(thongKe.tongGiaTri) }} khách hàng
-                         </div>
-                         <div class="metric-sub">Tổng khách nhập</div>
-                       </div>
-                     </div>
-
-                     <div class="col-5 text-start">
-                       <div class="target-progress target-progress-lg d-inline-flex justify-content-end">
-                         <div class="progress-circle progress-circle-lg" :style="{ '--progress': thongKe.tongPhanTramGT }">
-                           <span>{{ thongKe.tongPhanTramGT }} %</span>
-                         </div>
-                       </div>
-                     </div>
+                     <input
+                         v-model="formData.phone"
+                         type="tel"
+                         class="form-control"
+                         placeholder="09xxxxxxxx"
+-                        @blur="formData.phone = normalizePhone(formData.phone)"
++                        @blur="handlePhoneBlur"
+                         required
+                     />
                    </div>
                  </div>
-
                </div>
-             </div>
-+
-+            <div class="col-lg-4 col-md-6">
-+              <div class="chart-panel chart-panel-source">
-+                <div class="panel-header">
-+                  <h4>
-+                    <span class="icon-label" style="background: linear-gradient(135deg, #38bdf8, #0ea5e9);">
-+                      <i class="fas fa-chart-pie"></i>
-+                    </span>
-+                    Biểu đồ nguồn data
-+                  </h4>
-+                </div>
-+                <div class="distribution-chart">
-+                  <div class="chart-graphic chart-graphic-sm">
-+                    <canvas ref="sourceCanvas"></canvas>
-+                  </div>
-+                </div>
-+              </div>
-+            </div>
-           </div>
 
-           <!-- Doughnut status -->
-           <div class="row" style="padding: 0.8rem;">
-             <div class="col-7 chart-panel chart-panel-distribution mt-2">
-               <div class="panel-header">
-                 <h4>
-                   <span class="icon-label" style="background: linear-gradient(135deg, #FD746C, #FF9068);">
-                     <i class="fas fa-chart-pie"></i>
-                   </span>
-                   Biểu đồ đánh giá chất lượng data
-                 </h4>
-               </div>
-               <div class="distribution-chart">
-                 <div class="chart-graphic chart-graphic-sm">
-                   <canvas ref="distributionCanvas"></canvas>
-                 </div>
-               </div>
-             </div>
+               <div class="form-row">
+                 <!-- Province/City Searchable Dropdown -->
+                 <div class="form-group">
+                   <label>Tỉnh/Thành <span class="required">*</span></label>
+                   <div class="input-icon select-like" :class="{ open: provinceDropdownOpen }" style="position: relative;">
+                     <span class="icon-chip" style="background: linear-gradient(135deg, #8344C5, #3A7BD5); color: white;">
+                       <i class="fas fa-location-dot"></i>
+                     </span>
 
-             <div class="col-5 status-stack mt-2 ps-4" style="padding-right: 0px">
-               <div class="status-item success">
-                 <i class="fas fa-house-user"></i>
-                 <div>
-                   <div class="status-count">{{ thongKe.slChuNha }}</div>
-@@ -503,72 +521,107 @@ const customerSources = [
- const distributionCanvas = ref(null);
- let distributionChart = null;
-
- const STATUS_META = {
-   NEW: { label: "Mới", color: "#94a3b8" },                 // xám
-   DC_TELESALES: { label: "Đã cấp Telesales", color: "#6366f1" }, // tím xanh
-   CHAM_SOC: { label: "Đang chăm sóc", color: "#38bdf8" },  // xanh trời
-   TN_7NGAY: { label: "Theo dõi 7 ngày", color: "#0ea5e9" },
-   TN_14NGAY: { label: "Theo dõi 14 ngày", color: "#0284c7" },
-
-   THAT_BAI: { label: "Thất bại", color: "#dc2626" },       // đỏ đậm
-   KHONG_LIEN_LAC_DUOC: { label: "Không liên lạc được", color: "#ea580c" }, // cam đậm
-   SAI_SO_LIEU: { label: "Sai số liệu", color: "#9333ea" }, // tím đậm
-
-   THANH_CONG: { label: "Lên VP (ĐK)", color: "#22c55e" },  // xanh lá tươi
-
-   // ===== BỔ SUNG (ĐỔI MÀU RÕ HƠN) =====
-   KHACH_HUY_HEN: { label: "Khách huỷ hẹn", color: "#b45309" }, // nâu cam (huỷ)
-   BAN_NHANH: { label: "Bán nhanh", color: "#15803d" },        // xanh lá đậm
-   BAN_GP: { label: "Bán GP (Đã lên VP)", color: "#0f766e" },  // xanh ngọc đậm (premium)
- };
-
-
-
- const statusChartData = ref([]); // [{label,value,color}]
-+const sourceCanvas = ref(null);
-+let sourceChart = null;
-+
-+const SOURCE_META = {
-+  ADS: { label: "Quảng cáo", color: "#f97316" },
-+  FORUM: { label: "Diễn đàn", color: "#6366f1" },
-+  RAO_VAT: { label: "Rao vặt", color: "#22c55e" },
-+  FB: { label: "Facebook", color: "#1877f2" },
-+  SEO: { label: "SEO", color: "#e11d48" },
-+};
-+
-+const sourceChartData = ref([]);
-
- async function fetchThongKeStatus() {
-   try {
-     const res = await api.get("/customer-crm/marketing/thong-ke-status", { withCredentials: true });
-     const raw = Array.isArray(res.data) ? res.data : [];
-
-     // BE: StatusChartDTO {label, value}
-     statusChartData.value = raw
-         .filter(item => STATUS_META[item.label]) // label = enum key
-         .map(item => ({
-           label: STATUS_META[item.label].label, // dịch label
-           value: Number(item.value || 0),
-           color: STATUS_META[item.label].color,
-         }));
-
-     nextTick(() => renderDistributionChart());
-   } catch (err) {
-     console.error(err);
-     showCenterError("Không tải được thống kê trạng thái");
-   }
+                     <input
+                         v-model="provinceSearch"
+                         @focus="provinceDropdownOpen = true"
+                         @input="provinceDropdownOpen = true"
+                         @blur="closeProvinceDropdown"
+                         type="text"
+                         class="form-control"
+                         placeholder="Tìm tỉnh/thành"
+                         autocomplete="off"
+                         style="cursor: pointer;"
+@@ -973,72 +973,118 @@ const formatCurrency = (amount) => {
+ function normalizePriceInput(value) {
+   return String(value || "").replace(/[^\d]/g, "");
+ }
+ function formatPriceDisplay(value) {
+   if (!value) return "";
+   return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+ }
+ function handlePriceInput(event) {
+   const raw = normalizePriceInput(event.target.value);
+   priceDisplay.value = formatPriceDisplay(raw);
+   formData.price = raw ? Number(raw) : "";
+ }
+ function syncPriceDisplay() {
+   const raw = normalizePriceInput(priceDisplay.value);
+   priceDisplay.value = formatPriceDisplay(raw);
+   formData.price = raw ? Number(raw) : "";
  }
 
-+async function fetchThongKeNguon() {
+ /* ===== Upload ===== */
+ const pickedFileNames = ref([]);
+ const pickedFileLabel = computed(() => {
+   if (!pickedFileNames.value.length) return "";
+   if (pickedFileNames.value.length === 1) return pickedFileNames.value[0];
+   return `${pickedFileNames.value.length} tệp: ${pickedFileNames.value.join(", ")}`;
+ });
++const lastCheckedPhone = ref("");
++const isCheckingPhone = ref(false);
+ function onPickFile(e) {
+   const files = Array.from(e?.target?.files || []);
+   pickedFileNames.value = files.map(file => file.name);
+ }
+ function clearPickedFile() {
+   pickedFileNames.value = [];
+   const fileInput = document.getElementById("fileInput");
+   if (fileInput) fileInput.value = "";
+ }
+
+ /* ===== Validate ===== */
+ function isValidName(name) {
+   const normalized = name.trim().replace(/\s+/g, " ");
+   if (!normalized) return false;
+   const words = normalized.split(" ");
+   if (words.length < 2) return false;
+   return /^[A-Za-zÀ-ỹ\s]+$/u.test(normalized);
+ }
+ function isValidPhone(phone) {
+   const normalized = normalizePhone(phone);
+   return /^(0\d{9})$/.test(normalized);
+ }
++async function handlePhoneBlur() {
++  const normalized = normalizePhone(formData.phone);
++  formData.phone = normalized;
++
++  if (!normalized) return;
++
++  if (!isValidPhone(normalized)) {
++    showCenterWarning("Số điện thoại không đúng định dạng (ví dụ: 09xxxxxxxx).");
++    return;
++  }
++
++  if (normalized === lastCheckedPhone.value || isCheckingPhone.value) return;
++
++  isCheckingPhone.value = true;
 +  try {
-+    const res = await api.get("/customer-crm/marketing/thong-ke-nguon", { withCredentials: true });
-+    const raw = Array.isArray(res.data) ? res.data : [];
-+    const sourceTotals = raw.reduce((acc, item) => {
-+      const key = item?.nguon;
-+      if (key) acc[key] = Number(item?.total || 0);
-+      return acc;
-+    }, {});
++    const res = await api.get("/customer-crm/marketing/check-phone", {
++      withCredentials: true,
++      params: { phone: normalized },
++    });
 +
-+    sourceChartData.value = Object.entries(SOURCE_META).map(([key, meta]) => ({
-+      label: meta.label,
-+      value: sourceTotals[key] ?? 0,
-+      color: meta.color,
-+    }));
++    if (res?.data?.success === false) {
++      showCenterWarning(res?.data?.message || "Số điện thoại không hợp lệ.");
++      return;
++    }
 +
-+    nextTick(() => renderSourceChart());
++    const exists = Boolean(
++      res?.data?.data ??
++      res?.data?.exists ??
++      res?.data?.result ??
++      res?.data?.payload?.exists
++    );
++
++    if (exists) {
++      showCenterWarning("Số điện thoại đã tồn tại trong hệ thống.");
++    }
++
++    lastCheckedPhone.value = normalized;
 +  } catch (err) {
 +    console.error(err);
-+    showCenterError("Không tải được thống kê nguồn data");
++    showCenterError("Không thể kiểm tra số điện thoại. Vui lòng thử lại!");
++  } finally {
++    isCheckingPhone.value = false;
 +  }
 +}
-+
- const renderDistributionChart = () => {
-   const el = distributionCanvas.value;
-   if (!el) return;
-
-   if (distributionChart) distributionChart.destroy();
-
-   const chartData = Array.isArray(statusChartData.value) ? statusChartData.value : [];
-   const safeData = chartData.length
-       ? chartData
-       : [{ label: "Chưa có dữ liệu", value: 0, color: "#e2e8f0" }];
-
-   const totalCount = safeData.reduce((sum, r) => sum + (Number(r.value) || 0), 0);
-
-   distributionChart = new Chart(el, {
-     type: "doughnut",
-     data: {
-       labels: safeData.map(r => r.label),
-       datasets: [
-         {
-           data: safeData.map(r => r.value),
-           backgroundColor: safeData.map(r => r.color),
-           borderWidth: 2,
-           borderColor: "#ffffff",
-           hoverOffset: 15,
-           hoverBorderWidth: 3,
-@@ -629,50 +682,147 @@ const renderDistributionChart = () => {
-
-         tooltip: {
-           backgroundColor: "rgb(15,23,42)",
-           titleColor: "#ffffff",
-           bodyColor: "#e5e7eb",
-           padding: 12,
-           cornerRadius: 8,
-           displayColors: true,
-           bodySpacing: 4,
-           callbacks: {
-             label(context) {
-               const label = context.label || "";
-               const count = Number(context.raw || 0);
-               const percent = totalCount ? ((count / totalCount) * 100).toFixed(1) : "0.0";
-               return [`${label}: ${count} khách hàng (${percent}%)`];
-             },
-           },
-         },
-       },
-
-       interaction: { intersect: false, mode: "index" },
-     },
-   });
- };
-
-+const renderSourceChart = () => {
-+  const el = sourceCanvas.value;
-+  if (!el) return;
-+
-+  if (sourceChart) sourceChart.destroy();
-+
-+  const chartData = Array.isArray(sourceChartData.value) ? sourceChartData.value : [];
-+  const safeData = chartData.length
-+      ? chartData
-+      : [{ label: "Chưa có dữ liệu", value: 0, color: "#e2e8f0" }];
-+
-+  const totalCount = safeData.reduce((sum, r) => sum + (Number(r.value) || 0), 0);
-+
-+  sourceChart = new Chart(el, {
-+    type: "doughnut",
-+    data: {
-+      labels: safeData.map(r => r.label),
-+      datasets: [
-+        {
-+          data: safeData.map(r => r.value),
-+          backgroundColor: safeData.map(r => r.color),
-+          borderWidth: 2,
-+          borderColor: "#ffffff",
-+          hoverOffset: 10,
-+        },
-+      ],
-+    },
-+    options: {
-+      responsive: true,
-+      maintainAspectRatio: false,
-+      cutout: "70%",
-+      layout: { padding: { top: 12, bottom: 12 } },
-+      animation: {
-+        animateRotate: true,
-+        animateScale: true,
-+        onComplete(animation) {
-+          const chart = animation.chart;
-+          const { ctx, chartArea } = chart;
-+          if (!chartArea) return;
-+
-+          const centerX = (chartArea.left + chartArea.right) / 2;
-+          const centerY = (chartArea.top + chartArea.bottom) / 2;
-+
-+          ctx.save();
-+          ctx.textAlign = "center";
-+          ctx.textBaseline = "middle";
-+
-+          ctx.font = "700 12px Inter, system-ui, sans-serif";
-+          ctx.fillStyle = "#64748b";
-+          ctx.fillText("TỔNG", centerX, centerY - 12);
-+
-+          ctx.font = "700 16px Inter, system-ui, sans-serif";
-+          ctx.fillStyle = "#0f172a";
-+          ctx.fillText(`${totalCount} KH`, centerX, centerY + 10);
-+
-+          ctx.restore();
-+        },
-+      },
-+      plugins: {
-+        legend: {
-+          display: true,
-+          position: "bottom",
-+          labels: {
-+            usePointStyle: true,
-+            pointStyle: "circle",
-+            padding: 12,
-+            color: "#1e293b",
-+            font: {
-+              size: 11,
-+              family: "'Inter', system-ui, sans-serif",
-+              weight: "600",
-+            },
-+          },
-+        },
-+        tooltip: {
-+          backgroundColor: "rgb(15,23,42)",
-+          titleColor: "#ffffff",
-+          bodyColor: "#e5e7eb",
-+          padding: 10,
-+          cornerRadius: 8,
-+          displayColors: true,
-+          bodySpacing: 4,
-+          callbacks: {
-+            label(context) {
-+              const label = context.label || "";
-+              const count = Number(context.raw || 0);
-+              const percent = totalCount ? ((count / totalCount) * 100).toFixed(1) : "0.0";
-+              return [`${label}: ${count} khách hàng (${percent}%)`];
-+            },
-+          },
-+        },
-+      },
-+      interaction: { intersect: false, mode: "index" },
-+    },
-+  });
-+};
-+
- /* =========================
-    ACTIVITY BAR (Chart.js) - DATA THẬT TỪ BE
-    GET /customer-crm/marketing/thong-ke-theo-thoi-gian?type=WEEK|MONTH|YEAR
- ========================= */
- const activityCanvas = ref(null);
- let activityChart = null;
-
- const activityRange = ref("week");
- const activityRangeLabel = computed(() => {
-   if (activityRange.value === "week") return "tuần";
-   if (activityRange.value === "month") return "tháng";
-   return "năm";
- });
-
- const activityChartData = ref({
-   labels: [],
-   values: [],
- });
-
- function normalizeWeekLabel(label) {
-   // BE có thể trả "Th 2" => convert thành "T2"
-   if (!label) return "";
-   const s = String(label).trim().replace(/\s+/g, "");
-   if (s.startsWith("Th")) return s.replace("Th", "T");
-   return s;
-@@ -928,50 +1078,51 @@ async function submitData() {
-     const fileInput = document.getElementById("fileInput");
-     if (fileInput?.files?.length) {
-       Array.from(fileInput.files).forEach(f => form.append("files", f));
-     }
-
-     const res = await showLoading(
-         api.post("/customer-crm/marketing/create", form, {
-           headers: { "Content-Type": "multipart/form-data" },
-           withCredentials: true,
-         })
-     );
-
-     const data = res.data;
-     if (!data.success) {
-       updateAlertError(data?.message || "Gửi dữ liệu không thành công. Vui lòng thử lại!");
-       return;
-     }
-
-     submissionCount.value++;
-     updateAlertSuccess(`Đã ghi nhận dữ liệu lượt #${submissionCount.value}`);
-     clearForm();
-
-     // ✅ refresh dashboard data thật
-     fetchThongKeSoBo();
-     fetchThongKeStatus();
-+    fetchThongKeNguon();
-     fetchActivityData();
-   } catch (err) {
-     console.error(err);
-     showCenterError("Gửi dữ liệu thất bại. Vui lòng thử lại!");
+ function validateForm() {
+   if (!formData.name?.trim()) {
+     showCenterWarning("Vui lòng nhập họ tên.");
+     return false;
    }
- }
-
- function clearForm() {
-   formData.name = "";
-   formData.phone = "";
-   formData.area = "";
-   formData.oldArea = "";
-   formData.type = "CHINH_CHU";
-   formData.source = "ADS";
-   formData.price = "";
-   formData.note = "";
-   priceDisplay.value = "";
-   clearPickedFile();
- }
-
- /* ===== Demo (giữ nguyên) ===== */
- function generateSampleData() {
-   const names = ["Lê Minh Anh", "Trần Quốc Bảo", "Phạm Thị Cẩm", "Nguyễn Đức Duy"];
-   const types = ["CHINH_CHU", "MOI_GIOI", "NGUOI_THAN"];
-   const sources = ["ADS", "FORUM", "RAO_VAT", "FB", "SEO"];
-@@ -1023,56 +1174,58 @@ function selectProvince(province) {
- function closeProvinceDropdown() {
-   setTimeout(() => {
-     provinceDropdownOpen.value = false;
-     const selected = provinces.value.find(p => p.name === formData.area);
-     provinceSearch.value = selected ? selected.name : "";
-   }, 120);
- }
-
- function toggleProvinceDropdown() {
-   provinceDropdownOpen.value = !provinceDropdownOpen.value;
- }
-
- watch(() => formData.area, val => {
-   const selected = provinces.value.find(p => p.name === val);
-   provinceSearch.value = selected ? selected.name : "";
- });
-
- /* ===== lifecycle ===== */
- watch(activityRange, () => {
-   fetchActivityData(); // ✅ đổi range là fetch data thật luôn
- });
-
- onMounted(() => {
-   fetchThongKeSoBo();
-   fetchThongKeStatus();
-+  fetchThongKeNguon();
-   fetchActivityData(); // ✅ mặc định tuần hiện tại
- });
-
- onBeforeUnmount(() => {
-   if (activityChart) activityChart.destroy();
-   if (distributionChart) distributionChart.destroy();
-+  if (sourceChart) sourceChart.destroy();
- });
- </script>
- <style scoped>
- /* ===== MODERN DASHBOARD STYLES ===== */
- .refined-dashboard {
-   min-height: 100vh;
-   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-   font-size: 14px;
-   line-height: 1.5;
-   color: #1e293b;
-   position: relative;
-   max-width: 100%;
-   top:-10px;
- }
-
- /* ===== HEADER ===== */
- .dashboard-header {
-   top:-10px;
-   background: #ffffff;
-   border-bottom: 1px solid #e2e8f0;
-   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-   position: sticky;
-   z-index: 100;
-   padding: 10px 20px;
-@@ -1291,50 +1444,54 @@ onBeforeUnmount(() => {
-   font-weight: 800;
- }
- .metric-sub {
-   margin-top: 0.2rem;
-   font-size: 0.8rem;
-   color: #64748b;
- }
- .target-progress-lg .progress-circle-lg {
-   width: 96px;
-   height: 96px;
- }
- .target-progress-lg .progress-circle-lg::before {
-   width: 72px;
-   height: 72px;
- }
-
- .chart-panel {
-   padding: 1.25rem;
-   background: #ffffff;
- }
-
- .chart-panel-distribution {
-   background: linear-gradient(135deg, #fff7ed 0%, #ffffff 65%);
- }
-
-+.chart-panel-source {
-+  background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 65%);
-+}
-+
- .chart-panel-activity {
-   background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 65%);
- }
-
- .panel-header {
-   display: flex;
-   align-items: center;
-   justify-content: space-between;
-   margin-bottom: 1.25rem;
-   padding-bottom: 0.75rem;
-   border-bottom: 1px solid #f1f5f9;
- }
-
- .panel-header h3,
- .panel-header h4 {
-   margin: 0;
-   font-size: 1rem;
-   font-weight: 600;
-   color: #0f172a;
-   display: flex;
-   align-items: center;
-   gap: 0.5rem;
- }
-
- .badge {
+   if (!isValidName(formData.name)) {
+     showCenterWarning("Họ tên phải có ít nhất 2 từ và không chứa số hoặc ký tự đặc biệt.");
+     return false;
+   }
+   if (!formData.phone?.trim()) {
+     showCenterWarning("Vui lòng nhập số điện thoại.");
+     return false;
+   }
+   if (!isValidPhone(formData.phone)) {
+     showCenterWarning("Số điện thoại không đúng định dạng (ví dụ: 09xxxxxxxx).");
+     return false;
+   }
+   if (!formData.area?.trim()) {
+     showCenterWarning("Vui lòng chọn tỉnh/thành.");
+     return false;
+   }
+   if (!formData.price) {
+     showWarning("Vui lòng nhập giá bán.");
+     return false;
+   }

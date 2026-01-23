@@ -305,7 +305,7 @@
         <div class="detail-header">
           <h3 class="stat-title">
             <i class="fas fa-user-circle stat-icon-detail"></i>
-            Chi tiết khách hàng
+            &nbsp; Chi tiết khách hàng
           </h3>
           <button class="close-btn" @click="selectedCustomer = null">
             <i class="fas fa-times"></i>
@@ -1012,8 +1012,8 @@ const buildLineChartData = () => {
   const isYear = selectedTimeRange.value === 'year'
 
   const labels = isYear
-      ? Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}`)
-      : Array.from({ length: 31 }, (_, i) => `Ngày ${i + 1}`)
+      ? Array.from({ length: 12 }, (_, i) => `T ${i + 1}`)
+      : Array.from({ length: 31 }, (_, i) => `${i + 1}`)
 
   // status -> [..data..]
   const statusMap = {}
@@ -1877,7 +1877,7 @@ body {
 
 /* Detail panel */
 .detail-panel {
-  width: 400px;
+  width: 500px;
   background: linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%);
   border-left: 1px solid #e2e8f0;
   display: flex;
