@@ -102,6 +102,19 @@
         </div>
       </section>
 
+      <section class="card">
+        <div class="card__title">
+          <span class="card__titleIcon bg--violet"><i class="fa-solid fa-chart-line"></i></span>
+          <div>
+            <h3>{{ salesTitle }}</h3>
+            <p class="muted">{{ salesSubtitle }}</p>
+          </div>
+        </div>
+        <div class="chartWrap chartWrap--lg">
+          <canvas ref="trend3El"></canvas>
+        </div>
+      </section>
+
       <!-- 3 charts row -->
       <section class="grid3">
         <article class="card">
@@ -208,17 +221,19 @@ const chartsReady = ref(false);
 const startDate = ref("");
 const endDate = ref("");
 const services = ref([]);
-const segments = ref([]);
+const statusLegend = ref([]);
+const customerLegend = ref([]);
+const serviceLegend = ref([]);
 
 // Stats base (giống file gốc)
-const baseStats = {
-  totalContracts: 48,
-  activeContracts: 32,
-  completedContracts: 12,
-  cancelledContracts: 4,
-  totalRevenue: 1245, // triệu VNĐ
-};
-const stats = ref({ ...baseStats });
+const stats = ref({
+  totalContracts: 0,
+  activeContracts: 0,
+  completedContracts: 0,
+  cancelledContracts: 0,
+  totalRevenue: 0,
+  totalSales: 0,
+});
 
 // ===== Helpers =====
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
@@ -280,25 +295,15 @@ const statCards = computed(() => [
     tone: "amber",
     badge: "Doanh thu",
   },
+  {
+    key: "totalSales",
+    icon: "fa-solid fa-chart-line",
+    label: "Tổng doanh số (triệu VNĐ)",
+    value: stats.value.totalSales.toLocaleString("vi-VN"),
+    tone: "violet",
+    badge: "Doanh số",
+  },
 ]);
-
-const statusLegend = [
-  { label: "Thành công", color: COLORS.THANH_CONG },
-  { label: "Tiềm năng", color: COLORS.TN_7NGAY },
-  { label: "Đang CS", color: COLORS.CHAM_SOC },
-  { label: "Thất bại", color: COLORS.THAT_BAI },
-  { label: "Không LL", color: COLORS.KHONG_LIEN_LAC_DUOC },
-];
-const customerLegend = [
-  { label: "Mới tiếp nhận", color: COLORS.DC_TELESALES },
-  { label: "Đang chăm sóc", color: COLORS.CHAM_SOC },
-  { label: "Sai số liệu", color: COLORS.SAI_SO_LIEU },
-];
-const serviceLegend = [
-  { label: "Không liên lạc", color: COLORS.KHONG_LIEN_LAC_DUOC },
-  { label: "Bán nhanh", color: COLORS.BAN_NHANH },
-  { label: "Đã lên VP", color: COLORS.BAN_GP },
-];
 
 const serviceOptions = computed(() => [
   { id: "all", name: "Tất cả dịch vụ" },
@@ -312,24 +317,25 @@ const revenueTitle = computed(() => {
 });
 
 const revenueSubtitle = computed(() => {
-  if (selectedService.value === "all") {
-    return "Phân loại theo dịch vụ";
-  }
-  const serviceSegments = segments.value.filter(
-    (segment) => String(segment.serviceId) === String(selectedService.value)
-  );
-  if (!serviceSegments.length) {
-    return "Phân loại theo phân khúc dịch vụ";
-  }
-  const segmentNames = serviceSegments
-    .map((segment, index) => segment.name || segment.ten || `Phân khúc ${index + 1}`)
-    .join(" / ");
-  return `Phân loại theo phân khúc: ${segmentNames}`;
+  if (selectedService.value === "all") return "Phân loại theo dịch vụ";
+  return "Phân loại theo phân khúc dịch vụ";
+});
+
+const salesTitle = computed(() => {
+  const selected = serviceOptions.value.find((option) => option.id === selectedService.value);
+  const suffix = timeRange.value === "month" ? "theo tháng" : "theo năm";
+  return `Doanh số ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
+});
+
+const salesSubtitle = computed(() => {
+  if (selectedService.value === "all") return "Phân loại theo dịch vụ";
+  return "Phân loại theo phân khúc dịch vụ";
 });
 
 // ===== Chart refs =====
 const trend1El = ref(null);
 const trend2El = ref(null);
+const trend3El = ref(null);
 const statusEl = ref(null);
 const customerTypeEl = ref(null);
 const serviceTypeEl = ref(null);
@@ -337,6 +343,7 @@ const serviceTypeEl = ref(null);
 // ===== Chart instances =====
 let trendChart1 = null;
 let trendChart2 = null;
+let trendChart3 = null;
 let statusChart = null;
 let customerTypeChart = null;
 let serviceTypeChart = null;
@@ -346,45 +353,6 @@ const monthLabels = [
   "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
   "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12",
 ];
-
-const trendData1 = {
-  labels: monthLabels,
-  datasets: [
-    {
-      label: "Hợp đồng mới",
-      data: [8, 12, 9, 14, 18, 16, 20, 18, 15, 12, 10, 13],
-      borderColor: COLORS.DC_TELESALES,
-      backgroundColor: `${COLORS.DC_TELESALES}22`,
-      borderWidth: 3,
-      fill: true,
-      tension: 0.4,
-      pointRadius: 2,
-      pointHoverRadius: 5,
-    },
-    {
-      label: "Hợp đồng thành công",
-      data: [4, 6, 5, 8, 10, 12, 14, 13, 11, 9, 7, 8],
-      borderColor: COLORS.THANH_CONG,
-      backgroundColor: `${COLORS.THANH_CONG}22`,
-      borderWidth: 3,
-      fill: true,
-      tension: 0.4,
-      pointRadius: 2,
-      pointHoverRadius: 5,
-    },
-    {
-      label: "Hợp đồng thất bại",
-      data: [1, 2, 1, 2, 3, 2, 3, 2, 2, 1, 1, 2],
-      borderColor: COLORS.THAT_BAI,
-      backgroundColor: `${COLORS.THAT_BAI}1F`,
-      borderWidth: 2,
-      fill: true,
-      tension: 0.4,
-      pointRadius: 2,
-      pointHoverRadius: 5,
-    },
-  ],
-};
 
 const revenuePalette = [
   COLORS.BAN_NHANH,
@@ -397,67 +365,18 @@ const revenuePalette = [
   COLORS.THANH_CONG,
 ];
 
-const revenueBaseSeries = [85, 105, 92, 125, 145, 160, 180, 165, 155, 135, 120, 140];
-
-const buildServiceSeries = (index) => {
-  const multiplier = 1 - Math.min(index * 0.08, 0.4);
-  return revenueBaseSeries.map((value) => Math.round(value * multiplier));
-};
-
-const buildSegmentSeries = (index) => {
-  const ratio = 0.55 - Math.min(index * 0.08, 0.35);
-  return revenueBaseSeries.map((value) => Math.max(0, Math.round(value * ratio)));
-};
-
-const buildRevenueDatasets = (range, serviceId) => {
-  const datasetSource =
-    serviceId === "all"
-      ? services.value.map((service, index) => ({
-          label: service.name,
-          data: buildServiceSeries(index),
-        }))
-      : segments.value
-          .filter((segment) => String(segment.serviceId) === String(serviceId))
-          .map((segment, index) => ({
-            label: segment.name || segment.ten || `Phân khúc ${index + 1}`,
-            data: buildSegmentSeries(index),
-          }));
-
-  const fallback = datasetSource.length
-    ? datasetSource
-    : [{ label: "Doanh thu", data: revenueBaseSeries }];
-
-  return fallback.map((item, index) => ({
-    label: item.label,
-    data: generateFilteredLineData([{ data: item.data }], range)[0],
-    borderColor: revenuePalette[index % revenuePalette.length],
-    backgroundColor: `${revenuePalette[index % revenuePalette.length]}22`,
-    borderWidth: 3,
-    fill: true,
-    tension: 0.4,
-    pointRadius: 2,
-    pointHoverRadius: 5,
-  }));
-};
-
-const trendData2 = {
+const emptyLineData = {
   labels: monthLabels,
-  datasets: buildRevenueDatasets("month", "all"),
+  datasets: [],
 };
 
 const statusData = {
-  labels: ["Thành công", "Tiềm năng", "Đang CS", "Thất bại", "Không LL"],
+  labels: [],
   datasets: [
     {
       label: "Số lượng",
-      data: [45, 28, 32, 12, 8],
-      backgroundColor: [
-        COLORS.THANH_CONG,
-        COLORS.TN_7NGAY,
-        COLORS.CHAM_SOC,
-        COLORS.THAT_BAI,
-        COLORS.KHONG_LIEN_LAC_DUOC,
-      ],
+      data: [],
+      backgroundColor: [],
       borderWidth: 0,
       borderRadius: 10,
       barPercentage: 0.55,
@@ -467,11 +386,11 @@ const statusData = {
 };
 
 const customerTypeData = {
-  labels: ["Mới tiếp nhận", "Đang chăm sóc", "Sai số liệu"],
+  labels: [],
   datasets: [
     {
-      data: [40, 35, 25],
-      backgroundColor: [COLORS.DC_TELESALES, COLORS.CHAM_SOC, COLORS.SAI_SO_LIEU],
+      data: [],
+      backgroundColor: [],
       borderWidth: 0,
       spacing: 4,
     },
@@ -479,11 +398,11 @@ const customerTypeData = {
 };
 
 const serviceTypeData = {
-  labels: ["Không liên lạc", "Bán nhanh", "Đã lên VP"],
+  labels: [],
   datasets: [
     {
-      data: [30, 40, 30],
-      backgroundColor: [COLORS.KHONG_LIEN_LAC_DUOC, COLORS.BAN_NHANH, COLORS.BAN_GP],
+      data: [],
+      backgroundColor: [],
       borderWidth: 0,
       spacing: 4,
     },
@@ -496,7 +415,7 @@ function createCharts() {
 
   trendChart1 = new Chart(trend1El.value.getContext("2d"), {
     type: "line",
-    data: structuredClone(trendData1),
+    data: structuredClone(emptyLineData),
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -521,7 +440,32 @@ function createCharts() {
 
   trendChart2 = new Chart(trend2El.value.getContext("2d"), {
     type: "line",
-    data: structuredClone(trendData2),
+    data: structuredClone(emptyLineData),
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      scales: {
+        x: { grid: { color: gridColor } },
+        y: {
+          beginAtZero: true,
+          grid: { color: gridColor },
+          title: { display: true, text: "Triệu VNĐ", font: { weight: "700" } },
+        },
+      },
+      plugins: {
+        legend: {
+          position: "top",
+          labels: { usePointStyle: true, padding: 14, font: { size: 12 } },
+        },
+        tooltip: { padding: 10, cornerRadius: 10 },
+      },
+    },
+  });
+
+  trendChart3 = new Chart(trend3El.value.getContext("2d"), {
+    type: "line",
+    data: structuredClone(emptyLineData),
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -582,8 +526,10 @@ function createCharts() {
 }
 
 function destroyCharts() {
-  [trendChart1, trendChart2, statusChart, customerTypeChart, serviceTypeChart].forEach((c) => c?.destroy());
-  trendChart1 = trendChart2 = statusChart = customerTypeChart = serviceTypeChart = null;
+  [trendChart1, trendChart2, trendChart3, statusChart, customerTypeChart, serviceTypeChart].forEach((c) =>
+    c?.destroy()
+  );
+  trendChart1 = trendChart2 = trendChart3 = statusChart = customerTypeChart = serviceTypeChart = null;
 }
 
 // ===== Filter logic =====
@@ -632,59 +578,114 @@ watch(
   { deep: true }
 );
 
-function multiplierByRange(r) {
-  return r === "month" ? 0.3 : r === "quarter" ? 0.7 : r === "year" ? 1 : 1.2;
-}
+const normalizeSeries = (series) =>
+  Array.isArray(series)
+    ? series.map((item, index) => ({
+        label: item?.label || `Dòng ${index + 1}`,
+        data: Array.isArray(item?.data) ? item.data : [],
+      }))
+    : [];
 
-function generateFilteredLineData(currentDatasets, range) {
-  const m = multiplierByRange(range);
-  return currentDatasets.map((ds) =>
-    ds.data.map((v) => Math.round(v * m + (Math.random() * 10 - 5)))
+const buildLineDatasets = (series) =>
+  normalizeSeries(series).map((item, index) => ({
+    label: item.label,
+    data: item.data,
+    borderColor: revenuePalette[index % revenuePalette.length],
+    backgroundColor: `${revenuePalette[index % revenuePalette.length]}22`,
+    borderWidth: 3,
+    fill: true,
+    tension: 0.4,
+    pointRadius: 2,
+    pointHoverRadius: 5,
+  }));
+
+const buildLegend = (items, palette) =>
+  items.map((item, index) => ({
+    label: item?.label || `Nhóm ${index + 1}`,
+    color: palette[index % palette.length],
+  }));
+
+const updateBarChart = (chart, labels, values, palette) => {
+  chart.data.labels = labels;
+  chart.data.datasets[0].data = values;
+  chart.data.datasets[0].backgroundColor = labels.map(
+    (_, index) => palette[index % palette.length]
   );
-}
+  chart.update();
+};
 
-function generateRandomData(count, range) {
-  const base = range === "month" ? 10 : range === "quarter" ? 30 : range === "year" ? 100 : 150;
-  const arr = [];
-  for (let i = 0; i < count; i++) arr.push(Math.round(base + Math.random() * 50 - 25));
-  return arr.map((x) => clamp(x, 0, 9999));
-}
+const updateDoughnutChart = (chart, labels, values, palette) => {
+  chart.data.labels = labels;
+  chart.data.datasets[0].data = values;
+  chart.data.datasets[0].backgroundColor = labels.map(
+    (_, index) => palette[index % palette.length]
+  );
+  chart.update();
+};
 
-function updateStatistics(range) {
-  const m = multiplierByRange(range);
-  stats.value = {
-    totalContracts: Math.round(baseStats.totalContracts * m),
-    activeContracts: Math.round(baseStats.activeContracts * m),
-    completedContracts: Math.round(baseStats.completedContracts * m),
-    cancelledContracts: Math.round(baseStats.cancelledContracts * m),
-    totalRevenue: Math.round(baseStats.totalRevenue * m),
-  };
-}
+const updateLineChart = (chart, labels, series) => {
+  chart.data.labels = labels;
+  chart.data.datasets = buildLineDatasets(series);
+  chart.update();
+};
 
-function updateAllCharts(range, serviceId) {
-  // Trend 1
-  const newT1 = generateFilteredLineData(trendChart1.data.datasets, range);
-  trendChart1.data.datasets.forEach((ds, idx) => (ds.data = newT1[idx]));
-  trendChart1.update();
+const updateChartsFromResponse = (payload) => {
+  const labels = Array.isArray(payload?.labels) && payload.labels.length ? payload.labels : monthLabels;
 
-  // Trend 2
-  trendChart2.data.datasets = buildRevenueDatasets(range, serviceId);
-  trendChart2.update();
+  updateLineChart(trendChart1, labels, payload?.hopDongTrend || []);
+  updateLineChart(trendChart2, labels, payload?.doanhThuTrend || []);
+  updateLineChart(trendChart3, labels, payload?.doanhSoTrend || []);
 
-  // Bar
-  statusChart.data.datasets[0].data = generateRandomData(5, range);
-  statusChart.update();
+  const statusItems = Array.isArray(payload?.trangThaiHopDong) ? payload.trangThaiHopDong : [];
+  const statusLabels = statusItems.map((item) => item?.label || "");
+  const statusValues = statusItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
+  updateBarChart(statusChart, statusLabels, statusValues, [
+    COLORS.THANH_CONG,
+    COLORS.TN_7NGAY,
+    COLORS.CHAM_SOC,
+    COLORS.THAT_BAI,
+    COLORS.KHONG_LIEN_LAC_DUOC,
+  ]);
+  statusLegend.value = buildLegend(statusItems, [
+    COLORS.THANH_CONG,
+    COLORS.TN_7NGAY,
+    COLORS.CHAM_SOC,
+    COLORS.THAT_BAI,
+    COLORS.KHONG_LIEN_LAC_DUOC,
+  ]);
 
-  // Doughnuts
-  customerTypeChart.data.datasets[0].data = generateRandomData(3, range);
-  customerTypeChart.update();
+  const customerItems = Array.isArray(payload?.loaiKhachHang) ? payload.loaiKhachHang : [];
+  const customerLabels = customerItems.map((item) => item?.label || "");
+  const customerValues = customerItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
+  updateDoughnutChart(customerTypeChart, customerLabels, customerValues, [
+    COLORS.DC_TELESALES,
+    COLORS.CHAM_SOC,
+    COLORS.SAI_SO_LIEU,
+    COLORS.NEW,
+  ]);
+  customerLegend.value = buildLegend(customerItems, [
+    COLORS.DC_TELESALES,
+    COLORS.CHAM_SOC,
+    COLORS.SAI_SO_LIEU,
+    COLORS.NEW,
+  ]);
 
-  serviceTypeChart.data.datasets[0].data = generateRandomData(3, range);
-  serviceTypeChart.update();
-
-  // Stats
-  updateStatistics(range);
-}
+  const serviceItems = Array.isArray(payload?.loaiDichVu) ? payload.loaiDichVu : [];
+  const serviceLabels = serviceItems.map((item) => item?.label || "");
+  const serviceValues = serviceItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
+  updateDoughnutChart(serviceTypeChart, serviceLabels, serviceValues, [
+    COLORS.KHONG_LIEN_LAC_DUOC,
+    COLORS.BAN_NHANH,
+    COLORS.BAN_GP,
+    COLORS.NEW,
+  ]);
+  serviceLegend.value = buildLegend(serviceItems, [
+    COLORS.KHONG_LIEN_LAC_DUOC,
+    COLORS.BAN_NHANH,
+    COLORS.BAN_GP,
+    COLORS.NEW,
+  ]);
+};
 
 const buildRequestParams = () => ({
   nam: selectedYear.value,
@@ -700,13 +701,22 @@ async function fetchStats() {
   loading.value = true;
 
   try {
-    await api.get("/hop-dong/admin/thong-ke", {
+    const res = await api.get("/hop-dong/admin/thong-ke", {
       params: buildRequestParams(),
     });
+    const payload = res?.data || {};
+    stats.value = {
+      totalContracts: Number(payload?.summary?.totalContracts) || 0,
+      activeContracts: Number(payload?.summary?.activeContracts) || 0,
+      completedContracts: Number(payload?.summary?.completedContracts) || 0,
+      cancelledContracts: Number(payload?.summary?.cancelledContracts) || 0,
+      totalRevenue: Number(payload?.summary?.totalRevenue) || 0,
+      totalSales: Number(payload?.summary?.totalSales) || 0,
+    };
+    updateChartsFromResponse(payload);
   } catch (error) {
     console.error("Không thể tải thống kê hợp đồng", error);
   } finally {
-    updateAllCharts(timeRange.value, selectedService.value);
     loading.value = false;
   }
 }
@@ -725,19 +735,9 @@ const fetchServices = async () => {
   }
 };
 
-const fetchSegments = async () => {
-  try {
-    const res = await api.get("/dich-vu-thg/admin/phan-khuc");
-    segments.value = Array.isArray(res?.data) ? res.data : [];
-  } catch (error) {
-    console.error("Không thể tải phân khúc dịch vụ", error);
-    segments.value = [];
-  }
-};
-
 onMounted(async () => {
   createCharts();
-  await Promise.all([fetchServices(), fetchSegments()]);
+  await fetchServices();
   chartsReady.value = true;
 });
 
@@ -932,7 +932,7 @@ h1{
 /* ========= Stats ========= */
 .stats{
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 14px;
   margin: 14px 0 18px;
 }

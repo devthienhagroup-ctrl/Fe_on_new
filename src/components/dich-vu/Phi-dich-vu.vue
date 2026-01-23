@@ -1656,8 +1656,8 @@ const fetchContracts = async () => {
     const page = res?.data || {}
     const items = Array.isArray(page.content) ? page.content : []
     contracts.value = items
-    totalElements.value = Number(page.totalElements ?? items.length)
-    totalPages.value = Number(page.totalPages ?? Math.max(1, Math.ceil(totalElements.value / pageSize.value)))
+    totalElements.value = Number(page.page.totalElements ?? items.length)
+    totalPages.value = Number(page.page.totalPages ?? Math.max(1, Math.ceil(totalElements.value / pageSize.value)))
     if (currentPage.value > totalPages.value) {
       currentPage.value = totalPages.value || 1
     }

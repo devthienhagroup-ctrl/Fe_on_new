@@ -157,7 +157,7 @@ import ProjectManagementCMS from "../components/cms/NewCms/ProjectMannagement/Pr
 import PropertyManagementCMS from "../components/cms/NewCms/PropertyManagement/PropertyManagementCMS.vue";
 import CTVRecruitCMS from "../components/cms/NewCms/CTVRecruit/CTVRecruitCMS.vue";
 import DichVuSetting from "../components/dich-vu/Phi-dich-vu.vue";
-
+import DichVuSetting2 from "../components/dich-vu/Dich-vu-setting.vue";
 const routes = [
 
     {
@@ -169,6 +169,18 @@ const routes = [
             path: '',
             name: "DichVuSetting1",
             component: DichVuSetting,
+        }]
+    },
+
+    {
+        path: "/-thg/dich-vu-chinh",
+        name: "DichVuSetting2",
+        component: Menu,
+        meta: {requiresAuth: false, enableTailwind: true},
+        children: [{
+            path: '',
+            name: "DichVuSetting3",
+            component: DichVuSetting2,
         }]
     },
     {
