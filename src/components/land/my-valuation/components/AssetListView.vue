@@ -42,7 +42,7 @@
             <div class="main-image-col">
               <div class="image-wrapper main-image-wrapper">
                 <img
-                    :src="asset.images?.[0]?.tempUrl || 'https://s3.cloudfly.vn/thg-storage/uploads-public/file_20260113_171315_590.jpg'"
+                    :src="asset.images?.[0]?.tempUrl || 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/file_20260113_171315_590.jpg'"
                     class="image-content"
                     :alt="'Ảnh ' + asset.images?.[0]?.name"
                 />

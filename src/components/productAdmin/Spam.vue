@@ -24,7 +24,7 @@ async function simulateUser() {
               name: "page_view",
               params: {
                 page_title: "Fake User Test",
-                page_location: "https://thienhagroup.vn/test-spam",
+                page_location: "http://localhost:8084test-spam",
                 page_referrer: ""
               }
             }

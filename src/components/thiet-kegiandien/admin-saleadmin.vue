@@ -33,7 +33,7 @@
 
             <img
                 v-if="info.avatarUrl"
-                :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
+                :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
                 alt="avatar"
                 class="rounded-circle border"
                 style="width: 36px; height: 36px; object-fit: cover;"
@@ -597,7 +597,7 @@
                             v-if="customer.nhanVienTaoTen"
                         >
                           <img
-                              :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/'+ customer.nhanVienTaoAvatar"
+                              :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+ customer.nhanVienTaoAvatar"
                               :alt="customer.nhanVienTaoTen"
                               class="member-avatar"
                           >
@@ -613,7 +613,7 @@
                             v-if="customer.nhanVienPhuTrachTen"
                         >
                           <img
-                              :src=" 'https://s3.cloudfly.vn/thg-storage/uploads-public/'+ customer.nhanVienPhuTrachAvatar"
+                              :src=" 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+ customer.nhanVienPhuTrachAvatar"
                               :alt="customer.nhanVienPhuTrachTen"
                               class="member-avatar"
                           >
@@ -1286,7 +1286,7 @@
                       <div class="staff-item">
                         <div class="staff-avatar">
                           <div v-if="detailCustomer.nhanVienTaoAvatar" class="avatar-img">
-                            <img :src=" 'https://s3.cloudfly.vn/thg-storage/uploads-public/'+  detailCustomer.nhanVienTaoAvatar" :alt="detailCustomer.nhanVienTaoTen">
+                            <img :src=" 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+  detailCustomer.nhanVienTaoAvatar" :alt="detailCustomer.nhanVienTaoTen">
                           </div>
                           <div v-else class="avatar-placeholder small">
                             <i class="fas fa-user"></i>
@@ -1300,7 +1300,7 @@
                       <div class="staff-item">
                         <div class="staff-avatar">
                           <div v-if="detailCustomer.nhanVienPhuTrachAvatar" class="avatar-img">
-                            <img :src=" 'https://s3.cloudfly.vn/thg-storage/uploads-public/'+  detailCustomer.nhanVienPhuTrachAvatar" :alt="detailCustomer.nhanVienPhuTrachTen">
+                            <img :src=" 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+  detailCustomer.nhanVienPhuTrachAvatar" :alt="detailCustomer.nhanVienPhuTrachTen">
                           </div>
                           <div v-else class="avatar-placeholder small">
                             <i class="fas fa-user"></i>
@@ -1886,7 +1886,7 @@ const resolveEmployeeAvatar = (avatar, name) => {
   if (avatar) {
     return avatar.startsWith('http')
       ? avatar
-      : `https://s3.cloudfly.vn/thg-storage/uploads-public/${avatar}`
+      : `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${avatar}`
   }
   return generateAvatarFromName(name || 'NV')
 }
@@ -2849,7 +2849,7 @@ const fetchTeleSales = async () => {
       const avatarPath = staff.avatar
         ? (staff.avatar.startsWith('http')
           ? staff.avatar
-          : `https://s3.cloudfly.vn/thg-storage/uploads-public/${staff.avatar}`)
+          : `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${staff.avatar}`)
         : generateAvatarFromName(staff.tenNhanVien)
       return {
         id: staff.id,

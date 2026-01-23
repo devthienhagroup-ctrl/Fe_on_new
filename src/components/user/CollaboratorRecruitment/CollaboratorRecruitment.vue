@@ -406,7 +406,7 @@ import addressData from "../../../assets/js/address.json";
 
 // Mock data for images (replace with actual imports in your project)
 const logoTHG = '/imgs/logoTHG.png'
-const ASSET_BASE_URL = 'https://s3.cloudfly.vn/thg-storage/uploads-public/'
+const ASSET_BASE_URL = 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'
 
 // Thêm vào script setup
 const searchQuery = ref('')

@@ -54,7 +54,7 @@
 
                 <!-- Status badge - FIXED: corrected string comparison -->
                 <img v-if="item.status === 'Đã kiểm duyệt'"
-                     src="https://s3.cloudfly.vn/thg-storage/uploads-public/icon-kiem-duỵet.png"
+                     src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png"
                      class="absolute z-20"
                      style="width: 32px; height: auto; top: 20px; right: 20px;"
                      alt="checked"
