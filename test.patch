@@ -1,496 +1,528 @@
-diff --git a/src/components/land/AdminValuationManager.vue b/src/components/land/AdminValuationManager.vue
-index d59d9b1b291356ec69ac2f268b7a7399ed85eceb..0ca2b130bcca92808c95ac78fad595baec9cc004 100644
---- a/src/components/land/AdminValuationManager.vue
-+++ b/src/components/land/AdminValuationManager.vue
-@@ -320,69 +320,69 @@
+diff --git a/src/components/user/NewUser/QuickSale30D/QuickSale30D.vue b/src/components/user/NewUser/QuickSale30D/QuickSale30D.vue
+index 857bb555ee675ac75fe81464885147396644ac39..50c6260d9195eb0b3fcd30888ae4112f52b60187 100644
+--- a/src/components/user/NewUser/QuickSale30D/QuickSale30D.vue
++++ b/src/components/user/NewUser/QuickSale30D/QuickSale30D.vue
+@@ -263,50 +263,68 @@
+                 </div>
 
+                 <div>
+                   <label class="block text-sm font-medium text-slate-300 mb-1.5">Diện tích sàn (m²)</label>
+                   <input type="number" step="0.1" v-model="searchForm.dienTichSan"
+                          class="w-full rounded-xl bg-slate-900/70 border border-white/10 px-4 py-3
+                       text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                          :placeholder="searchFormPlaceholders.dienTichSan">
+                 </div>
                </div>
-             </div>
 
-             <!-- Chủ sở hữu + thông tin khách -->
-             <div class="col-md-6">
-               <div class="info-block">
-                 <h6>Chủ sở hữu</h6>
-                 <ul class="list-unstyled mb-0 small" >
-                   <li><strong>Tên chủ sở hữu:</strong> {{ selectedAsset.ownerOfLand.fullName || '—' }}</li>
-                   <li><strong>Địa chỉ:</strong> {{ formatAddress(selectedAsset.ownerOfLand.address) || '—' }}</li>
-                   <li><strong>Số điện thoại:</strong> {{ selectedAsset.ownerOfLand.phone || '—' }}</li>
-                   <li><strong>Email:</strong> {{ selectedAsset.ownerOfLand.email || 'Không có' }}</li>
-                   <li><strong>Người tạo tài sản:</strong> {{ selectedAsset.nguoiTao || 'Chính chủ' }}</li>
-                 </ul>
+               <!-- Quyền sử dụng đất -->
+               <div>
+                 <label class="block text-sm font-medium text-slate-300 mb-1.5">Quyền sử dụng đất <span class="text-rose-500">*</span></label>
+                 <select required v-model="searchForm.quyenSuDungDat"
+                         class="w-full rounded-xl bg-slate-900/70 border border-white/10 px-4 py-3
+                  text-sm text-slate-50 focus:outline-none focus:ring-2 focus:ring-purple-500/50
+                  appearance-none">
+                   <option value="" disabled selected class="text-slate-500">Chọn loại quyền sử dụng</option>
+                   <option v-for="option in landUseOptions" :key="option.value" :value="option.value" class="text-white bg-slate-900">
+                     {{ option.label }}
+                   </option>
+                 </select>
                </div>
-             </div>
+
++              <!-- Quan hệ sở hữu -->
++              <div>
++                <label class="block text-sm font-medium text-slate-300 mb-1.5">Quan hệ sở hữu <span class="text-rose-500">*</span></label>
++                <select required v-model="ownershipChoice"
++                        class="w-full rounded-xl bg-slate-900/70 border border-white/10 px-4 py-3
++                 text-sm text-slate-50 focus:outline-none focus:ring-2 focus:ring-purple-500/50
++                 appearance-none">
++                  <option value="" disabled selected class="text-slate-500">Chọn quan hệ sở hữu</option>
++                  <option v-for="option in ownershipOptions" :key="option" :value="option" class="text-white bg-slate-900">
++                    {{ option }}
++                  </option>
++                </select>
++                <input v-if="ownershipChoice === 'Khác'" type="text" required v-model="searchForm.ownershipRelation"
++                       class="mt-3 w-full rounded-xl bg-slate-900/70 border border-white/10 px-4 py-3
++                    text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
++                       placeholder="Nhập quan hệ sở hữu khác...">
++              </div>
++
+               <!-- Kết cấu -->
+               <div>
+                 <label class="block text-sm font-medium text-slate-300 mb-1.5">Kết cấu công trình</label>
+                 <input type="text" v-model="searchForm.ketCauCongTrinh"
+                        class="w-full rounded-xl bg-slate-900/70 border border-white/10 px-4 py-3
+                     text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                        :placeholder="searchFormPlaceholders.ketCauCongTrinh">
+               </div>
+
+               <!-- Giá mong muốn bán -->
+               <div>
+                 <label class="block text-sm font-medium text-slate-300 mb-1.5">Giá mong muốn bán (tỷ VNĐ) <span class="text-rose-500">*</span></label>
+                 <div class="relative">
+                   <input type="number" step="0.1" required v-model="searchForm.giaMongMuon"
+                          class="w-full rounded-xl bg-slate-900/70 border border-white/10 px-4 py-3
+                       text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                          :placeholder="searchFormPlaceholders.giaMongMuon">
+                   <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 text-sm">
+                     tỷ VNĐ
+                   </div>
+                 </div>
+                 <p class="text-xs text-slate-500 mt-1">{{ priceHint }}</p>
+               </div>
+
+               <!-- Nút submit -->
+@@ -674,51 +692,51 @@
+                 <button type="submit"
+                         class="btn-gradient flex-1 inline-flex items-center justify-center px-5 py-3 rounded-lg md:rounded-xl text-sm font-semibold
+                            transition order-2 sm:order-1">
+                   {{ config.buttons.submit.text }}
+                 </button>
+                 <button v-if="authStore.userInfo==null" @click="openLoginModal" type="button"
+                         class="inline-flex items-center justify-center px-5 py-3 rounded-lg md:rounded-xl text-sm font-semibold
+                       bg-blue-400/10 text-white border border-white/10
+                       hover:bg-white/15 hover:border-white/20 transition order-1 sm:order-2">
+                   Đăng nhập ngay
+                 </button>
+               </div>
+
+               <p class="text-xs text-slate-500 leading-relaxed text-center lg:text-left">
+                 {{ contactPrivacyNotice }}
+               </p>
+             </form>
            </div>
+         </div>
+       </div>
+     </section>
+   </div>
+ </template>
 
-           <!-- Lịch sử định giá -->
-           <div class="mt-4">
-             <h6 class="mb-3">Lịch sử định giá</h6>
-             <div v-if="!selectedAsset.valuationReports || !selectedAsset.valuationReports.length" class="alert alert-light mb-0">
-               Chưa có lần định giá nào.
-             </div>
--            <div v-else class="accordion" id="valuationHistory">
--              <div class="accordion-item" v-for="report in selectedAsset.valuationReports" :key="report.valuationId">
--                <h2 class="accordion-header">
--                  <button
--                      class="accordion-button collapsed"
--                      type="button"
--                      data-bs-toggle="collapse"
--                      :data-bs-target="`#val-${report.valuationId}`"
--                  >
--                    Lần {{ report.valuationRound }} — {{ formatDate(report.effectiveDate) }} → {{ formatDate(report.expiryDate) }}
--                    <span class="ms-auto">{{ numberFormat(report.totalPrice) }} ₫</span>
--                  </button>
--                </h2>
--                <div
--                    :id="`val-${report.valuationId}`"
--                    class="accordion-collapse collapse"
--                    data-bs-parent="#valuationHistory"
-+            <div v-else class="valuation-history space-y-3">
-+              <div class="history-item" v-for="report in selectedAsset.valuationReports" :key="report.valuationId">
-+                <button
-+                    class="history-toggle w-full"
-+                    type="button"
-+                    @click="toggleHistory(report.valuationId)"
-                 >
--                  <div class="accordion-body">
-+                  <div class="history-toggle-content">
-+                    <div class="history-toggle-title">
-+                      Lần {{ report.valuationRound }} — {{ formatDate(report.effectiveDate) }} → {{ formatDate(report.expiryDate) }}
-+                    </div>
-+                    <div class="history-toggle-price">{{ numberFormat(report.totalPrice) }} ₫</div>
-+                  </div>
-+                  <span class="history-toggle-icon" :class="{ 'is-open': isHistoryOpen(report.valuationId) }">
-+                    <i class="fa-solid fa-chevron-down"></i>
-+                  </span>
-+                </button>
-+                <div class="history-panel" :class="{ 'is-open': isHistoryOpen(report.valuationId) }">
-+                  <div class="history-panel-inner">
-                     <div class="row small border-bottom pb-2 mb-2">
-                       <div class="col-md-6">
-                         <p><strong>Quy hoạch:</strong> {{ report.planning || '—' }}</p>
-                         <p><strong>Phân loại đất tổng thể:</strong> {{ report.landClassification || '—' }}</p>
-                         <p>
-                           <strong>Bằng chữ:</strong>
-                           {{ convertToWords(report.totalPrice) }}
-                         </p>
-                       </div>
-                       <div class="col-md-6">
-                         <p><strong>Ngày tạo:</strong> {{ formatDateTime(report.createdAt) }}</p>
-                         <p><strong>Cập nhật:</strong> {{ formatDateTime(report.updatedAt) }}</p>
-                         <p><strong>Trạng thái báo cáo:</strong>
-                           <span
-                               :class="formatReportStatus(report.status).class"
-                               class="badge ms-2"
-                           >
-                             {{ formatReportStatus(report.status).text }}
-                           </span>
-                         </p>
-                       </div>
-                     </div>
+ <script setup>
+-import { computed, onMounted, reactive, ref, onUnmounted, nextTick } from "vue";
++import { computed, onMounted, reactive, ref, onUnmounted, nextTick, watch } from "vue";
+ import GlassCard from "../../UI/GlassCard.vue";
+ import TestimonialCard from "../../UI/TestimonialCard.vue";
+ import SoldProjectCard from "../../UI/SoldProjectCard.vue";
+ import { useAuthStore } from "../../../../stores/authStore.js";
+ import addressData from "../../../../assets/js/address.json";
+ import Fuse from "fuse.js";
+ import api from "../../../../api/api.js";
+ import { buildSeoUrl } from "../../../../assets/js/global.js";
+ import Swal from 'sweetalert2';
 
-                     <!-- 💰 So sánh giá mong muốn và giá định giá -->
-                     <div
-@@ -772,63 +772,68 @@
-         <div class="card shadow-sm border-0 mb-4">
-           <div class="card-body p-3 p-md-4">
-             <div class="d-flex justify-content-between align-items-center mb-3">
-               <h5 class="fw-bold text-primary mb-0">Bảng loại đất</h5>
-               <button class="btn btn-sm btn-outline-primary" @click="addTypeRow">
-                 <i class="fa fa-plus me-1"></i>Thêm dòng
-               </button>
-             </div>
+ // ========== SOLD PROJECTS - Lấy từ API ==========
+ const soldProjects = ref([]);
+ const loadingSoldProjects = ref(false);
+ const loadingMoreProjects = ref(false);
+ const soldProjectsPage = ref(0);
+ const soldProjectsTotalPages = ref(0);
+ const soldProjectsContainer = ref(null);
+ const hasMoreSoldProjects = ref(true);
 
-             <div class="table-responsive">
-               <table class="table table-bordered table-sm align-middle">
-                 <thead class="table-light">
-                 <tr>
-                   <th style="width: 350px">Loại đất</th>
-                   <th style="width: 200px" class="text-end">Diện tích (m²)</th>
-                   <th style="width: 250px" class="text-end">Đơn giá (VNĐ/m²)</th>
-                   <th class="text-end">Giá (VNĐ)</th>
-                   <th class="text-center" style="width: 70px">#</th>
-                 </tr>
-                 </thead>
+ // Hàm format địa chỉ: chỉ lấy Thành phố/Tỉnh, giới hạn 40 ký tự
+ const formatLocation = (address) => {
+   if (!address) return '';
 
-                 <tbody>
-                 <tr v-for="(row, index) in valuationDraft.valuationLandTypes" :key="row._key">
-                   <td>
-                     <template v-if="!row.isCustom">
--                      <select
--                          class="form-select form-select-sm better-input"
--                          v-model="row.landType"
--                          @change="handleLandTypeChange(row, $event)"
--                      >
--                        <option disabled value="">-- Chọn loại đất --</option>
--                        <option>Đất ở tại đô thị</option>
--                        <option>Đất ở tại nông thôn</option>
--                        <option>Đất trồng cây lâu năm</option>
--                        <option>Đất trồng cây hàng năm</option>
--                        <option>Đất thương mại dịch vụ</option>
--                        <option value="__custom__">+ Tự nhập...</option>
--                      </select>
-+                      <div class="dropdown-wrapper relative">
-+                        <select
-+                            class="valuation-select w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-+                            v-model="row.landType"
-+                            @change="handleLandTypeChange(row, $event)"
-+                        >
-+                          <option disabled value="">-- Chọn loại đất --</option>
-+                          <option>Đất ở tại đô thị</option>
-+                          <option>Đất ở tại nông thôn</option>
-+                          <option>Đất trồng cây lâu năm</option>
-+                          <option>Đất trồng cây hàng năm</option>
-+                          <option>Đất thương mại dịch vụ</option>
-+                          <option value="__custom__">+ Tự nhập...</option>
-+                        </select>
-+                        <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400">
-+                          <i class="fa-solid fa-chevron-down"></i>
-+                        </span>
-+                      </div>
-                     </template>
+   const parts = address.split('/!!');
 
-                     <template v-else>
-                       <div class="d-flex align-items-center gap-2">
-                         <input
-                             type="text"
-                             class="form-control form-control-sm better-input"
-                             v-model="row.landType"
-                             placeholder="Nhập loại đất..."
-                         />
-                         <button class="btn btn-sm btn-outline-secondary" @click="row.isCustom = false; row.landType = ''">
-                           ↩
-                         </button>
-                       </div>
-                     </template>
-                   </td>
-
-                   <td>
-                     <input
-                         type="number"
-                         class="form-control form-control-sm text-end better-input"
-                         v-model.number="row.areaFormatted"
-                         @input="handleAreaInput(row, $event)"
-                         placeholder="0"
-                         step="0.1"
-@@ -1040,50 +1045,60 @@ import { showLoading, updateAlertError, updateAlertSuccess, showSuccess, showWar
- import AddressSelector3 from "./my-valuation/components/AddressSelector3.vue";
- import  api  from "../../api/api.js"
- import { useAuthStore } from "../../stores/authStore.js";
- import { useSidebarStore } from "../../stores/sidebarStore.js";
- const authStore = useAuthStore();
- const info = authStore.userInfo;
- const sidebar = useSidebarStore();
-
- /* ---------------------- Tabs ---------------------- */
- const tabs = [
-   { key: "assets", label: "Tài sản" },
-   { key: "detail", label: "Chi tiết" },
-   { key: "requests", label: "Yêu cầu định giá" },
-   { key: "valuation", label: "Định giá" },
- ];
- const activeTab = ref("assets");
- function switchTab(tab) {
-   activeTab.value = tab;
-
-   // Rời khỏi tab định giá hoặc tab chi tiết → clear asset
-   if (tab !== "valuation" && tab !== "detail") {
-     selectedAsset.value = null;
-   }
- }
-
-+const openHistoryId = ref(null);
-+
-+function toggleHistory(id) {
-+  openHistoryId.value = openHistoryId.value === id ? null : id;
-+}
-+
-+function isHistoryOpen(id) {
-+  return openHistoryId.value === id;
-+}
-+
- const editAssetMode = ref(false);
- const editAsset = ref({});
-
- function toggleEditAsset() {
-   if (!editAssetMode.value) {
-     editAsset.value = { ...currentAsset.value }; // copy dữ liệu hiện tại
-     editAssetMode.value = true;
-   } else {
-     editAssetMode.value = false;
-   }
- }
-
- function saveAssetEditsLocal() {
-   // Ghi tạm thay đổi vào currentAsset, không gọi API
-   Object.assign(currentAsset.value, editAsset.value);
-   editAssetMode.value = false;
-   updateAlertSuccess("✅ Đã cập nhật thông tin tài sản (chưa gửi server)");
- }
-
- /* ---------------------- Data Structures ---------------------- */
- const assetsData = reactive({
-   content: [],
-   page: {
-     size: 10,
-     number: 0,
-@@ -1113,50 +1128,56 @@ async function loadAssets(pageNo = 1, pageSize = 10) {
+@@ -840,50 +858,51 @@ const handleSoldProjectsScroll = () => {
+       scrolled: (scrollLeft / scrollableDistance) * 100 + '%'
      });
-
-     Object.assign(assetsData, res.data);
-     console.log("📄 Danh sách tài sản:", assetsData);
-   } catch (err) {
-     const message = err.response?.data || "Lỗi khi tải danh sách tài sản";
-     console.error("⚠️ Lỗi khi tải danh sách tài sản:", err);
-     updateAlertError(message);
+     loadMoreSoldProjects();
    }
+ };
+
+ // Hàm load thêm dự án - THÊM DEBOUNCE
+ const loadMoreSoldProjects = async () => {
+   if (loadingMoreProjects.value || !hasMoreSoldProjects.value) return;
+
+   console.log('Loading more projects, page:', soldProjectsPage.value + 1);
+
+   const nextPage = soldProjectsPage.value + 1;
+   await fetchSoldProjects(nextPage, true);
+ };
+
+ // Hàm refresh danh sách dự án
+ const refreshSoldProjects = () => {
+   soldProjectsPage.value = 0;
+   fetchSoldProjects(0, false);
+ };
+
+ // Data từ address.json
+ const provinces = ref([]);
+ const selectedProvince = ref(null);
++const ownershipChoice = ref('');
+
+ // Fuse.js instances
+ let provinceFuse = null;
+ let wardFuse = null;
+
+ // State cho search và dropdown
+ const provinceSearch = ref(''); // Biến riêng cho search tỉnh
+ const wardSearch = ref(''); // Biến riêng cho search phường
+ const showProvinceDropdown = ref(false);
+ const showWardDropdown = ref(false);
+ const filteredProvinces = ref([]);
+ const filteredWards = ref([]);
+
+ // Khởi tạo dữ liệu địa chỉ
+ const initializeAddressData = () => {
+   provinces.value = addressData.map(province => ({
+     name: province.name,
+     code: province.code,
+     codename: province.codename,
+     phone_code: province.phone_code,
+     wards: province.wards || []
+   }));
+
+   // Khởi tạo Fuse.js cho tỉnh
+   provinceFuse = new Fuse(provinces.value, {
+@@ -971,57 +990,60 @@ const authStore = useAuthStore();
+ const openLoginModal = () => {
+   authStore.openLoginModal()
  }
 
- // Tìm kiếm tài sản
- watch(assetSearch, () => {
-   loadAssets(1);
+ // ========== FORM CONFIG (SET CỨNG) ==========
+ const searchFormTitle = 'Tra cứu thời gian bán trên chính sản phẩm của bạn';
+ const searchFormDescription = 'Nhập thông tin nhà phố của bạn - hệ thống AI của chúng tôi sẽ dự đoán chính xác thời gian bán và giá đề xuất trong vòng 30 ngày.';
+
+ const searchFormPlaceholders = {
+   hoTen: 'Nguyễn Văn A',
+   soDienThoai: '0912 345 678',
+   email: 'example@gmail.com',
+   tinhThanh: 'Chọn tỉnh/thành phố',
+   quanHuyen: 'VD: Quận 2, Quận 7, Bình Thạnh...',
+   diaChiChiTiet: 'VD: Số 123, đường Nguyễn Văn Linh, Phường Tân Phong',
+   soTo: 'VD: 123',
+   soThua: 'VD: 456',
+   dienTichDat: 'VD: 100',
+   dienTichSan: 'VD: 350',
+   quyenSuDungDat: 'Chọn loại quyền sử dụng',
+   ketCauCongTrinh: 'VD: Nhà 4 tầng, 1 hầm, 5 phòng ngủ, 2 WC, nội thất cao cấp',
+   giaMongMuon: 'VD: 15.5'
+ };
+
+ const landUseOptions = [
+-  { value: 'SO_DO', label: 'Sổ đỏ (Sở hữu lâu dài)' },
+-  { value: 'SO_HONG', label: 'Sổ hồng (Nhà nước cho thuê đất)' },
+-  { value: 'HOP_DONG_THUE_DAT', label: 'Hợp đồng thuê đất' },
+-  { value: 'CHUA_CO_SO', label: 'Chưa có sổ' },
+-  { value: 'GIAY_TO_KHAC', label: 'Giấy tờ khác' }
++  { value: 'Sổ đỏ lâu dài', label: 'Sổ đỏ lâu dài' },
++  { value: 'Sổ hồng', label: 'Sổ hồng' },
++  { value: 'Sổ đỏ 50 năm', label: 'Sổ đỏ 50 năm' },
++  { value: 'Đang chờ cấp sổ', label: 'Đang chờ cấp sổ' },
++  { value: 'Giấy tờ khác', label: 'Giấy tờ khác' },
++  { value: 'Khác', label: 'Khác' }
+ ];
+
++const ownershipOptions = ['Sở hữu riêng', 'Sở hữu chung', 'Đồng sở hữu', 'Khác'];
++
+ const priceHint = 'Nhập giá bạn mong muốn bán (đơn vị: tỷ đồng)';
+
+ // ========== SEARCH RESULT CONFIG (SET CỨNG) ==========
+ const searchResultTitle = 'Kết quả dự đoán';
+ const searchResultSubtitle = 'Dựa trên phân tích AI và dữ liệu thị trường thực tế';
+
+ const searchResultAreaInfo = {
+   title: 'Thông tin khu vực',
+   province: 'Tỉnh/Thành phố:',
+   district: 'Quận/Huyện:',
+   highDemand: '✓ Khu vực này có nhu cầu mua cao trong 3 tháng gần đây'
+ };
+
+ const searchResultEstimatedTime = {
+   title: 'Thời gian bán dự kiến',
+   subtitle: 'Dưới mục tiêu 30 ngày'
+ };
+
+ const searchResultSuggestedPrice = {
+   title: 'Giá đề xuất tối ưu',
+   subtitle: 'Giá thị trường chấp nhận: {min} - {max} tỷ',
+   compare: 'So với giá mong muốn',
+   average: 'Giá trung bình khu vực'
+ };
+
+@@ -1354,95 +1376,105 @@ const config = ref({
+         id: 3,
+         name: 'Lê Thị Hương',
+         position: 'Chủ nhà phố, Thủ Đức',
+         quote: 'Dashboard theo dõi tiến độ real-time giúp tôi yên tâm. Mọi thứ minh bạch, hỗ trợ pháp lý rất tận tình. Cảm ơn Thiên Hà Group!',
+         initials: 'LT',
+         color: 'emerald',
+         rating: 5
+       }
+     ]
+   }
  });
 
- /* ---------------------- Detail Asset ---------------------- */
+ // Reactive data cho form tra cứu
+ const searchForm = reactive({
+   hoTen: '',
+   soDienThoai: '',
+   email: '',
+   tinhThanh: '',
+   quanHuyen: '',
+   diaChiChiTiet: '',
+   soTo: '',
+   soThua: '',
+   dienTichDat: '',
+   dienTichSan: '',
+   quyenSuDungDat: '',
++  ownershipRelation: '',
+   ketCauCongTrinh: '',
+   giaMongMuon: ''
+ });
 
- async function viewAssetDetailUpdate(asset){
-   await viewAssetDetail(asset)
-   editAssetMode.value = true;
- }
- const galleryKey = ref(0);
+ // Reactive data cho kết quả
+ const searchResult = reactive({
+   show: false,
+   tinhThanh: '',
+   quanHuyen: '',
+   ngayBan: 0,
+   giaDeXuat: 0,
+   chenhLech: 0,
+   phanTram: 0,
+   minPrice: 0, // Thêm trường min
+   maxPrice: 0  // Thêm trường max
+ });
+ //Dữ liệu gửi về BE
+ const PropertySaleDTO = reactive({
+   fullName: '',
+   phone: '',
+   email: '',
+   province: '',
+   ward: '',
+   addressDetail: '',
+-  soTo: 0,
+-  soThua: 0,
++  soTo: '',
++  soThua: '',
+   dienTichDat: 0,
+   dienTichSan: 0,
+   ketCauCongTrinh: '',
 
- const selectedAsset = ref(null);
-+watch(
-+    () => selectedAsset.value?.id,
-+    () => {
-+      openHistoryId.value = null;
-+    }
-+);
- async function viewAssetDetail(asset) {
-   try {
-     const oldServiceRQID = selectedAsset.value?.serviceRQID;
-     const res = await api.get(`/admin.thg/land-assets/detail/${asset.id}`);
-     console.log("📋 Chi tiết tài sản:", res.data);
+   landUseRight: '',
++  ownershipRelation: '',
+   expectedPrice: 0,
 
+   estimatedSaleTimeDays: 0,
+   suggestedPrice: 0,
+   priceChangePercent: 0,
+   areaAveragePrice: 0,
+   acceptedPriceMin: 0,
+   acceptedPriceMax: 0,
+   saleSuccessRate: 0,
+ })
 
-     selectedAsset.value = null;
+ // ========== COMPUTED PROPERTIES ==========
+ const isLoggedIn = computed(() => authStore.userInfo != null);
 
-     // 🧱 2️⃣ Gán dữ liệu mới từ backend
-     selectedAsset.value = res.data || {};
-     galleryKey.value++;
++watch(ownershipChoice, (val) => {
++  if (val && val !== 'Khác') {
++    searchForm.ownershipRelation = val;
++  } else {
++    searchForm.ownershipRelation = '';
++  }
++});
++
+ // Computed properties cho hiển thị giá
+ const displayedGiaDeXuat = computed(() => {
+   if (isLoggedIn.value) {
+     return `${searchResult.giaDeXuat} tỷ VNĐ`;
+   }
+   return '*******';
+ });
 
+ const displayedChenhLech = computed(() => {
+   if (isLoggedIn.value) {
+     return chenhLechText.value;
+   }
+   return '******';
+ });
 
+ const displayedAveragePrice = computed(() => {
+   if (isLoggedIn.value) {
+     return `${(searchResult.giaDeXuat * 0.96).toFixed(1)} tỷ`;
+   }
+   return '******';
+ });
 
-     // 🧩 3️⃣ Đảm bảo luôn có mảng trống (tránh dính file cũ)
-     ['files', 'fileTables', 'newFiles', 'deletedFileIds'].forEach(k => {
-       if (!Array.isArray(selectedAsset.value[k])) selectedAsset.value[k] = [];
+ const displayedPriceRange = computed(() => {
+   if (isLoggedIn.value) {
+     return `Giá thị trường chấp nhận: ${searchResult.minPrice} - ${searchResult.maxPrice} tỷ`;
+@@ -1724,80 +1756,84 @@ const calculateAndShowResult = async () => {
+     timer: 2000
+   });
+
+   // Scroll đến kết quả
+   setTimeout(() => {
+     const resultEl = document.getElementById('ket-qua-du-doan');
+     if (resultEl) {
+       resultEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+     }
+   }, 100);
+ };
+
+ // Hàm xử lý submit form - đã thêm tính toán min-max và kiểm tra localStorage
+ // Hàm xử lý submit form - đã thêm tính toán min-max và kiểm tra localStorage
+ const handleSearchSubmit = async (e) => {
+   e.preventDefault();
+
+   // Kiểm tra các trường bắt buộc
+   const requiredFields = [
+     'hoTen',
+     'soDienThoai',
+     'email',
+     'tinhThanh',
+     'quanHuyen',
+     'dienTichDat',
+-    'giaMongMuon'
++    'giaMongMuon',
++    'quyenSuDungDat',
++    'ownershipRelation'
+   ];
+
+   // Kiểm tra xem các trường bắt buộc có được điền không
+   const missingFields = requiredFields.filter(field => {
+     const value = searchForm[field];
+
+     // Kiểm tra các trường string
+     if (field === 'hoTen' || field === 'soDienThoai' || field === 'email' ||
+         field === 'tinhThanh' || field === 'quanHuyen') {
+       return !value || String(value).trim() === '';
+     }
+
+     // Kiểm tra các trường số
+     if (field === 'dienTichDat' || field === 'giaMongMuon') {
+       return !value && value !== 0;
+     }
+
+     return !value;
+   });
+
+   if (missingFields.length > 0) {
+     const fieldLabels = {
+       'hoTen': 'Họ tên',
+       'soDienThoai': 'Số điện thoại',
+       'email': 'Email',
+       'tinhThanh': 'Tỉnh/Thành phố',
+       'quanHuyen': 'Quận/Huyện',
+       'dienTichDat': 'Diện tích đất',
+-      'giaMongMuon': 'Giá mong muốn'
++      'giaMongMuon': 'Giá mong muốn',
++      'quyenSuDungDat': 'Quyền sử dụng đất',
++      'ownershipRelation': 'Quan hệ sở hữu'
+     };
+
+     const missingFieldNames = missingFields.map(field => fieldLabels[field] || field).join(', ');
+
+     Swal.fire({
+       title: 'Thiếu thông tin',
+       html: `<div class="text-slate-300 text-sm">
+               <p class="mb-2">Vui lòng điền đầy đủ các trường bắt buộc:</p>
+               <p class="text-amber-300 font-medium">${missingFieldNames}</p>
+             </div>`,
+       icon: 'warning',
+       background: '#0f172a',
+       color: '#e2e8f0',
+       confirmButtonText: 'OK',
+       customClass: {
+         popup: 'rounded-2xl border border-white/10',
+         confirmButton: 'btn-gradient !rounded-xl !px-6 !py-2.5 !text-sm !font-semibold'
+       },
+       buttonsStyling: false
+     });
+     return;
+   }
+
+   // Kiểm tra định dạng email
+   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+@@ -1852,56 +1888,57 @@ const handleSearchSubmit = async (e) => {
+     else heSoKhuVuc = 0.95;
+
+     const giaMongMuon = parseFloat(searchForm.giaMongMuon) || 15;
+     const giaDeXuat = parseFloat((giaMongMuon * heSoKhuVuc).toFixed(1));
+     const minPrice = parseFloat((giaDeXuat * 0.92).toFixed(1));
+     const maxPrice = parseFloat((giaDeXuat * 1.03).toFixed(1));
+
+     // Tính ngày bán dự kiến
+     let ngayBan = 28;
+     if (tinhThanh.includes('Hồ Chí Minh')) ngayBan = Math.floor(Math.random() * 8) + 18;
+     else if (tinhThanh.includes('Hà Nội')) ngayBan = Math.floor(Math.random() * 10) + 20;
+     else ngayBan = Math.floor(Math.random() * 12) + 22;
+     ngayBan = Math.min(ngayBan, 30);
+
+     const phanTram = Math.floor((ngayBan / 30) * 100);
+     const chenhLech = parseFloat(((giaDeXuat / giaMongMuon - 1) * 100).toFixed(1));
+
+     // Cập nhật PropertySaleDTO
+     Object.assign(PropertySaleDTO, {
+       fullName: searchForm.hoTen.trim(),
+       phone: phoneNumber,
+       email: searchForm.email.trim(),
+       province: searchForm.tinhThanh.trim(),
+       ward: searchForm.quanHuyen.trim(),
+       addressDetail: searchForm.diaChiChiTiet?.trim() || '',
+-      soTo: parseInt(searchForm.soTo) || 0,
+-      soThua: parseInt(searchForm.soThua) || 0,
++      soTo: searchForm.soTo?.trim() || '',
++      soThua: searchForm.soThua?.trim() || '',
+       dienTichDat: parseFloat(searchForm.dienTichDat) || 0,
+       dienTichSan: parseFloat(searchForm.dienTichSan) || 0,
+       ketCauCongTrinh: searchForm.ketCauCongTrinh?.trim() || '',
+       landUseRight: searchForm.quyenSuDungDat || '',
++      ownershipRelation: searchForm.ownershipRelation?.trim() || '',
+       expectedPrice: parseFloat(searchForm.giaMongMuon) || 0,
+
+       // Kết quả dự đoán
+       estimatedSaleTimeDays: ngayBan,
+       suggestedPrice: giaDeXuat,
+       priceChangePercent: chenhLech,
+       areaAveragePrice: parseFloat((giaDeXuat * 0.96).toFixed(1)), // Giá trung bình khu vực
+       acceptedPriceMin: minPrice,
+       acceptedPriceMax: maxPrice,
+       saleSuccessRate: phanTram
      });
 
-     console.log("👉 FULL DTO backend trả về:", JSON.stringify(res.data, null, 2));
+     // console.log('PropertySaleDTO sau khi assign:', PropertySaleDTO);
+     // console.log('=== PREPARE DTO END ===');
+   };
 
-     activeTab.value = "detail";
-     editAssetMode.value = false;
-   } catch (err) {
-@@ -2662,67 +2683,138 @@ async function deleteRequest(request) {
-   background: #fbfdff;
- }
- .asset-brief .brief-line { font-size: 13.5px; margin-bottom: 4px; }
- .asset-brief .brief-line span { color: #0b5ed7; font-weight: 600; }
+   // Gọi hàm chuẩn bị dữ liệu
+   preparePropertySaleDTO();
 
- .label-strong { font-weight: 600; color: #0b5ed7; }
- .label-muted { font-weight: 600; color: #6b7280; }
- .better-input {
-   background: #ffffff;
-   border: 1px solid #d0d7e2;
-   box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
-   border-radius: 6px;
-   padding: 8px 12px;
-   font-size: 14px;
- }
- .better-input:focus {
-   border-color: #0b74ff;
-   outline: 0;
-   box-shadow: 0 0 0 0.15rem rgba(11,116,255,.15);
+   // Kiểm tra nếu đã có kết quả trong localStorage
+   const savedResult = getResultFromLocalStorage();
+   if (savedResult) {
+     // Hiển thị kết quả đã lưu
+     Object.assign(searchResult, savedResult);
+     searchResult.show = true;
+@@ -2409,26 +2446,26 @@ onUnmounted(() => {
  }
 
- .table thead th { font-weight: 600; background-color: #f8f9fa; }
- .table td, .table th { vertical-align: middle !important; font-size: 13.5px; padding: 8px 12px; }
- .table-bordered > :not(caption) > * { border-width: 1px; }
-
--.form-control, .form-select {
-+.form-control {
-   min-height: 38px;
+ /* THÊM: Style cho loading indicator khi scroll */
+ .flex.overflow-x-auto::after {
+   content: '';
+   min-width: 20px;
+   flex-shrink: 0;
  }
 
- .form-control-sm {
-   min-height: 32px;
-   padding: 4px 8px;
- }
-
--.accordion-button:not(.collapsed) {
--  background-color: #f8f9fa;
--  color: #0b5ed7;
-+.valuation-history {
-+  display: flex;
-+  flex-direction: column;
-+  gap: 12px;
- }
-
--.accordion-button:focus {
--  border-color: #0b74ff;
--  box-shadow: 0 0 0 0.15rem rgba(11,116,255,.15);
-+.history-item {
-+  border: 1px solid #e2e8f0;
-+  border-radius: 12px;
-+  background: #ffffff;
-+  overflow: hidden;
-+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
-+}
-+
-+.history-toggle {
-+  display: flex;
-+  align-items: center;
-+  justify-content: space-between;
-+  gap: 12px;
-+  width: 100%;
-+  padding: 12px 16px;
-+  background: #f8fafc;
-+  border: none;
-+  text-align: left;
-+  font-weight: 600;
-+  color: #1e293b;
-+  cursor: pointer;
-+  transition: background 0.2s ease, color 0.2s ease;
-+}
-+
-+.history-toggle:hover {
-+  background: #e2e8f0;
-+}
-+
-+.history-toggle-content {
-+  display: flex;
-+  flex-direction: column;
-+  gap: 4px;
-+}
-+
-+.history-toggle-title {
-+  font-size: 0.95rem;
-+}
-+
-+.history-toggle-price {
-+  font-size: 0.85rem;
-+  font-weight: 600;
-+  color: #0f172a;
-+}
-+
-+.history-toggle-icon {
-+  display: inline-flex;
-+  align-items: center;
-+  justify-content: center;
-+  width: 32px;
-+  height: 32px;
-+  border-radius: 999px;
-+  background: #e2e8f0;
-+  color: #475569;
-+  transition: transform 0.2s ease, background 0.2s ease;
-+}
-+
-+.history-toggle-icon.is-open {
-+  transform: rotate(180deg);
-+  background: #cbd5f5;
-+}
-+
-+.history-panel {
-+  max-height: 0;
-+  overflow: hidden;
-+  transition: max-height 0.25s ease;
-+}
-+
-+.history-panel.is-open {
-+  max-height: 2000px;
-+}
-+
-+.history-panel-inner {
-+  padding: 16px;
- }
-
- .info-compact {
-   display: flex;
-   align-items: center;
-   padding: 8px 0;
-   border-bottom: 1px solid #f8f9fa;
- }
-
- .info-compact:last-child {
-   border-bottom: none;
- }
-
- .info-compact .text-muted {
-   min-width: 140px;
-   font-size: 0.875rem;
- }
-
- .info-compact .fw-semibold {
-   font-size: 0.9rem;
-   color: #333;
- }
-
- .better-input {
-   border-radius: 6px;
-@@ -2871,50 +2963,57 @@ h6.fw-bold {
- /* NEW */
- .badge-new {
-   background: rgba(108, 117, 125, 0.18);
-   color: #5c636a;
-   border: 1px solid rgba(108, 117, 125, 0.25);
- }
-
- /* Đang thực hiện */
- .badge-inprogress {
-   background: rgba(255, 193, 7, 0.20);
-   color: #b88600;
-   border: 1px solid rgba(255, 193, 7, 0.35);
- }
-
- /* Mặc định */
- .badge-default {
-   background: rgba(0, 0, 0, 0.08);
-   color: #444;
-   border: 1px solid rgba(0, 0, 0, 0.12);
- }
- .asset-detail .address-selector,
- .asset-detail .dropdown-wrapper {
-   width: 100% !important;
-   display: block;
- }
-+.valuation-select:hover {
-+  border-color: #94a3b8;
-+}
-+
-+.valuation-select:focus-visible {
-+  outline: none;
-+}
- .asset-status-row {
-   display: flex;
-   justify-content: center;   /* ⬅️ căn giữa ngang */
-   align-items: center;       /* ⬅️ căn giữa dọc */
-   gap: 6px;
+ /* THÊM: Đảm bảo SoldProjectCard có z-index cao khi hover */
+ .flex.overflow-x-auto > *:hover {
+   z-index: 10; /* Đảm bảo card hover hiển thị trên các card khác */
    position: relative;
-   bottom: -3px;
-   white-space: nowrap;
-   font-size: 11.5px;
-   border-radius: 10px;
-
-   text-overflow: ellipsis;
-   overflow: hidden;
-
-   text-align: center; /* không có tác dụng khi dùng flex */
  }
 
+ /* THÊM: Tăng khoảng cách giữa các card */
+ .flex.overflow-x-auto {
+   gap: 1.5rem; /* Thay vì gap-4 (16px) -> 24px */
+ }
 
- .asset-status-pill {
-   font-size: 13px !important; /* chữ trạng thái to hơn */
-   padding: 4px 10px;          /* kích thước nhỏ gọn */
-   border-radius: 12px;
-   white-space: nowrap;
-   position: relative;
-   bottom:-5px;/* không cho xuống dòng */
+ /* Style cho icon ẩn giá */
+ button.text-slate-400:hover {
+   transform: scale(1.1);
+   transition: transform 0.2s ease;
+ }
+-</style>
+\ No newline at end of file
++</style>

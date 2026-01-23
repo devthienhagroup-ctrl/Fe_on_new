@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from "vue";
 
-const url = ref("http://localhost:8084"); // không dùng nhưng giữ nguyên UI
+const url = ref("https://thienhagroup.vn"); // không dùng nhưng giữ nguyên UI
 const total = ref(20);
 const count = ref(0);
 const isRunning = ref(false);
@@ -24,7 +24,7 @@ async function simulateUser() {
               name: "page_view",
               params: {
                 page_title: "Fake User Test",
-                page_location: "http://localhost:8084/test-spam",
+                page_location: "https://thienhagroup.vn/test-spam",
                 page_referrer: ""
               }
             }

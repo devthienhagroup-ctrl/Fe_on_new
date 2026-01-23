@@ -285,6 +285,24 @@
                 </select>
               </div>
 
+              <!-- Quan hệ sở hữu -->
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1.5">Quan hệ sở hữu <span class="text-rose-500">*</span></label>
+                <select required v-model="ownershipChoice"
+                        class="w-full rounded-xl bg-slate-900/70 border border-white/10 px-4 py-3
+                 text-sm text-slate-50 focus:outline-none focus:ring-2 focus:ring-purple-500/50
+                 appearance-none">
+                  <option value="" disabled selected class="text-slate-500">Chọn quan hệ sở hữu</option>
+                  <option v-for="option in ownershipOptions" :key="option" :value="option" class="text-white bg-slate-900">
+                    {{ option }}
+                  </option>
+                </select>
+                <input v-if="ownershipChoice === 'Khác'" type="text" required v-model="searchForm.ownershipRelation"
+                       class="mt-3 w-full rounded-xl bg-slate-900/70 border border-white/10 px-4 py-3
+                    text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                       placeholder="Nhập quan hệ sở hữu khác...">
+              </div>
+
               <!-- Kết cấu -->
               <div>
                 <label class="block text-sm font-medium text-slate-300 mb-1.5">Kết cấu công trình</label>
@@ -466,7 +484,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                   </svg>
-                  Phân tích chi tiết
+                  {{ isLoggedIn ? config.buttons.viewDetails.text : config.buttons.loginToView.text }}
                 </button>
                 <p class="text-xs text-slate-500 mt-3">{{ isLoggedIn ? searchResultSavedNotice : 'Đăng nhập để xem giá và lưu kết quả' }}</p>
               </div>
@@ -696,7 +714,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, onUnmounted, nextTick } from "vue";
+import { computed, onMounted, reactive, ref, onUnmounted, nextTick, watch } from "vue";
 import GlassCard from "../../UI/GlassCard.vue";
 import TestimonialCard from "../../UI/TestimonialCard.vue";
 import SoldProjectCard from "../../UI/SoldProjectCard.vue";
@@ -862,6 +880,7 @@ const refreshSoldProjects = () => {
 // Data từ address.json
 const provinces = ref([]);
 const selectedProvince = ref(null);
+const ownershipChoice = ref('');
 
 // Fuse.js instances
 let provinceFuse = null;
@@ -993,12 +1012,15 @@ const searchFormPlaceholders = {
 };
 
 const landUseOptions = [
-  { value: 'SO_DO', label: 'Sổ đỏ (Sở hữu lâu dài)' },
-  { value: 'SO_HONG', label: 'Sổ hồng (Nhà nước cho thuê đất)' },
-  { value: 'HOP_DONG_THUE_DAT', label: 'Hợp đồng thuê đất' },
-  { value: 'CHUA_CO_SO', label: 'Chưa có sổ' },
-  { value: 'GIAY_TO_KHAC', label: 'Giấy tờ khác' }
+  { value: 'Sổ đỏ lâu dài', label: 'Sổ đỏ lâu dài' },
+  { value: 'Sổ hồng', label: 'Sổ hồng' },
+  { value: 'Sổ đỏ 50 năm', label: 'Sổ đỏ 50 năm' },
+  { value: 'Đang chờ cấp sổ', label: 'Đang chờ cấp sổ' },
+  { value: 'Giấy tờ khác', label: 'Giấy tờ khác' },
+  { value: 'Khác', label: 'Khác' }
 ];
+
+const ownershipOptions = ['Sở hữu riêng', 'Sở hữu chung', 'Đồng sở hữu', 'Khác'];
 
 const priceHint = 'Nhập giá bạn mong muốn bán (đơn vị: tỷ đồng)';
 
@@ -1376,6 +1398,7 @@ const searchForm = reactive({
   dienTichDat: '',
   dienTichSan: '',
   quyenSuDungDat: '',
+  ownershipRelation: '',
   ketCauCongTrinh: '',
   giaMongMuon: ''
 });
@@ -1400,13 +1423,14 @@ const PropertySaleDTO = reactive({
   province: '',
   ward: '',
   addressDetail: '',
-  soTo: 0,
-  soThua: 0,
+  soTo: '',
+  soThua: '',
   dienTichDat: 0,
   dienTichSan: 0,
   ketCauCongTrinh: '',
 
   landUseRight: '',
+  ownershipRelation: '',
   expectedPrice: 0,
 
   estimatedSaleTimeDays: 0,
@@ -1420,6 +1444,14 @@ const PropertySaleDTO = reactive({
 
 // ========== COMPUTED PROPERTIES ==========
 const isLoggedIn = computed(() => authStore.userInfo != null);
+
+watch(ownershipChoice, (val) => {
+  if (val && val !== 'Khác') {
+    searchForm.ownershipRelation = val;
+  } else {
+    searchForm.ownershipRelation = '';
+  }
+});
 
 // Computed properties cho hiển thị giá
 const displayedGiaDeXuat = computed(() => {
@@ -1746,7 +1778,9 @@ const handleSearchSubmit = async (e) => {
     'tinhThanh',
     'quanHuyen',
     'dienTichDat',
-    'giaMongMuon'
+    'giaMongMuon',
+    'quyenSuDungDat',
+    'ownershipRelation'
   ];
 
   // Kiểm tra xem các trường bắt buộc có được điền không
@@ -1775,7 +1809,9 @@ const handleSearchSubmit = async (e) => {
       'tinhThanh': 'Tỉnh/Thành phố',
       'quanHuyen': 'Quận/Huyện',
       'dienTichDat': 'Diện tích đất',
-      'giaMongMuon': 'Giá mong muốn'
+      'giaMongMuon': 'Giá mong muốn',
+      'quyenSuDungDat': 'Quyền sử dụng đất',
+      'ownershipRelation': 'Quan hệ sở hữu'
     };
 
     const missingFieldNames = missingFields.map(field => fieldLabels[field] || field).join(', ');
@@ -1874,12 +1910,13 @@ const handleSearchSubmit = async (e) => {
       province: searchForm.tinhThanh.trim(),
       ward: searchForm.quanHuyen.trim(),
       addressDetail: searchForm.diaChiChiTiet?.trim() || '',
-      soTo: parseInt(searchForm.soTo) || 0,
-      soThua: parseInt(searchForm.soThua) || 0,
+      soTo: searchForm.soTo?.trim() || '',
+      soThua: searchForm.soThua?.trim() || '',
       dienTichDat: parseFloat(searchForm.dienTichDat) || 0,
       dienTichSan: parseFloat(searchForm.dienTichSan) || 0,
       ketCauCongTrinh: searchForm.ketCauCongTrinh?.trim() || '',
       landUseRight: searchForm.quyenSuDungDat || '',
+      ownershipRelation: searchForm.ownershipRelation?.trim() || '',
       expectedPrice: parseFloat(searchForm.giaMongMuon) || 0,
 
       // Kết quả dự đoán
@@ -2002,8 +2039,8 @@ const handleViewPrice = () => {
     showLoginPrompt('Đăng nhập để xem giá đề xuất và phân tích chi tiết.');
   }
 };
-import { useRouter } from "vue-router";
 
+import { useRouter } from "vue-router";
 const router = useRouter();
 // Hàm xử lý khi nhấn nút xem chi tiết
 const handleViewDetails = () => {
