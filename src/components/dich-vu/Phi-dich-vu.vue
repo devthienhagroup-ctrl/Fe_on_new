@@ -8,7 +8,6 @@
         </div>
         <div class="min-w-0">
           <div class="brand-title">Quản lý Hợp đồng</div>
-          <div class="brand-sub">Upgrade Demo UI • Responsive • Không sửa HĐ • Có xem chi tiết</div>
         </div>
       </div>
 
@@ -20,36 +19,7 @@
       </div>
     </div>
     <!-- KPIs -->
-    <div class="kpi-row mt-3">
-      <div class="stat-card kpi-total">
-        <div class="stat-card-content">
-          <h5><i class="fa-solid fa-file-signature"></i> Tổng hợp đồng</h5>
-          <div class="stat-number">{{ totalElements }}</div>
-        </div>
-        <i class="fa-solid fa-file-signature stat-icon"></i>
-      </div>
-      <div class="stat-card kpi-revenue">
-        <div class="stat-card-content">
-          <h5><i class="fa-solid fa-chart-line"></i> Tổng doanh thu</h5>
-          <div class="stat-number">{{ formatMoney(totalDoanhThu) }}</div>
-        </div>
-        <i class="fa-solid fa-chart-line stat-icon"></i>
-      </div>
-      <div class="stat-card kpi-adjust">
-        <div class="stat-card-content">
-          <h5><i class="fa-solid fa-sliders"></i> Tổng điều chỉnh</h5>
-          <div class="stat-number">{{ formatMoney(totalDieuChinh) }}</div>
-        </div>
-        <i class="fa-solid fa-sliders stat-icon"></i>
-      </div>
-      <div class="stat-card kpi-sales">
-        <div class="stat-card-content">
-          <h5><i class="fa-solid fa-sack-dollar"></i> Tổng doanh số</h5>
-          <div class="stat-number">{{ formatMoney(totalDoanhSo) }}</div>
-        </div>
-        <i class="fa-solid fa-sack-dollar stat-icon"></i>
-      </div>
-    </div>
+
     <!-- TABS -->
     <div class="tabs-shell">
       <div class="tabs">
@@ -68,11 +38,41 @@
 
       <!-- PANEL TAB 1 -->
       <div class="panel attached" v-show="activeTab === 1">
+        <div class="kpi-row mt-3 px-3">
+          <div class="stat-card kpi-total">
+            <div class="stat-card-content">
+              <h5><i class="fa-solid fa-file-signature"></i> Tổng hợp đồng</h5>
+              <div class="stat-number">{{ totalElements }}</div>
+            </div>
+            <i class="fa-solid fa-file-signature stat-icon"></i>
+          </div>
+          <div class="stat-card kpi-revenue">
+            <div class="stat-card-content">
+              <h5><i class="fa-solid fa-chart-line"></i> Tổng doanh thu</h5>
+              <div class="stat-number">{{ formatMoney(totalDoanhThu) }}</div>
+            </div>
+            <i class="fa-solid fa-chart-line stat-icon"></i>
+          </div>
+          <div class="stat-card kpi-adjust">
+            <div class="stat-card-content">
+              <h5><i class="fa-solid fa-sliders"></i> Tổng điều chỉnh</h5>
+              <div class="stat-number">{{ formatMoney(totalDieuChinh) }}</div>
+            </div>
+            <i class="fa-solid fa-sliders stat-icon"></i>
+          </div>
+          <div class="stat-card kpi-sales">
+            <div class="stat-card-content">
+              <h5><i class="fa-solid fa-sack-dollar"></i> Tổng doanh số</h5>
+              <div class="stat-number">{{ formatMoney(totalDoanhSo) }}</div>
+            </div>
+            <i class="fa-solid fa-sack-dollar stat-icon"></i>
+          </div>
+        </div>
         <div class="panel-h">
           <div class="tools">
             <div class="input select filter-item filter-search" :class="{ active: searchQuery }">
               <label>Tiềm kiếm</label>
-              <i class="fa-solid fa-magnifying-glass mt-3"></i>
+              <i class="fa-solid fa-magnifying-glass mt-2"></i>
               <input v-model="searchQuery" type="text" placeholder="Tìm theo mã HĐ / khách / người tạo...">
             </div>
 
@@ -116,15 +116,15 @@
                 <tr>
                   <th style="width:150px">Mã HĐ</th>
                   <th>Khách hàng</th>
-                  <th style="width:260px">Dịch vụ</th>
-                  <th style="width:160px">Giá tài sản</th>
+                  <th style="width:240px">Dịch vụ</th>
+                  <th style="width:140px">Giá tài sản</th>
                   <th style="width:140px">Giá sau giảm</th>
                   <th style="width:140px">Doanh thu</th>
                   <th style="width:140px">Doanh số</th>
                   <th style="width:120px">Trạng thái</th>
                   <th style="width:160px">Nhân viên tạo</th>
-                  <th style="width:160px">Ngày tạo</th>
-                  <th style="width:230px">Thao tác</th>
+                  <th style="width:100px">Ngày tạo</th>
+                  <th style="width:80px">Thao tác</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -181,21 +181,9 @@
                   </td>
                   <td class="mono">{{ formatCreatedAt(contract.ngayTao) }}</td>
                   <td>
-                    <div class="actions">
-                      <div class="icon-btn icon-view" title="Xem chi tiết" @click="openDetail(contract)">
-                        <i class="fa-solid fa-eye"></i>
-                      </div>
-                      <div class="icon-btn icon-pay" title="Đóng phí" @click="openPay(contract)">
-                        <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                      </div>
-                      <div class="icon-btn icon-refund" title="Hoàn phí" @click="openRefund(contract)">
-                        <i class="fa-solid fa-arrow-rotate-left"></i>
-                      </div>
-                      <div class="icon-btn icon-adjust" title="Điều chỉnh" @click="openAdjust(contract)">
-                        <i class="fa-solid fa-sliders"></i>
-                      </div>
-                      <div class="icon-btn icon-del" title="Xóa" @click="openDelete(contract)">
-                        <i class="fa-solid fa-trash"></i>
+                    <div class="actions" @click.stop>
+                      <div class="icon-btn icon-menu" title="Tác vụ" @click.stop="toggleActionMenu(contract.id, $event)">
+                        <i class="fa-solid fa-ellipsis"></i>
                       </div>
                     </div>
                   </td>
@@ -205,6 +193,57 @@
             </div>
           </div>
         </div>
+        <teleport to="body">
+          <div
+            v-if="openActionMenu && activeActionContract"
+            class="action-menu action-menu--floating"
+            :style="actionMenuPositionStyle"
+            @click.stop
+          >
+            <div class="action-item" @click="closeActionMenu(); openDetail(activeActionContract)">
+              <span class="icon-btn icon-view" aria-hidden="true">
+                <i class="fa-solid fa-eye"></i>
+              </span>
+              <span class="action-label">Chi tiết</span>
+            </div>
+            <div
+              class="action-item"
+              :class="{ disabled: !isActiveContract(activeActionContract) }"
+              @click="isActiveContract(activeActionContract) && (closeActionMenu(), openPay(activeActionContract))"
+            >
+              <span class="icon-btn icon-pay" aria-hidden="true">
+                <i class="fa-solid fa-circle-dollar-to-slot"></i>
+              </span>
+              <span class="action-label">Đóng phí</span>
+            </div>
+            <div
+              class="action-item"
+              :class="{ disabled: !isActiveContract(activeActionContract) }"
+              @click="isActiveContract(activeActionContract) && (closeActionMenu(), openRefund(activeActionContract))"
+            >
+              <span class="icon-btn icon-refund" aria-hidden="true">
+                <i class="fa-solid fa-arrow-rotate-left"></i>
+              </span>
+              <span class="action-label">Hoàn phí</span>
+            </div>
+            <div
+              class="action-item"
+              :class="{ disabled: !isActiveContract(activeActionContract) }"
+              @click="isActiveContract(activeActionContract) && (closeActionMenu(), openAdjust(activeActionContract))"
+            >
+              <span class="icon-btn icon-adjust" aria-hidden="true">
+                <i class="fa-solid fa-sliders"></i>
+              </span>
+              <span class="action-label">Điều chỉnh</span>
+            </div>
+            <div class="action-item" @click="closeActionMenu(); openDelete(activeActionContract)">
+              <span class="icon-btn icon-del" aria-hidden="true">
+                <i class="fa-solid fa-trash"></i>
+              </span>
+              <span class="action-label">Xóa</span>
+            </div>
+          </div>
+        </teleport>
         <div class="pagination">
           <div class="muted tiny">
             Hiển thị {{ pageStart }}-{{ pageEnd }} / {{ totalElements }}
@@ -227,22 +266,7 @@
 
       <!-- PANEL TAB 2 -->
       <div class="panel attached" v-show="activeTab === 2">
-        <div class="panel-h">
-          <div class="panel-title">
-            <i class="fa-solid fa-chart-simple"></i>
-            Thống kê (để trống)
-          </div>
-        </div>
-        <div class="panel-b">
-          <div class="text-center py-16">
-            <div class="mx-auto w-12 h-12 rounded-2xl grid place-items-center text-white shadow-lg"
-                 style="background: var(--info-gradient);">
-              <i class="fa-solid fa-chart-line"></i>
-            </div>
-            <div class="mt-3 font-extrabold">Tab thống kê</div>
-            <div class="mt-2 muted">Bạn yêu cầu để trống. Khi cần mình làm dashboard Chart.js sau.</div>
-          </div>
-        </div>
+        <ContractStatsDashboard/>
       </div>
     </div>
 
@@ -788,50 +812,50 @@
                 <div class="text-sm font-extrabold">{{ detailContract?.maHopDong }} • {{ detailContract?.tenKhachHang }}</div>
                 <div class="muted tiny mt-1">{{ detailContract?.tenDichVu }} • Ngày tạo {{ formatDateValue(detailContract?.ngayTao) }}</div>
 
-                <div class="grid grid-cols-2 gap-2 mt-3">
+                  <div class="grid grid-cols-3 gap-2 mt-3">
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Giá gốc</div>
-                    <div class="v price p2">{{ formatMoney(detailContract?.giaDichVuGoc || 0) }}</div>
+                    <div class="v price p2 font-extrabold">{{ formatMoney(detailContract?.giaDichVuGoc || 0) }}</div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Phí giảm</div>
-                    <div class="v price p4">{{ formatMoney(detailContract?.phiGiam || 0) }}</div>
+                    <div class="v price p4 font-extrabold">{{ formatMoney(detailContract?.phiGiam || 0) }}</div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Giá sau giảm</div>
-                    <div class="v price p1">{{ formatMoney(detailContract?.giaSauGiam || 0) }}</div>
+                    <div class="v price p1 font-extrabold">{{ formatMoney(detailContract?.giaSauGiam || 0) }}</div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Giá tài sản ký</div>
-                    <div class="v price p3">{{ formatMoney(detailContract?.giaTaiSanKy || 0) }}</div>
+                    <div class="v price p3 font-extrabold">{{ formatMoney(detailContract?.giaTaiSanKy || 0) }}</div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Doanh thu</div>
-                    <div class="v price p1">{{ formatMoney(getDoanhThuRow(detailContract)) }}</div>
+                    <div class="v price p1 font-extrabold">{{ formatMoney(getDoanhThuRow(detailContract)) }}</div>
                     <div class="muted tiny mt-1">Tổng hoàn: <span class="mono">{{ formatMoney(getTongHoan(detailContract)) }}</span></div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Doanh số</div>
-                    <div class="v price p3">{{ formatMoney(getDoanhSoRow(detailContract)) }}</div>
+                    <div class="v price p3 font-extrabold">{{ formatMoney(getDoanhSoRow(detailContract)) }}</div>
                     <div class="muted tiny mt-1">Tổng điều chỉnh: <span class="mono">{{ formatMoney(getTongDieuChinh(detailContract)) }}</span></div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Doanh thu</div>
-                    <div class="v price p1">{{ formatMoney(getDoanhThuRow(detailContract)) }}</div>
+                    <div class="v price p1 font-extrabold">{{ formatMoney(getDoanhThuRow(detailContract)) }}</div>
                     <div class="muted tiny mt-1">Tổng hoàn: <span class="mono">{{ formatMoney(getTongHoan(detailContract)) }}</span></div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Doanh số</div>
-                    <div class="v price p3">{{ formatMoney(getDoanhSoRow(detailContract)) }}</div>
+                    <div class="v price p3 font-extrabold">{{ formatMoney(getDoanhSoRow(detailContract)) }}</div>
                     <div class="muted tiny mt-1">Tổng điều chỉnh: <span class="mono">{{ formatMoney(getTongDieuChinh(detailContract)) }}</span></div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Ngày ký</div>
-                    <div class="v mono">{{ formatDateValue(detailContract?.ngayKy) }}</div>
+                    <div class="v mono font-extrabold">{{ formatDateValue(detailContract?.ngayKy) }}</div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Người tạo</div>
-                    <div class="v">{{ detailContract?.nguoiTaoFullName || '-' }}</div>
+                    <div class="v font-extrabold">{{ detailContract?.nguoiTaoFullName || '-' }}</div>
                   </div>
                 </div>
               </div>
@@ -996,7 +1020,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import api from '/src/api/api.js'
 import {
   confirmWithInput,
@@ -1006,6 +1030,7 @@ import {
   updateAlertError,
   updateAlertSuccess
 } from '/src/assets/js/alertService.js'
+import ContractStatsDashboard from "../thiet-kegiandien/ContractStatsDashboard.vue";
 const todayISO = () => {
   const d = new Date()
   const yyyy = d.getFullYear()
@@ -1072,6 +1097,8 @@ const newContract = ref({
 const showModal = ref(null)
 const currentContract = ref(null)
 const detailContract = ref(null)
+const openActionMenu = ref(null)
+const actionMenuPosition = ref({ top: 0, left: 0 })
 
 // Payment form
 const payment = ref({
@@ -1960,6 +1987,45 @@ const saveAdjustment = async () => {
   }
 }
 
+const isActiveContract = (contract) => contract?.trangThaiHopDong === 'DANG_HIEU_LUC'
+
+const activeActionContract = computed(() =>
+  contracts.value.find((contract) => contract.id === openActionMenu.value)
+)
+
+const actionMenuPositionStyle = computed(() => ({
+  top: `${actionMenuPosition.value.top}px`,
+  left: `${actionMenuPosition.value.left}px`
+}))
+
+const toggleActionMenu = (contractId, event) => {
+  if (openActionMenu.value === contractId) {
+    openActionMenu.value = null
+    return
+  }
+  const target = event?.currentTarget
+  if (target) {
+    const rect = target.getBoundingClientRect()
+    const menuWidth = 200
+    const gap = 12
+    const left = Math.max(12, rect.left - menuWidth - gap)
+    const top = Math.min(
+      window.innerHeight - 12,
+      Math.max(12, rect.top + rect.height / 2)
+    )
+    actionMenuPosition.value = { top, left }
+  }
+  openActionMenu.value = contractId
+}
+
+const closeActionMenu = () => {
+  openActionMenu.value = null
+}
+
+const handleDocumentClick = () => {
+  openActionMenu.value = null
+}
+
 // Detail view
 const openDetail = (contract) => {
   currentContract.value = contract
@@ -1970,6 +2036,7 @@ const openDetail = (contract) => {
     dieuChinhHopDongs: contract?.dieuChinh || []
   }
   openModal('modalDetail')
+  console.log(contract)
   fetchDetailContract(contract.id)
 }
 
@@ -2284,9 +2351,14 @@ const init3Samples = () => {
 
 // Lifecycle
 onMounted(async () => {
+  document.addEventListener('click', handleDocumentClick)
   await Promise.all([fetchServices(), fetchSegments()])
   await fetchContracts()
   resetContractForm()
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleDocumentClick)
 })
 </script>
 
@@ -2545,14 +2617,14 @@ onMounted(async () => {
   display:grid;
   grid-template-columns: 4.2fr 220px 190px  190px auto;
   gap: 10px;
-  align-items:end;
+  align-items:start;
   width: 100%;
   max-width: 1280px;
-  margin-left: auto;
+  margin-right: auto;
 }
 @media (max-width: 1100px){
   .tools{ grid-template-columns: 1fr 220px 190px; }
-  .tools .tools-actions{ grid-column: 1 / -1; justify-content:flex-end; }
+  .tools .tools-actions{ grid-column: 1 / -1; justify-content:flex-start; }
 }
 @media (max-width: 720px){
   .tools{ grid-template-columns: 1fr; max-width: 100%; }
@@ -2864,11 +2936,55 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
    ACTION ICONS - chỉnh sửa cho 5 nút nằm trên 1 hàng
 ========================= */
 .actions{
+  position: relative;
   display:flex;
-  gap:4px; /* Giảm khoảng cách giữa các nút */
+  justify-content:center;
   align-items:center;
-  flex-wrap:nowrap; /* Không cho wrap */
-  min-width: 180px; /* Đảm bảo đủ chỗ cho 5 nút */
+  min-width: 40px;
+}
+.action-menu{
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(20,30,48,.12);
+  box-shadow: 0 14px 26px rgba(20,30,48,.12);
+  z-index: 2000;
+  width: 200px;
+}
+.action-menu--floating{
+  position: fixed;
+  transform: translateY(-50%);
+}
+.action-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: var(--t);
+}
+.action-item:hover{
+  background: rgba(20,30,48,.04);
+}
+.action-label{
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.action-item.disabled{
+  cursor: not-allowed;
+  opacity: .55;
+  pointer-events: none;
+}
+.action-item.disabled .icon-btn{
+  filter: grayscale(1);
+}
+.icon-menu{
+  --ig: var(--dark-gradient);
+  background: linear-gradient(135deg, rgba(20,30,48,.12), rgba(36,59,85,.08));
 }
 .icon-btn{
   width:32px; /* Giảm kích thước nút */
@@ -2912,7 +3028,15 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
   --ig: var(--danger-gradient);
   background: linear-gradient(135deg, rgba(255,88,88,.18), rgba(240,152,25,.10));
 }
+.icon-btn.disabled{
+  cursor: not-allowed;
+  filter: grayscale(1);
+  opacity: .5;
+  box-shadow: none;
+  pointer-events: none;
+}
 .icon-btn:hover{ transform: translateY(-1px); filter: brightness(1.02); }
+.icon-btn.disabled:hover{ transform: none; filter: grayscale(1); }
 .icon-view:hover{ border-color: rgba(79,172,254,.40); box-shadow: 0 12px 20px rgba(79,172,254,.20); }
 .icon-pay:hover{ border-color: rgba(67,233,123,.42); box-shadow: 0 12px 20px rgba(67,233,123,.18); }
 .icon-refund:hover{ border-color: rgba(240,147,251,.42); box-shadow: 0 12px 20px rgba(245,87,108,.18); }
