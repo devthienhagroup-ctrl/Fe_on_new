@@ -1211,6 +1211,7 @@ const customerSearchError = ref('')
 const customerSearchTimer = ref(null)
 const lastCustomerKeyword = ref('')
 const suppressCustomerSearch = ref(false)
+const CONTRACT_DRAFT_KEY = 'contractDraftFromAppointment'
 
 // New contract form
 const newContract = ref({
@@ -1671,6 +1672,50 @@ const fetchContracts = async () => {
 
 const getServiceById = (serviceId) => {
   return serviceOptions.value.find(s => String(s.id || s.name) === String(serviceId)) || null
+}
+
+const applyContractDraftFromAppointment = async () => {
+  const raw = localStorage.getItem(CONTRACT_DRAFT_KEY)
+  if (!raw) return
+  localStorage.removeItem(CONTRACT_DRAFT_KEY)
+
+  let draft = null
+  try {
+    draft = JSON.parse(raw)
+  } catch (e) {
+    return
+  }
+
+  if (!draft?.phone && !draft?.serviceId) return
+
+  resetContractForm()
+
+  if (draft?.serviceId) {
+    const matchedService = getServiceById(draft.serviceId)
+    if (matchedService) {
+      newContract.value.serviceId = matchedService.id || matchedService.name
+    }
+  }
+
+  openModal('modalContract')
+  updateServicePrice()
+
+  const phone = String(draft?.phone || '').trim()
+  if (!phone) return
+
+  suppressCustomerSearch.value = true
+  customerSearch.value = phone
+  suppressCustomerSearch.value = false
+
+  await fetchCustomerSearch(phone)
+  const matchedCustomer = customerSearchResults.value.find(
+    (customer) => String(customer.phone || customer.raw?.phone || '') === phone
+  )
+  if (matchedCustomer) {
+    selectCustomer(matchedCustomer)
+  } else if (customerSearchResults.value.length === 1) {
+    selectCustomer(customerSearchResults.value[0])
+  }
 }
 
 const getSegmentsByService = (serviceId) => {
@@ -2629,8 +2674,9 @@ const init3Samples = () => {
 onMounted(async () => {
   document.addEventListener('click', handleDocumentClick)
   await Promise.all([fetchServices(), fetchSegments()])
-  await fetchContracts()
   resetContractForm()
+  await applyContractDraftFromAppointment()
+  await fetchContracts()
 })
 
 onUnmounted(() => {

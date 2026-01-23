@@ -343,6 +343,10 @@ const editForm = reactive({
   updateReason: '',
   consultStatus: null
 })
+const editContext = reactive({
+  phone: '',
+  serviceId: null,
+})
 
 function makeHistory(actor, action, desc) {
   return { ts: nowISO(), actor, action, desc }
@@ -574,6 +578,7 @@ function mapAppointmentDetailFromApi(dto) {
     status: dto.status,
     consultStatus: dto.consultStatus,
     rating: dto.rating,
+    maDichVu: dto.maDichVu ?? dto.serviceId ?? dto.dichVuId ?? null,
     tenDichVu: dto.tenDichVu ?? dto.serviceName ?? dto.dichVuName ?? '',
     mauDichVu: dto.mauDichVu ?? dto.serviceColor ?? dto.dichVuColor ?? '',
     note: dto.note,
@@ -968,10 +973,12 @@ async function openEditModal(id) {
     editForm.time = mapped.time || ''
     editForm.consultantId = mapped.consultantId || null
     editForm.status = mapped.status || 'WAITING'
-    editForm.rating = mapped.rating ?? null
+    editForm.rating = mapped.maDichVu ?? mapped.rating ?? null
     editForm.note = mapped.note || ''
     editForm.customerNote = mapped.customerNote || ''
     editForm.consultStatus = mapped.consultStatus || null
+    editContext.phone = mapped.phone || ''
+    editContext.serviceId = mapped.maDichVu ?? mapped.rating ?? null
     applyServiceDefaults()
 
     renderHistory(mapped)
@@ -1018,8 +1025,20 @@ async function saveEditModal() {
     if (res.data.success) {
       updateAlertSuccess('✅ Cập nhật lịch hẹn thành công')
       await refreshAppointmentsAndStats()
+      const temp = editForm.consultStatus;
       closeEditModal()
       // reload list / calendar nếu cần
+      if ( temp === ConsultStatus.SUCCESS) {
+        const shouldCreateContract = window.confirm('Buổi hẹn thành công. Tạo hợp đồng cho khách hàng?')
+        if (shouldCreateContract) {
+          const payloadDraft = {
+            phone: editContext.phone || null,
+            serviceId: editForm.rating ?? editContext.serviceId ?? null,
+          }
+          localStorage.setItem('contractDraftFromAppointment', JSON.stringify(payloadDraft))
+          window.location.assign('/-thg/dich-vu')
+        }
+      }
     } else {
       updateAlertError('❌ Cập nhật thất bại:', res.data.message)
       alert(res.data.message)
