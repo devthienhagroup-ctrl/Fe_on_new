@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, nextTick, watch, computed } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import api from '/src/api/api.js'
 import FileNew from './File.vue'
@@ -146,10 +146,65 @@ const RATING = {
   BAN_NHANH_30N: { label: 'Bán nhanh 30 ngày', cls: 'rt-bn30' },
   BAN_GP: { label: 'Bán giải pháp', cls: 'rt-bgp' },
 }
-function getRatingInfo(value) {
-  return RATING[value] || {
-    label: value || 'Chưa có',
-    cls: 'rt-unknown',
+
+const services = ref([])
+const servicesLoading = ref(false)
+const serviceOptions = computed(() => services.value)
+
+const normalizeColor = (color) => (color ? String(color).trim() : '')
+
+function parseColorToRgb(color) {
+  if (!color) return null
+  const hex = color.startsWith('#') ? color.slice(1) : null
+  if (hex) {
+    const value = hex.length === 3
+      ? hex.split('').map((c) => c + c).join('')
+      : hex
+    if (value.length !== 6) return null
+    const r = Number.parseInt(value.slice(0, 2), 16)
+    const g = Number.parseInt(value.slice(2, 4), 16)
+    const b = Number.parseInt(value.slice(4, 6), 16)
+    return [r, g, b]
+  }
+  const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i)
+  if (rgbMatch) {
+    return [Number(rgbMatch[1]), Number(rgbMatch[2]), Number(rgbMatch[3])]
+  }
+  return null
+}
+
+function getServiceById(serviceId) {
+  if (!serviceId) return null
+  return serviceOptions.value.find((s) => String(s.id ?? s.name) === String(serviceId)) || null
+}
+
+function getServiceDisplay(appt) {
+  const service = getServiceById(appt?.rating)
+  const label =
+    appt?.tenDichVu ||
+    appt?.serviceName ||
+    service?.name ||
+    RATING[appt?.rating]?.label ||
+    appt?.rating ||
+    'Chưa có'
+  const color = normalizeColor(
+    appt?.mauDichVu ||
+    appt?.serviceColor ||
+    service?.mauDichVu ||
+    service?.color
+  )
+  return { label, color }
+}
+
+function getServiceChipStyle(appt) {
+  const { color } = getServiceDisplay(appt)
+  const rgb = parseColorToRgb(color)
+  if (!rgb) return {}
+  const [r, g, b] = rgb
+  return {
+    backgroundColor: `rgba(${r}, ${g}, ${b}, 0.18)`,
+    color: `rgb(${r}, ${g}, ${b})`,
+    borderColor: `rgba(${r}, ${g}, ${b}, 0.28)`,
   }
 }
 
@@ -273,7 +328,7 @@ const createForm = reactive({
   staff: '',
   consultant: 'Tư vấn 1',
   note: '',
-  rating: 'BAN_NHANH_30N'
+  rating: null,
 })
 
 const editForm = reactive({
@@ -282,7 +337,7 @@ const editForm = reactive({
   time: '',
   consultantId: null,
   status: 'WAITING',
-  rating: 'BAN_NHANH_30N',
+  rating: null,
   note: '',
   customerNote: '',
   updateReason: '',
@@ -485,6 +540,8 @@ function mapAppointmentFromApi(dto) {
     status: dto.status,
     consultStatus: dto.consultStatus,
     rating: dto.rating,
+    tenDichVu: dto.tenDichVu ?? dto.serviceName ?? dto.dichVuName ?? '',
+    mauDichVu: dto.mauDichVu ?? dto.serviceColor ?? dto.dichVuColor ?? '',
     fee: dto.phi ?? 0,
     createdByMe: dto.createdByMe,
     inCharge: dto.inCharge,
@@ -517,6 +574,8 @@ function mapAppointmentDetailFromApi(dto) {
     status: dto.status,
     consultStatus: dto.consultStatus,
     rating: dto.rating,
+    tenDichVu: dto.tenDichVu ?? dto.serviceName ?? dto.dichVuName ?? '',
+    mauDichVu: dto.mauDichVu ?? dto.serviceColor ?? dto.dichVuColor ?? '',
     note: dto.note,
     branchId: dto.branchID ?? null,   // ✅ ID
     branch: dto.branch ?? null,
@@ -851,6 +910,8 @@ async function openCreateModal() {
     createForm.branch = BRANCHES.value[0].key
   }
 
+  applyServiceDefaults()
+
   // ✅ LOAD NV TƯ VẤN THEO CHI NHÁNH
   await fetchCreateConsultantsByBranch(createForm.branch)
 
@@ -907,10 +968,11 @@ async function openEditModal(id) {
     editForm.time = mapped.time || ''
     editForm.consultantId = mapped.consultantId || null
     editForm.status = mapped.status || 'WAITING'
-    editForm.rating = mapped.rating || 'BAN_NHANH_30N'
+    editForm.rating = mapped.rating ?? null
     editForm.note = mapped.note || ''
     editForm.customerNote = mapped.customerNote || ''
     editForm.consultStatus = mapped.consultStatus || null
+    applyServiceDefaults()
 
     renderHistory(mapped)
     await fetchEditConsultantsByBranch(editForm.branch)
@@ -967,6 +1029,39 @@ async function saveEditModal() {
   }
 }
 // ===== Lấy tất cả chi nhánh =========
+const applyServiceDefaults = () => {
+  const firstServiceId = serviceOptions.value[0]?.id ?? null
+  const createHasService = serviceOptions.value.some(
+    (service) => String(service.id ?? service.name) === String(createForm.rating)
+  )
+  const editHasService = serviceOptions.value.some(
+    (service) => String(service.id ?? service.name) === String(editForm.rating)
+  )
+  if ((!createForm.rating || !createHasService) && firstServiceId) {
+    createForm.rating = firstServiceId
+  }
+  if (isModalOpen.value && (!editForm.rating || !editHasService) && firstServiceId) {
+    editForm.rating = firstServiceId
+  }
+}
+
+const fetchServices = async () => {
+  if (servicesLoading.value) return
+  servicesLoading.value = true
+  try {
+    const res = await api.get('/dich-vu-thg/admin', {
+      params: { keyword: null },
+    })
+    services.value = Array.isArray(res.data) ? res.data : []
+  } catch (e) {
+    services.value = []
+    showToast('Lỗi tải dịch vụ', 'Không thể tải danh sách dịch vụ.', 'error')
+  } finally {
+    servicesLoading.value = false
+    applyServiceDefaults()
+  }
+}
+
 // ===== Branch options (API) =====
 const BRANCHES = ref([])
 const branchLoading = ref(false)
@@ -1084,7 +1179,7 @@ function buildCreateAppointmentPayload() {
     appointmentDate: createForm.date,          // yyyy-MM-dd
     appointmentTime: createForm.time,          // HH:mm
     note: createForm.note || '',
-    rating: createForm.rating || 'BAN_NHANH_30N',
+    rating: createForm.rating || null,
   }
 }
 async function createAppointmentApi() {
@@ -1135,6 +1230,10 @@ async function saveNewAppointment() {
     showCenterWarning('Thiếu thông tin', 'Vui lòng chọn NV tư vấn.', 'error')
     return
   }
+  if (!createForm.rating) {
+    showCenterWarning('Thiếu thông tin', 'Vui lòng chọn dịch vụ.', 'error')
+    return
+  }
 
   const timeCheck = isValidAppointmentTime(
       createForm.date,
@@ -1183,7 +1282,7 @@ function exportCSV() {
     STATUS[a.status].label,
     CONSULT_STATUS[a.consultStatus]?.label || '',
     CUSTOMER_TYPE[a.customerType]?.label || '',
-    RATING[a.rating]?.label || '',
+    getServiceDisplay(a).label || '',
     a.creator,
     a.note || '',
   ])
@@ -1839,6 +1938,7 @@ onMounted(async () => {
   const flagDatLich = localStorage.getItem('flagDatLich')
   const customerPhone = localStorage.getItem('customerPhone')
   try {
+    await fetchServices()
     await fetchBranchOptions()
   } catch (e) {
     console.error('Fetch branch failed', e)
@@ -2305,8 +2405,8 @@ onBeforeUnmount(() => {
               </td>
 
               <td>
-                  <span class="chip" :class="getRatingInfo(appt.rating).cls">
-                    {{ getRatingInfo(appt.rating).label }}
+                  <span class="chip service-chip" :style="getServiceChipStyle(appt)">
+                    {{ getServiceDisplay(appt).label }}
                   </span>
               </td>
 
@@ -2503,13 +2603,14 @@ onBeforeUnmount(() => {
 
                 <select class="form-select" v-model="createForm.rating">
                   <option disabled value="">-- Chọn dịch vụ --</option>
-
-                  <option value="BAN_NHANH_30N">
-                    Bán nhanh 30 ngày
-                  </option>
-
-                  <option value="BAN_GP">
-                    Bán giải pháp
+                  <option v-if="servicesLoading" disabled value="">Đang tải dịch vụ...</option>
+                  <option v-if="!servicesLoading && !serviceOptions.length" disabled value="">Chưa có dịch vụ</option>
+                  <option
+                      v-for="service in serviceOptions"
+                      :key="service.id || service.name"
+                      :value="service.id ?? service.name"
+                  >
+                    {{ service.name }}
                   </option>
                 </select>
               </div>
@@ -2656,8 +2757,16 @@ onBeforeUnmount(() => {
                     </span>
                   </label>
                   <select class="form-select" v-model="editForm.rating">
-                    <option value="BAN_NHANH_30N">Bán nhanh 30 ngày</option>
-                    <option value="BAN_GP">Bán giải pháp</option>
+                    <option disabled value="">-- Chọn dịch vụ --</option>
+                    <option v-if="servicesLoading" disabled value="">Đang tải dịch vụ...</option>
+                    <option v-if="!servicesLoading && !serviceOptions.length" disabled value="">Chưa có dịch vụ</option>
+                    <option
+                        v-for="service in serviceOptions"
+                        :key="service.id || service.name"
+                        :value="service.id ?? service.name"
+                    >
+                      {{ service.name }}
+                    </option>
                   </select>
                 </div>
                 <div class="form-group">
@@ -2804,13 +2913,13 @@ onBeforeUnmount(() => {
                     </div>
                   </div>
                   <div class="field-row">
-                    <div class="field-label">Loại dịch vụ</div>
-                    <div class="field-value">
-                      <span class="chip" :class="getRatingInfo(selectedAppointment.rating).cls">
-                        {{ getRatingInfo(selectedAppointment.rating).label }}
+                  <div class="field-label">Loại dịch vụ</div>
+                  <div class="field-value">
+                      <span class="chip service-chip" :style="getServiceChipStyle(selectedAppointment)">
+                        {{ getServiceDisplay(selectedAppointment).label }}
                       </span>
-                    </div>
                   </div>
+                </div>
                   <div class="field-row">
                     <div class="field-label">Chi nhánh</div>
                     <div class="field-value">{{ getBranchLabel(selectedAppointment.branch) }}</div>
@@ -2855,10 +2964,6 @@ onBeforeUnmount(() => {
                         {{ getCustomerTypeInfo(selectedAppointment.customerType).label }}
                       </span>
                     </div>
-                  </div>
-                  <div class="field-row">
-                    <div class="field-label">Phí dịch vụ</div>
-                    <div class="field-value">{{ formatCurrencyVND(selectedAppointment.customerFee) }}</div>
                   </div>
                 </div>
               </div>
@@ -3652,6 +3757,10 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
   font-size:12px;
   border:1px solid rgba(20,22,30,0.06);
   white-space:nowrap;
+}
+.service-chip{
+  background: rgba(148,163,184,0.22);
+  color:#475569;
 }
 .ct-owner{ background: rgba(148,163,184,0.16); color:#334155; }
 .ct-broker{ background: rgba(67,233,123,0.18); color:#0b7f6a; }

@@ -1,739 +1,1002 @@
-diff --git a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-index 47d1e024bf39354556167c1c82219a65ac0a2fd3..b123037263589e2d062ca6a34635d0a5b5e8160b 100644
---- a/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-+++ b/src/components/thiet-kegiandien/telesales-lien-he-khach-hang.vue
-@@ -318,114 +318,158 @@
-               :class="{ active: activeDetailTab === 'detail' }"
-               @click="activeDetailTab = 'detail'"
-           >
-             <i class="fas fa-id-card"></i> Chi tiết
-           </button>
-           <button
-               class="detail-tab"
-               :class="{ active: activeDetailTab === 'history' }"
-               @click="activeDetailTab = 'history'"
-           >
-             <i class="fas fa-history"></i> Lịch sử
-           </button>
-         </div>
+diff --git a/src/components/thiet-kegiandien/AppointmentsPage.vue b/src/components/thiet-kegiandien/AppointmentsPage.vue
+index af189b37e274d401a8a67a3a1f923fac97c8a93b..7a3bdc51bdbe32d1d7b8fa7283fcd93375632630 100644
+--- a/src/components/thiet-kegiandien/AppointmentsPage.vue
++++ b/src/components/thiet-kegiandien/AppointmentsPage.vue
+@@ -1,27 +1,27 @@
+ <script setup>
+-import { ref, reactive, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
++import { ref, reactive, onMounted, onBeforeUnmount, nextTick, watch, computed } from 'vue'
+ import { Chart, registerables } from 'chart.js'
+ import api from '/src/api/api.js'
+ import FileNew from './File.vue'
+ import NotificationBell from '/src/components/NotificationBell.vue'
+ Chart.register(...registerables)
+ import {useAuthStore} from "/src/stores/authStore.js";
+ import { useSidebarStore } from "/src/stores/sidebarStore.js";
+ const authStore = useAuthStore();
+ const sidebar = useSidebarStore();
+ const info = authStore.userInfo;
+ // Trong script setup, thêm route
+ const rootRef = ref(null)
+ const cleanupHandlers = []
+ let chart1 = null
+ let chart2 = null
+ let chart3 = null
+ let chart4 = null
+ let chart5 = null
+ const statsReady = ref(false)
 
-         <div class="detail-content" v-if="selectedCustomer">
-           <div v-if="activeDetailTab === 'detail'">
-             <div class="customer-detail-header">
-               <div
-                   class="detail-avatar avatar-initials"
-                   :style="selectedCustomer ? { backgroundColor: getAvatarColor(selectedCustomer.name) } : {}"
-               >
-                 {{ selectedCustomer ? getInitials(selectedCustomer.name) : '' }}
+ // ===== Stats (KHÔNG ăn theo bộ lọc) =====
+ const statTotal = ref(0)
+ const statSelectedDay = ref(0)
+ const statUp = ref(0)
+ const statPending = ref(0)
+@@ -124,54 +124,109 @@ const APPOINTMENT_ACTION = {
+   CREATE: { label: 'Tạo mới', cls: 'act-create' },
+   EDIT: { label: 'Chỉnh sửa', cls: 'act-edit' },
+   STATUS: { label: 'Đổi trạng thái', cls: 'act-status' },
+   RESCHEDULE: { label: 'Dời lịch', cls: 'act-reschedule' },
+   NOTE: { label: 'Ghi chú', cls: 'act-note' },
+   DELETE: { label: 'Xoá lịch', cls: 'act-delete' },
+ }
+
+ const CUSTOMER_TYPE = {
+   CHINH_CHU:  { label: 'Chính chủ', cls: 'ct-owner' },
+   MOI_GIOI:   { label: 'Môi giới', cls: 'ct-broker' },
+   NGUOI_THAN: { label: 'Người thân', cls: 'ct-relative' },
+ }
+ function getCustomerTypeInfo(value) {
+   return CUSTOMER_TYPE[value] || {
+     label: value || 'Chưa có',
+     cls: 'ct-unknown',
+   }
+ }
+
+
+ const RATING = {
+   BAN_NHANH_30N: { label: 'Bán nhanh 30 ngày', cls: 'rt-bn30' },
+   BAN_GP: { label: 'Bán giải pháp', cls: 'rt-bgp' },
+ }
+-function getRatingInfo(value) {
+-  return RATING[value] || {
+-    label: value || 'Chưa có',
+-    cls: 'rt-unknown',
++
++const services = ref([])
++const servicesLoading = ref(false)
++const serviceOptions = computed(() => services.value)
++
++const normalizeColor = (color) => (color ? String(color).trim() : '')
++
++function parseColorToRgb(color) {
++  if (!color) return null
++  const hex = color.startsWith('#') ? color.slice(1) : null
++  if (hex) {
++    const value = hex.length === 3
++      ? hex.split('').map((c) => c + c).join('')
++      : hex
++    if (value.length !== 6) return null
++    const r = Number.parseInt(value.slice(0, 2), 16)
++    const g = Number.parseInt(value.slice(2, 4), 16)
++    const b = Number.parseInt(value.slice(4, 6), 16)
++    return [r, g, b]
++  }
++  const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i)
++  if (rgbMatch) {
++    return [Number(rgbMatch[1]), Number(rgbMatch[2]), Number(rgbMatch[3])]
++  }
++  return null
++}
++
++function getServiceById(serviceId) {
++  if (!serviceId) return null
++  return serviceOptions.value.find((s) => String(s.id ?? s.name) === String(serviceId)) || null
++}
++
++function getServiceDisplay(appt) {
++  const service = getServiceById(appt?.rating)
++  const label =
++    appt?.tenDichVu ||
++    appt?.serviceName ||
++    service?.name ||
++    RATING[appt?.rating]?.label ||
++    appt?.rating ||
++    'Chưa có'
++  const color = normalizeColor(
++    appt?.mauDichVu ||
++    appt?.serviceColor ||
++    service?.mauDichVu ||
++    service?.color
++  )
++  return { label, color }
++}
++
++function getServiceChipStyle(appt) {
++  const { color } = getServiceDisplay(appt)
++  const rgb = parseColorToRgb(color)
++  if (!rgb) return {}
++  const [r, g, b] = rgb
++  return {
++    backgroundColor: `rgba(${r}, ${g}, ${b}, 0.18)`,
++    color: `rgb(${r}, ${g}, ${b})`,
++    borderColor: `rgba(${r}, ${g}, ${b}, 0.28)`,
+   }
+ }
+
+ const DAY_START_HOUR = 8
+ const DAY_END_HOUR = 17
+ const TIME_SLOTS = Array.from({ length: DAY_END_HOUR - DAY_START_HOUR + 1 }, (_, i) => `${pad2(DAY_START_HOUR + i)}:00`)
+
+ function timeToMinutes(time) {
+   const [h, m] = String(time || '').split(':')
+   return Number(h) * 60 + Number(m)
+ }
+
+ function buildDaySlotTimes(list) {
+   const times = new Set(TIME_SLOTS)
+   list.forEach((a) => {
+     if (!a?.time) return
+     const minutes = timeToMinutes(a.time)
+     if (Number.isNaN(minutes)) return
+     if (minutes < DAY_START_HOUR * 60 || minutes > DAY_END_HOUR * 60) return
+     times.add(a.time)
+   })
+   return Array.from(times).sort((a, b) => timeToMinutes(a) - timeToMinutes(b))
+ }
+
+ function formatVNDate(yyyyMMdd) {
+@@ -251,60 +306,60 @@ const activeStatus = ref('ALL')
+ const searchQuery = ref('')
+ const searchKeyword = ref('')
+ const appointmentsLoading = ref(false)
+ const appointmentsError = ref('')
+ let searchTimer = null
+
+ // ===== Modals =====
+ const editId = ref(null)
+ const isModalOpen = ref(false)
+ const isCreateModalOpen = ref(false)
+ const isDetailModalOpen = ref(false)
+ const selectedAppointment = ref(null)
+ const detailCardRef = ref(null)
+ const historyPanelRef = ref(null)
+
+ // ===== Create form =====
+ const createForm = reactive({
+   customerSearch: '',
+   selectedCustomer: null,
+   branch: null,
+   date: '',
+   time: '',
+   staff: '',
+   consultant: 'Tư vấn 1',
+   note: '',
+-  rating: 'BAN_NHANH_30N'
++  rating: null,
+ })
+
+ const editForm = reactive({
+   branch: null,
+   date: '',
+   time: '',
+   consultantId: null,
+   status: 'WAITING',
+-  rating: 'BAN_NHANH_30N',
++  rating: null,
+   note: '',
+   customerNote: '',
+   updateReason: '',
+   consultStatus: null
+ })
+
+ function makeHistory(actor, action, desc) {
+   return { ts: nowISO(), actor, action, desc }
+ }
+
+
+
+ /**
+  * Flags for marker rule:
+  * - createdByMe => ORANGE marker
+  * - inCharge => BLUE marker
+  */
+ const appointments = ref([])
+
+ function getRowMarker(appt) {
+   if (appt?.createdByMe) return { color: '#f97316', glow: 'rgba(253, 230, 138, 0.75)' } // ORANGE
+   if (appt?.inCharge) return { color: '#2563eb', glow: 'rgba(191, 219, 254, 0.78)' } // BLUE
+   return { color: '#667eea', glow: 'rgba(224, 231, 255, 0.7)' }
+ }
+
+@@ -463,82 +518,86 @@ function getFilterRange() {
+
+   const year = calendarMonth.value.getFullYear()
+   const month = calendarMonth.value.getMonth()
+   const start = new Date(year, month, 1)
+   const end = new Date(year, month + 1, 0)
+   return { startDate: toISODate(start), endDate: toISODate(end) }
+ }
+
+ function mapAppointmentFromApi(dto) {
+   return {
+     id: dto.appointmentId,
+     customerId: dto.customerId,
+     customer: dto.customerName,
+     phone: dto.customerPhone,
+     date: dto.appointmentDate,
+     time: dto.appointmentTime,
+     staffId: dto.staffId,
+     staff: dto.staffName,
+     consultantId: dto.consultantId,
+     consultant: dto.consultantName,
+     creatorId: dto.creatorId,
+     creator: dto.creatorName,
+     status: dto.status,
+     consultStatus: dto.consultStatus,
+     rating: dto.rating,
++    tenDichVu: dto.tenDichVu ?? dto.serviceName ?? dto.dichVuName ?? '',
++    mauDichVu: dto.mauDichVu ?? dto.serviceColor ?? dto.dichVuColor ?? '',
+     fee: dto.phi ?? 0,
+     createdByMe: dto.createdByMe,
+     inCharge: dto.inCharge,
+     branch: dto.branch || '',
+     customerType: dto.customerType || null,
+     note: dto.note || '',
+     history: dto.history || [],
+   }
+ }
+ const detailLoading = ref(false)
+ const detailError = ref('')
+ const editLoading = ref(false)
+ const editError = ref('')
+ function mapAppointmentDetailFromApi(dto) {
+   return {
+     id: dto.appointmentId,
+
+     customerId: dto.customer?.id,
+     customer: dto.customer?.name,
+     phone: dto.customer?.phone,
+     address: dto.customer?.address,
+     oldAddress: dto.customer?.oldAress,
+     customerNote: dto.customer?.customerNote,
+     customerFee: dto.customer?.phi ?? null,
+     customerType: dto.customer?.customerType,
+     files: dto.customer?.files || [],
+     giaBDS: dto.customer?.giaBDS || null,
+     date: dto.appointmentDate,
+     time: dto.appointmentTime,
+     status: dto.status,
+     consultStatus: dto.consultStatus,
+     rating: dto.rating,
++    tenDichVu: dto.tenDichVu ?? dto.serviceName ?? dto.dichVuName ?? '',
++    mauDichVu: dto.mauDichVu ?? dto.serviceColor ?? dto.dichVuColor ?? '',
+     note: dto.note,
+     branchId: dto.branchID ?? null,   // ✅ ID
+     branch: dto.branch ?? null,
+
+     consultantId: dto.consultant?.id ?? dto.consultantId,
+     consultant: dto.consultant?.name,
+     creator: dto.creator?.name,
+
+     history: (dto.histories || []).map(h => ({
+       ts: h.createdAt,
+       actor: h.actorName,
+       action: h.action,
+       desc: h.note,
+       status: h.status,
+       consultStatus: h.consultStatus,
+     })),
+   }
+ }
+ async function openDetailModal(appt) {
+   isDetailModalOpen.value = true
+   selectedAppointment.value = null
+   detailLoading.value = true
+   detailError.value = ''
+
+   try {
+@@ -829,50 +888,52 @@ function selectCustomer(customer) {
+
+   // mở lại sau 1 tick (để watch nhận biết)
+   setTimeout(() => {
+     suppressCustomerSearch = false
+   }, 0)
+ }
+
+
+
+ // ===== Create modal =====
+ function getStaffOptionsByBranch(branchKey) {
+   return STAFF_BY_BRANCH[branchKey] || []
+ }
+ async function openCreateModal() {
+   createForm.customerSearch = ''
+   createForm.selectedCustomer = null
+   createForm.date = selectedDateISO.value
+   createForm.time = ''
+   createForm.note = ''
+
+   // ✅ CHI NHÁNH ĐẦU TIÊN
+   if (!createForm.branch && BRANCHES.value.length > 0) {
+     createForm.branch = BRANCHES.value[0].key
+   }
+
++  applyServiceDefaults()
++
+   // ✅ LOAD NV TƯ VẤN THEO CHI NHÁNH
+   await fetchCreateConsultantsByBranch(createForm.branch)
+
+   isCreateModalOpen.value = true
+ }
+
+ function closeCreateModal() {
+   isCreateModalOpen.value = false
+   createForm.selectedCustomer = null
+   createForm.customerSearch = ''
+ }
+
+ // ===== History =====
+ function renderHistory(appt) {
+   const history = (appt.history || []).slice(0, 120)
+   historyItems.value = history.map((h) => {
+     const dt = new Date(h.ts)
+     const stamp = `${pad2(dt.getHours())}:${pad2(dt.getMinutes())} • ${pad2(dt.getDate())}/${pad2(dt.getMonth() + 1)}/${dt.getFullYear()}`
+     const actionInfo = getActionInfo(h.action)
+     return { ...h, stamp, actionLabel: actionInfo.label, actionClass: actionInfo.cls }
+   })
+ }
+
+ // ===== Detail modal =====
+ function closeDetailModal() {
+@@ -885,54 +946,55 @@ function syncHistoryPanelHeight() {
+   const leftHeight = detailCardRef.value.offsetHeight
+   if (!leftHeight) return
+   historyPanelRef.value.style.height = `${leftHeight}px`
+ }
+
+ // ===== Edit modal =====
+ async function openEditModal(id) {
+   editId.value = id
+   closeDetailModal()
+   isModalOpen.value = true
+   editLoading.value = true
+   editError.value = ''
+
+   try {
+     const res = await api.get(`/customer-crm/admin/lich-hen/${id}`)
+     const mapped = mapAppointmentDetailFromApi(res.data)
+     console.log('Edit appointment data', mapped.branchId)
+     editForm.branch = BRANCHES.value.find(
+         b => b.key === mapped.branchId
+     )?.key ?? null
+     console.log('Mapped branch ID for edit form', editForm.branch)
+     editForm.date = mapped.date || ''
+     editForm.time = mapped.time || ''
+     editForm.consultantId = mapped.consultantId || null
+     editForm.status = mapped.status || 'WAITING'
+-    editForm.rating = mapped.rating || 'BAN_NHANH_30N'
++    editForm.rating = mapped.rating ?? null
+     editForm.note = mapped.note || ''
+     editForm.customerNote = mapped.customerNote || ''
+     editForm.consultStatus = mapped.consultStatus || null
++    applyServiceDefaults()
+
+     renderHistory(mapped)
+     await fetchEditConsultantsByBranch(editForm.branch)
+   } catch (e) {
+     editError.value = 'Không thể tải chi tiết lịch hẹn'
+     showToast('Lỗi tải lịch hẹn', 'Không thể tải chi tiết lịch hẹn.', 'error')
+   } finally {
+     editLoading.value = false
+   }
+ }
+ function closeEditModal() {
+   isModalOpen.value = false
+   editId.value = null
+   editError.value = ''
+   editLoading.value = false,
+   editForm.updateReason = ''
+ }
+ async function saveEditModal() {
+   if (editId.value == null) return
+
+   const payload = {
+     appointmentId: editId.value,
+     branchId: editForm.branch,
+     appointmentDate: editForm.date,
+     appointmentTime: editForm.time,
+@@ -945,50 +1007,83 @@ async function saveEditModal() {
+     updateReason: editForm.updateReason?.trim(),
+   }
+
+   console.log('Update appointment payload', payload)
+
+   try {
+     const res = await showLoading( api.post(
+         '/customer-crm/admin/lich-hen/update',
+         payload
+     ));
+
+     if (res.data.success) {
+       updateAlertSuccess('✅ Cập nhật lịch hẹn thành công')
+       await refreshAppointmentsAndStats()
+       closeEditModal()
+       // reload list / calendar nếu cần
+     } else {
+       updateAlertError('❌ Cập nhật thất bại:', res.data.message)
+       alert(res.data.message)
+     }
+   } catch (e) {
+     console.error('❌ Lỗi gọi API update lịch hẹn', e)
+   }
+ }
+ // ===== Lấy tất cả chi nhánh =========
++const applyServiceDefaults = () => {
++  const firstServiceId = serviceOptions.value[0]?.id ?? null
++  const createHasService = serviceOptions.value.some(
++    (service) => String(service.id ?? service.name) === String(createForm.rating)
++  )
++  const editHasService = serviceOptions.value.some(
++    (service) => String(service.id ?? service.name) === String(editForm.rating)
++  )
++  if ((!createForm.rating || !createHasService) && firstServiceId) {
++    createForm.rating = firstServiceId
++  }
++  if (isModalOpen.value && (!editForm.rating || !editHasService) && firstServiceId) {
++    editForm.rating = firstServiceId
++  }
++}
++
++const fetchServices = async () => {
++  if (servicesLoading.value) return
++  servicesLoading.value = true
++  try {
++    const res = await api.get('/dich-vu-thg/admin', {
++      params: { keyword: null },
++    })
++    services.value = Array.isArray(res.data) ? res.data : []
++  } catch (e) {
++    services.value = []
++    showToast('Lỗi tải dịch vụ', 'Không thể tải danh sách dịch vụ.', 'error')
++  } finally {
++    servicesLoading.value = false
++    applyServiceDefaults()
++  }
++}
++
+ // ===== Branch options (API) =====
+ const BRANCHES = ref([])
+ const branchLoading = ref(false)
+
+ async function fetchBranchOptions() {
+   if (branchLoading.value) return
+
+   branchLoading.value = true
+   try {
+     const res = await api.get('/customer-crm/admin/lich-hen/options')
+
+     // BE trả: [{ id, address }]
+     BRANCHES.value = (Array.isArray(res.data) ? res.data : []).map(b => ({
+       key: Number(b.id),      // đảm bảo là number
+       label: b.address,
+     }))
+
+     // ✅ AUTO SELECT CHI NHÁNH ĐẦU TIÊN
+     if (!createForm.branch && BRANCHES.value.length > 0) {
+       createForm.branch = BRANCHES.value[0].key
+       createForm.staff = getStaffOptionsByBranch(createForm.branch)[0] || ''
+     }
+
+   } catch (e) {
+     showToast('Lỗi tải chi nhánh', 'Không thể tải danh sách chi nhánh.', 'error')
+@@ -1062,150 +1157,154 @@ async function fetchEditConsultantsByBranch(branchId) {
+   } catch (e) {
+     EDIT_CONSULTANTS.value = []
+     editForm.consultantId = null
+     showToast('Lỗi tải NV phụ trách', 'Không thể tải danh sách nhân viên.', 'error')
+   } finally {
+     editConsultantsLoading.value = false
+   }
+ }
+ watch(
+     () => editForm.branch,
+     async (branchId) => {
+       if (!isModalOpen.value) return
+       await fetchEditConsultantsByBranch(branchId)
+     },
+ )
+
+
+ function buildCreateAppointmentPayload() {
+   return {
+     customerId: createForm.selectedCustomer.id,
+     consultantId: createForm.consultant,      // ID NV tư vấn
+     branchId: createForm.branch,               // ID chi nhánh
+     appointmentDate: createForm.date,          // yyyy-MM-dd
+     appointmentTime: createForm.time,          // HH:mm
+     note: createForm.note || '',
+-    rating: createForm.rating || 'BAN_NHANH_30N',
++    rating: createForm.rating || null,
+   }
+ }
+ async function createAppointmentApi() {
+   const payload = buildCreateAppointmentPayload()
+
+   return api.post(
+       '/customer-crm/admin/lich-hen/create-lich-hen',
+       payload
+   )
+ }
+
+ import {showCenterWarning, updateAlertError, updateAlertSuccess, showLoading} from "../../assets/js/alertService.js";
+ function isValidAppointmentTime(dateStr, timeStr) {
+   const [y, m, d] = dateStr.split('-').map(Number)
+   const date = new Date(y, m - 1, d)
+
+   const today = new Date()
+   today.setHours(0, 0, 0, 0)
+
+   // ❌ chỉ chặn ngày quá khứ (nếu muốn)
+   if (date < today) {
+     return {
+       valid: false,
+       message: 'Không thể tạo lịch hẹn cho ngày đã qua.'
+     }
+   }
+
+   // ✅ không giới hạn giờ
+   return { valid: true }
+ }
+
+
+
+ async function saveNewAppointment() {
+   if (!createForm.selectedCustomer) {
+     showCenterWarning('Thiếu thông tin', 'Vui lòng chọn khách hàng.', 'error')
+     return
+   }
+   if (!createForm.date || !createForm.time) {
+     showCenterWarning('Thiếu thông tin', 'Vui lòng chọn ngày và giờ.', 'error')
+     return
+   }
+   if (!createForm.branch) {
+     showCenterWarning('Thiếu thông tin', 'Vui lòng chọn chi nhánh.', 'error')
+     return
+   }
+   if (!createForm.consultant) {
+     showCenterWarning('Thiếu thông tin', 'Vui lòng chọn NV tư vấn.', 'error')
+     return
+   }
++  if (!createForm.rating) {
++    showCenterWarning('Thiếu thông tin', 'Vui lòng chọn dịch vụ.', 'error')
++    return
++  }
+
+   const timeCheck = isValidAppointmentTime(
+       createForm.date,
+       createForm.time
+   )
+
+   if (!timeCheck.valid) {
+     showCenterWarning('Thời gian không hợp lệ', timeCheck.message, 'error')
+     return
+   }
+
+   try {
+     const res = await showLoading(createAppointmentApi());
+
+     if( !res.data.success) {
+       updateAlertError('Không thể tạo lịch hẹn', res.data.message || 'Có lỗi xảy ra, vui lòng thử lại.', 'error')
+       return
+     }
+
+     updateAlertSuccess('Tạo lịch hẹn thành công', 'Lịch hẹn đã được tạo.')
+
+     await refreshAppointmentsAndStats()
+     closeCreateModal()
+   } catch (e) {
+     console.error(e)
+     showToast(
+         'Tạo lịch thất bại',
+         e?.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.',
+         'error'
+     )
+   }
+ }
+
+ // ===== Export (theo filter của table) =====
+ function exportCSV() {
+   const filtered = applyFilters(appointments.value)
+   const header = ['Khách hàng', 'SĐT', 'Chi nhánh', 'Ngày', 'Giờ', 'NV phụ trách', 'Tình trạng', 'KQ tư vấn', 'Phân loại', 'Đánh giá', 'Người tạo', 'Ghi chú']
+
+   const rows = filtered.map((a) => [
+     a.customer,
+     a.phone,
+     a.branch ? BRANCHES.find((b) => b.key === a.branch)?.label || a.branch : '-',
+     a.date,
+     a.time,
+     a.staff,
+     STATUS[a.status].label,
+     CONSULT_STATUS[a.consultStatus]?.label || '',
+     CUSTOMER_TYPE[a.customerType]?.label || '',
+-    RATING[a.rating]?.label || '',
++    getServiceDisplay(a).label || '',
+     a.creator,
+     a.note || '',
+   ])
+
+   const csv = [header, ...rows].map((r) => r.map((v) => `"${String(v || '').replaceAll('"', '""')}"`).join(',')).join('\n')
+
+   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+   const url = URL.createObjectURL(blob)
+   const a = document.createElement('a')
+   a.href = url
+   a.download = `lich-hen_${selectedDateISO.value}.csv`
+   document.body.appendChild(a)
+   a.click()
+   a.remove()
+   URL.revokeObjectURL(url)
+
+   showToast('Xuất file thành công', `Đã xuất ${filtered.length} dòng CSV.`, 'success')
+ }
+
+ // ===== Charts =====
+ function destroyCharts() {
+   if (chart1) {
+     chart1.destroy()
+     chart1 = null
+   }
+@@ -1817,50 +1916,51 @@ async function autoPickCustomerByPhone(phone) {
+   // gán vào input tìm kiếm
+   createForm.customerSearch = phone
+
+   // gọi search
+   await fetchCustomerSearch(phone)
+
+   // đợi DOM + data
+   await nextTick()
+
+   // auto chọn khách đầu tiên (SĐT unique)
+   if (customerSearchResults.value.length > 0) {
+     selectCustomer(customerSearchResults.value[0])
+   }
+
+
+ }
+
+ // ===== Mount =====
+ onMounted(async () => {
+   if (!rootRef.value) return
+ // ===== AUTO MỞ MODAL TẠO LỊCH TỪ TELESALE =====
+
+   const flagDatLich = localStorage.getItem('flagDatLich')
+   const customerPhone = localStorage.getItem('customerPhone')
+   try {
++    await fetchServices()
+     await fetchBranchOptions()
+   } catch (e) {
+     console.error('Fetch branch failed', e)
+   }
+   if (flagDatLich === 'true' && customerPhone) {
+     // mở modal tạo lịch
+     await openCreateModal()
+     await nextTick()
+     // auto tìm + chọn khách theo SĐT
+     await autoPickCustomerByPhone(customerPhone)
+
+     // xoá localStorage để tránh lặp
+     localStorage.removeItem('flagDatLich')
+     localStorage.removeItem('customerPhone')
+   }
+   // ===== Init date =====
+   selectedDateISO.value = getTodayISO()
+   calendarMonth.value = new Date() // tháng hiện tại
+
+   // ===== Init data =====
+   await fetchAppointments()
+
+
+   // ===== Init charts =====
+   await nextTick()
+@@ -2283,52 +2383,52 @@ onBeforeUnmount(() => {
+               <td>
+                   <span class="pill-soft">
+                     <i class="fa-solid fa-building"></i>{{ appt.branch ? appt.branch : '-' }}
+                   </span>
+               </td>
+
+               <td>{{ appt.staff }}</td>
+
+               <td v-if="appt.consultStatus != null">
+                   <span class="consult-badge" :class="getConsultInfo(appt.consultStatus).cls">
+                     <i class="fa-solid" :class="getConsultInfo(appt.consultStatus).icon"></i>
+                     {{ getConsultInfo(appt.consultStatus).label }}
+                   </span>
+               </td>
+               <td v-else>
+                  <span>- - - -</span>
+               </td>
+
+               <td>
+                   <span class="chip" :class="getCustomerTypeInfo(appt.customerType).cls">
+                     {{ getCustomerTypeInfo(appt.customerType).label }}
+                   </span>
+               </td>
+
+               <td>
+-                  <span class="chip" :class="getRatingInfo(appt.rating).cls">
+-                    {{ getRatingInfo(appt.rating).label }}
++                  <span class="chip service-chip" :style="getServiceChipStyle(appt)">
++                    {{ getServiceDisplay(appt).label }}
+                   </span>
+               </td>
+
+               <td style="position: relative">
+                   <span
+                       class="status-badge readonly"
+                       :class="getStatusInfo(appt.status).cls"
+                   >
+                     {{ getStatusInfo(appt.status).label }}
+                   </span>
+               </td>
+
+               <td>{{ appt.creator }}</td>
+
+               <td>
+                 <div class="action-dropdown">
+                   <button class="action-btn" @click.stop="toggleActionMenu(appt.id)">
+                     <i class="fas fa-ellipsis-v"></i>
+                   </button>
+                   <div class="menu-pop" :class="{ open: openActionMenuId === appt.id }">
+                     <button @click.stop="handleAction('detail', appt, $event)">
+                       <i class="fa-regular fa-eye"></i>
+                       Xem chi tiết
+                     </button>
+                     <button @click.stop="handleAction('edit', appt, $event)">
+@@ -2481,57 +2581,58 @@ onBeforeUnmount(() => {
+                     Đang tải nhân viên...
+                   </option>
+
+                   <option
+                       v-for="c in CREATE_CONSULTANTS"
+                       :key="c.id"
+                       :value="c.id"
+                   >
+                     {{ c.name }} <span v-if="c.phone">- {{ c.phone }}</span>
+                   </option>
+                 </select>
+
+               </div>
+               <div class="form-group">
+                 <label class="form-label">
+     <span class="lbl">
+       <span class="lbl-ico gi9">
+         <i class="fa-solid fa-bullseye"></i>
+       </span>
+       Dịch vụ tư vấn
+     </span>
+                 </label>
+
+                 <select class="form-select" v-model="createForm.rating">
+                   <option disabled value="">-- Chọn dịch vụ --</option>
+-
+-                  <option value="BAN_NHANH_30N">
+-                    Bán nhanh 30 ngày
+-                  </option>
+-
+-                  <option value="BAN_GP">
+-                    Bán giải pháp
++                  <option v-if="servicesLoading" disabled value="">Đang tải dịch vụ...</option>
++                  <option v-if="!servicesLoading && !serviceOptions.length" disabled value="">Chưa có dịch vụ</option>
++                  <option
++                      v-for="service in serviceOptions"
++                      :key="service.id || service.name"
++                      :value="service.id ?? service.name"
++                  >
++                    {{ service.name }}
+                   </option>
+                 </select>
                </div>
 
-               <div class="detail-name-info">
--                <h4>{{ selectedCustomer ? selectedCustomer.name : '' }}</h4>
--                <p class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</p>
-+                <input
-+                    v-model="detailForm.name"
-+                    class="detail-input detail-name-input"
-+                    type="text"
-+                    placeholder="Nhập họ tên khách"
-+                />
-+                <div class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</div>
-                 <p class="detail-received">
-                   Tiếp nhận: {{ selectedCustomer ? formatReceivedAt(selectedCustomer.receivedAt) : '' }}
-                 </p>
--                <p class="detail-type">
--                  <span :class="selectedCustomer ? `type-badge ${selectedCustomer.type}` : 'type-badge'">
--                    {{ selectedCustomer ? getCustomerTypeLabel(selectedCustomer.type) : '' }}
--                  </span>
--                </p>
-               </div>
              </div>
 
-             <div class="detail-section  mt-3">
-               <h5><i class="fas fa-map-marked-alt"></i> Thông tin địa chỉ</h5>
-               <div class="detail-row">
-                 <span class="detail-label">Tỉnh hiện tại:</span>
--                <span class="detail-value">{{ selectedCustomer.province }}</span>
-+                <div class="detail-select-wrapper">
-+                  <input
-+                      v-model="provinceSearch"
-+                      type="text"
-+                      class="detail-input search-enabled"
-+                      placeholder="Chọn tỉnh/thành phố"
-+                      @focus="provinceDropdownOpen = true"
-+                      @input="provinceDropdownOpen = true"
-+                      @blur="handleProvinceBlur"
-+                  />
-+                  <div v-if="provinceDropdownOpen" class="detail-dropdown">
-+                    <button
-+                        v-for="province in filteredProvinces"
-+                        :key="province"
-+                        type="button"
-+                        class="detail-dropdown-item"
-+                        @mousedown.prevent="selectProvince(province)"
-+                    >
-+                      {{ province }}
-+                    </button>
-+                    <div v-if="filteredProvinces.length === 0" class="detail-dropdown-empty">
-+                      Không tìm thấy tỉnh phù hợp
-+                    </div>
-+                  </div>
-+                </div>
-               </div>
--              <div class="detail-row" v-if="selectedCustomer.oldProvince">
-+              <div class="detail-row">
-                 <span class="detail-label">Tỉnh cũ:</span>
--                <span class="detail-value">{{ selectedCustomer.oldProvince }}</span>
-+                <input
-+                    v-model="detailForm.oldProvince"
-+                    type="text"
-+                    class="detail-input"
-+                    placeholder="Nhập tỉnh cũ"
-+                />
-               </div>
+             <div class="form-group">
+               <label class="form-label">
+                 <span class="lbl">
+                   <span class="lbl-ico gi7"><i class="fa-regular fa-note-sticky"></i></span>
+                   Ghi chú
+                 </span>
+               </label>
+               <textarea class="form-textarea" v-model="createForm.note" placeholder="Thêm ghi chú cho lịch hẹn..."></textarea>
              </div>
 
-             <div class="detail-section">
-               <h5><i class="fas fa-coins"></i> Thông tin BĐS</h5>
-               <div class="detail-row">
-                 <span class="detail-label">Giá BĐS:</span>
--                <span class="detail-value">{{ formatCurrency(selectedCustomer.giaBDS) }}</span>
-+                <input
-+                    v-model="detailForm.giaBDS"
-+                    type="text"
-+                    inputmode="numeric"
-+                    class="detail-input"
-+                    placeholder="Nhập giá BĐS"
-+                    @input="handleGiaBdsInput"
-+                />
-               </div>
-             </div>
-
-             <div class="detail-section">
-               <h5><i class="fas fa-layer-group"></i> Phân loại khách</h5>
-               <div class="detail-row">
-                 <span class="detail-label">Loại khách:</span>
--                <span class="detail-value">{{ getCustomerTypeLabel(selectedCustomer.type) || 'Chưa phân loại' }}</span>
-+                <select v-model="detailForm.type" class="detail-input detail-select-input">
-+                  <option :value="null">Chưa phân loại</option>
-+                  <option value="CHINH_CHU">Chủ nhà</option>
-+                  <option value="MOI_GIOI">Môi giới</option>
-+                  <option value="NGUOI_THAN">Người thân</option>
-+                </select>
-               </div>
-             </div>
-
-             <div class="detail-section">
-               <h5><i class="fas fa-tags"></i> Đánh dấu khách hàng</h5>
-               <div class="tag-selector">
-                 <button
-                     v-for="tag in availableTags"
-                     :key="tag.value"
-                     class="tag-option"
-                     :class="{ active: isTagActive(tag.value) }"
-                     :style="isTagActive(tag.value) ? { backgroundColor: tag.color, borderColor: tag.color, color: '#fff' } : {}"
-                     @click="toggleCustomerStatus(tag.value)"
-                 >
-                   {{ tag.label }}
-                 </button>
-               </div>
-             </div>
-
-             <div class="detail-section mt-3">
-               <h5>
-                 <i class="fas fa-sticky-note"></i>Mô tả:
--                <span style="font-size: 14px; color: #4A4A4A; font-weight: 400">
--                  {{ selectedCustomer.note !== '' ? selectedCustomer.note : 'Không có' }}
--                </span>
-               </h5>
-+              <textarea
-+                  v-model="detailForm.note"
-+                  class="detail-textarea"
-+                  rows="3"
-+                  placeholder="Nhập mô tả cho khách hàng"
-+              ></textarea>
-             </div>
-
-             <FileNew
-                 v-if="selectedCustomer"
-                 :key="'request-new-asset'"
-                 :file-list="fileForm.files"
-                 :entity-id="selectedCustomer.id"
-                 :allow-download-all="true"
-                 entity-type="host"
-                 :can-edit="true"
-                 :on-upload="true"
-                 class="mt-2"
-                 @update:files="handleFileUpdate"
-             />
-
-             <div class="add-note-form">
-               <textarea v-model="newNote" placeholder="Thêm ghi chú cuộc gọi..." rows="3"></textarea>
-             </div>
-
-             <div class="detail-actions">
-               <button class="action-btn move-btn" @click="moveToContacted">
-                 <i class="fas fa-save"></i> Lưu thông tin
-               </button>
+             <div class="mini-help">
+               <i class="fa-solid fa-circle-info me-2"></i>
+               Nếu trùng lịch theo nhân viên, hệ thống sẽ báo ngay khi bấm <b>Tạo lịch</b>.
              </div>
            </div>
-@@ -460,83 +504,94 @@
-                   </div>
+         </div>
 
-                   <div class="history-note" v-if="item.ghiChu">
-                     {{ item.ghiChu }}
+         <div class="modal-foot">
+           <button class="btn btn-secondary" type="button" @click="closeCreateModal">Huỷ</button>
+@@ -2634,52 +2735,60 @@ onBeforeUnmount(() => {
+               <div class="form-grid">
+                 <div class="form-group">
+                   <label class="form-label">
+                     <span class="lbl">
+                       <span class="lbl-ico gi9"><i class="fa-solid fa-traffic-light"></i></span>
+                       Trạng thái
+                     </span>
+                   </label>
+                   <select class="form-select" v-model="editForm.status">
+                     <option value="WAITING">Chờ đến hẹn</option>
+                     <option value="UP">Đã lên</option>
+                     <option value="NOT_UP">Chưa lên</option>
+                     <option value="POSTPONED">Tạm hoãn</option>
+                     <option value="CANCELLED">Huỷ</option>
+                   </select>
+                 </div>
+
+                 <div class="form-group">
+                   <label class="form-label">
+                     <span class="lbl">
+                       <span class="lbl-ico gi12"><i class="fa-solid fa-star"></i></span>
+                       Dịch vụ tư vấn
+                     </span>
+                   </label>
+                   <select class="form-select" v-model="editForm.rating">
+-                    <option value="BAN_NHANH_30N">Bán nhanh 30 ngày</option>
+-                    <option value="BAN_GP">Bán giải pháp</option>
++                    <option disabled value="">-- Chọn dịch vụ --</option>
++                    <option v-if="servicesLoading" disabled value="">Đang tải dịch vụ...</option>
++                    <option v-if="!servicesLoading && !serviceOptions.length" disabled value="">Chưa có dịch vụ</option>
++                    <option
++                        v-for="service in serviceOptions"
++                        :key="service.id || service.name"
++                        :value="service.id ?? service.name"
++                    >
++                      {{ service.name }}
++                    </option>
+                   </select>
+                 </div>
+                 <div class="form-group">
+                   <label class="form-label">
+     <span class="lbl">
+       <span class="lbl-ico gi10"><i class="fa-solid fa-handshake"></i></span>
+       Kết quả tư vấn
+     </span>
+                   </label>
+
+                   <select class="form-select" v-model="editForm.consultStatus">
+                     <option :value="null">Chưa có</option>
+                     <option :value="ConsultStatus.SUCCESS">Thành công</option>
+                     <option :value="ConsultStatus.FAIL">Thất bại</option>
+                     <option :value="ConsultStatus.CARE">Chăm sóc</option>
+                   </select>
+                 </div>
+
+               </div>
+
+               <div class="form-group">
+                 <label class="form-label">
+                   <span class="lbl">
+                     <span class="lbl-ico gi7"><i class="fa-regular fa-note-sticky"></i></span>
+                     Ghi chú lịch hẹn
+@@ -2782,57 +2891,57 @@ onBeforeUnmount(() => {
+                 </div>
+                 <div class="section-divider"></div>
+                 <div class="section-grid">
+                   <div class="field-row">
+                     <div class="field-label">Ngày & Giờ</div>
+                     <div class="field-value">{{ formatVNDate(selectedAppointment.date) }} • {{ selectedAppointment.time }}</div>
                    </div>
-                   <div class="history-note muted" v-else>
-                     Không có mô tả
+                   <div class="field-row">
+                     <div class="field-label">Trạng thái</div>
+                     <div class="field-value">
+                       <span class="status-badge" :class="getStatusInfo(selectedAppointment.status).cls">
+                         {{ getStatusInfo(selectedAppointment.status).label }}
+                       </span>
+                     </div>
+                   </div>
+                   <div class="field-row">
+                     <div class="field-label">KQ tư vấn</div>
+                     <div class="field-value">
+                       <span class="consult-badge" :class="getConsultInfo(selectedAppointment.consultStatus).cls">
+                         <i class="fa-solid" :class="getConsultInfo(selectedAppointment.consultStatus).icon"></i>
+                         {{ getConsultInfo(selectedAppointment.consultStatus).label }}
+                       </span>
+                     </div>
+                   </div>
+                   <div class="field-row">
+-                    <div class="field-label">Loại dịch vụ</div>
+-                    <div class="field-value">
+-                      <span class="chip" :class="getRatingInfo(selectedAppointment.rating).cls">
+-                        {{ getRatingInfo(selectedAppointment.rating).label }}
++                  <div class="field-label">Loại dịch vụ</div>
++                  <div class="field-value">
++                      <span class="chip service-chip" :style="getServiceChipStyle(selectedAppointment)">
++                        {{ getServiceDisplay(selectedAppointment).label }}
+                       </span>
+-                    </div>
+                   </div>
++                </div>
+                   <div class="field-row">
+                     <div class="field-label">Chi nhánh</div>
+                     <div class="field-value">{{ getBranchLabel(selectedAppointment.branch) }}</div>
                    </div>
                  </div>
                </div>
 
-               <div v-else class="empty-history">Chưa có lịch sử.</div>
-             </div>
-           </div>
-         </div>
-       </div>
-     </div>
-   </div>
- </template>
+               <div class="detail-section">
+                 <div class="section-head">
+                   <span class="section-ico si-customer"><i class="fa-solid fa-user"></i></span>
+                   <h5>Thông tin khách hàng</h5>
+                 </div>
+                 <div class="section-divider"></div>
+                 <div class="section-grid">
+                   <div class="field-row">
+                     <div class="field-label">Tên khách hàng</div>
+                     <div class="field-value">{{ selectedAppointment.customer || '-' }}</div>
+                   </div>
+                   <div class="field-row">
+                     <div class="field-label">Giá BĐS: </div>
+                     <div class="field-value">
+                       {{ formatCurrencyVND(selectedAppointment.giaBDS) }}
+                     </div>
 
- <script setup>
- import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
- import Chart from 'chart.js/auto'
- import api from '/src/api/api.js'
- import FileNew from './File.vue'
-+import addressData from '/src/assets/js/address.json'
-
- import NotificationBell from "../NotificationBell.vue";
- import { useAuthStore } from "/src/stores/authStore.js";
- import { useSidebarStore } from "/src/stores/sidebarStore.js";
- const authStore = useAuthStore();
- const info = authStore.userInfo;
- const sidebar = useSidebarStore();
- // ====== META ======
- const STATUS_META = {
-   NEW: { label: 'Mới', color: '#94a3b8' },
-
-   DC_TELESALES: { label: 'Mới tiếp nhận', color: '#6366f1' },
-   CHAM_SOC: { label: 'Đang chăm sóc', color: '#38bdf8' },
-   TN_7NGAY: { label: 'Tiềm năng 7 ngày', color: '#0ea5e9' },
-   TN_14NGAY: { label: 'Tiềm năng 14 ngày', color: '#0284c7' },
-
-   THAT_BAI: { label: 'Thất bại', color: '#f43f5e' },
-   KHONG_LIEN_LAC_DUOC: { label: 'Không liên lạc được', color: '#f97316' },
-   SAI_SO_LIEU: { label: 'Sai số liệu', color: '#a855f7' },
-
-   THANH_CONG: { label: 'Thành công (Lên VP)', color: '#22c55e' },
-
-   // ===== BỔ SUNG =====
-   KHACH_HUY_HEN: { label: 'Khách huỷ hẹn', color: '#b45309' },   // cam nâu – huỷ
-   BAN_NHANH: { label: 'Bán nhanh', color: '#15803d' },          // xanh lá đậm
-   BAN_GP: { label: 'Bán GP (Đã lên VP)', color: '#0f766e' },    // xanh ngọc đậm
+                   </div>
+@@ -3631,50 +3740,54 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
+ }
+ .customer-avatar .ava-dot::before{
+   content:"";
+   position:absolute;
+   left:50%;
+   top:50%;
+   width:20px;
+   height:20px;
+   transform: translate(-50%, -50%);
+   border-radius:999px;
+   background: var(--mkGlow, rgba(79,172,254,0.28));
  }
 
-
- // ====== Reactive state ======
- const activeTab = ref('new')
- const activeDetailTab = ref('detail')
- const selectedCustomer = ref(null)
-+const detailForm = ref({
-+  name: '',
-+  province: '',
-+  oldProvince: '',
-+  type: null,
-+  giaBDS: '',
-+  note: ''
-+})
-+const provinceSearch = ref('')
-+const provinceDropdownOpen = ref(false)
- const newNote = ref('')
- const searchQuery = ref('')
- const originalFiles = ref([])
- const skipTabReload = ref(false)
-
- const fileForm = ref({
-   files: [],
-   newFiles: [],
-   newLandBookFiles: [],
-   deletedFileIds: [],
-   deletedLandBookFileIds: []
- })
-
- // ✅ FIX all -> null
- const statusFilter = ref(null)
- const typeFilter = ref(null)
-
- const currentPage = ref(1)
- const pageSize = ref(10)
-
- const selectedTimeRange = ref('month')
- const selectedYear = ref(new Date().getFullYear())
- const selectedMonth = ref(new Date().getMonth() + 1)
-
- const lineChart = ref(null)
-@@ -707,168 +762,242 @@ const getAvatarColor = (name) => {
- const formatTime = (isoString) => {
-   if (!isoString) return 'Chưa gọi'
-   const date = new Date(isoString)
-   return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+ /* Chips / consult */
+ .chip{
+   display:inline-flex;
+   align-items:center;
+   gap:8px;
+   padding:6px 10px;
+   border-radius:999px;
+   font-weight:900;
+   font-size:12px;
+   border:1px solid rgba(20,22,30,0.06);
+   white-space:nowrap;
  }
-
- const formatReceivedAt = (isoString) => {
-   if (!isoString) return '-'
-   const date = new Date(isoString)
-   return date.toLocaleString('vi-VN', {
-     hour: '2-digit',
-     minute: '2-digit',
-     day: '2-digit',
-     month: '2-digit',
-     year: 'numeric'
-   })
- }
-
- const formatCurrency = (value) => {
-   if (value === null || value === undefined || value === '') return '-'
-   const numericValue = Number(value)
-   if (Number.isNaN(numericValue)) return value
-   return `${new Intl.NumberFormat('vi-VN').format(numericValue)} ₫`
- }
-
-+const normalizeText = (value) => (value || '').toString().toLowerCase().trim()
-+
-+const provinces = computed(() => (addressData || []).map((item) => item.name))
-+
-+const filteredProvinces = computed(() => {
-+  const keyword = normalizeText(provinceSearch.value)
-+  if (!keyword) return provinces.value
-+  return provinces.value.filter((province) => normalizeText(province).includes(keyword))
-+})
-+
-+const formatCurrencyInput = (value) => {
-+  if (value === null || value === undefined) return ''
-+  const digits = String(value).replace(/\D/g, '')
-+  if (!digits) return ''
-+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
++.service-chip{
++  background: rgba(148,163,184,0.22);
++  color:#475569;
 +}
-+
-+const parseCurrencyInput = (value) => {
-+  const digits = String(value || '').replace(/\D/g, '')
-+  return digits ? Number(digits) : null
-+}
-+
-+const handleGiaBdsInput = () => {
-+  detailForm.value.giaBDS = formatCurrencyInput(detailForm.value.giaBDS)
-+}
-+
-+const selectProvince = (province) => {
-+  detailForm.value.province = province
-+  provinceSearch.value = province
-+  provinceDropdownOpen.value = false
-+}
-+
-+const handleProvinceBlur = () => {
-+  setTimeout(() => {
-+    detailForm.value.province = provinceSearch.value
-+    provinceDropdownOpen.value = false
-+  }, 150)
-+}
-+
-+const handleDocumentClick = (event) => {
-+  if (!event.target.closest('.detail-select-wrapper')) {
-+    provinceDropdownOpen.value = false
-+    detailForm.value.province = provinceSearch.value
-+  }
-+}
-+
-+const syncDetailForm = (customer) => {
-+  detailForm.value = {
-+    name: customer?.name || '',
-+    province: customer?.province || '',
-+    oldProvince: customer?.oldProvince || '',
-+    type: customer?.type ?? null,
-+    giaBDS: formatCurrencyInput(customer?.giaBDS ?? ''),
-+    note: customer?.note || ''
-+  }
-+  provinceSearch.value = detailForm.value.province
-+}
-+
- // ====== Detail actions ======
- const selectCustomer = (customer) => {
-   selectedCustomer.value = customer
-   activeDetailTab.value = 'detail'
-   newNote.value = ''
-+  syncDetailForm(customer)
-   resetFileForm(customer?.files)
+ .ct-owner{ background: rgba(148,163,184,0.16); color:#334155; }
+ .ct-broker{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
+ .ct-relative{ background: rgba(250,112,154,0.16); color:#a43e73; }
+ .ct-unknown{ background: rgba(148,163,184,0.22); color:#475569; }
+
+ .rt-bn30{ background: rgba(34,197,94,0.18); color:#166534; }
+ .rt-bgp{ background: rgba(147,51,234,0.18); color:#6b21a8; }
+ .rt-unknown{ background: rgba(148,163,184,0.22); color:#475569; }
+
+ .consult-badge{
+   padding:7px 12px;
+   border-radius:999px;
+   font-size:12px;
+   font-weight:900;
+   display:inline-flex;
+   align-items:center;
+   gap:8px;
+   border:1px solid rgba(20,22,30,0.06);
+   white-space:nowrap;
  }
+ .consult-badge i{ font-size:11px; opacity:0.9; }
+ .cs-ok{ background: rgba(67,233,123,0.18); color:#0b7f6a; }
+ .cs-fail{ background: rgba(255,88,88,0.18); color:#b83b2c; }
+ .cs-care{ background: rgba(79,172,254,0.18); color:#0b6ea8; }
 
- const toggleCustomerStatus = (status) => {
-   if (!selectedCustomer.value) return
-   selectedCustomer.value.status = selectedCustomer.value.status === status ? null : status
- }
-
- const resetFileForm = (files) => {
-   const safeFiles = Array.isArray(files) ? JSON.parse(JSON.stringify(files)) : []
-   fileForm.value = {
-     files: safeFiles,
-     newFiles: [],
-     newLandBookFiles: [],
-     deletedFileIds: [],
-     deletedLandBookFileIds: []
-   }
-   originalFiles.value = JSON.parse(JSON.stringify(safeFiles))
- }
-
- const handleFileUpdate = (files) => {
-   fileForm.value.files = Array.isArray(files) ? files : []
-
-   const existingFiles = fileForm.value.files.filter((file) => !file.file && file.id)
-   const newFiles = fileForm.value.files.filter((file) => file.file instanceof File)
-
-   fileForm.value.newFiles = newFiles
-       .filter((file) => !file.isIG)
-       .map((file) => ({ file: file.file, isOnTop: file.isOnTop }))
-
-   fileForm.value.newLandBookFiles = newFiles
-       .filter((file) => file.isIG)
-       .map((file) => ({ file: file.file, isOnTop: file.isOnTop }))
-
-   const originalIds = (originalFiles.value || []).map((file) => file.id)
-   const currentIds = existingFiles.map((file) => file.id)
-
-   fileForm.value.deletedFileIds = originalIds.filter((id) => {
-     const file = (originalFiles.value || []).find((item) => item.id === id)
-     return !currentIds.includes(id) && file && !file.isIG
-   })
-
-   fileForm.value.deletedLandBookFileIds = originalIds.filter((id) => {
-     const file = (originalFiles.value || []).find((item) => item.id === id)
-     return !currentIds.includes(id) && file && file.isIG
-   })
- }
-
- const buildFilePayload = () => {
-+  const giaBDSValue = parseCurrencyInput(detailForm.value.giaBDS)
-   const dto = {
-     customerId: selectedCustomer.value.id,
-     status: selectedCustomer.value.status,
-     description: newNote.value,
-+    hoTen: detailForm.value.name,
-+    soDienThoai: selectedCustomer.value.phone,
-+    tinhMoi: detailForm.value.province,
-+    tinhCu: detailForm.value.oldProvince || null,
-+    type: detailForm.value.type || null,
-+    giaBDS: giaBDSValue,
-+    ghiChu: detailForm.value.note || '',
-     files: fileForm.value.files
-         .filter((file) => !file.file && file.id)
-         .map((file) => ({
-           id: file.id,
-           fileName: file.fileName,
-           isIG: file.isIG,
-           isOnTop: file.isOnTop
-         })),
-     deletedFileIds: fileForm.value.deletedFileIds,
-     deletedLandBookFileIds: fileForm.value.deletedLandBookFileIds
-   }
-
-   const fd = new FormData()
-   fd.append('dto', new Blob([JSON.stringify(dto)], { type: 'application/json' }))
-
-   const mainFile = fileForm.value.newFiles.find((file) => file?.isOnTop && file.file instanceof File)
-       || fileForm.value.newLandBookFiles.find((file) => file?.isOnTop && file.file instanceof File)
-
-   if (mainFile) {
-     fd.append('newFileOntop', mainFile.file)
-   }
-
-   fileForm.value.newFiles.forEach((file) => {
-     if (file?.file instanceof File) {
-       fd.append('newFiles', file.file)
-     }
-   })
-
-   fileForm.value.newLandBookFiles.forEach((file) => {
-     if (file?.file instanceof File) {
-       fd.append('newLandBookFiles', file.file)
-     }
-   })
-
-   return fd
- }
-
- const moveToContacted = async () => {
-   if (!selectedCustomer.value) return
-
-   try {
-+    selectedCustomer.value.name = detailForm.value.name
-+    selectedCustomer.value.province = detailForm.value.province
-+    selectedCustomer.value.oldProvince = detailForm.value.oldProvince || null
-+    selectedCustomer.value.type = detailForm.value.type || null
-+    selectedCustomer.value.giaBDS = parseCurrencyInput(detailForm.value.giaBDS)
-+    selectedCustomer.value.note = detailForm.value.note || ''
-     const targetId = selectedCustomer.value.id
-     const payload = buildFilePayload()
-     const flag = selectedCustomer.value.status === 'THANH_CONG'
-     await api.post('/customer-crm/telesales/journey-history/create', payload, {
-       headers: { 'Content-Type': 'multipart/form-data' }
-     })
-
-     skipTabReload.value = activeTab.value !== 'contacted'
-     activeTab.value = 'contacted'
-     await Promise.all([loadKhachDaLienHe(), loadKhachMoiTiepNhan()])
-
-     const updatedCustomer = contactedCustomers.value.find((c) => c.id === targetId)
-         || newCustomers.value.find((c) => c.id === targetId)
-
-     selectedCustomer.value = updatedCustomer || null
-     activeDetailTab.value = 'detail'
-     newNote.value = ''
-     if (selectedCustomer.value) {
-       resetFileForm(selectedCustomer.value.files)
-+      syncDetailForm(selectedCustomer.value)
-     } else {
-       resetFileForm([])
-     }
-
-     // ===== LƯU LOCAL STORAGE + CHUYỂN TRANG =====
-     if (flag) {
-       localStorage.setItem('flagDatLich', 'true')
-       localStorage.setItem('customerPhone', selectedCustomer.value.phone)
-
-       // chuyển qua trang đặt lịch
-       window.location.href = '/-thg/quan-ly-lich-hen'
-     }
-
-
-     // reload thống kê
-     await refreshData()
-   } catch (err) {
-     console.error(err)
-   }
- }
-
- // ====== API ======
- const fetchThongKeHomNay = async () => {
-   try {
-     const { data } = await api.get('/customer-crm/telesales/thong-ke/hom-nay')
-@@ -1140,62 +1269,64 @@ const initSummaryChart = () => {
-           position: 'bottom',
-           labels: { boxWidth: 12, font: { size: 12 } }
-         }
-       }
-     },
-     plugins: [doughnutTotalPlugin]
-   })
-
- }
-
- // ====== Refresh all ======
- const refreshData = async () => {
-   await Promise.all([
-     loadKhachMoiTiepNhan,
-     loadKhachDaLienHe(),
-     fetchThongKeHomNay(),
-     fetchThongKeTrangThaiTeleSales(),
-     fetchThongKeBieuDo()
-   ])
-   await nextTick()
-   initSummaryChart()
- }
-
- // ====== Lifecycle ======
- onMounted(async () => {
-+  document.addEventListener('click', handleDocumentClick)
-   await Promise.all([
-     fetchThongKeHomNay(),
-     loadKhachDaLienHe(),
-     fetchThongKeTrangThaiTeleSales(),
-     loadKhachMoiTiepNhan(),
-     fetchThongKeBieuDo()
-   ])
-   await nextTick()
-   initSummaryChart()
- })
-
- onUnmounted(() => {
-+  document.removeEventListener('click', handleDocumentClick)
-   if (lineChartInstance.value) lineChartInstance.value.destroy()
-   if (summaryChartInstance.value) summaryChartInstance.value.destroy()
- })
- </script>
-
- <style scoped>
- /* Reset và kiểu cơ bản */
- * {
-   margin: 0;
-   padding: 0;
-   box-sizing: border-box;
- }
-
- body {
-   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-   background-color: #f0f2f5;
-   color: #333;
-
- }
-
- .telesale-app {
-   position: relative;
-   top: -10px!important;
-   display: flex;
-   flex-direction: column;
-@@ -1995,62 +2126,157 @@ body {
- .type-badge.MOI_GIOI {
-   background-color: #1e88e5;
- }
-
- .type-badge.CHINH_CHU {
-   background-color: #2e7d32;
- }
-
- .type-badge.NGUOI_THAN {
-   background-color: #6a1b9a;
- }
-
- .detail-section h5 {
-   font-size: 16px;
-   margin-bottom: 12px;
-   color: #3f51b5;
-   display: flex;
-   align-items: center;
-   gap: 8px;
- }
-
- .detail-row {
-   display: flex;
-   justify-content: space-between;
-   margin-bottom: 10px;
-+  align-items: center;
-+  gap: 12px;
- }
-
- .detail-label {
-   color: #666;
-   font-size: 14px;
-+  min-width: 110px;
- }
-
- .detail-value {
-   font-weight: 500;
-   font-size: 14px;
- }
-
-+.detail-input {
-+  flex: 1;
-+  padding: 8px 12px;
-+  border: 1px solid #e2e8f0;
-+  border-radius: 8px;
-+  font-size: 14px;
-+  color: #1e293b;
-+  background: #ffffff;
-+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-+}
-+
-+.detail-input:focus {
-+  outline: none;
-+  border-color: #6366f1;
-+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-+}
-+
-+.detail-name-input {
-+  font-size: 18px;
-+  font-weight: 600;
-+  padding: 6px 10px;
-+  margin-bottom: 6px;
-+}
-+
-+.detail-select-input {
-+  appearance: none;
-+  background-image: linear-gradient(45deg, transparent 50%, #94a3b8 50%),
-+    linear-gradient(135deg, #94a3b8 50%, transparent 50%);
-+  background-position: calc(100% - 18px) calc(50% - 2px), calc(100% - 12px) calc(50% - 2px);
-+  background-size: 6px 6px, 6px 6px;
-+  background-repeat: no-repeat;
-+}
-+
-+.detail-select-wrapper {
-+  position: relative;
-+  flex: 1;
-+}
-+
-+.detail-dropdown {
-+  position: absolute;
-+  top: calc(100% + 6px);
-+  left: 0;
-+  right: 0;
-+  background: #ffffff;
-+  border: 1px solid #e2e8f0;
-+  border-radius: 10px;
-+  max-height: 220px;
-+  overflow-y: auto;
-+  z-index: 10;
-+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
-+  padding: 6px;
-+}
-+
-+.detail-dropdown-item {
-+  width: 100%;
-+  text-align: left;
-+  padding: 8px 10px;
-+  border: none;
-+  background: transparent;
-+  border-radius: 8px;
-+  font-size: 14px;
-+  color: #1e293b;
-+  cursor: pointer;
-+}
-+
-+.detail-dropdown-item:hover {
-+  background: #eef2ff;
-+}
-+
-+.detail-dropdown-empty {
-+  padding: 8px 10px;
-+  font-size: 13px;
-+  color: #94a3b8;
-+}
-+
-+.detail-textarea {
-+  width: 100%;
-+  padding: 10px 12px;
-+  border: 1px solid #e2e8f0;
-+  border-radius: 10px;
-+  font-size: 14px;
-+  color: #1e293b;
-+  background: #ffffff;
-+  resize: vertical;
-+}
-+
-+.detail-textarea:focus {
-+  outline: none;
-+  border-color: #6366f1;
-+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-+}
-+
- .tag-selector {
-   display: flex;
-   flex-wrap: wrap;
-   gap: 8px;
- }
-
- .tag-option {
-   padding: 6px 12px;
-   border-radius: 999px;
-   border: 1px solid #e5e7eb;
-   background: #fff;
-   font-size: 13px;
-   transition: all 0.2s ease;
- }
-
- .tag-option.active {
-   font-weight: 500;
- }
-
-
- .tag-option:hover {
-   background-color: #f5f5f5;
- }
-
- .tag-option:not(.active):hover {
