@@ -1,71 +1,12 @@
 diff --git a/src/components/dich-vu/Phi-dich-vu.vue b/src/components/dich-vu/Phi-dich-vu.vue
-index e95630de60d92cd6646879339b41ce7233afa80d..37db7d9b8e5cc76613bca0b89f471b90600ee39a 100644
+index 288498598fc7e6f5da8c2b5946d7942dcd41f819..9971d52cdf3ab056286a493ad946941369059198 100644
 --- a/src/components/dich-vu/Phi-dich-vu.vue
 +++ b/src/components/dich-vu/Phi-dich-vu.vue
-@@ -70,50 +70,60 @@
-       <div class="panel attached" v-show="activeTab === 1">
-         <div class="panel-h">
-           <div class="tools">
-             <div class="input filter-item filter-search" :class="{ active: searchQuery }">
-               <i class="fa-solid fa-magnifying-glass"></i>
-               <input v-model="searchQuery" type="text" placeholder="Tìm theo mã HĐ / khách / người tạo...">
-             </div>
-
-             <div class="select filter-item filter-service" :class="{ active: filterService }">
-               <label>Dịch vụ</label>
-               <select v-model="filterService">
-                 <option :value="null">Tất cả</option>
-                 <option v-for="service in serviceOptions" :key="service.id || service.name" :value="service.id || service.name">{{ service.name }}</option>
-               </select>
-             </div>
-
-             <div class="select filter-item filter-status" :class="{ active: filterStatus }">
-               <label>Trạng thái</label>
-               <select v-model="filterStatus">
-                 <option :value="null">Tất cả</option>
-                 <option value="DANG_HIEU_LUC">Đang hiệu lực</option>
-                 <option value="HOAN_TAT">Hoàn tất</option>
-                 <option value="HUY">Đã hủy</option>
-               </select>
-             </div>
-+
-+            <div class="input filter-item filter-date" :class="{ active: tuNgay }">
-+              <label>Từ ngày</label>
-+              <input v-model="tuNgay" type="date">
-+            </div>
-+
-+            <div class="input filter-item filter-date" :class="{ active: denNgay }">
-+              <label>Đến ngày</label>
-+              <input v-model="denNgay" type="date">
-+            </div>
-           </div>
-         </div>
-
-         <div class="panel-b">
-
-
-           <div class="table-wrap">
-             <div class="table-scroll">
-               <table>
-                 <thead>
-                 <tr>
-                   <th style="width:150px">Mã HĐ</th>
-                   <th>Khách hàng</th>
-                   <th style="width:260px">Dịch vụ</th>
-                   <th style="width:160px">Giá tài sản</th>
-                   <th style="width:140px">Giá sau giảm</th>
-                   <th style="width:140px">Doanh thu</th>
-                   <th style="width:140px">Doanh số</th>
-                   <th style="width:120px">Trạng thái</th>
-                   <th style="width:160px">Nhân viên tạo</th>
-                   <th style="width:160px">Ngày tạo</th>
-                   <th style="width:230px">Thao tác</th>
-                 </tr>
-                 </thead>
-                 <tbody>
-@@ -734,205 +744,220 @@
-                 <div class="note mt-3">
-                   <b>Lưu ý:</b> Tóm tắt lấy trực tiếp từ dữ liệu hợp đồng hiện tại.
+@@ -739,85 +739,104 @@
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Doanh số</div>
+                     <div class="v price p3">{{ formatMoney(getDoanhSoRow(currentContract)) }}</div>
+                   </div>
                  </div>
                </div>
              </div>
@@ -87,10 +28,19 @@ index e95630de60d92cd6646879339b41ce7233afa80d..37db7d9b8e5cc76613bca0b89f471b90
      <div class="modal" :class="{ show: showModal === 'modalDetail' }" @click.self="closeModal('modalDetail')">
        <div class="modal-card detail">
          <div class="modal-h">
-           <div class="modal-title">
+-          <div class="modal-title">
++          <div class="modal-title flex items-center gap-2">
              <i class="fa-solid fa-file-lines"></i>
--            <span>Chi tiết hợp đồng {{ currentContract?.maHopDong }}</span>
-+            <span>Chi tiết hợp đồng {{ detailContract?.maHopDong }}</span>
+             <span>Chi tiết hợp đồng {{ detailContract?.maHopDong }}</span>
++            <span v-if="detailContract?.trangThaiHopDong === 'DANG_HIEU_LUC'" class="status st-on">
++              <i class="fa-solid fa-circle"></i>Đang hiệu lực
++            </span>
++            <span v-else-if="detailContract?.trangThaiHopDong === 'HOAN_TAT'" class="status st-done">
++              <i class="fa-solid fa-circle"></i>Hoàn tất
++            </span>
++            <span v-else-if="detailContract?.trangThaiHopDong === 'HUY'" class="status st-cancel">
++              <i class="fa-solid fa-circle"></i>Đã hủy
++            </span>
            </div>
            <button class="x" @click="closeModal('modalDetail')">
              <i class="fa-solid fa-xmark"></i>
@@ -103,48 +53,45 @@ index e95630de60d92cd6646879339b41ce7233afa80d..37db7d9b8e5cc76613bca0b89f471b90
                <div class="card-h"><i class="fa-solid fa-circle-info"></i> Thông tin hợp đồng</div>
 
                <div class="p-3">
--                <div class="text-sm font-extrabold">{{ currentContract?.maHopDong }} • {{ currentContract?.tenKhachHang }}</div>
--                <div class="muted tiny mt-1">{{ currentContract?.tenDichVu }} • Ngày tạo {{ formatCreatedAt(currentContract?.ngayTao) }} • Trạng thái {{ getStatusText(currentContract?.trangThaiHopDong) }}</div>
-+                <div class="text-sm font-extrabold">{{ detailContract?.maHopDong }} • {{ detailContract?.tenKhachHang }}</div>
-+                <div class="muted tiny mt-1">{{ detailContract?.tenDichVu }} • Ngày tạo {{ formatDateValue(detailContract?.ngayTao) }} • Trạng thái {{ getStatusText(detailContract?.trangThaiHopDong) }}</div>
+                 <div class="text-sm font-extrabold">{{ detailContract?.maHopDong }} • {{ detailContract?.tenKhachHang }}</div>
+-                <div class="muted tiny mt-1">{{ detailContract?.tenDichVu }} • Ngày tạo {{ formatDateValue(detailContract?.ngayTao) }} • Trạng thái {{ getStatusText(detailContract?.trangThaiHopDong) }}</div>
++                <div class="muted tiny mt-1">{{ detailContract?.tenDichVu }} • Ngày tạo {{ formatDateValue(detailContract?.ngayTao) }}</div>
 
                  <div class="grid grid-cols-2 gap-2 mt-3">
                    <div class="kpi">
--                    <div class="k"><span class="dot"></span>Giá chốt</div>
--                    <div class="v price p4">{{ formatMoney(currentContract?.giaSauGiam || 0) }}</div>
-+                    <div class="k"><span class="dot"></span>Giá gốc</div>
-+                    <div class="v price p2">{{ formatMoney(detailContract?.giaDichVuGoc || 0) }}</div>
+                     <div class="k"><span class="dot"></span>Giá gốc</div>
+                     <div class="v price p2">{{ formatMoney(detailContract?.giaDichVuGoc || 0) }}</div>
                    </div>
                    <div class="kpi">
--                    <div class="k"><span class="dot"></span>Giá điều chỉnh</div>
--                    <div class="v price p2">{{ formatMoney(calcGiaDieuChinh(currentContract)) }}</div>
-+                    <div class="k"><span class="dot"></span>Phí giảm</div>
-+                    <div class="v price p4">{{ formatMoney(detailContract?.phiGiam || 0) }}</div>
+                     <div class="k"><span class="dot"></span>Phí giảm</div>
+                     <div class="v price p4">{{ formatMoney(detailContract?.phiGiam || 0) }}</div>
                    </div>
                    <div class="kpi">
--                    <div class="k"><span class="dot"></span>Thực thu</div>
--                    <div class="v price p3">{{ formatMoney(calcThucThu(currentContract)) }}</div>
-+                    <div class="k"><span class="dot"></span>Giá sau giảm</div>
-+                    <div class="v price p1">{{ formatMoney(detailContract?.giaSauGiam || 0) }}</div>
+                     <div class="k"><span class="dot"></span>Giá sau giảm</div>
+                     <div class="v price p1">{{ formatMoney(detailContract?.giaSauGiam || 0) }}</div>
                    </div>
                    <div class="kpi">
--                    <div class="k"><span class="dot"></span>Doanh thu</div>
--                    <div class="v price p1">{{ formatMoney(calcDoanhThu(currentContract)) }}</div>
-+                    <div class="k"><span class="dot"></span>Giá tài sản ký</div>
-+                    <div class="v price p3">{{ formatMoney(detailContract?.giaTaiSanKy || 0) }}</div>
+                     <div class="k"><span class="dot"></span>Giá tài sản ký</div>
+                     <div class="v price p3">{{ formatMoney(detailContract?.giaTaiSanKy || 0) }}</div>
+                   </div>
++                  <div class="kpi">
++                    <div class="k"><span class="dot"></span>Doanh thu</div>
++                    <div class="v price p1">{{ formatMoney(getDoanhThuRow(detailContract)) }}</div>
++                    <div class="muted tiny mt-1">Tổng hoàn: <span class="mono">{{ formatMoney(getTongHoan(detailContract)) }}</span></div>
 +                  </div>
 +                  <div class="kpi">
-+                    <div class="k"><span class="dot"></span>Ngày ký</div>
-+                    <div class="v mono">{{ formatDateValue(detailContract?.ngayKy) }}</div>
++                    <div class="k"><span class="dot"></span>Doanh số</div>
++                    <div class="v price p3">{{ formatMoney(getDoanhSoRow(detailContract)) }}</div>
++                    <div class="muted tiny mt-1">Tổng điều chỉnh: <span class="mono">{{ formatMoney(getTongDieuChinh(detailContract)) }}</span></div>
 +                  </div>
-+                  <div class="kpi">
-+                    <div class="k"><span class="dot"></span>Người tạo</div>
-+                    <div class="v">{{ detailContract?.nguoiTaoFullName || '-' }}</div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Ngày ký</div>
+                     <div class="v mono">{{ formatDateValue(detailContract?.ngayKy) }}</div>
                    </div>
-                 </div>
-
-                 <div class="note mt-3">
-                   <b>Lưu ý:</b> Đây là màn hình chỉ xem. Muốn thao tác thì dùng các nút ở bảng.
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Người tạo</div>
+                     <div class="v">{{ detailContract?.nguoiTaoFullName || '-' }}</div>
+                   </div>
                  </div>
                </div>
              </div>
@@ -162,596 +109,3 @@ index e95630de60d92cd6646879339b41ce7233afa80d..37db7d9b8e5cc76613bca0b89f471b90
                    <div class="table-scroll">
                      <table style="min-width: 860px">
                        <thead>
-                       <tr>
-                         <th style="width:190px">Ngày</th>
-                         <th style="width:160px">Số tiền</th>
-                         <th style="width:160px">Hình thức</th>
-                         <th>Ghi chú</th>
-                         <th style="width:160px">Người ghi nhận</th>
-                       </tr>
-                       </thead>
-                       <tbody>
--                      <tr v-if="!currentContract?.dotDongTien?.length">
-+                      <tr v-if="!detailContract?.dotDongTiens?.length">
-                         <td colspan="5">
-                           <div class="text-center py-6 muted">Chưa có đợt đóng phí.</div>
-                         </td>
-                       </tr>
--                      <tr v-for="payment in currentContract?.dotDongTien || []" :key="payment.id">
--                        <td class="mono">{{ payment.ngayDongTien || '-' }}</td>
-+                      <tr v-for="payment in detailContract?.dotDongTiens || []" :key="payment.id">
-+                        <td class="mono">{{ formatDateValue(payment.ngayDongTien) }}</td>
-                         <td class="mono">{{ formatMoney(payment.soTienDong) }}</td>
-                         <td class="mono">{{ payment.hinhThucThanhToan || '-' }}</td>
-                         <td>{{ payment.ghiChu || '' }}</td>
--                        <td class="mono">{{ payment.nguoiGhiNhan || '-' }}</td>
-+                        <td class="mono">{{ payment.nguoiGhiNhanFullName || '-' }}</td>
-                       </tr>
-                       </tbody>
-                     </table>
-                   </div>
-                 </div>
-
-                 <!-- Refunds -->
-                 <div class="font-extrabold mb-2 flex items-center gap-2">
-                   <span class="w-2.5 h-2.5 rounded-full" style="background: var(--secondary-gradient);"></span>
-                   Hoàn phí
-                 </div>
-                 <div class="table-wrap mb-4">
-                   <div class="table-scroll">
-                     <table style="min-width: 860px">
-                       <thead>
-                       <tr>
-                         <th style="width:190px">Ngày</th>
-                         <th style="width:160px">Số tiền</th>
-                         <th>Lý do</th>
-                         <th style="width:160px">Người duyệt</th>
-                       </tr>
-                       </thead>
-                       <tbody>
--                      <tr v-if="!currentContract?.hoanTien?.length">
-+                      <tr v-if="!detailContract?.hoanTiens?.length">
-                         <td colspan="4">
-                           <div class="text-center py-6 muted">Chưa có đợt hoàn phí.</div>
-                         </td>
-                       </tr>
--                      <tr v-for="refund in currentContract?.hoanTien || []" :key="refund.id">
--                        <td class="mono">{{ refund.ngayHoan || '-' }}</td>
-+                      <tr v-for="refund in detailContract?.hoanTiens || []" :key="refund.id">
-+                        <td class="mono">{{ formatDateValue(refund.ngayHoan) }}</td>
-                         <td class="mono">{{ formatMoney(refund.soTienHoan) }}</td>
-                         <td>{{ refund.lyDoHoan || '' }}</td>
--                        <td class="mono">{{ refund.nguoiDuyet || '-' }}</td>
-+                        <td class="mono">{{ refund.nguoiDuyetFullName || '-' }}</td>
-                       </tr>
-                       </tbody>
-                     </table>
-                   </div>
-                 </div>
-
-                 <!-- Adjust -->
-                 <div class="font-extrabold mb-2 flex items-center gap-2">
-                   <span class="w-2.5 h-2.5 rounded-full" style="background: var(--warning-gradient);"></span>
-                   Điều chỉnh
-                 </div>
-                 <div class="table-wrap">
-                   <div class="table-scroll">
-                     <table style="min-width: 860px">
-                       <thead>
-                       <tr>
-                         <th style="width:210px">Ngày</th>
-                         <th style="width:160px">Số tiền</th>
-                         <th style="width:160px">Loại</th>
-                         <th>Lý do</th>
-                       </tr>
-                       </thead>
-                       <tbody>
--                      <tr v-if="!currentContract?.dieuChinh?.length">
-+                      <tr v-if="!detailContract?.dieuChinhHopDongs?.length">
-                         <td colspan="4">
-                           <div class="text-center py-6 muted">Chưa có điều chỉnh.</div>
-                         </td>
-                       </tr>
--                      <tr v-for="adj in currentContract?.dieuChinh || []" :key="adj.id">
--                        <td class="mono">{{ adj.ngayTao || '-' }}</td>
-+                      <tr v-for="adj in detailContract?.dieuChinhHopDongs || []" :key="adj.id">
-+                        <td class="mono">{{ formatDateValue(adj.ngayTao) }}</td>
-                         <td class="mono">{{ formatMoney(adj.soTienDieuChinh) }}</td>
-                         <td class="mono">{{ adj.loaiDieuChinh || '-' }}</td>
-                         <td>{{ adj.lyDo || '' }}</td>
-                       </tr>
-                       </tbody>
-                     </table>
-                   </div>
-                 </div>
-
-                 <div class="note mt-3">
-                   <b>Mẹo:</b> Nếu bạn muốn hiển thị "đợt" theo thứ tự, cứ sort theo ngày hoặc theo index trong mảng.
-                 </div>
-               </div>
-             </div>
-           </div>
-         </div>
-
-         <div class="modal-f">
-+          <button
-+            v-if="detailContract?.trangThaiHopDong === 'DANG_HIEU_LUC'"
-+            class="btn danger"
-+            @click="cancelContract"
-+          >
-+            <i class="fa-solid fa-ban"></i> Hủy hợp đồng
-+          </button>
-           <button class="btn ghost" @click="closeModal('modalDetail')">
-             <i class="fa-solid fa-xmark"></i> Đóng
-           </button>
-         </div>
-       </div>
-     </div>
-
-     <!-- MODAL: DELETE -->
-     <div class="modal" :class="{ show: showModal === 'modalDelete' }" @click.self="closeModal('modalDelete')">
-       <div class="modal-card">
-         <div class="modal-h">
-           <div class="modal-title">
-             <i class="fa-solid fa-triangle-exclamation"></i>
-             Xác nhận xóa
-           </div>
-           <button class="x" @click="closeModal('modalDelete')">
-             <i class="fa-solid fa-xmark"></i>
-           </button>
-         </div>
-         <div class="modal-b">
-           <div class="p-2">
-             <div class="font-extrabold">Xóa hợp đồng {{ currentContract?.maHopDong }}?</div>
-             <div class="muted mt-2">{{ currentContract?.tenKhachHang }} • {{ currentContract?.tenDichVu }} • Doanh thu hiện tại: {{ formatMoney(getDoanhThu(currentContract)) }}</div>
-             <div class="note mt-3">
-               Xóa sẽ mất cả các đợt <b>đóng phí</b>, <b>hoàn phí</b>, <b>điều chỉnh</b> của hợp đồng này.
-@@ -966,88 +991,91 @@ import {
- const todayISO = () => {
-   const d = new Date()
-   const yyyy = d.getFullYear()
-   const mm = String(d.getMonth() + 1).padStart(2, '0')
-   const dd = String(d.getDate()).padStart(2, '0')
-   return `${yyyy}-${mm}-${dd}`
- }
- // Constants
- const ENUM_STATUS = ['DANG_HIEU_LUC', 'HOAN_TAT', 'HUY']
- const ENUM_PAY = ['TIEN_MAT', 'CHUYEN_KHOAN', 'QR', 'KHAC']
- const ENUM_ADJ = ['GIAM_GIA', 'PHU_THU', 'PHAT']
-
- // State
- const activeTab = ref(1)
- const contracts = ref([])
- const totalElements = ref(0)
- const totalPages = ref(1)
- const seq = ref(1)
- const services = ref([])
- const segments = ref([])
-
- // Filters
- const searchQuery = ref('')
- const filterService = ref(null)
- const filterStatus = ref(null)
-+const tuNgay = ref(null)
-+const denNgay = ref(null)
- const currentPage = ref(1)
- const pageSize = ref(2)
- const currentUserName = ref('Nguyễn Minh')
- const searchTimer = ref(null)
-
- // Customer search
- const customerSearch = ref('')
- const selectedCustomer = ref(null)
- const customerSearchResults = ref([])
- const customerSearchLoading = ref(false)
- const customerSearchError = ref('')
- const customerSearchTimer = ref(null)
- const lastCustomerKeyword = ref('')
- const suppressCustomerSearch = ref(false)
-
- // New contract form
- const newContract = ref({
-   maHopDong: '',
-   maKhachHang: '',
-   tenKhachHang: '',
-   tenDichVu: '',
-   serviceId: null,
-   giaTriTaiSan: null,
-   giaDichVuGoc: 0,
-   phiGiam: 0,
-   discountMode: 'PERCENT',
-   discountValue: 0,
-   giaSauGiam: 0,
-   trangThaiHopDong: 'DANG_HIEU_LUC',
-   ngayKy: todayISO(),
-   initPlan: 'COC',
-   tiLeCoc: 30,
-   firstMethod: 'CHUYEN_KHOAN'
- })
-
- // Modals
- const showModal = ref(null)
- const currentContract = ref(null)
-+const detailContract = ref(null)
-
- // Payment form
- const payment = ref({
-   amount: 0,
-   method: 'CHUYEN_KHOAN',
-   date: todayISO(),
-   note: ''
- })
-
- // Refund form
- const refund = ref({
-   amount: 0,
-   date: todayISO(),
-   reason: ''
- })
-
- // Adjustment form
- const adjustment = ref({
-   amount: 0,
-   type: 'GIAM_GIA',
-   reason: ''
- })
-
- // Toast
- const showToast = ref(false)
-@@ -1116,50 +1144,55 @@ const segmentHint = computed(() => {
- const firstPaymentAmount = computed(() => {
-   if (newContract.value.initPlan === 'FULL') {
-     return newContract.value.giaSauGiam
-   } else {
-     const percent = Math.max(0, Math.min(100, newContract.value.tiLeCoc || 0))
-     return Math.round(newContract.value.giaSauGiam * (percent / 100))
-   }
- })
-
- // Watchers
- watch(searchQuery, () => {
-   currentPage.value = 1
-   queueSearch()
- })
-
- watch(filterService, () => {
-   currentPage.value = 1
-   fetchContracts()
- })
-
- watch(filterStatus, () => {
-   currentPage.value = 1
-   fetchContracts()
- })
-
-+watch([tuNgay, denNgay], () => {
-+  currentPage.value = 1
-+  fetchContracts()
-+})
-+
- watch(currentPage, () => {
-   fetchContracts()
- })
-
- watch(pageSize, () => {
-   currentPage.value = 1
-   fetchContracts()
- })
-
- watch(customerSearch, (val) => {
-   if (suppressCustomerSearch.value) return
-
-   if (selectedCustomer.value && (val || '').trim() === (selectedCustomer.value.name || '').trim()) {
-     customerSearchResults.value = []
-     customerSearchLoading.value = false
-     customerSearchError.value = ''
-     return
-   }
-
-   if (selectedCustomer.value && (val || '').trim() !== (selectedCustomer.value?.name || '').trim()) {
-     selectedCustomer.value = null
-     newContract.value.maKhachHang = ''
-     newContract.value.tenKhachHang = ''
-   }
-
-@@ -1268,50 +1301,58 @@ const getStatusText = (status) => {
-   }
- }
-
-
-
- const formatCreatedAt = (value) => {
-   if (!value) return '-'
-   if (typeof value === 'string') {
-     const parts = value.split(',')
-     if (parts.length === 2) {
-       const datePart = parts[0].trim()
-       const timePart = parts[1].trim()
-       if (timePart && datePart) return `${timePart} ${datePart}`
-     }
-     if (/\d{1,2}:\d{2}:\d{2}/.test(value) && /\d{1,2}\/\d{1,2}\/\d{4}/.test(value)) {
-       return value
-     }
-   }
-   const parsed = value instanceof Date ? value : new Date(value)
-   if (!Number.isNaN(parsed.getTime())) {
-     return `${parsed.toLocaleTimeString('vi-VN')} ${parsed.toLocaleDateString('vi-VN')}`
-   }
-   return String(value)
- }
-
-+const formatDateValue = (value) => {
-+  if (!value) return '-'
-+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-+    return value
-+  }
-+  return formatCreatedAt(value)
-+}
-+
- const getGiaGiam = (contract) => {
-   return Number(contract?.giaGiam ?? contract?.phiGiam ?? 0)
- }
-
- const getGiaTaiSanKy = (contract) => {
-   return Number(contract?.giaTaiSanKyGoc ?? contract?.giaTriTaiSan ?? contract?.giaTriKyBan ?? 0)
- }
-
- const getTongHoan = (contract) => {
-   if (contract?.giaHoanTien !== undefined && contract?.giaHoanTien !== null) {
-     return Number(contract.giaHoanTien || 0)
-   }
-   return calcTongHoan(contract)
- }
-
- const getTongDieuChinh = (contract) => {
-   if (contract?.tongDC !== undefined && contract?.tongDC !== null) {
-     return Number(contract.tongDC || 0)
-   }
-   return 0
- }
-
- const getDoanhThuRow = (contract) => {
-   return Number(contract?.doanhThu ?? 0)
- }
-@@ -1367,50 +1408,52 @@ const fetchServices = async () => {
-   }
- }
-
- const fetchSegments = async () => {
-   try {
-     const res = await api.get('/dich-vu-thg/admin/phan-khuc')
-     segments.value = res.data || []
-   } catch (e) {
-     console.error('❌ Lỗi fetch segments', e)
-     segments.value = []
-   }
- }
-
- const queueSearch = () => {
-   if (searchTimer.value) clearTimeout(searchTimer.value)
-   searchTimer.value = setTimeout(() => {
-     fetchContracts()
-   }, 300)
- }
-
- const fetchContracts = async () => {
-   const payload = {
-     keyword: searchQuery.value || null,
-     serviceId: filterService.value || null,
-     trangThaiHopDong: filterStatus.value || null,
-+    tuNgay: tuNgay.value || null,
-+    denNgay: denNgay.value || null,
-     page: currentPage.value,
-     size: pageSize.value
-   }
-
-   try {
-     const res = await api.post('/hop-dong/admin/search', payload)
-     const page = res?.data || {}
-     const items = Array.isArray(page.content) ? page.content : []
-     contracts.value = items
-     totalElements.value = Number(page.totalElements ?? items.length)
-     totalPages.value = Number(page.totalPages ?? Math.max(1, Math.ceil(totalElements.value / pageSize.value)))
-     if (currentPage.value > totalPages.value) {
-       currentPage.value = totalPages.value || 1
-     }
-   } catch (e) {
-     console.error('❌ Lỗi fetch contracts', e)
-     contracts.value = []
-     totalElements.value = 0
-     totalPages.value = 1
-   }
- }
-
- const getServiceById = (serviceId) => {
-   return serviceOptions.value.find(s => String(s.id || s.name) === String(serviceId)) || null
- }
-@@ -1462,50 +1505,53 @@ const calcDoanhThu = (c) => {
- const getConThieu = (c) => {
-   const giaSauGiam = Number(c?.giaSauGiam || 0)
-   const tongDieuChinh = getTongDieuChinh(c)
-   const doanhThu = getDoanhThuRow(c)
-   return Math.max(0, giaSauGiam + tongDieuChinh - doanhThu)
- }
-
- const calcConThieu = (c) => {
-   return getConThieu(c)
- }
-
- const getMaxRefundAmount = (c) => {
-   return Math.max(0, getDoanhThuRow(c))
- }
-
- // Modal control
- const openModal = (modal) => {
-   showModal.value = modal
- }
-
- const closeModal = (modal) => {
-   resetContractForm()
-   if (showModal.value === modal) {
-     showModal.value = null
-   }
-+  if (modal === 'modalDetail') {
-+    detailContract.value = null
-+  }
- }
-
- // Contract management
- const resetContractForm = () => {
-   const firstService = serviceOptions.value[0] || null
-   newContract.value = {
-     maHopDong: genContractCode(),
-     maKhachHang: '',
-     tenKhachHang: '',
-     tenDichVu: firstService?.name || '',
-     serviceId: firstService?.id || firstService?.name || null,
-     giaTriTaiSan: null,
-     giaDichVuGoc: 0,
-     phiGiam: 0,
-     discountMode: 'PERCENT',
-     discountValue: 0,
-     giaSauGiam: 0,
-     trangThaiHopDong: 'DANG_HIEU_LUC',
-     ngayKy: todayISO(),
-     initPlan: 'COC',
-     tiLeCoc: 30,
-     firstMethod: 'CHUYEN_KHOAN'
-   }
-   customerSearch.value = ''
-   selectedCustomer.value = null
-@@ -1877,87 +1923,134 @@ const saveAdjustment = async () => {
-     return
-   }
-
-   const payload = {
-     hopDongId: currentContract.value.id,
-     soTienDieuChinh: adjustment.value.amount,
-     loaiDieuChinh: adjustment.value.type,
-     lyDo: reason
-   }
-
-   try {
-     await showLoading(api.post('/hop-dong/admin/dieu-chinh', payload))
-     updateAlertSuccess('Điều chỉnh thành công',
-         `${adjustment.value.type === 'GIAM_GIA' ? '-' : '+'}${formatMoney(adjustment.value.amount)} (${adjustment.value.type})`)
-     await fetchContracts()
-     closeModal('modalAdjust')
-   } catch (error) {
-     console.error('❌ Lỗi điều chỉnh', error)
-     updateAlertError('Điều chỉnh thất bại', 'Vui lòng thử lại sau.')
-   }
- }
-
- // Detail view
- const openDetail = (contract) => {
-   currentContract.value = contract
-+  detailContract.value = {
-+    ...contract,
-+    dotDongTiens: contract?.dotDongTien || [],
-+    hoanTiens: contract?.hoanTien || [],
-+    dieuChinhHopDongs: contract?.dieuChinh || []
-+  }
-   openModal('modalDetail')
-+  fetchDetailContract(contract.id)
-+}
-+
-+const fetchDetailContract = async (contractId) => {
-+  if (!contractId) return
-+  try {
-+    const res = await showLoading(api.get(`/hop-dong/admin/${contractId}/detail`))
-+    detailContract.value = res?.data || detailContract.value
-+  } catch (error) {
-+    console.error('❌ Lỗi tải chi tiết hợp đồng', error)
-+    updateAlertError('Tải chi tiết thất bại', 'Vui lòng thử lại sau.')
-+  }
-+}
-+
-+const cancelContract = async () => {
-+  const contract = detailContract.value || currentContract.value
-+  if (!contract?.id) return
-+
-+  await confirmWithInput(
-+    'Xác nhận hủy hợp đồng',
-+    `Nhập mã hợp đồng ${contract.maHopDong} để xác nhận hủy.`,
-+    contract.maHopDong,
-+    async () => {
-+      try {
-+        await showLoading(api.patch(`/hop-dong/admin/${contract.id}/trang-thai/HUY`))
-+        updateAlertSuccess('Đã hủy hợp đồng', `${contract.maHopDong} đã chuyển sang trạng thái HUY.`)
-+        if (detailContract.value) {
-+          detailContract.value.trangThaiHopDong = 'HUY'
-+        }
-+        if (currentContract.value) {
-+          currentContract.value.trangThaiHopDong = 'HUY'
-+        }
-+        await fetchContracts()
-+      } catch (error) {
-+        console.error('❌ Lỗi hủy hợp đồng', error)
-+        updateAlertError('Hủy hợp đồng thất bại', 'Vui lòng thử lại sau.')
-+      }
-+    }
-+  )
- }
-
- // Delete management
- const openDelete = (contract) => {
-   currentContract.value = contract
-   openModal('modalDelete')
- }
-
- const confirmDelete = async () => {
-   const contract = currentContract.value
-   if (!contract) return
-
-   closeModal('modalDelete')
-
-   await confirmWithInput(
-     'Xác nhận xóa hợp đồng',
-     `Nhập mã hợp đồng ${contract.maHopDong} để xác nhận xóa.`,
-     contract.maHopDong,
-     async () => {
-       try {
-         await showLoading(api.delete(`/hop-dong/admin/${contract.id}`))
-         updateAlertSuccess('Đã xóa hợp đồng', `Đã xóa ${contract.maHopDong}`)
-         await fetchContracts()
-       } catch (error) {
-         console.error('❌ Lỗi xóa hợp đồng', error)
-         updateAlertError('Xóa hợp đồng thất bại', 'Vui lòng thử lại sau.')
-       }
-     }
-   )
- }
-
- // Filters
- const resetFilters = () => {
-   searchQuery.value = ''
-   filterService.value = null
-   filterStatus.value = null
-+  tuNgay.value = null
-+  denNgay.value = null
-   currentPage.value = 1
-   fetchContracts()
-   showCenterWarning('Đã reset lọc', 'Hiển thị toàn bộ hợp đồng.')
- }
-
- const goToPage = (page) => {
-   const next = Math.min(totalPages.value, Math.max(1, page))
-   currentPage.value = next
- }
-
- const nextPage = () => {
-   goToPage(currentPage.value + 1)
- }
-
- const prevPage = () => {
-   goToPage(currentPage.value - 1)
- }
-
- // Seed data
- const seedMock = () => {
-   const names = ['Nguyễn Văn A', 'Trần Thị B', 'Lê Hoàng C', 'Phạm Minh D', 'Võ Thúy E', 'Đặng Quốc F']
-   const staffNames = ['Nguyễn Minh', 'Trần Hà', 'Phạm Quân', 'Lê Thu']
-   const serviceList = serviceOptions.value
-
-   if (!serviceList.length) {

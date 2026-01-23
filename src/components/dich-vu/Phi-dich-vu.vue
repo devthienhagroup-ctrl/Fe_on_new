@@ -761,9 +761,18 @@
     <div class="modal" :class="{ show: showModal === 'modalDetail' }" @click.self="closeModal('modalDetail')">
       <div class="modal-card detail">
         <div class="modal-h">
-          <div class="modal-title">
+          <div class="modal-title flex items-center gap-2">
             <i class="fa-solid fa-file-lines"></i>
             <span>Chi tiết hợp đồng {{ detailContract?.maHopDong }}</span>
+            <span v-if="detailContract?.trangThaiHopDong === 'DANG_HIEU_LUC'" class="status st-on">
+              Đang hiệu lực
+                      </span>
+            <span v-else-if="detailContract?.trangThaiHopDong === 'HOAN_TAT'" class="status st-done">
+              Hoàn tất
+                      </span>
+            <span v-else-if="detailContract?.trangThaiHopDong === 'HUY'" class="status st-cancel">
+              Đã hủy
+            </span>
           </div>
           <button class="x" @click="closeModal('modalDetail')">
             <i class="fa-solid fa-xmark"></i>
@@ -777,7 +786,7 @@
 
               <div class="p-3">
                 <div class="text-sm font-extrabold">{{ detailContract?.maHopDong }} • {{ detailContract?.tenKhachHang }}</div>
-                <div class="muted tiny mt-1">{{ detailContract?.tenDichVu }} • Ngày tạo {{ formatDateValue(detailContract?.ngayTao) }} • Trạng thái {{ getStatusText(detailContract?.trangThaiHopDong) }}</div>
+                <div class="muted tiny mt-1">{{ detailContract?.tenDichVu }} • Ngày tạo {{ formatDateValue(detailContract?.ngayTao) }}</div>
 
                 <div class="grid grid-cols-2 gap-2 mt-3">
                   <div class="kpi">
@@ -795,6 +804,26 @@
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Giá tài sản ký</div>
                     <div class="v price p3">{{ formatMoney(detailContract?.giaTaiSanKy || 0) }}</div>
+                  </div>
+                  <div class="kpi">
+                    <div class="k"><span class="dot"></span>Doanh thu</div>
+                    <div class="v price p1">{{ formatMoney(getDoanhThuRow(detailContract)) }}</div>
+                    <div class="muted tiny mt-1">Tổng hoàn: <span class="mono">{{ formatMoney(getTongHoan(detailContract)) }}</span></div>
+                  </div>
+                  <div class="kpi">
+                    <div class="k"><span class="dot"></span>Doanh số</div>
+                    <div class="v price p3">{{ formatMoney(getDoanhSoRow(detailContract)) }}</div>
+                    <div class="muted tiny mt-1">Tổng điều chỉnh: <span class="mono">{{ formatMoney(getTongDieuChinh(detailContract)) }}</span></div>
+                  </div>
+                  <div class="kpi">
+                    <div class="k"><span class="dot"></span>Doanh thu</div>
+                    <div class="v price p1">{{ formatMoney(getDoanhThuRow(detailContract)) }}</div>
+                    <div class="muted tiny mt-1">Tổng hoàn: <span class="mono">{{ formatMoney(getTongHoan(detailContract)) }}</span></div>
+                  </div>
+                  <div class="kpi">
+                    <div class="k"><span class="dot"></span>Doanh số</div>
+                    <div class="v price p3">{{ formatMoney(getDoanhSoRow(detailContract)) }}</div>
+                    <div class="muted tiny mt-1">Tổng điều chỉnh: <span class="mono">{{ formatMoney(getTongDieuChinh(detailContract)) }}</span></div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Ngày ký</div>
