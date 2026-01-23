@@ -52,7 +52,7 @@ import ProductList from "../components/productAdmin/ProductList.vue";
 import ProductDetail from "../components/productAdmin/ProductDetail.vue";
 import ProductUser from "../components/productAdmin/productUser/ProductUser.vue";
 import ProductUpdate from "../components/productAdmin/ProductUpdate.vue";
-import ProductDetail2 from "../components/productAdmin/productUser/ProductDetail2.vue";
+import ProductDetail2 from "../components/productAdmin/ProductDetail2.vue";
 import ProductCreate from "../components/productAdmin/ProductCreate.vue";
 import HostManager from "../components/host/HostManager.vue";
 
@@ -156,16 +156,33 @@ import CTVRecruit from "../components/user/NewUser/CTVRecruit/CTVRecruit.vue";
 import ProjectManagementCMS from "../components/cms/NewCms/ProjectMannagement/ProjectManagementCMS.vue";
 import PropertyManagementCMS from "../components/cms/NewCms/PropertyManagement/PropertyManagementCMS.vue";
 import CTVRecruitCMS from "../components/cms/NewCms/CTVRecruit/CTVRecruitCMS.vue";
-import DichVuSetting from "../components/dich-vu/Dich-vu-setting.vue";
-
+import DichVuSetting from "../components/dich-vu/Phi-dich-vu.vue";
+import DichVuSetting2 from "../components/dich-vu/Dich-vu-setting.vue";
 const routes = [
-    //
-    // {
-    //     path: "/-thg/dich-vu",
-    //     name: "DichVuSetting",
-    //     component: DichVuSetting,
-    //     meta: {requiresAuth: false, enableTailwind: true}
-    // },
+
+    {
+        path: "/-thg/dich-vu",
+        name: "DichVuSetting",
+        component: Menu,
+        meta: {requiresAuth: false, enableTailwind: true},
+        children: [{
+            path: '',
+            name: "DichVuSetting1",
+            component: DichVuSetting,
+        }]
+    },
+
+    {
+        path: "/-thg/dich-vu-chinh",
+        name: "DichVuSetting2",
+        component: Menu,
+        meta: {requiresAuth: false, enableTailwind: true},
+        children: [{
+            path: '',
+            name: "DichVuSetting3",
+            component: DichVuSetting2,
+        }]
+    },
     {
         path: "/-thg/nhap-lieu",
         name: "TeamCollaboration1",

@@ -1,528 +1,873 @@
-diff --git a/src/components/user/NewUser/QuickSale30D/QuickSale30D.vue b/src/components/user/NewUser/QuickSale30D/QuickSale30D.vue
-index 857bb555ee675ac75fe81464885147396644ac39..50c6260d9195eb0b3fcd30888ae4112f52b60187 100644
---- a/src/components/user/NewUser/QuickSale30D/QuickSale30D.vue
-+++ b/src/components/user/NewUser/QuickSale30D/QuickSale30D.vue
-@@ -263,50 +263,68 @@
-                 </div>
+diff --git a/src/components/thiet-kegiandien/ContractStatsDashboard.vue b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
+index 2e5b2a545a9383ab27ead329937f8f993e26c973..7ab3e23c72116ea14e9a8271e2b6dc3e78510cae 100644
+--- a/src/components/thiet-kegiandien/ContractStatsDashboard.vue
++++ b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
+@@ -80,50 +80,63 @@
+       </section>
 
-                 <div>
-                   <label class="block text-sm font-medium text-slate-300 mb-1.5">Diện tích sàn (m²)</label>
-                   <input type="number" step="0.1" v-model="searchForm.dienTichSan"
-                          class="w-full rounded-xl bg-slate-900/70 border border-white/10 px-4 py-3
-                       text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                          :placeholder="searchFormPlaceholders.dienTichSan">
-                 </div>
-               </div>
-
-               <!-- Quyền sử dụng đất -->
-               <div>
-                 <label class="block text-sm font-medium text-slate-300 mb-1.5">Quyền sử dụng đất <span class="text-rose-500">*</span></label>
-                 <select required v-model="searchForm.quyenSuDungDat"
-                         class="w-full rounded-xl bg-slate-900/70 border border-white/10 px-4 py-3
-                  text-sm text-slate-50 focus:outline-none focus:ring-2 focus:ring-purple-500/50
-                  appearance-none">
-                   <option value="" disabled selected class="text-slate-500">Chọn loại quyền sử dụng</option>
-                   <option v-for="option in landUseOptions" :key="option.value" :value="option.value" class="text-white bg-slate-900">
-                     {{ option.label }}
-                   </option>
-                 </select>
-               </div>
-
-+              <!-- Quan hệ sở hữu -->
-+              <div>
-+                <label class="block text-sm font-medium text-slate-300 mb-1.5">Quan hệ sở hữu <span class="text-rose-500">*</span></label>
-+                <select required v-model="ownershipChoice"
-+                        class="w-full rounded-xl bg-slate-900/70 border border-white/10 px-4 py-3
-+                 text-sm text-slate-50 focus:outline-none focus:ring-2 focus:ring-purple-500/50
-+                 appearance-none">
-+                  <option value="" disabled selected class="text-slate-500">Chọn quan hệ sở hữu</option>
-+                  <option v-for="option in ownershipOptions" :key="option" :value="option" class="text-white bg-slate-900">
-+                    {{ option }}
-+                  </option>
-+                </select>
-+                <input v-if="ownershipChoice === 'Khác'" type="text" required v-model="searchForm.ownershipRelation"
-+                       class="mt-3 w-full rounded-xl bg-slate-900/70 border border-white/10 px-4 py-3
-+                    text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-+                       placeholder="Nhập quan hệ sở hữu khác...">
-+              </div>
-+
-               <!-- Kết cấu -->
-               <div>
-                 <label class="block text-sm font-medium text-slate-300 mb-1.5">Kết cấu công trình</label>
-                 <input type="text" v-model="searchForm.ketCauCongTrinh"
-                        class="w-full rounded-xl bg-slate-900/70 border border-white/10 px-4 py-3
-                     text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                        :placeholder="searchFormPlaceholders.ketCauCongTrinh">
-               </div>
-
-               <!-- Giá mong muốn bán -->
-               <div>
-                 <label class="block text-sm font-medium text-slate-300 mb-1.5">Giá mong muốn bán (tỷ VNĐ) <span class="text-rose-500">*</span></label>
-                 <div class="relative">
-                   <input type="number" step="0.1" required v-model="searchForm.giaMongMuon"
-                          class="w-full rounded-xl bg-slate-900/70 border border-white/10 px-4 py-3
-                       text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                          :placeholder="searchFormPlaceholders.giaMongMuon">
-                   <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 text-sm">
-                     tỷ VNĐ
-                   </div>
-                 </div>
-                 <p class="text-xs text-slate-500 mt-1">{{ priceHint }}</p>
-               </div>
-
-               <!-- Nút submit -->
-@@ -674,51 +692,51 @@
-                 <button type="submit"
-                         class="btn-gradient flex-1 inline-flex items-center justify-center px-5 py-3 rounded-lg md:rounded-xl text-sm font-semibold
-                            transition order-2 sm:order-1">
-                   {{ config.buttons.submit.text }}
-                 </button>
-                 <button v-if="authStore.userInfo==null" @click="openLoginModal" type="button"
-                         class="inline-flex items-center justify-center px-5 py-3 rounded-lg md:rounded-xl text-sm font-semibold
-                       bg-blue-400/10 text-white border border-white/10
-                       hover:bg-white/15 hover:border-white/20 transition order-1 sm:order-2">
-                   Đăng nhập ngay
-                 </button>
-               </div>
-
-               <p class="text-xs text-slate-500 leading-relaxed text-center lg:text-left">
-                 {{ contactPrivacyNotice }}
-               </p>
-             </form>
+       <section class="card">
+         <div class="card__title">
+           <span class="card__titleIcon bg--emerald"><i class="fa-solid fa-money-bill-trend-up"></i></span>
+           <div>
+             <h3>{{ revenueTitle }}</h3>
+             <p class="muted">{{ revenueSubtitle }}</p>
+           </div>
+           <div class="card__actions">
+             <div class="field field--compact">
+               <label>Dịch vụ</label>
+               <select v-model="selectedService">
+                 <option v-for="service in serviceOptions" :key="service.id" :value="service.id">
+                   {{ service.name }}
+                 </option>
+               </select>
+             </div>
            </div>
          </div>
-       </div>
-     </section>
-   </div>
- </template>
+         <div class="chartWrap chartWrap--lg">
+           <canvas ref="trend2El"></canvas>
+         </div>
+       </section>
 
- <script setup>
--import { computed, onMounted, reactive, ref, onUnmounted, nextTick } from "vue";
-+import { computed, onMounted, reactive, ref, onUnmounted, nextTick, watch } from "vue";
- import GlassCard from "../../UI/GlassCard.vue";
- import TestimonialCard from "../../UI/TestimonialCard.vue";
- import SoldProjectCard from "../../UI/SoldProjectCard.vue";
- import { useAuthStore } from "../../../../stores/authStore.js";
- import addressData from "../../../../assets/js/address.json";
- import Fuse from "fuse.js";
- import api from "../../../../api/api.js";
- import { buildSeoUrl } from "../../../../assets/js/global.js";
- import Swal from 'sweetalert2';
-
- // ========== SOLD PROJECTS - Lấy từ API ==========
- const soldProjects = ref([]);
- const loadingSoldProjects = ref(false);
- const loadingMoreProjects = ref(false);
- const soldProjectsPage = ref(0);
- const soldProjectsTotalPages = ref(0);
- const soldProjectsContainer = ref(null);
- const hasMoreSoldProjects = ref(true);
-
- // Hàm format địa chỉ: chỉ lấy Thành phố/Tỉnh, giới hạn 40 ký tự
- const formatLocation = (address) => {
-   if (!address) return '';
-
-   const parts = address.split('/!!');
-
-@@ -840,50 +858,51 @@ const handleSoldProjectsScroll = () => {
-       scrolled: (scrollLeft / scrollableDistance) * 100 + '%'
-     });
-     loadMoreSoldProjects();
-   }
- };
-
- // Hàm load thêm dự án - THÊM DEBOUNCE
- const loadMoreSoldProjects = async () => {
-   if (loadingMoreProjects.value || !hasMoreSoldProjects.value) return;
-
-   console.log('Loading more projects, page:', soldProjectsPage.value + 1);
-
-   const nextPage = soldProjectsPage.value + 1;
-   await fetchSoldProjects(nextPage, true);
- };
-
- // Hàm refresh danh sách dự án
- const refreshSoldProjects = () => {
-   soldProjectsPage.value = 0;
-   fetchSoldProjects(0, false);
- };
-
- // Data từ address.json
- const provinces = ref([]);
- const selectedProvince = ref(null);
-+const ownershipChoice = ref('');
-
- // Fuse.js instances
- let provinceFuse = null;
- let wardFuse = null;
-
- // State cho search và dropdown
- const provinceSearch = ref(''); // Biến riêng cho search tỉnh
- const wardSearch = ref(''); // Biến riêng cho search phường
- const showProvinceDropdown = ref(false);
- const showWardDropdown = ref(false);
- const filteredProvinces = ref([]);
- const filteredWards = ref([]);
-
- // Khởi tạo dữ liệu địa chỉ
- const initializeAddressData = () => {
-   provinces.value = addressData.map(province => ({
-     name: province.name,
-     code: province.code,
-     codename: province.codename,
-     phone_code: province.phone_code,
-     wards: province.wards || []
-   }));
-
-   // Khởi tạo Fuse.js cho tỉnh
-   provinceFuse = new Fuse(provinces.value, {
-@@ -971,57 +990,60 @@ const authStore = useAuthStore();
- const openLoginModal = () => {
-   authStore.openLoginModal()
- }
-
- // ========== FORM CONFIG (SET CỨNG) ==========
- const searchFormTitle = 'Tra cứu thời gian bán trên chính sản phẩm của bạn';
- const searchFormDescription = 'Nhập thông tin nhà phố của bạn - hệ thống AI của chúng tôi sẽ dự đoán chính xác thời gian bán và giá đề xuất trong vòng 30 ngày.';
-
- const searchFormPlaceholders = {
-   hoTen: 'Nguyễn Văn A',
-   soDienThoai: '0912 345 678',
-   email: 'example@gmail.com',
-   tinhThanh: 'Chọn tỉnh/thành phố',
-   quanHuyen: 'VD: Quận 2, Quận 7, Bình Thạnh...',
-   diaChiChiTiet: 'VD: Số 123, đường Nguyễn Văn Linh, Phường Tân Phong',
-   soTo: 'VD: 123',
-   soThua: 'VD: 456',
-   dienTichDat: 'VD: 100',
-   dienTichSan: 'VD: 350',
-   quyenSuDungDat: 'Chọn loại quyền sử dụng',
-   ketCauCongTrinh: 'VD: Nhà 4 tầng, 1 hầm, 5 phòng ngủ, 2 WC, nội thất cao cấp',
-   giaMongMuon: 'VD: 15.5'
- };
-
- const landUseOptions = [
--  { value: 'SO_DO', label: 'Sổ đỏ (Sở hữu lâu dài)' },
--  { value: 'SO_HONG', label: 'Sổ hồng (Nhà nước cho thuê đất)' },
--  { value: 'HOP_DONG_THUE_DAT', label: 'Hợp đồng thuê đất' },
--  { value: 'CHUA_CO_SO', label: 'Chưa có sổ' },
--  { value: 'GIAY_TO_KHAC', label: 'Giấy tờ khác' }
-+  { value: 'Sổ đỏ lâu dài', label: 'Sổ đỏ lâu dài' },
-+  { value: 'Sổ hồng', label: 'Sổ hồng' },
-+  { value: 'Sổ đỏ 50 năm', label: 'Sổ đỏ 50 năm' },
-+  { value: 'Đang chờ cấp sổ', label: 'Đang chờ cấp sổ' },
-+  { value: 'Giấy tờ khác', label: 'Giấy tờ khác' },
-+  { value: 'Khác', label: 'Khác' }
- ];
-
-+const ownershipOptions = ['Sở hữu riêng', 'Sở hữu chung', 'Đồng sở hữu', 'Khác'];
++      <section class="card">
++        <div class="card__title">
++          <span class="card__titleIcon bg--violet"><i class="fa-solid fa-chart-line"></i></span>
++          <div>
++            <h3>{{ salesTitle }}</h3>
++            <p class="muted">{{ salesSubtitle }}</p>
++          </div>
++        </div>
++        <div class="chartWrap chartWrap--lg">
++          <canvas ref="trend3El"></canvas>
++        </div>
++      </section>
 +
- const priceHint = 'Nhập giá bạn mong muốn bán (đơn vị: tỷ đồng)';
+       <!-- 3 charts row -->
+       <section class="grid3">
+         <article class="card">
+           <div class="card__title">
+             <span class="card__titleIcon bg--sky"><i class="fa-solid fa-chart-column"></i></span>
+             <div>
+               <h3>Trạng thái hợp đồng</h3>
+               <p class="muted">Phân bố số lượng theo nhóm</p>
+             </div>
+           </div>
 
- // ========== SEARCH RESULT CONFIG (SET CỨNG) ==========
- const searchResultTitle = 'Kết quả dự đoán';
- const searchResultSubtitle = 'Dựa trên phân tích AI và dữ liệu thị trường thực tế';
+           <div class="chartWrap chartWrap--md">
+             <canvas ref="statusEl"></canvas>
+           </div>
 
- const searchResultAreaInfo = {
-   title: 'Thông tin khu vực',
-   province: 'Tỉnh/Thành phố:',
-   district: 'Quận/Huyện:',
-   highDemand: '✓ Khu vực này có nhu cầu mua cao trong 3 tháng gần đây'
+           <div class="legend">
+             <div v-for="l in statusLegend" :key="l.label" class="legend__item">
+               <span class="legend__dot" :style="{ background: l.color }"></span>
+               <span>{{ l.label }}</span>
+             </div>
+           </div>
+         </article>
+
+         <article class="card">
+           <div class="card__title">
+@@ -186,61 +199,63 @@ import api from "../../api/api.js";
+ const COLORS = {
+   NEW: "#94a3b8",
+   DC_TELESALES: "#7c83ff",
+   CHAM_SOC: "#60c8ff",
+   TN_7NGAY: "#44b7ff",
+   TN_14NGAY: "#2ea2ff",
+   THAT_BAI: "#ff6b8a",
+   KHONG_LIEN_LAC_DUOC: "#ffb86b",
+   SAI_SO_LIEU: "#c39bff",
+   THANH_CONG: "#55e6a5",
+   KHACH_HUY_HEN: "#fbbf24",
+   BAN_NHANH: "#34d399",
+   BAN_GP: "#2dd4bf",
  };
 
- const searchResultEstimatedTime = {
-   title: 'Thời gian bán dự kiến',
-   subtitle: 'Dưới mục tiêu 30 ngày'
+ // ===== State =====
+ const loading = ref(false);
+ const timeRange = ref("month");
+ const selectedMonth = ref(new Date().getMonth() + 1);
+ const selectedYear = ref(new Date().getFullYear());
+ const selectedService = ref("all");
+ const chartsReady = ref(false);
+ const startDate = ref("");
+ const endDate = ref("");
+ const services = ref([]);
+-const segments = ref([]);
++const statusLegend = ref([]);
++const customerLegend = ref([]);
++const serviceLegend = ref([]);
+
+ // Stats base (giống file gốc)
+-const baseStats = {
+-  totalContracts: 48,
+-  activeContracts: 32,
+-  completedContracts: 12,
+-  cancelledContracts: 4,
+-  totalRevenue: 1245, // triệu VNĐ
+-};
+-const stats = ref({ ...baseStats });
++const stats = ref({
++  totalContracts: 0,
++  activeContracts: 0,
++  completedContracts: 0,
++  cancelledContracts: 0,
++  totalRevenue: 0,
++  totalSales: 0,
++});
+
+ // ===== Helpers =====
+ const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+ const toISODate = (d) => {
+   const yyyy = d.getFullYear();
+   const mm = String(d.getMonth() + 1).padStart(2, "0");
+   const dd = String(d.getDate()).padStart(2, "0");
+   return `${yyyy}-${mm}-${dd}`;
  };
 
- const searchResultSuggestedPrice = {
-   title: 'Giá đề xuất tối ưu',
-   subtitle: 'Giá thị trường chấp nhận: {min} - {max} tỷ',
-   compare: 'So với giá mong muốn',
-   average: 'Giá trung bình khu vực'
- };
+ const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1);
 
-@@ -1354,95 +1376,105 @@ const config = ref({
-         id: 3,
-         name: 'Lê Thị Hương',
-         position: 'Chủ nhà phố, Thủ Đức',
-         quote: 'Dashboard theo dõi tiến độ real-time giúp tôi yên tâm. Mọi thứ minh bạch, hỗ trợ pháp lý rất tận tình. Cảm ơn Thiên Hà Group!',
-         initials: 'LT',
-         color: 'emerald',
-         rating: 5
-       }
-     ]
+ const dateText = computed(() => {
+   if (!selectedYear.value || selectedYear.value < 1) return "—";
+   if (timeRange.value === "month") {
+     return `Tháng ${selectedMonth.value}/${selectedYear.value}`;
    }
+   return `Năm ${selectedYear.value}`;
  });
 
- // Reactive data cho form tra cứu
- const searchForm = reactive({
-   hoTen: '',
-   soDienThoai: '',
-   email: '',
-   tinhThanh: '',
-   quanHuyen: '',
-   diaChiChiTiet: '',
-   soTo: '',
-   soThua: '',
-   dienTichDat: '',
-   dienTichSan: '',
-   quyenSuDungDat: '',
-+  ownershipRelation: '',
-   ketCauCongTrinh: '',
-   giaMongMuon: ''
+ const statCards = computed(() => [
+   {
+     key: "totalContracts",
+     icon: "fa-solid fa-file-contract",
+     label: "Tổng hợp đồng",
+@@ -258,292 +273,221 @@ const statCards = computed(() => [
+   },
+   {
+     key: "completedContracts",
+     icon: "fa-solid fa-circle-check",
+     label: "Hợp đồng hoàn tất",
+     value: stats.value.completedContracts.toLocaleString("vi-VN"),
+     tone: "emerald",
+     badge: "Kết quả",
+   },
+   {
+     key: "cancelledContracts",
+     icon: "fa-solid fa-circle-xmark",
+     label: "Hợp đồng hủy",
+     value: stats.value.cancelledContracts.toLocaleString("vi-VN"),
+     tone: "rose",
+     badge: "Cảnh báo",
+   },
+   {
+     key: "totalRevenue",
+     icon: "fa-solid fa-money-bill-wave",
+     label: "Tổng doanh thu (triệu VNĐ)",
+     value: stats.value.totalRevenue.toLocaleString("vi-VN"),
+     tone: "amber",
+     badge: "Doanh thu",
+   },
++  {
++    key: "totalSales",
++    icon: "fa-solid fa-chart-line",
++    label: "Tổng doanh số (triệu VNĐ)",
++    value: stats.value.totalSales.toLocaleString("vi-VN"),
++    tone: "violet",
++    badge: "Doanh số",
++  },
+ ]);
+
+-const statusLegend = [
+-  { label: "Thành công", color: COLORS.THANH_CONG },
+-  { label: "Tiềm năng", color: COLORS.TN_7NGAY },
+-  { label: "Đang CS", color: COLORS.CHAM_SOC },
+-  { label: "Thất bại", color: COLORS.THAT_BAI },
+-  { label: "Không LL", color: COLORS.KHONG_LIEN_LAC_DUOC },
+-];
+-const customerLegend = [
+-  { label: "Mới tiếp nhận", color: COLORS.DC_TELESALES },
+-  { label: "Đang chăm sóc", color: COLORS.CHAM_SOC },
+-  { label: "Sai số liệu", color: COLORS.SAI_SO_LIEU },
+-];
+-const serviceLegend = [
+-  { label: "Không liên lạc", color: COLORS.KHONG_LIEN_LAC_DUOC },
+-  { label: "Bán nhanh", color: COLORS.BAN_NHANH },
+-  { label: "Đã lên VP", color: COLORS.BAN_GP },
+-];
+-
+ const serviceOptions = computed(() => [
+   { id: "all", name: "Tất cả dịch vụ" },
+   ...services.value.map((service) => ({ id: service.id, name: service.name })),
+ ]);
+
+ const revenueTitle = computed(() => {
+   const selected = serviceOptions.value.find((option) => option.id === selectedService.value);
+   const suffix = timeRange.value === "month" ? "theo tháng" : "theo năm";
+   return `Doanh thu ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
  });
 
- // Reactive data cho kết quả
- const searchResult = reactive({
-   show: false,
-   tinhThanh: '',
-   quanHuyen: '',
-   ngayBan: 0,
-   giaDeXuat: 0,
-   chenhLech: 0,
-   phanTram: 0,
-   minPrice: 0, // Thêm trường min
-   maxPrice: 0  // Thêm trường max
- });
- //Dữ liệu gửi về BE
- const PropertySaleDTO = reactive({
-   fullName: '',
-   phone: '',
-   email: '',
-   province: '',
-   ward: '',
-   addressDetail: '',
--  soTo: 0,
--  soThua: 0,
-+  soTo: '',
-+  soThua: '',
-   dienTichDat: 0,
-   dienTichSan: 0,
-   ketCauCongTrinh: '',
-
-   landUseRight: '',
-+  ownershipRelation: '',
-   expectedPrice: 0,
-
-   estimatedSaleTimeDays: 0,
-   suggestedPrice: 0,
-   priceChangePercent: 0,
-   areaAveragePrice: 0,
-   acceptedPriceMin: 0,
-   acceptedPriceMax: 0,
-   saleSuccessRate: 0,
- })
-
- // ========== COMPUTED PROPERTIES ==========
- const isLoggedIn = computed(() => authStore.userInfo != null);
-
-+watch(ownershipChoice, (val) => {
-+  if (val && val !== 'Khác') {
-+    searchForm.ownershipRelation = val;
-+  } else {
-+    searchForm.ownershipRelation = '';
-+  }
+ const revenueSubtitle = computed(() => {
+-  if (selectedService.value === "all") {
+-    return "Phân loại theo dịch vụ";
+-  }
+-  const serviceSegments = segments.value.filter(
+-    (segment) => String(segment.serviceId) === String(selectedService.value)
+-  );
+-  if (!serviceSegments.length) {
+-    return "Phân loại theo phân khúc dịch vụ";
+-  }
+-  const segmentNames = serviceSegments
+-    .map((segment, index) => segment.name || segment.ten || `Phân khúc ${index + 1}`)
+-    .join(" / ");
+-  return `Phân loại theo phân khúc: ${segmentNames}`;
++  if (selectedService.value === "all") return "Phân loại theo dịch vụ";
++  return "Phân loại theo phân khúc dịch vụ";
 +});
 +
- // Computed properties cho hiển thị giá
- const displayedGiaDeXuat = computed(() => {
-   if (isLoggedIn.value) {
-     return `${searchResult.giaDeXuat} tỷ VNĐ`;
-   }
-   return '*******';
++const salesTitle = computed(() => {
++  const selected = serviceOptions.value.find((option) => option.id === selectedService.value);
++  const suffix = timeRange.value === "month" ? "theo tháng" : "theo năm";
++  return `Doanh số ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
++});
++
++const salesSubtitle = computed(() => {
++  if (selectedService.value === "all") return "Phân loại theo dịch vụ";
++  return "Phân loại theo phân khúc dịch vụ";
  });
 
- const displayedChenhLech = computed(() => {
-   if (isLoggedIn.value) {
-     return chenhLechText.value;
-   }
-   return '******';
- });
+ // ===== Chart refs =====
+ const trend1El = ref(null);
+ const trend2El = ref(null);
++const trend3El = ref(null);
+ const statusEl = ref(null);
+ const customerTypeEl = ref(null);
+ const serviceTypeEl = ref(null);
 
- const displayedAveragePrice = computed(() => {
-   if (isLoggedIn.value) {
-     return `${(searchResult.giaDeXuat * 0.96).toFixed(1)} tỷ`;
-   }
-   return '******';
- });
+ // ===== Chart instances =====
+ let trendChart1 = null;
+ let trendChart2 = null;
++let trendChart3 = null;
+ let statusChart = null;
+ let customerTypeChart = null;
+ let serviceTypeChart = null;
 
- const displayedPriceRange = computed(() => {
-   if (isLoggedIn.value) {
-     return `Giá thị trường chấp nhận: ${searchResult.minPrice} - ${searchResult.maxPrice} tỷ`;
-@@ -1724,80 +1756,84 @@ const calculateAndShowResult = async () => {
-     timer: 2000
-   });
+ // ===== Initial data =====
+ const monthLabels = [
+   "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+   "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12",
+ ];
 
-   // Scroll đến kết quả
-   setTimeout(() => {
-     const resultEl = document.getElementById('ket-qua-du-doan');
-     if (resultEl) {
-       resultEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-     }
-   }, 100);
+-const trendData1 = {
+-  labels: monthLabels,
+-  datasets: [
+-    {
+-      label: "Hợp đồng mới",
+-      data: [8, 12, 9, 14, 18, 16, 20, 18, 15, 12, 10, 13],
+-      borderColor: COLORS.DC_TELESALES,
+-      backgroundColor: `${COLORS.DC_TELESALES}22`,
+-      borderWidth: 3,
+-      fill: true,
+-      tension: 0.4,
+-      pointRadius: 2,
+-      pointHoverRadius: 5,
+-    },
+-    {
+-      label: "Hợp đồng thành công",
+-      data: [4, 6, 5, 8, 10, 12, 14, 13, 11, 9, 7, 8],
+-      borderColor: COLORS.THANH_CONG,
+-      backgroundColor: `${COLORS.THANH_CONG}22`,
+-      borderWidth: 3,
+-      fill: true,
+-      tension: 0.4,
+-      pointRadius: 2,
+-      pointHoverRadius: 5,
+-    },
+-    {
+-      label: "Hợp đồng thất bại",
+-      data: [1, 2, 1, 2, 3, 2, 3, 2, 2, 1, 1, 2],
+-      borderColor: COLORS.THAT_BAI,
+-      backgroundColor: `${COLORS.THAT_BAI}1F`,
+-      borderWidth: 2,
+-      fill: true,
+-      tension: 0.4,
+-      pointRadius: 2,
+-      pointHoverRadius: 5,
+-    },
+-  ],
+-};
+-
+ const revenuePalette = [
+   COLORS.BAN_NHANH,
+   COLORS.BAN_GP,
+   COLORS.DC_TELESALES,
+   COLORS.CHAM_SOC,
+   COLORS.TN_7NGAY,
+   COLORS.TN_14NGAY,
+   COLORS.SAI_SO_LIEU,
+   COLORS.THANH_CONG,
+ ];
+
+-const revenueBaseSeries = [85, 105, 92, 125, 145, 160, 180, 165, 155, 135, 120, 140];
+-
+-const buildServiceSeries = (index) => {
+-  const multiplier = 1 - Math.min(index * 0.08, 0.4);
+-  return revenueBaseSeries.map((value) => Math.round(value * multiplier));
+-};
+-
+-const buildSegmentSeries = (index) => {
+-  const ratio = 0.55 - Math.min(index * 0.08, 0.35);
+-  return revenueBaseSeries.map((value) => Math.max(0, Math.round(value * ratio)));
+-};
+-
+-const buildRevenueDatasets = (range, serviceId) => {
+-  const datasetSource =
+-    serviceId === "all"
+-      ? services.value.map((service, index) => ({
+-          label: service.name,
+-          data: buildServiceSeries(index),
+-        }))
+-      : segments.value
+-          .filter((segment) => String(segment.serviceId) === String(serviceId))
+-          .map((segment, index) => ({
+-            label: segment.name || segment.ten || `Phân khúc ${index + 1}`,
+-            data: buildSegmentSeries(index),
+-          }));
+-
+-  const fallback = datasetSource.length
+-    ? datasetSource
+-    : [{ label: "Doanh thu", data: revenueBaseSeries }];
+-
+-  return fallback.map((item, index) => ({
+-    label: item.label,
+-    data: generateFilteredLineData([{ data: item.data }], range)[0],
+-    borderColor: revenuePalette[index % revenuePalette.length],
+-    backgroundColor: `${revenuePalette[index % revenuePalette.length]}22`,
+-    borderWidth: 3,
+-    fill: true,
+-    tension: 0.4,
+-    pointRadius: 2,
+-    pointHoverRadius: 5,
+-  }));
+-};
+-
+-const trendData2 = {
++const emptyLineData = {
+   labels: monthLabels,
+-  datasets: buildRevenueDatasets("month", "all"),
++  datasets: [],
  };
 
- // Hàm xử lý submit form - đã thêm tính toán min-max và kiểm tra localStorage
- // Hàm xử lý submit form - đã thêm tính toán min-max và kiểm tra localStorage
- const handleSearchSubmit = async (e) => {
-   e.preventDefault();
+ const statusData = {
+-  labels: ["Thành công", "Tiềm năng", "Đang CS", "Thất bại", "Không LL"],
++  labels: [],
+   datasets: [
+     {
+       label: "Số lượng",
+-      data: [45, 28, 32, 12, 8],
+-      backgroundColor: [
+-        COLORS.THANH_CONG,
+-        COLORS.TN_7NGAY,
+-        COLORS.CHAM_SOC,
+-        COLORS.THAT_BAI,
+-        COLORS.KHONG_LIEN_LAC_DUOC,
+-      ],
++      data: [],
++      backgroundColor: [],
+       borderWidth: 0,
+       borderRadius: 10,
+       barPercentage: 0.55,
+       categoryPercentage: 0.7,
+     },
+   ],
+ };
 
-   // Kiểm tra các trường bắt buộc
-   const requiredFields = [
-     'hoTen',
-     'soDienThoai',
-     'email',
-     'tinhThanh',
-     'quanHuyen',
-     'dienTichDat',
--    'giaMongMuon'
-+    'giaMongMuon',
-+    'quyenSuDungDat',
-+    'ownershipRelation'
-   ];
+ const customerTypeData = {
+-  labels: ["Mới tiếp nhận", "Đang chăm sóc", "Sai số liệu"],
++  labels: [],
+   datasets: [
+     {
+-      data: [40, 35, 25],
+-      backgroundColor: [COLORS.DC_TELESALES, COLORS.CHAM_SOC, COLORS.SAI_SO_LIEU],
++      data: [],
++      backgroundColor: [],
+       borderWidth: 0,
+       spacing: 4,
+     },
+   ],
+ };
 
-   // Kiểm tra xem các trường bắt buộc có được điền không
-   const missingFields = requiredFields.filter(field => {
-     const value = searchForm[field];
+ const serviceTypeData = {
+-  labels: ["Không liên lạc", "Bán nhanh", "Đã lên VP"],
++  labels: [],
+   datasets: [
+     {
+-      data: [30, 40, 30],
+-      backgroundColor: [COLORS.KHONG_LIEN_LAC_DUOC, COLORS.BAN_NHANH, COLORS.BAN_GP],
++      data: [],
++      backgroundColor: [],
+       borderWidth: 0,
+       spacing: 4,
+     },
+   ],
+ };
 
-     // Kiểm tra các trường string
-     if (field === 'hoTen' || field === 'soDienThoai' || field === 'email' ||
-         field === 'tinhThanh' || field === 'quanHuyen') {
-       return !value || String(value).trim() === '';
-     }
+ // ===== Build charts =====
+ function createCharts() {
+   const gridColor = "rgba(15, 23, 42, 0.06)";
 
-     // Kiểm tra các trường số
-     if (field === 'dienTichDat' || field === 'giaMongMuon') {
-       return !value && value !== 0;
-     }
-
-     return !value;
+   trendChart1 = new Chart(trend1El.value.getContext("2d"), {
+     type: "line",
+-    data: structuredClone(trendData1),
++    data: structuredClone(emptyLineData),
+     options: {
+       responsive: true,
+       maintainAspectRatio: false,
+       interaction: { mode: "index", intersect: false },
+       scales: {
+         x: { grid: { color: gridColor } },
+         y: {
+           beginAtZero: true,
+           grid: { color: gridColor },
+           title: { display: true, text: "Số hợp đồng", font: { weight: "700" } },
+         },
+       },
+       plugins: {
+         legend: {
+           position: "top",
+           labels: { usePointStyle: true, padding: 14, font: { size: 12 } },
+         },
+         tooltip: { padding: 10, cornerRadius: 10 },
+       },
+     },
    });
 
-   if (missingFields.length > 0) {
-     const fieldLabels = {
-       'hoTen': 'Họ tên',
-       'soDienThoai': 'Số điện thoại',
-       'email': 'Email',
-       'tinhThanh': 'Tỉnh/Thành phố',
-       'quanHuyen': 'Quận/Huyện',
-       'dienTichDat': 'Diện tích đất',
--      'giaMongMuon': 'Giá mong muốn'
-+      'giaMongMuon': 'Giá mong muốn',
-+      'quyenSuDungDat': 'Quyền sử dụng đất',
-+      'ownershipRelation': 'Quan hệ sở hữu'
-     };
-
-     const missingFieldNames = missingFields.map(field => fieldLabels[field] || field).join(', ');
-
-     Swal.fire({
-       title: 'Thiếu thông tin',
-       html: `<div class="text-slate-300 text-sm">
-               <p class="mb-2">Vui lòng điền đầy đủ các trường bắt buộc:</p>
-               <p class="text-amber-300 font-medium">${missingFieldNames}</p>
-             </div>`,
-       icon: 'warning',
-       background: '#0f172a',
-       color: '#e2e8f0',
-       confirmButtonText: 'OK',
-       customClass: {
-         popup: 'rounded-2xl border border-white/10',
-         confirmButton: 'btn-gradient !rounded-xl !px-6 !py-2.5 !text-sm !font-semibold'
+   trendChart2 = new Chart(trend2El.value.getContext("2d"), {
+     type: "line",
+-    data: structuredClone(trendData2),
++    data: structuredClone(emptyLineData),
++    options: {
++      responsive: true,
++      maintainAspectRatio: false,
++      interaction: { mode: "index", intersect: false },
++      scales: {
++        x: { grid: { color: gridColor } },
++        y: {
++          beginAtZero: true,
++          grid: { color: gridColor },
++          title: { display: true, text: "Triệu VNĐ", font: { weight: "700" } },
++        },
++      },
++      plugins: {
++        legend: {
++          position: "top",
++          labels: { usePointStyle: true, padding: 14, font: { size: 12 } },
++        },
++        tooltip: { padding: 10, cornerRadius: 10 },
++      },
++    },
++  });
++
++  trendChart3 = new Chart(trend3El.value.getContext("2d"), {
++    type: "line",
++    data: structuredClone(emptyLineData),
+     options: {
+       responsive: true,
+       maintainAspectRatio: false,
+       interaction: { mode: "index", intersect: false },
+       scales: {
+         x: { grid: { color: gridColor } },
+         y: {
+           beginAtZero: true,
+           grid: { color: gridColor },
+           title: { display: true, text: "Triệu VNĐ", font: { weight: "700" } },
+         },
        },
-       buttonsStyling: false
-     });
-     return;
+       plugins: {
+         legend: {
+           position: "top",
+           labels: { usePointStyle: true, padding: 14, font: { size: 12 } },
+         },
+         tooltip: { padding: 10, cornerRadius: 10 },
+       },
+     },
+   });
+
+   statusChart = new Chart(statusEl.value.getContext("2d"), {
+     type: "bar",
+     data: structuredClone(statusData),
+@@ -560,206 +504,262 @@ function createCharts() {
+
+   customerTypeChart = new Chart(customerTypeEl.value.getContext("2d"), {
+     type: "doughnut",
+     data: structuredClone(customerTypeData),
+     options: {
+       responsive: true,
+       maintainAspectRatio: false,
+       cutout: "72%",
+       plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 10 } },
+     },
+   });
+
+   serviceTypeChart = new Chart(serviceTypeEl.value.getContext("2d"), {
+     type: "doughnut",
+     data: structuredClone(serviceTypeData),
+     options: {
+       responsive: true,
+       maintainAspectRatio: false,
+       cutout: "72%",
+       plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 10 } },
+     },
+   });
+ }
+
+ function destroyCharts() {
+-  [trendChart1, trendChart2, statusChart, customerTypeChart, serviceTypeChart].forEach((c) => c?.destroy());
+-  trendChart1 = trendChart2 = statusChart = customerTypeChart = serviceTypeChart = null;
++  [trendChart1, trendChart2, trendChart3, statusChart, customerTypeChart, serviceTypeChart].forEach((c) =>
++    c?.destroy()
++  );
++  trendChart1 = trendChart2 = trendChart3 = statusChart = customerTypeChart = serviceTypeChart = null;
+ }
+
+ // ===== Filter logic =====
+ const normalizeYear = () => {
+   const safeYear = Math.floor(Number(selectedYear.value) || 0);
+   selectedYear.value = safeYear > 0 ? safeYear : 1;
+ };
+
+ const updateDateRange = () => {
+   normalizeYear();
+   if (timeRange.value === "month") {
+     const s = new Date(selectedYear.value, selectedMonth.value - 1, 1);
+     const e = new Date(selectedYear.value, selectedMonth.value, 0);
+     startDate.value = toISODate(s);
+     endDate.value = toISODate(e);
+   } else {
+     const s = new Date(selectedYear.value, 0, 1);
+     const e = new Date(selectedYear.value, 11, 31);
+     startDate.value = toISODate(s);
+     endDate.value = toISODate(e);
    }
+ };
 
-   // Kiểm tra định dạng email
-   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-@@ -1852,56 +1888,57 @@ const handleSearchSubmit = async (e) => {
-     else heSoKhuVuc = 0.95;
+ watch([timeRange, selectedMonth, selectedYear], updateDateRange, { immediate: true });
 
-     const giaMongMuon = parseFloat(searchForm.giaMongMuon) || 15;
-     const giaDeXuat = parseFloat((giaMongMuon * heSoKhuVuc).toFixed(1));
-     const minPrice = parseFloat((giaDeXuat * 0.92).toFixed(1));
-     const maxPrice = parseFloat((giaDeXuat * 1.03).toFixed(1));
+ watch(
+   [timeRange, selectedMonth, selectedYear, selectedService, chartsReady],
+   ([, , , , ready]) => {
+     if (!ready) return;
+     fetchStats();
+   },
+   { immediate: true }
+ );
 
-     // Tính ngày bán dự kiến
-     let ngayBan = 28;
-     if (tinhThanh.includes('Hồ Chí Minh')) ngayBan = Math.floor(Math.random() * 8) + 18;
-     else if (tinhThanh.includes('Hà Nội')) ngayBan = Math.floor(Math.random() * 10) + 20;
-     else ngayBan = Math.floor(Math.random() * 12) + 22;
-     ngayBan = Math.min(ngayBan, 30);
+ watch(
+   services,
+   (nextServices) => {
+     if (selectedService.value === "all") return;
+     const exists = nextServices.some(
+       (service) => String(service.id) === String(selectedService.value)
+     );
+     if (!exists) {
+       selectedService.value = "all";
+     }
+   },
+   { deep: true }
+ );
 
-     const phanTram = Math.floor((ngayBan / 30) * 100);
-     const chenhLech = parseFloat(((giaDeXuat / giaMongMuon - 1) * 100).toFixed(1));
+-function multiplierByRange(r) {
+-  return r === "month" ? 0.3 : r === "quarter" ? 0.7 : r === "year" ? 1 : 1.2;
+-}
+-
+-function generateFilteredLineData(currentDatasets, range) {
+-  const m = multiplierByRange(range);
+-  return currentDatasets.map((ds) =>
+-    ds.data.map((v) => Math.round(v * m + (Math.random() * 10 - 5)))
+-  );
+-}
++const normalizeSeries = (series) =>
++  Array.isArray(series)
++    ? series.map((item, index) => ({
++        label: item?.label || `Dòng ${index + 1}`,
++        data: Array.isArray(item?.data) ? item.data : [],
++      }))
++    : [];
 
-     // Cập nhật PropertySaleDTO
-     Object.assign(PropertySaleDTO, {
-       fullName: searchForm.hoTen.trim(),
-       phone: phoneNumber,
-       email: searchForm.email.trim(),
-       province: searchForm.tinhThanh.trim(),
-       ward: searchForm.quanHuyen.trim(),
-       addressDetail: searchForm.diaChiChiTiet?.trim() || '',
--      soTo: parseInt(searchForm.soTo) || 0,
--      soThua: parseInt(searchForm.soThua) || 0,
-+      soTo: searchForm.soTo?.trim() || '',
-+      soThua: searchForm.soThua?.trim() || '',
-       dienTichDat: parseFloat(searchForm.dienTichDat) || 0,
-       dienTichSan: parseFloat(searchForm.dienTichSan) || 0,
-       ketCauCongTrinh: searchForm.ketCauCongTrinh?.trim() || '',
-       landUseRight: searchForm.quyenSuDungDat || '',
-+      ownershipRelation: searchForm.ownershipRelation?.trim() || '',
-       expectedPrice: parseFloat(searchForm.giaMongMuon) || 0,
+-function generateRandomData(count, range) {
+-  const base = range === "month" ? 10 : range === "quarter" ? 30 : range === "year" ? 100 : 150;
+-  const arr = [];
+-  for (let i = 0; i < count; i++) arr.push(Math.round(base + Math.random() * 50 - 25));
+-  return arr.map((x) => clamp(x, 0, 9999));
+-}
+-
+-function updateStatistics(range) {
+-  const m = multiplierByRange(range);
+-  stats.value = {
+-    totalContracts: Math.round(baseStats.totalContracts * m),
+-    activeContracts: Math.round(baseStats.activeContracts * m),
+-    completedContracts: Math.round(baseStats.completedContracts * m),
+-    cancelledContracts: Math.round(baseStats.cancelledContracts * m),
+-    totalRevenue: Math.round(baseStats.totalRevenue * m),
+-  };
+-}
+-
+-function updateAllCharts(range, serviceId) {
+-  // Trend 1
+-  const newT1 = generateFilteredLineData(trendChart1.data.datasets, range);
+-  trendChart1.data.datasets.forEach((ds, idx) => (ds.data = newT1[idx]));
+-  trendChart1.update();
++const buildLineDatasets = (series) =>
++  normalizeSeries(series).map((item, index) => ({
++    label: item.label,
++    data: item.data,
++    borderColor: revenuePalette[index % revenuePalette.length],
++    backgroundColor: `${revenuePalette[index % revenuePalette.length]}22`,
++    borderWidth: 3,
++    fill: true,
++    tension: 0.4,
++    pointRadius: 2,
++    pointHoverRadius: 5,
++  }));
 
-       // Kết quả dự đoán
-       estimatedSaleTimeDays: ngayBan,
-       suggestedPrice: giaDeXuat,
-       priceChangePercent: chenhLech,
-       areaAveragePrice: parseFloat((giaDeXuat * 0.96).toFixed(1)), // Giá trung bình khu vực
-       acceptedPriceMin: minPrice,
-       acceptedPriceMax: maxPrice,
-       saleSuccessRate: phanTram
+-  // Trend 2
+-  trendChart2.data.datasets = buildRevenueDatasets(range, serviceId);
+-  trendChart2.update();
++const buildLegend = (items, palette) =>
++  items.map((item, index) => ({
++    label: item?.label || `Nhóm ${index + 1}`,
++    color: palette[index % palette.length],
++  }));
+
+-  // Bar
+-  statusChart.data.datasets[0].data = generateRandomData(5, range);
+-  statusChart.update();
++const updateBarChart = (chart, labels, values, palette) => {
++  chart.data.labels = labels;
++  chart.data.datasets[0].data = values;
++  chart.data.datasets[0].backgroundColor = labels.map(
++    (_, index) => palette[index % palette.length]
++  );
++  chart.update();
++};
+
+-  // Doughnuts
+-  customerTypeChart.data.datasets[0].data = generateRandomData(3, range);
+-  customerTypeChart.update();
++const updateDoughnutChart = (chart, labels, values, palette) => {
++  chart.data.labels = labels;
++  chart.data.datasets[0].data = values;
++  chart.data.datasets[0].backgroundColor = labels.map(
++    (_, index) => palette[index % palette.length]
++  );
++  chart.update();
++};
+
+-  serviceTypeChart.data.datasets[0].data = generateRandomData(3, range);
+-  serviceTypeChart.update();
++const updateLineChart = (chart, labels, series) => {
++  chart.data.labels = labels;
++  chart.data.datasets = buildLineDatasets(series);
++  chart.update();
++};
+
+-  // Stats
+-  updateStatistics(range);
+-}
++const updateChartsFromResponse = (payload) => {
++  const labels = Array.isArray(payload?.labels) && payload.labels.length ? payload.labels : monthLabels;
++
++  updateLineChart(trendChart1, labels, payload?.hopDongTrend || []);
++  updateLineChart(trendChart2, labels, payload?.doanhThuTrend || []);
++  updateLineChart(trendChart3, labels, payload?.doanhSoTrend || []);
++
++  const statusItems = Array.isArray(payload?.trangThaiHopDong) ? payload.trangThaiHopDong : [];
++  const statusLabels = statusItems.map((item) => item?.label || "");
++  const statusValues = statusItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
++  updateBarChart(statusChart, statusLabels, statusValues, [
++    COLORS.THANH_CONG,
++    COLORS.TN_7NGAY,
++    COLORS.CHAM_SOC,
++    COLORS.THAT_BAI,
++    COLORS.KHONG_LIEN_LAC_DUOC,
++  ]);
++  statusLegend.value = buildLegend(statusItems, [
++    COLORS.THANH_CONG,
++    COLORS.TN_7NGAY,
++    COLORS.CHAM_SOC,
++    COLORS.THAT_BAI,
++    COLORS.KHONG_LIEN_LAC_DUOC,
++  ]);
++
++  const customerItems = Array.isArray(payload?.loaiKhachHang) ? payload.loaiKhachHang : [];
++  const customerLabels = customerItems.map((item) => item?.label || "");
++  const customerValues = customerItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
++  updateDoughnutChart(customerTypeChart, customerLabels, customerValues, [
++    COLORS.DC_TELESALES,
++    COLORS.CHAM_SOC,
++    COLORS.SAI_SO_LIEU,
++    COLORS.NEW,
++  ]);
++  customerLegend.value = buildLegend(customerItems, [
++    COLORS.DC_TELESALES,
++    COLORS.CHAM_SOC,
++    COLORS.SAI_SO_LIEU,
++    COLORS.NEW,
++  ]);
++
++  const serviceItems = Array.isArray(payload?.loaiDichVu) ? payload.loaiDichVu : [];
++  const serviceLabels = serviceItems.map((item) => item?.label || "");
++  const serviceValues = serviceItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
++  updateDoughnutChart(serviceTypeChart, serviceLabels, serviceValues, [
++    COLORS.KHONG_LIEN_LAC_DUOC,
++    COLORS.BAN_NHANH,
++    COLORS.BAN_GP,
++    COLORS.NEW,
++  ]);
++  serviceLegend.value = buildLegend(serviceItems, [
++    COLORS.KHONG_LIEN_LAC_DUOC,
++    COLORS.BAN_NHANH,
++    COLORS.BAN_GP,
++    COLORS.NEW,
++  ]);
++};
+
+ const buildRequestParams = () => ({
+   nam: selectedYear.value,
+   thang: timeRange.value === "month" ? selectedMonth.value : null,
+   theo: timeRange.value,
+   tuNgay: startDate.value,
+   denNgay: endDate.value,
+   dichVu: selectedService.value === "all" ? "all" : selectedService.value,
+ });
+
+ async function fetchStats() {
+   if (loading.value) return;
+   loading.value = true;
+
+   try {
+-    await api.get("/hop-dong/admin/thong-ke", {
++    const res = await api.get("/hop-dong/admin/thong-ke", {
+       params: buildRequestParams(),
      });
-
-     // console.log('PropertySaleDTO sau khi assign:', PropertySaleDTO);
-     // console.log('=== PREPARE DTO END ===');
-   };
-
-   // Gọi hàm chuẩn bị dữ liệu
-   preparePropertySaleDTO();
-
-   // Kiểm tra nếu đã có kết quả trong localStorage
-   const savedResult = getResultFromLocalStorage();
-   if (savedResult) {
-     // Hiển thị kết quả đã lưu
-     Object.assign(searchResult, savedResult);
-     searchResult.show = true;
-@@ -2409,26 +2446,26 @@ onUnmounted(() => {
++    const payload = res?.data || {};
++    stats.value = {
++      totalContracts: Number(payload?.summary?.totalContracts) || 0,
++      activeContracts: Number(payload?.summary?.activeContracts) || 0,
++      completedContracts: Number(payload?.summary?.completedContracts) || 0,
++      cancelledContracts: Number(payload?.summary?.cancelledContracts) || 0,
++      totalRevenue: Number(payload?.summary?.totalRevenue) || 0,
++      totalSales: Number(payload?.summary?.totalSales) || 0,
++    };
++    updateChartsFromResponse(payload);
+   } catch (error) {
+     console.error("Không thể tải thống kê hợp đồng", error);
+   } finally {
+-    updateAllCharts(timeRange.value, selectedService.value);
+     loading.value = false;
+   }
  }
 
- /* THÊM: Style cho loading indicator khi scroll */
- .flex.overflow-x-auto::after {
-   content: '';
-   min-width: 20px;
-   flex-shrink: 0;
+ const fetchServices = async () => {
+   try {
+     const res = await api.get("/dich-vu-thg/admin", {
+       params: {
+         keyword: null,
+       },
+     });
+     services.value = Array.isArray(res?.data) ? res.data : [];
+   } catch (error) {
+     console.error("Không thể tải danh sách dịch vụ", error);
+     services.value = [];
+   }
+ };
+
+-const fetchSegments = async () => {
+-  try {
+-    const res = await api.get("/dich-vu-thg/admin/phan-khuc");
+-    segments.value = Array.isArray(res?.data) ? res.data : [];
+-  } catch (error) {
+-    console.error("Không thể tải phân khúc dịch vụ", error);
+-    segments.value = [];
+-  }
+-};
+-
+ onMounted(async () => {
+   createCharts();
+-  await Promise.all([fetchServices(), fetchSegments()]);
++  await fetchServices();
+   chartsReady.value = true;
+ });
+
+ onBeforeUnmount(() => {
+   destroyCharts();
+ });
+ </script>
+
+ <style scoped>
+ h1{
+   color: #0e0f4f;
+   font-weight: 800;
+   z-index: 1;
  }
 
- /* THÊM: Đảm bảo SoldProjectCard có z-index cao khi hover */
- .flex.overflow-x-auto > *:hover {
-   z-index: 10; /* Đảm bảo card hover hiển thị trên các card khác */
+ /* ========= Pastel gradient tokens ========= */
+ .page{
+   --bg-0: #f8fafc;
+   --bg-1: #ffffff;
+
+   --g-indigo: linear-gradient(135deg, #a78bfa 0%, #60a5fa 100%);
+   --g-sky: linear-gradient(135deg, #7dd3fc 0%, #a7f3d0 100%);
+   --g-emerald: linear-gradient(135deg, #86efac 0%, #5eead4 100%);
+   --g-rose: linear-gradient(135deg, #fda4af 0%, #fbcfe8 100%);
+   --g-amber: linear-gradient(135deg, #fde68a 0%, #fdba74 100%);
+@@ -910,51 +910,51 @@ h1{
+   display: inline-flex;
+   gap: 8px;
+   align-items: center;
+   justify-content: center;
+   background: linear-gradient(135deg, rgba(255,255,255,.9), rgba(255,255,255,.72));
+   box-shadow: 0 10px 24px rgba(2,6,23,.10);
+   transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+   border: 1px solid rgba(15,23,42,.10);
+ }
+
+ .btn:hover{ transform: translateY(-1px); box-shadow: 0 14px 30px rgba(2,6,23,.12); }
+ .btn:disabled{ opacity: .65; cursor: not-allowed; transform: none; }
+
+ .filter__hint{
+   display: inline-flex;
+   align-items: center;
+   gap: 8px;
+   font-size: 13px;
+   color: rgba(15,23,42,.62);
+   padding-left: 2px;
+ }
+
+ /* ========= Stats ========= */
+ .stats{
+   display: grid;
+-  grid-template-columns: repeat(5, minmax(0, 1fr));
++  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+   gap: 14px;
+   margin: 14px 0 18px;
+ }
+
+ .stat{
    position: relative;
+   overflow: hidden;
+   border-radius: 18px;
+   padding: 16px;
+   background: var(--card);
+   border: 1px solid var(--stroke);
+   box-shadow: var(--shadow-sm);
+   transition: transform .18s ease, box-shadow .18s ease;
  }
 
- /* THÊM: Tăng khoảng cách giữa các card */
- .flex.overflow-x-auto {
-   gap: 1.5rem; /* Thay vì gap-4 (16px) -> 24px */
+ .stat:hover{
+   transform: translateY(-4px);
+   box-shadow: var(--shadow-md);
  }
 
- /* Style cho icon ẩn giá */
- button.text-slate-400:hover {
-   transform: scale(1.1);
-   transition: transform 0.2s ease;
- }
--</style>
-\ No newline at end of file
-+</style>
+ .stat__top{
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   gap: 10px;
