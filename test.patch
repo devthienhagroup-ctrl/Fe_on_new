@@ -1,126 +1,135 @@
 diff --git a/src/components/thiet-kegiandien/marketing-cap-da-ta.vue b/src/components/thiet-kegiandien/marketing-cap-da-ta.vue
-index 44c39592984653dacc6e9093257867166524376b..740f5d97f35105e4e04df2bd28203e8884a8326c 100644
+index 740f5d97f35105e4e04df2bd28203e8884a8326c..da963d0a86c81c357c28e9a21b8ea2e5080b7511 100644
 --- a/src/components/thiet-kegiandien/marketing-cap-da-ta.vue
 +++ b/src/components/thiet-kegiandien/marketing-cap-da-ta.vue
-@@ -171,50 +171,66 @@
-                       class="form-control"
-                       placeholder="0"
-                       @input="handlePriceInput"
-                       @blur="syncPriceDisplay"
-                       required
-                   />
+@@ -278,106 +278,124 @@
+                 </span>
+                 Thống kê nhanh
+               </h4>
+             </div>
+             <div class="mini-stats">
+               <div class="mini-stat stat-a">
+                 <div class="stat-value sm">{{ thongKe.slHomNay }}</div>
+                 <div class="stat-label">Hôm nay</div>
+               </div>
+               <div class="mini-stat stat-b">
+                 <div class="stat-value sm">{{ thongKe.phanTramLienLacDuocHomNay }}%</div>
+                 <div class="stat-label">Liên lạc được</div>
+               </div>
+               <div class="mini-stat stat-c">
+                 <div class="stat-value sm">{{ formatCurrency(thongKe.giaTBSHomNay) }}</div>
+                 <div class="stat-label">Giá trị TB</div>
+               </div>
+             </div>
+           </div>
+         </div>
+
+         <!-- Right: Analytics Panels -->
+         <div class="col-lg-7">
+           <!-- Performance Metrics -->
+           <div class="row g-4">
+-            <div class="col-md-6">
++            <div class="col-lg-4 col-md-6">
+               <div class="metric-card metric-card-call">
+                 <div class="metric-header">
+                   <h4>
+                     <span class="icon-label" style="background: linear-gradient(135deg, #00C9FF, #92FE9D);">
+                       <i class="fas fa-phone-volume"></i>
+                     </span>
+                     Hiệu suất cuộc gọi
+                   </h4>
+                 </div>
+                 <div class="metric-content">
+                   <div class="metric-value">{{ thongKe.tongPhanTramLLD }} %</div>
+                   <div class="progress-bar">
+                     <div class="progress-fill" :style="{ width: thongKe.tongPhanTramLLD + '%' }"></div>
+                   </div>
+                   <div class="metric-details">
+                     <span>Kết nối:{{ thongKe.slKhachLenDuoc }}</span>
+                     <span>Không kết nối: {{ thongKe.slKhackKongLienLac }}</span>
+                   </div>
                  </div>
                </div>
+             </div>
 
-               <div class="form-group">
-                 <label>Phân loại <span class="required">*</span></label>
-                 <div class="type-buttons">
-                   <button
-                       v-for="type in customerTypes"
-                       :key="type.id"
-                       type="button"
-                       :class="['type-btn', type.id, { active: formData.type === type.id }]"
-                       @click="formData.type = type.id"
-                   >
-                     <i :class="type.icon"></i>
-                     {{ type.label }}
-                   </button>
+-            <div class="col-md-6">
++            <div class="col-lg-4 col-md-6">
+               <div class="metric-card metric-card-revenue">
+                 <div class="metric-header">
+                   <h4>
+                     <span class="icon-label" style="background: linear-gradient(135deg, #FF8A00, #FFC837);">
+                       <i class="fas fa-money-bill-wave"></i>
+                     </span>
+                     Tổng dữ liệu đã nhập
+                   </h4>
                  </div>
-               </div>
+                 <div class="metric-content">
+                   <div class="row align-items-center">
+                     <div class="col-7">
+                       <div class="metric-main">
+                         <div class="metric-value metric-value-sm" style="font-size: 16px">
+                           {{ formatCurrency(thongKe.tongGiaTri) }} khách hàng
+                         </div>
+                         <div class="metric-sub">Tổng khách nhập</div>
+                       </div>
+                     </div>
 
-+              <div class="form-group">
-+                <label>Nguồn <span class="required">*</span></label>
-+                <div class="source-buttons">
-+                  <button
-+                      v-for="source in customerSources"
-+                      :key="source.id"
-+                      type="button"
-+                      :class="['type-btn', source.id, { active: formData.source === source.id }]"
-+                      @click="formData.source = source.id"
-+                  >
-+                    <i :class="source.icon"></i>
-+                    {{ source.label }}
-+                  </button>
+                     <div class="col-5 text-start">
+                       <div class="target-progress target-progress-lg d-inline-flex justify-content-end">
+                         <div class="progress-circle progress-circle-lg" :style="{ '--progress': thongKe.tongPhanTramGT }">
+                           <span>{{ thongKe.tongPhanTramGT }} %</span>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+
+               </div>
+             </div>
++
++            <div class="col-lg-4 col-md-6">
++              <div class="chart-panel chart-panel-source">
++                <div class="panel-header">
++                  <h4>
++                    <span class="icon-label" style="background: linear-gradient(135deg, #38bdf8, #0ea5e9);">
++                      <i class="fas fa-chart-pie"></i>
++                    </span>
++                    Biểu đồ nguồn data
++                  </h4>
++                </div>
++                <div class="distribution-chart">
++                  <div class="chart-graphic chart-graphic-sm">
++                    <canvas ref="sourceCanvas"></canvas>
++                  </div>
 +                </div>
 +              </div>
-+
-               <div class="form-group">
-                 <label>Ghi chú</label>
-                 <div class="input-icon">
-                   <span class="icon-chip" style="background: linear-gradient(135deg, #FF9966, #FF5E62); color: white;">
-                     <i class="fas fa-note-sticky"></i>
++            </div>
+           </div>
+
+           <!-- Doughnut status -->
+           <div class="row" style="padding: 0.8rem;">
+             <div class="col-7 chart-panel chart-panel-distribution mt-2">
+               <div class="panel-header">
+                 <h4>
+                   <span class="icon-label" style="background: linear-gradient(135deg, #FD746C, #FF9068);">
+                     <i class="fas fa-chart-pie"></i>
                    </span>
-                   <textarea
-                       v-model="formData.note"
-                       class="form-control"
-                       rows="2"
-                       placeholder="Thông tin bổ sung..."
-                   ></textarea>
+                   Biểu đồ đánh giá chất lượng data
+                 </h4>
+               </div>
+               <div class="distribution-chart">
+                 <div class="chart-graphic chart-graphic-sm">
+                   <canvas ref="distributionCanvas"></canvas>
                  </div>
                </div>
+             </div>
 
-               <!-- Upload tiny -->
-               <div class="form-group">
-                 <label>Đính kèm (tuỳ chọn)</label>
-                 <div class="upload-row">
-                   <label class="upload-btn" title="Tải tệp nhỏ">
-                     <i class="fas fa-paperclip"></i>
-                     <span>Up file</span>
-                     <input id="fileInput" class="upload-input" type="file" multiple @change="onPickFile" />
-                   </label>
-                   <div class="upload-meta" v-if="pickedFileNames.length">
-@@ -436,64 +452,73 @@ import {
-   showLoading,
-   updateAlertError,
-   updateAlertSuccess,
-   showCenterError,
-   showCenterWarning,
-   showWarning
- } from "../../assets/js/alertService.js";
- import NotificationBell from "../NotificationBell.vue";
- import { useAuthStore } from "/src/stores/authStore.js";
- import { useSidebarStore } from "/src/stores/sidebarStore.js";
- const authStore = useAuthStore();
- const info = authStore.userInfo;
- const sidebar = useSidebarStore();
- const provinces = ref(addressData);
- function normalizePhone(phone) {
-   if (!phone) return "";
-   return String(phone).trim().replace(/\s+/g, "");
- }
-
- const formData = reactive({
-   name: "",
-   phone: "",
-   area: "",
-   oldArea: null,
-   type: "CHINH_CHU",
-+  source: "ADS",
-   price: "",
-   note: "",
- });
-
- const submissionCount = ref(0);
- const totalValue = ref(2435000000);
- const priceDisplay = ref("");
-
- const customerTypes = [
-   { id: "CHINH_CHU", label: "Chủ nhà", icon: "fas fa-house-user" },
-   { id: "MOI_GIOI", label: "Môi giới", icon: "fas fa-handshake" },
-   { id: "NGUOI_THAN", label: "Người thân", icon: "fas fa-people-group" },
- ];
-
-+const customerSources = [
-+  { id: "ADS", label: "Quảng cáo", icon: "fas fa-bullhorn" },
-+  { id: "FORUM", label: "Diễn đàn", icon: "fas fa-comments" },
-+  { id: "RAO_VAT", label: "Rao vặt", icon: "fas fa-tags" },
-+  { id: "FB", label: "Facebook", icon: "fab fa-facebook" },
-+  { id: "SEO", label: "SEO", icon: "fas fa-magnifying-glass-chart" },
-+];
-+
- /* =========================
-    STATUS DOUGHNUT (Chart.js)
- ========================= */
+             <div class="col-5 status-stack mt-2 ps-4" style="padding-right: 0px">
+               <div class="status-item success">
+                 <i class="fas fa-house-user"></i>
+                 <div>
+                   <div class="status-count">{{ thongKe.slChuNha }}</div>
+@@ -503,72 +521,107 @@ const customerSources = [
  const distributionCanvas = ref(null);
  let distributionChart = null;
 
@@ -143,57 +152,240 @@ index 44c39592984653dacc6e9093257867166524376b..740f5d97f35105e4e04df2bd28203e88
    BAN_GP: { label: "Bán GP (Đã lên VP)", color: "#0f766e" },  // xanh ngọc đậm (premium)
  };
 
-@@ -853,122 +878,130 @@ function validateForm() {
+
+
+ const statusChartData = ref([]); // [{label,value,color}]
++const sourceCanvas = ref(null);
++let sourceChart = null;
++
++const SOURCE_META = {
++  ADS: { label: "Quảng cáo", color: "#f97316" },
++  FORUM: { label: "Diễn đàn", color: "#6366f1" },
++  RAO_VAT: { label: "Rao vặt", color: "#22c55e" },
++  FB: { label: "Facebook", color: "#1877f2" },
++  SEO: { label: "SEO", color: "#e11d48" },
++};
++
++const sourceChartData = ref([]);
+
+ async function fetchThongKeStatus() {
+   try {
+     const res = await api.get("/customer-crm/marketing/thong-ke-status", { withCredentials: true });
+     const raw = Array.isArray(res.data) ? res.data : [];
+
+     // BE: StatusChartDTO {label, value}
+     statusChartData.value = raw
+         .filter(item => STATUS_META[item.label]) // label = enum key
+         .map(item => ({
+           label: STATUS_META[item.label].label, // dịch label
+           value: Number(item.value || 0),
+           color: STATUS_META[item.label].color,
+         }));
+
+     nextTick(() => renderDistributionChart());
+   } catch (err) {
+     console.error(err);
+     showCenterError("Không tải được thống kê trạng thái");
    }
-   if (!isValidName(formData.name)) {
-     showCenterWarning("Họ tên phải có ít nhất 2 từ và không chứa số hoặc ký tự đặc biệt.");
-     return false;
-   }
-   if (!formData.phone?.trim()) {
-     showCenterWarning("Vui lòng nhập số điện thoại.");
-     return false;
-   }
-   if (!isValidPhone(formData.phone)) {
-     showCenterWarning("Số điện thoại không đúng định dạng (ví dụ: 09xxxxxxxx).");
-     return false;
-   }
-   if (!formData.area?.trim()) {
-     showCenterWarning("Vui lòng chọn tỉnh/thành.");
-     return false;
-   }
-   if (!formData.price) {
-     showWarning("Vui lòng nhập giá bán.");
-     return false;
-   }
-   if (!formData.type) {
-     showWarning("Vui lòng chọn phân loại.");
-     return false;
-   }
-+  if (!formData.source) {
-+    showWarning("Vui lòng chọn nguồn khách hàng.");
-+    return false;
-+  }
-   return true;
  }
 
- async function submitData() {
-   try {
-     if (!validateForm()) return;
++async function fetchThongKeNguon() {
++  try {
++    const res = await api.get("/customer-crm/marketing/thong-ke-nguon", { withCredentials: true });
++    const raw = Array.isArray(res.data) ? res.data : [];
++    const sourceTotals = raw.reduce((acc, item) => {
++      const key = item?.nguon;
++      if (key) acc[key] = Number(item?.total || 0);
++      return acc;
++    }, {});
++
++    sourceChartData.value = Object.entries(SOURCE_META).map(([key, meta]) => ({
++      label: meta.label,
++      value: sourceTotals[key] ?? 0,
++      color: meta.color,
++    }));
++
++    nextTick(() => renderSourceChart());
++  } catch (err) {
++    console.error(err);
++    showCenterError("Không tải được thống kê nguồn data");
++  }
++}
++
+ const renderDistributionChart = () => {
+   const el = distributionCanvas.value;
+   if (!el) return;
 
-     const form = new FormData();
-     const dto = {
-       name: formData.name,
-       phone: normalizePhone(formData.phone),
-       area: formData.area,
-       oldArea: formData.oldArea,
-       type: formData.type,
-+      source: formData.source,
-       price: formData.price,
-       note: formData.note,
-     };
+   if (distributionChart) distributionChart.destroy();
 
-     form.append("dto", new Blob([JSON.stringify(dto)], { type: "application/json" }));
+   const chartData = Array.isArray(statusChartData.value) ? statusChartData.value : [];
+   const safeData = chartData.length
+       ? chartData
+       : [{ label: "Chưa có dữ liệu", value: 0, color: "#e2e8f0" }];
 
+   const totalCount = safeData.reduce((sum, r) => sum + (Number(r.value) || 0), 0);
+
+   distributionChart = new Chart(el, {
+     type: "doughnut",
+     data: {
+       labels: safeData.map(r => r.label),
+       datasets: [
+         {
+           data: safeData.map(r => r.value),
+           backgroundColor: safeData.map(r => r.color),
+           borderWidth: 2,
+           borderColor: "#ffffff",
+           hoverOffset: 15,
+           hoverBorderWidth: 3,
+@@ -629,50 +682,147 @@ const renderDistributionChart = () => {
+
+         tooltip: {
+           backgroundColor: "rgb(15,23,42)",
+           titleColor: "#ffffff",
+           bodyColor: "#e5e7eb",
+           padding: 12,
+           cornerRadius: 8,
+           displayColors: true,
+           bodySpacing: 4,
+           callbacks: {
+             label(context) {
+               const label = context.label || "";
+               const count = Number(context.raw || 0);
+               const percent = totalCount ? ((count / totalCount) * 100).toFixed(1) : "0.0";
+               return [`${label}: ${count} khách hàng (${percent}%)`];
+             },
+           },
+         },
+       },
+
+       interaction: { intersect: false, mode: "index" },
+     },
+   });
+ };
+
++const renderSourceChart = () => {
++  const el = sourceCanvas.value;
++  if (!el) return;
++
++  if (sourceChart) sourceChart.destroy();
++
++  const chartData = Array.isArray(sourceChartData.value) ? sourceChartData.value : [];
++  const safeData = chartData.length
++      ? chartData
++      : [{ label: "Chưa có dữ liệu", value: 0, color: "#e2e8f0" }];
++
++  const totalCount = safeData.reduce((sum, r) => sum + (Number(r.value) || 0), 0);
++
++  sourceChart = new Chart(el, {
++    type: "doughnut",
++    data: {
++      labels: safeData.map(r => r.label),
++      datasets: [
++        {
++          data: safeData.map(r => r.value),
++          backgroundColor: safeData.map(r => r.color),
++          borderWidth: 2,
++          borderColor: "#ffffff",
++          hoverOffset: 10,
++        },
++      ],
++    },
++    options: {
++      responsive: true,
++      maintainAspectRatio: false,
++      cutout: "70%",
++      layout: { padding: { top: 12, bottom: 12 } },
++      animation: {
++        animateRotate: true,
++        animateScale: true,
++        onComplete(animation) {
++          const chart = animation.chart;
++          const { ctx, chartArea } = chart;
++          if (!chartArea) return;
++
++          const centerX = (chartArea.left + chartArea.right) / 2;
++          const centerY = (chartArea.top + chartArea.bottom) / 2;
++
++          ctx.save();
++          ctx.textAlign = "center";
++          ctx.textBaseline = "middle";
++
++          ctx.font = "700 12px Inter, system-ui, sans-serif";
++          ctx.fillStyle = "#64748b";
++          ctx.fillText("TỔNG", centerX, centerY - 12);
++
++          ctx.font = "700 16px Inter, system-ui, sans-serif";
++          ctx.fillStyle = "#0f172a";
++          ctx.fillText(`${totalCount} KH`, centerX, centerY + 10);
++
++          ctx.restore();
++        },
++      },
++      plugins: {
++        legend: {
++          display: true,
++          position: "bottom",
++          labels: {
++            usePointStyle: true,
++            pointStyle: "circle",
++            padding: 12,
++            color: "#1e293b",
++            font: {
++              size: 11,
++              family: "'Inter', system-ui, sans-serif",
++              weight: "600",
++            },
++          },
++        },
++        tooltip: {
++          backgroundColor: "rgb(15,23,42)",
++          titleColor: "#ffffff",
++          bodyColor: "#e5e7eb",
++          padding: 10,
++          cornerRadius: 8,
++          displayColors: true,
++          bodySpacing: 4,
++          callbacks: {
++            label(context) {
++              const label = context.label || "";
++              const count = Number(context.raw || 0);
++              const percent = totalCount ? ((count / totalCount) * 100).toFixed(1) : "0.0";
++              return [`${label}: ${count} khách hàng (${percent}%)`];
++            },
++          },
++        },
++      },
++      interaction: { intersect: false, mode: "index" },
++    },
++  });
++};
++
+ /* =========================
+    ACTIVITY BAR (Chart.js) - DATA THẬT TỪ BE
+    GET /customer-crm/marketing/thong-ke-theo-thoi-gian?type=WEEK|MONTH|YEAR
+ ========================= */
+ const activityCanvas = ref(null);
+ let activityChart = null;
+
+ const activityRange = ref("week");
+ const activityRangeLabel = computed(() => {
+   if (activityRange.value === "week") return "tuần";
+   if (activityRange.value === "month") return "tháng";
+   return "năm";
+ });
+
+ const activityChartData = ref({
+   labels: [],
+   values: [],
+ });
+
+ function normalizeWeekLabel(label) {
+   // BE có thể trả "Th 2" => convert thành "T2"
+   if (!label) return "";
+   const s = String(label).trim().replace(/\s+/g, "");
+   if (s.startsWith("Th")) return s.replace("Th", "T");
+   return s;
+@@ -928,50 +1078,51 @@ async function submitData() {
      const fileInput = document.getElementById("fileInput");
      if (fileInput?.files?.length) {
        Array.from(fileInput.files).forEach(f => form.append("files", f));
@@ -219,6 +411,7 @@ index 44c39592984653dacc6e9093257867166524376b..740f5d97f35105e4e04df2bd28203e88
      // ✅ refresh dashboard data thật
      fetchThongKeSoBo();
      fetchThongKeStatus();
++    fetchThongKeNguon();
      fetchActivityData();
    } catch (err) {
      console.error(err);
@@ -232,7 +425,7 @@ index 44c39592984653dacc6e9093257867166524376b..740f5d97f35105e4e04df2bd28203e88
    formData.area = "";
    formData.oldArea = "";
    formData.type = "CHINH_CHU";
-+  formData.source = "ADS";
+   formData.source = "ADS";
    formData.price = "";
    formData.note = "";
    priceDisplay.value = "";
@@ -243,140 +436,118 @@ index 44c39592984653dacc6e9093257867166524376b..740f5d97f35105e4e04df2bd28203e88
  function generateSampleData() {
    const names = ["Lê Minh Anh", "Trần Quốc Bảo", "Phạm Thị Cẩm", "Nguyễn Đức Duy"];
    const types = ["CHINH_CHU", "MOI_GIOI", "NGUOI_THAN"];
-+  const sources = ["ADS", "FORUM", "RAO_VAT", "FB", "SEO"];
-
-   formData.name = names[Math.floor(Math.random() * names.length)];
-   formData.phone = `09${Math.floor(Math.random() * 90000000 + 10000000)}`;
-   formData.type = types[Math.floor(Math.random() * types.length)];
-+  formData.source = sources[Math.floor(Math.random() * sources.length)];
-   const samplePrice = Math.floor(Math.random() * 5000 + 500) * 100000;
-   formData.price = samplePrice;
-   priceDisplay.value = formatPriceDisplay(String(samplePrice));
-   formData.note = "Quan tâm dịch vụ. Nhắc gọi lại tuần sau.";
+   const sources = ["ADS", "FORUM", "RAO_VAT", "FB", "SEO"];
+@@ -1023,56 +1174,58 @@ function selectProvince(province) {
+ function closeProvinceDropdown() {
+   setTimeout(() => {
+     provinceDropdownOpen.value = false;
+     const selected = provinces.value.find(p => p.name === formData.area);
+     provinceSearch.value = selected ? selected.name : "";
+   }, 120);
  }
 
- function exportData() {
-   const dataStr = JSON.stringify(
-       {
-         entries: submissionCount.value,
-         exportTime: new Date().toISOString(),
-         totalValue: totalValue.value,
-       },
-       null,
-       2
-   );
-
-   const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-   const link = document.createElement("a");
-   link.setAttribute("href", dataUri);
-   link.setAttribute("download", `marketing-data-${new Date().toISOString().split("T")[0]}.json`);
-   document.body.appendChild(link);
-   link.click();
-   link.remove();
+ function toggleProvinceDropdown() {
+   provinceDropdownOpen.value = !provinceDropdownOpen.value;
  }
-@@ -1367,50 +1400,56 @@ onBeforeUnmount(() => {
-   border: 1px solid #e2e8f0;
-   border-radius: 10px;
-   font-size: 0.875rem;
+
+ watch(() => formData.area, val => {
+   const selected = provinces.value.find(p => p.name === val);
+   provinceSearch.value = selected ? selected.name : "";
+ });
+
+ /* ===== lifecycle ===== */
+ watch(activityRange, () => {
+   fetchActivityData(); // ✅ đổi range là fetch data thật luôn
+ });
+
+ onMounted(() => {
+   fetchThongKeSoBo();
+   fetchThongKeStatus();
++  fetchThongKeNguon();
+   fetchActivityData(); // ✅ mặc định tuần hiện tại
+ });
+
+ onBeforeUnmount(() => {
+   if (activityChart) activityChart.destroy();
+   if (distributionChart) distributionChart.destroy();
++  if (sourceChart) sourceChart.destroy();
+ });
+ </script>
+ <style scoped>
+ /* ===== MODERN DASHBOARD STYLES ===== */
+ .refined-dashboard {
+   min-height: 100vh;
+   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+   font-size: 14px;
+   line-height: 1.5;
    color: #1e293b;
-   background: white;
-   transition: all 0.2s ease;
+   position: relative;
+   max-width: 100%;
+   top:-10px;
  }
 
- .form-control:focus {
-   outline: none;
-   border-color: #4f46e5;
-   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+ /* ===== HEADER ===== */
+ .dashboard-header {
+   top:-10px;
+   background: #ffffff;
+   border-bottom: 1px solid #e2e8f0;
+   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+   position: sticky;
+   z-index: 100;
+   padding: 10px 20px;
+@@ -1291,50 +1444,54 @@ onBeforeUnmount(() => {
+   font-weight: 800;
+ }
+ .metric-sub {
+   margin-top: 0.2rem;
+   font-size: 0.8rem;
+   color: #64748b;
+ }
+ .target-progress-lg .progress-circle-lg {
+   width: 96px;
+   height: 96px;
+ }
+ .target-progress-lg .progress-circle-lg::before {
+   width: 72px;
+   height: 72px;
  }
 
- .form-control::placeholder {
-   color: #94a3b8;
+ .chart-panel {
+   padding: 1.25rem;
+   background: #ffffff;
  }
 
- /* ===== TYPE BUTTONS ===== */
- .type-buttons {
-   display: grid;
-   grid-template-columns: repeat(3, 1fr);
+ .chart-panel-distribution {
+   background: linear-gradient(135deg, #fff7ed 0%, #ffffff 65%);
+ }
+
++.chart-panel-source {
++  background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 65%);
++}
++
+ .chart-panel-activity {
+   background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 65%);
+ }
+
+ .panel-header {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   margin-bottom: 1.25rem;
+   padding-bottom: 0.75rem;
+   border-bottom: 1px solid #f1f5f9;
+ }
+
+ .panel-header h3,
+ .panel-header h4 {
+   margin: 0;
+   font-size: 1rem;
+   font-weight: 600;
+   color: #0f172a;
+   display: flex;
+   align-items: center;
    gap: 0.5rem;
  }
 
-+.source-buttons {
-+  display: grid;
-+  grid-template-columns: repeat(5, minmax(0, 1fr));
-+  gap: 0.5rem;
-+}
-+
- .type-btn {
-   padding: 0.7rem 0.55rem;
-   background: rgba(248, 250, 252, 0.9);
-   border: 1px solid #e2e8f0;
-   border-radius: 10px;
-   color: #64748b;
-   font-size: 0.8125rem;
-   cursor: pointer;
-   transition: all 0.2s ease;
-   display: inline-flex;
-   align-items: center;
-   justify-content: center;
-   gap: 0.45rem;
- }
-
- .type-btn:hover {
-   border-color: #cbd5e1;
-   background: rgba(241, 245, 249, 0.95);
- }
-
- .type-btn.active {
-   background: #e0e7ff;
-   border-color: #4f46e5;
-   color: #4f46e5;
- }
-@@ -1783,44 +1822,48 @@ onBeforeUnmount(() => {
-     align-items: flex-start;
-     gap: 1.2rem;
-   }
-
-   .chart-graphic-sm {
-     align-self: center;
-   }
-
-   .half-panel,
-   .status-stack {
-     max-width: 100%;
-   }
- }
-
- @media (max-width: 768px) {
-   .header-content {
-     flex-direction: column;
-     align-items: flex-start;
-     gap: 1rem;
-   }
-
-   .type-buttons {
-     grid-template-columns: 1fr;
-   }
-
-+  .source-buttons {
-+    grid-template-columns: repeat(2, minmax(0, 1fr));
-+  }
-+
-   .activity-filter {
-     width: 100%;
-     justify-content: space-between;
-   }
- }
-
- .chart-graphic canvas {
-   width: 100% !important;
-   height: 100% !important;
- }
- .province-dropdown {
-   box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-   font-size: 0.95em;
- }
- .province-dropdown li:hover {
-   background: #f1f5f9;
- }
-
- </style>
+ .badge {
