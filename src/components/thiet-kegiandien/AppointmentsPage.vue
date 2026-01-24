@@ -2446,7 +2446,13 @@ onBeforeUnmount(() => {
                       </div>
 
                       <div class="appt-cta">
-                        <button class="mini-btn" title="Sửa" @click.stop="openEditModal(appt.id)">
+                        <button
+                          class="mini-btn"
+                          :class="{ 'is-disabled': !canEditAppointment(appt) }"
+                          :disabled="!canEditAppointment(appt)"
+                          :title="!canEditAppointment(appt) ? 'Lịch hẹn đã có kết quả tư vấn' : 'Sửa'"
+                          @click.stop="handleAction('edit', appt, $event)"
+                        >
                           <i class="fa-regular fa-pen-to-square"></i>
                         </button>
                       </div>
@@ -3206,7 +3212,14 @@ onBeforeUnmount(() => {
 
         <div class="modal-foot">
           <button class="btn btn-secondary" type="button" @click="closeDetailModal">Đóng</button>
-          <button class="btn btn-primary" type="button" @click="openEditModal(selectedAppointment.id)">
+          <button
+            class="btn btn-primary"
+            type="button"
+            :class="{ 'is-disabled': selectedAppointment && !canEditAppointment(selectedAppointment) }"
+            :disabled="selectedAppointment && !canEditAppointment(selectedAppointment)"
+            :title="selectedAppointment && !canEditAppointment(selectedAppointment) ? 'Lịch hẹn đã có kết quả tư vấn' : ''"
+            @click="openEditModal(selectedAppointment.id)"
+          >
             <i class="fa-regular fa-pen-to-square"></i>Chỉnh sửa
           </button>
         </div>
@@ -3525,6 +3538,18 @@ onBeforeUnmount(() => {
   transition:0.2s ease;
   border:none;
 }
+.btn:disabled,
+.btn.is-disabled{
+  cursor:not-allowed;
+  opacity:0.6;
+  filter: grayscale(0.1);
+  box-shadow:none;
+}
+.btn:disabled:hover,
+.btn.is-disabled:hover{
+  transform:none;
+  filter: grayscale(0.1);
+}
 .btn-sm{ padding:10px 12px; border-radius:12px; font-size:12.6px; }
 .btn-primary{
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -3808,6 +3833,20 @@ onBeforeUnmount(() => {
   background: rgba(102,126,234,0.08);
   color:#3846c2;
   border-color: rgba(102,126,234,0.28);
+}
+.mini-btn.is-disabled,
+.mini-btn:disabled{
+  cursor:not-allowed;
+  opacity:0.55;
+  background: rgba(226,232,240,0.5);
+  border-color: rgba(148,163,184,0.35);
+  color:#64748b;
+}
+.mini-btn.is-disabled:hover,
+.mini-btn:disabled:hover{
+  background: rgba(226,232,240,0.5);
+  border-color: rgba(148,163,184,0.35);
+  color:#64748b;
 }
 
 /* Status badges (table + day schedule) */
