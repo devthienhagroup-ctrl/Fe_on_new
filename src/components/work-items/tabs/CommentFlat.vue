@@ -3,7 +3,7 @@
       <div class="avatar-circle mt-1 flex-shrink-0">
         <img
             class="rounded-circle"
-            :src="comment.avatar ? ` https://s3.cloudfly.vn/thg-storage/uploads-public/${comment.avatar}` : '/images/default-avatar.png'"
+            :src="comment.avatar ? ` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${comment.avatar}` : '/images/default-avatar.png'"
             alt="avatar"
             width="32"
             height="32"

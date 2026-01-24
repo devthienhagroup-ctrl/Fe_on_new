@@ -52,7 +52,7 @@
       >
         <div class="d-flex align-items-center">
           <div class="avatar flex-shrink-0 me-3">
-            <img :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/'+ team.urlAvatar || getDefaultAvatar(team.teamId)" :alt="team.teamName" />
+            <img :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+ team.urlAvatar || getDefaultAvatar(team.teamId)" :alt="team.teamName" />
 
           </div>
 

@@ -1,342 +1,283 @@
-diff --git a/src/components/thiet-kegiandien/admin-saleadmin.vue b/src/components/thiet-kegiandien/admin-saleadmin.vue
-index e2db2696f311f2029cba161948cd873cf4f003be..ca22c67e859619e1e64d4d75deede3d8084751c2 100644
---- a/src/components/thiet-kegiandien/admin-saleadmin.vue
-+++ b/src/components/thiet-kegiandien/admin-saleadmin.vue
-@@ -535,55 +535,65 @@
-                     <tr
-                         v-for="(customer, index) in customers"
-                         :key="customer.id"
-                         class="table-row-clickable"
-                         @click="openCustomerDetail(customer)"
-                     >
-                       <!-- Checkbox -->
-                       <td style="width: 20px !important;">
-                         <input
-                             type="checkbox"
-                             class="form-check-input customer-checkbox"
-                             :checked="customer.selected"
-                             @click.stop
-                             @change="toggleCustomerSelection(customer.id)"
-                         >
-                       </td>
+diff --git a/src/components/thiet-kegiandien/ContractStatsDashboard.vue b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
+index 2f0677bf0a9380fd96e05eed24650db170fa8c15..dd267a0c92e465e14e973a2f085f9c49d09159ee 100644
+--- a/src/components/thiet-kegiandien/ContractStatsDashboard.vue
++++ b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
+@@ -127,71 +127,79 @@
+           </div>
 
-                       <!-- ID -->
-                       <td style="width: 20px !important;">
-                         <span class="badge bg-light text-dark">{{ customer.index }}</span>
-                       </td>
+           <div class="chartWrap chartWrap--md">
+             <canvas ref="statusEl"></canvas>
+           </div>
 
-                       <!-- Khách hàng -->
-                       <td style="width: 220px!important;">
-                         <div class="d-flex align-items-center">
--                          <img
--                              :src="customer.avatarKhach || generateAvatarFromName(customer.hoTen)"
--                              :alt="customer.hoTen"
--                              class="customer-avatar me-3"
--                          />
-+                          <div class="customer-avatar-wrap me-3">
-+                            <img
-+                                :src="customer.avatarKhach || generateAvatarFromName(customer.hoTen)"
-+                                :alt="customer.hoTen"
-+                                class="customer-avatar"
-+                            />
-+                            <span
-+                                v-if="customer.nguonKhachHang"
-+                                class="source-icon-badge"
-+                                :class="`source-${customer.nguonKhachHang}`"
-+                                :title="getSourceLabel(customer.nguonKhachHang)"
-+                            >
-+                              <i :class="getSourceIcon(customer.nguonKhachHang)"></i>
-+                            </span>
-+                          </div>
-                           <div>
-                             <div class="fw-semibold">{{ shortenName( customer.hoTen, 15 )}}</div>
-                             <small class="text-muted">{{ customer.ngayTao }}</small>
-                           </div>
-                         </div>
-                       </td>
-
-                       <!-- SĐT -->
-                       <td class="fw-medium">
-                         {{ formatPhoneNumber(customer.soDienThoai) }}
-                       </td>
-
-                       <!-- Tỉnh / TP -->
-                       <td>
-                         {{ getProvinceShortLabel(customer.tinhThanhPho) }}
-                       </td>
-
-                       <!-- Phân loại -->
-                       <td>
-     <span :class="`type-badge type-${customer.phanLoaiKhach}`">
-       {{ getTypeLabel(customer.phanLoaiKhach) }}
-     </span>
-                       </td>
-
-                       <!-- Trạng thái -->
-@@ -1209,50 +1219,57 @@
-           <div class="modal-content ">
-             <div class="modal-header">
-               <h5 class="modal-title">
-                 <i class="fas fa-address-card me-2"></i>
-                 Chi tiết khách hàng
-               </h5>
-               <button type="button" class="btn-close btn-close-white" @click="closeDetailModal"></button>
+           <div class="legend">
+             <div v-for="l in statusLegend" :key="l.label" class="legend__item">
+               <span class="legend__dot" :style="{ background: l.color }"></span>
+               <span>{{ l.label }}</span>
              </div>
-             <div class="modal-body" v-if="detailCustomer">
-               <!-- Hero section - Avatar và thông tin cơ bản -->
-               <div class="detail-hero">
-                 <div class="detail-avatar">
-                   <div  class="avatar-img">
-                     <img
-                         :src=" generateAvatarFromName( detailCustomer.hoTen )"
-                         :alt="detailCustomer.hoTen"
-                     >
-                   </div>
-                 </div>
-                 <div class="detail-hero-info">
-                   <div class="detail-hero-title">
-                     <h4 class="mb-0">{{ detailCustomer.hoTen }}</h4>
-                     <span :class="['status-badge', getStatusClass(detailCustomer.trangThai)]" style="font-size: 14px !important;">
-                   {{ getStatusLabel(detailCustomer.trangThai) }}
-                 </span>
-+                    <span
-+                      v-if="detailCustomer.nguonKhachHang"
-+                      class="source-badge"
-+                      :class="`source-${detailCustomer.nguonKhachHang}`"
-+                    >
-+                      {{ getSourceLabel(detailCustomer.nguonKhachHang) }}
-+                    </span>
-                   </div>
-                   <div class="detail-hero-meta">
-                     <span><i class="fas fa-phone-alt"></i> {{ formatPhoneNumber(detailCustomer.soDienThoai) }}</span>
-                     <span><i class="fas fa-map-marker-alt"></i> {{ detailCustomer.tinhThanhPho }}</span>
-                     <span><i class="fas fa-calendar-alt"></i> Ngày tạo: {{ detailCustomer.ngayTao }}</span>
-                   </div>
-                   <div class="detail-hero-tags">
-                 <span :class="`type-badge type-${detailCustomer.phanLoaiKhach}`" style="font-size: 14px !important;">
-                   {{ getTypeLabel(detailCustomer.phanLoaiKhach) }}
-                 </span>
-                     <span class="update-badge" style="font-size: 16px !important;">
-                   <i class="fas fa-sync-alt me-1"></i>Cập nhật: {{ detailCustomer.ngayCapNhat }}
-                 </span>
-                   </div>
-                 </div>
-               </div>
+           </div>
+         </article>
 
-               <!-- Main content - 2 cột -->
-               <div class="detail-main">
-                 <!-- Cột trái: Thông tin chi tiết -->
-                 <div class="detail-left-col">
-                   <div class="detail-section">
-                     <h6 class="section-title-detail">
-                       <i class="fas fa-user-circle me-2 icon-red"></i>
-                       Thông tin khách hàng
-@@ -1273,50 +1290,56 @@
-                       <div class="info-item">
-                         <div class="info-label">Loại dịch vụ triển khai</div>
-                         <div class="info-value">
-                           <span
-                             v-if="detailServiceName"
-                             class="service-badge"
-                             :style="{ background: detailServiceColor ? `linear-gradient(135deg, ${detailServiceColor}, #ffffff)` : 'linear-gradient(135deg, #22c55e, #2dd4bf)' }"
-                           >
-                             {{ detailServiceName }}
-                           </span>
-                           <span v-else>-</span>
-                         </div>
-                       </div>
-                       <div class="info-item">
-                         <div class="info-label">Địa chỉ</div>
-                         <div class="info-value">{{ detailCustomer.tinhThanhPho }}</div>
-                       </div>
-                       <div class="info-item">
-                         <div class="info-label">Phân loại</div>
-                         <div class="info-value">
-                       <span :class="`type-label type-${detailCustomer.phanLoaiKhach}`" style=" font-size: 1rem !important;">
-                         {{ getTypeLabel(detailCustomer.phanLoaiKhach) }}
-                       </span>
-                         </div>
-                       </div>
-+                      <div class="info-item">
-+                        <div class="info-label">Nguồn khách</div>
-+                        <div class="info-value">
-+                          {{ getSourceLabel(detailCustomer.nguonKhachHang) || '-' }}
-+                        </div>
-+                      </div>
-                     </div>
-                   </div>
+         <article class="card">
+           <div class="card__title">
+             <span class="card__titleIcon bg--violet"><i class="fa-solid fa-users"></i></span>
+             <div>
+               <h3>Loại khách hàng</h3>
+               <p class="muted">Tỉ trọng theo nhóm</p>
+             </div>
+           </div>
 
-                   <div class="detail-section">
-                     <h6 class="section-title-detail">
-                       <i class="fas fa-users me-2 icon-green"></i>
-                       Nhân sự phụ trách
-                     </h6>
-                     <div class="staff-grid">
-                       <div class="staff-item">
-                         <div class="staff-avatar">
-                           <div v-if="detailCustomer.nhanVienTaoAvatar" class="avatar-img">
-                             <img :src=" 'https://s3.cloudfly.vn/thg-storage/uploads-public/'+  detailCustomer.nhanVienTaoAvatar" :alt="detailCustomer.nhanVienTaoTen">
-                           </div>
-                           <div v-else class="avatar-placeholder small">
-                             <i class="fas fa-user"></i>
-                           </div>
-                         </div>
-                         <div class="staff-info">
-                           <div class="staff-role">Người tạo</div>
-                           <div class="staff-name">{{ detailCustomer.nhanVienTaoTen || '-' }}</div>
-                         </div>
-                       </div>
-                       <div class="staff-item">
-                         <div class="staff-avatar">
-@@ -2545,50 +2568,59 @@ const getStatusLabel = (status) => {
-     CHAM_SOC: 'Chăm sóc',
-     TN_7NGAY: 'TN 7 ngày',
-     TN_14NGAY: 'TN 14 ngày',
+           <div class="chartWrap chartWrap--md">
+             <canvas ref="customerTypeEl"></canvas>
++            <div class="chartTotal">
++              <span class="chartTotal__label">Tổng số</span>
++              <strong>{{ customerTotal.toLocaleString("vi-VN") }}</strong>
++            </div>
+           </div>
 
-     THANH_CONG: 'Thành công',
+           <div class="legend">
+             <div v-for="l in customerLegend" :key="l.label" class="legend__item">
+               <span class="legend__dot" :style="{ background: l.color }"></span>
+               <span>{{ l.label }}</span>
+             </div>
+           </div>
+         </article>
 
-     // ===== BỔ SUNG =====
-     KHACH_HUY_HEN: 'Huỷ hẹn',
-     TRIEN_KHAI: 'Triển khai',
+         <article class="card">
+           <div class="card__title">
+             <span class="card__titleIcon bg--amber"><i class="fa-solid fa-concierge-bell"></i></span>
+             <div>
+               <h3>Loại dịch vụ</h3>
+               <p class="muted">Tỉ trọng theo nhóm</p>
+             </div>
+           </div>
 
-     THAT_BAI: 'Thất bại',
-     KHONG_LIEN_LAC_DUOC: 'KLLD',
-     SAI_SO: 'Sai số',
-     SAI_SO_LIEU: 'Sai số',
-   }
+           <div class="chartWrap chartWrap--md">
+             <canvas ref="serviceTypeEl"></canvas>
++            <div class="chartTotal">
++              <span class="chartTotal__label">Tổng số</span>
++              <strong>{{ serviceTotal.toLocaleString("vi-VN") }}</strong>
++            </div>
+           </div>
 
-   const normalizedStatus = normalizeStatus(status)
-   return statusMap[normalizedStatus] || normalizedStatus
- }
+           <div class="legend">
+             <div v-for="l in serviceLegend" :key="l.label" class="legend__item">
+               <span class="legend__dot" :style="{ background: l.color }"></span>
+               <span>{{ l.label }}</span>
+             </div>
+           </div>
+         </article>
+       </section>
+     </div>
+   </div>
+ </template>
 
- const getTypeLabel = (type) => {
-   const typeMap = { 'MOI_GIOI': 'Môi giới', 'CHINH_CHU': 'Chủ nhà', 'NGUOI_THAN': 'Người thân' }
-   return typeMap[type] || type
- }
+ <script setup>
+ import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+ import Chart from "chart.js/auto";
+ import api from "../../api/api.js";
 
-+const getSourceMeta = (source) => customerSources.find((item) => item.id === source) || {}
-+
-+const getSourceLabel = (source) => {
-+  if (!source) return ''
-+  return getSourceMeta(source).label || source
-+}
-+
-+const getSourceIcon = (source) => getSourceMeta(source).icon || 'fas fa-circle'
-+
- const getProvinceLabel = (province) => {
-   if (!province) return '-'
-   if (province === 'Khác' || province === 'other') return 'Khác'
-   const provinceMatch = addressData.find(item => item.name === province)
-   if (provinceMatch) return provinceMatch.name
-   const legacyMap = {
-     'hanoi': 'Thành phố Hà Nội',
-     'hcm': 'Thành phố Hồ Chí Minh',
-     'danang': 'Thành phố Đà Nẵng',
-     'haiphong': 'Thành phố Hải Phòng',
-     'cantho': 'Thành phố Cần Thơ'
-   }
-   return legacyMap[province] || province
- }
+ /**
+  * Lưu ý:
+  * - Component này chuyển từ HTML thuần sang Vue SFC.
+  * - Yêu cầu FontAwesome đã được load global (như bạn đang làm ở app).
+  */
 
- const formatPhoneNumber = (phone) => {
-   if (!phone) return '-'
-   return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
- }
+@@ -202,50 +210,52 @@ const COLORS = {
+   CHAM_SOC: "#60c8ff",
+   TN_7NGAY: "#44b7ff",
+   TN_14NGAY: "#2ea2ff",
+   THAT_BAI: "#ff6b8a",
+   KHONG_LIEN_LAC_DUOC: "#ffb86b",
+   SAI_SO_LIEU: "#c39bff",
+   THANH_CONG: "#55e6a5",
+   KHACH_HUY_HEN: "#fbbf24",
+   BAN_NHANH: "#34d399",
+   BAN_GP: "#2dd4bf",
+ };
 
- const formatCurrency = (value) => {
-   if (value === null || value === undefined || value === '') return '-'
-   const numericValue = Number(value)
-   if (Number.isNaN(numericValue)) return value
-   return `${new Intl.NumberFormat('vi-VN').format(numericValue)} ₫`
-@@ -3671,50 +3703,91 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
+ // ===== State =====
+ const loading = ref(false);
+ const timeRange = ref("month");
+ const selectedMonth = ref(new Date().getMonth() + 1);
+ const selectedYear = ref(new Date().getFullYear());
+ const selectedService = ref("all");
+ const chartsReady = ref(false);
+ const startDate = ref("");
+ const endDate = ref("");
+ const services = ref([]);
+ const statusLegend = ref([]);
+ const customerLegend = ref([]);
+ const serviceLegend = ref([]);
++const customerTotal = ref(0);
++const serviceTotal = ref(0);
 
- .table-custom td {
-   padding: 15px !important ;
-   vertical-align: middle !important;
-   border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
-   font-size: 16px !important;
- }
+ // Stats base (giống file gốc)
+ const stats = ref({
+   totalContracts: 0,
+   activeContracts: 0,
+   completedContracts: 0,
+   cancelledContracts: 0,
+   totalRevenue: 0,
+   totalSales: 0,
+ });
 
- .table-custom tbody tr { transition: var(--transition-fast); }
- .table-row-clickable { cursor: pointer; }
- .table-custom tbody tr:hover { background: rgba(102, 126, 234, 0.03)!important;  }
- .table-custom tbody tr:hover td {
-   background: rgba(102, 126, 234, 0.06) !important;
-   border: none !important;
- }
+ // ===== Helpers =====
+ const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+ const toISODate = (d) => {
+   const yyyy = d.getFullYear();
+   const mm = String(d.getMonth() + 1).padStart(2, "0");
+   const dd = String(d.getDate()).padStart(2, "0");
+   return `${yyyy}-${mm}-${dd}`;
+ };
 
- .customer-avatar {
-   width: 42px; height: 42px;
-   border-radius: 50%;
-   object-fit: cover;
-   border: 3px solid white;
-   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-   transition: var(--transition-normal);
- }
+ const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1);
 
-+.customer-avatar-wrap {
-+  position: relative;
-+  display: inline-flex;
-+  align-items: center;
-+  justify-content: center;
-+}
-+
-+.source-icon-badge {
-+  position: absolute;
-+  top: -6px;
-+  left: -6px;
-+  width: 20px;
-+  height: 20px;
-+  border-radius: 50%;
-+  display: inline-flex;
-+  align-items: center;
-+  justify-content: center;
-+  color: #fff;
-+  font-size: 10px;
-+  border: 2px solid #fff;
-+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
-+  transform: rotate(-12deg);
-+}
-+
-+.source-badge {
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 4px 10px;
-+  border-radius: 999px;
-+  font-size: 13px;
-+  font-weight: 600;
-+  color: #fff;
-+}
-+
-+.source-ADS { background: #f97316; }
-+.source-FORUM { background: #6366f1; }
-+.source-RAO_VAT { background: #14b8a6; }
-+.source-FB { background: #1877f2; }
-+.source-SEO { background: #22c55e; }
-+
- .customer-avatar-lg {
-   width: 72px;
-   height: 72px;
-   border-radius: 50%;
-   object-fit: cover;
-   border: 4px solid white;
-   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
- }
+ const dateText = computed(() => {
+   if (!selectedYear.value || selectedYear.value < 1) return "—";
+   if (timeRange.value === "month") {
+@@ -645,66 +655,68 @@ const updateChartsFromResponse = (payload) => {
+   updateLineChart(trendChart1, labels, payload?.hopDongTrend || []);
+   updateLineChart(trendChart2, labels, payload?.doanhThuTrend || []);
+   updateLineChart(trendChart3, labels, payload?.doanhSoTrend || []);
 
- .detail-modal .modal-content {
-   border-radius: 24px;
-   overflow: hidden;
- }
+   const statusItems = Array.isArray(payload?.trangThaiHopDong) ? payload.trangThaiHopDong : [];
+   const statusLabels = statusItems.map((item) => item?.label || "");
+   const statusValues = statusItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
+   updateBarChart(statusChart, statusLabels, statusValues, [
+     COLORS.THANH_CONG,
+     COLORS.TN_7NGAY,
+     COLORS.CHAM_SOC,
+     COLORS.THAT_BAI,
+     COLORS.KHONG_LIEN_LAC_DUOC,
+   ]);
+   statusLegend.value = buildLegend(statusItems, [
+     COLORS.THANH_CONG,
+     COLORS.TN_7NGAY,
+     COLORS.CHAM_SOC,
+     COLORS.THAT_BAI,
+     COLORS.KHONG_LIEN_LAC_DUOC,
+   ]);
 
- .detail-hero {
-   display: flex;
-   gap: 20px;
+   const customerItems = Array.isArray(payload?.loaiKhachHang) ? payload.loaiKhachHang : [];
+   const customerLabels = customerItems.map((item) => item?.label || "");
+   const customerValues = customerItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
++  customerTotal.value = customerValues.reduce((sum, value) => sum + value, 0);
+   updateDoughnutChart(customerTypeChart, customerLabels, customerValues, [
+     COLORS.DC_TELESALES,
+     COLORS.CHAM_SOC,
+     COLORS.SAI_SO_LIEU,
+     COLORS.NEW,
+   ]);
+   customerLegend.value = buildLegend(customerItems, [
+     COLORS.DC_TELESALES,
+     COLORS.CHAM_SOC,
+     COLORS.SAI_SO_LIEU,
+     COLORS.NEW,
+   ]);
+
+   const serviceItems = Array.isArray(payload?.loaiDichVu) ? payload.loaiDichVu : [];
+   const serviceLabels = serviceItems.map((item) => item?.label || "");
+   const serviceValues = serviceItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
++  serviceTotal.value = serviceValues.reduce((sum, value) => sum + value, 0);
+   updateDoughnutChart(serviceTypeChart, serviceLabels, serviceValues, [
+     COLORS.KHONG_LIEN_LAC_DUOC,
+     COLORS.BAN_NHANH,
+     COLORS.BAN_GP,
+     COLORS.NEW,
+   ]);
+   serviceLegend.value = buildLegend(serviceItems, [
+     COLORS.KHONG_LIEN_LAC_DUOC,
+     COLORS.BAN_NHANH,
+     COLORS.BAN_GP,
+     COLORS.NEW,
+   ]);
+ };
+
+ const buildRequestParams = () => ({
+   nam: selectedYear.value,
+   thang: timeRange.value === "month" ? selectedMonth.value : null,
+   theo: timeRange.value,
+   tuNgay: startDate.value,
+   denNgay: endDate.value,
+   dichVu: selectedService.value === "all" ? "all" : selectedService.value,
+ });
+
+ async function fetchStats() {
+   if (loading.value) return;
+@@ -1089,55 +1101,76 @@ h1{
    align-items: center;
-   padding: 20px;
-   background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.08));
-   border-radius: 18px;
-   margin-bottom: 24px;
+   justify-content: center;
+   color: #fff;
+   box-shadow: 0 12px 26px rgba(2,6,23,.12);
+   flex: 0 0 auto;
  }
 
- .detail-avatar img {
+ .card h3{
+   margin: 0;
+   font-size: 18px;
+   line-height: 1.15;
+ }
+
+ .card p{
+   margin: 6px 0 0;
+   font-size: 13px;
+ }
+
+ /* ========= Chart wrappers ========= */
+ .chartWrap{
+   width: 100%;
+   border-radius: 16px;
+   padding: 10px;
+   background: rgba(248, 250, 252, .55);
+   border: 1px dashed rgba(15,23,42,.08);
++  position: relative;
+ }
+
+ .chartWrap--lg{ height: 360px; }
+ .chartWrap--md{ height: 280px; }
+
++.chartTotal{
++  position: absolute;
++  inset: 0;
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  justify-content: center;
++  text-align: center;
++  font-weight: 800;
++  color: #0f172a;
++  pointer-events: none;
++  gap: 4px;
++}
++
++.chartTotal__label{
++  font-size: 12px;
++  font-weight: 700;
++  color: rgba(15,23,42,.6);
++}
++
+ /* ========= Legend ========= */
+ .legend{
+   margin-top: 12px;
+   display: flex;
+   flex-wrap: wrap;
+   gap: 10px 14px;
+   justify-content: center;
+   padding: 10px 0 2px;
+ }
+
+ .legend__item{
+   display: inline-flex;
+   align-items: center;
+   gap: 8px;
+   font-size: 12.5px;
+   color: rgba(15,23,42,.62);
+   font-weight: 700;
+ }
+
+ .legend__dot{
+   width: 12px;
+   height: 12px;
+   border-radius: 4px;
+ }
+

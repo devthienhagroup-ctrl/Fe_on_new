@@ -254,7 +254,7 @@ const getImageUrl = (filename) => {
   if (!filename) return ''
   if (filename.startsWith('data:image')) return filename
   if (filename.startsWith('http://') || filename.startsWith('https://')) return filename
-  return `https://s3.cloudfly.vn/thg-storage/uploads-public/${filename}`
+  return `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${filename}`
 }
 
 // Service management

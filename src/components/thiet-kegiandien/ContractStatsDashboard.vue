@@ -149,6 +149,10 @@
 
           <div class="chartWrap chartWrap--md">
             <canvas ref="customerTypeEl"></canvas>
+            <div class="chartTotal">
+              <span class="chartTotal__label">Tổng số</span>
+              <strong>{{ customerTotal.toLocaleString("vi-VN") }}</strong>
+            </div>
           </div>
 
           <div class="legend">
@@ -170,6 +174,10 @@
 
           <div class="chartWrap chartWrap--md">
             <canvas ref="serviceTypeEl"></canvas>
+            <div class="chartTotal">
+              <span class="chartTotal__label">Tổng số</span>
+              <strong>{{ serviceTotal.toLocaleString("vi-VN") }}</strong>
+            </div>
           </div>
 
           <div class="legend">
@@ -224,6 +232,8 @@ const services = ref([]);
 const statusLegend = ref([]);
 const customerLegend = ref([]);
 const serviceLegend = ref([]);
+const customerTotal = ref(0);
+const serviceTotal = ref(0);
 
 // Stats base (giống file gốc)
 const stats = ref({
@@ -667,6 +677,7 @@ const updateChartsFromResponse = (payload) => {
   const customerItems = Array.isArray(payload?.loaiKhachHang) ? payload.loaiKhachHang : [];
   const customerLabels = customerItems.map((item) => item?.label || "");
   const customerValues = customerItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
+  customerTotal.value = customerValues.reduce((sum, value) => sum + value, 0);
   updateDoughnutChart(customerTypeChart, customerLabels, customerValues, [
     COLORS.DC_TELESALES,
     COLORS.CHAM_SOC,
@@ -683,6 +694,7 @@ const updateChartsFromResponse = (payload) => {
   const serviceItems = Array.isArray(payload?.loaiDichVu) ? payload.loaiDichVu : [];
   const serviceLabels = serviceItems.map((item) => item?.label || "");
   const serviceValues = serviceItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
+  serviceTotal.value = serviceValues.reduce((sum, value) => sum + value, 0);
   updateDoughnutChart(serviceTypeChart, serviceLabels, serviceValues, [
     COLORS.KHONG_LIEN_LAC_DUOC,
     COLORS.BAN_NHANH,
@@ -1111,10 +1123,31 @@ h1{
   padding: 10px;
   background: rgba(248, 250, 252, .55);
   border: 1px dashed rgba(15,23,42,.08);
+  position: relative;
 }
 
 .chartWrap--lg{ height: 360px; }
 .chartWrap--md{ height: 280px; }
+
+.chartTotal{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: 800;
+  color: #0f172a;
+  pointer-events: none;
+  gap: 4px;
+}
+
+.chartTotal__label{
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(15,23,42,.6);
+}
 
 /* ========= Legend ========= */
 .legend{
