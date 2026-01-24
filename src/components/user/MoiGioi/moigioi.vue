@@ -123,7 +123,7 @@
 
                 <div class="mobile-broker-avatar">
                   <img
-                      :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + (broker.avatar == null ? 'vat-default.jpg':broker.avatar)"
+                      :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/' + (broker.avatar == null ? 'vat-default.jpg':broker.avatar)"
                       :alt="broker.name"
                   />
                 </div>
@@ -204,7 +204,7 @@
                 <div class="broker-info-compact">
                   <div class="broker-avatar-small">
                     <img
-                        :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' +  (broker.avatar == null ? 'vat-default.jpg':broker.avatar)"
+                        :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/' +  (broker.avatar == null ? 'vat-default.jpg':broker.avatar)"
                         :alt="broker.name"
                     />
                   </div>
@@ -820,9 +820,9 @@ const getCurrentMonthValue = () => {
 
 const getAvatarUrl = (avatar) => {
   if (!avatar) {
-    return 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/vat-default.jpg';
+    return 'https://s3.cloudfly.vn/thg-storage/uploads-public/vat-default.jpg';
   }
-  return `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${avatar}`;
+  return `https://s3.cloudfly.vn/thg-storage/uploads-public/${avatar}`;
 }
 // Computed properties
 const currentMonthLabel = computed(() => {

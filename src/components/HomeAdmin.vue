@@ -20,7 +20,7 @@
           <div class="text-secondary small"> {{ info.role}} </div>
         </div>
         <img
-        :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+        :src="' https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
         alt="Avatar"
             class="rounded-circle border border-light-subtle"
          style="height: 46px !important; width: 46px !important;"

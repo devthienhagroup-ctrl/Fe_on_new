@@ -8,6 +8,15 @@
         <div class="brand-title">Quản lý Hợp đồng</div>
       </div>
     </div>
+    <button
+        type="button"
+        class="header-menu-toggle"
+        title="Ẩn/hiện menu"
+        @click="sidebar.toggle()"
+    >
+      <i class="fa-solid fa-bars"></i>
+      <span class="d-none d-md-inline">Menu</span>
+    </button>
     <div class="top-actions">
       <router-link v-if="canContractSetting" class="btn ghost" to="/-thg/cau-hinh-phi-dich-vu">
         <i class="fa-solid fa-gear"></i>
@@ -16,11 +25,10 @@
       <div class="user-chip">
         <div class="user-meta">
           <div class="user-name">{{ info.fullName || 'Chưa có tên' }}</div>
-          <div v-if="info.role" class="user-role">{{ info.role }}</div>
         </div>
         <img
           v-if="info.avatarUrl"
-          :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+          :src="' https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
           alt="avatar"
           class="user-avatar"
         />
@@ -1184,6 +1192,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import api from '/src/api/api.js'
 import { useAuthStore } from '../../stores/authStore'
+import { useSidebarStore } from '../../stores/sidebarStore'
 import {
   confirmWithInput,
   showCenterWarning,
@@ -1195,6 +1204,7 @@ import {
 import ContractStatsDashboard from "../thiet-kegiandien/ContractStatsDashboard.vue";
 import {shortenName} from "../../assets/js/global.js";
 const authStore = useAuthStore()
+const sidebar = useSidebarStore()
 const info = computed(() => authStore.userInfo || {})
 const canPayContract = computed(() => authStore.hasPermission('HOPDONG_THU'))
 const canRefundContract = computed(() => authStore.hasPermission('HOPDONG_HOANPHI'))
@@ -2786,12 +2796,33 @@ onUnmounted(() => {
   box-shadow: var(--sh2);
   background: rgba(255,255,255,.66);
   backdrop-filter: blur(10px);
-  padding: 10px 22px 26px;
+  padding: 0px 22px 16px;
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap: 12px;
   flex-wrap: wrap;
+}
+.header-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(102,126,234,.35);
+  background: rgba(248,250,252,.9);
+  color: #334155;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.header-menu-toggle:hover {
+  background: rgba(226,232,240,.9);
+  border-color: rgba(148,163,184,.9);
+  color: #1e293b;
+}
+.header-menu-toggle:active {
+  transform: scale(0.98);
 }
 .brand{ display:flex; align-items:center; gap:10px; min-width: 0; }
 .brand-ico{

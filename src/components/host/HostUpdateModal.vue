@@ -323,7 +323,7 @@ const avatarPreview = ref('')
 const avatarError = ref('')
 const fileInput = ref(null)
 
-const DEFAULT_AVATAR = 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/vat-default.jpg'
+const DEFAULT_AVATAR = 'https://s3.cloudfly.vn/thg-storage/uploads-public/vat-default.jpg'
 
 const fieldErrors = ref({
   fullName: '',
@@ -369,7 +369,7 @@ const populateData = () => {
   detailAddress.value = parsed.detail
   oldAddress.value = props.host?.oldAddress || ''
   avatarPreview.value = props.host?.avatar
-      ? `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${props.host.avatar}`
+      ? `https://s3.cloudfly.vn/thg-storage/uploads-public/${props.host.avatar}`
       : DEFAULT_AVATAR
   fieldErrors.value = { fullName: '', phone: '', province: '', ward: '', detailAddress: '' }
 }
@@ -418,7 +418,7 @@ const onAvatarChange = (event) => {
 const resetAvatar = () => {
   avatarFile.value = null
   avatarPreview.value = props.host?.avatar
-      ? `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${props.host.avatar}`
+      ? `https://s3.cloudfly.vn/thg-storage/uploads-public/${props.host.avatar}`
       : DEFAULT_AVATAR
   if (fileInput.value) {
     fileInput.value.value = ''

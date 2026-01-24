@@ -123,7 +123,7 @@
                   <img src="/imgs/sold-out.png" />
                 </div>
                 <div v-else-if="'Đã kiểm duyệt' === item.status" class="card-badge verified-badge">
-                  <img src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png" />
+                  <img src="https://s3.cloudfly.vn/thg-storage/uploads-public/icon-kiem-duỵet.png" />
                 </div>
               </div>
 
@@ -644,7 +644,7 @@ async function fetchFilteredAssets() {
           ...item,
           imageUrl: item.imageUrl
               ? item.imageUrl
-              : 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/default.jpg'
+              : 'https://s3.cloudfly.vn/thg-storage/uploads-public/default.jpg'
         }))
         : [];
 

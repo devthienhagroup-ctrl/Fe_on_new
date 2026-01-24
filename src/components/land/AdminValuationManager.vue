@@ -21,7 +21,7 @@
 
         <img
             v-if="info.avatarUrl"
-            :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+            :src="' https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
             alt="avatar"
             class="rounded-circle border"
             style="width: 36px; height: 36px; object-fit: cover;"
@@ -2248,7 +2248,7 @@ async function generateValuationPDF(asset, report) {
   noteY += 12;
   const linkColor = rgb(0.1, 0.1, 0.1); // gần đen
   const link1 = "https://thienhagroup.vn";    // đường dẫn thật bạn có thể thay
-  const link2 = "http://localhost:8084giai-phap-ban-nhanh";    // đường dẫn thật bạn có thể thay
+  const link2 = "https://thienhagroup.vngiai-phap-ban-nhanh";    // đường dẫn thật bạn có thể thay
 
   page.drawText("Khảo sát thực tế - ", { x: 40, y: toY(noteY), font: fB, size: 10, color: linkColor });
   const link1X = 40 + fB.widthOfTextAtSize("Khảo sát thực tế - ", 10);

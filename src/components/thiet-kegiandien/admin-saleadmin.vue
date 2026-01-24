@@ -33,7 +33,7 @@
 
             <img
                 v-if="info.avatarUrl"
-                :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+                :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
                 alt="avatar"
                 class="rounded-circle border"
                 style="width: 36px; height: 36px; object-fit: cover;"
@@ -557,11 +557,21 @@
                       <!-- Khách hàng -->
                       <td style="width: 220px!important;">
                         <div class="d-flex align-items-center">
-                          <img
-                              :src="customer.avatarKhach || generateAvatarFromName(customer.hoTen)"
-                              :alt="customer.hoTen"
-                              class="customer-avatar me-3"
-                          />
+                          <div class="customer-avatar-wrap me-3">
+                            <img
+                                :src="customer.avatarKhach || generateAvatarFromName(customer.hoTen)"
+                                :alt="customer.hoTen"
+                                class="customer-avatar"
+                            />
+                            <span
+                                v-if="customer.nguonKhachHang"
+                                class="source-icon-badge"
+                                :class="`source-${customer.nguonKhachHang}`"
+                                :title="getSourceLabel(customer.nguonKhachHang)"
+                            >
+                              <i :class="getSourceIcon(customer.nguonKhachHang)"></i>
+                            </span>
+                          </div>
                           <div>
                             <div class="fw-semibold">{{ shortenName( customer.hoTen, 15 )}}</div>
                             <small class="text-muted">{{ customer.ngayTao }}</small>
@@ -610,7 +620,7 @@
                             v-if="customer.nhanVienTaoTen"
                         >
                           <img
-                              :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+ customer.nhanVienTaoAvatar"
+                              :src="'https://s3.cloudfly.vn/thg-storage/uploads-public/'+ customer.nhanVienTaoAvatar"
                               :alt="customer.nhanVienTaoTen"
                               class="member-avatar"
                           >
@@ -626,7 +636,7 @@
                             v-if="customer.nhanVienPhuTrachTen"
                         >
                           <img
-                              :src=" 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+ customer.nhanVienPhuTrachAvatar"
+                              :src=" 'https://s3.cloudfly.vn/thg-storage/uploads-public/'+ customer.nhanVienPhuTrachAvatar"
                               :alt="customer.nhanVienPhuTrachTen"
                               class="member-avatar"
                           >
@@ -1231,6 +1241,13 @@
                     <span :class="['status-badge', getStatusClass(detailCustomer.trangThai)]" style="font-size: 14px !important;">
                   {{ getStatusLabel(detailCustomer.trangThai) }}
                 </span>
+                    <span
+                      v-if="detailCustomer.nguonKhachHang"
+                      class="source-badge"
+                      :class="`source-${detailCustomer.nguonKhachHang}`"
+                    >
+                      {{ getSourceLabel(detailCustomer.nguonKhachHang) }}
+                    </span>
                   </div>
                   <div class="detail-hero-meta">
                     <span><i class="fas fa-phone-alt"></i> {{ formatPhoneNumber(detailCustomer.soDienThoai) }}</span>
@@ -1295,6 +1312,12 @@
                       </span>
                         </div>
                       </div>
+                      <div class="info-item">
+                        <div class="info-label">Nguồn khách</div>
+                        <div class="info-value">
+                          {{ getSourceLabel(detailCustomer.nguonKhachHang) || '-' }}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -1307,7 +1330,7 @@
                       <div class="staff-item">
                         <div class="staff-avatar">
                           <div v-if="detailCustomer.nhanVienTaoAvatar" class="avatar-img">
-                            <img :src=" 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+  detailCustomer.nhanVienTaoAvatar" :alt="detailCustomer.nhanVienTaoTen">
+                            <img :src=" 'https://s3.cloudfly.vn/thg-storage/uploads-public/'+  detailCustomer.nhanVienTaoAvatar" :alt="detailCustomer.nhanVienTaoTen">
                           </div>
                           <div v-else class="avatar-placeholder small">
                             <i class="fas fa-user"></i>
@@ -1321,7 +1344,7 @@
                       <div class="staff-item">
                         <div class="staff-avatar">
                           <div v-if="detailCustomer.nhanVienPhuTrachAvatar" class="avatar-img">
-                            <img :src=" 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'+  detailCustomer.nhanVienPhuTrachAvatar" :alt="detailCustomer.nhanVienPhuTrachTen">
+                            <img :src=" 'https://s3.cloudfly.vn/thg-storage/uploads-public/'+  detailCustomer.nhanVienPhuTrachAvatar" :alt="detailCustomer.nhanVienPhuTrachTen">
                           </div>
                           <div v-else class="avatar-placeholder small">
                             <i class="fas fa-user"></i>
@@ -1919,7 +1942,7 @@ const resolveEmployeeAvatar = (avatar, name) => {
   if (avatar) {
     return avatar.startsWith('http')
       ? avatar
-      : `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${avatar}`
+      : `https://s3.cloudfly.vn/thg-storage/uploads-public/${avatar}`
   }
   return generateAvatarFromName(name || 'NV')
 }
@@ -2567,6 +2590,15 @@ const getTypeLabel = (type) => {
   return typeMap[type] || type
 }
 
+const getSourceMeta = (source) => customerSources.find((item) => item.id === source) || {}
+
+const getSourceLabel = (source) => {
+  if (!source) return ''
+  return getSourceMeta(source).label || source
+}
+
+const getSourceIcon = (source) => getSourceMeta(source).icon || 'fas fa-circle'
+
 const getProvinceLabel = (province) => {
   if (!province) return '-'
   if (province === 'Khác' || province === 'other') return 'Khác'
@@ -2898,7 +2930,7 @@ const fetchTeleSales = async () => {
       const avatarPath = staff.avatar
         ? (staff.avatar.startsWith('http')
           ? staff.avatar
-          : `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${staff.avatar}`)
+          : `https://s3.cloudfly.vn/thg-storage/uploads-public/${staff.avatar}`)
         : generateAvatarFromName(staff.tenNhanVien)
       return {
         id: staff.id,
@@ -3692,6 +3724,47 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
   transition: var(--transition-normal);
 }
+
+.customer-avatar-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.source-icon-badge {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+  border: 2px solid #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
+  transform: rotate(-12deg);
+}
+
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.source-ADS { background: #f97316; }
+.source-FORUM { background: #6366f1; }
+.source-RAO_VAT { background: #14b8a6; }
+.source-FB { background: #1877f2; }
+.source-SEO { background: #22c55e; }
 
 .customer-avatar-lg {
   width: 72px;

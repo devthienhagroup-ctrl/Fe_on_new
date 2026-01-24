@@ -716,7 +716,7 @@ const extractAndUpdateImagesFromHTML = (html) => {
           console.log('✅ Đã thêm fileDTO NEW từ blob URL:', src.substring(0, 50) + '...')
         }
       }
-    } else if (src.includes('https://s3.cloudfly.vn/thg-storage-dev/uploads-public/')) {
+    } else if (src.includes('https://s3.cloudfly.vn/thg-storage/uploads-public/')) {
       // Nếu là ảnh cũ từ server
       const filename = src.split('/').pop()
       blobUrlsInHTML.push(src)

@@ -801,7 +801,7 @@ async function handleDrop(e, targetTime) {
     )
 
     if (!res.data.success) {
-      updateAlertError('Không thể dời giờ', res.data.message)
+      updateAlertError(res?.data?.message || 'Không thể dời giờ')
       return
     }
 
@@ -809,8 +809,8 @@ async function handleDrop(e, targetTime) {
     await refreshAppointmentsAndStats()
 
     updateAlertSuccess(
-        'Đã dời giờ hẹn',
-        `${appt.customer}: ${formatVNDate(appt.date)} → ${targetTime}`
+        res?.data?.message || 'Đã dời giờ hẹn',
+        `${appt.customer}: ${formatVNDate(appt.date)} → ${targetTime}`,
     )
   } catch (e) {
     console.error(e)
@@ -1095,7 +1095,7 @@ async function saveEditModal() {
     ));
 
     if (res.data.success) {
-      updateAlertSuccess('✅ Cập nhật lịch hẹn thành công')
+      updateAlertSuccess(res?.data?.message || 'Cập nhật lịch hẹn thành công')
       await refreshAppointmentsAndStats()
       const temp = editForm.consultStatus;
       closeEditModal()
@@ -1114,14 +1114,14 @@ async function saveEditModal() {
             serviceId: editForm.rating ?? editContext.serviceId ?? null,
           }
           localStorage.setItem('contractDraftFromAppointment', JSON.stringify(payloadDraft))
-          window.location.assign('/-thg/dich-vu')
+          window.location.assign('/-thg/quan-ly-hop-dong')
         }
       }
     } else {
-      updateAlertError('❌ Cập nhật thất bại:', res.data.message)
+      updateAlertError(res?.data?.message || 'Cập nhật thất bại')
       await openConfirmDialog({
         title: 'Cập nhật thất bại',
-        message: res.data.message || 'Có lỗi xảy ra, vui lòng thử lại.',
+        message: res?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.',
         confirmText: 'Đóng',
         showCancel: false,
         variant: 'danger',
@@ -1351,12 +1351,12 @@ async function saveNewAppointment() {
   try {
     const res = await showLoading(createAppointmentApi());
 
-    if( !res.data.success) {
-      updateAlertError('Không thể tạo lịch hẹn', res.data.message || 'Có lỗi xảy ra, vui lòng thử lại.', 'error')
+    if (!res.data.success) {
+      updateAlertError(res?.data?.message || 'Không thể tạo lịch hẹn')
       return
     }
 
-    updateAlertSuccess('Tạo lịch hẹn thành công', 'Lịch hẹn đã được tạo.')
+    updateAlertSuccess(res?.data?.message || 'Tạo lịch hẹn thành công')
 
     const createdAppointmentId =
       res?.data?.data?.appointmentId ??
@@ -2164,7 +2164,7 @@ onBeforeUnmount(() => {
 
       <img
           v-if="info.avatarUrl"
-          :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+          :src="' https://s3.cloudfly.vn/thg-storage/uploads-public/' + info.avatarUrl"
           alt="avatar"
           class="rounded-circle border"
           style="width: 36px; height: 36px; object-fit: cover;"
