@@ -226,6 +226,7 @@
               <span class="action-label">Chi tiết</span>
             </div>
             <div
+              v-if="canPayContract"
               class="action-item"
               :class="{ disabled: !isActiveContract(activeActionContract) }"
               @click="isActiveContract(activeActionContract) && (openPay(activeActionContract), closeActionMenu())"
@@ -236,6 +237,7 @@
               <span class="action-label">Đóng phí</span>
             </div>
             <div
+              v-if="canRefundContract"
               class="action-item"
               :class="{ disabled: !isActiveContract(activeActionContract) }"
               @click="isActiveContract(activeActionContract) && (openRefund(activeActionContract), closeActionMenu())"
@@ -246,6 +248,7 @@
               <span class="action-label">Hoàn phí</span>
             </div>
             <div
+              v-if="canAdjustContract"
               class="action-item"
               :class="{ disabled: !isActiveContract(activeActionContract) }"
               @click="isActiveContract(activeActionContract) && (openAdjust(activeActionContract), closeActionMenu())"
@@ -255,7 +258,7 @@
               </span>
               <span class="action-label">Điều chỉnh</span>
             </div>
-            <div class="action-item" @click="openDelete(activeActionContract); closeActionMenu()">
+            <div v-if="canDeleteContract" class="action-item" @click="openDelete(activeActionContract); closeActionMenu()">
               <span class="icon-btn icon-del" aria-hidden="true">
                 <i class="fa-solid fa-trash"></i>
               </span>
@@ -627,7 +630,7 @@
           <button class="btn ghost" @click="closeModal('modalPay')">
             <i class="fa-solid fa-ban"></i> Hủy
           </button>
-          <button class="btn primary" @click="savePayment">
+          <button v-if="canPayContract" class="btn primary" @click="savePayment">
             <i class="fa-solid fa-check"></i> Xác nhận đóng
           </button>
         </div>
@@ -708,7 +711,7 @@
           <button class="btn ghost" @click="closeModal('modalRefund')">
             <i class="fa-solid fa-ban"></i> Hủy
           </button>
-          <button class="btn primary" @click="saveRefund">
+          <button v-if="canRefundContract" class="btn primary" @click="saveRefund">
             <i class="fa-solid fa-check"></i> Xác nhận hoàn
           </button>
         </div>
@@ -936,7 +939,7 @@
           <button class="btn ghost" @click="closeModal('modalAdjust')">
             <i class="fa-solid fa-ban"></i> Hủy
           </button>
-          <button class="btn primary" @click="saveAdjustment">
+          <button v-if="canAdjustContract" class="btn primary" @click="saveAdjustment">
             <i class="fa-solid fa-check"></i> Xác nhận điều chỉnh
           </button>
         </div>
@@ -1130,7 +1133,7 @@
 
         <div class="modal-f">
           <button
-            v-if="detailContract?.trangThaiHopDong === 'DANG_HIEU_LUC'"
+            v-if="detailContract?.trangThaiHopDong === 'DANG_HIEU_LUC' && canCancelContract"
             class="btn danger"
             @click="cancelContract"
           >
@@ -1168,7 +1171,7 @@
           <button class="btn ghost" @click="closeModal('modalDelete')">
             <i class="fa-solid fa-ban"></i> Hủy
           </button>
-          <button class="btn danger" @click="confirmDelete">
+          <button v-if="canDeleteContract" class="btn danger" @click="confirmDelete">
             <i class="fa-solid fa-trash"></i> Xóa luôn
           </button>
         </div>
@@ -1193,6 +1196,11 @@ import ContractStatsDashboard from "../thiet-kegiandien/ContractStatsDashboard.v
 import {shortenName} from "../../assets/js/global.js";
 const authStore = useAuthStore()
 const info = computed(() => authStore.userInfo || {})
+const canPayContract = computed(() => authStore.hasPermission('HOPDONG_THU'))
+const canRefundContract = computed(() => authStore.hasPermission('HOPDONG_HOANPHI'))
+const canAdjustContract = computed(() => authStore.hasPermission('HOPDONG_DIEUCHINH'))
+const canDeleteContract = computed(() => authStore.hasPermission('HOPDONG_DELETE'))
+const canCancelContract = computed(() => authStore.hasPermission('HOPDONG_HUY'))
 const todayISO = () => {
   const d = new Date()
   const yyyy = d.getFullYear()

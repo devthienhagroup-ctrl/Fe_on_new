@@ -1,118 +1,303 @@
 diff --git a/src/components/dich-vu/Phi-dich-vu.vue b/src/components/dich-vu/Phi-dich-vu.vue
-index f2314c4345ea0b0c0daf28222f9305b57e0c3fb5..7ecc5857fdeec9a300505d05ade4b994fc2554b1 100644
+index bc7bbe3dd829ec6372182a24bcb180cda57f2734..68f2229a9d1ec9b07d61389992be050c8e068381 100644
 --- a/src/components/dich-vu/Phi-dich-vu.vue
 +++ b/src/components/dich-vu/Phi-dich-vu.vue
-@@ -1,85 +1,105 @@
- <template>
-   <div class="topbar">
-     <div class="brand">
-       <div class="brand-ico">
-         <i class="fa-solid fa-file-signature"></i>
-       </div>
-       <div class="min-w-0">
-         <div class="brand-title">Quản lý Hợp đồng</div>
+@@ -204,80 +204,83 @@
+                       <div class="icon-btn icon-menu" title="Tác vụ" @click.stop="toggleActionMenu(contract.id, $event)">
+                         <i class="fa-solid fa-ellipsis"></i>
+                       </div>
+                     </div>
+                   </td>
+                 </tr>
+                 </tbody>
+               </table>
+             </div>
+           </div>
+         </div>
+         <teleport to="body">
+           <div
+             v-if="openActionMenu && activeActionContract"
+             class="action-menu action-menu--floating"
+             :style="actionMenuPositionStyle"
+             @click.stop
+           >
+             <div class="action-item" @click="openDetail(activeActionContract); closeActionMenu()">
+               <span class="icon-btn icon-view" aria-hidden="true">
+                 <i class="fa-solid fa-eye"></i>
+               </span>
+               <span class="action-label">Chi tiết</span>
+             </div>
+             <div
++              v-if="canPayContract"
+               class="action-item"
+               :class="{ disabled: !isActiveContract(activeActionContract) }"
+               @click="isActiveContract(activeActionContract) && (openPay(activeActionContract), closeActionMenu())"
+             >
+               <span class="icon-btn icon-pay" aria-hidden="true">
+                 <i class="fa-solid fa-circle-dollar-to-slot"></i>
+               </span>
+               <span class="action-label">Đóng phí</span>
+             </div>
+             <div
++              v-if="canRefundContract"
+               class="action-item"
+               :class="{ disabled: !isActiveContract(activeActionContract) }"
+               @click="isActiveContract(activeActionContract) && (openRefund(activeActionContract), closeActionMenu())"
+             >
+               <span class="icon-btn icon-refund" aria-hidden="true">
+                 <i class="fa-solid fa-arrow-rotate-left"></i>
+               </span>
+               <span class="action-label">Hoàn phí</span>
+             </div>
+             <div
++              v-if="canAdjustContract"
+               class="action-item"
+               :class="{ disabled: !isActiveContract(activeActionContract) }"
+               @click="isActiveContract(activeActionContract) && (openAdjust(activeActionContract), closeActionMenu())"
+             >
+               <span class="icon-btn icon-adjust" aria-hidden="true">
+                 <i class="fa-solid fa-sliders"></i>
+               </span>
+               <span class="action-label">Điều chỉnh</span>
+             </div>
+-            <div class="action-item" @click="openDelete(activeActionContract); closeActionMenu()">
++            <div v-if="canDeleteContract" class="action-item" @click="openDelete(activeActionContract); closeActionMenu()">
+               <span class="icon-btn icon-del" aria-hidden="true">
+                 <i class="fa-solid fa-trash"></i>
+               </span>
+               <span class="action-label">Xóa</span>
+             </div>
+           </div>
+         </teleport>
+         <div class="pagination">
+           <div class="muted tiny">
+             Hiển thị {{ pageStart }}-{{ pageEnd }} / {{ totalElements }}
+           </div>
+           <div class="pager">
+             <button class="btn ghost btn-page" :disabled="currentPage === 1" @click="prevPage">Trước</button>
+             <button
+               v-for="page in totalPages"
+               :key="page"
+               class="btn ghost btn-page"
+               :class="{ active: currentPage === page }"
+               @click="goToPage(page)"
+             >
+               {{ page }}
+             </button>
+             <button class="btn ghost btn-page" :disabled="currentPage === totalPages" @click="nextPage">Sau</button>
+           </div>
+         </div>
+@@ -605,51 +608,51 @@
+                     <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
+                     <div class="v price p2">{{ formatMoney(getTongDieuChinh(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                   <div class="k"><span class="dot"></span>Còn thiếu</div>
+                   <div class="v price p1">{{ formatMoney(getConThieu(currentContract)) }}</div>
+                 </div>
+                 <div class="kpi">
+                   <div class="k"><span class="dot"></span>Đã thu</div>
+                   <div class="v price p3">{{ formatMoney(getDoanhThuRow(currentContract)) }}</div>
+                 </div>
+                 </div>
+
+                 <div class="note mt-3">
+                   <b>Lưu ý:</b> Đóng phí sẽ làm tăng <span class="mono">Thực thu</span>.
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+
+         <div class="modal-f">
+           <button class="btn ghost" @click="closeModal('modalPay')">
+             <i class="fa-solid fa-ban"></i> Hủy
+           </button>
+-          <button class="btn primary" @click="savePayment">
++          <button v-if="canPayContract" class="btn primary" @click="savePayment">
+             <i class="fa-solid fa-check"></i> Xác nhận đóng
+           </button>
+         </div>
        </div>
      </div>
--
-+    <div class="top-actions">
-+      <router-link class="btn ghost" to="/-thg/dich-vu-chinh">
-+        <i class="fa-solid fa-gear"></i>
-+        <span>Tinh chỉnh mức phí THG</span>
-+      </router-link>
-+      <div class="user-chip">
-+        <div class="user-meta">
-+          <div class="user-name">{{ info.fullName || 'Chưa có tên' }}</div>
-+          <div v-if="info.role" class="user-role">{{ info.role }}</div>
-+        </div>
-+        <img
-+          v-if="info.avatarUrl"
-+          :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-+          alt="avatar"
-+          class="user-avatar"
-+        />
-+        <div v-else class="user-avatar user-avatar--fallback">
-+          {{ initials(info.fullName) }}
-+        </div>
-+      </div>
-+    </div>
-   </div>
 
-   <div class="ui-page">
-     <!-- KPIs -->
-
-     <!-- TABS -->
-     <div class="tabs-shell">
-       <div class="tabs">
-         <div class="tab" :class="{ active: activeTab === 1 }" @click="activeTab = 1">
-           <i class="fa-solid fa-layer-group"></i>
-           Danh sách & thao tác
-           <span class="pill">{{ totalElements }}</span>
+     <!-- MODAL: REFUND -->
+     <div class="modal" :class="{ show: showModal === 'modalRefund' }" @click.self="closeModal('modalRefund')">
+       <div class="modal-card">
+         <div class="modal-h">
+           <div class="modal-title">
+             <i class="fa-solid fa-arrow-rotate-left"></i>
+             Hoàn phí
+           </div>
+           <button class="x" @click="closeModal('modalRefund')">
+             <i class="fa-solid fa-xmark"></i>
+           </button>
          </div>
 
-         <div class="tab" :class="{ active: activeTab === 2 }" @click="activeTab = 2">
-           <i class="fa-solid fa-chart-line"></i>
-           Thống kê
-           <span class="pill">0</span>
+         <div class="modal-b">
+           <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+             <div class="card">
+               <div class="card-h"><i class="fa-solid fa-reply"></i> Thông tin hoàn</div>
+               <div class="field">
+                 <label><i class="fa-solid fa-money-bill-transfer"></i> Số tiền hoàn</label>
+@@ -686,51 +689,51 @@
+                     <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
+                     <div class="v price p2">{{ formatMoney(getTongDieuChinh(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Còn thiếu</div>
+                     <div class="v price p1">{{ formatMoney(getConThieu(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Đã thu</div>
+                     <div class="v price p3">{{ formatMoney(getDoanhThuRow(currentContract)) }}</div>
+                   </div>
+                 </div>
+
+                 <div class="note mt-3">
+                   <b>Lưu ý:</b> Hoàn phí sẽ làm giảm <span class="mono">Thực thu</span>.
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+
+         <div class="modal-f">
+           <button class="btn ghost" @click="closeModal('modalRefund')">
+             <i class="fa-solid fa-ban"></i> Hủy
+           </button>
+-          <button class="btn primary" @click="saveRefund">
++          <button v-if="canRefundContract" class="btn primary" @click="saveRefund">
+             <i class="fa-solid fa-check"></i> Xác nhận hoàn
+           </button>
          </div>
        </div>
+     </div>
 
-       <!-- PANEL TAB 1 -->
-       <div class="panel attached" v-show="activeTab === 1">
-         <div class="kpi-row mt-3 px-3">
-           <div class="stat-card kpi-total">
-             <div class="stat-card-content">
-               <h5><i class="fa-solid fa-file-signature"></i> Tổng hợp đồng</h5>
-               <div class="stat-number">{{ totalElements }}</div>
-             </div>
-             <i class="fa-solid fa-file-signature stat-icon"></i>
+     <!-- MODAL: ADJUST -->
+     <div class="modal" :class="{ show: showModal === 'modalAdjust' }" @click.self="closeModal('modalAdjust')">
+       <div class="modal-card">
+         <div class="modal-h">
+           <div class="modal-title">
+             <i class="fa-solid fa-sliders"></i>
+             Điều chỉnh hợp đồng
            </div>
-           <div class="stat-card kpi-revenue">
-             <div class="stat-card-content">
-               <h5><i class="fa-solid fa-chart-line"></i> Tổng doanh thu</h5>
--              <div class="stat-number">{{ formatMoney(totalDoanhThu) }}</div>
-+              <div class="stat-number">{{ formatTy(totalDoanhThu) }}</div>
+           <button class="x" @click="closeModal('modalAdjust')">
+             <i class="fa-solid fa-xmark"></i>
+           </button>
+         </div>
+
+         <div class="modal-b">
+           <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+             <div class="card">
+               <div class="card-h"><i class="fa-solid fa-pen-to-square"></i> Thông tin điều chỉnh</div>
+
+               <div class="field">
+@@ -914,51 +917,51 @@
+                     <div class="k"><span class="dot"></span>Giá sau giảm</div>
+                     <div class="v price p4">{{ formatMoney(currentContract?.giaSauGiam || 0) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Tổng điều chỉnh</div>
+                     <div class="v price p2">{{ formatMoney(getTongDieuChinh(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Doanh thu</div>
+                     <div class="v price p1">{{ formatMoney(getDoanhThuRow(currentContract)) }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Doanh số</div>
+                     <div class="v price p3">{{ formatMoney(getDoanhSoRow(currentContract)) }}</div>
+                   </div>
+                 </div>
+               </div>
              </div>
-             <i class="fa-solid fa-chart-line stat-icon"></i>
-           </div>
-           <div class="stat-card kpi-adjust">
-             <div class="stat-card-content">
-               <h5><i class="fa-solid fa-sliders"></i> Tổng điều chỉnh</h5>
--              <div class="stat-number">{{ formatMoney(totalDieuChinh) }}</div>
-+              <div class="stat-number">{{ formatTy(totalDieuChinh) }}</div>
-             </div>
-             <i class="fa-solid fa-sliders stat-icon"></i>
-           </div>
-           <div class="stat-card kpi-sales">
-             <div class="stat-card-content">
-               <h5><i class="fa-solid fa-sack-dollar"></i> Tổng doanh số</h5>
--              <div class="stat-number">{{ formatMoney(totalDoanhSo) }}</div>
-+              <div class="stat-number">{{ formatTy(totalDoanhSo) }}</div>
-             </div>
-             <i class="fa-solid fa-sack-dollar stat-icon"></i>
            </div>
          </div>
-         <div class="panel-h">
-           <div class="tools">
-             <div class="input select filter-item filter-search" :class="{ active: searchQuery }">
-               <label>Tiềm kiếm</label>
-               <i class="fa-solid fa-magnifying-glass mt-2"></i>
-               <input v-model="searchQuery" type="text" placeholder="Tìm theo mã HĐ / khách / người tạo...">
-             </div>
 
-             <div class="select filter-item filter-service" :class="{ active: filterService }">
-               <label>Dịch vụ</label>
-               <select v-model="filterService">
-                 <option :value="null">Tất cả</option>
-                 <option v-for="service in serviceOptions" :key="service.id || service.name" :value="service.id || service.name">{{ service.name }}</option>
-               </select>
-             </div>
+         <div class="modal-f">
+           <button class="btn ghost" @click="closeModal('modalAdjust')">
+             <i class="fa-solid fa-ban"></i> Hủy
+           </button>
+-          <button class="btn primary" @click="saveAdjustment">
++          <button v-if="canAdjustContract" class="btn primary" @click="saveAdjustment">
+             <i class="fa-solid fa-check"></i> Xác nhận điều chỉnh
+           </button>
+         </div>
+       </div>
+     </div>
 
-             <div class="select filter-item filter-status" :class="{ active: filterStatus }">
-               <label>Trạng thái</label>
-               <select v-model="filterStatus">
-                 <option :value="null">Tất cả</option>
-                 <option value="DANG_HIEU_LUC">Đang hiệu lực</option>
-@@ -1138,60 +1158,63 @@
+     <!-- MODAL: DETAIL -->
+     <div class="modal" :class="{ show: showModal === 'modalDetail' }" @click.self="closeModal('modalDetail')">
+       <div class="modal-card detail">
+         <div class="modal-h">
+           <div class="modal-title flex items-center gap-2">
+             <i class="fa-solid fa-file-lines"></i>
+             <span>Chi tiết hợp đồng {{ detailContract?.maHopDong }}</span>
+             <span v-if="detailContract?.trangThaiHopDong === 'DANG_HIEU_LUC'" class="status st-on">
+               Đang hiệu lực
+                       </span>
+             <span v-else-if="detailContract?.trangThaiHopDong === 'HOAN_TAT'" class="status st-done">
+               Hoàn tất
+                       </span>
+             <span v-else-if="detailContract?.trangThaiHopDong === 'HUY'" class="status st-cancel">
+               Đã hủy
+             </span>
+           </div>
+           <button class="x" @click="closeModal('modalDetail')">
+             <i class="fa-solid fa-xmark"></i>
+@@ -1108,113 +1111,118 @@
+                       </tr>
+                       </thead>
+                       <tbody>
+                       <tr v-if="!detailContract?.dieuChinhHopDongs?.length">
+                         <td colspan="4">
+                           <div class="text-center py-6 muted">Chưa có điều chỉnh.</div>
+                         </td>
+                       </tr>
+                       <tr v-for="adj in detailContract?.dieuChinhHopDongs || []" :key="adj.id">
+                         <td class="mono">{{ formatDateValue(adj.ngayTao) }}</td>
+                         <td class="mono">{{ formatMoney(adj.soTienDieuChinh) }}</td>
+                         <td class="mono">{{ adj.loaiDieuChinh || '-' }}</td>
+                         <td>{{ adj.lyDo || '' }}</td>
+                       </tr>
+                       </tbody>
+                     </table>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+
+         <div class="modal-f">
+           <button
+-            v-if="detailContract?.trangThaiHopDong === 'DANG_HIEU_LUC'"
++            v-if="detailContract?.trangThaiHopDong === 'DANG_HIEU_LUC' && canCancelContract"
+             class="btn danger"
+             @click="cancelContract"
+           >
+             <i class="fa-solid fa-ban"></i> Hủy hợp đồng
+           </button>
+           <button class="btn ghost" @click="closeModal('modalDetail')">
+             <i class="fa-solid fa-xmark"></i> Đóng
+           </button>
+         </div>
+       </div>
+     </div>
+
+     <!-- MODAL: DELETE -->
+     <div class="modal" :class="{ show: showModal === 'modalDelete' }" @click.self="closeModal('modalDelete')">
+       <div class="modal-card">
+         <div class="modal-h">
+           <div class="modal-title">
+             <i class="fa-solid fa-triangle-exclamation"></i>
+             Xác nhận xóa
+           </div>
+           <button class="x" @click="closeModal('modalDelete')">
+             <i class="fa-solid fa-xmark"></i>
+           </button>
+         </div>
          <div class="modal-b">
            <div class="p-2">
              <div class="font-extrabold">Xóa hợp đồng {{ currentContract?.maHopDong }}?</div>
@@ -126,7 +311,8 @@ index f2314c4345ea0b0c0daf28222f9305b57e0c3fb5..7ecc5857fdeec9a300505d05ade4b994
            <button class="btn ghost" @click="closeModal('modalDelete')">
              <i class="fa-solid fa-ban"></i> Hủy
            </button>
-           <button class="btn danger" @click="confirmDelete">
+-          <button class="btn danger" @click="confirmDelete">
++          <button v-if="canDeleteContract" class="btn danger" @click="confirmDelete">
              <i class="fa-solid fa-trash"></i> Xóa luôn
            </button>
          </div>
@@ -138,7 +324,7 @@ index f2314c4345ea0b0c0daf28222f9305b57e0c3fb5..7ecc5857fdeec9a300505d05ade4b994
  <script setup>
  import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
  import api from '/src/api/api.js'
-+import { useAuthStore } from '../../stores/authStore'
+ import { useAuthStore } from '../../stores/authStore'
  import {
    confirmWithInput,
    showCenterWarning,
@@ -149,8 +335,13 @@ index f2314c4345ea0b0c0daf28222f9305b57e0c3fb5..7ecc5857fdeec9a300505d05ade4b994
  } from '/src/assets/js/alertService.js'
  import ContractStatsDashboard from "../thiet-kegiandien/ContractStatsDashboard.vue";
  import {shortenName} from "../../assets/js/global.js";
-+const authStore = useAuthStore()
-+const info = computed(() => authStore.userInfo || {})
+ const authStore = useAuthStore()
+ const info = computed(() => authStore.userInfo || {})
++const canPayContract = computed(() => authStore.hasPermission('HOPDONG_THU'))
++const canRefundContract = computed(() => authStore.hasPermission('HOPDONG_HOANPHI'))
++const canAdjustContract = computed(() => authStore.hasPermission('HOPDONG_DIEUCHINH'))
++const canDeleteContract = computed(() => authStore.hasPermission('HOPDONG_DELETE'))
++const canCancelContract = computed(() => authStore.hasPermission('HOPDONG_HUY'))
  const todayISO = () => {
    const d = new Date()
    const yyyy = d.getFullYear()
@@ -176,321 +367,3 @@ index f2314c4345ea0b0c0daf28222f9305b57e0c3fb5..7ecc5857fdeec9a300505d05ade4b994
  const searchQuery = ref('')
  const filterService = ref(null)
  const filterStatus = ref(null)
-@@ -1457,50 +1480,60 @@ watch(() => payment.value.amount, (val) => {
- })
-
- watch(() => refund.value.amount, (val) => {
-   if (!currentContract.value) return
-
-   const maxAmount = getMaxRefundAmount(currentContract.value)
-   let num = Math.floor(parseNumberInput(val))
-
-   if (num > maxAmount) num = maxAmount
-   if (num < 0) num = 0
-
-   if (num !== refund.value.amount) {
-     refund.value.amount = num
-   }
- })
-
- // Methods
- // Helper functions
- const formatMoney = (n) => {
-   const x = Math.round(Number(n || 0))
-   const sign = x < 0 ? '-' : ''
-   const abs = Math.abs(x)
-   return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' ₫'
- }
-
-+const formatTy = (n) => {
-+  const value = Number(n || 0) / 1_000_000_000
-+  const abs = Math.abs(value)
-+  const formatted = value.toLocaleString('vi-VN', {
-+    minimumFractionDigits: abs > 0 && abs < 1 ? 1 : 0,
-+    maximumFractionDigits: 1
-+  })
-+  return `${formatted} tỷ`
-+}
-+
- const formatNumberInput = (n) => {
-   if (n === null || n === undefined || n === '') return ''
-   const x = Math.round(Number(n || 0))
-   const sign = x < 0 ? '-' : ''
-   const abs = Math.abs(x)
-   return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
- }
-
- const parseNumberInput = (value, allowNegative = false) => {
-   const raw = String(value || '').trim()
-   if (!raw) return 0
-   const noDots = raw.replace(/\./g, '')
-   const cleaned = allowNegative ? noDots.replace(/[^0-9-]/g, '') : noDots.replace(/[^0-9]/g, '')
-   let parsed = Number(cleaned)
-   if (Number.isNaN(parsed)) parsed = 0
-   if (!allowNegative) return Math.max(0, parsed)
-   return parsed
- }
-
- const initials = (name) => {
-   const parts = String(name || '')
-       .trim()
-       .split(/\s+/)
-       .filter(Boolean)
-   if (parts.length === 0) return 'NA'
-@@ -2718,98 +2751,141 @@ onUnmounted(() => {
-   --sh2: 0 12px 26px rgba(20,30,48,.10);
-   --t: all .18s cubic-bezier(.4,0,.2,1);
-
-   min-height: 92vh;
-   color: var(--text);
-   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-   background:
-       radial-gradient(1200px 700px at 12% 6%, rgba(102,126,234,.18), transparent 60%),
-       radial-gradient(900px 650px at 88% 0%, rgba(240,147,251,.16), transparent 58%),
-       radial-gradient(1000px 750px at 70% 100%, rgba(79,172,254,.14), transparent 55%),
-       linear-gradient(135deg, rgba(20,30,48,.05), rgba(20,30,48,.00));
-   padding: 5px 20px;
-   position: relative;
-   top: -10px;
- }
- .muted{ color: var(--muted); }
- .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
- .tiny{ font-size: 12px; }
- .no-select{ user-select:none; }
-
- /* =========================
-    TOPBAR
- ========================= */
- .topbar{
-   border: 1px solid var(--line);
-+  border-bottom: 1px solid #ef4444;
-   border-radius: var(--r);
-   box-shadow: var(--sh2);
-   background: rgba(255,255,255,.66);
-   backdrop-filter: blur(10px);
-   padding: 10px 22px 26px;
-   display:flex;
-   align-items:center;
-   justify-content:space-between;
-   gap: 12px;
-   flex-wrap: wrap;
- }
- .brand{ display:flex; align-items:center; gap:10px; min-width: 0; }
- .brand-ico{
-   width:40px; height:40px;
-   border-radius: 14px;
-   display:grid; place-items:center;
-   color:#fff;
-   background: var(--primary-gradient);
-   box-shadow: 0 16px 28px rgba(102,126,234,.24);
-   flex: 0 0 auto;
- }
- .brand-title{
-   font-size: 18px;
-   font-weight: 850;
-   letter-spacing: .2px;
-   line-height: 1.1;
-   background: var(--dark-gradient);
-   -webkit-background-clip: text;
-   background-clip: text;
-   color: transparent;
-   -webkit-text-fill-color: transparent;
-   white-space: nowrap;
-   overflow: hidden;
-   text-overflow: ellipsis;
-   max-width: 62vw;
- }
- @media (max-width: 640px){
-   .brand-title{ max-width: 78vw; }
- }
- .brand-sub{ font-size:12px; color: rgba(11,18,32,.62); font-weight: 650; margin-top:2px; }
-
- .top-actions{
-   display:flex; align-items:center; gap:8px;
-   flex-wrap: wrap;
-   justify-content:flex-end;
-   width: fit-content;
-   margin-left: auto;
- }
-+.user-chip{
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 12px;
-+  padding: 6px 10px;
-+  border-radius: 999px;
-+  background: rgba(255,255,255,.7);
-+  border: 1px solid rgba(15,23,42,.08);
-+}
-+.user-meta{
-+  display:flex;
-+  flex-direction: column;
-+  align-items: flex-end;
-+  line-height: 1.1;
-+}
-+.user-name{
-+  font-size: 13px;
-+  font-weight: 750;
-+  color: #0f172a;
-+}
-+.user-role{
-+  font-size: 11px;
-+  color: rgba(15,23,42,.6);
-+  font-weight: 600;
-+}
-+.user-avatar{
-+  width: 34px;
-+  height: 34px;
-+  border-radius: 999px;
-+  object-fit: cover;
-+  border: 1px solid rgba(15,23,42,.12);
-+  display: grid;
-+  place-items: center;
-+  font-weight: 700;
-+  color: #fff;
-+  background: var(--primary-gradient);
-+  text-transform: uppercase;
-+}
-+.user-avatar--fallback{
-+  display: grid;
-+  place-items: center;
-+}
-
- /* =========================
-    BUTTONS
- ========================= */
- .btn{
-   height: 36px;
-   padding: 0 12px;
-   border-radius: 12px;
-   border: none;
-   cursor: pointer;
-   font-size: 13px;
-   font-weight: 760;
-   display:inline-flex;
-   align-items:center;
-   gap:8px;
-   transition: var(--t);
-   position: relative;
-   overflow:hidden;
-   white-space: nowrap;
- }
- .btn:hover{ transform: translateY(-1px); filter: brightness(1.01); }
- .btn:active{ transform: translateY(0px); }
-
- .btn.primary{ background: var(--primary-gradient); color:#fff; box-shadow: 0 14px 28px rgba(102,126,234,.22); }
- .btn.secondary{ background: var(--secondary-gradient); color:#fff; box-shadow: 0 14px 28px rgba(240,147,251,.20); }
-diff --git a/src/components/thiet-kegiandien/ContractStatsDashboard.vue b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
-index 7ab3e23c72116ea14e9a8271e2b6dc3e78510cae..2f0677bf0a9380fd96e05eed24650db170fa8c15 100644
---- a/src/components/thiet-kegiandien/ContractStatsDashboard.vue
-+++ b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
-@@ -232,96 +232,106 @@ const stats = ref({
-   completedContracts: 0,
-   cancelledContracts: 0,
-   totalRevenue: 0,
-   totalSales: 0,
- });
-
- // ===== Helpers =====
- const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
- const toISODate = (d) => {
-   const yyyy = d.getFullYear();
-   const mm = String(d.getMonth() + 1).padStart(2, "0");
-   const dd = String(d.getDate()).padStart(2, "0");
-   return `${yyyy}-${mm}-${dd}`;
- };
-
- const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1);
-
- const dateText = computed(() => {
-   if (!selectedYear.value || selectedYear.value < 1) return "—";
-   if (timeRange.value === "month") {
-     return `Tháng ${selectedMonth.value}/${selectedYear.value}`;
-   }
-   return `Năm ${selectedYear.value}`;
- });
-
-+const formatTy = (value) => {
-+  const amount = Number(value || 0) / 1_000_000_000;
-+  const abs = Math.abs(amount);
-+  const formatted = amount.toLocaleString("vi-VN", {
-+    minimumFractionDigits: abs > 0 && abs < 1 ? 1 : 0,
-+    maximumFractionDigits: 1,
-+  });
-+  return `${formatted} tỷ`;
-+};
-+
- const statCards = computed(() => [
-   {
-     key: "totalContracts",
-     icon: "fa-solid fa-file-contract",
-     label: "Tổng hợp đồng",
-     value: stats.value.totalContracts.toLocaleString("vi-VN"),
-     tone: "indigo",
-     badge: "Tổng quan",
-   },
-   {
-     key: "activeContracts",
-     icon: "fa-solid fa-handshake",
-     label: "Hợp đồng đang hiệu lực",
-     value: stats.value.activeContracts.toLocaleString("vi-VN"),
-     tone: "sky",
-     badge: "Đang chạy",
-   },
-   {
-     key: "completedContracts",
-     icon: "fa-solid fa-circle-check",
-     label: "Hợp đồng hoàn tất",
-     value: stats.value.completedContracts.toLocaleString("vi-VN"),
-     tone: "emerald",
-     badge: "Kết quả",
-   },
-   {
-     key: "cancelledContracts",
-     icon: "fa-solid fa-circle-xmark",
-     label: "Hợp đồng hủy",
-     value: stats.value.cancelledContracts.toLocaleString("vi-VN"),
-     tone: "rose",
-     badge: "Cảnh báo",
-   },
-   {
-     key: "totalRevenue",
-     icon: "fa-solid fa-money-bill-wave",
--    label: "Tổng doanh thu (triệu VNĐ)",
--    value: stats.value.totalRevenue.toLocaleString("vi-VN"),
-+    label: "Tổng doanh thu (tỷ VNĐ)",
-+    value: formatTy(stats.value.totalRevenue),
-     tone: "amber",
-     badge: "Doanh thu",
-   },
-   {
-     key: "totalSales",
-     icon: "fa-solid fa-chart-line",
--    label: "Tổng doanh số (triệu VNĐ)",
--    value: stats.value.totalSales.toLocaleString("vi-VN"),
-+    label: "Tổng doanh số (tỷ VNĐ)",
-+    value: formatTy(stats.value.totalSales),
-     tone: "violet",
-     badge: "Doanh số",
-   },
- ]);
-
- const serviceOptions = computed(() => [
-   { id: "all", name: "Tất cả dịch vụ" },
-   ...services.value.map((service) => ({ id: service.id, name: service.name })),
- ]);
-
- const revenueTitle = computed(() => {
-   const selected = serviceOptions.value.find((option) => option.id === selectedService.value);
-   const suffix = timeRange.value === "month" ? "theo tháng" : "theo năm";
-   return `Doanh thu ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
- });
-
- const revenueSubtitle = computed(() => {
-   if (selectedService.value === "all") return "Phân loại theo dịch vụ";
-   return "Phân loại theo phân khúc dịch vụ";
- });
-
- const salesTitle = computed(() => {
-   const selected = serviceOptions.value.find((option) => option.id === selectedService.value);
-   const suffix = timeRange.value === "month" ? "theo tháng" : "theo năm";
-   return `Doanh số ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
