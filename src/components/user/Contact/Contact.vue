@@ -63,7 +63,7 @@
 
         <!-- Right Column -->
         <div class="contact-right">
-          <div class="support-form" :style="supportFormStyles">
+<!--          <div class="support-form" :style="supportFormStyles">
             <h2 class="form-title" :style="{ fontSize: config.styles.formTitle.fontSize, color: config.colors.primary, fontWeight: config.styles.formTitle.fontWeight }">
               {{ config.content.form.title }}
             </h2>
@@ -95,7 +95,8 @@
 
           <div class="rich-text-editor-wrapper" :style="thankYouMessageStyles">
             <div class="tiptap" v-html="config.content.thankYouMessage"></div>
-          </div>
+          </div>-->
+          <cooperation-form/>
         </div>
       </div>
     </main>
@@ -110,6 +111,7 @@
 <script setup>
 import {ref, reactive, computed, onMounted} from 'vue'
 import api from "../../../api/api.js";
+import CooperationForm from "../UI/CooperationForm.vue";
 
 // Configuration object - CHỈNH FONT SIZE NHỎ HƠN Ở ĐÂY
 let config = {
@@ -167,7 +169,7 @@ let config = {
       {
         id: 'email',
         icon: 'fas fa-envelope',
-        value: 'thienhagroup@gmail.com'
+        value: 'thienhalandgroupvn@gmail.com'
       },
       {
         id: 'phone',

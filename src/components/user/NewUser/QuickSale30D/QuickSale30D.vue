@@ -116,6 +116,7 @@
               :quick-access-url="service.quickAccessUrl"
               :quick-access-text="service.quickAccessText"
               show-login-button
+              :use-tag_a_-link="true"
           >
             {{ service.description }}
           </GlassCard>
@@ -556,7 +557,7 @@
             </p>
           </div>
 
-          <a :href="config.buttons.dashboard.href"
+          <a v-if="config.buttons.dashboard.href!==''" :href="config.buttons.dashboard.href"
              class="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm font-semibold
                   bg-white/10 text-white border border-white/10
                   hover:bg-white/15 hover:border-white/20 transition">
@@ -601,95 +602,8 @@
 
     <!-- Contact (Đã mở rộng) -->
     <section id="lien-he" class="relative py-10 lg:py-20">
-      <div class="container mx-auto px-4 lg:px-6">
-        <div class="glass-card rounded-2xl lg:rounded-3xl p-6 md:p-8 lg:p-10">
-          <!-- Thay đổi flex container -->
-          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 lg:gap-10">
-            <!-- Phần nội dung bên trái -->
-            <div class="lg:max-w-lg">
-              <div class="flex items-center justify-center">
-                <img src="/imgs/logoTHG.png" alt="logo Thiên Hà Group" class="w-32 md:w-40 lg:w-48 mb-4"/>
-              </div>
-              <h2 class="text-xl md:text-2xl lg:text-2xl font-extrabold text-white text-center lg:text-left">
-                {{ contactTitle }}
-              </h2>
-              <p class="mt-3 text-slate-300/90 text-sm md:text-base text-center lg:text-left">
-                {{ contactDescription }}
-              </p>
-            </div>
-
-            <!-- Form bên phải -->
-            <form class="w-full lg:max-w-xl space-y-4">
-              <!-- Grid cho 2 cột trên mobile -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="md:col-span-2">
-                  <label class="text-xs md:text-sm text-slate-400">{{ contactFormLabels.name }}</label>
-                  <input type="text" :placeholder="contactFormPlaceholders.name" required
-                         class="mt-1 w-full rounded-lg md:rounded-xl bg-slate-950/60 border border-white/10 px-4 py-3
-                            text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"/>
-                </div>
-
-                <div>
-                  <label class="text-xs md:text-sm text-slate-400">{{ contactFormLabels.phone }}</label>
-                  <input type="tel" :placeholder="contactFormPlaceholders.phone" required
-                         class="mt-1 w-full rounded-lg md:rounded-xl bg-slate-950/60 border border-white/10 px-4 py-3
-                            text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"/>
-                </div>
-
-                <div>
-                  <label class="text-xs md:text-sm text-slate-400">{{ contactFormLabels.propertyType }}</label>
-                  <select class="mt-1 w-full rounded-lg md:rounded-xl bg-slate-950/60 border border-white/10 px-4 py-3
-                            text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50">
-                    <option value="">{{ contactFormPlaceholders.propertyType }}</option>
-                    <option v-for="type in propertyTypes" :key="type.value" :value="type.value">
-                      {{ type.label }}
-                    </option>
-                  </select>
-                </div>
-
-                <div class="md:col-span-2">
-                  <label class="text-xs md:text-sm text-slate-400">{{ contactFormLabels.area }}</label>
-                  <input type="text" :placeholder="contactFormPlaceholders.area" required
-                         class="mt-1 w-full rounded-lg md:rounded-xl bg-slate-950/60 border border-white/10 px-4 py-3
-                            text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"/>
-                </div>
-
-                <div class="md:col-span-2">
-                  <label class="text-xs md:text-sm text-slate-400">{{ contactFormLabels.address }}</label>
-                  <textarea :placeholder="contactFormPlaceholders.address" rows="2"
-                            class="mt-1 w-full rounded-lg md:rounded-xl bg-slate-950/60 border border-white/10 px-4 py-3
-                            text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"></textarea>
-                </div>
-
-                <div class="md:col-span-2">
-                  <label class="text-xs md:text-sm text-slate-400">{{ contactFormLabels.price }}</label>
-                  <input type="number" :placeholder="contactFormPlaceholders.price" step="0.1"
-                         class="mt-1 w-full rounded-lg md:rounded-xl bg-slate-950/60 border border-white/10 px-4 py-3
-                            text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"/>
-                </div>
-              </div>
-
-              <!-- Nút bấm - thay đổi layout trên mobile -->
-              <div class="flex flex-col sm:flex-row gap-3 pt-4">
-                <button type="submit"
-                        class="btn-gradient flex-1 inline-flex items-center justify-center px-5 py-3 rounded-lg md:rounded-xl text-sm font-semibold
-                           transition order-2 sm:order-1">
-                  {{ config.buttons.submit.text }}
-                </button>
-                <button v-if="authStore.userInfo==null" @click="openLoginModal" type="button"
-                        class="inline-flex items-center justify-center px-5 py-3 rounded-lg md:rounded-xl text-sm font-semibold
-                      bg-blue-400/10 text-white border border-white/10
-                      hover:bg-white/15 hover:border-white/20 transition order-1 sm:order-2">
-                  Đăng nhập ngay
-                </button>
-              </div>
-
-              <p class="text-xs text-slate-500 leading-relaxed text-center lg:text-left">
-                {{ contactPrivacyNotice }}
-              </p>
-            </form>
-          </div>
-        </div>
+      <div id="contact" class="container mx-auto px-4 lg:px-6">
+        <CooperationForm :purple-template="true" />
       </div>
     </section>
   </div>
@@ -706,6 +620,7 @@ import Fuse from "fuse.js";
 import api from "../../../../api/api.js";
 import { buildSeoUrl } from "../../../../assets/js/global.js";
 import Swal from 'sweetalert2';
+import CooperationForm from "../../UI/CooperationForm.vue";
 
 // ========== SOLD PROJECTS - Lấy từ API ==========
 const soldProjects = ref([]);
@@ -1103,6 +1018,7 @@ const config = ref({
     gradients: {
       hero: 'from-blue-400 to-purple-500',
       solutions: 'from-blue-500 to-purple-600',
+      solutions: 'from-blue-500 to-purple-600',
       soldProjects: 'from-blue-400 to-purple-500'
     }
   },
@@ -1175,7 +1091,7 @@ const config = ref({
     },
     dashboard: {
       text: 'Mở dashboard tiến độ',
-      href: '#'
+      href: ''
     },
     submit: {
       text: 'Gửi đăng ký'

@@ -157,6 +157,10 @@ import ProjectManagementCMS from "../components/cms/NewCms/ProjectMannagement/Pr
 import PropertyManagementCMS from "../components/cms/NewCms/PropertyManagement/PropertyManagementCMS.vue";
 import CTVRecruitCMS from "../components/cms/NewCms/CTVRecruit/CTVRecruitCMS.vue";
 import DichVuSetting from "../components/dich-vu/Dich-vu-setting.vue";
+import ProductReportManagemnet from "../components/productAdmin/productReportManagement/ProductReportManagemnet.vue";
+import ContactManagement from "../components/ContactManagement/ContactManagement.vue";
+import ServicePackages from "../components/user/NewUser/ServicePackages/ServicePackages.vue";
+import ServicePackageCMS from "../components/cms/NewCms/ServicePackages/ServicePackageCMS.vue";
 
 const routes = [
 
@@ -175,13 +179,13 @@ const routes = [
             path: '',
             name: "NHAP_LIEU",
             component: test,
-    }]
+        }]
     },
     {
         path: "/-thg/quan-tri-du-lieu",
         name: "TeamCollaboration",
         component: Menu,
-        meta: { requiresAuth: false, enableTailwind: false},
+        meta: {requiresAuth: false, enableTailwind: false},
         children: [{
             path: '',
             name: "QUAN_TRI_KHACH_HANG",
@@ -192,12 +196,12 @@ const routes = [
         path: "/-thg/telesale-lien-he-khach-hang",
         name: "TELESALESetyui",
         component: Menu,
-        meta: { requiresAuth: false, enableTailwind: false},
+        meta: {requiresAuth: false, enableTailwind: false},
         children: [{
             path: '',
             name: "LIEN_HE",
             component: test1,
-    }]
+        }]
     },
 
     {
@@ -676,7 +680,19 @@ const routes = [
                         name: 'CTVRecruitCMS',
                         component: CTVRecruitCMS
                     }
-                    ]
+                ]
+            },
+            {
+                path: 'goi-dich-vu',
+                name: 'service-packages-cms',
+                component: cms,
+                children: [
+                    {
+                        path: 'noi-dung-chinh',
+                        name: 'ServicePackagesCMS',
+                        component: ServicePackageCMS
+                    }
+                ]
             },
             {
                 path: 'quan-ly-tin-tuc',
@@ -1176,7 +1192,7 @@ const routes = [
         path: "/thanh-toan-san-pham",
         name: "Checkout1",
         component: MenuUser,
-        meta: {requiresAuth: false},
+        meta: {requiresAuth: true},
         children: [
             {
                 path: '',
@@ -1503,7 +1519,7 @@ const routes = [
             enableTailwind: true,
             newCustomScroll: true,
             useAOS: true,
-            requiresAuth: false
+            requiresAuth: false,
         },
         children: [
             {
@@ -1540,6 +1556,37 @@ const routes = [
                 path: 'ung-tuyen-cong-tac-vien',
                 name: 'CTVRecruitment',
                 component: CTVRecruit
+            },
+            {
+                path: 'goi-dich-vu-thg',
+                name: 'ServicePackageTHG',
+                component: ServicePackages
+            }
+        ]
+    },
+    {
+        path: '/-thg/quan-ly-bao-cao',
+        name: 'ReportManagement',
+        component: Menu,
+        meta: {requiresAuth: true},
+        children: [
+            {
+                path: '',
+                name: 'report-management',
+                component: ProductReportManagemnet
+            }
+        ]
+    },
+    {
+        path: '/-thg/quan-ly-lien-he',
+        name: 'ContactManagement',
+        component: Menu,
+        meta: {requiresAuth: true},
+        children: [
+            {
+                path: '',
+                name: 'contact-managemnet',
+                component: ContactManagement
             }
         ]
     },
@@ -1648,24 +1695,26 @@ router.afterEach((to, from, failure) => {
         return;
     }
 
-    console.log("Bắt đầu kiểm tra tailwind");
-    const id = "tailwind-admin-css";
-    let link = document.getElementById(id);
-    const needTailwind = to.matched.some(r => r.meta.enableTailwind);
+    /*
+        console.log("Bắt đầu kiểm tra tailwind");
+        const id = "tailwind-admin-css";
+        let link = document.getElementById(id);
+        const needTailwind = to.matched.some(r => r.meta.enableTailwind);
 
-    if (needTailwind && !link) {
-        console.log(to.path + " Cần tailwind");
-        link = document.createElement("link");
-        link.id = id;
-        link.rel = "stylesheet";
-        link.href = "/tailwind-admin-compiled.css";
-        document.head.appendChild(link);
-    }
+        if (needTailwind && !link) {
+            console.log(to.path + " Cần tailwind");
+            link = document.createElement("link");
+            link.id = id;
+            link.rel = "stylesheet";
+            link.href = "/tailwind-admin-compiled.css";
+            document.head.appendChild(link);
+        }
 
-    if (!needTailwind && link) {
-        console.log(to.path + " Không cần tailwind");
-        link.remove();
-    }
+        if (!needTailwind && link) {
+            console.log(to.path + " Không cần tailwind");
+            link.remove();
+        }
+    */
 
 
     // Kiểm tra để add style cho scroll

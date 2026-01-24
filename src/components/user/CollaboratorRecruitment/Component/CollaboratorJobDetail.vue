@@ -217,9 +217,9 @@ const quickLinks = ref([
     type: 'action',
     items: [
       {
-        title: 'Email: thienhagroup@gmail.com',
+        title: 'Email: thienhalandgroupvn@gmail.com',
         action: 'copy',
-        value: 'thienhagroup@gmail.com'
+        value: 'thienhalandgroupvn@gmail.com'
       },
       {
         title: 'Hotline: 091.123.1882',

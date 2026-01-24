@@ -44,7 +44,7 @@
 
           <div class="label-pill" :class="{ 'pill-left': align === 'left' }">
             <div class="pill-pointer" :class="pointerClasses"></div>
-            <span class="label-text">thienhagroup@gmail.com</span>
+            <span class="label-text">thienhalandgroup@gmail.com</span>
           </div>
 
           <div v-if="align === 'right'" class="icon-circle email">
@@ -121,7 +121,7 @@ const openMessenger = () => {
 }
 
 const sendEmail = () => {
-  window.location.href = 'mailto:thienhagroup@gmail.com'
+  window.location.href = 'mailto:thienhalandgroupvn@gmail.com'
 }
 
 const makeCall = () => {

@@ -164,7 +164,12 @@ const statusText = computed(() => {
 });
 
 const formattedAmount = computed(() => {
-  return amount.value.toLocaleString("vi-VN");
+  const amt = amount.value;
+  // Kiểm tra nếu amt là undefined, null, hoặc không phải số
+  if (amt == null || isNaN(amt)) {
+    return '0';
+  }
+  return amt.toLocaleString("vi-VN");
 });
 
 // === LOAD PAYMENT INFO ===

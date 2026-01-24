@@ -19,8 +19,8 @@
               <span class="text-sm font-semibold text-purple-300">{{ config.hero.badgeText }}</span>
             </div>
 
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-              {{ config.hero.titleLine1 }}
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 space-y-3">
+              <span class="mb-1">{{ config.hero.titleLine1 }} </span>
               <span class="gradient-text block">{{ config.hero.titleLine2 }}</span>
             </h1>
 
@@ -33,7 +33,7 @@
                 <i class="fas fa-play-circle mr-3"></i>
                 {{ config.hero.button1.text }}
               </a>
-              <a href="#features" class="inline-flex items-center justify-center px-8 py-4 rounded-xl text-base font-semibold bg-white/10 text-white border border-white/10 hover:bg-white/15 transition">
+              <a href="#ytb-video-demo" class="inline-flex items-center justify-center px-8 py-4 rounded-xl text-base font-semibold bg-white/10 text-white border border-white/10 hover:bg-white/15 transition">
                 <i class="fas fa-video mr-3"></i>
                 {{ config.hero.button2.text }}
               </a>
@@ -148,7 +148,7 @@
         </p>
       </div>
 
-      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <div id="ytb-video-demo" class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         <MiniCardIcon
             v-for="tool in config.tools"
             :key="tool.id"
@@ -162,6 +162,7 @@
 
       <!-- Video Demo -->
       <YoutubeVideo
+
           :video-id="config.videoId"
           :show-controls="true"
       />
@@ -241,39 +242,7 @@
   <!-- Contact CTA -->
   <section id="contact" class="py-20 lg:py-32 bg-gradient-to-b from-slate-900/60 to-darker overflow-hidden">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="max-w-4xl mx-auto">
-        <div class="glass-card rounded-3xl p-12 text-center" data-aos="fade-up">
-          <div class="w-24 h-24 gradient-bg rounded-full flex items-center justify-center mx-auto mb-8">
-            <i class="fas fa-users text-white text-3xl"></i>
-          </div>
-
-          <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
-            {{ config.sections.contact.title }}
-          </h2>
-
-          <p class="text-lg text-slate-300 max-w-2xl mx-auto mb-8">
-            {{ config.sections.contact.description }}
-          </p>
-
-          <!-- Contact Form -->
-          <div class="max-w-md mx-auto">
-            <div class="grid md:grid-cols-2 gap-4 mb-6">
-              <input type="text" placeholder="Họ và tên" class="form-input rounded-xl px-4 py-3 text-white">
-              <input type="tel" placeholder="Số điện thoại" class="form-input rounded-xl px-4 py-3 text-white">
-            </div>
-            <input type="email" placeholder="Email công ty" class="form-input rounded-xl px-4 py-3 text-white w-full mb-6">
-
-            <button class="w-full gradient-bg text-white py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition">
-              <i class="fas fa-paper-plane mr-3"></i>
-              {{ config.sections.contact.buttonText }}
-            </button>
-
-            <p class="text-sm text-slate-400 mt-6">
-              Hoặc gọi ngay: <span class="text-white font-semibold">{{ config.sections.contact.phone }}</span>
-            </p>
-          </div>
-        </div>
-      </div>
+      <CooperationForm :purple-template="true"/>
     </div>
   </section>
 </template>
@@ -286,6 +255,7 @@ import PackageService from "../EstimateProperty/PackageService.vue";
 import TestimonialCard from "../../UI/TestimonialCard.vue";
 import YoutubeVideo from "../../UI/YoutubeVideo.vue";
 import api from "../../../../api/api.js";
+import CooperationForm from "../../UI/CooperationForm.vue";
 
 // Config object
 const config = ref({

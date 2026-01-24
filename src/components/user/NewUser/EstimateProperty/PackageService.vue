@@ -62,11 +62,11 @@
                 <i
                     v-else
                     :class="{
-    [packageItem.icon]: true,
-    'text-pink-400': gradientPinkPurple,
-    'text-purple-400': !gradientPinkPurple,
-    'text-3xl': true
-  }"
+                        [packageItem.icon]: true,
+                        'text-pink-400': gradientPinkPurple,
+                        'text-purple-400': !gradientPinkPurple,
+                        'text-3xl': true
+                      }"
                 ></i>
 
               </div>
@@ -100,11 +100,22 @@
               </span>
               </li>
             </ul>
+            <div>
+              <router-link
+                  to="/goi-dich-vu-thg"
+                  :class="gradientPinkPurple ?
+    'bg-pink-500/20 border-pink-500/30 text-pink-300 hover:bg-pink-500/30' :
+    'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/30'"
+                  class="w-full py-3 px-4 border rounded-lg flex items-center justify-center gap-2 font-semibold transition-all hover:scale-[1.02]">
+                Xem thêm
+                <i class="fas fa-external-link-alt text-sm"></i>
+              </router-link>
+            </div>
           </div>
         </div>
       </div>
       <div class="flex justify-end mt-2" data-aos="fade-left" data-aos-delay="100">
-        <router-link to="/ho-so/goi-dich-vu" class="btn-gradient glow py-2 rounded-lg px-3">Tới trang đăng ký</router-link>
+
       </div>
     </div>
   </section>

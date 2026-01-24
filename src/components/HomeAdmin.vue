@@ -149,7 +149,22 @@ const allMenuItems = [
     icon: 'fa-solid fa-users-gear text-danger fs-2',
     title: 'Quản trị khách hàng',
     desc: 'Toàn quyền quản lý dữ liệu khách hàng'
+  },
+  {
+    label: 'CONTACTMANAGE',
+    route: '/-thg/quan-ly-lien-he',
+    icon: 'fa-solid fa-address-book text-emerald-500 fs-5',
+    title: 'KH liên hệ',
+    desc: 'Xem và phản hồi các yêu cầu liên hệ từ khách hàng'
+  },
+  {
+    label: 'REPORTMANAGE',
+    route: '/-thg/quan-ly-bao-cao',
+    icon: 'fa-solid fa-flag text-amber-500 fs-5',
+    title: 'Báo cáo SP',
+    desc: 'Xem và quản lý các báo cáo từ khách hàng'
   }
+
 
 
 

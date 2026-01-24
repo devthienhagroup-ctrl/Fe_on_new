@@ -12,6 +12,7 @@
       <!-- Desktop Menu -->
       <div class="hidden md:flex space-x-8 items-center" data-aos="fade-down" data-aos-delay="100">
         <router-link to="/" class="hover:text-blue-400 transition text-sm font-semibold uppercase tracking-widest">Trang chủ</router-link>
+        <router-link to="/goi-dich-vu-thg" class="hover:text-blue-400 transition text-sm font-semibold uppercase tracking-widest">Gói dịch vụ</router-link>
         <a href="#about" class="hover:text-blue-400 transition text-sm font-semibold uppercase tracking-widest">Về chúng tôi</a>
         <a href="#services" class="hover:text-blue-400 transition text-sm font-semibold uppercase tracking-widest">Lĩnh vực</a>
         <a href="#contact" class="hover:text-blue-400 transition text-sm font-semibold uppercase tracking-widest">Liên hệ</a>
@@ -64,6 +65,13 @@
               @click="closeMobileMenu"
           >
             Trang chủ
+          </router-link>
+          <router-link
+              to="/goi-dich-vu"
+              class="text-white hover:text-blue-400 transition text-lg font-semibold uppercase tracking-widest py-3"
+              @click="closeMobileMenu"
+          >
+            Gói dịch vụ
           </router-link>
           <a
               href="#about"

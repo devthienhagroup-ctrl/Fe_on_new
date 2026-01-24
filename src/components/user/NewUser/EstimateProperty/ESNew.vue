@@ -19,8 +19,8 @@
               </div>
 
               <h1 class="text-4xl md:text-5xl font-bold text-slate-50 mb-6 leading-tight">
-                {{ config.hero.title }}
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">{{ config.hero.highlightedText }}</span>
+                <span class="block">{{ config.hero.title }}</span>
+                <span class="block mt-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">{{ config.hero.highlightedText }}</span>
               </h1>
 
               <p class="text-lg text-slate-300 mb-8 leading-relaxed">
@@ -31,11 +31,11 @@
               </p>
 
               <div class="flex flex-col sm:flex-row gap-4">
-                <button @click="goToStep(1)" class="btn-gradient glow px-8 py-3 rounded-xl font-semibold hover:opacity-90 transition flex items-center justify-center space-x-2">
+                <router-link to="/bao-cao-dinh-gia?openTab=yeu-cau" class="btn-gradient glow px-8 py-3 rounded-xl font-semibold hover:opacity-90 transition flex items-center justify-center space-x-2">
                   <i :class="config.hero.ctaButtons.priceNow.icon"></i>
                   <span>{{ config.hero.ctaButtons.priceNow.text }}</span>
-                </button>
-                <button class="glass-card border border-blue/10 px-8 py-3 rounded-xl font-semibold hover:bg-white/5 transition flex items-center justify-center space-x-2">
+                </router-link>
+                <button @click="showYoutubeModal=true" class="glass-card border border-blue/10 px-8 py-3 rounded-xl font-semibold hover:bg-white/5 transition flex items-center justify-center space-x-2">
                   <i :class="config.hero.ctaButtons.watchDemo.icon"></i>
                   <span>{{ config.hero.ctaButtons.watchDemo.text }}</span>
                 </button>
@@ -615,7 +615,7 @@
                 <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto text-slate-50 text-2xl font-bold">
                   {{ config.howItWorks.steps[0].number }}
                 </div>
-                <div class="absolute top-1/2 right-0 w-full h-0.5 bg-slate-700 hidden md:block"></div>
+<!--                <div class="absolute top-1/2 right-0 w-full h-0.5 bg-slate-700 hidden md:block"></div>-->
               </div>
               <h3 class="text-xl font-bold text-slate-50 mb-3">{{ config.howItWorks.steps[0].title }}</h3>
               <p class="text-slate-300 text-sm">
@@ -629,7 +629,7 @@
                 <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto text-slate-50 text-2xl font-bold">
                   {{ config.howItWorks.steps[1].number }}
                 </div>
-                <div class="absolute top-1/2 right-0 w-full h-0.5 bg-slate-700 hidden md:block"></div>
+<!--                <div class="absolute top-1/2 right-0 w-full h-0.5 bg-slate-700 hidden md:block"></div>-->
               </div>
               <h3 class="text-xl font-bold text-slate-50 mb-3">{{ config.howItWorks.steps[1].title }}</h3>
               <p class="text-slate-300 text-sm">
@@ -643,7 +643,7 @@
                 <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto text-slate-50 text-2xl font-bold">
                   {{ config.howItWorks.steps[2].number }}
                 </div>
-                <div class="absolute top-1/2 right-0 w-full h-0.5 bg-slate-700 hidden md:block"></div>
+<!--                <div class="absolute top-1/2 right-0 w-full h-0.5 bg-slate-700 hidden md:block"></div>-->
               </div>
               <h3 class="text-xl font-bold text-slate-50 mb-3">{{ config.howItWorks.steps[2].title }}</h3>
               <p class="text-slate-300 text-sm">
@@ -667,7 +667,7 @@
 
           <!-- CTA -->
           <div class="text-center mt-16">
-            <button @click="goToStep(1)"
+            <button @click="router.push('/bao-cao-dinh-gia?openTab=yeu-cau')"
                     class="gradient-bg text-slate-50 px-8 py-4 rounded-xl font-semibold hover:opacity-90 transition text-lg flex items-center mx-auto space-x-3">
               <i :class="config.howItWorks.ctaButton.icon"></i>
               <span>{{ config.howItWorks.ctaButton.text }}</span>
@@ -764,54 +764,19 @@
             </div>
 
             <!-- Contact Form - GIỮ NGUYÊN LOGIC -->
-            <div data-aos="fade-left">
-              <div class="glass-card rounded-2xl p-8">
-                <h3 class="text-xl font-bold text-slate-50 mb-6">Đăng ký tư vấn miễn phí</h3>
-
-                <form @submit.prevent="submitContactForm" class="space-y-4">
-                  <div>
-                    <input type="text" v-model="contactForm.name" placeholder="Họ và tên" required
-                           class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-50 placeholder-slate-500 focus:outline-none focus:border-purple-500">
-                  </div>
-
-                  <div>
-                    <input type="tel" v-model="contactForm.phone" placeholder="Số điện thoại" required
-                           class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-50 placeholder-slate-500 focus:outline-none focus:border-purple-500">
-                  </div>
-
-                  <div>
-                    <input type="email" v-model="contactForm.email" placeholder="Email" required
-                           class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-50 placeholder-slate-500 focus:outline-none focus:border-purple-500">
-                  </div>
-
-                  <div>
-                    <select v-model="contactForm.need" required
-                            class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-50 focus:outline-none focus:border-purple-500">
-                      <option value="" disabled>Nhu cầu của bạn</option>
-                      <option>Tư vấn định giá BĐS</option>
-                      <option>Đăng ký dùng thử</option>
-                      <option>Hợp tác doanh nghiệp</option>
-                      <option>Khác</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <textarea rows="4" v-model="contactForm.message" placeholder="Tin nhắn của bạn"
-                              class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-50 placeholder-slate-500 focus:outline-none focus:border-purple-500"></textarea>
-                  </div>
-
-                  <button type="submit"
-                          class="w-full btn-gradient py-3 rounded-lg font-semibold hover:opacity-90 transition">
-                    Gửi yêu cầu tư vấn
-                  </button>
-                </form>
-              </div>
-            </div>
+            <CooperationForm/>
           </div>
         </div>
       </div>
     </section>
   </div>
+
+  <ModalYoutube
+      v-if="showYoutubeModal"
+      :is-open="showYoutubeModal"
+      youtube-url="https://www.youtube.com/embed/bUS6QR81ZG8?si=jM0CFuFcapcZ_KOe"
+      @close="closeYoutubeModal"
+  />
 </template>
 
 <script setup>
@@ -824,6 +789,17 @@ import Fuse from "fuse.js";
 import Swal from 'sweetalert2'
 import PackageService from "./PackageService.vue";
 import {useAuthStore} from "../../../../stores/authStore.js";
+import YoutubeVideo from "../../UI/YoutubeVideo.vue";
+import CooperationForm from "../../UI/CooperationForm.vue";
+import ModalYoutube from "../NewHome/ModalYoutube.vue";
+import {useRouter} from "vue-router";
+
+const router = useRouter();
+const showYoutubeModal = ref(false);
+
+const closeYoutubeModal = () => {
+  showYoutubeModal.value = false;
+};
 
 function ensureArray(value) {
   if (!value) return [];
@@ -1144,7 +1120,7 @@ const config = ref({
       },
       email: {
         title: 'Email',
-        value: 'thienhagroup@gmail.com',
+        value: 'thienhalandgroupvn@gmail.com',
         responseTime: 'Phản hồi trong 2 giờ',
         icon: 'fas fa-envelope'
       },
@@ -1927,7 +1903,7 @@ watch(() => propertyData.province, (newProvince, oldProvince) => {
 });
 </script>
 
-<style>
+<style scoped>
 .text-blue-400 {
 color: v-bind('getColor("styles.colors.blue400")');
 }

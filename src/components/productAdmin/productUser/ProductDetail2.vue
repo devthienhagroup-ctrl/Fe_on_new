@@ -842,9 +842,7 @@ async function handleUnlock(asset) {
 
   localStorage.setItem("redirectAfterLogin", "/san-pham-thien-ha/" + asset.id);
   if (!auth.accessToken) {
-    router.push({
-      path: "/dang-nhap"
-    });
+    auth.openLoginModal();
     return;
   }
 

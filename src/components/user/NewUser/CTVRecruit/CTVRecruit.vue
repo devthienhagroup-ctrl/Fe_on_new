@@ -12,8 +12,8 @@
           <div class="text-left" data-aos="fade-right" data-aos-duration="1000">
             <h1 class="text-4xl md:text-5xl lg:text-6xl font-display font-black mb-6 leading-tight text-white fade-in-up"
                 data-aos="fade-up" data-aos-delay="200">
-              {{ config.hero.title.line1 }} <br>
-              <span class="text-gradient highlight-text">{{ config.hero.title.line2 }}</span>
+              <span class="block">{{ config.hero.title.line1 }} </span>
+              <span class="text-gradient highlight-text block mt-2">{{ config.hero.title.line2 }}</span>
             </h1>
 
             <p class="text-slate-300 text-lg mb-6 font-light fade-in-up" data-aos="fade-up"
@@ -39,7 +39,7 @@
             </div>
 
             <div class="flex flex-col sm:flex-row gap-4 fade-in-up" data-aos="fade-up" data-aos-delay="600">
-              <a href="#application" class="btn-gradient">
+              <a href="#contact" class="btn-gradient">
                 <i class="fas fa-paper-plane mr-2"></i> {{ config.hero.buttons.apply }}
               </a>
 
@@ -143,7 +143,7 @@
         </div>
 
         <div class="text-center mt-12" data-aos="fade-up" data-aos-delay="700">
-          <a href="#application" class="btn-gradient inline-block">
+          <a href="#contact" class="btn-gradient inline-block">
             <i class="fas fa-briefcase mr-2"></i> {{ config.jobs.applyButton }}
           </a>
           <p class="text-slate-400 text-sm mt-4">{{ config.jobs.footerNote }}</p>
@@ -210,7 +210,7 @@
           </div>
 
           <div class="text-center mt-12" data-aos="fade-up" data-aos-delay="500">
-            <a href="#application" class="btn-gradient inline-block">
+            <a href="#contact" class="btn-gradient inline-block">
               <i class="fas fa-play-circle mr-2"></i> {{ config.process.startButton }}
             </a>
             <p class="text-slate-400 text-sm mt-4">{{ config.process.footerNote }}</p>
@@ -253,7 +253,7 @@
     </section>
 
     <!-- FORM ĐĂNG KÝ -->
-    <section id="application" class="py-24 bg-gradient-to-br from-slate-900 to-blue-900/30 relative overflow-hidden">
+    <section id="contact" class="py-24 bg-gradient-to-br from-slate-900 to-blue-900/30 relative overflow-hidden">
       <div class="container mx-auto px-6">
         <div class="mx-auto">
           <div class="text-center mb-16" data-aos="fade-up">
@@ -265,45 +265,7 @@
 
           <div class="grid md:grid-cols-2 gap-12">
             <!-- Form đăng ký -->
-            <div class="glass-card p-8" data-aos="fade-right">
-              <h3 class="text-2xl font-bold text-white mb-6">{{ config.form.sections.info.title }}</h3>
-
-              <form @submit.prevent="submitForm">
-                <div v-for="field in config.form.fields" :key="field.name" class="mb-6">
-                  <label class="block text-slate-300 mb-2">{{ field.label }}</label>
-                  <input v-if="field.type !== 'select'"
-                         v-model="formData[field.name]"
-                         :type="field.type"
-                         class="form-input"
-                         :placeholder="field.placeholder"
-                         :required="field.required">
-                  <select v-else v-model="formData[field.name]" class="form-input" required>
-                    <option value="">{{ field.placeholder }}</option>
-                    <option v-for="option in field.options" :key="option.value" :value="option.value">
-                      {{ option.text }}
-                    </option>
-                  </select>
-                </div>
-
-                <div class="mb-6">
-                  <label class="block text-slate-300 mb-2">{{ config.form.timeLabel }}</label>
-                  <div class="grid grid-cols-2 gap-4">
-                    <div v-for="time in config.form.workTimes" :key="time.id" class="flex items-center">
-                      <input v-model="formData.workTime[time.id]" type="checkbox" :id="time.id" class="mr-2">
-                      <label :for="time.id" class="text-slate-300">{{ time.label }}</label>
-                    </div>
-                  </div>
-                </div>
-
-                <button type="submit" class="btn-gradient w-full">
-                  <i class="fas fa-paper-plane mr-2"></i> {{ config.form.submitButton }}
-                </button>
-
-                <p class="text-slate-400 text-xs mt-4">
-                  {{ config.form.terms.text }} <a href="#" class="text-blue-400">{{ config.form.terms.linkText }}</a>
-                </p>
-              </form>
-            </div>
+            <CooperationForm/>
 
             <!-- Thông tin hỗ trợ -->
             <div class="glass-card p-8 flex justify-center flex-col" data-aos="fade-left">
@@ -346,12 +308,13 @@ import GlassCard from "../../UI/GlassCard.vue";
 import TestimonialCard from "../../UI/TestimonialCard.vue";
 import api from "../../../../api/api.js";
 import {baseImgaeUrl} from "../../../../assets/js/global.js";
+import CooperationForm from "../../UI/CooperationForm.vue";
 
 // CONFIG OBJECT
 const config = reactive({
   company: {
     name: "Thiên Hà Group",
-    email: "thienhagroup@gmail.com",
+    email: "thienhalandgroupvn@gmail.com",
     phone: "091.123.1882"
   },
   hero: {
@@ -715,7 +678,7 @@ const config = reactive({
       {
         type: "email",
         title: "Email Tuyển Dụng",
-        value: "thienhagroup@gmail.com",
+        value: "thienhalandgroupvn@gmail.com",
         note: "(Phản hồi trong 2h)",
         iconClass: "fas fa-envelope text-emerald-400",
         iconBgClass: "bg-emerald-500/10 p-3 rounded-lg mr-4"
@@ -797,7 +760,7 @@ const submitForm = () => {
     return
   }
 
-  // In a real application, you would send data to server here
+  // In a real contact, you would send data to server here
   alert('Đăng ký thành công! Chúng tôi sẽ liên hệ với bạn trong vòng 2 giờ làm việc.')
 
   // Reset form

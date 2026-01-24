@@ -211,6 +211,14 @@ const menuData = ref([
     }
   },
   {
+    id: 18,
+    name: 'Gói dịch vụ',
+    slug: 'goi-dich-vu',
+    sections: {
+      'noi-dung-chinh': 'Nội dung chính'
+    }
+  },
+  {
     id: 1,
     name: 'Trang chủ',
     slug: 'trang-chu',
@@ -345,7 +353,8 @@ const getMenuIcon = (slug) => {
     'quan-ly-nhom': 'fas fa-users-cog',
     'quan-ly-tai-san': 'fas fa-building',
     'quan-ly-du-an': 'fas fa-project-diagram',
-    'ung-tuyen-cong-tac-vien': 'fas fa-user-plus'
+    'ung-tuyen-cong-tac-vien': 'fas fa-user-plus',
+    'goi-dich-vu': 'fa-solid fa-gem'
   }
   return icons[slug] || 'fas fa-file'
 }

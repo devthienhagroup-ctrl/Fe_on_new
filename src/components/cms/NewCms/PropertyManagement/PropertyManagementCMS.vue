@@ -47,13 +47,13 @@
       >
         <i class="fas fa-puzzle-piece"></i> Tích hợp
       </button>
-      <button
+<!--      <button
           class="tab-button"
           :class="{ active: activeTab === 'cta' }"
           @click="activeTab = 'cta'"
       >
         <i class="fas fa-bullhorn"></i> Call to Action
-      </button>
+      </button>-->
     </div>
 
     <!-- Nội dung tab -->

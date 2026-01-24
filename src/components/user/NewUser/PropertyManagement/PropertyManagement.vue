@@ -15,8 +15,8 @@
           </p>
 
           <h1 class="text-4xl md:text-5xl lg:text-6xl font-display font-black mb-6 leading-tight text-white fade-in-up" data-aos="fade-up" data-aos-delay="200">
-            {{ config.hero.titleLine1 }} <br>
-            <span class="text-gradient highlight-text">{{ config.hero.titleLine2 }}</span>
+            <span class="block">{{ config.hero.titleLine1 }} </span>
+            <span class="mt-2 text-gradient highlight-text block">{{ config.hero.titleLine2 }}</span>
           </h1>
 
           <p class="text-slate-300 text-lg mb-8 lg:mb-10 font-light fade-in-up" data-aos="fade-up" data-aos-delay="400">
@@ -28,7 +28,7 @@
               <i :class="`${config.hero.buttons.explore.icon} mr-2`"></i> {{ config.hero.buttons.explore.text }}
             </a>
 
-            <a :href="config.hero.buttons.demo.link" class="btn-outline">
+            <a v-if="config.hero.buttons.demo.link!==''" :href="config.hero.buttons.demo.link" class="btn-outline">
               <i :class="`${config.hero.buttons.demo.icon} mr-2`"></i> {{ config.hero.buttons.demo.text }}
             </a>
           </div>
@@ -109,14 +109,13 @@
             :key="feature.id"
             :title="feature.title"
             :icon-name="feature.iconName"
-            :link="feature.link"
-            :link-text="feature.linkText"
+            :link="feature.link === '' ? null : feature.link"
+            :link-text="feature.linkText === '' ? null : feature.linkText"
             :color="feature.color"
             :padding="feature.padding"
             :hover-effect="feature.hoverEffect"
             :aos="feature.aos"
             :aos-delay="feature.aosDelay"
-            :quick-access-url="feature.quickAccessUrl"
             show-login-button
         >{{feature.description}}</GlassCard>
       </div>
@@ -241,33 +240,7 @@
   <section id="contact" class="py-24 relative overflow-hidden"
            :style="`background: ${config.cta.background}`">
     <div class="container mx-auto px-6">
-      <div :class="`${config.cta.card.bgColor} rounded-3xl p-12 md:p-20 text-center relative overflow-hidden`"
-           data-aos="zoom-in"
-           data-aos-duration="1000">
-        <!-- Decorative Circles (exact like original) -->
-        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-white opacity-10 rounded-full"></div>
-        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-black opacity-10 rounded-full"></div>
-
-        <h2 class="text-4xl font-display font-bold text-white mb-6">{{ config.cta.title }}</h2>
-        <p class="text-slate-300 mb-10">
-          {{ config.cta.description }}
-        </p>
-
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a :href="config.cta.buttons.consultation.link"
-             :class="config.cta.buttons.consultation.class">
-            <i :class="`${config.cta.buttons.consultation.icon} mr-2`"></i> {{ config.cta.buttons.consultation.text }}
-          </a>
-          <a :href="config.cta.buttons.phone.link"
-             :class="config.cta.buttons.phone.class">
-            <i :class="`${config.cta.buttons.phone.icon} mr-2`"></i> {{ config.cta.buttons.phone.text }}
-          </a>
-        </div>
-
-        <p class="text-slate-400 text-sm mt-8">
-          <i :class="`${config.cta.footer.icon} mr-2`"></i> {{ config.cta.footer.text }}
-        </p>
-      </div>
+      <CooperationForm/>
     </div>
   </section>
 </template>
@@ -279,6 +252,7 @@ import SimpleGlassCard from "../../UI/SimpleGlassCard.vue"
 import ImageWithShadow from "../../UI/ImageWithShadow.vue"
 import api from "../../../../api/api.js";
 import {baseImgaeUrl} from "../../../../assets/js/global.js";
+import CooperationForm from "../../UI/CooperationForm.vue";
 
 const injectBaseImgUrl =(str)=> {
   return str.replace(/url\(\s*['"]?/g, match => match + baseImgaeUrl);

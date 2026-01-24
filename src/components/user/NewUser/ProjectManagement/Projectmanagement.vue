@@ -1,5 +1,5 @@
 <template>
-  <div class="main-container mt-20" :style="cssVars">
+  <div class="main-container mt-20">
     <!-- HERO SECTION -->
     <section class="hero-container flex items-center justify-center relative pt-20">
       <!-- Particle Background -->
@@ -86,7 +86,7 @@
             <br>
             <span class="text-white">{{ config.hero.title.part2 }}</span>
             <br>
-            <span class="text-gradient-primary">{{ config.hero.title.part3 }}</span>
+            <span class="text-gradient-primary font-bold">{{ config.hero.title.part3 }}</span>
           </h1>
 
           <!-- Description -->
@@ -97,12 +97,17 @@
           <!-- CTA Buttons -->
           <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16" data-aos="fade-up"
                data-aos-delay="600">
-            <button class="btn-gradient">
+            <a href="#feature" class="btn-gradient glow" style="
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  line-height: 1;
+              ">
               <i :class="config.hero.buttons.demo.icon" class="mr-2"></i> {{ config.hero.buttons.demo.text }}
-            </button>
-            <button class="btn-secondary">
+            </a>
+            <a href="#contact" class="btn-secondary">
               <i :class="config.hero.buttons.consultation.icon" class="mr-2"></i> {{ config.hero.buttons.consultation.text }}
-            </button>
+            </a>
           </div>
 
           <!-- Stats card for mobile - chỉ hiện trên mobile -->
@@ -130,7 +135,7 @@
     </section>
 
     <!-- FEATURE SHOWCASE -->
-    <section class="feature-showcase bg-slate-900">
+    <section id="feature" class="feature-showcase bg-slate-900">
       <div class="container mx-auto px-4 lg:px-6">
         <div class="text-center mb-16" data-aos="fade-up">
           <h2 class="text-sm font-bold text-blue-500 uppercase tracking-widest mb-4">
@@ -217,9 +222,9 @@
               {{ config.showcases.kanban.description }}
             </p>
 
-            <button class="btn-secondary">
+            <a href="#kanban-preview" class="btn-secondary">
               <i :class="config.showcases.kanban.button.icon" class="mr-2"></i> {{ config.showcases.kanban.button.text }}
-            </button>
+            </a>
           </div>
           <div class="showcase-visual">
             <div class="showcase-card">
@@ -263,7 +268,7 @@
     </section>
 
     <!-- BENEFITS CAROUSEL -->
-    <section class="benefits-carousel bg-slate-950">
+    <section id="kanban-preview" class="benefits-carousel bg-slate-950">
       <div class="container mx-auto px-4 lg:px-6">
         <div class="text-center mb-16" data-aos="fade-up">
           <h2 class="text-sm font-bold text-blue-500 uppercase tracking-widest mb-4">
@@ -365,9 +370,14 @@
         </div>
 
         <div class="text-center mt-16" data-aos="fade-up">
-          <button class="btn-gradient">
+          <router-link to="/goi-dich-vu-thg" class="btn-gradient glow px-2 py-3" style="
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  line-height: 1;
+              ">
             <i :class="config.timeline.button.icon" class="mr-2"></i> {{ config.timeline.button.text }}
-          </button>
+          </router-link>
         </div>
       </div>
     </section>
@@ -412,12 +422,12 @@
 
             <!-- CTA Buttons -->
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-              <button class="btn-gradient">
+              <a href="#package" class="btn-gradient inline-flex align-items-center">
                 <i :class="config.cta.buttons.primary.icon" class="mr-2"></i> {{ config.cta.buttons.primary.text }}
-              </button>
-              <button class="btn-secondary">
+              </a>
+              <a href="#contact" class="btn-secondary">
                 <i :class="config.cta.buttons.secondary.icon" class="mr-2"></i> {{ config.cta.buttons.secondary.text }}
-              </button>
+              </a>
             </div>
 
             <!-- Guarantee -->
@@ -431,11 +441,21 @@
         </div>
       </div>
     </section>
+
+    <section id="package">
+      <PackageService/>
+    </section>
+
+    <section id="contact" class="cta-section">
+      <div class="container mx-auto px-4 lg:px-6">
+        <CooperationForm/>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import {onMounted, ref, computed, reactive} from 'vue'
+import {onMounted, ref, reactive} from 'vue'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
 import Glide from '@glidejs/glide'
@@ -443,6 +463,8 @@ import '@glidejs/glide/dist/css/glide.core.min.css'
 import '@glidejs/glide/dist/css/glide.theme.min.css'
 import SimpleGlassCard from "../../UI/SimpleGlassCard.vue";
 import api from "../../../../api/api.js";
+import CooperationForm from "../../UI/CooperationForm.vue";
+import PackageService from "../EstimateProperty/PackageService.vue";
 
 // CONFIG OBJECT
 const config = reactive({
@@ -929,28 +951,6 @@ const loadConfig = async () => {
   }
 };
 
-// CSS Variables computed from config
-const cssVars = computed(() => ({
-  '--color-blue-400': config.colors.blue400,
-  '--color-blue-500': config.colors.blue500,
-  '--color-blue-600': config.colors.blue600,
-  '--color-blue-700': config.colors.blue700,
-  '--color-purple-500': config.colors.purple500,
-  '--color-purple-600': config.colors.purple600,
-  '--color-slate-300': config.colors.slate300,
-  '--color-slate-400': config.colors.slate400,
-  '--color-slate-700': config.colors.slate700,
-  '--color-slate-900': config.colors.slate900,
-  '--color-emerald-500': config.colors.emerald500,
-  '--color-emerald-600': config.colors.emerald600,
-  '--color-cyan-400': config.colors.cyan400,
-  '--color-pink-500': config.colors.pink500,
-  '--gradient-primary': config.gradients.primary,
-  '--gradient-secondary': config.gradients.secondary,
-  '--gradient-hero-bg': config.gradients.heroBg,
-  '--gradient-cta-bg': config.gradients.ctaBg
-}))
-
 // Tham chiếu cho Glide slider
 let glide = ref(null)
 
@@ -1299,7 +1299,7 @@ onMounted(async () => {
 
 .main-container {
   font-family: 'Inter', sans-serif;
-  background-color: var(--color-slate-900);
+  background-color: v-bind('config.colors.slate900');
   color: white;
   overflow-x: hidden;
 }
@@ -1310,19 +1310,19 @@ onMounted(async () => {
 }
 
 .bg-brand-dark {
-  background-color: var(--color-slate-900);
+  background-color: v-bind('config.colors.slate900');
 }
 
 /* Gradient Text */
 .text-gradient-primary {
-  background: var(--gradient-primary);
+  background: v-bind('config.gradients.primary');
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .text-gradient-secondary {
-  background: var(--gradient-secondary);
+  background: v-bind('config.gradients.secondary');
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1331,7 +1331,7 @@ onMounted(async () => {
 /* Hero Section */
 .hero-container {
   min-height: 100vh;
-  background: var(--gradient-hero-bg),
+  background: v-bind('config.gradients.heroBg'),
   url('https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
   background-size: cover;
   background-position: center;
@@ -1430,7 +1430,7 @@ onMounted(async () => {
 .stat-number {
   font-size: 3.5rem;
   font-weight: 900;
-  background: var(--gradient-primary);
+  background: v-bind('config.gradients.primary');
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1442,6 +1442,7 @@ onMounted(async () => {
   position: relative;
   padding: 8rem 0;
   overflow: hidden;
+  background-color: v-bind('config.colors.slate900');
 }
 
 .showcase-container {
@@ -1479,7 +1480,7 @@ onMounted(async () => {
   left: 0;
   right: 0;
   height: 4px;
-  background: var(--gradient-primary);
+  background: v-bind('config.gradients.primary');
   border-radius: 24px 24px 0 0;
 }
 
@@ -1510,6 +1511,7 @@ onMounted(async () => {
 .benefits-carousel {
   position: relative;
   padding: 6rem 0;
+  background-color: v-bind('config.colors.slate950');
 }
 
 .benefit-slide {
@@ -1547,10 +1549,8 @@ onMounted(async () => {
 }
 
 .benefits-slider .glide__bullet--active {
-  background-color: var(--color-blue-500) !important;
+  background-color: v-bind('config.colors.blue500') !important;
 }
-
-
 
 @keyframes pulse {
   0%, 100% {
@@ -1567,13 +1567,14 @@ onMounted(async () => {
 .interactive-timeline {
   position: relative;
   padding: 6rem 0;
+  background-color: v-bind('config.colors.slate900');
 }
 
 .timeline-node {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: var(--gradient-primary);
+  background: v-bind('config.gradients.primary');
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1594,7 +1595,7 @@ onMounted(async () => {
 .cta-section {
   position: relative;
   padding: 10rem 0;
-  background: var(--gradient-cta-bg);
+  background: v-bind('config.gradients.ctaBg');
   overflow: hidden;
 }
 
@@ -1630,26 +1631,23 @@ onMounted(async () => {
 }
 
 /* Button Styles */
-.btn-primary {
-  background: var(--gradient-primary);
+/*.btn-gradient {
+  background: v-bind('config.gradients.primary');
   color: white;
   font-weight: 600;
   padding: 1rem 2.5rem;
   border-radius: 12px;
   border: none;
   position: relative;
-  overflow: hidden;
+  overflow: hidden !important;
   transition: all 0.4s ease;
   box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
 }
 
-.btn-primary:hover {
+.btn-gradient:hover {
   transform: translateY(-5px);
   box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
-  background: linear-gradient(90deg,
-  var(--color-blue-600),
-  var(--color-purple-600));
-}
+}*/
 
 .btn-secondary {
   background: transparent;
@@ -1664,7 +1662,7 @@ onMounted(async () => {
 }
 
 .btn-secondary:hover {
-  border-color: var(--color-blue-500);
+  border-color: v-bind('config.colors.blue500');
   background: rgba(59, 130, 246, 0.1);
   transform: translateY(-5px);
   box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
@@ -1684,7 +1682,7 @@ onMounted(async () => {
 
 .particle {
   position: absolute;
-  background: var(--gradient-primary);
+  background: v-bind('config.gradients.primary');
   border-radius: 50%;
   opacity: 0.3;
   animation: particle-float 20s linear infinite;
@@ -1812,7 +1810,7 @@ onMounted(async () => {
 
 /* Additional responsive fixes */
 @media (max-width: 640px) {
-  .btn-primary, .btn-secondary {
+  .btn-gradient, .btn-secondary {
     padding: 0.75rem 1.5rem;
     font-size: 0.875rem;
   }
@@ -1850,7 +1848,6 @@ onMounted(async () => {
   border-radius: 8px;
   pointer-events: none;
   animation: drop-pulse 0.5s ease-out;
-  /*width: calc(100% + 1.5rem);*/
 }
 
 @keyframes drop-pulse {
@@ -1866,5 +1863,51 @@ onMounted(async () => {
     border-color: rgba(59, 130, 246, 0);
     transform: scale(1);
   }
+}
+
+/* Additional styles for elements that use config colors */
+.text-blue-400 {
+  color: v-bind('config.colors.blue400');
+}
+
+.text-purple-400 {
+  color: v-bind('config.colors.purple500');
+}
+
+.text-emerald-400 {
+  color: v-bind('config.colors.emerald500');
+}
+
+.text-cyan-400 {
+  color: v-bind('config.colors.cyan400');
+}
+
+.bg-blue-500\/10 {
+  background-color: color-mix(in srgb, v-bind('config.colors.blue500') 10%, transparent);
+}
+
+.bg-purple-500\/10 {
+  background-color: color-mix(in srgb, v-bind('config.colors.purple500') 10%, transparent);
+}
+
+.bg-emerald-500\/10 {
+  background-color: color-mix(in srgb, v-bind('config.colors.emerald500') 10%, transparent);
+}
+
+.bg-green-500\/10 {
+  background-color: color-mix(in srgb, v-bind('config.colors.emerald500') 10%, transparent);
+}
+
+.bg-amber-500\/10 {
+  background-color: color-mix(in srgb, #f59e0b 10%, transparent);
+}
+
+.from-blue-500 {
+  --tw-gradient-from: v-bind('config.colors.blue500');
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(59 130 246 / 0));
+}
+
+.to-purple-500 {
+  --tw-gradient-to: v-bind('config.colors.purple500');
 }
 </style>

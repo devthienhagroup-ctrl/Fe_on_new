@@ -283,7 +283,7 @@
                   type="email"
                   id="companyEmail"
                   v-model="content.company.email"
-                  placeholder="thienhagroup@gmail.com"
+                  placeholder="thienhalandgroupvn@gmail.com"
               />
             </div>
 
@@ -626,7 +626,7 @@
                     <ColorInputWithGlobalColors
                         v-model="job.color"
                         placeholder="#60a5fa"
-                        return-type="hex"
+                        return-type="value"
                         :colors="globalColors"
                     />
                   </div>
@@ -770,7 +770,7 @@
                         v-if="benefit.color === 'custom'"
                         v-model="benefit.customColor"
                         placeholder="Nhập mã màu tùy chỉnh"
-                        return-type="hex"
+                        return-type="value"
                         :colors="globalColors"
                         class="mt-2"
                     />
@@ -992,7 +992,7 @@
                         v-if="testimonial.color === 'custom'"
                         v-model="testimonial.customColor"
                         placeholder="Nhập mã màu tùy chỉnh"
-                        return-type="hex"
+                        return-type="value"
                         :colors="globalColors"
                         class="mt-2"
                     />
@@ -1249,7 +1249,7 @@ const testimonialColors = ['blue', 'purple', 'emerald', 'indigo', 'pink']
 const content = reactive({
   company: {
     name: "Thiên Hà Group",
-    email: "thienhagroup@gmail.com",
+    email: "thienhalandgroupvn@gmail.com",
     phone: "091.123.1882"
   },
   hero: {

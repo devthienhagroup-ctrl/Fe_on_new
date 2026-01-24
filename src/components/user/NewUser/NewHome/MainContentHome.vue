@@ -108,6 +108,7 @@
   <!-- SERVICES SECTION -->
   <section id="services" class="py-24 bg-[#0B1120] relative">
     <div class="circle-decor">
+      <img src="https://s3.cloudfly.vn/thg-storage/uploads-public/circle.png" alt="circle decor"/>
     </div>
     <div class="container mx-auto px-6">
       <div class="text-center mb-16" data-aos="fade-up">
@@ -772,9 +773,9 @@ onBeforeUnmount(() => {
 
 // Methods
 const handleFormSubmit = (email) => {
-  console.log('Form submitted with email:', email)
-  // Handle form submission logic here
-  alert(`Cảm ơn bạn đã đăng ký với email: ${email}. Chúng tôi sẽ liên hệ với bạn sớm nhất!`)
+  // console.log('Form submitted with email:', email)
+  // // Handle form submission logic here
+  // alert(`Cảm ơn bạn đã đăng ký với email: ${email}. Chúng tôi sẽ liên hệ với bạn sớm nhất!`)
 }
 </script>
 

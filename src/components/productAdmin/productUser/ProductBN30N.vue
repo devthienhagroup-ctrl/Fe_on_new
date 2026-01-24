@@ -177,9 +177,9 @@
               {{ formatPriceNumber(item.giaBan) }}
               <span class="price-unit">VNĐ</span>
             </div>
-            <div class="grid-commission" v-if="item.phiMoiGioi">
+            <div class="grid-commission">
               <i class="fa-solid fa-fire-flame-curved"></i>
-              Hoa hồng: <strong>{{ item.phiMoiGioi }}%</strong>
+              Hoa hồng: <strong>{{ item.phiMoiGioi ? item.phiMoiGioi +'%' : 'Đang cập nhật' }}</strong>
             </div>
             <div class="grid-details">
               <div class="detail">

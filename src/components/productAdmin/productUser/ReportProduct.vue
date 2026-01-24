@@ -6,8 +6,10 @@
         @click="openModal"
         :disabled="isSubmitting"
     >
-      <span v-if="!isSubmitting"><i class="fa-solid fa-triangle-exclamation"></i> Báo cáo tin này</span>
-      <span v-else class="loading-text">Đang xử lý...</span>
+      <span v-if="!isSubmitting"><i class="fa-solid fa-flag"></i> Báo cáo tin này</span>
+      <span v-else class="loading-text">
+        <i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...
+      </span>
     </button>
 
     <!-- Modal overlay -->
@@ -18,110 +20,185 @@
           @click.self="closeModal"
       >
         <!-- Modal content -->
-        <transition name="modal">
+        <transition name="modal-slide">
           <div class="modal-container" v-if="isModalOpen">
             <!-- Modal header -->
             <div class="modal-header">
-              <h2 class="modal-title">Báo cáo tin đăng</h2>
+              <div class="modal-icon">
+                <i class="fa-solid fa-flag"></i>
+              </div>
+              <div class="modal-title-wrapper">
+                <h2 class="modal-title">Báo cáo tin đăng</h2>
+                <p class="modal-subtitle">Giúp chúng tôi cải thiện chất lượng cộng đồng</p>
+              </div>
               <button class="close-button" @click="closeModal" :disabled="isSubmitting">
-                &times;
+                <i class="fa-solid fa-times"></i>
               </button>
             </div>
 
             <!-- Modal body -->
             <div class="modal-body">
-              <form @submit.prevent="submitReport">
+              <form @submit.prevent="submitReport" class="report-form">
                 <!-- Lý do báo cáo -->
                 <div class="form-group">
-                  <label class="form-label" for="reason">Lý do báo cáo</label>
-                  <select
-                      id="reason"
-                      v-model="form.reason"
-                      class="form-select"
-                      :class="{ 'error': validationErrors.reason }"
-                      :disabled="isSubmitting"
-                  >
-                    <option value="" disabled>Vui lòng chọn lý do</option>
-                    <option
-                        v-for="reason in reportReasons"
-                        :key="reason.value"
-                        :value="reason.value"
+                  <label class="form-label" for="reason">
+                    <span class="label-text">Lý do báo cáo</span>
+                    <span class="required">*</span>
+                  </label>
+                  <div class="select-wrapper">
+                    <select
+                        id="reason"
+                        v-model="form.reason"
+                        class="form-select"
+                        :class="{ 'error': validationErrors.reason }"
+                        :disabled="isSubmitting"
+                        @change="clearValidationError('reason')"
                     >
-                      {{ reason.text }}
-                    </option>
-                  </select>
-                  <div v-if="validationErrors.reason" class="error-message">
+                      <option value="" disabled>Chọn lý do báo cáo</option>
+                      <option
+                          v-for="reason in reportReasons"
+                          :key="reason.value"
+                          :value="reason.value"
+                      >
+                        {{ reason.text }}
+                      </option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down select-icon"></i>
+                  </div>
+                  <div v-if="validationErrors.reason" class="validation-error">
+                    <i class="fa-solid fa-circle-exclamation"></i>
                     {{ validationErrors.reason }}
                   </div>
                 </div>
 
                 <!-- Mô tả chi tiết -->
                 <div class="form-group">
-                  <label class="form-label" for="description">Mô tả chi tiết</label>
-                  <textarea
-                      id="description"
-                      v-model="form.description"
-                      class="form-textarea"
-                      placeholder="Vui lòng cung cấp thông tin chi tiết về vấn đề bạn gặp phải..."
-                      rows="4"
-                      :disabled="isSubmitting"
-                  ></textarea>
-                </div>
-
-                <!-- Checkbox liên hệ -->
-                <div class="form-group checkbox-group" v-if="!isLoggedIn">
-                  <input
-                      type="checkbox"
-                      id="contactOptIn"
-                      v-model="form.contactOptIn"
-                      class="form-checkbox"
-                      :disabled="isSubmitting"
-                  />
-                  <label for="contactOptIn" class="checkbox-label">
-                    Bạn có muốn để lại thông tin để chúng tôi liên hệ xác minh?
+                  <label class="form-label" for="description">
+                    <span class="label-text">Mô tả chi tiết</span>
+                    <span class="optional">(Tùy chọn)</span>
                   </label>
+                  <div class="textarea-wrapper">
+                    <textarea
+                        id="description"
+                        v-model="form.description"
+                        class="form-textarea"
+                        placeholder="Vui lòng cung cấp thêm thông tin chi tiết về vấn đề bạn gặp phải. Điều này giúp chúng tôi xử lý nhanh hơn."
+                        rows="4"
+                        :disabled="isSubmitting"
+                    ></textarea>
+                    <div class="char-count">
+                      {{ form.description.length }}/500
+                    </div>
+                  </div>
+<!--                  <div class="form-hint">-->
+<!--                    <i class="fa-solid fa-lightbulb"></i>-->
+<!--                    Càng cung cấp nhiều thông tin, chúng tôi càng xử lý nhanh hơn-->
+<!--                  </div>-->
                 </div>
 
-                <!-- Thông tin liên hệ (chỉ hiển thị khi chưa đăng nhập và checkbox được chọn) -->
-                <div v-if="form.contactOptIn && !isLoggedIn" class="contact-info">
-                  <div class="form-group">
-                    <label class="form-label" for="email">Email</label>
-                    <input
-                        id="email"
-                        v-model="form.email"
-                        type="email"
-                        class="form-input"
-                        :class="{ 'error': validationErrors.email }"
-                        placeholder="Nhập email của bạn"
-                        :disabled="isSubmitting"
-                    />
-                    <div v-if="validationErrors.email" class="error-message">
-                      {{ validationErrors.email }}
+                <!-- Thông tin liên hệ (chỉ hiển thị khi chưa đăng nhập) -->
+                <div v-if="!isLoggedIn" class="contact-section">
+                  <div class="section-header">
+                    <h3 class="section-title">
+                      <i class="fa-solid fa-user-circle"></i>
+                      Thông tin liên hệ
+                    </h3>
+                    <p class="section-subtitle">Để chúng tôi có thể phản hồi kết quả cho bạn</p>
+                  </div>
+
+                  <!-- Checkbox liên hệ -->
+                  <div class="form-group checkbox-group">
+                    <div class="checkbox-wrapper">
+                      <input
+                          type="checkbox"
+                          id="contactOptIn"
+                          v-model="form.contactOptIn"
+                          class="form-checkbox"
+                          :disabled="isSubmitting"
+                      />
+                      <label for="contactOptIn" class="checkbox-label">
+                        <div class="checkbox-box">
+                          <i class="fa-solid fa-check" v-if="form.contactOptIn"></i>
+                        </div>
+                        <span class="checkbox-text">Để lại thông tin liên hệ để nhận phản hồi</span>
+                      </label>
                     </div>
                   </div>
 
-                  <div class="form-group">
-                    <label class="form-label" for="phone">Số điện thoại</label>
-                    <input
-                        id="phone"
-                        v-model="form.phone"
-                        type="tel"
-                        class="form-input"
-                        placeholder="Nhập số điện thoại của bạn"
-                        :disabled="isSubmitting"
-                    />
-                  </div>
+                  <!-- Thông tin liên hệ chi tiết -->
+                  <transition name="expand">
+                    <div v-if="form.contactOptIn" class="contact-details">
+                      <div class="form-group">
+                        <label class="form-label" for="email">
+                          <span class="label-text">Email</span>
+                          <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                          <i class="fa-solid fa-envelope input-icon"></i>
+                          <input
+                              id="email"
+                              v-model="form.email"
+                              type="email"
+                              class="form-input"
+                              :class="{ 'error': validationErrors.email }"
+                              placeholder="email@example.com"
+                              :disabled="isSubmitting"
+                              @input="clearValidationError('email')"
+                          />
+                        </div>
+                        <div v-if="validationErrors.email" class="validation-error">
+                          <i class="fa-solid fa-circle-exclamation"></i>
+                          {{ validationErrors.email }}
+                        </div>
+                      </div>
 
-                  <div class="form-group">
-                    <label class="form-label" for="fullname">Họ và tên</label>
-                    <input
-                        id="fullname"
-                        v-model="form.reporterName"
-                        type="text"
-                        class="form-input"
-                        placeholder="Nhập họ và tên của bạn"
-                        :disabled="isSubmitting"
-                    />
+                      <div class="form-group">
+                        <label class="form-label" for="phone">
+                          <span class="label-text">Số điện thoại</span>
+                          <span class="optional">(Tùy chọn)</span>
+                        </label>
+                        <div class="input-wrapper">
+                          <i class="fa-solid fa-phone input-icon"></i>
+                          <input
+                              id="phone"
+                              v-model="form.phone"
+                              type="tel"
+                              class="form-input"
+                              placeholder="0123 456 789"
+                              :disabled="isSubmitting"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label class="form-label" for="fullname">
+                          <span class="label-text">Họ và tên</span>
+                          <span class="optional">(Tùy chọn)</span>
+                        </label>
+                        <div class="input-wrapper">
+                          <i class="fa-solid fa-user input-icon"></i>
+                          <input
+                              id="fullname"
+                              v-model="form.reporterName"
+                              type="text"
+                              class="form-input"
+                              placeholder="Nguyễn Văn A"
+                              :disabled="isSubmitting"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </transition>
+                </div>
+
+                <!-- Thông báo cho người đã đăng nhập -->
+                <div v-else class="logged-in-notice">
+                  <div class="notice-content">
+                    <i class="fa-solid fa-user-check"></i>
+                    <div class="notice-text">
+                      <strong>Bạn đang đăng nhập</strong>
+                      <p>Chúng tôi sẽ sử dụng thông tin từ tài khoản của bạn để liên hệ khi cần</p>
+                    </div>
                   </div>
                 </div>
 
@@ -133,6 +210,7 @@
                       @click="closeModal"
                       :disabled="isSubmitting"
                   >
+                    <i class="fa-solid fa-times"></i>
                     Huỷ
                   </button>
                   <button
@@ -140,38 +218,20 @@
                       class="submit-button"
                       :disabled="isSubmitting"
                   >
-                    <span v-if="!isSubmitting">Gửi báo cáo</span>
-                    <div v-else class="spinner"></div>
+                    <template v-if="!isSubmitting">
+                      <i class="fa-solid fa-paper-plane"></i>
+                      Gửi báo cáo
+                    </template>
+                    <template v-else>
+                      <i class="fa-solid fa-spinner fa-spin"></i>
+                      Đang gửi...
+                    </template>
                   </button>
                 </div>
               </form>
             </div>
           </div>
         </transition>
-      </div>
-    </transition>
-
-    <!-- Success message -->
-    <transition name="fade">
-      <div v-if="showSuccessMessage" class="success-message">
-        <div class="success-content">
-          <div class="success-icon">✓</div>
-          <h3>Báo cáo đã được gửi thành công!</h3>
-          <p>Cảm ơn bạn đã đóng góp. Chúng tôi sẽ xem xét báo cáo của bạn trong thời gian sớm nhất.</p>
-          <button class="success-button" @click="showSuccessMessage = false">Đóng</button>
-        </div>
-      </div>
-    </transition>
-
-    <!-- Error message -->
-    <transition name="fade">
-      <div v-if="showErrorMessage" class="success-message">
-        <div class="success-content">
-          <div class="success-icon" style="background-color: #f44336;">✕</div>
-          <h3>Có lỗi xảy ra!</h3>
-          <p>{{ errorMessage }}</p>
-          <button class="success-button" @click="showErrorMessage = false">Đóng</button>
-        </div>
       </div>
     </transition>
   </div>
@@ -181,6 +241,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from "../../../stores/authStore.js";
 import api from "../../../api/api.js";
+import Swal from 'sweetalert2';
 
 // Props
 const props = defineProps({
@@ -196,21 +257,18 @@ const auth = useAuthStore()
 // State
 const isModalOpen = ref(false)
 const isSubmitting = ref(false)
-const showSuccessMessage = ref(false)
-const showErrorMessage = ref(false)
-const errorMessage = ref('')
 
-// API endpoint - cập nhật đường dẫn API của bạn
+// API endpoint
 const API_URL = '/thg/public-view/product-report/save-report'
 
 // Danh sách lý do báo cáo
 const reportReasons = ref([
-  { value: 'sold_still_posted', text: '1. Tin đã bán nhưng vẫn đăng' },
-  { value: 'incorrect_info', text: '2. Thông tin sai lệch (giá, diện tích, hình ảnh)' },
-  { value: 'spam', text: '3. Tin spam / quảng cáo không liên quan' },
-  { value: 'scam', text: '4. Có dấu hiệu lừa đảo (scam)' },
-  { value: 'legal_violation', text: '5. Vi phạm pháp lý / giả mạo' },
-  { value: 'other', text: '6. Khác' }
+  { value: 'sold_still_posted', text: 'Tin đã bán nhưng vẫn đăng' },
+  { value: 'incorrect_info', text: 'Thông tin sai lệch (giá, diện tích, hình ảnh)' },
+  { value: 'spam', text: 'Tin spam / quảng cáo không liên quan' },
+  { value: 'scam', text: 'Có dấu hiệu lừa đảo (scam)' },
+  { value: 'legal_violation', text: 'Vi phạm pháp lý / giả mạo' },
+  { value: 'other', text: 'Lý do khác' }
 ])
 
 // Form data
@@ -239,6 +297,11 @@ const openModal = () => {
   isModalOpen.value = true
   // Reset form khi mở modal
   resetForm()
+  // Focus vào select đầu tiên khi modal mở
+  setTimeout(() => {
+    const reasonSelect = document.getElementById('reason')
+    if (reasonSelect) reasonSelect.focus()
+  }, 300)
 }
 
 const closeModal = () => {
@@ -257,10 +320,12 @@ const resetForm = () => {
 
   validationErrors.reason = ''
   validationErrors.email = ''
+}
 
-  // Reset error message
-  showErrorMessage.value = false
-  errorMessage.value = ''
+const clearValidationError = (field) => {
+  if (validationErrors[field]) {
+    validationErrors[field] = ''
+  }
 }
 
 const validateForm = () => {
@@ -280,12 +345,17 @@ const validateForm = () => {
   if (form.contactOptIn && !isLoggedIn.value) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!form.email.trim()) {
-      validationErrors.email = 'Vui lòng nhập email'
+      validationErrors.email = 'Vui lòng nhập email để nhận phản hồi'
       isValid = false
     } else if (!emailRegex.test(form.email)) {
       validationErrors.email = 'Email không hợp lệ'
       isValid = false
     }
+  }
+
+  // Giới hạn độ dài mô tả
+  if (form.description.length > 500) {
+    form.description = form.description.substring(0, 500)
   }
 
   return isValid
@@ -294,6 +364,15 @@ const validateForm = () => {
 const submitReport = async () => {
   // Validate form
   if (!validateForm()) {
+    // Scroll đến lỗi đầu tiên
+    const firstError = Object.keys(validationErrors).find(key => validationErrors[key])
+    if (firstError) {
+      const errorElement = document.getElementById(firstError)
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        errorElement.focus()
+      }
+    }
     return
   }
 
@@ -304,73 +383,89 @@ const submitReport = async () => {
   const payload = {
     listingId: props.listingId,
     reason: form.reason,
-    description: form.description,
+    description: form.description.trim(),
     contactOptIn: form.contactOptIn,
-    createdAt: new Date().toISOString()
   }
 
   // Nếu đã đăng nhập, backend sẽ tự lấy thông tin từ auth
   // Nếu chưa đăng nhập và muốn liên hệ, gửi thêm thông tin liên hệ
   if (!isLoggedIn.value && form.contactOptIn) {
-    payload.email = form.email
-    payload.phone = form.phone
-    payload.reporterName = form.reporterName
-  }
-
-  // Nếu đã đăng nhập, có thể thêm thông tin user vào payload nếu backend cần
-  if (isLoggedIn.value) {
-    payload.userId = auth.userInfo.id // Giả sử auth store có userInfo.id
-    payload.email = auth.userInfo.email // Nếu có email trong userInfo
+    payload.email = form.email.trim()
+    payload.phone = form.phone.trim()
+    payload.reporterName = form.reporterName.trim()
   }
 
   try {
-    // Gọi API bằng api.post
+    // Gọi API
     const response = await api.post(API_URL, payload)
 
-    // Kiểm tra response theo cấu trúc của API của bạn
-    if (response.status === 200 || response.data?.status === 'success') {
-      // Hiển thị thông báo thành công
-      showSuccessMessage.value = true
+    // Kiểm tra response
+    if (response.status === 200) {
+      // Lấy message từ backend
+      const successMessage = response.data?.status === 'success'
+          ? response.data.message
+          : response.data
 
-      // Đóng modal sau 100ms
+      // Đóng modal
+      isModalOpen.value = false
+      isSubmitting.value = false
+
+      // Hiển thị thông báo thành công bằng SweetAlert
       setTimeout(() => {
-        isModalOpen.value = false
-        isSubmitting.value = false
+        Swal.fire({
+          icon: 'success',
+          title: 'Thành công!',
+          text: successMessage || 'Báo cáo đã được gửi thành công',
+          confirmButtonText: 'Đóng',
+          confirmButtonColor: '#2196f3',
+          timer: 3000,
+          timerProgressBar: true,
+          showClass: {
+            popup: 'animate__animated animate__fadeInDown'
+          },
+          hideClass: {
+            popup: 'animate__animated animate__fadeOutUp'
+          }
+        })
       }, 100)
 
-      // Tự động đóng thông báo thành công sau 5 giây
-      setTimeout(() => {
-        showSuccessMessage.value = false
-      }, 5000)
     } else {
-      // Xử lý lỗi từ server
-      throw new Error(response.data?.message || 'Có lỗi xảy ra khi gửi báo cáo')
+      throw new Error(response.data?.message || 'Có lỗi xảy ra')
     }
 
   } catch (error) {
     console.error('Lỗi khi gửi báo cáo:', error)
 
-    // Xử lý lỗi từ api.post (có thể có cấu trúc khác)
-    let errorMsg = 'Có lỗi xảy ra khi gửi báo cáo. Vui lòng thử lại sau.'
+    let errorMessage = 'Có lỗi xảy ra khi gửi báo cáo. Vui lòng thử lại sau.'
+    let icon = 'error'
+    let title = 'Lỗi!'
 
-    if (error.response?.data?.message) {
-      errorMsg = error.response.data.message
+    // Kiểm tra lỗi spam (status 429)
+    if (error.response?.status === 429) {
+      errorMessage = error.response.data?.message || 'Bạn đã báo cáo sản phẩm này trước đó. Vui lòng không spam báo cáo.'
+      icon = 'warning'
+      title = 'Thông báo'
+    }
+    // Các lỗi khác
+    else if (error.response?.data?.message) {
+      errorMessage = error.response.data.message
     } else if (error.message) {
-      errorMsg = error.message
-    } else if (error.data?.message) {
-      errorMsg = error.data.message
+      errorMessage = error.message
     }
 
-    // Hiển thị thông báo lỗi
-    errorMessage.value = errorMsg
-    showErrorMessage.value = true
+    // Hiển thị thông báo lỗi bằng SweetAlert
+    Swal.fire({
+      icon: icon,
+      title: title,
+      text: errorMessage,
+      confirmButtonText: 'Đóng',
+      confirmButtonColor: icon === 'warning' ? '#ff9800' : '#f44336',
+      showClass: {
+        popup: 'animate__animated animate__shakeX'
+      }
+    })
 
     isSubmitting.value = false
-
-    // Tự động đóng thông báo lỗi sau 5 giây
-    setTimeout(() => {
-      showErrorMessage.value = false
-    }, 5000)
   }
 }
 
@@ -398,25 +493,30 @@ onUnmounted(() => {
 
 /* Button styles */
 .report-button {
-  background-color: #f44336;
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
+  border-radius: 8px;
+  padding: 10px 20px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
 }
 
 .report-button:hover:not(:disabled) {
-  background-color: #d32f2f;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
 }
 
 .report-button:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none !important;
 }
 
 .report-button:active:not(:disabled) {
@@ -424,7 +524,7 @@ onUnmounted(() => {
 }
 
 .loading-text {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
 }
@@ -436,61 +536,150 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 500;
   padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Modal container */
 .modal-container {
-  background-color: white;
-  border-radius: 8px;
+  background: white;
+  border-radius: 16px;
   width: 100%;
-  max-width: 500px;
+  max-width: 520px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.4s ease;
+  position: relative;
+  margin: auto;
+}
+
+/* Tạo lớp bảo vệ border-radius */
+.modal-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 16px;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  z-index: 1;
+}
+
+/* Tùy chỉnh scrollbar */
+.modal-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 0 16px 16px 0;
+  margin: 16px 0;
+}
+
+.modal-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.modal-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Cho Firefox */
+.modal-container {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Modal header */
 .modal-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px;
+  align-items: flex-start;
+  padding: 24px 32px 20px;
   border-bottom: 1px solid #eaeaea;
+  background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);
+  border-radius: 16px 16px 0 0;
+  position: relative;
+}
+
+.modal-icon {
+  background: linear-gradient(135deg, #f44336 0%, #ff9800 100%);
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.modal-title-wrapper {
+  flex: 1;
 }
 
 .modal-title {
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 700;
   color: #333;
+  line-height: 1.3;
+}
+
+.modal-subtitle {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
 }
 
 .close-button {
-  background: none;
+  background: #f5f5f5;
   border: none;
-  font-size: 28px;
-  line-height: 1;
-  cursor: pointer;
-  color: #777;
-  padding: 0;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  transition: background-color 0.2s;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  font-size: 16px;
 }
 
 .close-button:hover:not(:disabled) {
-  background-color: #f5f5f5;
+  background: #e0e0e0;
   color: #333;
+  transform: rotate(90deg);
 }
 
 .close-button:disabled {
@@ -500,99 +689,357 @@ onUnmounted(() => {
 
 /* Modal body */
 .modal-body {
-  padding: 24px;
+  padding: 24px 32px;
 }
 
 /* Form styles */
+.report-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .form-group {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .form-label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 600;
   color: #333;
+  margin-bottom: 4px;
 }
 
-.form-label::after {
-  content: ' *';
+.label-text {
+  font-size: 15px;
+}
+
+.required {
   color: #f44336;
-  opacity: 0.8;
+  font-weight: bold;
 }
 
-.form-select,
-.form-input,
+.optional {
+  color: #666;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+/* Select */
+.select-wrapper {
+  position: relative;
+}
+
+.form-select {
+  width: 100%;
+  padding: 12px 16px;
+  padding-right: 40px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.form-select.error {
+  border-color: #f44336;
+  background: #fff5f5;
+}
+
+.form-select:disabled {
+  background: #f9f9f9;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.select-icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  pointer-events: none;
+  font-size: 14px;
+}
+
+/* Textarea */
+.textarea-wrapper {
+  position: relative;
+}
+
 .form-textarea {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.3s, box-shadow 0.3s;
-  box-sizing: border-box;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.5;
 }
 
-.form-select:focus,
-.form-input:focus,
 .form-textarea:focus {
   outline: none;
   border-color: #2196f3;
-  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
 }
 
-.form-select.error,
-.form-input.error {
-  border-color: #f44336;
-}
-
-.form-select:disabled,
-.form-input:disabled,
 .form-textarea:disabled {
-  background-color: #f9f9f9;
+  background: #f9f9f9;
   cursor: not-allowed;
+  opacity: 0.7;
 }
 
-.form-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.error-message {
-  color: #f44336;
+.char-count {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
   font-size: 12px;
+  color: #999;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.form-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #666;
   margin-top: 4px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 3px solid #ff9800;
+}
+
+.form-hint i {
+  color: #ff9800;
+}
+
+/* Contact section */
+.contact-section {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 8px;
+}
+
+.section-header {
+  margin-bottom: 16px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 16px;
+  color: #333;
+}
+
+.section-title i {
+  color: #2196f3;
+}
+
+.section-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
 }
 
 /* Checkbox */
-.checkbox-group {
+.checkbox-wrapper {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  gap: 12px;
 }
 
 .form-checkbox {
-  margin-top: 4px;
-  margin-right: 10px;
-  cursor: pointer;
-}
-
-.form-checkbox:disabled {
-  cursor: not-allowed;
+  display: none;
 }
 
 .checkbox-label {
-  font-weight: normal;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   cursor: pointer;
   user-select: none;
 }
 
-/* Contact info */
-.contact-info {
-  margin-top: 20px;
+.checkbox-box {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.checkbox-box i {
+  font-size: 12px;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.form-checkbox:checked + .checkbox-label .checkbox-box {
+  background: #2196f3;
+  border-color: #2196f3;
+}
+
+.form-checkbox:checked + .checkbox-label .checkbox-box i {
+  opacity: 1;
+}
+
+.checkbox-text {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Contact details */
+.contact-details {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.expand-enter-active,
+.expand-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+  opacity: 0;
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.expand-enter-to,
+.expand-leave-from {
+  opacity: 1;
+  max-height: 500px;
+}
+
+/* Input with icon */
+.input-wrapper {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 16px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px 12px 44px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.form-input.error {
+  border-color: #f44336;
+  background: #fff5f5;
+}
+
+.form-input:disabled {
+  background: #f9f9f9;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Logged in notice */
+.logged-in-notice {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  border-radius: 12px;
   padding: 16px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-  border-left: 3px solid #2196f3;
+  margin: 8px 0;
+}
+
+.notice-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.notice-content i {
+  font-size: 24px;
+  color: #4caf50;
+  flex-shrink: 0;
+}
+
+.notice-text {
+  flex: 1;
+}
+
+.notice-text strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.notice-text p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Validation error */
+.validation-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #f44336;
+  margin-top: 4px;
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.validation-error i {
+  font-size: 14px;
 }
 
 /* Modal actions */
@@ -600,178 +1047,86 @@ onUnmounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 24px;
-  padding-top: 20px;
+  margin-top: 12px;
+  padding: 12px 0;
   border-top: 1px solid #eaeaea;
+  position: sticky;
+  bottom: 0;
+  background-color: white;
 }
 
 .cancel-button,
 .submit-button {
-  padding: 10px 20px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   border: none;
-}
-
-.cancel-button {
-  background-color: #f5f5f5;
-  color: #333;
-}
-
-.cancel-button:hover:not(:disabled) {
-  background-color: #e0e0e0;
-}
-
-.submit-button {
-  background-color: #2196f3;
-  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 120px;
+  gap: 8px;
+  min-width: 140px;
+}
+
+.cancel-button {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.cancel-button:hover:not(:disabled) {
+  background: #e0e0e0;
+  transform: translateY(-1px);
+}
+
+.submit-button {
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
 }
 
 .submit-button:hover:not(:disabled) {
-  background-color: #0b7dda;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .cancel-button:disabled,
 .submit-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-/* Spinner */
-.spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: white;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Success message */
-.success-message {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1001;
-}
-
-.success-content {
-  background-color: white;
-  border-radius: 8px;
-  padding: 32px;
-  max-width: 400px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.success-icon {
-  width: 60px;
-  height: 60px;
-  background-color: #4caf50;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 30px;
-  font-weight: bold;
-  margin: 0 auto 20px;
-}
-
-.success-content h3 {
-  margin: 0 0 12px;
-  color: #333;
-}
-
-.success-content p {
-  margin: 0 0 24px;
-  color: #666;
-  line-height: 1.5;
-}
-
-.success-button {
-  background-color: #2196f3;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 24px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.success-button:hover {
-  background-color: #0b7dda;
-}
-
-/* Animation for modal */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.modal-enter-active {
-  animation: modal-enter 0.3s ease-out;
-}
-
-.modal-leave-active {
-  animation: modal-leave 0.2s ease-in;
-}
-
-@keyframes modal-enter {
-  from {
-    opacity: 0;
-    transform: scale(0.9) translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes modal-leave {
-  from {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.95) translateY(10px);
-  }
+  transform: none !important;
 }
 
 /* Responsive */
-@media (max-width: 576px) {
+@media (max-width: 640px) {
   .modal-container {
     max-width: 100%;
-    margin: 10px;
+    margin: 0;
+    border-radius: 0;
+    max-height: 100vh;
+  }
+
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
   }
 
   .modal-header {
-    padding: 16px 20px;
+    padding: 20px 20px 16px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .modal-icon {
+    margin-right: 0;
+    margin-bottom: 12px;
   }
 
   .modal-body {
@@ -779,12 +1134,122 @@ onUnmounted(() => {
   }
 
   .modal-actions {
-    flex-direction: column;
+    flex-direction: column-reverse;
+    gap: 10px;
   }
 
   .cancel-button,
   .submit-button {
     width: 100%;
+    min-width: auto;
+  }
+
+  .contact-section {
+    padding: 16px;
+  }
+
+  .section-title {
+    font-size: 15px;
+  }
+
+  .modal-title {
+    font-size: 20px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .modal-container {
+    background: #1e1e1e;
+    color: #fff;
+  }
+
+  .modal-title {
+    color: #fff;
+  }
+
+  .modal-subtitle {
+    color: #aaa;
+  }
+
+  .close-button {
+    background: #2d2d2d;
+    color: #aaa;
+  }
+
+  .form-select,
+  .form-input,
+  .form-textarea {
+    background: #2d2d2d;
+    border-color: #444;
+    color: #fff;
+  }
+
+  .form-select:focus,
+  .form-input:focus,
+  .form-textarea:focus {
+    border-color: #2196f3;
+  }
+
+  .contact-section {
+    background: #252525;
+  }
+
+  .form-hint {
+    background: #2d2d2d;
+    color: #aaa;
+  }
+
+  .logged-in-notice {
+    background: linear-gradient(135deg, #252525 0%, #2d2d2d 100%);
+  }
+
+  .notice-text strong {
+    color: #fff;
+  }
+
+  .notice-text p {
+    color: #aaa;
+  }
+
+  .modal-actions {
+    border-top-color: #444;
+  }
+
+  .cancel-button {
+    background: #2d2d2d;
+    color: #fff;
+  }
+
+  .checkbox-text {
+    color: #fff;
+  }
+
+  .checkbox-box {
+    background: #2d2d2d;
+    border-color: #444;
+  }
+
+  .char-count {
+    background: rgba(45, 45, 45, 0.9);
+    color: #aaa;
+  }
+
+  /* Dark mode scrollbar */
+  .modal-container::-webkit-scrollbar-track {
+    background: #2d2d2d;
+  }
+
+  .modal-container::-webkit-scrollbar-thumb {
+    background: #555;
+  }
+
+  .modal-container::-webkit-scrollbar-thumb:hover {
+    background: #666;
+  }
+
+  .modal-container {
+    scrollbar-color: #555 #2d2d2d;
   }
 }
 </style>

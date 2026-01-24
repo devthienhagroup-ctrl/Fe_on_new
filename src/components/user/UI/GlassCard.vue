@@ -42,7 +42,7 @@
     <div v-if="hasLinkSection" class="mt-6 space-y-3">
       <!-- Container cho 2 nút hiển thị cùng hàng -->
       <!-- Link chính -->
-      <div class="flex flex-row gap-3">
+      <div v-if="!useTag_a_Link" class="flex flex-row gap-3">
         <router-link
             v-if="link"
             :to="link"
@@ -65,6 +65,31 @@
           <i class="fas fa-bolt text-xs transition"></i>
           {{ quickAccessText }}
         </router-link>
+      </div>
+
+      <div v-else class="flex flex-row gap-3">
+        <a
+            v-if="link"
+            :href="link"
+            :class="linkClasses"
+            class="glass-card-link inline-flex items-center gap-2 justify-center flex-1 text-center"
+            :style="linkStyles"
+        >
+          {{ linkText }}
+          <i class="fas fa-chevron-right text-xs transition"></i>
+        </a>
+
+        <!-- Nút Truy cập nhanh -->
+        <a
+            v-if="quickAccessUrl"
+            :href="quickAccessUrl"
+            :class="quickAccessClasses"
+            class="glass-card-quick-access inline-flex items-center gap-2 justify-center flex-1 text-center"
+            :style="quickAccessStyles"
+        >
+          <i class="fas fa-bolt text-xs transition"></i>
+          {{ quickAccessText }}
+        </a>
       </div>
       <slot name="link"></slot>
     </div>
@@ -125,6 +150,11 @@ const props = defineProps({
   statNumber: String,
   // Thêm props cho gradient icon
   gradientClassIcon: {
+    type: Boolean,
+    default: false
+  },
+
+  useTag_a_Link: {
     type: Boolean,
     default: false
   }

@@ -661,7 +661,7 @@
             </div>
             <div class="form-group">
               <label>Địa chỉ email</label>
-              <input type="text" v-model="content.contact.info.email.value" placeholder="thienhagroup@gmail.com"/>
+              <input type="text" v-model="content.contact.info.email.value" placeholder="thienhalandgroupvn@gmail.com"/>
             </div>
             <div class="form-group">
               <label>Thời gian phản hồi</label>
@@ -970,7 +970,7 @@ const content = reactive({
       },
       email: {
         title: "Email",
-        value: "thienhagroup@gmail.com",
+        value: "thienhalandgroupvn@gmail.com",
         responseTime: "Phản hồi trong 2 giờ",
         icon: "fas fa-envelope"
       },

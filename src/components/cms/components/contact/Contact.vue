@@ -554,7 +554,7 @@ const content = reactive({
       {
         id: "email",
         icon: "fas fa-envelope",
-        value: "thienhagroup@gmail.com"
+        value: "thienhalandgroupvn@gmail.com"
       },
       {
         id: "phone",

@@ -60,7 +60,7 @@
             </li>
             <li class="flex items-center">
               <i class="fas fa-envelope w-6 h-6 text-blue-500 mr-3 flex-shrink-0"></i>
-              <span>thienhagroup@gmail.com</span>
+              <span>thienhalandgroupvn@gmail.com</span>
             </li>
           </ul>
         </div>

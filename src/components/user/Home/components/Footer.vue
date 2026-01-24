@@ -68,7 +68,7 @@
               </div>
               <div class="contact-text">
                 <strong>Email:</strong>
-                <p>thienhagroup@gmail.com</p>
+                <p>thienhalandgroupvn@gmail.com</p>
               </div>
             </div>
           </div>
