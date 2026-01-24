@@ -1,283 +1,419 @@
-diff --git a/src/components/thiet-kegiandien/ContractStatsDashboard.vue b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
-index 2f0677bf0a9380fd96e05eed24650db170fa8c15..dd267a0c92e465e14e973a2f085f9c49d09159ee 100644
---- a/src/components/thiet-kegiandien/ContractStatsDashboard.vue
-+++ b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
-@@ -127,71 +127,79 @@
-           </div>
+diff --git a/src/components/dich-vu/Phi-dich-vu.vue b/src/components/dich-vu/Phi-dich-vu.vue
+index 5a9def4d616e09b1b122ac6269b1cf23fcf026e7..c065f28bc8a0656e9b59ec8ab87adcc5d8c84a10 100644
+--- a/src/components/dich-vu/Phi-dich-vu.vue
++++ b/src/components/dich-vu/Phi-dich-vu.vue
+@@ -378,50 +378,63 @@
 
-           <div class="chartWrap chartWrap--md">
-             <canvas ref="statusEl"></canvas>
-           </div>
+                 <div v-if="selectedCustomer" class="selected-customer">
+                   <div class="customer-avatar">{{ initials(selectedCustomer.name) }}</div>
+                   <div class="min-w-0">
+                     <div class="customer-name">{{ selectedCustomer.name }}</div>
+                     <div class="customer-phone"><i class="fa-solid fa-phone me-1"></i>{{ selectedCustomer.phone }}</div>
+                   </div>
+                   <button class="clear-btn" type="button" @click="clearSelectedCustomer">
+                     <i class="fa-solid fa-xmark"></i>
+                   </button>
+                 </div>
+               </div>
+                 <div class="field !m-0" style="max-height: 50px !important;">
+                   <label class="field-label">
+                     <span class="label-ico tone-emerald"><i class="fa-solid fa-phone"></i></span>
+                     <span>Số điện thoại</span>
+                   </label>
+                   <input :value="selectedCustomer?.phone || ''" type="text" readonly>
+                 </div>
+               </div>
+               <div class="section-title">
+                 <i class="fa-solid fa-briefcase"></i>
+                 Dịch vụ & giá trị
+               </div>
 
-           <div class="legend">
-             <div v-for="l in statusLegend" :key="l.label" class="legend__item">
-               <span class="legend__dot" :style="{ background: l.color }"></span>
-               <span>{{ l.label }}</span>
-             </div>
-           </div>
-         </article>
++              <div v-if="canFullBranch" class="field">
++                <label class="field-label">
++                  <span class="label-ico tone-emerald"><i class="fa-solid fa-code-branch"></i></span>
++                  <span>Chi nhánh</span>
++                </label>
++                <select v-model="newContract.branchId" :disabled="branchLoading">
++                  <option v-for="branch in branchOptions" :key="branch.id" :value="branch.id">
++                    {{ branch.label }}
++                  </option>
++                </select>
++                <div class="muted tiny">Chọn chi nhánh áp dụng cho hợp đồng.</div>
++              </div>
++
+               <div class="field">
+                 <label class="field-label">
+                   <span class="label-ico tone-indigo"><i class="fa-solid fa-list"></i></span>
+                   <span>Dịch vụ</span>
+                 </label>
+                 <select v-model="newContract.serviceId">
+                   <option v-for="service in serviceOptions" :key="service.id || service.name" :value="service.id || service.name">
+                     {{ service.name }}
+                   </option>
+                 </select>
+                 <div class="muted tiny">Dịch vụ lấy từ hệ thống, giá gốc dựa theo phân khúc.</div>
+               </div>
 
-         <article class="card">
-           <div class="card__title">
-             <span class="card__titleIcon bg--violet"><i class="fa-solid fa-users"></i></span>
-             <div>
-               <h3>Loại khách hàng</h3>
-               <p class="muted">Tỉ trọng theo nhóm</p>
-             </div>
-           </div>
-
-           <div class="chartWrap chartWrap--md">
-             <canvas ref="customerTypeEl"></canvas>
-+            <div class="chartTotal">
-+              <span class="chartTotal__label">Tổng số</span>
-+              <strong>{{ customerTotal.toLocaleString("vi-VN") }}</strong>
-+            </div>
-           </div>
-
-           <div class="legend">
-             <div v-for="l in customerLegend" :key="l.label" class="legend__item">
-               <span class="legend__dot" :style="{ background: l.color }"></span>
-               <span>{{ l.label }}</span>
-             </div>
-           </div>
-         </article>
-
-         <article class="card">
-           <div class="card__title">
-             <span class="card__titleIcon bg--amber"><i class="fa-solid fa-concierge-bell"></i></span>
-             <div>
-               <h3>Loại dịch vụ</h3>
-               <p class="muted">Tỉ trọng theo nhóm</p>
-             </div>
-           </div>
-
-           <div class="chartWrap chartWrap--md">
-             <canvas ref="serviceTypeEl"></canvas>
-+            <div class="chartTotal">
-+              <span class="chartTotal__label">Tổng số</span>
-+              <strong>{{ serviceTotal.toLocaleString("vi-VN") }}</strong>
-+            </div>
-           </div>
-
-           <div class="legend">
-             <div v-for="l in serviceLegend" :key="l.label" class="legend__item">
-               <span class="legend__dot" :style="{ background: l.color }"></span>
-               <span>{{ l.label }}</span>
-             </div>
-           </div>
-         </article>
-       </section>
-     </div>
-   </div>
- </template>
+               <div class="grid grid-cols-1 md:grid-cols-2 gap-3 px-3 pb-2">
+                 <div class="field !m-0">
+                   <label class="field-label">
+                     <span class="label-ico tone-teal"><i class="fa-solid fa-building"></i></span>
+                     <span>Giá trị tài sản chấp nhận ký bán</span>
+                   </label>
+                   <input
+                     :value="formatNumberInput(newContract.giaTriTaiSan)"
+                     type="text"
+                     inputmode="numeric"
+                     placeholder="VD: 1.500.000.000"
+                     @input="newContract.giaTriTaiSan = parseNumberInput($event.target.value)"
+@@ -1190,100 +1203,104 @@
 
  <script setup>
- import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
- import Chart from "chart.js/auto";
- import api from "../../api/api.js";
+ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+ import api from '/src/api/api.js'
+ import { useAuthStore } from '../../stores/authStore'
+ import { useSidebarStore } from '../../stores/sidebarStore'
+ import {
+   confirmWithInput,
+   showCenterWarning,
+   showError,
+   showLoading,
+   updateAlertError,
+   updateAlertSuccess
+ } from '/src/assets/js/alertService.js'
+ import ContractStatsDashboard from "../thiet-kegiandien/ContractStatsDashboard.vue";
+ import {shortenName} from "../../assets/js/global.js";
+ const authStore = useAuthStore()
+ const sidebar = useSidebarStore()
+ const info = computed(() => authStore.userInfo || {})
+ const canPayContract = computed(() => authStore.hasPermission('HOPDONG_THU'))
+ const canRefundContract = computed(() => authStore.hasPermission('HOPDONG_HOANPHI'))
+ const canAdjustContract = computed(() => authStore.hasPermission('HOPDONG_DIEUCHINH'))
+ const canDeleteContract = computed(() => authStore.hasPermission('HOPDONG_DELETE'))
+ const canCancelContract = computed(() => authStore.hasPermission('HOPDONG_HUY'))
+ const canContractSetting = computed(() => authStore.hasPermission('HOPDONG_SETTING'))
++const canFullBranch = computed(() => authStore.hasPermission('HOPDONG_FULL_CHINHANH'))
+ const todayISO = () => {
+   const d = new Date()
+   const yyyy = d.getFullYear()
+   const mm = String(d.getMonth() + 1).padStart(2, '0')
+   const dd = String(d.getDate()).padStart(2, '0')
+   return `${yyyy}-${mm}-${dd}`
+ }
+ // Constants
+ const ENUM_STATUS = ['DANG_HIEU_LUC', 'HOAN_TAT', 'HUY']
+ const ENUM_PAY = ['TIEN_MAT', 'CHUYEN_KHOAN', 'QR', 'KHAC']
+ const ENUM_ADJ = ['GIAM_GIA', 'PHU_THU', 'PHAT', 'CHUYEN_DOI_DV']
 
- /**
-  * Lưu ý:
-  * - Component này chuyển từ HTML thuần sang Vue SFC.
-  * - Yêu cầu FontAwesome đã được load global (như bạn đang làm ở app).
-  */
+ // State
+ const activeTab = ref(1)
+ const contracts = ref([])
+ const totalElements = ref(0)
+ const totalPages = ref(1)
+ const seq = ref(1)
+ const services = ref([])
+ const segments = ref([])
++const branchOptions = ref([])
++const branchLoading = ref(false)
 
-@@ -202,50 +210,52 @@ const COLORS = {
-   CHAM_SOC: "#60c8ff",
-   TN_7NGAY: "#44b7ff",
-   TN_14NGAY: "#2ea2ff",
-   THAT_BAI: "#ff6b8a",
-   KHONG_LIEN_LAC_DUOC: "#ffb86b",
-   SAI_SO_LIEU: "#c39bff",
-   THANH_CONG: "#55e6a5",
-   KHACH_HUY_HEN: "#fbbf24",
-   BAN_NHANH: "#34d399",
-   BAN_GP: "#2dd4bf",
- };
+ // Filters
+ const searchQuery = ref('')
+ const filterService = ref(null)
+ const filterStatus = ref(null)
+ const tuNgay = ref(null)
+ const denNgay = ref(null)
+ const currentPage = ref(1)
+ const pageSize = ref(10)
+ const currentUserName = ref('Nguyễn Minh')
+ const searchTimer = ref(null)
 
- // ===== State =====
- const loading = ref(false);
- const timeRange = ref("month");
- const selectedMonth = ref(new Date().getMonth() + 1);
- const selectedYear = ref(new Date().getFullYear());
- const selectedService = ref("all");
- const chartsReady = ref(false);
- const startDate = ref("");
- const endDate = ref("");
- const services = ref([]);
- const statusLegend = ref([]);
- const customerLegend = ref([]);
- const serviceLegend = ref([]);
-+const customerTotal = ref(0);
-+const serviceTotal = ref(0);
+ // Customer search
+ const customerSearch = ref('')
+ const selectedCustomer = ref(null)
+ const customerSearchResults = ref([])
+ const customerSearchLoading = ref(false)
+ const customerSearchError = ref('')
+ const customerSearchTimer = ref(null)
+ const lastCustomerKeyword = ref('')
+ const suppressCustomerSearch = ref(false)
+ const CONTRACT_DRAFT_KEY = 'contractDraftFromAppointment'
 
- // Stats base (giống file gốc)
- const stats = ref({
-   totalContracts: 0,
-   activeContracts: 0,
-   completedContracts: 0,
-   cancelledContracts: 0,
-   totalRevenue: 0,
-   totalSales: 0,
- });
+ // New contract form
+ const newContract = ref({
+   maHopDong: '',
+   maKhachHang: '',
+   tenKhachHang: '',
+   tenDichVu: '',
+   serviceId: null,
++  branchId: null,
+   giaTriTaiSan: null,
+   giaDichVuGoc: 0,
+   phiGiam: 0,
+   discountMode: 'PERCENT',
+   discountValue: 0,
+   giaSauGiam: 0,
+   trangThaiHopDong: 'DANG_HIEU_LUC',
+   ngayKy: todayISO(),
+   initPlan: 'COC',
+   tiLeCoc: 30,
+   firstMethod: 'CHUYEN_KHOAN'
+ })
 
- // ===== Helpers =====
- const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
- const toISODate = (d) => {
-   const yyyy = d.getFullYear();
-   const mm = String(d.getMonth() + 1).padStart(2, "0");
-   const dd = String(d.getDate()).padStart(2, "0");
-   return `${yyyy}-${mm}-${dd}`;
- };
+ // Modals
+ const showModal = ref(null)
+ const currentContract = ref(null)
+ const detailContract = ref(null)
+ const openActionMenu = ref(null)
+ const actionMenuPosition = ref({ top: 0, left: 0 })
 
- const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1);
+ // Payment form
+ const payment = ref({
+   amount: 0,
+   method: 'CHUYEN_KHOAN',
+   date: todayISO(),
+@@ -1460,50 +1477,65 @@ watch(customerSearch, (val) => {
 
- const dateText = computed(() => {
-   if (!selectedYear.value || selectedYear.value < 1) return "—";
-   if (timeRange.value === "month") {
-@@ -645,66 +655,68 @@ const updateChartsFromResponse = (payload) => {
-   updateLineChart(trendChart1, labels, payload?.hopDongTrend || []);
-   updateLineChart(trendChart2, labels, payload?.doanhThuTrend || []);
-   updateLineChart(trendChart3, labels, payload?.doanhSoTrend || []);
+ watch(() => newContract.value.serviceId, () => {
+   updateServicePrice()
+ })
 
-   const statusItems = Array.isArray(payload?.trangThaiHopDong) ? payload.trangThaiHopDong : [];
-   const statusLabels = statusItems.map((item) => item?.label || "");
-   const statusValues = statusItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
-   updateBarChart(statusChart, statusLabels, statusValues, [
-     COLORS.THANH_CONG,
-     COLORS.TN_7NGAY,
-     COLORS.CHAM_SOC,
-     COLORS.THAT_BAI,
-     COLORS.KHONG_LIEN_LAC_DUOC,
-   ]);
-   statusLegend.value = buildLegend(statusItems, [
-     COLORS.THANH_CONG,
-     COLORS.TN_7NGAY,
-     COLORS.CHAM_SOC,
-     COLORS.THAT_BAI,
-     COLORS.KHONG_LIEN_LAC_DUOC,
-   ]);
+ watch(() => newContract.value.giaTriTaiSan, () => {
+   updateGiaGocFromAsset()
+ })
 
-   const customerItems = Array.isArray(payload?.loaiKhachHang) ? payload.loaiKhachHang : [];
-   const customerLabels = customerItems.map((item) => item?.label || "");
-   const customerValues = customerItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
-+  customerTotal.value = customerValues.reduce((sum, value) => sum + value, 0);
-   updateDoughnutChart(customerTypeChart, customerLabels, customerValues, [
-     COLORS.DC_TELESALES,
-     COLORS.CHAM_SOC,
-     COLORS.SAI_SO_LIEU,
-     COLORS.NEW,
-   ]);
-   customerLegend.value = buildLegend(customerItems, [
-     COLORS.DC_TELESALES,
-     COLORS.CHAM_SOC,
-     COLORS.SAI_SO_LIEU,
-     COLORS.NEW,
-   ]);
+ watch(() => newContract.value.discountMode, () => {
+   updateGiaSauGiam()
+ })
 
-   const serviceItems = Array.isArray(payload?.loaiDichVu) ? payload.loaiDichVu : [];
-   const serviceLabels = serviceItems.map((item) => item?.label || "");
-   const serviceValues = serviceItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
-+  serviceTotal.value = serviceValues.reduce((sum, value) => sum + value, 0);
-   updateDoughnutChart(serviceTypeChart, serviceLabels, serviceValues, [
-     COLORS.KHONG_LIEN_LAC_DUOC,
-     COLORS.BAN_NHANH,
-     COLORS.BAN_GP,
-     COLORS.NEW,
-   ]);
-   serviceLegend.value = buildLegend(serviceItems, [
-     COLORS.KHONG_LIEN_LAC_DUOC,
-     COLORS.BAN_NHANH,
-     COLORS.BAN_GP,
-     COLORS.NEW,
-   ]);
- };
+ watch(() => adjustment.value.serviceId, () => {
+   updateAdjustmentServicePrice()
+ })
 
- const buildRequestParams = () => ({
-   nam: selectedYear.value,
-   thang: timeRange.value === "month" ? selectedMonth.value : null,
-   theo: timeRange.value,
-   tuNgay: startDate.value,
-   denNgay: endDate.value,
-   dichVu: selectedService.value === "all" ? "all" : selectedService.value,
- });
+ watch(() => adjustment.value.giaTriTaiSan, () => {
+   updateAdjustmentGiaGocFromAsset()
+ })
 
- async function fetchStats() {
-   if (loading.value) return;
-@@ -1089,55 +1101,76 @@ h1{
-   align-items: center;
-   justify-content: center;
-   color: #fff;
-   box-shadow: 0 12px 26px rgba(2,6,23,.12);
-   flex: 0 0 auto;
+ watch(() => adjustment.value.discountMode, () => {
+   updateAdjustmentGiaSauGiam()
+ })
+
++watch(
++  canFullBranch,
++  (value) => {
++    if (value) {
++      fetchBranchOptions()
++      if (!newContract.value.branchId && branchOptions.value.length) {
++        newContract.value.branchId = branchOptions.value[0].id ?? null
++      }
++      return
++    }
++    newContract.value.branchId = null
++  },
++  { immediate: true }
++)
++
+ watch(() => payment.value.amount, (val) => {
+   if (!currentContract.value) return
+
+   const maxAmount = calcConThieu(currentContract.value)
+
+   // 🔑 Parse → ÉP SỐ NGUYÊN
+   let num = Math.floor(parseNumberInput(val))
+
+   if (num > maxAmount) num = maxAmount
+   if (num < 0) num = 0
+
+   if (num !== payment.value.amount) {
+     payment.value.amount = num
+   }
+ })
+
+ watch(() => refund.value.amount, (val) => {
+   if (!currentContract.value) return
+
+   const maxAmount = getMaxRefundAmount(currentContract.value)
+   let num = Math.floor(parseNumberInput(val))
+
+   if (num > maxAmount) num = maxAmount
+   if (num < 0) num = 0
+
+@@ -1664,50 +1696,75 @@ const pad4 = (n) => {
+
+ const fetchServices = async () => {
+   try {
+     const res = await api.get('/dich-vu-thg/admin', {
+       params: {
+         keyword: null
+       }
+     })
+     services.value = res.data || []
+   } catch (e) {
+     console.error('❌ Lỗi fetch services', e)
+     services.value = []
+   }
  }
 
- .card h3{
-   margin: 0;
-   font-size: 18px;
-   line-height: 1.15;
+ const fetchSegments = async () => {
+   try {
+     const res = await api.get('/dich-vu-thg/admin/phan-khuc')
+     segments.value = res.data || []
+   } catch (e) {
+     console.error('❌ Lỗi fetch segments', e)
+     segments.value = []
+   }
  }
 
- .card p{
-   margin: 6px 0 0;
-   font-size: 13px;
- }
-
- /* ========= Chart wrappers ========= */
- .chartWrap{
-   width: 100%;
-   border-radius: 16px;
-   padding: 10px;
-   background: rgba(248, 250, 252, .55);
-   border: 1px dashed rgba(15,23,42,.08);
-+  position: relative;
- }
-
- .chartWrap--lg{ height: 360px; }
- .chartWrap--md{ height: 280px; }
-
-+.chartTotal{
-+  position: absolute;
-+  inset: 0;
-+  display: flex;
-+  flex-direction: column;
-+  align-items: center;
-+  justify-content: center;
-+  text-align: center;
-+  font-weight: 800;
-+  color: #0f172a;
-+  pointer-events: none;
-+  gap: 4px;
++const fetchBranchOptions = async () => {
++  if (branchLoading.value) return
++  branchLoading.value = true
++  try {
++    const res = await api.get('/customer-crm/admin/lich-hen/options')
++    branchOptions.value = (Array.isArray(res.data) ? res.data : []).map((branch) => ({
++      id: Number(branch.id),
++      label: branch.address
++    }))
++    if (canFullBranch.value && branchOptions.value.length > 0) {
++      const hasMatch = branchOptions.value.some(
++        (branch) => String(branch.id) === String(newContract.value.branchId)
++      )
++      if (!hasMatch) {
++        newContract.value.branchId = branchOptions.value[0].id ?? null
++      }
++    }
++  } catch (e) {
++    console.error('❌ Lỗi fetch branches', e)
++    branchOptions.value = []
++  } finally {
++    branchLoading.value = false
++  }
 +}
 +
-+.chartTotal__label{
-+  font-size: 12px;
-+  font-weight: 700;
-+  color: rgba(15,23,42,.6);
-+}
-+
- /* ========= Legend ========= */
- .legend{
-   margin-top: 12px;
-   display: flex;
-   flex-wrap: wrap;
-   gap: 10px 14px;
-   justify-content: center;
-   padding: 10px 0 2px;
+ const queueSearch = () => {
+   if (searchTimer.value) clearTimeout(searchTimer.value)
+   searchTimer.value = setTimeout(() => {
+     fetchContracts()
+   }, 300)
  }
 
- .legend__item{
-   display: inline-flex;
-   align-items: center;
-   gap: 8px;
-   font-size: 12.5px;
-   color: rgba(15,23,42,.62);
-   font-weight: 700;
+ const fetchContracts = async () => {
+   const payload = {
+     keyword: searchQuery.value || null,
+     serviceId: filterService.value || null,
+     trangThaiHopDong: filterStatus.value || null,
+     tuNgay: tuNgay.value || null,
+     denNgay: denNgay.value || null,
+     page: currentPage.value,
+     size: pageSize.value
+   }
+
+   try {
+     const res = await api.post('/hop-dong/admin/search', payload)
+     const page = res?.data || {}
+     const items = Array.isArray(page.content) ? page.content : []
+     contracts.value = items
+     totalElements.value = Number(page.page.totalElements ?? items.length)
+     totalPages.value = Number(page.page.totalPages ?? Math.max(1, Math.ceil(totalElements.value / pageSize.value)))
+@@ -1831,50 +1888,51 @@ const getMaxRefundAmount = (c) => {
+
+ // Modal control
+ const openModal = (modal) => {
+   showModal.value = modal
  }
 
- .legend__dot{
-   width: 12px;
-   height: 12px;
-   border-radius: 4px;
+ const closeModal = (modal) => {
+   resetContractForm()
+   if (showModal.value === modal) {
+     showModal.value = null
+   }
+   if (modal === 'modalDetail') {
+     detailContract.value = null
+   }
  }
 
+ // Contract management
+ const resetContractForm = () => {
+   const firstService = serviceOptions.value[0] || null
+   newContract.value = {
+     maHopDong: genContractCode(),
+     maKhachHang: '',
+     tenKhachHang: '',
+     tenDichVu: firstService?.name || '',
+     serviceId: firstService?.id || firstService?.name || null,
++    branchId: canFullBranch.value ? branchOptions.value[0]?.id ?? null : null,
+     giaTriTaiSan: null,
+     giaDichVuGoc: 0,
+     phiGiam: 0,
+     discountMode: 'PERCENT',
+     discountValue: 0,
+     giaSauGiam: 0,
+     trangThaiHopDong: 'DANG_HIEU_LUC',
+     ngayKy: todayISO(),
+     initPlan: 'COC',
+     tiLeCoc: 30,
+     firstMethod: 'CHUYEN_KHOAN'
+   }
+   customerSearch.value = ''
+   selectedCustomer.value = null
+   customerSearchResults.value = []
+   customerSearchError.value = ''
+   customerSearchLoading.value = false
+   updateServicePrice()
+ }
+
+ const updateServicePrice = () => {
+   const service = getServiceById(newContract.value.serviceId)
+   newContract.value.tenDichVu = service?.name || ''
+   updateGiaGocFromAsset()
+ }
+@@ -2051,50 +2109,51 @@ const saveContract = async () => {
+   }
+
+   if (!newContract.value.giaTriTaiSan) {
+     showError('Thiếu dữ liệu', 'Bạn cần nhập giá trị tài sản.')
+     return
+   }
+
+   if (!newContract.value.giaDichVuGoc) {
+     showError('Thiếu dữ liệu', 'Giá gốc chưa xác định theo phân khúc.')
+     return
+   }
+
+   if (newContract.value.discountMode === 'MONEY' && newContract.value.discountValue <= 0) {
+     showError('Giảm giá không hợp lệ', 'Giảm giá tiền phải > 0 và không vượt quá giá gốc.')
+     return
+   }
+
+   const payload = {
+     maKhachHang: newContract.value.maKhachHang,
+     giaTriKyBan: newContract.value.giaTriTaiSan,
+     giaDichVuGoc: newContract.value.giaDichVuGoc,
+     phiGiam: newContract.value.phiGiam || 0,
+     giaSauGiam: newContract.value.giaSauGiam,
+     hinhThucThanhToan: newContract.value.firstMethod,
+     serviceId: newContract.value.serviceId,
++    branchId: canFullBranch.value ? newContract.value.branchId : null,
+     soTienThanhToan: firstPaymentAmount.value,
+     initPlan: newContract.value.initPlan
+   }
+
+   try {
+     const res = await showLoading(api.post('/hop-dong/admin/create', payload))
+     const created = res?.data || {}
+     const hasPayments = Array.isArray(created.dotDongTien) && created.dotDongTien.length > 0
+     const contract = {
+       id: created.id || crypto.randomUUID(),
+       maHopDong: created.maHopDong || newContract.value.maHopDong,
+       maKhachHang: created.maKhachHang ?? newContract.value.maKhachHang,
+       tenKhachHang: created.tenKhachHang || newContract.value.tenKhachHang,
+       nhanVienTao: created.nhanVienTao || currentUserName.value,
+       tenDichVu: created.tenDichVu || newContract.value.tenDichVu,
+       serviceId: created.serviceId ?? newContract.value.serviceId,
+       giaTriTaiSan: created.giaTriKyBan ?? created.giaTriTaiSan ?? newContract.value.giaTriTaiSan,
+       giaDichVuGoc: created.giaDichVuGoc ?? newContract.value.giaDichVuGoc,
+       phiGiam: created.phiGiam ?? newContract.value.phiGiam ?? 0,
+       giaSauGiam: created.giaSauGiam ?? newContract.value.giaSauGiam,
+       trangThaiHopDong: created.trangThaiHopDong ?? newContract.value.trangThaiHopDong,
+       ngayKy: created.ngayKy ?? newContract.value.ngayKy ?? todayISO(),
+       ngayTao: created.ngayTao ?? new Date().toLocaleString('vi-VN'),
+       dotDongTien: hasPayments ? created.dotDongTien : [],
+       hoanTien: created.hoanTien || [],

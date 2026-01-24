@@ -164,7 +164,7 @@ const routes = [
         path: "/-thg/quan-ly-hop-dong",
         name: "DichVuSetting",
         component: Menu,
-        meta: {requiresAuth: false, enableTailwind: true},
+        meta: {requiresAuth: true, enableTailwind: true, loginFrom: "admin"},
         children: [{
             path: '',
             name: "DichVuSetting1",
@@ -176,7 +176,7 @@ const routes = [
         path: "/-thg/cau-hinh-phi-dich-vu",
         name: "DichVuSetting2",
         component: Menu,
-        meta: {requiresAuth: false, enableTailwind: true},
+        meta: {requiresAuth: true, enableTailwind: true, loginFrom: "admin"},
         children: [{
             path: '',
             name: "DichVuSetting3",
@@ -187,7 +187,7 @@ const routes = [
         path: "/-thg/nhap-lieu",
         name: "TeamCollaboration1",
         component: Menu,
-        meta: {requiresAuth: false, enableTailwind: false},
+        meta: {requiresAuth: true, enableTailwind: false, loginFrom: "admin"},
         children: [{
             path: '',
             name: "NHAP_LIEU",
@@ -198,7 +198,7 @@ const routes = [
         path: "/-thg/quan-tri-du-lieu",
         name: "TeamCollaboration",
         component: Menu,
-        meta: { requiresAuth: false, enableTailwind: false},
+        meta: { requiresAuth: true, enableTailwind: false, loginFrom: "admin"},
         children: [{
             path: '',
             name: "QUAN_TRI_KHACH_HANG",
@@ -209,7 +209,7 @@ const routes = [
         path: "/-thg/telesale-lien-he-khach-hang",
         name: "TELESALESetyui",
         component: Menu,
-        meta: { requiresAuth: false, enableTailwind: false},
+        meta: { requiresAuth: true, enableTailwind: false, loginFrom: "admin"},
         children: [{
             path: '',
             name: "LIEN_HE",

@@ -400,6 +400,19 @@
                 Dịch vụ & giá trị
               </div>
 
+              <div v-if="canFullBranch" class="field">
+                <label class="field-label">
+                  <span class="label-ico tone-emerald"><i class="fa-solid fa-code-branch"></i></span>
+                  <span>Chi nhánh</span>
+                </label>
+                <select v-model="newContract.branchId" :disabled="branchLoading">
+                  <option v-for="branch in branchOptions" :key="branch.id" :value="branch.id">
+                    {{ branch.label }}
+                  </option>
+                </select>
+                <div class="muted tiny">Chọn chi nhánh áp dụng cho hợp đồng.</div>
+              </div>
+
               <div class="field">
                 <label class="field-label">
                   <span class="label-ico tone-indigo"><i class="fa-solid fa-list"></i></span>
@@ -1212,6 +1225,7 @@ const canAdjustContract = computed(() => authStore.hasPermission('HOPDONG_DIEUCH
 const canDeleteContract = computed(() => authStore.hasPermission('HOPDONG_DELETE'))
 const canCancelContract = computed(() => authStore.hasPermission('HOPDONG_HUY'))
 const canContractSetting = computed(() => authStore.hasPermission('HOPDONG_SETTING'))
+const canFullBranch = computed(() => authStore.hasPermission('HOPDONG_FULL_CHINHANH'))
 const todayISO = () => {
   const d = new Date()
   const yyyy = d.getFullYear()
@@ -1232,6 +1246,8 @@ const totalPages = ref(1)
 const seq = ref(1)
 const services = ref([])
 const segments = ref([])
+const branchOptions = ref([])
+const branchLoading = ref(false)
 
 // Filters
 const searchQuery = ref('')
@@ -1262,6 +1278,7 @@ const newContract = ref({
   tenKhachHang: '',
   tenDichVu: '',
   serviceId: null,
+  branchId: null,
   giaTriTaiSan: null,
   giaDichVuGoc: 0,
   phiGiam: 0,
@@ -1481,6 +1498,44 @@ watch(() => adjustment.value.giaTriTaiSan, () => {
 watch(() => adjustment.value.discountMode, () => {
   updateAdjustmentGiaSauGiam()
 })
+const fetchBranchOptions = async () => {
+  if (branchLoading.value) return
+  branchLoading.value = true
+  try {
+    const res = await api.get('/customer-crm/admin/lich-hen/options')
+    branchOptions.value = (Array.isArray(res.data) ? res.data : []).map((branch) => ({
+      id: Number(branch.id),
+      label: branch.address
+    }))
+    if (canFullBranch.value && branchOptions.value.length > 0) {
+      const hasMatch = branchOptions.value.some(
+          (branch) => String(branch.id) === String(newContract.value.branchId)
+      )
+      if (!hasMatch) {
+        newContract.value.branchId = branchOptions.value[0].id ?? null
+      }
+    }
+  } catch (e) {
+    console.error('❌ Lỗi fetch branches', e)
+    branchOptions.value = []
+  } finally {
+    branchLoading.value = false
+  }
+}
+watch(
+  canFullBranch,
+  (value) => {
+    if (value) {
+      fetchBranchOptions()
+      if (!newContract.value.branchId && branchOptions.value.length) {
+        newContract.value.branchId = branchOptions.value[0].id ?? null
+      }
+      return
+    }
+    newContract.value.branchId = null
+  },
+  { immediate: true }
+)
 
 watch(() => payment.value.amount, (val) => {
   if (!currentContract.value) return
@@ -1686,6 +1741,8 @@ const fetchSegments = async () => {
   }
 }
 
+
+
 const queueSearch = () => {
   if (searchTimer.value) clearTimeout(searchTimer.value)
   searchTimer.value = setTimeout(() => {
@@ -1853,6 +1910,7 @@ const resetContractForm = () => {
     tenKhachHang: '',
     tenDichVu: firstService?.name || '',
     serviceId: firstService?.id || firstService?.name || null,
+    branchId: canFullBranch.value ? branchOptions.value[0]?.id ?? null : null,
     giaTriTaiSan: null,
     giaDichVuGoc: 0,
     phiGiam: 0,
@@ -2073,6 +2131,7 @@ const saveContract = async () => {
     giaSauGiam: newContract.value.giaSauGiam,
     hinhThucThanhToan: newContract.value.firstMethod,
     serviceId: newContract.value.serviceId,
+    branchId: canFullBranch.value ? newContract.value.branchId : null,
     soTienThanhToan: firstPaymentAmount.value,
     initPlan: newContract.value.initPlan
   }
