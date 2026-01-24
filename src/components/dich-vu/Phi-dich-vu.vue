@@ -3241,7 +3241,7 @@ onUnmounted(() => {
 .kpi-row{
   display:grid;
   grid-template-columns: repeat(4, minmax(0,1fr));
-  gap:10px;
+  gap:20px;
   margin-bottom: 12px;
 }
 @media (max-width: 980px){ .kpi-row{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
@@ -3263,7 +3263,7 @@ onUnmounted(() => {
   position: relative;
   overflow: hidden;
   box-shadow: 0 12px 24px rgba(20,30,48,.16);
-  min-height: 120px;
+  height: 150px!important;
   display: flex;
   flex-direction: column;
   justify-content: space-between;

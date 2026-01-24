@@ -156,7 +156,7 @@
             </div>
           </div>
 
-          <div class="chartWrap chartWrap--md">
+          <div class="chartWrap chartWrap--md chartWrap--donut">
             <canvas ref="customerTypeEl"></canvas>
             <div class="chartTotal">
               <span class="chartTotal__label">Tổng số</span>
@@ -181,7 +181,7 @@
             </div>
           </div>
 
-          <div class="chartWrap chartWrap--md">
+          <div class="chartWrap chartWrap--md chartWrap--donut">
             <canvas ref="serviceTypeEl"></canvas>
             <div class="chartTotal">
               <span class="chartTotal__label">Tổng số</span>
@@ -1215,6 +1215,17 @@ h1{
 
 .chartWrap--lg{ height: 360px; }
 .chartWrap--md{ height: 280px; }
+.chartWrap--donut{
+  height: 230px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chartWrap--donut canvas{
+  max-width: 210px;
+  max-height: 210px;
+}
 
 .chartTotal{
   position: absolute;
@@ -1234,6 +1245,11 @@ h1{
   font-size: 12px;
   font-weight: 700;
   color: rgba(15,23,42,.6);
+}
+
+.chartTotal strong{
+  font-size: 26px;
+  line-height: 1.1;
 }
 
 /* ========= Legend ========= */
