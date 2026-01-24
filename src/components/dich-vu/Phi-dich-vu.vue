@@ -9,7 +9,7 @@
       </div>
     </div>
     <div class="top-actions">
-      <router-link class="btn ghost" to="/-thg/dich-vu-chinh">
+      <router-link v-if="canContractSetting" class="btn ghost" to="/-thg/dich-vu-chinh">
         <i class="fa-solid fa-gear"></i>
         <span>Tinh chỉnh mức phí THG</span>
       </router-link>
@@ -1201,6 +1201,7 @@ const canRefundContract = computed(() => authStore.hasPermission('HOPDONG_HOANPH
 const canAdjustContract = computed(() => authStore.hasPermission('HOPDONG_DIEUCHINH'))
 const canDeleteContract = computed(() => authStore.hasPermission('HOPDONG_DELETE'))
 const canCancelContract = computed(() => authStore.hasPermission('HOPDONG_HUY'))
+const canContractSetting = computed(() => authStore.hasPermission('HOPDONG_SETTING'))
 const todayISO = () => {
   const d = new Date()
   const yyyy = d.getFullYear()

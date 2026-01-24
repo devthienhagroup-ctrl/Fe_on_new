@@ -1274,11 +1274,11 @@
                         <div class="info-label">Loại dịch vụ triển khai</div>
                         <div class="info-value">
                           <span
-                            v-if="detailCustomer.tenDichVu"
+                            v-if="detailServiceName"
                             class="service-badge"
-                            :style="{ background: detailCustomer.mauDichVu ? `linear-gradient(135deg, ${detailCustomer.mauDichVu}, #ffffff)` : 'linear-gradient(135deg, #22c55e, #2dd4bf)' }"
+                            :style="{ background: detailServiceColor ? `linear-gradient(135deg, ${detailServiceColor}, #ffffff)` : 'linear-gradient(135deg, #22c55e, #2dd4bf)' }"
                           >
-                            {{ detailCustomer.tenDichVu }}
+                            {{ detailServiceName }}
                           </span>
                           <span v-else>-</span>
                         </div>
@@ -1764,6 +1764,8 @@ const callTimer = computed(() => {
 
 const detailCustomer = computed(() => selectedCustomer.value?.customerListItemDTO || null)
 const detailHistory = computed(() => selectedCustomer.value?.lichSu || [])
+const detailServiceName = computed(() => selectedCustomer.value?.tenDichVu || '')
+const detailServiceColor = computed(() => selectedCustomer.value?.mauDichVu || '')
 
 const assignSummary = computed(() => {
   if (selectedCount.value === 0) return 'Chưa có khách hàng nào được chọn'
@@ -3014,7 +3016,7 @@ const buildFilterPayload = () => ({
 
   phanLoaiKhach: filters.type !== 'all' ? filters.type : null,
   trangThai: filters.status !== 'all' ? filters.status : null,
-  resouce: filters.resource !== 'all' ? filters.resource : null,
+  resource: filters.resource !== 'all' ? filters.resource : null,
   tinhThanhPho: filters.province || null,
   nguoiTaoId: filters.creator !== 'all' ? filters.creator : null,
 
@@ -3033,7 +3035,7 @@ const buildFilterPayloadDB = () => ({
 
   phanLoaiKhach: filters.type !== 'all' ? filters.type : null,
   trangThai: filters.status !== 'all' ? filters.status : null,
-  resouce: filters.resource !== 'all' ? filters.resource : null,
+  resource: filters.resource !== 'all' ? filters.resource : null,
   tinhThanhPho: filters.province || null,
   nguoiTaoId: filters.creator !== 'all' ? filters.creator : null,
 
@@ -5004,6 +5006,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   color: #64748b;
   display: flex;
   align-items: center;
+  padding-right: 5px;
 }
 
 .history-staff {

@@ -14,6 +14,10 @@
 <!--        <i class="fa-solid fa-plus"></i>-->
 <!--        <span>Thêm dịch vụ</span>-->
 <!--      </button>-->
+      <router-link class="svc3-btn ghost" to="/-thg/dich-vu">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Quay về hợp đồng</span>
+      </router-link>
       <div class="d-flex flex-column align-items-end text-end">
         <div class="fw-semibold text-dark">
           {{ info.fullName }}
