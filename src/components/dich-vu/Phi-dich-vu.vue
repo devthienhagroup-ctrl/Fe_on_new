@@ -91,7 +91,7 @@
           </div>
         </div>
         <div class="panel-h">
-          <div class="tools">
+          <div class="tools" :class="{ 'tools--branch': canFullBranch }">
             <div class="input select filter-item filter-search" :class="{ active: searchQuery }">
               <label>Tiềm kiếm</label>
               <i class="fa-solid fa-magnifying-glass mt-2"></i>
@@ -103,6 +103,15 @@
               <select v-model="filterService">
                 <option :value="null">Tất cả</option>
                 <option v-for="service in serviceOptions" :key="service.id || service.name" :value="service.id || service.name">{{ service.name }}</option>
+              </select>
+            </div>
+
+            <div v-if="canFullBranch" class="select filter-item filter-branch" :class="{ active: filterBranch }">
+              <label>Chi nhánh</label>
+              <select v-model="filterBranch" :disabled="branchLoading">
+                <option v-for="branch in branchFilterOptions" :key="branch.id ?? 'all'" :value="branch.id">
+                  {{ branch.label }}
+                </option>
               </select>
             </div>
 
@@ -998,7 +1007,7 @@
                 <div class="text-sm font-extrabold">{{ detailContract?.maHopDong }} • {{ detailContract?.tenKhachHang }}</div>
                 <div class="muted tiny mt-1">{{ detailContract?.tenDichVu }} • Ngày tạo {{ formatDateValue(detailContract?.ngayTao) }}</div>
 
-                  <div class="grid grid-cols-3 gap-2 mt-3">
+                <div class="grid grid-cols-3 gap-2 mt-3">
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Giá gốc</div>
                     <div class="v price p2 font-extrabold">{{ formatMoney(detailContract?.giaDichVuGoc || 0) }}</div>
@@ -1026,18 +1035,16 @@
                     <div class="muted tiny mt-1">Tổng điều chỉnh: <span class="mono">{{ formatMoney(getTongDieuChinh(detailContract)) }}</span></div>
                   </div>
                   <div class="kpi">
-                    <div class="k"><span class="dot"></span>Doanh thu</div>
-                    <div class="v price p1 font-extrabold">{{ formatMoney(getDoanhThuRow(detailContract)) }}</div>
-                    <div class="muted tiny mt-1">Tổng hoàn: <span class="mono">{{ formatMoney(getTongHoan(detailContract)) }}</span></div>
-                  </div>
-                  <div class="kpi">
-                    <div class="k"><span class="dot"></span>Doanh số</div>
-                    <div class="v price p3 font-extrabold">{{ formatMoney(getDoanhSoRow(detailContract)) }}</div>
-                    <div class="muted tiny mt-1">Tổng điều chỉnh: <span class="mono">{{ formatMoney(getTongDieuChinh(detailContract)) }}</span></div>
+                    <div class="k"><span class="dot"></span>Chi nhánh</div>
+                    <div class="v font-extrabold" style="font-size: 14px!important;">{{ detailContract?.tenChiNhanh || '-' }}</div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Người tạo</div>
-                    <div class="v font-extrabold">{{ detailContract?.nguoiTaoFullName || '-' }}</div>
+                    <div class="v font-extrabold fs-6"  style="font-size: 14px!important;">{{ detailContract?.nguoiTaoFullName || '-' }}</div>
+                  </div>
+                  <div class="kpi">
+                    <div class="k"><span class="dot"></span>Dịch vụ</div>
+                    <div class="v font-extrabold fs-6"  style="font-size: 14px!important;">{{ detailContract?.tenDichVu || '-' }}</div>
                   </div>
                 </div>
               </div>
@@ -1252,6 +1259,7 @@ const branchLoading = ref(false)
 // Filters
 const searchQuery = ref('')
 const filterService = ref(null)
+const filterBranch = ref(null)
 const filterStatus = ref(null)
 const tuNgay = ref(null)
 const denNgay = ref(null)
@@ -1367,6 +1375,11 @@ const serviceOptions = computed(() => {
   return services.value
 })
 
+const branchFilterOptions = computed(() => ([
+  { id: null, label: 'Tất cả' },
+  ...branchOptions.value
+]))
+
 const selectedService = computed(() => {
   if (!newContract.value.serviceId) return null
   return serviceOptions.value.find(s => String(s.id || s.name) === String(newContract.value.serviceId)) || null
@@ -1425,6 +1438,11 @@ watch(filterService, () => {
 })
 
 watch(filterStatus, () => {
+  currentPage.value = 1
+  fetchContracts()
+})
+
+watch(filterBranch, () => {
   currentPage.value = 1
   fetchContracts()
 })
@@ -1577,13 +1595,22 @@ const formatMoney = (n) => {
 }
 
 const formatTy = (n) => {
-  const value = Number(n || 0) / 1_000_000_000
-  const abs = Math.abs(value)
+  const raw = Number(n || 0)
+  const abs = Math.abs(raw)
+  if (abs >= 1_000_000_000) {
+    const value = raw / 1_000_000_000
+    const formatted = value.toLocaleString('vi-VN', {
+      minimumFractionDigits: abs > 0 && abs < 1_000_000_000 ? 1 : 0,
+      maximumFractionDigits: 1
+    })
+    return `${formatted} tỷ`
+  }
+  const value = raw / 1_000_000
   const formatted = value.toLocaleString('vi-VN', {
-    minimumFractionDigits: abs > 0 && abs < 1 ? 1 : 0,
+    minimumFractionDigits: abs > 0 && abs < 1_000_000 ? 1 : 0,
     maximumFractionDigits: 1
   })
-  return `${formatted} tỷ`
+  return `${formatted} triệu`
 }
 
 const formatNumberInput = (n) => {
@@ -1754,6 +1781,7 @@ const fetchContracts = async () => {
   const payload = {
     keyword: searchQuery.value || null,
     serviceId: filterService.value || null,
+    branchId: canFullBranch.value ? filterBranch.value : null,
     trangThaiHopDong: filterStatus.value || null,
     tuNgay: tuNgay.value || null,
     denNgay: denNgay.value || null,
@@ -2543,6 +2571,7 @@ const confirmDelete = async () => {
 const resetFilters = () => {
   searchQuery.value = ''
   filterService.value = null
+  filterBranch.value = null
   filterStatus.value = null
   tuNgay.value = null
   denNgay.value = null
@@ -3117,8 +3146,12 @@ onUnmounted(() => {
   width: 100%;
   max-width: 1280px;
 }
+.tools.tools--branch{
+  grid-template-columns: 250px 160px 160px 190px 190px 190px 150px;
+}
 @media (max-width: 1100px){
   .tools{ grid-template-columns: 1fr 220px 190px; }
+  .tools.tools--branch{ grid-template-columns: 1fr 220px 190px; }
   .tools .tools-actions{ grid-column: 1 / -1; justify-content:flex-start; }
 }
 @media (max-width: 720px){

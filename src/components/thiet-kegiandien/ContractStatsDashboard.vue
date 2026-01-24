@@ -14,7 +14,7 @@
         </div>
 
         <div class="filter glass">
-          <div class="filter__row" :class="{ 'filter__row--year': timeRange === 'year' }">
+          <div class="filter__row" :style="filterGridStyle">
             <div class="field">
               <label>Chế độ</label>
               <select v-model="timeRange">
@@ -33,6 +33,15 @@
             <div class="field">
               <label>Năm</label>
               <input v-model.number="selectedYear" type="number" min="1" placeholder="2026" />
+            </div>
+
+            <div v-if="canFullBranch" class="field">
+              <label>Chi nhánh</label>
+              <select v-model="selectedBranch" :disabled="branchLoading">
+                <option v-for="branch in branchFilterOptions" :key="branch.id ?? 'all'" :value="branch.id">
+                  {{ branch.label }}
+                </option>
+              </select>
             </div>
           </div>
 
@@ -196,6 +205,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import Chart from "chart.js/auto";
 import api from "../../api/api.js";
+import { useAuthStore } from "../../stores/authStore";
 
 /**
  * Lưu ý:
@@ -221,19 +231,24 @@ const COLORS = {
 
 // ===== State =====
 const loading = ref(false);
+const authStore = useAuthStore();
 const timeRange = ref("month");
 const selectedMonth = ref(new Date().getMonth() + 1);
 const selectedYear = ref(new Date().getFullYear());
 const selectedService = ref("all");
+const selectedBranch = ref(null);
 const chartsReady = ref(false);
 const startDate = ref("");
 const endDate = ref("");
 const services = ref([]);
+const branchOptions = ref([]);
+const branchLoading = ref(false);
 const statusLegend = ref([]);
 const customerLegend = ref([]);
 const serviceLegend = ref([]);
 const customerTotal = ref(0);
 const serviceTotal = ref(0);
+const canFullBranch = computed(() => authStore.hasPermission("HOPDONG_FULL_CHINHANH"));
 
 // Stats base (giống file gốc)
 const stats = ref({
@@ -264,14 +279,23 @@ const dateText = computed(() => {
   return `Năm ${selectedYear.value}`;
 });
 
-const formatTy = (value) => {
-  const amount = Number(value || 0) / 1_000_000_000;
-  const abs = Math.abs(amount);
+const formatCompactVnd = (value) => {
+  const raw = Number(value || 0);
+  const abs = Math.abs(raw);
+  if (abs >= 1_000_000_000) {
+    const amount = raw / 1_000_000_000;
+    const formatted = amount.toLocaleString("vi-VN", {
+      minimumFractionDigits: abs > 0 && abs < 1_000_000_000 ? 1 : 0,
+      maximumFractionDigits: 1,
+    });
+    return `${formatted} tỷ`;
+  }
+  const amount = raw / 1_000_000;
   const formatted = amount.toLocaleString("vi-VN", {
-    minimumFractionDigits: abs > 0 && abs < 1 ? 1 : 0,
+    minimumFractionDigits: abs > 0 && abs < 1_000_000 ? 1 : 0,
     maximumFractionDigits: 1,
   });
-  return `${formatted} tỷ`;
+  return `${formatted} triệu`;
 };
 
 const statCards = computed(() => [
@@ -310,16 +334,16 @@ const statCards = computed(() => [
   {
     key: "totalRevenue",
     icon: "fa-solid fa-money-bill-wave",
-    label: "Tổng doanh thu (tỷ VNĐ)",
-    value: formatTy(stats.value.totalRevenue),
+    label: "Tổng doanh thu",
+    value: formatCompactVnd(stats.value.totalRevenue),
     tone: "amber",
     badge: "Doanh thu",
   },
   {
     key: "totalSales",
     icon: "fa-solid fa-chart-line",
-    label: "Tổng doanh số (tỷ VNĐ)",
-    value: formatTy(stats.value.totalSales),
+    label: "Tổng doanh số",
+    value: formatCompactVnd(stats.value.totalSales),
     tone: "violet",
     badge: "Doanh số",
   },
@@ -329,6 +353,23 @@ const serviceOptions = computed(() => [
   { id: "all", name: "Tất cả dịch vụ" },
   ...services.value.map((service) => ({ id: service.id, name: service.name })),
 ]);
+
+const branchFilterOptions = computed(() => [
+  { id: null, label: "Tất cả" },
+  ...branchOptions.value,
+]);
+
+const filterGridStyle = computed(() => {
+  const columns = ["1.1fr"];
+  if (timeRange.value === "month") {
+    columns.push("140px");
+  }
+  columns.push("140px");
+  if (canFullBranch.value) {
+    columns.push("180px");
+  }
+  return { gridTemplateColumns: columns.join(" ") };
+});
 
 const revenueTitle = computed(() => {
   const selected = serviceOptions.value.find((option) => option.id === selectedService.value);
@@ -576,8 +617,8 @@ const updateDateRange = () => {
 watch([timeRange, selectedMonth, selectedYear], updateDateRange, { immediate: true });
 
 watch(
-  [timeRange, selectedMonth, selectedYear, selectedService, chartsReady],
-  ([, , , , ready]) => {
+  [timeRange, selectedMonth, selectedYear, selectedService, selectedBranch, chartsReady],
+  ([, , , , , ready]) => {
     if (!ready) return;
     fetchStats();
   },
@@ -597,6 +638,22 @@ watch(
   },
   { deep: true }
 );
+
+watch(
+  branchOptions,
+  (nextBranches) => {
+    if (!canFullBranch.value) return;
+    if (selectedBranch.value === null) return;
+    const exists = nextBranches.some(
+      (branch) => String(branch.id) === String(selectedBranch.value)
+    );
+    if (!exists) {
+      selectedBranch.value = null;
+    }
+  },
+  { deep: true }
+);
+
 
 const normalizeSeries = (series) =>
   Array.isArray(series)
@@ -716,6 +773,7 @@ const buildRequestParams = () => ({
   tuNgay: startDate.value,
   denNgay: endDate.value,
   dichVu: selectedService.value === "all" ? "all" : selectedService.value,
+  branchId: canFullBranch.value ? selectedBranch.value : null,
 });
 
 async function fetchStats() {
@@ -756,6 +814,35 @@ const fetchServices = async () => {
     services.value = [];
   }
 };
+
+const fetchBranchOptions = async () => {
+  if (branchLoading.value) return;
+  branchLoading.value = true;
+  try {
+    const res = await api.get("/customer-crm/admin/lich-hen/options");
+    branchOptions.value = (Array.isArray(res?.data) ? res.data : []).map((branch) => ({
+      id: Number(branch.id),
+      label: branch.address,
+    }));
+  } catch (error) {
+    console.error("Không thể tải danh sách chi nhánh", error);
+    branchOptions.value = [];
+  } finally {
+    branchLoading.value = false;
+  }
+};
+
+watch(
+  canFullBranch,
+  (value) => {
+    if (value) {
+      fetchBranchOptions();
+      return;
+    }
+    selectedBranch.value = null;
+  },
+  { immediate: true }
+);
 
 onMounted(async () => {
   createCharts();
@@ -816,7 +903,7 @@ h1{
 /* ========= Header ========= */
 .header{
   display: grid;
-  grid-template-columns: 1.15fr 1fr;
+  grid-template-columns: 0.9fr 1.3fr;
   gap: 18px;
   align-items: stretch;
   margin-bottom: 18px;
