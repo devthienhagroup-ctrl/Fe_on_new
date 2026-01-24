@@ -399,7 +399,7 @@ function updateFilterOutputs() {
   activeFilterCount.value = filtered.length
 
   const rangeText =
-      activeRange.value === 'today' ? 'Hôm nay' : activeRange.value === 'week' ? 'Tuần này' : 'Tháng này'
+      activeRange.value === 'today' ? 'Ngày' : activeRange.value === 'week' ? 'Tuần' : 'Tháng'
   activeFilterText.value = `${rangeText}`
 }
 
@@ -440,7 +440,7 @@ function isCellEnabled(iso) {
   if (!iso) return false
   if (activeRange.value === 'month') return true
   const refDate = new Date(`${selectedDateISO.value}T00:00:00`)
-  if (activeRange.value === 'today') return iso === selectedDateISO.value
+  if (activeRange.value === 'today') return true
   if (activeRange.value === 'week') {
     const s = startOfWeek(refDate)
     const e = endOfWeek(refDate)
@@ -704,6 +704,30 @@ function handleMonthNav(dir) {
   generateCalendar()
   updateDaySchedule()
   updateFilterOutputs()
+}
+
+function shiftSelectedDate(days) {
+  const base = new Date(`${selectedDateISO.value}T00:00:00`)
+  base.setDate(base.getDate() + days)
+  selectedDateISO.value = toISODate(base)
+  calendarMonth.value = new Date(base.getFullYear(), base.getMonth(), 1)
+  generateCalendar()
+  updateDaySchedule()
+  updateFilterOutputs()
+}
+
+function handleRangeNav(dir) {
+  if (activeRange.value === 'month') {
+    handleMonthNav(dir)
+    return
+  }
+  if (activeRange.value === 'week') {
+    shiftSelectedDate(dir * 7)
+    return
+  }
+  if (activeRange.value === 'today') {
+    shiftSelectedDate(dir)
+  }
 }
 
 // ===== Day schedule (ăn theo selectedDate + filter range disable) =====
@@ -1334,8 +1358,30 @@ async function saveNewAppointment() {
 
     updateAlertSuccess('Tạo lịch hẹn thành công', 'Lịch hẹn đã được tạo.')
 
+    const createdAppointmentId =
+      res?.data?.data?.appointmentId ??
+      res?.data?.data?.id ??
+      res?.data?.appointmentId ??
+      res?.data?.id ??
+      null
+    const createdCustomerId = createForm.selectedCustomer?.id ?? null
+    const createdDate = createForm.date
+    const createdTime = createForm.time
     await refreshAppointmentsAndStats()
     closeCreateModal()
+    if (createdAppointmentId) {
+      await openDetailModal({ id: createdAppointmentId })
+    } else {
+      const fallback = appointments.value.find(
+        (appt) =>
+          appt.customerId === createdCustomerId &&
+          appt.date === createdDate &&
+          appt.time === createdTime,
+      )
+      if (fallback) {
+        await openDetailModal({ id: fallback.id })
+      }
+    }
   } catch (e) {
     console.error(e)
     showToast(
@@ -1774,9 +1820,18 @@ function initCharts() {
 function toggleActionMenu(id) {
   openActionMenuId.value = openActionMenuId.value === id ? null : id
 }
+function canEditAppointment(appt) {
+  return !appt?.consultStatus
+}
 function handleAction(type, appt, event) {
   openActionMenuId.value = null
-  if (type === 'edit') openEditModal(appt.id)
+  if (type === 'edit') {
+    if (!canEditAppointment(appt)) {
+      showToast('Không thể chỉnh sửa', 'Lịch hẹn đã có kết quả tư vấn.', 'warning')
+      return
+    }
+    openEditModal(appt.id)
+  }
   else if (type === 'status') openStatusPopover(event.currentTarget, appt.id)
   else if (type === 'delete') {
     appointments.value = appointments.value.filter((x) => x.id !== appt.id)
@@ -2229,10 +2284,10 @@ onBeforeUnmount(() => {
       <div class="filters">
         <div class="filter-tabs">
           <button class="filter-btn" :class="{ active: activeRange === 'today' }" @click="activeRange = 'today'">
-            Hôm nay
+            Ngày
           </button>
           <button class="filter-btn" :class="{ active: activeRange === 'week' }" @click="activeRange = 'week'">
-            Tuần này
+            Tuần
           </button>
           <button class="filter-btn" :class="{ active: activeRange === 'month' }" @click="activeRange = 'month'">
             Tháng
@@ -2276,11 +2331,11 @@ onBeforeUnmount(() => {
             </div>
 
             <!-- chỉ hiện khi Tháng này -->
-            <div v-if="activeRange === 'month'" class="calendar-nav">
-              <button class="icon-btn" @click="handleMonthNav(-1)">
+            <div class="calendar-nav">
+              <button class="icon-btn" @click="handleRangeNav(-1)">
                 <i class="fas fa-chevron-left"></i>
               </button>
-              <button class="icon-btn" @click="handleMonthNav(1)">
+              <button class="icon-btn" @click="handleRangeNav(1)">
                 <i class="fas fa-chevron-right"></i>
               </button>
             </div>
@@ -2511,7 +2566,12 @@ onBeforeUnmount(() => {
                       <i class="fa-regular fa-eye"></i>
                       Xem chi tiết
                     </button>
-                    <button @click.stop="handleAction('edit', appt, $event)">
+                    <button
+                      :class="{ 'is-disabled': !canEditAppointment(appt) }"
+                      :disabled="!canEditAppointment(appt)"
+                      :title="!canEditAppointment(appt) ? 'Lịch hẹn đã có kết quả tư vấn' : ''"
+                      @click.stop="handleAction('edit', appt, $event)"
+                    >
                       <i class="fa-regular fa-pen-to-square"></i>
                       Sửa lịch hẹn
                     </button>
@@ -3945,6 +4005,16 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
   gap:10px;
 }
 .menu-pop button:hover{ background: rgba(102,126,234,0.08); color:#3846c2; }
+.menu-pop button.is-disabled,
+.menu-pop button:disabled{
+  opacity:0.55;
+  cursor:not-allowed;
+}
+.menu-pop button.is-disabled:hover,
+.menu-pop button:disabled:hover{
+  background: transparent;
+  color:#0b1220;
+}
 
 /* Quick status popover */
 .status-pop{

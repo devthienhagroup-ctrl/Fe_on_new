@@ -14,7 +14,7 @@
 <!--        <i class="fa-solid fa-plus"></i>-->
 <!--        <span>Thêm dịch vụ</span>-->
 <!--      </button>-->
-      <router-link class="svc3-btn ghost" to="/-thg/dich-vu">
+      <router-link class="svc3-btn ghost" to="/-thg/quan-ly-hop-dong">
         <i class="fa-solid fa-arrow-left"></i>
         <span>Quay về hợp đồng</span>
       </router-link>

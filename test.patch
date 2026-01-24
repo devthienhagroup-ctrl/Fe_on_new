@@ -1,145 +1,357 @@
-diff --git a/src/components/dich-vu/Dich-vu-setting.vue b/src/components/dich-vu/Dich-vu-setting.vue
-index 2b0af37c6b28af2c488933835860f95bb1098606..c6091a8f5d1f39b69cd7bdb159f8d94b8d47852e 100644
---- a/src/components/dich-vu/Dich-vu-setting.vue
-+++ b/src/components/dich-vu/Dich-vu-setting.vue
-@@ -1,41 +1,45 @@
- <template>
-
-   <div class="svc3-topbar">
-     <div class="svc3-brand">
-       <div class="svc3-brand-ico"><i class="fa-solid fa-layer-group"></i></div>
-       <div class="min-w-0">
-         <div class="svc3-title">Quản trị Dịch vụ</div>
-       </div>
-     </div>
-
-     <div class="svc3-top-actions">
-
- <!--      <button class="svc3-btn primary" @click="openCreateService()">-->
- <!--        <i class="fa-solid fa-plus"></i>-->
- <!--        <span>Thêm dịch vụ</span>-->
- <!--      </button>-->
-+      <router-link class="svc3-btn ghost" to="/-thg/dich-vu">
-+        <i class="fa-solid fa-arrow-left"></i>
-+        <span>Quay về hợp đồng</span>
-+      </router-link>
-       <div class="d-flex flex-column align-items-end text-end">
-         <div class="fw-semibold text-dark">
-           {{ info.fullName }}
-         </div>
-       </div>
-
-       <img
-           v-if="info.avatarUrl"
-           :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-           alt="avatar"
-           class="rounded-circle border"
-           style="width: 36px; height: 36px; object-fit: cover;"
-       />
-
-       <div v-else class="avatar-circle">
-         {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-       </div>
-     </div>
-   </div>
-   <div class="svc3-page">
-     <div class="px-3 py-1">
-       <!-- Top bar -->
-
-       <!-- Tabs (ONLY 2) - browser style -->
-       <div class="svc3-tabs-shell mt-2">
-diff --git a/src/components/dich-vu/Phi-dich-vu.vue b/src/components/dich-vu/Phi-dich-vu.vue
-index 68f2229a9d1ec9b07d61389992be050c8e068381..4151295dbc93d49334ea7e0ad3a19c7f168008a4 100644
---- a/src/components/dich-vu/Phi-dich-vu.vue
-+++ b/src/components/dich-vu/Phi-dich-vu.vue
-@@ -1,37 +1,37 @@
- <template>
-   <div class="topbar">
-     <div class="brand">
-       <div class="brand-ico">
-         <i class="fa-solid fa-file-signature"></i>
-       </div>
-       <div class="min-w-0">
-         <div class="brand-title">Quản lý Hợp đồng</div>
-       </div>
-     </div>
-     <div class="top-actions">
--      <router-link class="btn ghost" to="/-thg/dich-vu-chinh">
-+      <router-link v-if="canContractSetting" class="btn ghost" to="/-thg/dich-vu-chinh">
-         <i class="fa-solid fa-gear"></i>
-         <span>Tinh chỉnh mức phí THG</span>
-       </router-link>
-       <div class="user-chip">
-         <div class="user-meta">
-           <div class="user-name">{{ info.fullName || 'Chưa có tên' }}</div>
-           <div v-if="info.role" class="user-role">{{ info.role }}</div>
-         </div>
-         <img
-           v-if="info.avatarUrl"
-           :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-           alt="avatar"
-           class="user-avatar"
-         />
-         <div v-else class="user-avatar user-avatar--fallback">
-           {{ initials(info.fullName) }}
-         </div>
-       </div>
-     </div>
-   </div>
-
-   <div class="ui-page">
-     <!-- KPIs -->
-
-     <!-- TABS -->
-@@ -1179,50 +1179,51 @@
-     </div>
-   </div>
- </template>
-
- <script setup>
- import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
- import api from '/src/api/api.js'
- import { useAuthStore } from '../../stores/authStore'
- import {
-   confirmWithInput,
-   showCenterWarning,
-   showError,
-   showLoading,
-   updateAlertError,
-   updateAlertSuccess
- } from '/src/assets/js/alertService.js'
- import ContractStatsDashboard from "../thiet-kegiandien/ContractStatsDashboard.vue";
- import {shortenName} from "../../assets/js/global.js";
- const authStore = useAuthStore()
- const info = computed(() => authStore.userInfo || {})
- const canPayContract = computed(() => authStore.hasPermission('HOPDONG_THU'))
- const canRefundContract = computed(() => authStore.hasPermission('HOPDONG_HOANPHI'))
- const canAdjustContract = computed(() => authStore.hasPermission('HOPDONG_DIEUCHINH'))
- const canDeleteContract = computed(() => authStore.hasPermission('HOPDONG_DELETE'))
- const canCancelContract = computed(() => authStore.hasPermission('HOPDONG_HUY'))
-+const canContractSetting = computed(() => authStore.hasPermission('HOPDONG_SETTING'))
- const todayISO = () => {
-   const d = new Date()
-   const yyyy = d.getFullYear()
-   const mm = String(d.getMonth() + 1).padStart(2, '0')
-   const dd = String(d.getDate()).padStart(2, '0')
-   return `${yyyy}-${mm}-${dd}`
+diff --git a/src/components/thiet-kegiandien/AppointmentsPage.vue b/src/components/thiet-kegiandien/AppointmentsPage.vue
+index 41f4f1258f67777b451b1472ebc5ffa3655877fb..fd80742bf01817b825780bd6a8c0bc7c932d7a70 100644
+--- a/src/components/thiet-kegiandien/AppointmentsPage.vue
++++ b/src/components/thiet-kegiandien/AppointmentsPage.vue
+@@ -377,92 +377,92 @@ function getRowMarker(appt) {
+   return { color: '#667eea', glow: 'rgba(224, 231, 255, 0.7)' }
  }
- // Constants
- const ENUM_STATUS = ['DANG_HIEU_LUC', 'HOAN_TAT', 'HUY']
- const ENUM_PAY = ['TIEN_MAT', 'CHUYEN_KHOAN', 'QR', 'KHAC']
- const ENUM_ADJ = ['GIAM_GIA', 'PHU_THU', 'PHAT', 'CHUYEN_DOI_DV']
 
- // State
- const activeTab = ref(1)
- const contracts = ref([])
- const totalElements = ref(0)
- const totalPages = ref(1)
- const seq = ref(1)
- const services = ref([])
- const segments = ref([])
+ function monthTitle(d) {
+   return `Tháng ${d.getMonth() + 1}, ${d.getFullYear()}`
+ }
 
- // Filters
- const searchQuery = ref('')
- const filterService = ref(null)
- const filterStatus = ref(null)
+ // ===== Conflict =====
+ function hasConflict({ id = null, date, time, staff }) {
+   return appointments.value.find((a) => a.id !== id && a.date === date && a.time === time && a.staff === staff && a.status !== 'CANCELLED')
+ }
+
+ // ===== Apply filters (Calendar + Day + Table) =====
+ function applyFilters(list) {
+   const out = [...list]
+   out.sort((a, b) => `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`))
+   return out
+ }
+
+ function updateFilterOutputs() {
+   const filtered = applyFilters(appointments.value)
+   filteredAppointments.value = filtered
+   activeFilterCount.value = filtered.length
+
+   const rangeText =
+-      activeRange.value === 'today' ? 'Hôm nay' : activeRange.value === 'week' ? 'Tuần này' : 'Tháng này'
++      activeRange.value === 'today' ? 'Ngày' : activeRange.value === 'week' ? 'Tuần' : 'Tháng'
+   activeFilterText.value = `${rangeText}`
+ }
+
+ function updateGlobalStats() {
+   const all = [...statsAppointments.value]
+   statTotal.value = all.length
+   statSelectedDay.value = all.filter((a) => a.date === selectedDateISO.value).length
+   statUp.value = all.filter((a) => a.status === 'UP').length
+   statPending.value = all.filter((a) => ['WAITING', 'NOT_UP', 'POSTPONED'].includes(a.status)).length
+   statCancelled.value = all.filter((a) => a.status === 'CANCELLED').length
+ }
+
+ // ===== Calendar markers by day (orange/blue) =====
+ function getMonthKey() {
+   const y = calendarMonth.value.getFullYear()
+   const m = calendarMonth.value.getMonth()
+   return { y, m, key: `${y}-${pad2(m + 1)}` }
+ }
+ function buildDayMarkerMap(monthKey) {
+   const map = new Map() // dayNumber -> marker {color, glow}
+   const monthAppts = appointments.value.filter((a) => a.date.startsWith(monthKey) && a.status !== 'CANCELLED')
+   monthAppts.forEach((a) => {
+     const day = Number(a.date.slice(-2))
+     const mk = map.get(day)
+     const marker = getRowMarker(a)
+     // ưu tiên ORANGE nếu có createdByMe; nếu không thì BLUE
+     if (!mk) {
+       map.set(day, marker)
+     } else {
+       if (marker.color === '#ffb347') map.set(day, marker)
+     }
+   })
+   return map
+ }
+
+ // ===== Disable calendar days for today/week =====
+ function isCellEnabled(iso) {
+   if (!iso) return false
+   if (activeRange.value === 'month') return true
+   const refDate = new Date(`${selectedDateISO.value}T00:00:00`)
+-  if (activeRange.value === 'today') return iso === selectedDateISO.value
++  if (activeRange.value === 'today') return true
+   if (activeRange.value === 'week') {
+     const s = startOfWeek(refDate)
+     const e = endOfWeek(refDate)
+     const d = new Date(`${iso}T00:00:00`)
+     return d >= s && d < e
+   }
+   return true
+ }
+
+ function generateCalendar() {
+   calendarTitle.value = monthTitle(calendarMonth.value)
+   const year = calendarMonth.value.getFullYear()
+   const month = calendarMonth.value.getMonth()
+   const todayIso = getTodayISO()
+
+   const firstDay = new Date(year, month, 1).getDay()
+   const daysInMonth = new Date(year, month + 1, 0).getDate()
+   const prevMonthDays = new Date(year, month, 0).getDate()
+
+   const { key: monthKey } = getMonthKey()
+   const markerMap = buildDayMarkerMap(monthKey)
+
+   const cells = []
+
+   for (let i = firstDay - 1; i >= 0; i -= 1) {
+@@ -684,50 +684,74 @@ async function refreshAppointmentsAndStats() {
+ }
+
+ function handleCalendarClick(cell) {
+   if (!cell.currentMonth || !cell.iso) return
+   if (!cell.enabled) return
+
+   selectedDateISO.value = cell.iso
+   updateDaySchedule()
+   updateFilterOutputs()
+   generateCalendar()
+ }
+
+ function handleMonthNav(dir) {
+   if (activeRange.value !== 'month') return
+   const y = calendarMonth.value.getFullYear()
+   const m = calendarMonth.value.getMonth()
+   const next = new Date(y, m + dir, 1)
+   calendarMonth.value = next
+   const nextISO = `${next.getFullYear()}-${pad2(next.getMonth() + 1)}-01`
+   selectedDateISO.value = nextISO
+   generateCalendar()
+   updateDaySchedule()
+   updateFilterOutputs()
+ }
+
++function shiftSelectedDate(days) {
++  const base = new Date(`${selectedDateISO.value}T00:00:00`)
++  base.setDate(base.getDate() + days)
++  selectedDateISO.value = toISODate(base)
++  calendarMonth.value = new Date(base.getFullYear(), base.getMonth(), 1)
++  generateCalendar()
++  updateDaySchedule()
++  updateFilterOutputs()
++}
++
++function handleRangeNav(dir) {
++  if (activeRange.value === 'month') {
++    handleMonthNav(dir)
++    return
++  }
++  if (activeRange.value === 'week') {
++    shiftSelectedDate(dir * 7)
++    return
++  }
++  if (activeRange.value === 'today') {
++    shiftSelectedDate(dir)
++  }
++}
++
+ // ===== Day schedule (ăn theo selectedDate + filter range disable) =====
+ function apptsForSelectedDay() {
+   // Day Schedule cũng phải nằm trong range
+   const inRange = isCellEnabled(selectedDateISO.value)
+   if (!inRange) return []
+   return appointments.value.filter((a) => a.date === selectedDateISO.value).sort((a, b) => a.time.localeCompare(b.time))
+ }
+
+ function updateDaySchedule() {
+   dayTitle.value = `Day Schedule • ${formatVNDate(selectedDateISO.value)}`
+   const list = apptsForSelectedDay()
+
+   const slotTimes = buildDaySlotTimes(list)
+   const byTime = new Map()
+   slotTimes.forEach((t) => byTime.set(t, []))
+   list.forEach((a) => {
+     const minutes = timeToMinutes(a.time)
+     if (Number.isNaN(minutes)) return
+     if (minutes < DAY_START_HOUR * 60 || minutes > DAY_END_HOUR * 60) return
+     if (!byTime.has(a.time)) byTime.set(a.time, [])
+     byTime.get(a.time).push(a)
+   })
+
+   daySlots.value = slotTimes.map((t) => ({ time: t, appointments: byTime.get(t) || [] }))
+ }
+@@ -1312,52 +1336,74 @@ async function saveNewAppointment() {
+   if (!createForm.rating) {
+     showCenterWarning('Thiếu thông tin', 'Vui lòng chọn dịch vụ.', 'error')
+     return
+   }
+
+   const timeCheck = isValidAppointmentTime(
+       createForm.date,
+       createForm.time
+   )
+
+   if (!timeCheck.valid) {
+     showCenterWarning('Thời gian không hợp lệ', timeCheck.message, 'error')
+     return
+   }
+
+   try {
+     const res = await showLoading(createAppointmentApi());
+
+     if( !res.data.success) {
+       updateAlertError('Không thể tạo lịch hẹn', res.data.message || 'Có lỗi xảy ra, vui lòng thử lại.', 'error')
+       return
+     }
+
+     updateAlertSuccess('Tạo lịch hẹn thành công', 'Lịch hẹn đã được tạo.')
+
++    const createdAppointmentId =
++      res?.data?.data?.appointmentId ??
++      res?.data?.data?.id ??
++      res?.data?.appointmentId ??
++      res?.data?.id ??
++      null
++    const createdCustomerId = createForm.selectedCustomer?.id ?? null
++    const createdDate = createForm.date
++    const createdTime = createForm.time
+     await refreshAppointmentsAndStats()
+     closeCreateModal()
++    if (createdAppointmentId) {
++      await openDetailModal({ id: createdAppointmentId })
++    } else {
++      const fallback = appointments.value.find(
++        (appt) =>
++          appt.customerId === createdCustomerId &&
++          appt.date === createdDate &&
++          appt.time === createdTime,
++      )
++      if (fallback) {
++        await openDetailModal({ id: fallback.id })
++      }
++    }
+   } catch (e) {
+     console.error(e)
+     showToast(
+         'Tạo lịch thất bại',
+         e?.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.',
+         'error'
+     )
+   }
+ }
+
+ // ===== Export (theo filter của table) =====
+ function exportCSV() {
+   const filtered = applyFilters(appointments.value)
+   const header = ['Khách hàng', 'SĐT', 'Chi nhánh', 'Ngày', 'Giờ', 'NV phụ trách', 'Tình trạng', 'KQ tư vấn', 'Phân loại', 'Đánh giá', 'Người tạo', 'Ghi chú']
+
+   const rows = filtered.map((a) => [
+     a.customer,
+     a.phone,
+     a.branch ? BRANCHES.find((b) => b.key === a.branch)?.label || a.branch : '-',
+     a.date,
+     a.time,
+     a.staff,
+     STATUS[a.status].label,
+     CONSULT_STATUS[a.consultStatus]?.label || '',
+     CUSTOMER_TYPE[a.customerType]?.label || '',
+@@ -2207,102 +2253,102 @@ onBeforeUnmount(() => {
+           <div class=" chart-container-wrapper">
+           <div class="chart-container">
+             <canvas id="successChartSecondary"></canvas>
+           </div>
+           </div>
+         </div>
+
+         <div class="chart-card c1 revenue-chart">
+           <div class="chart-head">
+             <div class="ico-bubble gA"><i class="fa-solid fa-sack-dollar"></i></div>
+             <div>
+               <h4>Doanh thu</h4>
+               <p class="sub">Tổng phí từ lịch hẹn trong khoảng thời gian</p>
+             </div>
+           </div>
+           <div class="chart-container">
+             <canvas id="revenueChart"></canvas>
+           </div>
+         </div>
+       </section>
+
+       <!-- Filters (CHỈ cho lịch + day + table) -->
+       <div class="filters">
+         <div class="filter-tabs">
+           <button class="filter-btn" :class="{ active: activeRange === 'today' }" @click="activeRange = 'today'">
+-            Hôm nay
++            Ngày
+           </button>
+           <button class="filter-btn" :class="{ active: activeRange === 'week' }" @click="activeRange = 'week'">
+-            Tuần này
++            Tuần
+           </button>
+           <button class="filter-btn" :class="{ active: activeRange === 'month' }" @click="activeRange = 'month'">
+             Tháng
+           </button>
+         </div>
+
+         <div class="status-filter">
+           <div class="status-tag st-all" :class="{ active: activeStatus === 'ALL' }" @click="activeStatus = 'ALL'">Tất cả</div>
+           <div class="status-tag st-wait-tag" :class="{ active: activeStatus === 'WAITING' }" @click="activeStatus = 'WAITING'">Chờ xác nhận</div>
+           <div class="status-tag st-up-tag" :class="{ active: activeStatus === 'UP' }" @click="activeStatus = 'UP'">Đã lên</div>
+           <div class="status-tag st-not-tag" :class="{ active: activeStatus === 'NOT_UP' }" @click="activeStatus = 'NOT_UP'">Chưa lên</div>
+           <div class="status-tag st-post-tag" :class="{ active: activeStatus === 'POSTPONED' }" @click="activeStatus = 'POSTPONED'">Tạm hoãn</div>
+           <div class="status-tag st-cancel-tag" :class="{ active: activeStatus === 'CANCELLED' }" @click="activeStatus = 'CANCELLED'">Huỷ</div>
+
+           <div class="search-bar">
+             <input
+                 id="searchInput"
+                 type="text"
+                 v-model="searchQuery"
+                 placeholder="Tìm theo tên / SĐT / NV phụ trách / người tạo..."
+             />
+           </div>
+         </div>
+
+         <div class="action-buttons">
+ <!--          <button class="btn btn-secondary" @click="exportCSV"><i class="fas fa-download"></i>Xuất file</button>-->
+           <button class="btn btn-primary" @click="openCreateModal"><i class="fas fa-plus"></i>Tạo lịch hẹn</button>
+         </div>
+       </div>
+
+       <!-- Calendar + Day Schedule -->
+       <div class="calendar-day-row">
+         <section class="card-surface calendar-section">
+           <div class="card-head">
+             <div class="card-title">
+               <div class="ico-bubble gD"><i class="fa-solid fa-calendar"></i></div>
+               <div>
+                 <h3>{{ calendarTitle }}</h3>
+                 <p class="sub">Click ngày để xem lịch • Chỉ ngày trong phạm vi filter được thao tác</p>
+               </div>
+             </div>
+
+             <!-- chỉ hiện khi Tháng này -->
+-            <div v-if="activeRange === 'month'" class="calendar-nav">
+-              <button class="icon-btn" @click="handleMonthNav(-1)">
++            <div class="calendar-nav">
++              <button class="icon-btn" @click="handleRangeNav(-1)">
+                 <i class="fas fa-chevron-left"></i>
+               </button>
+-              <button class="icon-btn" @click="handleMonthNav(1)">
++              <button class="icon-btn" @click="handleRangeNav(1)">
+                 <i class="fas fa-chevron-right"></i>
+               </button>
+             </div>
+           </div>
+
+           <div class="calendar-days">
+             <div class="day-name">CN</div>
+             <div class="day-name">T2</div>
+             <div class="day-name">T3</div>
+             <div class="day-name">T4</div>
+             <div class="day-name">T5</div>
+             <div class="day-name">T6</div>
+             <div class="day-name">T7</div>
+           </div>
+
+           <div class="calendar-dates">
+             <div
+                 v-for="cell in calendarCells"
+                 :key="cell.key"
+                 :class="cell.classes"
+                 @click="handleCalendarClick(cell)"
+                 :style="cell.marker ? { '--mk': cell.marker.color, '--mkGlow': cell.marker.glow } : {}"
+             >
+               {{ cell.label }}
+             </div>

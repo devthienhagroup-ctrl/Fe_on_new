@@ -109,6 +109,13 @@ const allMenuItems = [
     desc: 'Quản lý lịch hẹn, phân công và theo dõi kết quả'
   },
   {
+    label: 'HOPDONG',
+    route: '/-thg/quan-ly-hop-dong',
+    icon: 'fa-solid fa-file-contract text-success fs-2',
+    title: 'Hợp đồng',
+    desc: 'Quản lý hợp đồng và thanh toán dịch vụ'
+  },
+  {
     label: 'EDITER',
     route: '/-thg/quan-tri-noi-dung/trang-chu/noi-bat',
     icon: 'fa-solid fa-file-lines text-primary fs-2',

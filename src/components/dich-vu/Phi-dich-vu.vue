@@ -9,7 +9,7 @@
       </div>
     </div>
     <div class="top-actions">
-      <router-link v-if="canContractSetting" class="btn ghost" to="/-thg/dich-vu-chinh">
+      <router-link v-if="canContractSetting" class="btn ghost" to="/-thg/cau-hinh-phi-dich-vu">
         <i class="fa-solid fa-gear"></i>
         <span>Tinh chỉnh mức phí THG</span>
       </router-link>
@@ -1230,7 +1230,7 @@ const filterStatus = ref(null)
 const tuNgay = ref(null)
 const denNgay = ref(null)
 const currentPage = ref(1)
-const pageSize = ref(2)
+const pageSize = ref(10)
 const currentUserName = ref('Nguyễn Minh')
 const searchTimer = ref(null)
 

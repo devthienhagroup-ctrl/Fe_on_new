@@ -161,7 +161,7 @@ import DichVuSetting2 from "../components/dich-vu/Dich-vu-setting.vue";
 const routes = [
 
     {
-        path: "/-thg/dich-vu",
+        path: "/-thg/quan-ly-hop-dong",
         name: "DichVuSetting",
         component: Menu,
         meta: {requiresAuth: false, enableTailwind: true},
@@ -173,7 +173,7 @@ const routes = [
     },
 
     {
-        path: "/-thg/dich-vu-chinh",
+        path: "/-thg/cau-hinh-phi-dich-vu",
         name: "DichVuSetting2",
         component: Menu,
         meta: {requiresAuth: false, enableTailwind: true},
