@@ -1112,6 +1112,7 @@ async function saveEditModal() {
           const payloadDraft = {
             phone: editContext.phone || null,
             serviceId: editForm.rating ?? editContext.serviceId ?? null,
+            branchId: editForm.branch ?? null,
           }
           localStorage.setItem('contractDraftFromAppointment', JSON.stringify(payloadDraft))
           window.location.assign('/-thg/quan-ly-hop-dong')

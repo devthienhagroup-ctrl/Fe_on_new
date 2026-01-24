@@ -1255,6 +1255,7 @@ const services = ref([])
 const segments = ref([])
 const branchOptions = ref([])
 const branchLoading = ref(false)
+const draftBranchId = ref(null)
 
 // Filters
 const searchQuery = ref('')
@@ -1396,6 +1397,28 @@ const matchingSegment = computed(() => {
   ) || null
 })
 
+const getDefaultBranchId = () => {
+  if (canFullBranch.value) {
+    const hasDraftMatch = draftBranchId.value && branchOptions.value.some(
+      (branch) => String(branch.id) === String(draftBranchId.value)
+    )
+    if (hasDraftMatch) return draftBranchId.value
+    return branchOptions.value[0]?.id ?? null
+  }
+  return draftBranchId.value ?? null
+}
+
+const resolveBranchId = () => {
+  if (canFullBranch.value) {
+    const preferred = draftBranchId.value ?? newContract.value.branchId
+    const hasPreferred = preferred && branchOptions.value.some(
+      (branch) => String(branch.id) === String(preferred)
+    )
+    return hasPreferred ? preferred : branchOptions.value[0]?.id ?? null
+  }
+  return draftBranchId.value ?? null
+}
+
 const segmentHint = computed(() => {
   if (!newContract.value.serviceId) {
     return 'Vui lòng chọn dịch vụ để hiển thị phân khúc.'
@@ -1526,12 +1549,7 @@ const fetchBranchOptions = async () => {
       label: branch.address
     }))
     if (canFullBranch.value && branchOptions.value.length > 0) {
-      const hasMatch = branchOptions.value.some(
-          (branch) => String(branch.id) === String(newContract.value.branchId)
-      )
-      if (!hasMatch) {
-        newContract.value.branchId = branchOptions.value[0].id ?? null
-      }
+      newContract.value.branchId = resolveBranchId()
     }
   } catch (e) {
     console.error('❌ Lỗi fetch branches', e)
@@ -1545,12 +1563,10 @@ watch(
   (value) => {
     if (value) {
       fetchBranchOptions()
-      if (!newContract.value.branchId && branchOptions.value.length) {
-        newContract.value.branchId = branchOptions.value[0].id ?? null
-      }
+      newContract.value.branchId = resolveBranchId()
       return
     }
-    newContract.value.branchId = null
+    newContract.value.branchId = resolveBranchId()
   },
   { immediate: true }
 )
@@ -1834,6 +1850,11 @@ const applyContractDraftFromAppointment = async () => {
     }
   }
 
+  if (draft?.branchId !== undefined && draft?.branchId !== null) {
+    draftBranchId.value = draft.branchId
+    newContract.value.branchId = resolveBranchId()
+  }
+
   openModal('modalContract')
   updateServicePrice()
 
@@ -1932,13 +1953,14 @@ const closeModal = (modal) => {
 // Contract management
 const resetContractForm = () => {
   const firstService = serviceOptions.value[0] || null
+  draftBranchId.value = null
   newContract.value = {
     maHopDong: genContractCode(),
     maKhachHang: '',
     tenKhachHang: '',
     tenDichVu: firstService?.name || '',
     serviceId: firstService?.id || firstService?.name || null,
-    branchId: canFullBranch.value ? branchOptions.value[0]?.id ?? null : null,
+    branchId: getDefaultBranchId(),
     giaTriTaiSan: null,
     giaDichVuGoc: 0,
     phiGiam: 0,
@@ -2159,7 +2181,7 @@ const saveContract = async () => {
     giaSauGiam: newContract.value.giaSauGiam,
     hinhThucThanhToan: newContract.value.firstMethod,
     serviceId: newContract.value.serviceId,
-    branchId: canFullBranch.value ? newContract.value.branchId : null,
+    branchId: newContract.value.branchId ?? null,
     soTienThanhToan: firstPaymentAmount.value,
     initPlan: newContract.value.initPlan
   }
@@ -3263,7 +3285,7 @@ onUnmounted(() => {
   position: relative;
   overflow: hidden;
   box-shadow: 0 12px 24px rgba(20,30,48,.16);
-  height: 150px!important;
+  height: 145px!important;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
