@@ -1,8 +1,172 @@
 diff --git a/src/components/dich-vu/Phi-dich-vu.vue b/src/components/dich-vu/Phi-dich-vu.vue
-index 29df8e9f231afe33222c4b3827fb57b2bad9458d..f2314c4345ea0b0c0daf28222f9305b57e0c3fb5 100644
+index f2314c4345ea0b0c0daf28222f9305b57e0c3fb5..7ecc5857fdeec9a300505d05ade4b994fc2554b1 100644
 --- a/src/components/dich-vu/Phi-dich-vu.vue
 +++ b/src/components/dich-vu/Phi-dich-vu.vue
-@@ -1189,50 +1189,51 @@ const totalElements = ref(0)
+@@ -1,85 +1,105 @@
+ <template>
+   <div class="topbar">
+     <div class="brand">
+       <div class="brand-ico">
+         <i class="fa-solid fa-file-signature"></i>
+       </div>
+       <div class="min-w-0">
+         <div class="brand-title">Quản lý Hợp đồng</div>
+       </div>
+     </div>
+-
++    <div class="top-actions">
++      <router-link class="btn ghost" to="/-thg/dich-vu-chinh">
++        <i class="fa-solid fa-gear"></i>
++        <span>Tinh chỉnh mức phí THG</span>
++      </router-link>
++      <div class="user-chip">
++        <div class="user-meta">
++          <div class="user-name">{{ info.fullName || 'Chưa có tên' }}</div>
++          <div v-if="info.role" class="user-role">{{ info.role }}</div>
++        </div>
++        <img
++          v-if="info.avatarUrl"
++          :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
++          alt="avatar"
++          class="user-avatar"
++        />
++        <div v-else class="user-avatar user-avatar--fallback">
++          {{ initials(info.fullName) }}
++        </div>
++      </div>
++    </div>
+   </div>
+
+   <div class="ui-page">
+     <!-- KPIs -->
+
+     <!-- TABS -->
+     <div class="tabs-shell">
+       <div class="tabs">
+         <div class="tab" :class="{ active: activeTab === 1 }" @click="activeTab = 1">
+           <i class="fa-solid fa-layer-group"></i>
+           Danh sách & thao tác
+           <span class="pill">{{ totalElements }}</span>
+         </div>
+
+         <div class="tab" :class="{ active: activeTab === 2 }" @click="activeTab = 2">
+           <i class="fa-solid fa-chart-line"></i>
+           Thống kê
+           <span class="pill">0</span>
+         </div>
+       </div>
+
+       <!-- PANEL TAB 1 -->
+       <div class="panel attached" v-show="activeTab === 1">
+         <div class="kpi-row mt-3 px-3">
+           <div class="stat-card kpi-total">
+             <div class="stat-card-content">
+               <h5><i class="fa-solid fa-file-signature"></i> Tổng hợp đồng</h5>
+               <div class="stat-number">{{ totalElements }}</div>
+             </div>
+             <i class="fa-solid fa-file-signature stat-icon"></i>
+           </div>
+           <div class="stat-card kpi-revenue">
+             <div class="stat-card-content">
+               <h5><i class="fa-solid fa-chart-line"></i> Tổng doanh thu</h5>
+-              <div class="stat-number">{{ formatMoney(totalDoanhThu) }}</div>
++              <div class="stat-number">{{ formatTy(totalDoanhThu) }}</div>
+             </div>
+             <i class="fa-solid fa-chart-line stat-icon"></i>
+           </div>
+           <div class="stat-card kpi-adjust">
+             <div class="stat-card-content">
+               <h5><i class="fa-solid fa-sliders"></i> Tổng điều chỉnh</h5>
+-              <div class="stat-number">{{ formatMoney(totalDieuChinh) }}</div>
++              <div class="stat-number">{{ formatTy(totalDieuChinh) }}</div>
+             </div>
+             <i class="fa-solid fa-sliders stat-icon"></i>
+           </div>
+           <div class="stat-card kpi-sales">
+             <div class="stat-card-content">
+               <h5><i class="fa-solid fa-sack-dollar"></i> Tổng doanh số</h5>
+-              <div class="stat-number">{{ formatMoney(totalDoanhSo) }}</div>
++              <div class="stat-number">{{ formatTy(totalDoanhSo) }}</div>
+             </div>
+             <i class="fa-solid fa-sack-dollar stat-icon"></i>
+           </div>
+         </div>
+         <div class="panel-h">
+           <div class="tools">
+             <div class="input select filter-item filter-search" :class="{ active: searchQuery }">
+               <label>Tiềm kiếm</label>
+               <i class="fa-solid fa-magnifying-glass mt-2"></i>
+               <input v-model="searchQuery" type="text" placeholder="Tìm theo mã HĐ / khách / người tạo...">
+             </div>
+
+             <div class="select filter-item filter-service" :class="{ active: filterService }">
+               <label>Dịch vụ</label>
+               <select v-model="filterService">
+                 <option :value="null">Tất cả</option>
+                 <option v-for="service in serviceOptions" :key="service.id || service.name" :value="service.id || service.name">{{ service.name }}</option>
+               </select>
+             </div>
+
+             <div class="select filter-item filter-status" :class="{ active: filterStatus }">
+               <label>Trạng thái</label>
+               <select v-model="filterStatus">
+                 <option :value="null">Tất cả</option>
+                 <option value="DANG_HIEU_LUC">Đang hiệu lực</option>
+@@ -1138,60 +1158,63 @@
+         <div class="modal-b">
+           <div class="p-2">
+             <div class="font-extrabold">Xóa hợp đồng {{ currentContract?.maHopDong }}?</div>
+             <div class="muted mt-2">{{ currentContract?.tenKhachHang }} • {{ currentContract?.tenDichVu }} • Doanh thu hiện tại: {{ formatMoney(getDoanhThu(currentContract)) }}</div>
+             <div class="note mt-3">
+               Xóa sẽ mất cả các đợt <b>đóng phí</b>, <b>hoàn phí</b>, <b>điều chỉnh</b> của hợp đồng này.
+             </div>
+           </div>
+         </div>
+         <div class="modal-f">
+           <button class="btn ghost" @click="closeModal('modalDelete')">
+             <i class="fa-solid fa-ban"></i> Hủy
+           </button>
+           <button class="btn danger" @click="confirmDelete">
+             <i class="fa-solid fa-trash"></i> Xóa luôn
+           </button>
+         </div>
+       </div>
+     </div>
+   </div>
+ </template>
+
+ <script setup>
+ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+ import api from '/src/api/api.js'
++import { useAuthStore } from '../../stores/authStore'
+ import {
+   confirmWithInput,
+   showCenterWarning,
+   showError,
+   showLoading,
+   updateAlertError,
+   updateAlertSuccess
+ } from '/src/assets/js/alertService.js'
+ import ContractStatsDashboard from "../thiet-kegiandien/ContractStatsDashboard.vue";
+ import {shortenName} from "../../assets/js/global.js";
++const authStore = useAuthStore()
++const info = computed(() => authStore.userInfo || {})
+ const todayISO = () => {
+   const d = new Date()
+   const yyyy = d.getFullYear()
+   const mm = String(d.getMonth() + 1).padStart(2, '0')
+   const dd = String(d.getDate()).padStart(2, '0')
+   return `${yyyy}-${mm}-${dd}`
+ }
+ // Constants
+ const ENUM_STATUS = ['DANG_HIEU_LUC', 'HOAN_TAT', 'HUY']
+ const ENUM_PAY = ['TIEN_MAT', 'CHUYEN_KHOAN', 'QR', 'KHAC']
+ const ENUM_ADJ = ['GIAM_GIA', 'PHU_THU', 'PHAT', 'CHUYEN_DOI_DV']
+
+ // State
+ const activeTab = ref(1)
+ const contracts = ref([])
+ const totalElements = ref(0)
  const totalPages = ref(1)
  const seq = ref(1)
  const services = ref([])
@@ -12,423 +176,321 @@ index 29df8e9f231afe33222c4b3827fb57b2bad9458d..f2314c4345ea0b0c0daf28222f9305b5
  const searchQuery = ref('')
  const filterService = ref(null)
  const filterStatus = ref(null)
- const tuNgay = ref(null)
- const denNgay = ref(null)
- const currentPage = ref(1)
- const pageSize = ref(2)
- const currentUserName = ref('Nguyễn Minh')
- const searchTimer = ref(null)
-
- // Customer search
- const customerSearch = ref('')
- const selectedCustomer = ref(null)
- const customerSearchResults = ref([])
- const customerSearchLoading = ref(false)
- const customerSearchError = ref('')
- const customerSearchTimer = ref(null)
- const lastCustomerKeyword = ref('')
- const suppressCustomerSearch = ref(false)
-+const CONTRACT_DRAFT_KEY = 'contractDraftFromAppointment'
-
- // New contract form
- const newContract = ref({
-   maHopDong: '',
-   maKhachHang: '',
-   tenKhachHang: '',
-   tenDichVu: '',
-   serviceId: null,
-   giaTriTaiSan: null,
-   giaDichVuGoc: 0,
-   phiGiam: 0,
-   discountMode: 'PERCENT',
-   discountValue: 0,
-   giaSauGiam: 0,
-   trangThaiHopDong: 'DANG_HIEU_LUC',
-   ngayKy: todayISO(),
-   initPlan: 'COC',
-   tiLeCoc: 30,
-   firstMethod: 'CHUYEN_KHOAN'
+@@ -1457,50 +1480,60 @@ watch(() => payment.value.amount, (val) => {
  })
 
- // Modals
- const showModal = ref(null)
- const currentContract = ref(null)
- const detailContract = ref(null)
-@@ -1651,50 +1652,94 @@ const fetchContracts = async () => {
-     size: pageSize.value
-   }
+ watch(() => refund.value.amount, (val) => {
+   if (!currentContract.value) return
 
-   try {
-     const res = await api.post('/hop-dong/admin/search', payload)
-     const page = res?.data || {}
-     const items = Array.isArray(page.content) ? page.content : []
-     contracts.value = items
-     totalElements.value = Number(page.page.totalElements ?? items.length)
-     totalPages.value = Number(page.page.totalPages ?? Math.max(1, Math.ceil(totalElements.value / pageSize.value)))
-     if (currentPage.value > totalPages.value) {
-       currentPage.value = totalPages.value || 1
-     }
-   } catch (e) {
-     console.error('❌ Lỗi fetch contracts', e)
-     contracts.value = []
-     totalElements.value = 0
-     totalPages.value = 1
+   const maxAmount = getMaxRefundAmount(currentContract.value)
+   let num = Math.floor(parseNumberInput(val))
+
+   if (num > maxAmount) num = maxAmount
+   if (num < 0) num = 0
+
+   if (num !== refund.value.amount) {
+     refund.value.amount = num
    }
+ })
+
+ // Methods
+ // Helper functions
+ const formatMoney = (n) => {
+   const x = Math.round(Number(n || 0))
+   const sign = x < 0 ? '-' : ''
+   const abs = Math.abs(x)
+   return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' ₫'
  }
 
- const getServiceById = (serviceId) => {
-   return serviceOptions.value.find(s => String(s.id || s.name) === String(serviceId)) || null
- }
-
-+const applyContractDraftFromAppointment = async () => {
-+  const raw = localStorage.getItem(CONTRACT_DRAFT_KEY)
-+  if (!raw) return
-+  localStorage.removeItem(CONTRACT_DRAFT_KEY)
-+
-+  let draft = null
-+  try {
-+    draft = JSON.parse(raw)
-+  } catch (e) {
-+    return
-+  }
-+
-+  if (!draft?.phone && !draft?.serviceId) return
-+
-+  resetContractForm()
-+
-+  if (draft?.serviceId) {
-+    const matchedService = getServiceById(draft.serviceId)
-+    if (matchedService) {
-+      newContract.value.serviceId = matchedService.id || matchedService.name
-+    }
-+  }
-+
-+  openModal('modalContract')
-+  updateServicePrice()
-+
-+  const phone = String(draft?.phone || '').trim()
-+  if (!phone) return
-+
-+  suppressCustomerSearch.value = true
-+  customerSearch.value = phone
-+  suppressCustomerSearch.value = false
-+
-+  await fetchCustomerSearch(phone)
-+  const matchedCustomer = customerSearchResults.value.find(
-+    (customer) => String(customer.phone || customer.raw?.phone || '') === phone
-+  )
-+  if (matchedCustomer) {
-+    selectCustomer(matchedCustomer)
-+  } else if (customerSearchResults.value.length === 1) {
-+    selectCustomer(customerSearchResults.value[0])
-+  }
++const formatTy = (n) => {
++  const value = Number(n || 0) / 1_000_000_000
++  const abs = Math.abs(value)
++  const formatted = value.toLocaleString('vi-VN', {
++    minimumFractionDigits: abs > 0 && abs < 1 ? 1 : 0,
++    maximumFractionDigits: 1
++  })
++  return `${formatted} tỷ`
 +}
 +
- const getSegmentsByService = (serviceId) => {
-   return segments.value
-       .filter(seg => String(seg.serviceId) === String(serviceId))
-       .sort((a, b) => Number(a.min) - Number(b.min))
+ const formatNumberInput = (n) => {
+   if (n === null || n === undefined || n === '') return ''
+   const x = Math.round(Number(n || 0))
+   const sign = x < 0 ? '-' : ''
+   const abs = Math.abs(x)
+   return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
  }
 
- const findSegmentForAsset = (serviceId, assetValue) => {
-   if (!serviceId || !assetValue) return null
-   const segments = getSegmentsByService(serviceId)
-   return segments.find(seg =>
-       assetValue >= Number(seg.min) && assetValue < Number(seg.max)
-   ) || null
+ const parseNumberInput = (value, allowNegative = false) => {
+   const raw = String(value || '').trim()
+   if (!raw) return 0
+   const noDots = raw.replace(/\./g, '')
+   const cleaned = allowNegative ? noDots.replace(/[^0-9-]/g, '') : noDots.replace(/[^0-9]/g, '')
+   let parsed = Number(cleaned)
+   if (Number.isNaN(parsed)) parsed = 0
+   if (!allowNegative) return Math.max(0, parsed)
+   return parsed
  }
 
- const genContractCode = () => {
-   const y = new Date().getFullYear()
-   return `HD-${y}-${pad4(seq.value++)}`
+ const initials = (name) => {
+   const parts = String(name || '')
+       .trim()
+       .split(/\s+/)
+       .filter(Boolean)
+   if (parts.length === 0) return 'NA'
+@@ -2718,98 +2751,141 @@ onUnmounted(() => {
+   --sh2: 0 12px 26px rgba(20,30,48,.10);
+   --t: all .18s cubic-bezier(.4,0,.2,1);
+
+   min-height: 92vh;
+   color: var(--text);
+   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+   background:
+       radial-gradient(1200px 700px at 12% 6%, rgba(102,126,234,.18), transparent 60%),
+       radial-gradient(900px 650px at 88% 0%, rgba(240,147,251,.16), transparent 58%),
+       radial-gradient(1000px 750px at 70% 100%, rgba(79,172,254,.14), transparent 55%),
+       linear-gradient(135deg, rgba(20,30,48,.05), rgba(20,30,48,.00));
+   padding: 5px 20px;
+   position: relative;
+   top: -10px;
  }
+ .muted{ color: var(--muted); }
+ .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+ .tiny{ font-size: 12px; }
+ .no-select{ user-select:none; }
 
- // Calculation functions
- const calcTongDong = (c) => {
-   return (c?.dotDongTien || []).reduce((sum, x) => sum + (Number(x.soTienDong) || 0), 0)
+ /* =========================
+    TOPBAR
+ ========================= */
+ .topbar{
+   border: 1px solid var(--line);
++  border-bottom: 1px solid #ef4444;
+   border-radius: var(--r);
+   box-shadow: var(--sh2);
+   background: rgba(255,255,255,.66);
+   backdrop-filter: blur(10px);
+   padding: 10px 22px 26px;
+   display:flex;
+   align-items:center;
+   justify-content:space-between;
+   gap: 12px;
+   flex-wrap: wrap;
  }
-
- const calcTongHoan = (c) => {
-@@ -2607,52 +2652,53 @@ const init3Samples = () => {
-
-     // Add extra payment if HOAN_TAT and not FULL
-     if (x.trangThaiHopDong === 'HOAN_TAT' && x.initPlan !== 'FULL') {
-       const remain = Math.max(0, giaSau - amount)
-       if (remain > 0) {
-         contract.dotDongTien.push({
-           id: crypto.randomUUID(),
-           soTienDong: remain,
-           hinhThucThanhToan: 'CHUYEN_KHOAN',
-           ngayDongTien: x.ngayKy,
-           ghiChu: 'Đóng nốt (mẫu)',
-           nguoiGhiNhan: 'demo_admin',
-           ngayTao: new Date().toLocaleString('vi-VN')
-         })
-       }
-     }
-
-     return contract
-   })
+ .brand{ display:flex; align-items:center; gap:10px; min-width: 0; }
+ .brand-ico{
+   width:40px; height:40px;
+   border-radius: 14px;
+   display:grid; place-items:center;
+   color:#fff;
+   background: var(--primary-gradient);
+   box-shadow: 0 16px 28px rgba(102,126,234,.24);
+   flex: 0 0 auto;
  }
-
- // Lifecycle
- onMounted(async () => {
-   document.addEventListener('click', handleDocumentClick)
-   await Promise.all([fetchServices(), fetchSegments()])
--  await fetchContracts()
-   resetContractForm()
-+  await applyContractDraftFromAppointment()
-+  await fetchContracts()
- })
-
- onUnmounted(() => {
-   document.removeEventListener('click', handleDocumentClick)
- })
- </script>
-
- <style scoped>
- /* CSS styles from original file - với chỉnh sửa cho 5 nút thao tác */
- .ui-page{
-   --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-   --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-   --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-   --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-   --danger-gradient: linear-gradient(135deg, #ff5858 0%, #f09819 100%);
-   --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-   --dark-gradient: linear-gradient(135deg, #141e30 0%, #243b55 100%);
-   --light-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-
-   --primary-color: #667eea;
-   --secondary-color: #f093fb;
-   --success-color: #43e97b;
-   --warning-color: #fa709a;
-   --danger-color: #ff5858;
-   --info-color: #4facfe;
-diff --git a/src/components/thiet-kegiandien/AppointmentsPage.vue b/src/components/thiet-kegiandien/AppointmentsPage.vue
-index ba8379e9afa46c1297314dfeb4bd4f481a7a5f31..0fdc4f47a519892e27e79b7d4f1dbce7a305f302 100644
---- a/src/components/thiet-kegiandien/AppointmentsPage.vue
-+++ b/src/components/thiet-kegiandien/AppointmentsPage.vue
-@@ -321,50 +321,54 @@ const historyPanelRef = ref(null)
- // ===== Create form =====
- const createForm = reactive({
-   customerSearch: '',
-   selectedCustomer: null,
-   branch: null,
-   date: '',
-   time: '',
-   staff: '',
-   consultant: 'Tư vấn 1',
-   note: '',
-   rating: null,
- })
-
- const editForm = reactive({
-   branch: null,
-   date: '',
-   time: '',
-   consultantId: null,
-   status: 'WAITING',
-   rating: null,
-   note: '',
-   customerNote: '',
-   updateReason: '',
-   consultStatus: null
- })
-+const editContext = reactive({
-+  phone: '',
-+  serviceId: null,
-+})
-
- function makeHistory(actor, action, desc) {
-   return { ts: nowISO(), actor, action, desc }
+ .brand-title{
+   font-size: 18px;
+   font-weight: 850;
+   letter-spacing: .2px;
+   line-height: 1.1;
+   background: var(--dark-gradient);
+   -webkit-background-clip: text;
+   background-clip: text;
+   color: transparent;
+   -webkit-text-fill-color: transparent;
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   max-width: 62vw;
  }
-
-
-
- /**
-  * Flags for marker rule:
-  * - createdByMe => ORANGE marker
-  * - inCharge => BLUE marker
-  */
- const appointments = ref([])
-
- function getRowMarker(appt) {
-   if (appt?.createdByMe) return { color: '#f97316', glow: 'rgba(253, 230, 138, 0.75)' } // ORANGE
-   if (appt?.inCharge) return { color: '#2563eb', glow: 'rgba(191, 219, 254, 0.78)' } // BLUE
-   return { color: '#667eea', glow: 'rgba(224, 231, 255, 0.7)' }
+ @media (max-width: 640px){
+   .brand-title{ max-width: 78vw; }
  }
+ .brand-sub{ font-size:12px; color: rgba(11,18,32,.62); font-weight: 650; margin-top:2px; }
 
- function monthTitle(d) {
-   return `Tháng ${d.getMonth() + 1}, ${d.getFullYear()}`
+ .top-actions{
+   display:flex; align-items:center; gap:8px;
+   flex-wrap: wrap;
+   justify-content:flex-end;
+   width: fit-content;
+   margin-left: auto;
  }
++.user-chip{
++  display: inline-flex;
++  align-items: center;
++  gap: 12px;
++  padding: 6px 10px;
++  border-radius: 999px;
++  background: rgba(255,255,255,.7);
++  border: 1px solid rgba(15,23,42,.08);
++}
++.user-meta{
++  display:flex;
++  flex-direction: column;
++  align-items: flex-end;
++  line-height: 1.1;
++}
++.user-name{
++  font-size: 13px;
++  font-weight: 750;
++  color: #0f172a;
++}
++.user-role{
++  font-size: 11px;
++  color: rgba(15,23,42,.6);
++  font-weight: 600;
++}
++.user-avatar{
++  width: 34px;
++  height: 34px;
++  border-radius: 999px;
++  object-fit: cover;
++  border: 1px solid rgba(15,23,42,.12);
++  display: grid;
++  place-items: center;
++  font-weight: 700;
++  color: #fff;
++  background: var(--primary-gradient);
++  text-transform: uppercase;
++}
++.user-avatar--fallback{
++  display: grid;
++  place-items: center;
++}
 
- // ===== Conflict =====
-@@ -552,50 +556,51 @@ function mapAppointmentFromApi(dto) {
+ /* =========================
+    BUTTONS
+ ========================= */
+ .btn{
+   height: 36px;
+   padding: 0 12px;
+   border-radius: 12px;
+   border: none;
+   cursor: pointer;
+   font-size: 13px;
+   font-weight: 760;
+   display:inline-flex;
+   align-items:center;
+   gap:8px;
+   transition: var(--t);
+   position: relative;
+   overflow:hidden;
+   white-space: nowrap;
+ }
+ .btn:hover{ transform: translateY(-1px); filter: brightness(1.01); }
+ .btn:active{ transform: translateY(0px); }
+
+ .btn.primary{ background: var(--primary-gradient); color:#fff; box-shadow: 0 14px 28px rgba(102,126,234,.22); }
+ .btn.secondary{ background: var(--secondary-gradient); color:#fff; box-shadow: 0 14px 28px rgba(240,147,251,.20); }
+diff --git a/src/components/thiet-kegiandien/ContractStatsDashboard.vue b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
+index 7ab3e23c72116ea14e9a8271e2b6dc3e78510cae..2f0677bf0a9380fd96e05eed24650db170fa8c15 100644
+--- a/src/components/thiet-kegiandien/ContractStatsDashboard.vue
++++ b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
+@@ -232,96 +232,106 @@ const stats = ref({
+   completedContracts: 0,
+   cancelledContracts: 0,
+   totalRevenue: 0,
+   totalSales: 0,
+ });
+
+ // ===== Helpers =====
+ const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+ const toISODate = (d) => {
+   const yyyy = d.getFullYear();
+   const mm = String(d.getMonth() + 1).padStart(2, "0");
+   const dd = String(d.getDate()).padStart(2, "0");
+   return `${yyyy}-${mm}-${dd}`;
+ };
+
+ const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1);
+
+ const dateText = computed(() => {
+   if (!selectedYear.value || selectedYear.value < 1) return "—";
+   if (timeRange.value === "month") {
+     return `Tháng ${selectedMonth.value}/${selectedYear.value}`;
    }
- }
- const detailLoading = ref(false)
- const detailError = ref('')
- const editLoading = ref(false)
- const editError = ref('')
- function mapAppointmentDetailFromApi(dto) {
-   return {
-     id: dto.appointmentId,
+   return `Năm ${selectedYear.value}`;
+ });
 
-     customerId: dto.customer?.id,
-     customer: dto.customer?.name,
-     phone: dto.customer?.phone,
-     address: dto.customer?.address,
-     oldAddress: dto.customer?.oldAress,
-     customerNote: dto.customer?.customerNote,
-     customerFee: dto.customer?.phi ?? null,
-     customerType: dto.customer?.customerType,
-     files: dto.customer?.files || [],
-     giaBDS: dto.customer?.giaBDS || null,
-     date: dto.appointmentDate,
-     time: dto.appointmentTime,
-     status: dto.status,
-     consultStatus: dto.consultStatus,
-     rating: dto.rating,
-+    maDichVu: dto.maDichVu ?? dto.serviceId ?? dto.dichVuId ?? null,
-     tenDichVu: dto.tenDichVu ?? dto.serviceName ?? dto.dichVuName ?? '',
-     mauDichVu: dto.mauDichVu ?? dto.serviceColor ?? dto.dichVuColor ?? '',
-     note: dto.note,
-     branchId: dto.branchID ?? null,   // ✅ ID
-     branch: dto.branch ?? null,
++const formatTy = (value) => {
++  const amount = Number(value || 0) / 1_000_000_000;
++  const abs = Math.abs(amount);
++  const formatted = amount.toLocaleString("vi-VN", {
++    minimumFractionDigits: abs > 0 && abs < 1 ? 1 : 0,
++    maximumFractionDigits: 1,
++  });
++  return `${formatted} tỷ`;
++};
++
+ const statCards = computed(() => [
+   {
+     key: "totalContracts",
+     icon: "fa-solid fa-file-contract",
+     label: "Tổng hợp đồng",
+     value: stats.value.totalContracts.toLocaleString("vi-VN"),
+     tone: "indigo",
+     badge: "Tổng quan",
+   },
+   {
+     key: "activeContracts",
+     icon: "fa-solid fa-handshake",
+     label: "Hợp đồng đang hiệu lực",
+     value: stats.value.activeContracts.toLocaleString("vi-VN"),
+     tone: "sky",
+     badge: "Đang chạy",
+   },
+   {
+     key: "completedContracts",
+     icon: "fa-solid fa-circle-check",
+     label: "Hợp đồng hoàn tất",
+     value: stats.value.completedContracts.toLocaleString("vi-VN"),
+     tone: "emerald",
+     badge: "Kết quả",
+   },
+   {
+     key: "cancelledContracts",
+     icon: "fa-solid fa-circle-xmark",
+     label: "Hợp đồng hủy",
+     value: stats.value.cancelledContracts.toLocaleString("vi-VN"),
+     tone: "rose",
+     badge: "Cảnh báo",
+   },
+   {
+     key: "totalRevenue",
+     icon: "fa-solid fa-money-bill-wave",
+-    label: "Tổng doanh thu (triệu VNĐ)",
+-    value: stats.value.totalRevenue.toLocaleString("vi-VN"),
++    label: "Tổng doanh thu (tỷ VNĐ)",
++    value: formatTy(stats.value.totalRevenue),
+     tone: "amber",
+     badge: "Doanh thu",
+   },
+   {
+     key: "totalSales",
+     icon: "fa-solid fa-chart-line",
+-    label: "Tổng doanh số (triệu VNĐ)",
+-    value: stats.value.totalSales.toLocaleString("vi-VN"),
++    label: "Tổng doanh số (tỷ VNĐ)",
++    value: formatTy(stats.value.totalSales),
+     tone: "violet",
+     badge: "Doanh số",
+   },
+ ]);
 
-     consultantId: dto.consultant?.id ?? dto.consultantId,
-     consultant: dto.consultant?.name,
-     creator: dto.creator?.name,
+ const serviceOptions = computed(() => [
+   { id: "all", name: "Tất cả dịch vụ" },
+   ...services.value.map((service) => ({ id: service.id, name: service.name })),
+ ]);
 
-     history: (dto.histories || []).map(h => ({
-       ts: h.createdAt,
-       actor: h.actorName,
-       action: h.action,
-       desc: h.note,
-       status: h.status,
-       consultStatus: h.consultStatus,
-     })),
-   }
- }
- async function openDetailModal(appt) {
-   isDetailModalOpen.value = true
-   selectedAppointment.value = null
-   detailLoading.value = true
-   detailError.value = ''
-@@ -946,102 +951,115 @@ function syncHistoryPanelHeight() {
-   const leftHeight = detailCardRef.value.offsetHeight
-   if (!leftHeight) return
-   historyPanelRef.value.style.height = `${leftHeight}px`
- }
+ const revenueTitle = computed(() => {
+   const selected = serviceOptions.value.find((option) => option.id === selectedService.value);
+   const suffix = timeRange.value === "month" ? "theo tháng" : "theo năm";
+   return `Doanh thu ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
+ });
 
- // ===== Edit modal =====
- async function openEditModal(id) {
-   editId.value = id
-   closeDetailModal()
-   isModalOpen.value = true
-   editLoading.value = true
-   editError.value = ''
+ const revenueSubtitle = computed(() => {
+   if (selectedService.value === "all") return "Phân loại theo dịch vụ";
+   return "Phân loại theo phân khúc dịch vụ";
+ });
 
-   try {
-     const res = await api.get(`/customer-crm/admin/lich-hen/${id}`)
-     const mapped = mapAppointmentDetailFromApi(res.data)
-     console.log('Edit appointment data', mapped.branchId)
-     editForm.branch = BRANCHES.value.find(
-         b => b.key === mapped.branchId
-     )?.key ?? null
-     console.log('Mapped branch ID for edit form', editForm.branch)
-     editForm.date = mapped.date || ''
-     editForm.time = mapped.time || ''
-     editForm.consultantId = mapped.consultantId || null
-     editForm.status = mapped.status || 'WAITING'
--    editForm.rating = mapped.rating ?? null
-+    editForm.rating = mapped.maDichVu ?? mapped.rating ?? null
-     editForm.note = mapped.note || ''
-     editForm.customerNote = mapped.customerNote || ''
-     editForm.consultStatus = mapped.consultStatus || null
-+    editContext.phone = mapped.phone || ''
-+    editContext.serviceId = mapped.maDichVu ?? mapped.rating ?? null
-     applyServiceDefaults()
-
-     renderHistory(mapped)
-     await fetchEditConsultantsByBranch(editForm.branch)
-   } catch (e) {
-     editError.value = 'Không thể tải chi tiết lịch hẹn'
-     showToast('Lỗi tải lịch hẹn', 'Không thể tải chi tiết lịch hẹn.', 'error')
-   } finally {
-     editLoading.value = false
-   }
- }
- function closeEditModal() {
-   isModalOpen.value = false
-   editId.value = null
-   editError.value = ''
-   editLoading.value = false,
-   editForm.updateReason = ''
- }
- async function saveEditModal() {
-   if (editId.value == null) return
-
-   const payload = {
-     appointmentId: editId.value,
-     branchId: editForm.branch,
-     appointmentDate: editForm.date,
-     appointmentTime: editForm.time,
-     consultantId: editForm.consultantId,
-     status: editForm.status,
-     rating: editForm.rating,
-     consultStatus: editForm.consultStatus || null, // ✅ thêm
-     note: editForm.note?.trim(),
-     customerNote: editForm.customerNote?.trim(),
-     updateReason: editForm.updateReason?.trim(),
-   }
-
-   console.log('Update appointment payload', payload)
-
-   try {
-     const res = await showLoading( api.post(
-         '/customer-crm/admin/lich-hen/update',
-         payload
-     ));
-
-     if (res.data.success) {
-       updateAlertSuccess('✅ Cập nhật lịch hẹn thành công')
-       await refreshAppointmentsAndStats()
-       closeEditModal()
-       // reload list / calendar nếu cần
-+      if (editForm.consultStatus === ConsultStatus.SUCCESS) {
-+        const shouldCreateContract = window.confirm('Buổi hẹn thành công. Tạo hợp đồng cho khách hàng?')
-+        if (shouldCreateContract) {
-+          const payloadDraft = {
-+            phone: editContext.phone || null,
-+            serviceId: editForm.rating ?? editContext.serviceId ?? null,
-+          }
-+          localStorage.setItem('contractDraftFromAppointment', JSON.stringify(payloadDraft))
-+          window.location.assign('/-thg/dich-vu')
-+        }
-+      }
-     } else {
-       updateAlertError('❌ Cập nhật thất bại:', res.data.message)
-       alert(res.data.message)
-     }
-   } catch (e) {
-     console.error('❌ Lỗi gọi API update lịch hẹn', e)
-   }
- }
- // ===== Lấy tất cả chi nhánh =========
- const applyServiceDefaults = () => {
-   const firstServiceId = serviceOptions.value[0]?.id ?? null
-   const createHasService = serviceOptions.value.some(
-     (service) => String(service.id ?? service.name) === String(createForm.rating)
-   )
-   const editHasService = serviceOptions.value.some(
-     (service) => String(service.id ?? service.name) === String(editForm.rating)
-   )
-   if ((!createForm.rating || !createHasService) && firstServiceId) {
-     createForm.rating = firstServiceId
-   }
-   if (isModalOpen.value && (!editForm.rating || !editHasService) && firstServiceId) {
-     editForm.rating = firstServiceId
-   }
- }
-
+ const salesTitle = computed(() => {
+   const selected = serviceOptions.value.find((option) => option.id === selectedService.value);
+   const suffix = timeRange.value === "month" ? "theo tháng" : "theo năm";
+   return `Doanh số ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;

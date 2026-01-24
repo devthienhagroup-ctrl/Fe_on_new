@@ -314,6 +314,16 @@ const editId = ref(null)
 const isModalOpen = ref(false)
 const isCreateModalOpen = ref(false)
 const isDetailModalOpen = ref(false)
+const confirmDialog = reactive({
+  open: false,
+  title: '',
+  message: '',
+  confirmText: 'Đồng ý',
+  cancelText: 'Để sau',
+  variant: 'info',
+  showCancel: true,
+  resolve: null,
+})
 const selectedAppointment = ref(null)
 const detailCardRef = ref(null)
 const historyPanelRef = ref(null)
@@ -997,6 +1007,44 @@ function closeEditModal() {
   editLoading.value = false,
   editForm.updateReason = ''
 }
+
+function openConfirmDialog({
+  title,
+  message,
+  confirmText = 'Đồng ý',
+  cancelText = 'Để sau',
+  variant = 'info',
+  showCancel = true,
+} = {}) {
+  return new Promise((resolve) => {
+    confirmDialog.open = true
+    confirmDialog.title = title || 'Xác nhận thao tác'
+    confirmDialog.message = message || ''
+    confirmDialog.confirmText = confirmText
+    confirmDialog.cancelText = cancelText
+    confirmDialog.variant = variant
+    confirmDialog.showCancel = showCancel
+    confirmDialog.resolve = resolve
+  })
+}
+
+const closeConfirmDialog = (value = false) => {
+  confirmDialog.open = false
+  if (confirmDialog.resolve) {
+    confirmDialog.resolve(value)
+  }
+  confirmDialog.resolve = null
+}
+
+function getConfirmIcon(variant) {
+  const icons = {
+    success: 'fa-circle-check',
+    danger: 'fa-triangle-exclamation',
+    warning: 'fa-circle-exclamation',
+    info: 'fa-circle-info',
+  }
+  return icons[variant] || icons.info
+}
 async function saveEditModal() {
   if (editId.value == null) return
 
@@ -1029,7 +1077,13 @@ async function saveEditModal() {
       closeEditModal()
       // reload list / calendar nếu cần
       if ( temp === ConsultStatus.SUCCESS) {
-        const shouldCreateContract = window.confirm('Buổi hẹn thành công. Tạo hợp đồng cho khách hàng?')
+        const shouldCreateContract = await openConfirmDialog({
+          title: 'Tạo hợp đồng cho khách hàng?',
+          message: 'Buổi hẹn thành công. Bạn có muốn tạo hợp đồng ngay bây giờ không?',
+          confirmText: 'Tạo hợp đồng',
+          cancelText: 'Để sau',
+          variant: 'success',
+        })
         if (shouldCreateContract) {
           const payloadDraft = {
             phone: editContext.phone || null,
@@ -1041,7 +1095,13 @@ async function saveEditModal() {
       }
     } else {
       updateAlertError('❌ Cập nhật thất bại:', res.data.message)
-      alert(res.data.message)
+      await openConfirmDialog({
+        title: 'Cập nhật thất bại',
+        message: res.data.message || 'Có lỗi xảy ra, vui lòng thử lại.',
+        confirmText: 'Đóng',
+        showCancel: false,
+        variant: 'danger',
+      })
     }
   } catch (e) {
     console.error('❌ Lỗi gọi API update lịch hẹn', e)
@@ -1998,10 +2058,11 @@ onMounted(async () => {
 
   // ===== Global listeners =====
   registerWindowListener('keydown', (e) => {
-    if (e.key === 'Escape' && (isModalOpen.value || isCreateModalOpen.value || isDetailModalOpen.value)) {
+    if (e.key === 'Escape' && (isModalOpen.value || isCreateModalOpen.value || isDetailModalOpen.value || confirmDialog.open)) {
       if (isModalOpen.value) closeEditModal()
       if (isCreateModalOpen.value) closeCreateModal()
       if (isDetailModalOpen.value) closeDetailModal()
+      if (confirmDialog.open) closeConfirmDialog(false)
     }
   })
 
@@ -3090,6 +3151,36 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </div>
+
+    <div v-if="confirmDialog.open" class="backdrop popup-backdrop" @click.self="closeConfirmDialog(false)">
+      <div class="popup-modal" :class="`variant-${confirmDialog.variant}`" role="dialog" aria-modal="true">
+        <div class="popup-head">
+          <div class="popup-icon">
+            <i class="fa-solid" :class="getConfirmIcon(confirmDialog.variant)"></i>
+          </div>
+          <button class="popup-close" type="button" @click="closeConfirmDialog(false)">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="popup-body">
+          <h4>{{ confirmDialog.title }}</h4>
+          <p>{{ confirmDialog.message }}</p>
+        </div>
+        <div class="popup-foot">
+          <button
+            v-if="confirmDialog.showCancel"
+            class="btn btn-secondary"
+            type="button"
+            @click="closeConfirmDialog(false)"
+          >
+            {{ confirmDialog.cancelText }}
+          </button>
+          <button class="btn btn-primary popup-confirm" type="button" @click="closeConfirmDialog(true)">
+            {{ confirmDialog.confirmText }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -4093,6 +4184,83 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
   justify-content:flex-end;
   background: rgba(255,255,255,0.72);
   backdrop-filter: blur(10px);
+}
+
+/* ===== Popup confirm ===== */
+.popup-backdrop{
+  background: rgba(15,23,42,0.72);
+}
+.popup-modal{
+  width: min(420px, 92vw);
+  background: rgba(255,255,255,0.98);
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 20px 60px rgba(15,23,42,0.25);
+  border: 1px solid rgba(15,23,42,0.08);
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  animation: modalIn 0.18s ease-out;
+}
+.popup-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.popup-icon{
+  width:54px;
+  height:54px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  box-shadow: 0 14px 30px rgba(15,23,42,0.18);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.popup-modal.variant-success .popup-icon{
+  background: linear-gradient(135deg, #22c55e 0%, #4ade80 100%);
+}
+.popup-modal.variant-danger .popup-icon{
+  background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+}
+.popup-modal.variant-warning .popup-icon{
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+}
+.popup-modal.variant-info .popup-icon{
+  background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+}
+.popup-close{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid rgba(15,23,42,0.12);
+  background: rgba(248,250,252,0.9);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.popup-body h4{
+  margin:0 0 6px;
+  font-size:17px;
+  font-weight:900;
+  color:#0f172a;
+}
+.popup-body p{
+  margin:0;
+  color:#475569;
+  font-size:14px;
+  font-weight:600;
+  line-height:1.5;
+}
+.popup-foot{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+}
+.popup-confirm{
+  box-shadow: 0 12px 24px rgba(79,70,229,0.2);
 }
 
 /* Section title + gradient icons */

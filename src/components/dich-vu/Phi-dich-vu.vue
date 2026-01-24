@@ -8,7 +8,27 @@
         <div class="brand-title">Quản lý Hợp đồng</div>
       </div>
     </div>
-
+    <div class="top-actions">
+      <router-link class="btn ghost" to="/-thg/dich-vu-chinh">
+        <i class="fa-solid fa-gear"></i>
+        <span>Tinh chỉnh mức phí THG</span>
+      </router-link>
+      <div class="user-chip">
+        <div class="user-meta">
+          <div class="user-name">{{ info.fullName || 'Chưa có tên' }}</div>
+          <div v-if="info.role" class="user-role">{{ info.role }}</div>
+        </div>
+        <img
+          v-if="info.avatarUrl"
+          :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+          alt="avatar"
+          class="user-avatar"
+        />
+        <div v-else class="user-avatar user-avatar--fallback">
+          {{ initials(info.fullName) }}
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="ui-page">
@@ -43,21 +63,21 @@
           <div class="stat-card kpi-revenue">
             <div class="stat-card-content">
               <h5><i class="fa-solid fa-chart-line"></i> Tổng doanh thu</h5>
-              <div class="stat-number">{{ formatMoney(totalDoanhThu) }}</div>
+              <div class="stat-number">{{ formatTy(totalDoanhThu) }}</div>
             </div>
             <i class="fa-solid fa-chart-line stat-icon"></i>
           </div>
           <div class="stat-card kpi-adjust">
             <div class="stat-card-content">
               <h5><i class="fa-solid fa-sliders"></i> Tổng điều chỉnh</h5>
-              <div class="stat-number">{{ formatMoney(totalDieuChinh) }}</div>
+              <div class="stat-number">{{ formatTy(totalDieuChinh) }}</div>
             </div>
             <i class="fa-solid fa-sliders stat-icon"></i>
           </div>
           <div class="stat-card kpi-sales">
             <div class="stat-card-content">
               <h5><i class="fa-solid fa-sack-dollar"></i> Tổng doanh số</h5>
-              <div class="stat-number">{{ formatMoney(totalDoanhSo) }}</div>
+              <div class="stat-number">{{ formatTy(totalDoanhSo) }}</div>
             </div>
             <i class="fa-solid fa-sack-dollar stat-icon"></i>
           </div>
@@ -1160,6 +1180,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import api from '/src/api/api.js'
+import { useAuthStore } from '../../stores/authStore'
 import {
   confirmWithInput,
   showCenterWarning,
@@ -1170,6 +1191,8 @@ import {
 } from '/src/assets/js/alertService.js'
 import ContractStatsDashboard from "../thiet-kegiandien/ContractStatsDashboard.vue";
 import {shortenName} from "../../assets/js/global.js";
+const authStore = useAuthStore()
+const info = computed(() => authStore.userInfo || {})
 const todayISO = () => {
   const d = new Date()
   const yyyy = d.getFullYear()
@@ -1477,6 +1500,16 @@ const formatMoney = (n) => {
   const sign = x < 0 ? '-' : ''
   const abs = Math.abs(x)
   return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' ₫'
+}
+
+const formatTy = (n) => {
+  const value = Number(n || 0) / 1_000_000_000
+  const abs = Math.abs(value)
+  const formatted = value.toLocaleString('vi-VN', {
+    minimumFractionDigits: abs > 0 && abs < 1 ? 1 : 0,
+    maximumFractionDigits: 1
+  })
+  return `${formatted} tỷ`
 }
 
 const formatNumberInput = (n) => {
@@ -2787,6 +2820,48 @@ onUnmounted(() => {
   justify-content:flex-end;
   width: fit-content;
   margin-left: auto;
+}
+.user-chip{
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.7);
+  border: 1px solid rgba(15,23,42,.08);
+}
+.user-meta{
+  display:flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.1;
+}
+.user-name{
+  font-size: 13px;
+  font-weight: 750;
+  color: #0f172a;
+}
+.user-role{
+  font-size: 11px;
+  color: rgba(15,23,42,.6);
+  font-weight: 600;
+}
+.user-avatar{
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid rgba(15,23,42,.12);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: #fff;
+  background: var(--primary-gradient);
+  text-transform: uppercase;
+}
+.user-avatar--fallback{
+  display: grid;
+  place-items: center;
 }
 
 /* =========================

@@ -254,6 +254,16 @@ const dateText = computed(() => {
   return `Năm ${selectedYear.value}`;
 });
 
+const formatTy = (value) => {
+  const amount = Number(value || 0) / 1_000_000_000;
+  const abs = Math.abs(amount);
+  const formatted = amount.toLocaleString("vi-VN", {
+    minimumFractionDigits: abs > 0 && abs < 1 ? 1 : 0,
+    maximumFractionDigits: 1,
+  });
+  return `${formatted} tỷ`;
+};
+
 const statCards = computed(() => [
   {
     key: "totalContracts",
@@ -290,16 +300,16 @@ const statCards = computed(() => [
   {
     key: "totalRevenue",
     icon: "fa-solid fa-money-bill-wave",
-    label: "Tổng doanh thu (triệu VNĐ)",
-    value: stats.value.totalRevenue.toLocaleString("vi-VN"),
+    label: "Tổng doanh thu (tỷ VNĐ)",
+    value: formatTy(stats.value.totalRevenue),
     tone: "amber",
     badge: "Doanh thu",
   },
   {
     key: "totalSales",
     icon: "fa-solid fa-chart-line",
-    label: "Tổng doanh số (triệu VNĐ)",
-    value: stats.value.totalSales.toLocaleString("vi-VN"),
+    label: "Tổng doanh số (tỷ VNĐ)",
+    value: formatTy(stats.value.totalSales),
     tone: "violet",
     badge: "Doanh số",
   },
