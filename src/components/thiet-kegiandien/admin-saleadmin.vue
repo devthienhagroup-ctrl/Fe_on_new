@@ -75,12 +75,25 @@
                 <option value="all">Tất cả trạng thái</option>
                 <option value="NEW">Mới nhập</option>
                 <option value="DC_TELESALES">Chờ liên hệ</option>
+                <option value="CHAM_SOC">Chăm sóc</option>
                 <option value="TN_7NGAY">Tiềm năng 7 ngày</option>
                 <option value="TN_14NGAY">Tiềm năng 14 ngày</option>
                 <option value="THANH_CONG">Thành công</option>
+                <option value="TRIEN_KHAI">Triển khai</option>
+                <option value="KHACH_HUY_HEN">Khách huỷ hẹn</option>
+                <option value="THAT_BAI">Thất bại</option>
                 <option value="SAI_SO_LIEU">Sai số</option>
                 <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc</option>
-                <option value="CHAM_SOC">Chăm sóc</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label mb-2 fw-medium">Nguồn</label>
+              <select class="form-select form-select-custom" v-model="filters.resource">
+                <option value="all">Tất cả nguồn</option>
+                <option v-for="source in customerSources" :key="source.id" :value="source.id">
+                  {{ source.label }}
+                </option>
               </select>
             </div>
 
@@ -575,7 +588,7 @@
 
                       <!-- Trạng thái -->
                       <td>
-    <span :class="`status-badge status-${customer.trangThai}`">
+    <span :class="['status-badge', getStatusClass(customer.trangThai)]">
       {{ getStatusLabel(customer.trangThai) }}
     </span>
                       </td>
@@ -951,7 +964,7 @@
                 <div class="detail-hero-info">
                   <div class="detail-hero-title">
                     <h4 class="mb-0">{{ customerForm.name || 'Khách hàng' }}</h4>
-                    <span v-if="customerForm.status" :class="`status-badge status-${customerForm.status}`">
+                    <span v-if="customerForm.status" :class="['status-badge', getStatusClass(customerForm.status)]">
                       {{ getStatusLabel(customerForm.status) }}
                     </span>
                   </div>
@@ -1060,8 +1073,7 @@
 
                           <!-- ===== BỔ SUNG ===== -->
                           <option value="KHACH_HUY_HEN">Khách huỷ hẹn</option>
-                          <option value="BAN_NHANH">Bán nhanh</option>
-                          <option value="BAN_GP">Bán giải pháp</option>
+                          <option value="TRIEN_KHAI">Triển khai</option>
 
                           <option value="SAI_SO_LIEU">Sai số</option>
                           <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc được</option>
@@ -1216,7 +1228,7 @@
                 <div class="detail-hero-info">
                   <div class="detail-hero-title">
                     <h4 class="mb-0">{{ detailCustomer.hoTen }}</h4>
-                    <span :class="`status-badge status-${detailCustomer.trangThai}`" style="font-size: 14px !important;">
+                    <span :class="['status-badge', getStatusClass(detailCustomer.trangThai)]" style="font-size: 14px !important;">
                   {{ getStatusLabel(detailCustomer.trangThai) }}
                 </span>
                   </div>
@@ -1259,8 +1271,17 @@
                         <div class="info-value">{{ formatCurrency(detailCustomer.giaBDS) }}</div>
                       </div>
                       <div class="info-item">
-                        <div class="info-label">Phí</div>
-                        <div class="info-value">{{ formatCurrency(detailCustomer.phi) }}</div>
+                        <div class="info-label">Loại dịch vụ triển khai</div>
+                        <div class="info-value">
+                          <span
+                            v-if="detailCustomer.tenDichVu"
+                            class="service-badge"
+                            :style="{ background: detailCustomer.mauDichVu ? `linear-gradient(135deg, ${detailCustomer.mauDichVu}, #ffffff)` : 'linear-gradient(135deg, #22c55e, #2dd4bf)' }"
+                          >
+                            {{ detailCustomer.tenDichVu }}
+                          </span>
+                          <span v-else>-</span>
+                        </div>
                       </div>
                       <div class="info-item">
                         <div class="info-label">Địa chỉ</div>
@@ -1361,7 +1382,7 @@
                         <div class="history-content">
                           <div class="history-header">
                             <div class="history-status">
-                          <span :class="`status-badge status-${item.trangThai}`">
+                          <span :class="['status-badge', getStatusClass(item.trangThai)]">
                             {{ getStatusLabel(item.trangThai) }}
                           </span>
                             </div>
@@ -1609,6 +1630,7 @@ const isAnyModalOpen = computed(() =>
 const filters = reactive({
   type: 'all',
   status: 'all',
+  resource: 'all',
   province: '',
   creator: 'all',
   createdFrom: '',
@@ -1655,6 +1677,14 @@ const customerTypes = [
   { id: 'CHINH_CHU', label: 'Chủ nhà', icon: 'fas fa-house-user' },
   { id: 'MOI_GIOI', label: 'Môi giới', icon: 'fas fa-handshake' },
   { id: 'NGUOI_THAN', label: 'Người thân', icon: 'fas fa-people-group' }
+]
+
+const customerSources = [
+  { id: 'ADS', label: 'Quảng cáo', icon: 'fas fa-bullhorn' },
+  { id: 'FORUM', label: 'Diễn đàn', icon: 'fas fa-comments' },
+  { id: 'RAO_VAT', label: 'Rao vặt', icon: 'fas fa-tags' },
+  { id: 'FB', label: 'Facebook', icon: 'fab fa-facebook' },
+  { id: 'SEO', label: 'SEO', icon: 'fas fa-magnifying-glass-chart' }
 ]
 
 const callingCustomer = ref(null)
@@ -1802,6 +1832,7 @@ const resetFilters = () => {
   activeTab.value = 'all'
   filters.type = 'all'
   filters.status = 'all'
+  filters.resource = 'all'
   filters.province = ''
   filters.creator = 'all'
   filters.createdFrom = ''
@@ -2489,6 +2520,13 @@ const showNotification = (message, type = 'info') => {
 }
 
 // Helper functions
+const normalizeStatus = (status) => {
+  if (status === 'BAN_NHANH' || status === 'BAN_GP') return 'TRIEN_KHAI'
+  return status
+}
+
+const getStatusClass = (status) => `status-${normalizeStatus(status)}`
+
 const toDate = (value) => {
   if (!value) return new Date(0)
   const [year, month, day] = value.split('-').map(Number)
@@ -2510,8 +2548,7 @@ const getStatusLabel = (status) => {
 
     // ===== BỔ SUNG =====
     KHACH_HUY_HEN: 'Huỷ hẹn',
-    BAN_NHANH: 'Bán nhanh',
-    BAN_GP: 'Bán GP',
+    TRIEN_KHAI: 'Triển khai',
 
     THAT_BAI: 'Thất bại',
     KHONG_LIEN_LAC_DUOC: 'KLLD',
@@ -2519,7 +2556,8 @@ const getStatusLabel = (status) => {
     SAI_SO_LIEU: 'Sai số',
   }
 
-  return statusMap[status] || status
+  const normalizedStatus = normalizeStatus(status)
+  return statusMap[normalizedStatus] || normalizedStatus
 }
 
 const getTypeLabel = (type) => {
@@ -2638,8 +2676,7 @@ const STATUS_META = {
 
   // ===== BỔ SUNG =====
   KHACH_HUY_HEN: { label: 'Khách huỷ hẹn', color: '#b45309' }, // huỷ – cam nâu
-  BAN_NHANH: { label: 'Bán nhanh', color: '#15803d' },        // bán nhanh – xanh đậm
-  BAN_GP: { label: 'Bán GP', color: '#0f766e' }               // đã lên VP – xanh ngọc
+  TRIEN_KHAI: { label: 'Triển khai', color: '#10b981' }        // triển khai – xanh gradient
 }
 
 const PHAN_LOAI_META = {
@@ -2682,10 +2719,15 @@ const buildMonthlyLineDatasets = () => {
 
   const datasets = []
 
+  const normalizedMonthlyStats = monthlyStats.value.map(item => ({
+    ...item,
+    key: normalizeStatus(item.key)
+  }))
+
   Object.entries(meta).forEach(([key, metaItem]) => {
     const dataByMonth = Array(12).fill(0)
 
-    monthlyStats.value
+    normalizedMonthlyStats
         .filter(i => i.key === key)
         .forEach(i => {
           dataByMonth[i.month - 1] = i.count
@@ -2817,10 +2859,15 @@ const buildStatusChartData = () => {
   const labels = []
   const data = []
   const backgroundColor = []
+  const statusTotals = statusStats.value.reduce((acc, item) => {
+    const key = normalizeStatus(item.status)
+    if (!key) return acc
+    acc[key] = (acc[key] || 0) + Number(item.count || 0)
+    return acc
+  }, {})
 
   Object.entries(STATUS_META).forEach(([statusKey, meta]) => {
-    const found = statusStats.value.find(s => s.status === statusKey)
-    const value = found ? found.count : 0
+    const value = statusTotals[statusKey] || 0
 
     // nếu muốn ẩn status = 0 thì uncomment dòng dưới
     // if (value === 0) return
@@ -2967,6 +3014,7 @@ const buildFilterPayload = () => ({
 
   phanLoaiKhach: filters.type !== 'all' ? filters.type : null,
   trangThai: filters.status !== 'all' ? filters.status : null,
+  resouce: filters.resource !== 'all' ? filters.resource : null,
   tinhThanhPho: filters.province || null,
   nguoiTaoId: filters.creator !== 'all' ? filters.creator : null,
 
@@ -2985,6 +3033,7 @@ const buildFilterPayloadDB = () => ({
 
   phanLoaiKhach: filters.type !== 'all' ? filters.type : null,
   trangThai: filters.status !== 'all' ? filters.status : null,
+  resouce: filters.resource !== 'all' ? filters.resource : null,
   tinhThanhPho: filters.province || null,
   nguoiTaoId: filters.creator !== 'all' ? filters.creator : null,
 
@@ -3923,16 +3972,21 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   color: white;
 }
 
-/* ===== Bán nhanh ===== */
-.status-BAN_NHANH {
-  background: linear-gradient(135deg, #0f9b0f 0%, #38ef7d 100%);
+/* ===== Triển khai ===== */
+.status-TRIEN_KHAI {
+  background: linear-gradient(135deg, #22c55e 0%, #2dd4bf 100%);
   color: white;
 }
 
-/* ===== Bán GP (đã lên VP) ===== */
-.status-BAN_GP {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-  color: white;
+.service-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.18);
 }
 
 

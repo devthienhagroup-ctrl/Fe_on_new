@@ -517,6 +517,11 @@ const customerSources = [
 const distributionCanvas = ref(null);
 let distributionChart = null;
 
+const normalizeStatus = (status) => {
+  if (status == null) return status
+  return status === 'BAN_NHANH' || status === 'BAN_GP' ? 'TRIEN_KHAI' : status
+}
+
 const STATUS_META = {
   NEW: { label: "Mới", color: "#94a3b8" },                 // xám
   DC_TELESALES: { label: "Đã cấp Telesales", color: "#6366f1" }, // tím xanh
@@ -532,8 +537,7 @@ const STATUS_META = {
 
   // ===== BỔ SUNG (ĐỔI MÀU RÕ HƠN) =====
   KHACH_HUY_HEN: { label: "Khách huỷ hẹn", color: "#b45309" }, // nâu cam (huỷ)
-  BAN_NHANH: { label: "Bán nhanh", color: "#15803d" },        // xanh lá đậm
-  BAN_GP: { label: "Bán GP (Đã lên VP)", color: "#0f766e" },  // xanh ngọc đậm (premium)
+  TRIEN_KHAI: { label: "Triển khai", color: "#10b981" },  // xanh gradient hiện đại
 };
 
 
@@ -559,6 +563,10 @@ async function fetchThongKeStatus() {
 
     // BE: StatusChartDTO {label, value}
     statusChartData.value = raw
+        .map(item => ({
+          ...item,
+          label: normalizeStatus(item.label)
+        }))
         .filter(item => STATUS_META[item.label]) // label = enum key
         .map(item => ({
           label: STATUS_META[item.label].label, // dịch label

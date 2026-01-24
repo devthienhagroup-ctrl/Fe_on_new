@@ -179,6 +179,7 @@
                 <select id="statusFilter" v-model="statusFilter">
                   <option :value="null">Tất cả</option>
                   <option value="THANH_CONG">Thành công</option>
+                  <option value="TRIEN_KHAI">Triển khai</option>
                   <option value="TN_7NGAY">Tiềm năng 7 ngày</option>
                   <option value="TN_14NGAY">Tiềm năng 14 ngày</option>
                   <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc</option>
@@ -490,11 +491,9 @@
                   <div class="history-header">
                     <div
                         class="history-status"
-                        :style="{
-                      backgroundColor: STATUS_META[item.trangThai]?.color || '#94a3b8'
-                    }"
+                        :style="{ background: getStatusMeta(item.trangThai).gradient || getStatusMeta(item.trangThai).color }"
                     >
-                      {{ STATUS_META[item.trangThai]?.label || item.trangThai }}
+                      {{ getStatusMeta(item.trangThai).label }}
                     </div>
 
                     <div class="history-time">
@@ -551,8 +550,7 @@ const STATUS_META = {
 
   // ===== BỔ SUNG =====
   KHACH_HUY_HEN: { label: 'Khách huỷ hẹn', color: '#b45309' },   // cam nâu – huỷ
-  BAN_NHANH: { label: 'Bán nhanh', color: '#15803d' },          // xanh lá đậm
-  BAN_GP: { label: 'Bán GP (Đã lên VP)', color: '#0f766e' },    // xanh ngọc đậm
+  TRIEN_KHAI: { label: 'Triển khai', color: '#10b981', gradient: 'linear-gradient(135deg, #22c55e, #2dd4bf)' }
 }
 
 
@@ -609,6 +607,11 @@ const months = [
 
 const isTagActive = (value) => selectedCustomer.value?.status === value
 
+const normalizeStatus = (status) => {
+  if (status === 'BAN_NHANH' || status === 'BAN_GP') return 'TRIEN_KHAI'
+  return status
+}
+
 // ====== Sidebar stats ======
 const todayStats = ref({
   soCuocGoiMoiHN: 0,
@@ -627,7 +630,8 @@ const availableTags = [
   { value: 'THAT_BAI', label: 'Thất bại', color: '#f43f5e' },
   { value: 'KHONG_LIEN_LAC_DUOC', label: 'Không liên lạc được', color: '#f97316' },
   { value: 'SAI_SO_LIEU', label: 'Sai số liệu', color: '#a855f7' },
-  { value: 'THANH_CONG', label: 'Thành công (Lên VP)', color: '#22c55e' }
+  { value: 'THANH_CONG', label: 'Thành công (Lên VP)', color: '#22c55e' },
+  { value: 'TRIEN_KHAI', label: 'Triển khai', color: '#10b981' }
 ]
 
 // ====== Data from API ======
@@ -719,6 +723,11 @@ const getTagLabel = (tag) => {
   return STATUS_META[tag]?.label || tag
 }
 
+const getStatusMeta = (status) => {
+  const normalizedStatus = normalizeStatus(status)
+  return STATUS_META[normalizedStatus] || { label: normalizedStatus, color: '#94a3b8' }
+}
+
 const getLatestHistory = (customer) => {
   if (!customer?.lichSu || !customer.lichSu.length) return null
 
@@ -730,14 +739,16 @@ const getLatestHistory = (customer) => {
 const getLatestHistoryLabel = (customer) => {
   const latest = getLatestHistory(customer)
   if (!latest) return null
-  return STATUS_META[latest.trangThai]?.label || latest.trangThai
+  const normalizedStatus = normalizeStatus(latest.trangThai)
+  return STATUS_META[normalizedStatus]?.label || normalizedStatus
 }
 
 const getLatestHistoryStyle = (customer) => {
   const latest = getLatestHistory(customer)
   if (!latest) return {}
+  const normalizedStatus = normalizeStatus(latest.trangThai)
   return {
-    backgroundColor: STATUS_META[latest.trangThai]?.color || '#94a3b8'
+    background: STATUS_META[normalizedStatus]?.gradient || STATUS_META[normalizedStatus]?.color || '#94a3b8'
   }
 }
 
@@ -1149,7 +1160,7 @@ const buildLineChartData = () => {
 
   for (const item of thongKeThoiGian.value) {
     // expected: {status, time, total}
-    const status = item.status ?? item.label // fallback
+    const status = normalizeStatus(item.status ?? item.label) // fallback
     const t = Number(item.time ?? item.bucket ?? item.day ?? item.month) // fallback
     const total = Number(item.total ?? item.value ?? 0)
 
@@ -1250,9 +1261,9 @@ const initSummaryChart = () => {
     summaryChartInstance.value.destroy()
   }
 
-  const labels = thongKeTrangThai.value.map((item) => STATUS_META[item.label]?.label || item.label)
+  const labels = thongKeTrangThai.value.map((item) => getStatusMeta(item.label).label)
   const data = thongKeTrangThai.value.map((item) => item.value)
-  const backgroundColor = thongKeTrangThai.value.map((item) => STATUS_META[item.label]?.color || '#94a3b8')
+  const backgroundColor = thongKeTrangThai.value.map((item) => getStatusMeta(item.label).color)
 
   summaryChartInstance.value = new Chart(ctx, {
     type: 'doughnut',
