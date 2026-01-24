@@ -131,36 +131,59 @@ export function updateAlertError(title, text = "") {
  * @param {function} onConfirm - Hàm thực thi khi nhập đúng
  */
 export async function confirmWithInput(title, text, expectedText, onConfirm) {
-    const { value: userInput } = await Swal.fire(withRoundedPopup({
-        title: title,
-        text: text,
-        input: "text",
-        inputPlaceholder: expectedText,
-        showCancelButton: true,
-        confirmButtonText: "Xác nhận",
-        cancelButtonText: "Hủy",
-        inputValidator: (value) => {
-            if (!value) return "⚠️ Bạn chưa nhập gì!";
-            if (value.trim() !== expectedText)
-                return "❌ Nội dung không khớp, vui lòng nhập lại!";
+    const { value: userInput } = await Swal.fire({
+        ...withRoundedPopup({
+            title,
+            text,
+            input: "text",
+            inputPlaceholder: expectedText,
+            showCancelButton: true,
+            confirmButtonText: "Xác nhận",
+            cancelButtonText: "Hủy",
+            inputValidator: (value) => {
+                if (!value) return "⚠️ Bạn chưa nhập gì!";
+                if (value.trim() !== expectedText)
+                    return "❌ Nội dung không khớp, vui lòng nhập lại!";
+            },
+        }),
+
+        /* ===== BACKDROP GIỐNG svc3-modal ===== */
+        backdrop: "rgba(0, 0, 0, 0.65)",
+        backdropFilter: "blur(6px)",
+
+        background: "rgba(255,255,255,.96)", // giống .svc3-modal-card
+        width: 460,
+
+        customClass: {
+            popup: "thg-confirm-popup",
+            title: "thg-confirm-title",
+            input: "thg-confirm-input",
+            confirmButton: "thg-btn-confirm",
+            cancelButton: "thg-btn-cancel",
+            actions: "thg-confirm-actions",
         },
-    }));
+
+        buttonsStyling: false
+    });
 
     if (userInput && userInput.trim() === expectedText) {
-        // ✅ Thành công
-        await Swal.fire(withRoundedPopup({
-            icon: "success",
-            title: "Thành công!",
-            text: "Xác nhận đúng, đang thực hiện hành động...",
-            showConfirmButton: false,
-            timer: 1200,
-        }));
+        await Swal.fire({
+            ...withRoundedPopup({
+                icon: "success",
+                title: "Thành công!",
+                text: "Xác nhận đúng, đang thực hiện hành động...",
+                showConfirmButton: false,
+                timer: 1200,
+            }),
 
-        // Gọi callback nếu có
+            /* giữ cùng backdrop cho cảm giác liền mạch */
+            backdrop: "rgba(0, 0, 0, 0.55)",
+            backdropFilter: "blur(6px)",
+        });
+
         if (typeof onConfirm === "function") onConfirm();
     }
 }
-
 
 export async function confirmDeleteMember(memberName, onConfirm) {
     const { isConfirmed } = await Swal.fire(withRoundedPopup({

@@ -1,6 +1,6 @@
   <template>
     <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 p-3">
-      <div class="max-w-[1600px] mx-auto">
+      <div>
 
         <!-- Tiêu đề chính -->
         <div

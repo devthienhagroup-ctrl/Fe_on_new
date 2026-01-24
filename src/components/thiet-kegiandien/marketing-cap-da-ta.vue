@@ -89,7 +89,7 @@
                         type="tel"
                         class="form-control"
                         placeholder="09xxxxxxxx"
-                        @blur="formData.phone = normalizePhone(formData.phone)"
+                        @blur="handlePhoneBlur"
                         required
                     />
                   </div>
@@ -194,6 +194,22 @@
               </div>
 
               <div class="form-group">
+                <label>Nguồn <span class="required">*</span></label>
+                <div class="source-buttons">
+                  <button
+                      v-for="source in customerSources"
+                      :key="source.id"
+                      type="button"
+                      :class="['type-btn', source.id, { active: formData.source === source.id }]"
+                      @click="formData.source = source.id"
+                  >
+                    <i :class="source.icon"></i>
+                    {{ source.label }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
                 <label>Ghi chú</label>
                 <div class="input-icon">
                   <span class="icon-chip" style="background: linear-gradient(135deg, #FF9966, #FF5E62); color: white;">
@@ -284,7 +300,7 @@
         <div class="col-lg-7">
           <!-- Performance Metrics -->
           <div class="row g-4">
-            <div class="col-md-6">
+            <div class="col-lg-4 col-md-6">
               <div class="metric-card metric-card-call">
                 <div class="metric-header">
                   <h4>
@@ -294,7 +310,7 @@
                     Hiệu suất cuộc gọi
                   </h4>
                 </div>
-                <div class="metric-content">
+                <div class="metric-content py-4">
                   <div class="metric-value">{{ thongKe.tongPhanTramLLD }} %</div>
                   <div class="progress-bar">
                     <div class="progress-fill" :style="{ width: thongKe.tongPhanTramLLD + '%' }"></div>
@@ -307,37 +323,51 @@
               </div>
             </div>
 
-            <div class="col-md-6">
-              <div class="metric-card metric-card-revenue">
+            <div class="col-lg-4 col-md-6">
+              <div class="metric-card metric-card-revenue text-center">
                 <div class="metric-header">
                   <h4>
-                    <span class="icon-label" style="background: linear-gradient(135deg, #FF8A00, #FFC837);">
-                      <i class="fas fa-money-bill-wave"></i>
-                    </span>
+        <span class="icon-label" style="background: linear-gradient(135deg, #FF8A00, #FFC837);">
+          <i class="fas fa-money-bill-wave"></i>
+        </span>
                     Tổng dữ liệu đã nhập
                   </h4>
                 </div>
-                <div class="metric-content">
-                  <div class="row align-items-center">
-                    <div class="col-7">
-                      <div class="metric-main">
-                        <div class="metric-value metric-value-sm" style="font-size: 16px">
-                          {{ formatCurrency(thongKe.tongGiaTri) }} khách hàng
-                        </div>
-                        <div class="metric-sub">Tổng khách nhập</div>
-                      </div>
-                    </div>
 
-                    <div class="col-5 text-start">
-                      <div class="target-progress target-progress-lg d-inline-flex justify-content-end">
-                        <div class="progress-circle progress-circle-lg" :style="{ '--progress': thongKe.tongPhanTramGT }">
-                          <span>{{ thongKe.tongPhanTramGT }} %</span>
-                        </div>
-                      </div>
+                <div class="metric-content d-flex flex-column align-items-center">
+
+                  <!-- Vòng tròn -->
+                  <div class="progress-circle progress-circle-lg mb-2"
+                       :style="{ '--progress': thongKe.tongPhanTramGT }">
+                    <span class="progress-percent">{{ thongKe.tongPhanTramGT }}%</span>
+                  </div>
+
+                  <!-- Chữ nằm dưới -->
+                  <div class="metric-main mt-1">
+                    <div class="metric-value metric-value-sm" style="font-size:16px">
+                      {{ formatCurrency(thongKe.tongGiaTri) }} khách hàng
                     </div>
+                    <div class="metric-sub">Tổng khách nhập</div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+              <div class="chart-panel chart-panel-source">
+                <div class="panel-header">
+                  <h4>
+                    <span class="icon-label" style="background: linear-gradient(135deg, #38bdf8, #0ea5e9);">
+                      <i class="fas fa-chart-pie"></i>
+                    </span>
+                    Biểu đồ nguồn data
+                  </h4>
+                </div>
+                <div class="distribution-chart">
+                  <div class="chart-graphic chart-graphic-sm">
+                    <canvas ref="sourceCanvas"></canvas>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
@@ -458,6 +488,7 @@ const formData = reactive({
   area: "",
   oldArea: null,
   type: "CHINH_CHU",
+  source: "ADS",
   price: "",
   note: "",
 });
@@ -472,11 +503,24 @@ const customerTypes = [
   { id: "NGUOI_THAN", label: "Người thân", icon: "fas fa-people-group" },
 ];
 
+const customerSources = [
+  { id: "ADS", label: "Quảng cáo", icon: "fas fa-bullhorn" },
+  { id: "FORUM", label: "Diễn đàn", icon: "fas fa-comments" },
+  { id: "RAO_VAT", label: "Rao vặt", icon: "fas fa-tags" },
+  { id: "FB", label: "Facebook", icon: "fab fa-facebook" },
+  { id: "SEO", label: "SEO", icon: "fas fa-magnifying-glass-chart" },
+];
+
 /* =========================
    STATUS DOUGHNUT (Chart.js)
 ========================= */
 const distributionCanvas = ref(null);
 let distributionChart = null;
+
+const normalizeStatus = (status) => {
+  if (status == null) return status
+  return status === 'BAN_NHANH' || status === 'BAN_GP' ? 'TRIEN_KHAI' : status
+}
 
 const STATUS_META = {
   NEW: { label: "Mới", color: "#94a3b8" },                 // xám
@@ -493,13 +537,24 @@ const STATUS_META = {
 
   // ===== BỔ SUNG (ĐỔI MÀU RÕ HƠN) =====
   KHACH_HUY_HEN: { label: "Khách huỷ hẹn", color: "#b45309" }, // nâu cam (huỷ)
-  BAN_NHANH: { label: "Bán nhanh", color: "#15803d" },        // xanh lá đậm
-  BAN_GP: { label: "Bán GP (Đã lên VP)", color: "#0f766e" },  // xanh ngọc đậm (premium)
+  TRIEN_KHAI: { label: "Triển khai", color: "#10b981" },  // xanh gradient hiện đại
 };
 
 
 
 const statusChartData = ref([]); // [{label,value,color}]
+const sourceCanvas = ref(null);
+let sourceChart = null;
+
+const SOURCE_META = {
+  ADS: { label: "Quảng cáo", color: "#f97316" },
+  FORUM: { label: "Diễn đàn", color: "#6366f1" },
+  RAO_VAT: { label: "Rao vặt", color: "#22c55e" },
+  FB: { label: "Facebook", color: "#1877f2" },
+  SEO: { label: "SEO", color: "#e11d48" },
+};
+
+const sourceChartData = ref([]);
 
 async function fetchThongKeStatus() {
   try {
@@ -508,6 +563,10 @@ async function fetchThongKeStatus() {
 
     // BE: StatusChartDTO {label, value}
     statusChartData.value = raw
+        .map(item => ({
+          ...item,
+          label: normalizeStatus(item.label)
+        }))
         .filter(item => STATUS_META[item.label]) // label = enum key
         .map(item => ({
           label: STATUS_META[item.label].label, // dịch label
@@ -519,6 +578,29 @@ async function fetchThongKeStatus() {
   } catch (err) {
     console.error(err);
     showCenterError("Không tải được thống kê trạng thái");
+  }
+}
+
+async function fetchThongKeNguon() {
+  try {
+    const res = await api.get("/customer-crm/marketing/thong-ke-nguon", { withCredentials: true });
+    const raw = Array.isArray(res.data) ? res.data : [];
+    const sourceTotals = raw.reduce((acc, item) => {
+      const key = item?.nguon;
+      if (key) acc[key] = Number(item?.total || 0);
+      return acc;
+    }, {});
+
+    sourceChartData.value = Object.entries(SOURCE_META).map(([key, meta]) => ({
+      label: meta.label,
+      value: sourceTotals[key] ?? 0,
+      color: meta.color,
+    }));
+
+    nextTick(() => renderSourceChart());
+  } catch (err) {
+    console.error(err);
+    showCenterError("Không tải được thống kê nguồn data");
   }
 }
 
@@ -621,6 +703,103 @@ const renderDistributionChart = () => {
         },
       },
 
+      interaction: { intersect: false, mode: "index" },
+    },
+  });
+};
+
+const renderSourceChart = () => {
+  const el = sourceCanvas.value;
+  if (!el) return;
+
+  if (sourceChart) sourceChart.destroy();
+
+  const chartData = Array.isArray(sourceChartData.value) ? sourceChartData.value : [];
+  const safeData = chartData.length
+      ? chartData
+      : [{ label: "Chưa có dữ liệu", value: 0, color: "#e2e8f0" }];
+
+  const totalCount = safeData.reduce((sum, r) => sum + (Number(r.value) || 0), 0);
+
+  sourceChart = new Chart(el, {
+    type: "doughnut",
+    data: {
+      labels: safeData.map(r => r.label),
+      datasets: [
+        {
+          data: safeData.map(r => r.value),
+          backgroundColor: safeData.map(r => r.color),
+          borderWidth: 2,
+          borderColor: "#ffffff",
+          hoverOffset: 10,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "70%",
+      layout: { padding: { top: 12, bottom: 12 } },
+      animation: {
+        animateRotate: true,
+        animateScale: true,
+        onComplete(animation) {
+          const chart = animation.chart;
+          const { ctx, chartArea } = chart;
+          if (!chartArea) return;
+
+          const centerX = (chartArea.left + chartArea.right) / 2;
+          const centerY = (chartArea.top + chartArea.bottom) / 2;
+
+          ctx.save();
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+
+          ctx.font = "700 12px Inter, system-ui, sans-serif";
+          ctx.fillStyle = "#64748b";
+          ctx.fillText("TỔNG", centerX, centerY - 12);
+
+          ctx.font = "700 16px Inter, system-ui, sans-serif";
+          ctx.fillStyle = "#0f172a";
+          ctx.fillText(`${totalCount} KH`, centerX, centerY + 10);
+
+          ctx.restore();
+        },
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: "bottom",
+          labels: {
+            usePointStyle: true,
+            pointStyle: "circle",
+            padding: 12,
+            color: "#1e293b",
+            font: {
+              size: 11,
+              family: "'Inter', system-ui, sans-serif",
+              weight: "600",
+            },
+          },
+        },
+        tooltip: {
+          backgroundColor: "rgb(15,23,42)",
+          titleColor: "#ffffff",
+          bodyColor: "#e5e7eb",
+          padding: 10,
+          cornerRadius: 8,
+          displayColors: true,
+          bodySpacing: 4,
+          callbacks: {
+            label(context) {
+              const label = context.label || "";
+              const count = Number(context.raw || 0);
+              const percent = totalCount ? ((count / totalCount) * 100).toFixed(1) : "0.0";
+              return [`${label}: ${count} khách hàng (${percent}%)`];
+            },
+          },
+        },
+      },
       interaction: { intersect: false, mode: "index" },
     },
   });
@@ -824,6 +1003,8 @@ const pickedFileLabel = computed(() => {
   if (pickedFileNames.value.length === 1) return pickedFileNames.value[0];
   return `${pickedFileNames.value.length} tệp: ${pickedFileNames.value.join(", ")}`;
 });
+const lastCheckedPhone = ref("");
+const isCheckingPhone = ref(false);
 function onPickFile(e) {
   const files = Array.from(e?.target?.files || []);
   pickedFileNames.value = files.map(file => file.name);
@@ -846,6 +1027,44 @@ function isValidPhone(phone) {
   const normalized = normalizePhone(phone);
   return /^(0\d{9})$/.test(normalized);
 }
+async function handlePhoneBlur() {
+  const normalized = normalizePhone(formData.phone);
+  formData.phone = normalized;
+
+  if (!normalized) return;
+
+  if (!isValidPhone(normalized)) {
+    showCenterWarning("Số điện thoại không đúng định dạng (ví dụ: 09xxxxxxxx).");
+    return;
+  }
+
+  if (normalized === lastCheckedPhone.value || isCheckingPhone.value) return;
+
+  isCheckingPhone.value = true;
+  try {
+    const res = await api.get("/customer-crm/marketing/check-phone", {
+      withCredentials: true,
+      params: { phone: normalized },
+    });
+
+    // ❌ KHÔNG return khi success = false nữa
+    // success = true  => đã tồn tại
+    // success = false => chưa tồn tại (OK)
+
+    if (res?.data?.success === true) {
+      showCenterWarning("Số điện thoại đã tồn tại trong hệ thống.");
+    }
+
+    lastCheckedPhone.value = normalized;
+
+  } catch (err) {
+    console.error(err);
+    showCenterError("Không thể kiểm tra số điện thoại. Vui lòng thử lại!");
+  } finally {
+    isCheckingPhone.value = false;
+  }
+}
+
 function validateForm() {
   if (!formData.name?.trim()) {
     showCenterWarning("Vui lòng nhập họ tên.");
@@ -875,6 +1094,10 @@ function validateForm() {
     showWarning("Vui lòng chọn phân loại.");
     return false;
   }
+  if (!formData.source) {
+    showWarning("Vui lòng chọn nguồn khách hàng.");
+    return false;
+  }
   return true;
 }
 
@@ -889,6 +1112,7 @@ async function submitData() {
       area: formData.area,
       oldArea: formData.oldArea,
       type: formData.type,
+      source: formData.source,
       price: formData.price,
       note: formData.note,
     };
@@ -920,6 +1144,7 @@ async function submitData() {
     // ✅ refresh dashboard data thật
     fetchThongKeSoBo();
     fetchThongKeStatus();
+    fetchThongKeNguon();
     fetchActivityData();
   } catch (err) {
     console.error(err);
@@ -933,6 +1158,7 @@ function clearForm() {
   formData.area = "";
   formData.oldArea = "";
   formData.type = "CHINH_CHU";
+  formData.source = "ADS";
   formData.price = "";
   formData.note = "";
   priceDisplay.value = "";
@@ -943,10 +1169,12 @@ function clearForm() {
 function generateSampleData() {
   const names = ["Lê Minh Anh", "Trần Quốc Bảo", "Phạm Thị Cẩm", "Nguyễn Đức Duy"];
   const types = ["CHINH_CHU", "MOI_GIOI", "NGUOI_THAN"];
+  const sources = ["ADS", "FORUM", "RAO_VAT", "FB", "SEO"];
 
   formData.name = names[Math.floor(Math.random() * names.length)];
   formData.phone = `09${Math.floor(Math.random() * 90000000 + 10000000)}`;
   formData.type = types[Math.floor(Math.random() * types.length)];
+  formData.source = sources[Math.floor(Math.random() * sources.length)];
   const samplePrice = Math.floor(Math.random() * 5000 + 500) * 100000;
   formData.price = samplePrice;
   priceDisplay.value = formatPriceDisplay(String(samplePrice));
@@ -1012,12 +1240,14 @@ watch(activityRange, () => {
 onMounted(() => {
   fetchThongKeSoBo();
   fetchThongKeStatus();
+  fetchThongKeNguon();
   fetchActivityData(); // ✅ mặc định tuần hiện tại
 });
 
 onBeforeUnmount(() => {
   if (activityChart) activityChart.destroy();
   if (distributionChart) distributionChart.destroy();
+  if (sourceChart) sourceChart.destroy();
 });
 </script>
 <style scoped>
@@ -1280,6 +1510,10 @@ onBeforeUnmount(() => {
   background: linear-gradient(135deg, #fff7ed 0%, #ffffff 65%);
 }
 
+.chart-panel-source {
+  background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 65%);
+}
+
 .chart-panel-activity {
   background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 65%);
 }
@@ -1386,6 +1620,12 @@ onBeforeUnmount(() => {
 .type-buttons {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.source-buttons {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.5rem;
 }
 
@@ -1586,8 +1826,8 @@ onBeforeUnmount(() => {
 }
 
 .progress-circle {
-  width: 80px;
-  height: 80px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
   background: conic-gradient(#4f46e5 calc(var(--progress) * 3.6deg), #e2e8f0 0deg);
   display: flex;
@@ -1599,8 +1839,8 @@ onBeforeUnmount(() => {
 .progress-circle::before {
   content: "";
   position: absolute;
-  width: 60px;
-  height: 60px;
+  width: 85px;
+  height: 85px;
   background: white;
   border-radius: 50%;
 }
@@ -1803,6 +2043,10 @@ onBeforeUnmount(() => {
 
   .type-buttons {
     grid-template-columns: 1fr;
+  }
+
+  .source-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .activity-filter {

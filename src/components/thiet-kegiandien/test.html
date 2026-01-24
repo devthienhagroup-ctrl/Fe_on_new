@@ -3,111 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Dịch Vụ | Service Management</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
+    <title>Thống Kê Hợp Đồng</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Animate CSS for animations -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-        /* Custom CSS với gradient và hiệu ứng */
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            --card-gradient: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            --sidebar-gradient: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --secondary-gradient: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+            --success-gradient: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            --warning-gradient: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            --danger-gradient: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+            --info-gradient: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            --card-bg: #ffffff;
+            --body-bg: #f8fafc;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background-color: var(--body-bg);
+            color: var(--text-dark);
+            padding: 20px;
             min-height: 100vh;
         }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.9);
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: var(--primary-gradient);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 i {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+        }
+
+        .date-filter {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 20px;
+            border-radius: 12px;
             backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        .service-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 18px;
-            overflow: hidden;
-            background: var(--card-gradient);
-            position: relative;
-            z-index: 1;
-        }
-
-        .service-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--primary-gradient);
-            z-index: 2;
-            border-radius: 18px 18px 0 0;
-        }
-
-        .service-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .service-card:hover::before {
-            height: 6px;
-        }
-
-        .price-item {
-            border-bottom: 1px solid #e5e7eb;
-            transition: all 0.2s ease;
-            border-radius: 10px;
-            padding: 12px 16px;
-        }
-
-        .price-item:hover {
-            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 51, 234, 0.05) 100%);
-            transform: translateX(5px);
-        }
-
-        .gradient-btn {
-            background: var(--primary-gradient);
-            color: white;
-            transition: all 0.3s ease;
-            border-radius: 12px;
+        .date-filter label {
             font-weight: 600;
-            letter-spacing: 0.5px;
+            font-size: 14px;
         }
 
-        .gradient-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        .date-filter input, .date-filter select {
+            padding: 8px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: all 0.3s;
         }
 
-        .gradient-btn-secondary {
-            background: var(--secondary-gradient);
-            color: white;
-            transition: all 0.3s ease;
-            border-radius: 12px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+        .date-filter input:focus, .date-filter select:focus {
+            outline: none;
+            border-color: white;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
         }
 
-        .gradient-btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(240, 147, 251, 0.3);
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
         }
 
         .stat-card {
-            background: var(--card-gradient);
-            border-radius: 18px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -120,991 +124,869 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: var(--success-gradient);
-            border-radius: 18px 18px 0 0;
         }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .modal-overlay {
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background: var(--card-gradient);
-            border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            animation: modalIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes modalIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .floating-action-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: var(--primary-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 28px;
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
-            transition: all 0.3s ease;
-            z-index: 100;
-        }
-
-        .floating-action-btn:hover {
-            transform: scale(1.1) rotate(90deg);
-            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.6);
-        }
-
-        .color-preview {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: inline-block;
-            border: 3px solid white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .service-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            color: white;
-            margin-bottom: 15px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .service-1 {
+        .stat-card:nth-child(1)::before {
             background: var(--primary-gradient);
         }
 
-        .service-2 {
+        .stat-card:nth-child(2)::before {
             background: var(--secondary-gradient);
         }
 
-        .service-3 {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        .stat-card:nth-child(3)::before {
+            background: var(--success-gradient);
         }
 
-        .service-4 {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        .stat-card:nth-child(4)::before {
+            background: var(--warning-gradient);
         }
 
-        .pulse {
-            animation: pulse 2s infinite;
+        .stat-card:nth-child(5)::before {
+            background: var(--danger-gradient);
         }
 
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
-            }
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-            border-radius: 10px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, #5a6fd8 0%, #6a4190 100%);
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-
-        .price-badge {
-            background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-            color: #667eea;
-            border-left: 4px solid #667eea;
-        }
-
-        .animate-float {
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .input-field {
-            border-radius: 12px;
-            border: 2px solid #e5e7eb;
-            transition: all 0.3s ease;
-            padding: 14px 18px;
-        }
-
-        .input-field:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
-            outline: none;
-        }
-
-        .color-input-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .color-input {
+        .stat-card .icon {
+            font-size: 28px;
+            margin-bottom: 15px;
             width: 60px;
             height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             border-radius: 12px;
-            border: 3px solid white;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transition: transform 0.2s ease;
+            color: white;
         }
 
-        .color-input:hover {
-            transform: scale(1.1);
+        .stat-card:nth-child(1) .icon {
+            background: var(--primary-gradient);
         }
 
-        .color-input::-webkit-color-swatch-wrapper {
-            padding: 0;
+        .stat-card:nth-child(2) .icon {
+            background: var(--secondary-gradient);
         }
 
-        .color-input::-webkit-color-swatch {
-            border: none;
+        .stat-card:nth-child(3) .icon {
+            background: var(--success-gradient);
+        }
+
+        .stat-card:nth-child(4) .icon {
+            background: var(--warning-gradient);
+        }
+
+        .stat-card:nth-child(5) .icon {
+            background: var(--danger-gradient);
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 5px;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-card:nth-child(1) .value {
+            background-image: var(--primary-gradient);
+        }
+
+        .stat-card:nth-child(2) .value {
+            background-image: var(--secondary-gradient);
+        }
+
+        .stat-card:nth-child(3) .value {
+            background-image: var(--success-gradient);
+        }
+
+        .stat-card:nth-child(4) .value {
+            background-image: var(--warning-gradient);
+        }
+
+        .stat-card:nth-child(5) .value {
+            background-image: var(--danger-gradient);
+        }
+
+        .stat-card .label {
+            color: var(--text-light);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Biểu đồ đường chiếm full width */
+        .full-width-chart {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            margin-bottom: 30px;
+        }
+
+        .full-width-chart h3 {
+            margin-bottom: 20px;
+            color: var(--text-dark);
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .full-width-chart h3 i {
+            color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 8px;
             border-radius: 8px;
         }
 
-        .wave-divider {
-            height: 100px;
-            width: 100%;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        .full-width-chart .chart-wrapper {
             position: relative;
-            overflow: hidden;
-        }
-
-        .wave-divider::before {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 0;
+            height: 350px;
             width: 100%;
-            height: 20px;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' fill='%23ffffff'%3E%3C/path%3E%3C/svg%3E");
-            background-size: 1200px 100%;
         }
 
-        /* Responsive design */
+        /* 3 biểu đồ nhỏ cùng hàng */
+        .three-charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 1200px) {
+            .three-charts-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
-            .floating-action-btn {
-                width: 60px;
-                height: 60px;
-                bottom: 20px;
-                right: 20px;
-                font-size: 24px;
+            .three-charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .small-chart-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .small-chart-card h3 {
+            margin-bottom: 20px;
+            color: var(--text-dark);
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .small-chart-card h3 i {
+            color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .small-chart-card .chart-wrapper {
+            position: relative;
+            height: 280px;
+            width: 100%;
+        }
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 25px;
+            color: var(--text-light);
+            font-size: 14px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            margin-top: 40px;
+        }
+
+        @media (max-width: 1024px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
             }
 
-            .service-card:hover {
-                transform: translateY(-5px) scale(1.01);
+            .date-filter {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .stats-summary {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-summary {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .full-width-chart .chart-wrapper {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            body {
+                padding: 15px;
+            }
+
+            .stats-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width-chart, .small-chart-card {
+                padding: 20px;
             }
         }
     </style>
 </head>
-<body class="text-gray-800">
-<!-- Header -->
-<header class="pt-10 pb-16 px-6 text-center">
-    <div class="container mx-auto max-w-6xl">
-        <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
-            <i class="fas fa-cogs mr-4"></i>Quản Lý Dịch Vụ
-        </h1>
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Quản lý và cấu hình các dịch vụ với giao diện trực quan, chuyên nghiệp
-        </p>
-
-        <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div class="stat-card p-6 text-center animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
-                <div class="text-4xl font-bold text-purple-600 mb-2" id="totalServices">2</div>
-                <div class="text-gray-600 font-medium">Tổng dịch vụ</div>
-                <div class="mt-3 text-sm text-gray-500">
-                    <i class="fas fa-arrow-up text-green-500 mr-1"></i> Đang hoạt động
-                </div>
-            </div>
-
-            <div class="stat-card p-6 text-center animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
-                <div class="text-4xl font-bold text-blue-600 mb-2" id="totalPriceSegments">6</div>
-                <div class="text-gray-600 font-medium">Phân khúc giá</div>
-                <div class="mt-3 text-sm text-gray-500">
-                    <i class="fas fa-chart-line text-blue-500 mr-1"></i> Trung bình 3/dịch vụ
-                </div>
-            </div>
-
-            <div class="stat-card p-6 text-center animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
-                <div class="text-4xl font-bold text-green-600 mb-2" id="activeServices">2</div>
-                <div class="text-gray-600 font-medium">Đang hoạt động</div>
-                <div class="mt-3 text-sm text-gray-500">
-                    <i class="fas fa-check-circle text-green-500 mr-1"></i> 100% hoạt động
-                </div>
-            </div>
-        </div>
-    </div>
-</header>
-
-<!-- Wave Divider -->
-<div class="wave-divider"></div>
-
-<!-- Main Content -->
-<main class="py-10 px-4 md:px-6 bg-gradient-to-b from-white to-gray-50">
-    <div class="container mx-auto max-w-6xl">
-        <!-- Services Section -->
-        <div class="mb-12">
-            <div class="flex justify-between items-center mb-10">
-                <div>
-                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Danh sách dịch vụ</h2>
-                    <p class="text-gray-600">Quản lý tất cả dịch vụ và phân khúc giá của bạn</p>
-                </div>
-                <button id="filterBtn" class="gradient-btn-secondary px-6 py-3">
-                    <i class="fas fa-filter mr-2"></i>Lọc & Sắp xếp
-                </button>
-            </div>
-
-            <!-- Services Grid -->
-            <div id="servicesContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Service cards will be loaded here dynamically -->
-            </div>
-        </div>
-
-        <!-- Empty State (Hidden by default) -->
-        <div id="emptyState" class="text-center py-16 hidden">
-            <div class="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 mb-6 animate-float">
-                <i class="fas fa-box-open text-5xl text-purple-500"></i>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-700 mb-3">Chưa có dịch vụ nào</h3>
-            <p class="text-gray-600 max-w-md mx-auto mb-8">Bắt đầu bằng cách thêm dịch vụ đầu tiên của bạn để quản lý phân khúc giá và cấu hình.</p>
-            <button id="addFirstServiceBtn" class="gradient-btn px-8 py-3 text-lg">
-                <i class="fas fa-plus mr-2"></i>Thêm dịch vụ đầu tiên
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-chart-network"></i> Thống Kê Hợp Đồng</h1>
+        <div class="date-filter">
+            <label for="timeRange">Thời gian:</label>
+            <select id="timeRange">
+                <option value="month">Tháng này</option>
+                <option value="quarter">Quý này</option>
+                <option value="year" selected>Năm nay</option>
+                <option value="all">Tất cả</option>
+            </select>
+            <label for="startDate">Từ:</label>
+            <input type="date" id="startDate" value="2026-01-01">
+            <label for="endDate">Đến:</label>
+            <input type="date" id="endDate" value="2026-12-31">
+            <button id="applyFilter" style="padding: 8px 16px; background: white; color: #6366f1; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                Áp dụng
             </button>
         </div>
     </div>
-</main>
 
-<!-- Floating Action Button -->
-<button id="addServiceBtn" class="floating-action-btn pulse animate__animated animate__bounceIn" title="Thêm dịch vụ mới">
-    <i class="fas fa-plus"></i>
-</button>
-
-<!-- Modal thêm/sửa dịch vụ -->
-<div id="serviceModal" class="fixed inset-0 flex items-center justify-center z-50 hidden modal-overlay p-4">
-    <div class="modal-content w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
-        <div class="p-8 border-b border-gray-100">
-            <div class="flex justify-between items-center">
-                <h3 class="text-2xl font-bold text-gray-800" id="modalTitle">Thêm dịch vụ mới</h3>
-                <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600 text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <p class="text-gray-600 mt-2">Nhập thông tin chi tiết của dịch vụ và phân khúc giá</p>
+    <div class="stats-summary">
+        <div class="stat-card">
+            <div class="icon"><i class="fas fa-file-contract"></i></div>
+            <div class="value" id="totalContracts">48</div>
+            <div class="label">Tổng hợp đồng</div>
         </div>
-
-        <form id="serviceForm" class="p-8">
-            <div class="space-y-8">
-                <!-- Service Name -->
-                <div class="animate__animated animate__fadeIn">
-                    <label class="block text-gray-700 font-semibold mb-3 text-lg" for="serviceName">
-                        <i class="fas fa-heading mr-2 text-blue-500"></i>Tên dịch vụ *
-                    </label>
-                    <input type="text" id="serviceName" class="input-field w-full" placeholder="Nhập tên dịch vụ" required>
-                    <p class="text-gray-500 text-sm mt-2">Tên dịch vụ sẽ hiển thị trên giao diện khách hàng</p>
-                </div>
-
-                <!-- Service Description -->
-                <div class="animate__animated animate__fadeIn" style="animation-delay: 0.1s">
-                    <label class="block text-gray-700 font-semibold mb-3 text-lg" for="serviceDescription">
-                        <i class="fas fa-align-left mr-2 text-green-500"></i>Mô tả dịch vụ
-                    </label>
-                    <textarea id="serviceDescription" rows="3" class="input-field w-full" placeholder="Mô tả chi tiết về dịch vụ, tính năng và lợi ích"></textarea>
-                </div>
-
-                <!-- Service Color -->
-                <div class="animate__animated animate__fadeIn" style="animation-delay: 0.2s">
-                    <label class="block text-gray-700 font-semibold mb-3 text-lg">
-                        <i class="fas fa-palette mr-2 text-purple-500"></i>Màu phân loại *
-                    </label>
-                    <div class="color-input-container">
-                        <input type="color" id="serviceColor" name="serviceColor" value="#3b82f6" class="color-input">
-                        <div>
-                            <div class="font-medium text-gray-700 mb-1">Màu đã chọn: <span id="colorHexCode">#3b82f6</span></div>
-                            <p class="text-gray-500 text-sm">Màu này sẽ dùng để phân loại dịch vụ trong biểu mẫu</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Price List -->
-                <div class="animate__animated animate__fadeIn" style="animation-delay: 0.3s">
-                    <div class="flex justify-between items-center mb-6">
-                        <label class="block text-gray-700 font-semibold text-lg">
-                            <i class="fas fa-tags mr-2 text-yellow-500"></i>Phân khúc giá theo tài sản
-                        </label>
-                        <button type="button" id="addPriceBtn" class="gradient-btn-secondary px-5 py-2.5 text-sm">
-                            <i class="fas fa-plus mr-1"></i> Thêm phân khúc
-                        </button>
-                    </div>
-
-                    <div id="priceList" class="space-y-4">
-                        <!-- Price items will be added here dynamically -->
-                        <div class="price-item-input glass-card p-5">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối thiểu (Min) *</label>
-                                    <input type="number" class="price-min input-field w-full" placeholder="0" min="0" required>
-                                    <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
-                                </div>
-                                <div>
-                                    <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối đa (Max) *</label>
-                                    <input type="number" class="price-max input-field w-full" placeholder="1,000,000,000" min="0" required>
-                                    <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
-                                </div>
-                                <div>
-                                    <label class="block text-gray-600 font-medium mb-2">Giá dịch vụ *</label>
-                                    <input type="number" class="price-value input-field w-full" placeholder="500,000" min="0" required>
-                                    <div class="flex justify-between items-center mt-2">
-                                        <p class="text-gray-500 text-xs">Đơn vị: VNĐ</p>
-                                        <button type="button" class="remove-price-btn text-red-500 hover:text-red-700 text-sm">
-                                            <i class="fas fa-trash mr-1"></i>Xóa
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                        <div class="flex items-start">
-                            <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
-                            <div>
-                                <p class="text-blue-800 font-medium">Thông tin phân khúc giá</p>
-                                <p class="text-blue-700 text-sm mt-1">Mỗi dịch vụ có thể có nhiều phân khúc giá khác nhau dựa trên giá trị tài sản. Hệ thống sẽ tự động áp dụng phân khúc phù hợp với giá trị tài sản của khách hàng.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Form Actions -->
-            <div class="flex justify-end space-x-4 mt-10 pt-8 border-t border-gray-100">
-                <button type="button" id="cancelModalBtn" class="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
-                    <i class="fas fa-times mr-2"></i>Hủy bỏ
-                </button>
-                <button type="submit" class="gradient-btn px-8 py-3 font-semibold text-lg">
-                    <i class="fas fa-save mr-2"></i>Lưu dịch vụ
-                </button>
-            </div>
-        </form>
+        <div class="stat-card">
+            <div class="icon"><i class="fas fa-handshake"></i></div>
+            <div class="value" id="activeContracts">32</div>
+            <div class="label">Hợp đồng đang hiệu lực</div>
+        </div>
+        <div class="stat-card">
+            <div class="icon"><i class="fas fa-check-circle"></i></div>
+            <div class="value" id="completedContracts">12</div>
+            <div class="label">Hợp đồng hoàn tất</div>
+        </div>
+        <div class="stat-card">
+            <div class="icon"><i class="fas fa-times-circle"></i></div>
+            <div class="value" id="cancelledContracts">4</div>
+            <div class="label">Hợp đồng hủy</div>
+        </div>
+        <div class="stat-card">
+            <div class="icon"><i class="fas fa-money-bill-wave"></i></div>
+            <div class="value" id="totalRevenue">1.245</div>
+            <div class="label">Tổng doanh thu (triệu VNĐ)</div>
+        </div>
     </div>
-</div>
 
-<!-- Success Notification -->
-<div id="successNotification" class="fixed top-6 right-6 z-50 hidden">
-    <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-5 rounded-2xl shadow-2xl max-w-md animate__animated animate__fadeInRight">
-        <div class="flex items-center">
-            <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mr-4">
-                <i class="fas fa-check text-2xl"></i>
-            </div>
-            <div>
-                <p class="font-bold text-lg" id="notificationTitle">Thành công!</p>
-                <p id="notificationMessage" class="text-white/90">Dịch vụ đã được lưu thành công</p>
-            </div>
-            <button id="closeNotificationBtn" class="ml-auto text-white/70 hover:text-white">
-                <i class="fas fa-times"></i>
-            </button>
+    <!-- Biểu đồ đường 1: Xu hướng hợp đồng - Full width -->
+    <div class="full-width-chart">
+        <h3><i class="fas fa-chart-line"></i> Xu hướng hợp đồng theo tháng (2026)</h3>
+        <div class="chart-wrapper">
+            <canvas id="trendChart1"></canvas>
         </div>
+    </div>
+
+    <!-- Biểu đồ đường 2: Doanh thu - Full width -->
+    <div class="full-width-chart">
+        <h3><i class="fas fa-money-bill-trend-up"></i> Doanh thu theo tháng (2026)</h3>
+        <div class="chart-wrapper">
+            <canvas id="trendChart2"></canvas>
+        </div>
+    </div>
+
+    <!-- 3 Biểu đồ nhỏ cùng hàng -->
+    <div class="three-charts-row">
+        <!-- Biểu đồ cột: Trạng thái hợp đồng -->
+        <div class="small-chart-card">
+            <h3><i class="fas fa-chart-bar"></i> Trạng thái hợp đồng</h3>
+            <div class="chart-wrapper">
+                <canvas id="statusChart"></canvas>
+            </div>
+            <div class="chart-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #22c55e;"></div>
+                    <span>Thành công</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #0ea5e9;"></div>
+                    <span>Tiềm năng</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #38bdf8;"></div>
+                    <span>Đang CS</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f43f5e;"></div>
+                    <span>Thất bại</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f97316;"></div>
+                    <span>Không LL</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ tròn: Loại khách hàng -->
+        <div class="small-chart-card">
+            <h3><i class="fas fa-users"></i> Loại khách hàng</h3>
+            <div class="chart-wrapper">
+                <canvas id="customerTypeChart"></canvas>
+            </div>
+            <div class="chart-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #6366f1;"></div>
+                    <span>Mới tiếp nhận</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #38bdf8;"></div>
+                    <span>Đang chăm sóc</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #a855f7;"></div>
+                    <span>Sai số liệu</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ tròn: Loại dịch vụ -->
+        <div class="small-chart-card">
+            <h3><i class="fas fa-concierge-bell"></i> Loại dịch vụ</h3>
+            <div class="chart-wrapper">
+                <canvas id="serviceTypeChart"></canvas>
+            </div>
+            <div class="chart-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f97316;"></div>
+                    <span>Không liên lạc</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #15803d;"></div>
+                    <span>Bán nhanh</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #0f766e;"></div>
+                    <span>Đã lên VP</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Hệ thống Quản lý Hợp Đồng &copy; 2026 - Dữ liệu được cập nhật tự động</p>
+        <p style="margin-top: 5px; font-size: 12px; opacity: 0.7;">Phiên bản thống kê nâng cao v4.0</p>
     </div>
 </div>
 
 <script>
-    // Mock data cho dịch vụ
-    const mockServices = [
-        {
-            id: 1,
-            name: "Bán nhanh 30 ngày",
-            description: "Dịch vụ hỗ trợ bán tài sản nhanh chóng trong vòng 30 ngày với chiến lược marketing tối ưu và đội ngũ chuyên nghiệp.",
-            color: "#3b82f6",
-            prices: [
-                { min: 0, max: 500000000, value: 15000000 },
-                { min: 500000001, max: 2000000000, value: 30000000 },
-                { min: 2000000001, max: 5000000000, value: 70000000 }
-            ],
-            active: true,
-            createdAt: "2023-05-15",
-            icon: "fa-bolt"
-        },
-        {
-            id: 2,
-            name: "Bán giải pháp theo giá mong muốn",
-            description: "Dịch vụ tư vấn và thực hiện chiến lược bán tài sản đạt được mức giá mong muốn của khách hàng với tỷ lệ thành công cao.",
-            color: "#10b981",
-            prices: [
-                { min: 0, max: 1000000000, value: 20000000 },
-                { min: 1000000001, max: 5000000000, value: 50000000 },
-                { min: 5000000001, max: 10000000000, value: 100000000 }
-            ],
-            active: true,
-            createdAt: "2023-06-22",
-            icon: "fa-chart-line"
-        }
-    ];
-
-    // Biến lưu trữ tạm
-    let services = [...mockServices];
-    let editingServiceId = null;
-
-    // DOM Elements
-    const servicesContainer = document.getElementById('servicesContainer');
-    const serviceModal = document.getElementById('serviceModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const serviceForm = document.getElementById('serviceForm');
-    const serviceNameInput = document.getElementById('serviceName');
-    const serviceDescriptionInput = document.getElementById('serviceDescription');
-    const serviceColorInput = document.getElementById('serviceColor');
-    const colorHexCode = document.getElementById('colorHexCode');
-    const priceList = document.getElementById('priceList');
-    const addPriceBtn = document.getElementById('addPriceBtn');
-    const addServiceBtn = document.getElementById('addServiceBtn');
-    const addFirstServiceBtn = document.getElementById('addFirstServiceBtn');
-    const cancelModalBtn = document.getElementById('cancelModalBtn');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const filterBtn = document.getElementById('filterBtn');
-    const emptyState = document.getElementById('emptyState');
-    const successNotification = document.getElementById('successNotification');
-    const notificationTitle = document.getElementById('notificationTitle');
-    const notificationMessage = document.getElementById('notificationMessage');
-    const closeNotificationBtn = document.getElementById('closeNotificationBtn');
-    const totalServices = document.getElementById('totalServices');
-    const totalPriceSegments = document.getElementById('totalPriceSegments');
-    const activeServices = document.getElementById('activeServices');
-
-    // Định dạng tiền tệ
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
-        }).format(amount);
+    // Màu sắc từ gợi ý
+    const COLORS = {
+        NEW: '#94a3b8',
+        DC_TELESALES: '#6366f1',
+        CHAM_SOC: '#38bdf8',
+        TN_7NGAY: '#0ea5e9',
+        TN_14NGAY: '#0284c7',
+        THAT_BAI: '#f43f5e',
+        KHONG_LIEN_LAC_DUOC: '#f97316',
+        SAI_SO_LIEU: '#a855f7',
+        THANH_CONG: '#22c55e',
+        KHACH_HUY_HEN: '#b45309',
+        BAN_NHANH: '#15803d',
+        BAN_GP: '#0f766e'
     };
 
-    // Hiển thị danh sách dịch vụ
-    function renderServices() {
-        servicesContainer.innerHTML = '';
+    // Dữ liệu biểu đồ đường 1: Xu hướng hợp đồng
+    const trendData1 = {
+        labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+            'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+        datasets: [
+            {
+                label: 'Hợp đồng mới',
+                data: [8, 12, 9, 14, 18, 16, 20, 18, 15, 12, 10, 13],
+                borderColor: COLORS.DC_TELESALES,
+                backgroundColor: COLORS.DC_TELESALES + '20',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            },
+            {
+                label: 'Hợp đồng thành công',
+                data: [4, 6, 5, 8, 10, 12, 14, 13, 11, 9, 7, 8],
+                borderColor: COLORS.THANH_CONG,
+                backgroundColor: COLORS.THANH_CONG + '20',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            },
+            {
+                label: 'Hợp đồng thất bại',
+                data: [1, 2, 1, 2, 3, 2, 3, 2, 2, 1, 1, 2],
+                borderColor: COLORS.THAT_BAI,
+                backgroundColor: COLORS.THAT_BAI + '20',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }
+        ]
+    };
 
-        // Cập nhật thống kê
-        totalServices.textContent = services.length;
-        totalPriceSegments.textContent = services.reduce((total, service) => total + service.prices.length, 0);
-        activeServices.textContent = services.filter(s => s.active).length;
+    // Dữ liệu biểu đồ đường 2: Doanh thu
+    const trendData2 = {
+        labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+            'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+        datasets: [
+            {
+                label: 'Doanh thu (triệu VNĐ)',
+                data: [85, 105, 92, 125, 145, 160, 180, 165, 155, 135, 120, 140],
+                borderColor: COLORS.BAN_NHANH,
+                backgroundColor: COLORS.BAN_NHANH + '20',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            },
+            {
+                label: 'Doanh thu bán nhanh',
+                data: [25, 30, 28, 35, 45, 50, 60, 55, 50, 40, 35, 42],
+                borderColor: COLORS.BAN_GP,
+                backgroundColor: COLORS.BAN_GP + '20',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }
+        ]
+    };
 
-        if (services.length === 0) {
-            emptyState.classList.remove('hidden');
-            servicesContainer.classList.add('hidden');
+    // Dữ liệu biểu đồ cột: Trạng thái hợp đồng
+    const statusData = {
+        labels: ['Thành công', 'Tiềm năng', 'Đang CS', 'Thất bại', 'Không LL'],
+        datasets: [{
+            label: 'Số lượng',
+            data: [45, 28, 32, 12, 8],
+            backgroundColor: [
+                COLORS.THANH_CONG,
+                COLORS.TN_7NGAY,
+                COLORS.CHAM_SOC,
+                COLORS.THAT_BAI,
+                COLORS.KHONG_LIEN_LAC_DUOC
+            ],
+            borderColor: [
+                '#1db954',
+                '#0c8fd8',
+                '#2ca8e8',
+                '#d32f2f',
+                '#ff6b35'
+            ],
+            borderWidth: 1,
+            borderRadius: 6,
+            barPercentage: 0.5
+        }]
+    };
+
+    // Dữ liệu biểu đồ tròn: Loại khách hàng
+    const customerTypeData = {
+        labels: ['Mới tiếp nhận', 'Đang chăm sóc', 'Sai số liệu'],
+        datasets: [{
+            data: [40, 35, 25],
+            backgroundColor: [
+                COLORS.DC_TELESALES,
+                COLORS.CHAM_SOC,
+                COLORS.SAI_SO_LIEU
+            ],
+            borderWidth: 2,
+            spacing: 3
+        }]
+    };
+
+    // Dữ liệu biểu đồ tròn: Loại dịch vụ
+    const serviceTypeData = {
+        labels: ['Không liên lạc', 'Bán nhanh', 'Đã lên VP'],
+        datasets: [{
+            data: [30, 40, 30],
+            backgroundColor: [
+                COLORS.KHONG_LIEN_LAC_DUOC,
+                COLORS.BAN_NHANH,
+                COLORS.BAN_GP
+            ],
+            borderWidth: 2,
+            spacing: 3
+        }]
+    };
+
+    // Khởi tạo biểu đồ đường 1
+    const trendCtx1 = document.getElementById('trendChart1').getContext('2d');
+    const trendChart1 = new Chart(trendCtx1, {
+        type: 'line',
+        data: trendData1,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Số hợp đồng',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15,
+                        font: {
+                            size: 13
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Khởi tạo biểu đồ đường 2
+    const trendCtx2 = document.getElementById('trendChart2').getContext('2d');
+    const trendChart2 = new Chart(trendCtx2, {
+        type: 'line',
+        data: trendData2,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Triệu VNĐ',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15,
+                        font: {
+                            size: 13
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Khởi tạo biểu đồ cột trạng thái
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statusChart = new Chart(statusCtx, {
+        type: 'bar',
+        data: statusData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Khởi tạo biểu đồ tròn loại khách hàng
+    const customerTypeCtx = document.getElementById('customerTypeChart').getContext('2d');
+    const customerTypeChart = new Chart(customerTypeCtx, {
+        type: 'doughnut',
+        data: customerTypeData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Khởi tạo biểu đồ tròn loại dịch vụ
+    const serviceTypeCtx = document.getElementById('serviceTypeChart').getContext('2d');
+    const serviceTypeChart = new Chart(serviceTypeCtx, {
+        type: 'doughnut',
+        data: serviceTypeData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Xử lý sự kiện bộ lọc - ảnh hưởng đến TẤT CẢ biểu đồ
+    document.getElementById('timeRange').addEventListener('change', function() {
+        const timeRange = this.value;
+        let startDate, endDate;
+
+        const today = new Date('2026-06-15');
+
+        if (timeRange === 'month') {
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        } else if (timeRange === 'quarter') {
+            const quarter = Math.floor(today.getMonth() / 3);
+            startDate = new Date(today.getFullYear(), quarter * 3, 1);
+            endDate = new Date(today.getFullYear(), (quarter + 1) * 3, 0);
+        } else if (timeRange === 'year') {
+            startDate = new Date(today.getFullYear(), 0, 1);
+            endDate = new Date(today.getFullYear(), 11, 31);
         } else {
-            emptyState.classList.add('hidden');
-            servicesContainer.classList.remove('hidden');
-
-            services.forEach((service, index) => {
-                const serviceCard = document.createElement('div');
-                serviceCard.className = `service-card animate__animated animate__fadeInUp glass-card`;
-                serviceCard.style.animationDelay = `${index * 0.1}s`;
-
-                // Tính toán tổng số phân khúc giá
-                const totalPriceSegments = service.prices.length;
-
-                // Xác định icon class dựa trên service data
-                const iconClass = service.icon || (index % 4 === 0 ? 'fa-bolt' :
-                    index % 4 === 1 ? 'fa-chart-line' :
-                        index % 4 === 2 ? 'fa-gem' : 'fa-crown');
-
-                serviceCard.innerHTML = `
-                        <div class="p-7">
-                            <div class="flex justify-between items-start mb-6">
-                                <div class="flex items-start">
-                                    <div class="service-icon ${`service-${(index % 4) + 1}`} mr-5">
-                                        <i class="fas ${iconClass}"></i>
-                                    </div>
-                                    <div>
-                                        <div class="flex items-center mb-2">
-                                            <h3 class="text-2xl font-bold text-gray-800">${service.name}</h3>
-                                            ${service.active ?
-                    '<span class="badge bg-green-100 text-green-800 ml-4"><i class="fas fa-circle text-xs mr-1"></i> Đang hoạt động</span>' :
-                    '<span class="badge bg-red-100 text-red-800 ml-4"><i class="fas fa-circle text-xs mr-1"></i> Ngừng hoạt động</span>'}
-                                        </div>
-                                        <p class="text-gray-600 mb-4">${service.description}</p>
-                                        <div class="flex items-center text-gray-500 text-sm">
-                                            <div class="flex items-center mr-6">
-                                                <div class="color-preview mr-2" style="background-color: ${service.color};"></div>
-                                                <span>Màu phân loại</span>
-                                            </div>
-                                            <div class="flex items-center">
-                                                <i class="far fa-calendar-alt mr-2"></i>
-                                                <span>Tạo ngày: ${service.createdAt}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex space-x-2">
-                                    <button class="edit-service-btn px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-medium hover:bg-blue-100 transition-colors text-sm" data-id="${service.id}" title="Chỉnh sửa">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="delete-service-btn px-4 py-2 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-colors text-sm" data-id="${service.id}" title="Xóa dịch vụ">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="mt-8 pt-6 border-t border-gray-100">
-                                <div class="flex justify-between items-center mb-6">
-                                    <h4 class="font-bold text-gray-700 text-lg">
-                                        <i class="fas fa-tags mr-2 text-yellow-500"></i>Bảng giá theo phân khúc tài sản
-                                    </h4>
-                                    <span class="badge price-badge">${totalPriceSegments} phân khúc</span>
-                                </div>
-                                <div class="space-y-4">
-                                    ${service.prices.map(price => `
-                                        <div class="price-item glass-card p-4">
-                                            <div class="flex justify-between items-center">
-                                                <div>
-                                                    <div class="font-bold text-gray-800 text-lg">${formatCurrency(price.value)}</div>
-                                                    <div class="text-gray-600 text-sm mt-1">
-                                                        Áp dụng cho tài sản từ ${formatCurrency(price.min)} đến ${formatCurrency(price.max)}
-                                                    </div>
-                                                </div>
-                                                <div class="text-right">
-                                                    <div class="text-sm text-gray-500">Phạm vi giá trị</div>
-                                                    <div class="font-semibold text-gray-700">${formatCurrency(price.min)} - ${formatCurrency(price.max)}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-
-                servicesContainer.appendChild(serviceCard);
-            });
-
-            // Thêm sự kiện cho các nút chỉnh sửa và xóa
-            document.querySelectorAll('.edit-service-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const serviceId = parseInt(e.currentTarget.getAttribute('data-id'));
-                    openEditModal(serviceId);
-                });
-            });
-
-            document.querySelectorAll('.delete-service-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const serviceId = parseInt(e.currentTarget.getAttribute('data-id'));
-                    deleteService(serviceId);
-                });
-            });
+            startDate = new Date('2026-01-01');
+            endDate = new Date('2026-12-31');
         }
-    }
 
-    // Mở modal thêm dịch vụ mới
-    function openAddModal() {
-        editingServiceId = null;
-        modalTitle.textContent = 'Thêm dịch vụ mới';
-        serviceForm.reset();
+        document.getElementById('startDate').valueAsDate = startDate;
+        document.getElementById('endDate').valueAsDate = endDate;
+    });
 
-        // Reset màu về mặc định
-        serviceColorInput.value = "#3b82f6";
-        colorHexCode.textContent = "#3b82f6";
+    document.getElementById('applyFilter').addEventListener('click', function() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const timeRange = document.getElementById('timeRange').value;
 
-        // Reset danh sách giá
-        priceList.innerHTML = `
-                <div class="price-item-input glass-card p-5">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối thiểu (Min) *</label>
-                            <input type="number" class="price-min input-field w-full" placeholder="0" min="0" required>
-                            <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
-                        </div>
-                        <div>
-                            <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối đa (Max) *</label>
-                            <input type="number" class="price-max input-field w-full" placeholder="1,000,000,000" min="0" required>
-                            <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
-                        </div>
-                        <div>
-                            <label class="block text-gray-600 font-medium mb-2">Giá dịch vụ *</label>
-                            <input type="number" class="price-value input-field w-full" placeholder="500,000" min="0" required>
-                            <div class="flex justify-between items-center mt-2">
-                                <p class="text-gray-500 text-xs">Đơn vị: VNĐ</p>
-                                <button type="button" class="remove-price-btn text-red-500 hover:text-red-700 text-sm">
-                                    <i class="fas fa-trash mr-1"></i>Xóa
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
+        // Hiệu ứng loading
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải...';
+        this.disabled = true;
 
-        // Thêm sự kiện cho nút xóa giá
-        document.querySelectorAll('.remove-price-btn').forEach(btn => {
-            btn.addEventListener('click', removePriceItem);
+        // Giả lập API call
+        setTimeout(() => {
+            this.innerHTML = 'Áp dụng';
+            this.disabled = false;
+
+            // Cập nhật TẤT CẢ biểu đồ dựa trên bộ lọc
+            updateAllCharts(timeRange, startDate, endDate);
+            console.log(`Đã áp dụng bộ lọc: ${timeRange} (${startDate} đến ${endDate})`);
+        }, 1500);
+    });
+
+    // Hàm cập nhật TẤT CẢ biểu đồ
+    function updateAllCharts(timeRange, startDate, endDate) {
+        // Cập nhật tiêu đề biểu đồ đường
+        const dateText = getDateText(timeRange, startDate, endDate);
+
+        // Cập nhật biểu đồ đường 1
+        const newTrend1Data = generateFilteredData(trendData1.datasets, timeRange);
+        trendChart1.data.datasets.forEach((dataset, index) => {
+            dataset.data = newTrend1Data[index];
         });
+        trendChart1.update();
 
-        serviceModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    }
-
-    // Mở modal chỉnh sửa dịch vụ
-    function openEditModal(serviceId) {
-        const service = services.find(s => s.id === serviceId);
-        if (!service) return;
-
-        editingServiceId = serviceId;
-        modalTitle.textContent = 'Chỉnh sửa dịch vụ';
-
-        // Điền thông tin dịch vụ vào form
-        serviceNameInput.value = service.name;
-        serviceDescriptionInput.value = service.description;
-        serviceColorInput.value = service.color;
-        colorHexCode.textContent = service.color;
-
-        // Hiển thị danh sách giá
-        priceList.innerHTML = '';
-        service.prices.forEach(price => {
-            addPriceItem(price.min, price.max, price.value);
+        // Cập nhật biểu đồ đường 2
+        const newTrend2Data = generateFilteredData(trendData2.datasets, timeRange);
+        trendChart2.data.datasets.forEach((dataset, index) => {
+            dataset.data = newTrend2Data[index];
         });
+        trendChart2.update();
 
-        serviceModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+        // Cập nhật biểu đồ cột
+        const newStatusData = generateRandomData(5, timeRange);
+        statusChart.data.datasets[0].data = newStatusData;
+        statusChart.update();
+
+        // Cập nhật biểu đồ tròn loại khách hàng
+        const newCustomerData = generateRandomData(3, timeRange);
+        customerTypeChart.data.datasets[0].data = newCustomerData;
+        customerTypeChart.update();
+
+        // Cập nhật biểu đồ tròn loại dịch vụ
+        const newServiceData = generateRandomData(3, timeRange);
+        serviceTypeChart.data.datasets[0].data = newServiceData;
+        serviceTypeChart.update();
+
+        // Cập nhật số liệu thống kê
+        updateStatistics(timeRange);
     }
 
-    // Đóng modal
-    function closeModal() {
-        serviceModal.classList.add('hidden');
-        editingServiceId = null;
-        document.body.style.overflow = 'auto';
+    // Hàm tạo dữ liệu ngẫu nhiên dựa trên bộ lọc
+    function generateFilteredData(datasets, timeRange) {
+        const multiplier = timeRange === 'month' ? 0.3 :
+            timeRange === 'quarter' ? 0.7 :
+                timeRange === 'year' ? 1 : 1.2;
+
+        return datasets.map(dataset =>
+            dataset.data.map(value => Math.round(value * multiplier + (Math.random() * 10 - 5)))
+        );
     }
 
-    // Thêm một dòng giá mới
-    function addPriceItem(min = '', max = '', value = '') {
-        const priceItem = document.createElement('div');
-        priceItem.className = 'price-item-input glass-card p-5';
-        priceItem.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối thiểu (Min) *</label>
-                        <input type="number" class="price-min input-field w-full" placeholder="0" min="0" value="${min}" required>
-                        <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
-                    </div>
-                    <div>
-                        <label class="block text-gray-600 font-medium mb-2">Giá trị tài sản tối đa (Max) *</label>
-                        <input type="number" class="price-max input-field w-full" placeholder="1,000,000,000" min="0" value="${max}" required>
-                        <p class="text-gray-500 text-xs mt-1">Đơn vị: VNĐ</p>
-                    </div>
-                    <div>
-                        <label class="block text-gray-600 font-medium mb-2">Giá dịch vụ *</label>
-                        <input type="number" class="price-value input-field w-full" placeholder="500,000" min="0" value="${value}" required>
-                        <div class="flex justify-between items-center mt-2">
-                            <p class="text-gray-500 text-xs">Đơn vị: VNĐ</p>
-                            <button type="button" class="remove-price-btn text-red-500 hover:text-red-700 text-sm">
-                                <i class="fas fa-trash mr-1"></i>Xóa
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
+    // Hàm tạo dữ liệu ngẫu nhiên
+    function generateRandomData(count, timeRange) {
+        const base = timeRange === 'month' ? 10 :
+            timeRange === 'quarter' ? 30 :
+                timeRange === 'year' ? 100 : 150;
 
-        priceList.appendChild(priceItem);
-
-        // Thêm sự kiện cho nút xóa
-        priceItem.querySelector('.remove-price-btn').addEventListener('click', removePriceItem);
+        const data = [];
+        for (let i = 0; i < count; i++) {
+            data.push(Math.round(base + Math.random() * 50 - 25));
+        }
+        return data;
     }
 
-    // Xóa một dòng giá
-    function removePriceItem(e) {
-        // Chỉ cho phép xóa nếu còn nhiều hơn 1 dòng
-        if (priceList.children.length > 1) {
-            e.currentTarget.closest('.price-item-input').remove();
-        }
+    // Hàm cập nhật số liệu thống kê
+    function updateStatistics(timeRange) {
+        const multiplier = timeRange === 'month' ? 0.3 :
+            timeRange === 'quarter' ? 0.7 :
+                timeRange === 'year' ? 1 : 1.2;
+
+        const total = Math.round(48 * multiplier);
+        const active = Math.round(32 * multiplier);
+        const completed = Math.round(12 * multiplier);
+        const cancelled = Math.round(4 * multiplier);
+        const revenue = Math.round(1245 * multiplier);
+
+        animateValue('totalContracts', parseInt(document.getElementById('totalContracts').textContent), total, 800);
+        animateValue('activeContracts', parseInt(document.getElementById('activeContracts').textContent), active, 800);
+        animateValue('completedContracts', parseInt(document.getElementById('completedContracts').textContent), completed, 800);
+        animateValue('cancelledContracts', parseInt(document.getElementById('cancelledContracts').textContent), cancelled, 800);
+        animateValue('totalRevenue', parseInt(document.getElementById('totalRevenue').textContent), revenue, 800);
     }
 
-    // Xử lý submit form
-    function handleSubmitForm(e) {
-        e.preventDefault();
+    // Hàm lấy text hiển thị thời gian
+    function getDateText(timeRange, startDate, endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
 
-        // Lấy giá trị từ form
-        const name = serviceNameInput.value.trim();
-        const description = serviceDescriptionInput.value.trim();
-        const color = serviceColorInput.value;
-
-        // Lấy danh sách giá
-        const prices = [];
-        const priceItems = priceList.querySelectorAll('.price-item-input');
-
-        for (let item of priceItems) {
-            const min = parseInt(item.querySelector('.price-min').value) || 0;
-            const max = parseInt(item.querySelector('.price-max').value) || 0;
-            const value = parseInt(item.querySelector('.price-value').value) || 0;
-
-            if (min >= 0 && max >= min && value >= 0) {
-                prices.push({ min, max, value });
-            }
-        }
-
-        if (prices.length === 0) {
-            showNotification('Vui lòng thêm ít nhất một phân khúc giá hợp lệ!', 'error');
-            return;
-        }
-
-        // Xác định icon dựa trên tên dịch vụ
-        let icon = 'fa-cogs';
-        if (name.toLowerCase().includes('nhanh') || name.toLowerCase().includes('fast')) {
-            icon = 'fa-bolt';
-        } else if (name.toLowerCase().includes('giải pháp') || name.toLowerCase().includes('solution')) {
-            icon = 'fa-lightbulb';
-        } else if (name.toLowerCase().includes('premium') || name.toLowerCase().includes('cao cấp')) {
-            icon = 'fa-crown';
-        } else if (name.toLowerCase().includes('chiến lược') || name.toLowerCase().includes('strategy')) {
-            icon = 'fa-chess';
-        }
-
-        if (editingServiceId) {
-            // Cập nhật dịch vụ
-            const serviceIndex = services.findIndex(s => s.id === editingServiceId);
-            if (serviceIndex !== -1) {
-                services[serviceIndex] = {
-                    ...services[serviceIndex],
-                    name,
-                    description,
-                    color,
-                    prices,
-                    icon
-                };
-            }
-
-            showNotification(`Đã cập nhật dịch vụ "${name}" thành công!`, 'success');
+        if (timeRange === 'month') {
+            return `Tháng ${start.getMonth() + 1}/${start.getFullYear()}`;
+        } else if (timeRange === 'quarter') {
+            const quarter = Math.floor(start.getMonth() / 3) + 1;
+            return `Quý ${quarter}/${start.getFullYear()}`;
+        } else if (timeRange === 'year') {
+            return `Năm ${start.getFullYear()}`;
         } else {
-            // Thêm dịch vụ mới
-            const newId = services.length > 0 ? Math.max(...services.map(s => s.id)) + 1 : 1;
-            const newService = {
-                id: newId,
-                name,
-                description,
-                color,
-                prices,
-                active: true,
-                icon,
-                createdAt: new Date().toISOString().split('T')[0]
-            };
-
-            services.push(newService);
-            showNotification(`Đã thêm dịch vụ "${name}" thành công!`, 'success');
+            return `${start.toLocaleDateString('vi-VN')} - ${end.toLocaleDateString('vi-VN')}`;
         }
-
-        // Render lại danh sách và đóng modal
-        renderServices();
-        closeModal();
     }
 
-    // Xóa dịch vụ
-    function deleteService(serviceId) {
-        const service = services.find(s => s.id === serviceId);
-        if (!service) return;
-
-        // Tạo modal xác nhận xóa
-        const confirmModal = document.createElement('div');
-        confirmModal.className = 'fixed inset-0 flex items-center justify-center z-50 modal-overlay p-4';
-        confirmModal.innerHTML = `
-                <div class="modal-content w-full max-w-md">
-                    <div class="p-8">
-                        <div class="flex items-center mb-6">
-                            <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mr-5">
-                                <i class="fas fa-exclamation-triangle text-red-500 text-3xl"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-2xl font-bold text-gray-800">Xác nhận xóa</h3>
-                                <p class="text-gray-600 mt-1">Bạn có chắc chắn muốn xóa dịch vụ này?</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-red-50 p-4 rounded-xl mb-6">
-                            <div class="flex items-center text-red-800">
-                                <i class="fas fa-info-circle mr-3"></i>
-                                <p class="font-medium">Hành động này không thể hoàn tác. Tất cả phân khúc giá của dịch vụ sẽ bị xóa.</p>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end space-x-4">
-                            <button id="cancelDeleteBtn" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
-                                Hủy bỏ
-                            </button>
-                            <button id="confirmDeleteBtn" class="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all">
-                                <i class="fas fa-trash mr-2"></i>Xóa dịch vụ
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-        document.body.appendChild(confirmModal);
-
-        // Xử lý sự kiện cho nút hủy
-        confirmModal.querySelector('#cancelDeleteBtn').addEventListener('click', () => {
-            document.body.removeChild(confirmModal);
-        });
-
-        // Xử lý sự kiện cho nút xác nhận xóa
-        confirmModal.querySelector('#confirmDeleteBtn').addEventListener('click', () => {
-            services = services.filter(s => s.id !== serviceId);
-            renderServices();
-            document.body.removeChild(confirmModal);
-            showNotification(`Đã xóa dịch vụ "${service.name}" thành công!`, 'info');
-        });
-
-        // Đóng modal khi click ra ngoài
-        confirmModal.addEventListener('click', (e) => {
-            if (e.target === confirmModal) {
-                document.body.removeChild(confirmModal);
+    // Hiệu ứng đếm số
+    function animateValue(elementId, start, end, duration) {
+        const element = document.getElementById(elementId);
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const value = Math.floor(progress * (end - start) + start);
+            element.textContent = value.toLocaleString();
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
             }
-        });
+        };
+        window.requestAnimationFrame(step);
     }
 
-    // Hiển thị thông báo
-    function showNotification(message, type = 'success') {
-        notificationTitle.textContent = type === 'success' ? 'Thành công!' :
-            type === 'error' ? 'Lỗi!' : 'Thông tin';
-        notificationMessage.textContent = message;
-
-        // Đặt màu nền dựa trên loại thông báo
-        if (type === 'success') {
-            successNotification.className = successNotification.className.replace(/from-[\w-]+ to-[\w-]+/, 'from-green-500 to-emerald-500');
-        } else if (type === 'error') {
-            successNotification.className = successNotification.className.replace(/from-[\w-]+ to-[\w-]+/, 'from-red-500 to-pink-500');
-        } else {
-            successNotification.className = successNotification.className.replace(/from-[\w-]+ to-[\w-]+/, 'from-blue-500 to-cyan-500');
-        }
-
-        successNotification.classList.remove('hidden');
-        successNotification.classList.add('animate__animated', 'animate__fadeInRight');
-
-        // Tự động ẩn sau 5 giây
+    // Kích hoạt hiệu ứng đếm số khi tải trang
+    window.addEventListener('load', function() {
         setTimeout(() => {
-            hideNotification();
-        }, 5000);
-    }
-
-    // Ẩn thông báo
-    function hideNotification() {
-        successNotification.classList.add('animate__fadeOutRight');
-        setTimeout(() => {
-            successNotification.classList.remove('animate__fadeInRight', 'animate__fadeOutRight');
-            successNotification.classList.add('hidden');
-        }, 300);
-    }
-
-    // Khởi tạo sự kiện
-    function initEventListeners() {
-        // Nút thêm dịch vụ
-        addServiceBtn.addEventListener('click', openAddModal);
-        addFirstServiceBtn.addEventListener('click', openAddModal);
-
-        // Nút thêm phân khúc giá
-        addPriceBtn.addEventListener('click', () => addPriceItem());
-
-        // Nút hủy và đóng modal
-        cancelModalBtn.addEventListener('click', closeModal);
-        closeModalBtn.addEventListener('click', closeModal);
-
-        // Đóng modal khi click ra ngoài
-        serviceModal.addEventListener('click', (e) => {
-            if (e.target === serviceModal) {
-                closeModal();
-            }
-        });
-
-        // Xử lý submit form
-        serviceForm.addEventListener('submit', handleSubmitForm);
-
-        // Cập nhật mã màu hex khi chọn màu
-        serviceColorInput.addEventListener('input', () => {
-            colorHexCode.textContent = serviceColorInput.value;
-        });
-
-        // Nút lọc
-        filterBtn.addEventListener('click', () => {
-            showNotification('Tính năng lọc đang được phát triển', 'info');
-        });
-
-        // Đóng thông báo
-        closeNotificationBtn.addEventListener('click', hideNotification);
-
-        // Thêm hiệu ứng khi cuộn trang
-        window.addEventListener('scroll', () => {
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            const header = document.querySelector('header');
-
-            if (scrollTop > 50) {
-                header.style.transform = 'translateY(-10px)';
-                header.style.opacity = '0.9';
-            } else {
-                header.style.transform = 'translateY(0)';
-                header.style.opacity = '1';
-            }
-        });
-    }
-
-    // Khởi tạo ứng dụng
-    function initApp() {
-        renderServices();
-        initEventListeners();
-
-        // Thêm hiệu ứng cho các phần tử khi trang tải
-        setTimeout(() => {
-            document.querySelectorAll('.animate__animated').forEach(el => {
-                el.classList.add('animate__faster');
-            });
-        }, 1000);
-    }
-
-    // Chạy ứng dụng khi trang đã tải xong
-    document.addEventListener('DOMContentLoaded', initApp);
+            animateValue('totalContracts', 0, 48, 1000);
+            animateValue('activeContracts', 0, 32, 1000);
+            animateValue('completedContracts', 0, 12, 1000);
+            animateValue('cancelledContracts', 0, 4, 1000);
+            animateValue('totalRevenue', 0, 1245, 1000);
+        }, 500);
+    });
 </script>
 </body>
 </html>

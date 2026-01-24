@@ -1,31 +1,58 @@
 <template>
-  <div class="svc3-page">
-    <div class="mx-auto max-w-[1440px] px-4 py-5">
-      <!-- Top bar -->
-      <div class="svc3-topbar">
-        <div class="svc3-brand">
-          <div class="svc3-brand-ico"><i class="fa-solid fa-grid-2-plus"></i></div>
-          <div class="min-w-0">
-            <div class="svc3-title">Quản trị Dịch vụ</div>
-            <div class="svc3-sub">Quản lý dịch vụ & phân khúc giá (compact, pro, nhất quán)</div>
-          </div>
-        </div>
 
-        <div class="svc3-top-actions">
-          <button class="svc3-btn ghost" @click="seedMock()">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <span class="hidden sm:inline">Mock</span>
-          </button>
+  <div class="svc3-topbar">
+    <div class="svc3-brand">
 
-          <button class="svc3-btn primary" @click="openCreateService()">
-            <i class="fa-solid fa-plus"></i>
-            <span>Thêm dịch vụ</span>
-          </button>
+      <div class="svc3-brand-ico"><i class="fa-solid fa-layer-group"></i></div>
+      <div class="min-w-0">
+        <div class="svc3-title">Quản trị Dịch vụ</div>
+      </div>
+      <button
+          type="button"
+          class="header-menu-toggle"
+          title="Ẩn/hiện menu"
+          @click="sidebar.toggle()"
+      >
+        <i class="fa-solid fa-bars"></i>
+        <span class="d-none d-md-inline">Menu</span>
+      </button>
+    </div>
+
+    <div class="svc3-top-actions">
+
+<!--      <button class="svc3-btn primary" @click="openCreateService()">-->
+<!--        <i class="fa-solid fa-plus"></i>-->
+<!--        <span>Thêm dịch vụ</span>-->
+<!--      </button>-->
+      <router-link class="svc3-btn ghost" to="/-thg/quan-ly-hop-dong">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Quay về hợp đồng</span>
+      </router-link>
+      <div class="d-flex flex-column align-items-end text-end">
+        <div class="fw-semibold text-dark">
+          {{ info.fullName }}
         </div>
       </div>
 
+      <img
+          v-if="info.avatarUrl"
+          :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+          alt="avatar"
+          class="rounded-circle border"
+          style="width: 36px; height: 36px; object-fit: cover;"
+      />
+
+      <div v-else class="avatar-circle">
+        {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
+      </div>
+    </div>
+  </div>
+  <div class="svc3-page">
+    <div class="px-3 py-1">
+      <!-- Top bar -->
+
       <!-- Tabs (ONLY 2) - browser style -->
-      <div class="svc3-tabs-shell mt-4">
+      <div class="svc3-tabs-shell mt-2">
         <div class="svc3-tabs">
           <button class="svc3-tab" :class="{active: activeTab==='services'}" @click="activeTab='services'">
             <i class="fa-solid fa-list-check"></i>
@@ -46,12 +73,18 @@
         <section v-if="activeTab==='services'" class="svc3-panel attached">
           <div class="svc3-panel-h">
             <div class="svc3-panel-title">
-              <i class="fa-solid fa-concierge-bell"></i>
-              <span>Danh sách dịch vụ</span>
-              <span class="svc3-hint">
-                <i class="fa-regular fa-circle-question"></i>
-                Click <b>mắt</b> để xem, <b>bút</b> để sửa
-              </span>
+              <DotLottieVue
+                  src="https://lottie.host/5a73bb5b-1f82-4db1-b81b-32cc35cecd45/Hxy0beY7On.lottie"
+                  autoplay
+                  loop
+                  style="
+                            width: 40px;
+                            height: 46px;
+                            display: inline-block;
+                            vertical-align: bottom;
+                          "
+              />
+              <span class="fs-5">Danh sách dịch vụ</span>
             </div>
 
             <div class="svc3-tools">
@@ -84,10 +117,10 @@
                   <th style="min-width:300px">Dịch vụ</th>
                   <th style="width:180px">Màu</th>
                   <th>Mô tả</th>
-                  <th style="width:160px" class="text-right">Giá từ</th>
-                  <th style="width:160px" class="text-right">Giá đến</th>
-                  <th style="width:110px" class="text-center">Segments</th>
-                  <th style="width:170px" class="text-right">Thao tác</th>
+                  <th style="width:160px" class="text-left">Giá từ</th>
+                  <th style="width:160px" class="text-left">Giá đến</th>
+                  <th style="width:110px" class="text-center">SL Phân khúc</th>
+                  <th style="width:170px" class="text-center">Thao tác</th>
                 </tr>
                 </thead>
 
@@ -101,7 +134,7 @@
                         <div class="svc3-svc-sub">
                           <span class="mono">ID {{ pad3(s.id) }}</span>
                           <span class="muted">•</span>
-                          <span class="muted">{{ s.priceSegments.length }} phân khúc</span>
+                          <span class="muted">{{ s.segmentCount }} phân khúc</span>
                         </div>
                       </div>
                     </div>
@@ -118,27 +151,27 @@
                     <div class="svc3-ellipsis">{{ s.description || "—" }}</div>
                   </td>
 
-                  <td class="text-right">
-                    <span class="svc3-price p1">{{ formatCurrency(getMinPrice(s)) }}</span>
+                  <td class="text-left">
+                    <span class="svc3-price p1">{{ formatCurrency(s.minPrice) }}</span>
                   </td>
 
-                  <td class="text-right">
-                    <span class="svc3-price p2">{{ formatCurrency(getMaxPrice(s)) }}</span>
+                  <td class="text-left">
+                    <span class="svc3-price p2">{{ formatCurrency(s.maxPrice) }}</span>
                   </td>
 
                   <td class="text-center">
-                    <span class="svc3-badge">{{ s.priceSegments.length }}</span>
+                    <span class="svc3-badge">{{ s.segmentCount }}</span>
                   </td>
 
-                  <td class="text-right">
-                    <div class="svc3-actions justify-end">
+                  <td class="text-center">
+                    <div class="svc3-actions justify-content-center">
                       <button class="svc3-icon info" title="Chi tiết" @click="openServiceDetail(s.id)">
                         <i class="fa-solid fa-eye"></i>
                       </button>
                       <button class="svc3-icon warn" title="Sửa" @click="openEditService(s.id)">
                         <i class="fa-solid fa-pen"></i>
                       </button>
-                      <button class="svc3-icon danger" title="Xóa" @click="removeService(s.id)">
+                      <button class="svc3-icon danger" title="Xóa" @click="removeService(s)">
                         <i class="fa-solid fa-trash"></i>
                       </button>
                     </div>
@@ -146,10 +179,6 @@
                 </tr>
                 </tbody>
               </table>
-
-              <div class="svc3-footnote">
-                Header table set nền ở <b>thead</b> nên liền mạch, không “đứt” từng cột.
-              </div>
             </div>
           </div>
         </section>
@@ -158,34 +187,22 @@
         <section v-if="activeTab==='segments'" class="svc3-panel attached">
           <div class="svc3-panel-h">
             <div class="svc3-panel-title">
-              <i class="fa-solid fa-tags"></i>
-              <span>Phân khúc giá</span>
-              <span class="svc3-hint">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
-                Nhập <b>Giá trị tài sản</b> để highlight
-              </span>
+              <DotLottieVue
+                  src="https://lottie.host/ef658fd5-6fa8-46c4-9ab4-121172ab75a2/ykRlUdfBR8.lottie"
+                  autoplay
+                  loop
+                  style="
+                            width: 40px;
+                            height:46px;
+                            display: inline-block;
+                            vertical-align: bottom;
+                          "
+              />
+              <span class="fs-5">Phân khúc giá</span>
             </div>
 
             <div class="svc3-tools">
-              <div class="svc3-select">
-                <label>Dịch vụ</label>
-                <select v-model="segmentFilterServiceId">
-                  <option value="all">Tất cả</option>
-                  <option v-for="s in services" :key="s.id" :value="String(s.id)">{{ s.name }}</option>
-                </select>
-              </div>
-
-              <div class="svc3-select">
-                <label>Sắp xếp</label>
-                <select v-model="segmentSort">
-                  <option value="low-high">Giá ↑</option>
-                  <option value="high-low">Giá ↓</option>
-                  <option value="range-low">Khoảng ↑</option>
-                  <option value="range-high">Khoảng ↓</option>
-                </select>
-              </div>
-
-              <div class="svc3-input narrow">
+              <div v-if="segmentFilterServiceId != 'all'" class="svc3-input narrow">
                 <i class="fa-solid fa-magnifying-glass-dollar"></i>
                 <input
                     v-model="assetValueText"
@@ -196,6 +213,23 @@
                     @blur="onAssetMoneyBlur"
                 />
               </div>
+              <div class="svc3-select">
+                <select v-model="segmentFilterServiceId">
+                  <option value="all">Tất cả</option>
+                  <option v-for="s in services" :key="s.id" :value="String(s.id)">{{ s.name }}</option>
+                </select>
+              </div>
+
+              <div class="svc3-select">
+                <select v-model="segmentSort">
+                  <option value="low-high">Giá ↑</option>
+                  <option value="high-low">Giá ↓</option>
+                  <option value="range-low">Khoảng ↑</option>
+                  <option value="range-high">Khoảng ↓</option>
+                </select>
+              </div>
+
+
             </div>
           </div>
 
@@ -211,9 +245,10 @@
                 <thead>
                 <tr>
                   <th style="min-width:280px">Dịch vụ</th>
-                  <th>Khoảng giá trị tài sản</th>
+                  <th>Giá trị tối thiểu ( >= )</th>
+                  <th>Giá trị tối đa ( < ) </th>
                   <th style="width:180px" class="text-right">Giá dịch vụ</th>
-                  <th style="width:170px" class="text-right">Thao tác</th>
+                  <th style="width:170px" class="text-left">Thao tác</th>
                 </tr>
                 </thead>
 
@@ -231,7 +266,7 @@
                         <div class="svc3-svc-sub">
                           <span class="mono">ID {{ pad3(seg.serviceId) }}</span>
                           <span class="muted">•</span>
-                          <span class="muted">Segment #{{ seg.id }}</span>
+                          <span class="muted">Phân khúc #{{ seg.id }}</span>
                         </div>
                       </div>
                     </div>
@@ -243,25 +278,33 @@
                           <i class="fa-solid fa-arrow-up-short-wide"></i>
                           {{ formatCurrency(seg.min) }}
                         </span>
-                      <span class="muted">→</span>
-                      <span class="svc3-pill2">
+                    </div>
+                  </td>
+                  <td>
+                    <div class="svc3-range">
+                       <span class="svc3-pill2">
                           <i class="fa-solid fa-arrow-down-wide-short"></i>
                           {{ formatCurrency(seg.max) }}
                         </span>
-                      <span class="muted tiny ml-1">min ≤ x &lt; max</span>
                     </div>
                   </td>
 
-                  <td class="text-right">
+                  <td class="text-left">
                     <span class="svc3-price p3">{{ formatCurrency(seg.price) }}</span>
                   </td>
 
-                  <td class="text-right">
-                    <div class="svc3-actions justify-end">
-                      <button class="svc3-icon warn" title="Sửa phân khúc" @click="openEditSegment(seg.serviceId, seg.id)">
+                  <td class="text-align-center">
+                    <div class="svc3-actions">
+                      <button
+                          class="svc3-icon warn"
+                          title="Sửa phân khúc"
+                          @click="openEditSegment(seg)"
+
+                      >
                         <i class="fa-solid fa-pen"></i>
                       </button>
-                      <button class="svc3-icon danger" title="Xóa phân khúc" @click="removeSegment(seg.serviceId, seg.id)">
+
+                      <button class="svc3-icon danger" title="Xóa phân khúc" @click="removeSegment(seg)">
                         <i class="fa-solid fa-trash"></i>
                       </button>
                     </div>
@@ -281,7 +324,7 @@
 
     <!-- SERVICE DETAIL MODAL -->
     <div v-if="serviceDetailOpen" class="svc3-modal" @click.self="closeServiceDetail()">
-      <div class="svc3-modal-card">
+      <div class="svc3-modal-card detail">
         <div class="svc3-modal-h">
           <div class="svc3-modal-title">
             <i class="fa-solid fa-circle-info"></i>
@@ -295,7 +338,20 @@
             <div class="svc3-svc">
               <div class="svc3-dot big" :style="{background:detailService.color}"></div>
               <div class="min-w-0">
-                <div class="svc3-detail-name">{{ detailService.name }}</div>
+                <div class="svc3-detail-name flex items-center gap-2">
+                  <span>{{ detailService.name }}</span>
+
+                  <span
+                      class="svc3-status"
+                      :class="detailService.active ? 'on' : 'off'"
+                  >
+                  <i
+                      class="fa-solid"
+                      :class="detailService.active ? 'fa-circle-check' : 'fa-circle-pause'"
+                  ></i>
+                  {{ detailService.active ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
+                </span>
+                </div>
                 <div class="svc3-svc-sub">
                   <span class="mono">ID {{ pad3(detailService.id) }}</span>
                   <span class="muted">•</span>
@@ -306,11 +362,11 @@
 
             <div class="svc3-kpis">
               <div class="svc3-kpi">
-                <div class="k">Min</div>
+                <div class="k">Giá thấp nhất</div>
                 <div class="v p1">{{ formatCurrency(getMinPrice(detailService)) }}</div>
               </div>
               <div class="svc3-kpi">
-                <div class="k">Max</div>
+                <div class="k">Giá cao nhất</div>
                 <div class="v p2">{{ formatCurrency(getMaxPrice(detailService)) }}</div>
               </div>
             </div>
@@ -331,24 +387,14 @@
             <div class="svc3-seg-grid" v-if="detailService.priceSegments.length">
               <div v-for="seg in detailService.priceSegments" :key="seg.id" class="svc3-seg-card">
                 <div class="svc3-seg-h">
-                  <div class="t"><i class="fa-solid fa-tag"></i><span>Segment #{{ seg.id }}</span></div>
-                  <div class="svc3-actions">
-                    <button class="svc3-icon warn" title="Sửa" @click="(closeServiceDetail(), openEditService(detailService.id))">
-                      <i class="fa-solid fa-pen"></i>
-                    </button>
-                    <button class="svc3-icon danger" title="Xóa" @click="removeSegment(detailService.id, seg.id)">
-                      <i class="fa-solid fa-trash"></i>
-                    </button>
-                  </div>
+                  <div class="t"><i class="fa-solid fa-tag"></i><span>Phân khúc {{ formatMoneyShort(seg.min) }} đến nhỏ hơn {{ formatMoneyShort(seg.max)}}</span></div>
                 </div>
                 <div class="svc3-seg-b">
                   <div class="row">
-                    <span class="muted">Khoảng</span>
                     <b>{{ formatCurrency(seg.min) }} → {{ formatCurrency(seg.max) }}</b>
                   </div>
                   <div class="row">
-                    <span class="muted">Giá</span>
-                    <b class="p3">{{ formatCurrency(seg.price) }}</b>
+                    <span class="muted">Giá : <b class="p3 svc3-price-strong">{{ formatCurrency(seg.price) }}</b></span>
                   </div>
                 </div>
               </div>
@@ -405,6 +451,17 @@
               <div class="svc3-field">
                 <label><i class="fa-solid fa-file-lines"></i> Mô tả</label>
                 <textarea v-model.trim="serviceForm.description" rows="4" placeholder="Mô tả chi tiết..."></textarea>
+              </div>
+
+              <div class="svc3-field">
+                <label><i class="fa-solid fa-toggle-on"></i> Trạng thái</label>
+                <label class="svc3-switch">
+                  <input v-model="serviceForm.active" type="checkbox" />
+                  <span class="svc3-slider"></span>
+                  <span class="svc3-switch-text" :class="{ on: serviceForm.active }">
+                    {{ serviceForm.active ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
+                  </span>
+                </label>
               </div>
             </div>
 
@@ -491,7 +548,7 @@
             <i class="fa-solid fa-xmark"></i><span>Hủy</span>
           </button>
 
-          <button v-if="serviceForm.id" class="svc3-btn danger" @click="removeService(serviceForm.id)">
+          <button v-if="serviceForm.id" class="svc3-btn danger" @click="removeService(serviceForm)">
             <i class="fa-solid fa-trash"></i><span>Xóa dịch vụ</span>
           </button>
 
@@ -514,54 +571,55 @@
         </div>
 
         <div class="svc3-modal-b">
-          <div class="svc3-note">
-            Quy tắc: <b>[min, max)</b> không được giao nhau.
+
+          <!-- MIN / MAX INFO -->
+          <div class="svc3-range-info">
+            <div class="svc3-range-box min">
+              <div class="lb">
+                <i class="fa-solid fa-arrow-up-short-wide"></i>
+                <span>Giá trị tối thiểu</span>
+              </div>
+              <div class="val mono">
+                {{ segmentForm.minText }} ₫
+              </div>
+            </div>
+
+            <div class="svc3-range-box max">
+              <div class="lb">
+                <i class="fa-solid fa-arrow-down-wide-short"></i>
+                <span>Giá trị tối đa</span>
+              </div>
+              <div class="val mono">
+                {{ segmentForm.maxText }} ₫
+              </div>
+            </div>
           </div>
 
+          <!-- PRICE INPUT -->
           <div class="svc3-field mt-3">
-            <label><i class="fa-solid fa-arrow-up-short-wide"></i> Min</label>
-            <input
-                v-model="segmentForm.minText"
-                class="mono"
-                type="text"
-                placeholder="min"
-                @input="onSegmentFormMoneyInput('minText')"
-                @focus="onSegmentFormMoneyFocus('minText')"
-                @blur="onSegmentFormMoneyBlur('minText')"
-            />
-          </div>
-
-          <div class="svc3-field">
-            <label><i class="fa-solid fa-arrow-down-wide-short"></i> Max</label>
-            <input
-                v-model="segmentForm.maxText"
-                class="mono"
-                type="text"
-                placeholder="max"
-                @input="onSegmentFormMoneyInput('maxText')"
-                @focus="onSegmentFormMoneyFocus('maxText')"
-                @blur="onSegmentFormMoneyBlur('maxText')"
-            />
-          </div>
-
-          <div class="svc3-field">
-            <label><i class="fa-solid fa-dollar-sign"></i> Giá dịch vụ</label>
+            <label>
+              <i class="fa-solid fa-dollar-sign"></i>
+              Giá dịch vụ
+            </label>
             <input
                 v-model="segmentForm.priceText"
                 class="mono"
                 type="text"
-                placeholder="price"
+                placeholder="Nhập giá dịch vụ..."
                 @input="onSegmentFormMoneyInput('priceText')"
                 @focus="onSegmentFormMoneyFocus('priceText')"
                 @blur="onSegmentFormMoneyBlur('priceText')"
             />
           </div>
 
+          <!-- ERROR -->
           <div v-if="segmentError" class="svc3-err mt-2">
             <i class="fa-solid fa-triangle-exclamation"></i>
             <span>{{ segmentError }}</span>
           </div>
+
         </div>
+
 
         <div class="svc3-modal-f">
           <button class="svc3-btn ghost" @click="closeSegmentEdit()">
@@ -591,43 +649,54 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from "vue";
-
+import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
+import { computed, reactive, ref, onMounted, watch } from "vue";
+import { useAuthStore } from "/src/stores/authStore.js";
+import { useSidebarStore } from "../../stores/sidebarStore.js";
+const authStore = useAuthStore();
+const sidebar = useSidebarStore();
+const info = authStore.userInfo;
 /* ===== DATA ===== */
-const services = ref([
-  {
-    id: 1,
-    name: "Thiết kế UI/UX",
-    color: "#667eea",
-    description: "Thiết kế giao diện và trải nghiệm người dùng chuyên nghiệp cho ứng dụng web và di động.",
-    priceSegments: [
-      { id: 1, min: 1000000, max: 5000000, price: 8000000 },
-      { id: 2, min: 5000000, max: 10000000, price: 7000000 },
-      { id: 3, min: 10000000, max: 20000000, price: 6000000 }
-    ]
-  },
-  {
-    id: 2,
-    name: "Phát triển Website",
-    color: "#4facfe",
-    description: "Phát triển website responsive với công nghệ hiện đại, tối ưu tốc độ và trải nghiệm.",
-    priceSegments: [
-      { id: 1, min: 1000000, max: 10000000, price: 15000000 },
-      { id: 2, min: 10000000, max: 50000000, price: 12000000 }
-    ]
-  },
-  {
-    id: 3,
-    name: "Marketing Digital",
-    color: "#f093fb",
-    description: "Chiến dịch marketing tổng thể trên các nền tảng digital, tăng trưởng doanh thu.",
-    priceSegments: [
-      { id: 1, min: 1000000, max: 3000000, price: 12000000 },
-      { id: 2, min: 3000000, max: 8000000, price: 10000000 },
-      { id: 3, min: 8000000, max: 15000000, price: 9000000 }
-    ]
+const services = ref([])
+
+function formatMoneyShort(amount) {
+  if (!amount || amount <= 0) return "0";
+
+  const billion = 1_000_000_000;
+  const million = 1_000_000;
+
+  if (amount >= billion) {
+    const v = amount / billion;
+    return `${v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)} tỷ`;
   }
-]);
+
+  if (amount >= million) {
+    const v = amount / million;
+    return `${v % 1 === 0 ? v.toFixed(0) : v.toFixed(0)} triệu`;
+  }
+
+  return `${amount.toLocaleString("vi-VN")} ₫`;
+}
+
+import api from '/src/api/api.js' // nếu bạn đang dùng axios wrapper
+
+const fetchServices = async () => {
+  try {
+    const res = await api.get('/dich-vu-thg/admin', {
+      params: {
+        keyword: serviceQuery.value || null
+      }
+    })
+
+    // Map dữ liệu BE -> FE structure
+    services.value = (res.data || []);
+  } catch (e) {
+    console.error('❌ Lỗi fetch services', e)
+    services.value = []
+  }
+}
+
+
 
 /* ===== TABS ===== */
 const activeTab = ref("services");
@@ -651,26 +720,35 @@ const highlightKey = ref("");
 
 const assetValueNumber = computed(() => parseFormattedNumber(assetValueText.value));
 
-const totalSegments = computed(() => services.value.reduce((sum, s) => sum + (s.priceSegments?.length || 0), 0));
+const totalSegments = computed(() => segments.value.length);
+
+const segments = ref([]);
+
+const fetchAllSegments = async () => {
+  const res = await api.get('/dich-vu-thg/admin/phan-khuc');
+  segments.value = res.data || [];
+};
 
 const computedSegments = computed(() => {
-  let all = [];
-  for (const s of services.value) {
-    if (segmentFilterServiceId.value !== "all" && String(s.id) !== segmentFilterServiceId.value) continue;
-    for (const seg of s.priceSegments) {
-      all.push({ ...seg, serviceId: s.id, serviceName: s.name, serviceColor: s.color });
-    }
+  let list = [...segments.value];
+
+  // filter theo dịch vụ
+  if (segmentFilterServiceId.value !== "all") {
+    list = list.filter(
+        s => String(s.serviceId) === segmentFilterServiceId.value
+    );
   }
 
+  // highlight theo giá trị tài sản
   const x = assetValueNumber.value;
+  highlightKey.value = "";
   if (x > 0) {
-    all = all.filter(seg => x >= seg.min && x < seg.max);
-    highlightKey.value = all.length ? `${all[0].serviceId}-${all[0].id}` : "";
-  } else {
-    highlightKey.value = "";
+    const hit = list.find(seg => x >= seg.min && x < seg.max);
+    if (hit) highlightKey.value = `${hit.serviceId}-${hit.id}`;
   }
 
-  all.sort((a, b) => {
+  // sort
+  list.sort((a, b) => {
     switch (segmentSort.value) {
       case "low-high": return a.price - b.price;
       case "high-low": return b.price - a.price;
@@ -680,8 +758,9 @@ const computedSegments = computed(() => {
     }
   });
 
-  return all;
+  return list;
 });
+
 
 /* ===== MODALS ===== */
 const serviceDetailOpen = ref(false);
@@ -690,7 +769,18 @@ const segmentEditOpen = ref(false);
 
 /* Service detail */
 const detailServiceId = ref(null);
-const detailService = computed(() => services.value.find(s => s.id === detailServiceId.value) || null);
+const detailService = ref(null)
+const fetchServiceDetail = async (id) => {
+  try {
+    const res = await api.get(`/dich-vu-thg/admin/${id}`)
+    detailService.value = res.data
+    serviceDetailOpen.value = true
+  } catch (e) {
+    console.error('❌ Lỗi fetch service detail', e)
+    toast('error', 'Không tải được chi tiết dịch vụ')
+  }
+}
+
 
 /* Service form modal (create/edit) */
 const serviceForm = reactive({
@@ -698,6 +788,7 @@ const serviceForm = reactive({
   name: "",
   color: "#667eea",
   description: "",
+  active: true,
   segments: []
 });
 const segErrors = ref([]);
@@ -768,18 +859,24 @@ function onAssetMoneyBlur() {
 
 /* ===== SERVICES ACTIONS ===== */
 function openServiceDetail(id) {
-  detailServiceId.value = id;
-  serviceDetailOpen.value = true;
+  detailServiceId.value = id
+  fetchServiceDetail(id)
 }
+
 function closeServiceDetail() {
   serviceDetailOpen.value = false;
+  detailService.value = null;
+  segmentEditOpen.value = false;
 }
+
+
 
 function openCreateService() {
   serviceForm.id = null;
   serviceForm.name = "";
   serviceForm.color = "#667eea";
   serviceForm.description = "";
+  serviceForm.active = true;
   serviceForm.segments = [
     { _key: `${Date.now()}-${Math.random()}`, minText: formatNumberWithDots(1000000), maxText: formatNumberWithDots(5000000), priceText: formatNumberWithDots(8000000) }
   ];
@@ -787,24 +884,43 @@ function openCreateService() {
   serviceEditOpen.value = true;
 }
 
-function openEditService(id) {
-  const s = services.value.find(x => x.id === id);
-  if (!s) return;
-  serviceForm.id = s.id;
-  serviceForm.name = s.name;
-  serviceForm.color = s.color;
-  serviceForm.description = s.description || "";
-  serviceForm.segments = (s.priceSegments || []).map(seg => ({
-    _key: `${Date.now()}-${Math.random()}`,
-    minText: formatNumberWithDots(seg.min),
-    maxText: formatNumberWithDots(seg.max),
-    priceText: formatNumberWithDots(seg.price)
-  }));
+async function openEditService(id) {
+  const fallback = services.value.find(x => x.id === id);
+  if (!fallback) return;
+  serviceEditOpen.value = true;
+  try {
+    const res = await api.get(`/dich-vu-thg/admin/${id}`);
+    const s = res.data || fallback;
+    serviceForm.id = s.id;
+    serviceForm.name = s.name;
+    serviceForm.color = s.color;
+    serviceForm.description = s.description || "";
+    serviceForm.active = s.active ?? true;
+    serviceForm.segments = (s.priceSegments || []).map(seg => ({
+      _key: `${Date.now()}-${Math.random()}`,
+      minText: formatNumberWithDots(seg.min),
+      maxText: formatNumberWithDots(seg.max),
+      priceText: formatNumberWithDots(seg.price)
+    }));
+  } catch (e) {
+    console.error("❌ Lỗi fetch service detail", e);
+    toast("error", "Không tải được chi tiết dịch vụ, dùng dữ liệu danh sách.");
+    serviceForm.id = fallback.id;
+    serviceForm.name = fallback.name;
+    serviceForm.color = fallback.color;
+    serviceForm.description = fallback.description || "";
+    serviceForm.active = fallback.active ?? true;
+    serviceForm.segments = (fallback.priceSegments || []).map(seg => ({
+      _key: `${Date.now()}-${Math.random()}`,
+      minText: formatNumberWithDots(seg.min),
+      maxText: formatNumberWithDots(seg.max),
+      priceText: formatNumberWithDots(seg.price)
+    }));
+  }
   if (!serviceForm.segments.length) {
     serviceForm.segments = [{ _key: `${Date.now()}-${Math.random()}`, minText: formatNumberWithDots(1000000), maxText: formatNumberWithDots(5000000), priceText: formatNumberWithDots(8000000) }];
   }
   segErrors.value = new Array(serviceForm.segments.length).fill("");
-  serviceEditOpen.value = true;
 }
 
 function closeServiceEdit() {
@@ -894,78 +1010,124 @@ function validateServiceForm() {
   return true;
 }
 
-function saveServiceFromModal() {
+async function saveServiceFromModal() {
   if (!validateServiceForm()) return;
 
-  const normalizedSegments = serviceForm.segments.map((s, i) => ({
-    id: i + 1,
+  // ❌ KHÔNG GỬI ID SEGMENT
+  const normalizedSegments = serviceForm.segments.map(s => ({
     min: parseFormattedNumber(s.minText),
     max: parseFormattedNumber(s.maxText),
     price: parseFormattedNumber(s.priceText)
   }));
 
-  if (serviceForm.id) {
-    const idx = services.value.findIndex(x => x.id === serviceForm.id);
-    if (idx === -1) return toast("error", "Không tìm thấy dịch vụ.");
-    services.value[idx] = {
-      ...services.value[idx],
-      name: serviceForm.name.trim(),
-      color: serviceForm.color || "#667eea",
-      description: serviceForm.description.trim(),
-      priceSegments: normalizedSegments
-    };
-    toast("success", "Đã cập nhật dịch vụ.");
-  } else {
-    const newId = services.value.length ? Math.max(...services.value.map(s => s.id)) + 1 : 1;
-    services.value.unshift({
-      id: newId,
-      name: serviceForm.name.trim(),
-      color: serviceForm.color || "#667eea",
-      description: serviceForm.description.trim(),
-      priceSegments: normalizedSegments
-    });
-    toast("success", "Đã thêm dịch vụ mới.");
+  const payload = {
+    id: serviceForm.id || null, // null = create
+    name: serviceForm.name.trim(),
+    color: serviceForm.color || "#667eea",
+    description: serviceForm.description.trim(),
+    active: serviceForm.active,
+    priceSegments: normalizedSegments
+  };
+
+  try {
+    // BE xử lý create / update chung
+    const res = await api.post('/dich-vu-thg/admin/save', payload);
+
+    const saved = res.data;
+
+    // === sync lại list FE từ BE ===
+    const idx = services.value.findIndex(x => x.id === saved.id);
+    if (idx !== -1) {
+      services.value[idx] = saved;
+      toast("success", "Đã cập nhật dịch vụ.");
+      await fetchServices();
+    } else {
+      services.value.unshift(saved);
+      toast("success", "Đã thêm dịch vụ mới.");
+      await fetchServices();
+    }
+
+    serviceEditOpen.value = false;
+  } catch (e) {
+    console.error("❌ Lỗi lưu dịch vụ", e);
+    toast("error", "Lưu dịch vụ thất bại.");
   }
-
-  serviceEditOpen.value = false;
 }
 
-function removeService(id) {
-  if (!confirm("Bạn có chắc muốn xóa dịch vụ này?")) return;
-  services.value = services.value.filter(s => s.id !== id);
-  toast("success", "Đã xóa dịch vụ.");
-  if (detailServiceId.value === id) closeServiceDetail();
-  if (serviceForm.id === id) closeServiceEdit();
+
+import { confirmWithInput } from "/src/assets/js/alertService.js"
+
+async function removeService(service) {
+  const expectedText = service.name; // 👈 gõ đúng tên dịch vụ
+
+  await confirmWithInput(
+      "Xác nhận xoá dịch vụ",
+      `Hãy nhập chính xác tên dịch vụ để xác nhận xoá:\n"${expectedText}"`,
+      expectedText,
+      async () => {
+        try {
+          await api.delete(`/dich-vu-thg/admin/${service.id}`);
+          await fetchServices();
+          services.value = services.value.filter(s => s.id !== service.id);
+          toast("success", "Đã xoá dịch vụ.");
+
+          if (detailServiceId.value === service.id) closeServiceDetail();
+          if (serviceForm.id === service.id) closeServiceEdit();
+
+        } catch (e) {
+          console.error("❌ Lỗi xoá dịch vụ", e);
+          toast("error", "Xoá dịch vụ thất bại.");
+        }
+      }
+  );
 }
+
 
 /* ===== SEGMENTS ACTIONS ===== */
-function removeSegment(serviceId, segmentId) {
-  const sIdx = services.value.findIndex(s => s.id === serviceId);
-  if (sIdx === -1) return;
+async function removeSegment(seg) {
+  if (!seg) return;
 
-  if (!confirm("Bạn có chắc muốn xóa phân khúc này?")) return;
+  const expectedText = formatNumberWithDots(seg.price);
 
-  const segs = services.value[sIdx].priceSegments.filter(x => x.id !== segmentId);
-  if (segs.length === 0) return toast("error", "Dịch vụ phải có ít nhất 1 phân khúc.");
+  await confirmWithInput(
+      "Xác nhận xoá phân khúc",
+      `Hãy nhập đúng GIÁ của phân khúc để xác nhận xoá:\n${formatCurrency(seg.price)}`,
+      expectedText,
+      async () => {
+        try {
+          await api.delete(
+              `/dich-vu-thg/admin/${seg.serviceId}/phan-khuc/${seg.id}`
+          );
 
-  segs.forEach((x, i) => (x.id = i + 1));
-  services.value[sIdx].priceSegments = segs;
-  toast("success", "Đã xóa phân khúc.");
+          toast("success", "Đã xoá phân khúc.");
+
+          // 🔄 reload lại dữ liệu
+          await fetchServices();
+          await fetchAllSegments();
+
+        } catch (e) {
+          console.error("❌ Lỗi xoá phân khúc", e);
+          toast("error", e?.response?.data?.message || "Xoá phân khúc thất bại.");
+        }
+      }
+  );
 }
 
-function openEditSegment(serviceId, segmentId) {
-  const s = services.value.find(x => x.id === serviceId);
-  const seg = s?.priceSegments?.find(x => x.id === segmentId);
-  if (!s || !seg) return;
 
-  segmentForm.serviceId = serviceId;
-  segmentForm.segmentId = segmentId;
+function openEditSegment(seg) {
+  if (!seg) return;
+
+  segmentForm.serviceId = seg.serviceId;
+  segmentForm.segmentId = seg.id;
+
   segmentForm.minText = formatNumberWithDots(seg.min);
   segmentForm.maxText = formatNumberWithDots(seg.max);
   segmentForm.priceText = formatNumberWithDots(seg.price);
+
   segmentError.value = "";
   segmentEditOpen.value = true;
 }
+
 
 function closeSegmentEdit() {
   segmentEditOpen.value = false;
@@ -994,7 +1156,7 @@ function overlaps(serviceId, min, max, excludeSegmentId) {
   return false;
 }
 
-function saveSegmentFromModal() {
+async function saveSegmentFromModal() {
   const serviceId = segmentForm.serviceId;
   const segmentId = segmentForm.segmentId;
 
@@ -1010,28 +1172,76 @@ function saveSegmentFromModal() {
     segmentError.value = "Giá phải > 0.";
     return;
   }
-  if (overlaps(serviceId, min, max, segmentId)) {
-    segmentError.value = "Khoảng bị trùng với phân khúc khác trong cùng dịch vụ.";
-    return;
+
+  const payload = {
+    id: segmentId,
+    min,
+    max,
+    price
+  };
+
+  try {
+    await api.put(
+        `/dich-vu-thg/admin/${serviceId}/phan-khuc/${segmentId}`,
+        payload
+    );
+
+    toast("success", "Đã cập nhật giá phân khúc.");
+    segmentEditOpen.value = false;
+
+    // 🔄 reload lại dữ liệu
+    await fetchServices();
+    await fetchAllSegments();
+
+  } catch (e) {
+    console.error("❌ Lỗi lưu phân khúc", e);
+    toast("error", "Lưu phân khúc thất bại.");
   }
-
-  const sIdx = services.value.findIndex(s => s.id === serviceId);
-  const segIdx = services.value[sIdx].priceSegments.findIndex(x => x.id === segmentId);
-  services.value[sIdx].priceSegments[segIdx] = { ...services.value[sIdx].priceSegments[segIdx], min, max, price };
-
-  toast("success", "Đã cập nhật phân khúc.");
-  segmentEditOpen.value = false;
 }
+
 
 /* ===== MISC ===== */
 function seedMock() {
   toast("info", "Đang dùng mock data trong component.");
 }
+onMounted(async () => {
+  await fetchServices()
+  await fetchAllSegments();  // tab 2
+})
+watch(serviceQuery, async () => {
+  await fetchServices()
+})
+watch(activeTab, async (newTab, oldTab) => {
+  if (newTab === 'services') {
+    // Khi quay lại tab dịch vụ
+    await fetchServices();
+  }
+
+  if (newTab === 'segments') {
+    // Khi chuyển sang tab phân khúc
+    await fetchAllSegments();
+
+    // reset các filter phụ để UX sạch
+    highlightKey.value = "";
+    assetValueText.value = "";
+
+    // nếu đang filter theo service mà service bị xoá → reset
+    if (
+        segmentFilterServiceId.value !== 'all' &&
+        !services.value.some(s => String(s.id) === segmentFilterServiceId.value)
+    ) {
+      segmentFilterServiceId.value = 'all';
+    }
+  }
+});
+
 </script>
 
 <style scoped>
 /* ===== TOKENS (scoped-safe) ===== */
 .svc3-page{
+  position: relative;
+  top: -10px!important;
   --bg:
       radial-gradient(1200px 700px at 18% 8%, rgba(102,126,234,.16), transparent 60%),
       radial-gradient(900px 650px at 78% 0%, rgba(240,147,251,.12), transparent 58%),
@@ -1053,8 +1263,7 @@ function seedMock() {
   --sh: 0 14px 34px rgba(0,0,0,.10);
   --sh2: 0 10px 22px rgba(0,0,0,.08);
   --t: all .18s cubic-bezier(.4,0,.2,1);
-
-  min-height:100vh;
+  min-height:85vh;
   background: var(--bg);
   color: var(--text);
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -1066,7 +1275,8 @@ function seedMock() {
 
 /* ===== TOPBAR ===== */
 .svc3-topbar{
-  background: var(--card);
+  position: relative;
+  top: -10px!important;
   border: 1px solid var(--line);
   border-radius: var(--r);
   box-shadow: var(--sh2);
@@ -1076,24 +1286,51 @@ function seedMock() {
   justify-content:space-between;
   gap:12px;
   backdrop-filter: blur(10px);
+  border-bottom: solid 1px #bbbaba;
+}
+.header-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(37,99,235,.35);
+  background: rgba(248,250,252,.9);
+  color: #334155;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.header-menu-toggle:hover {
+  background: rgba(226,232,240,.9);
+  border-color: rgba(148,163,184,.9);
+  color: #1e293b;
+}
+.header-menu-toggle:active {
+  transform: scale(0.98);
 }
 .svc3-brand{ display:flex; align-items:center; gap:10px; min-width:0; }
 .svc3-brand-ico{
   width:38px; height:38px;
-  border-radius: 14px;
+  border-radius:14px;
   display:grid; place-items:center;
-  background: var(--g1);
-  color:#fff;
-  box-shadow: 0 14px 26px rgba(102,126,234,.22);
+
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 55%, #a855f7 100%);
+  color: #ffffff;
+
+  box-shadow: 0 14px 26px rgba(37,99,235,.22);
 }
-.svc3-title{ font-size: 14px; font-weight: 750; letter-spacing:.2px; line-height:1.1; }
-.svc3-sub{
-  margin-top:2px;
-  font-size: 12px;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow:hidden;
-  text-overflow: ellipsis;
+.svc3-title{
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: .2px;
+  line-height: 1.1;
+
+  background: linear-gradient(90deg, #2563eb 0%, #7c3aed 55%, #a855f7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 .svc3-top-actions{ display:flex; align-items:center; gap:8px; }
 
@@ -1133,51 +1370,73 @@ function seedMock() {
   color:#fff;
   box-shadow: 0 14px 28px rgba(255,88,88,.14);
 }
-
+.svc3-btn i{
+  background-color: rgba(255, 255, 255, 0) !important;
+}
 /* ===== TABS (browser-like + attached panel) ===== */
 .svc3-tabs-shell{ position: relative; }
 .svc3-tabs{
   display:flex;
-  gap:8px;
   align-items:flex-end;
-  padding: 0 6px;
-}
-.svc3-tabs-fill{
-  flex: 1;
-  height: 1px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 8px;
+
 }
 .svc3-tab{
   flex: 0 0 auto;
   display:flex;
   align-items:center;
   gap:10px;
-  padding: 10px 12px;
-  border-radius: 14px 14px 0 0;
-  border: 1px solid rgba(15,23,42,.10);
+  padding: 8px 10px;
+  border-radius: 18px 18px 0 0;
   border-bottom: none;
-  background: rgba(255,255,255,.56);
-  box-shadow: 0 10px 22px rgba(0,0,0,.06);
   cursor:pointer;
   transition: var(--t);
   font-size: 13px;
   font-weight: 650;
   position: relative;
+  top:5px;
+  z-index: 10;
 }
 .svc3-tab i{
   width:30px; height:30px;
   border-radius: 12px;
   display:grid; place-items:center;
-  background: rgba(15,23,42,.06);
   color: rgba(15,23,42,.78);
   transition: var(--t);
 }
-.svc3-tab:hover{ transform: translateY(-1px); background: rgba(102,126,234,.06); border-color: rgba(102,126,234,.22); }
+.svc3-tab:hover{
+  transform: translateY(-1px);
+  border-color: rgba(102,126,234,.22);
+  color: #491eb7 !important;
+}
+.svc3-tab::after{
+   content:"";
+   position:absolute;
+   left: 18px;
+   right: 18px;
+   bottom: 6px;          /* chỉnh lên/xuống tùy ý */
+   height: 2px;
+   border-radius: 999px;
+   background: linear-gradient(90deg,#2563eb 0%, #7c3aed 55%, #a855f7 100%);
+   transform: scaleX(0);
+   transform-origin: center;
+   transition: transform .18s cubic-bezier(.4,0,.2,1);
+   opacity: .95;
+ }
+
+/* hover: lan ra từ giữa */
+.svc3-tab:hover::after{
+  transform: scaleX(1);
+}
+.svc3-tab:hover i{
+  transform: translateY(-1px);
+  border-color: rgba(102,126,234,.22);
+  color: #491eb7 !important;
+}
 .svc3-tab.active{
   background: var(--card);
-  border-color: rgba(102,126,234,.26);
-  transform: translateY(1px);
+  border-color: var(--line);
+  box-shadow: none;
+  position: relative;
 }
 .svc3-tab.active i{ background: var(--g1); color:#fff; }
 .svc3-pill{
@@ -1395,21 +1654,70 @@ function seedMock() {
 .svc3-price.p3{ background: var(--g3); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 
 .svc3-actions{ display:flex; gap:6px; align-items:center; }
+
+/* base */
 .svc3-icon{
   width:32px; height:32px;
-  border-radius: 12px;
-  border: none;
+  border-radius:12px;
   cursor:pointer;
   display:grid;
   place-items:center;
-  color:#fff;
+  position: relative;
   transition: var(--t);
-  box-shadow: 0 10px 16px rgba(0,0,0,.08);
+  box-shadow: 0 10px 16px rgba(0,0,0,.06);
+  border: 1px solid transparent;   /* quan trọng để hover viền mượt */
 }
-.svc3-icon:hover{ transform: translateY(-1px); filter: brightness(1.02); }
-.svc3-icon.info{ background: var(--g4); }
-.svc3-icon.warn{ background: linear-gradient(135deg,#fa709a 0%, #fee140 100%); }
-.svc3-icon.danger{ background: linear-gradient(135deg,#ff5858 0%, #f09819 100%); }
+
+/* icon gradient */
+.svc3-icon i{
+  background: var(--ig);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* bỏ viền gradient cũ */
+.svc3-icon::before{ display:none; }
+
+/* nền pastel mặc định + gradient icon theo loại */
+.svc3-icon.info{
+  --ig: linear-gradient(135deg,#22c55e 0%, #16a34a 45%, #34d399 100%);
+  background: linear-gradient(135deg, rgba(34,197,94,.16) 0%, rgba(52,211,153,.10) 100%);
+}
+.svc3-icon.warn{
+  --ig: linear-gradient(135deg,#0ea5e9 0%, #2563eb 55%, #60a5fa 100%);
+  background: linear-gradient(135deg, rgba(14,165,233,.16) 0%, rgba(96,165,250,.10) 100%);
+}
+.svc3-icon.danger{
+  --ig: linear-gradient(135deg,#ef4444 0%, #f97316 55%, #fb7185 100%);
+  background: linear-gradient(135deg, rgba(239,68,68,.16) 0%, rgba(251,113,133,.10) 100%);
+}
+
+/* hover chung */
+.svc3-icon:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+}
+
+/* hover: nền đậm hơn + viền trùng tông */
+.svc3-icon.info:hover{
+  background: linear-gradient(135deg, rgba(34,197,94,.22) 0%, rgba(52,211,153,.14) 100%);
+  box-shadow: 0 12px 20px rgba(34,197,94,.18);
+  border-color: rgba(34,197,94,.35);
+}
+.svc3-icon.warn:hover{
+  background: linear-gradient(135deg, rgba(14,165,233,.22) 0%, rgba(96,165,250,.14) 100%);
+  box-shadow: 0 12px 20px rgba(37,99,235,.18);
+  border-color: rgba(37,99,235,.35);
+}
+.svc3-icon.danger:hover{
+  background: linear-gradient(135deg, rgba(239,68,68,.22) 0%, rgba(251,113,133,.14) 100%);
+  box-shadow: 0 12px 20px rgba(239,68,68,.18);
+  border-color: rgba(239,68,68,.35);
+}
+
+
 .svc3-icon.mini{ width:32px; height:32px; border-radius: 12px; }
 
 /* ===== RANGE ===== */
@@ -1463,6 +1771,15 @@ function seedMock() {
   overflow:hidden;
   animation: pop .16s ease;
 }
+.svc3-modal-card.detail{
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(255,214,214,.55), transparent 55%),
+    radial-gradient(120% 120% at 100% 0%, rgba(206,221,255,.55), transparent 60%),
+    radial-gradient(120% 120% at 100% 100%, rgba(210,255,238,.55), transparent 55%),
+    linear-gradient(160deg, rgba(255,255,255,.98), rgba(255,255,255,.92));
+  border: 1px solid rgba(168,185,255,.35);
+  box-shadow: 0 35px 80px rgba(88,116,255,.22);
+}
 .svc3-modal-card.wide{ width: min(1020px, 100%); }
 @keyframes pop{ from{ opacity:0; transform: translateY(10px) scale(.98);} to{ opacity:1; transform: translateY(0) scale(1);} }
 .svc3-modal-h{
@@ -1473,6 +1790,10 @@ function seedMock() {
   gap:10px;
   border-bottom: 1px solid rgba(15,23,42,.08);
   background: rgba(15,23,42,.02);
+}
+.svc3-modal-card.detail .svc3-modal-h{
+  background: linear-gradient(90deg, rgba(255,224,235,.65), rgba(224,238,255,.65), rgba(226,255,244,.65));
+  border-bottom: 1px solid rgba(168,185,255,.35);
 }
 .svc3-modal-title{
   display:flex;
@@ -1487,6 +1808,10 @@ function seedMock() {
   display:grid; place-items:center;
   background: var(--gd);
   color:#fff;
+}
+.svc3-modal-card.detail .svc3-modal-title i{
+  background: linear-gradient(135deg, #ffb7c5, #c9d7ff);
+  box-shadow: 0 12px 22px rgba(255, 183, 197, .35);
 }
 .svc3-x{
   width:36px; height:36px;
@@ -1506,6 +1831,19 @@ function seedMock() {
   border-top: 1px solid rgba(15,23,42,.08);
   background: rgba(15,23,42,.02);
 }
+.svc3-modal-card.detail .svc3-modal-f{
+  background: linear-gradient(90deg, rgba(229,240,255,.6), rgba(255,236,246,.6));
+  border-top: 1px solid rgba(168,185,255,.35);
+}
+.svc3-modal-card.detail .svc3-detail-name span{
+  color: #2f3b66;
+}
+.svc3-modal-card.detail .svc3-detail-name i{
+  color: #5f79d6;
+}
+.svc3-modal-card.detail .svc3-svc-sub{
+  color: rgba(47,59,102,.65);
+}
 
 /* Detail blocks */
 .svc3-detail-head{
@@ -1516,6 +1854,9 @@ function seedMock() {
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(15,23,42,.08);
 }
+.svc3-modal-card.detail .svc3-detail-head{
+  border-bottom: 1px solid rgba(168,185,255,.35);
+}
 .svc3-detail-name{ font-weight: 750; font-size: 14px; }
 .svc3-kpis{ display:flex; gap:10px; }
 .svc3-kpi{
@@ -1524,6 +1865,26 @@ function seedMock() {
   border-radius: 14px;
   padding: 8px 10px;
   background: #fff;
+}
+.svc3-modal-card.detail .svc3-kpi{
+  background: linear-gradient(160deg, rgba(255,255,255,.95), rgba(235,248,255,.9));
+  border: 1px solid rgba(168,185,255,.4);
+  box-shadow: 0 12px 24px rgba(167,196,255,.22);
+}
+.svc3-modal-card.detail .svc3-kpi .k{
+  color: rgba(70,85,130,.75);
+}
+.svc3-modal-card.detail .svc3-kpi .v{
+  font-size: 14px;
+  letter-spacing: .2px;
+  background: none;
+  -webkit-text-fill-color: initial;
+}
+.svc3-modal-card.detail .svc3-kpi .v.p1{
+  color: #2f6f8f;
+}
+.svc3-modal-card.detail .svc3-kpi .v.p2{
+  color: #8a4f8c;
 }
 .svc3-kpi .k{ font-size: 11px; color: var(--muted); font-weight: 650; }
 .svc3-kpi .v{ margin-top:2px; font-weight: 750; font-size: 13px; }
@@ -1534,6 +1895,17 @@ function seedMock() {
   border-radius: 14px;
   background: #fff;
   padding: 10px;
+}
+.svc3-modal-card.detail .svc3-box{
+  background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(255,239,247,.9));
+  border: 1px solid rgba(255,192,226,.45);
+  box-shadow: 0 14px 24px rgba(255,192,226,.2);
+}
+.svc3-modal-card.detail .svc3-box-k{
+  color: rgba(55,68,112,.82);
+}
+.svc3-modal-card.detail .svc3-box-k i{
+  color: #6b7fd9;
 }
 .svc3-box-k{ display:flex; align-items:center; gap:8px; font-size: 12px; font-weight: 700; color: rgba(11,18,32,.78); }
 .svc3-box-v{ margin-top: 6px; font-size: 13px; color: rgba(11,18,32,.80); line-height: 1.6; }
@@ -1553,12 +1925,35 @@ function seedMock() {
   background: #fff;
   overflow:hidden;
 }
+.svc3-modal-card.detail .svc3-seg-card{
+  background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(232,244,255,.9));
+  border: 1px solid rgba(168,185,255,.4);
+  box-shadow: 0 14px 24px rgba(167,196,255,.2);
+}
 .svc3-seg-h{
   padding: 8px 10px;
   display:flex;
   align-items:center;
   justify-content:space-between;
   border-bottom: 1px solid rgba(15,23,42,.08);
+}
+.svc3-modal-card.detail .svc3-seg-h{
+  background: linear-gradient(90deg, rgba(255,238,247,.7), rgba(232,244,255,.7));
+  border-bottom: 1px solid rgba(168,185,255,.35);
+}
+.svc3-modal-card.detail .svc3-seg-h .t{
+  color: #3a4b7a;
+}
+.svc3-modal-card.detail .svc3-seg-h .t i{
+  color: #7a8fe6;
+}
+.svc3-modal-card.detail .svc3-seg-b b{
+  color: #2f4a74;
+}
+.svc3-modal-card.detail .svc3-price-strong{
+  color: #2f5f88;
+  background: none;
+  -webkit-text-fill-color: initial;
 }
 .svc3-seg-h .t{ display:flex; align-items:center; gap:8px; font-weight: 700; font-size: 12px; }
 .svc3-seg-b{ padding: 10px; display:grid; gap:8px; }
@@ -1567,7 +1962,7 @@ function seedMock() {
 /* Form modal */
 .svc3-form-grid{
   display:grid;
-  grid-template-columns: 0.95fr 1.05fr;
+  grid-template-columns: 1.7fr 3fr;
   gap: 12px;
 }
 @media (max-width: 1000px){
@@ -1615,6 +2010,53 @@ function seedMock() {
   outline:none;
   transition: var(--t);
   color: #000;
+}
+.svc3-switch{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  cursor:pointer;
+  user-select:none;
+}
+.svc3-switch input{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+}
+.svc3-slider{
+  width:46px;
+  height:26px;
+  border-radius:999px;
+  background: rgba(15,23,42,.2);
+  position:relative;
+  transition: var(--t);
+  box-shadow: inset 0 2px 6px rgba(15,23,42,.2);
+}
+.svc3-slider::after{
+  content:"";
+  position:absolute;
+  top:3px;
+  left:3px;
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow: 0 6px 12px rgba(0,0,0,.18);
+  transition: var(--t);
+}
+.svc3-switch input:checked + .svc3-slider{
+  background: linear-gradient(135deg,#22c55e 0%, #16a34a 100%);
+}
+.svc3-switch input:checked + .svc3-slider::after{
+  transform: translateX(20px);
+}
+.svc3-switch-text{
+  font-weight: 650;
+  color: rgba(15,23,42,.7);
+  transition: var(--t);
+}
+.svc3-switch-text.on{
+  color: #0f172a;
 }
 .svc3-field input:focus,
 .svc3-field textarea:focus{
@@ -1748,4 +2190,64 @@ function seedMock() {
   .svc3-toast{ width: calc(100vw - 28px); }
   .svc3-input{ min-width: 100%; }
 }
+.svc3-status{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+  line-height:1;
+  white-space:nowrap;
+}
+
+.svc3-status.on{
+  color:#16a34a;
+  background:rgba(34,197,94,.12);
+  border:1px solid rgba(34,197,94,.25);
+}
+
+.svc3-status.off{
+  color:#64748b;
+  background:rgba(148,163,184,.12);
+  border:1px solid rgba(148,163,184,.25);
+}
+.svc3-range-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.svc3-range-box {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.svc3-range-box.min {
+  border-left: 4px solid #38bdf8; /* blue */
+}
+
+.svc3-range-box.max {
+  border-left: 4px solid #f59e0b; /* amber */
+}
+
+.svc3-range-box .lb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.svc3-range-box .val {
+  margin-top: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
 </style>

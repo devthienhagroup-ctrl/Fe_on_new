@@ -179,6 +179,7 @@
                 <select id="statusFilter" v-model="statusFilter">
                   <option :value="null">Tất cả</option>
                   <option value="THANH_CONG">Thành công</option>
+                  <option value="TRIEN_KHAI">Triển khai</option>
                   <option value="TN_7NGAY">Tiềm năng 7 ngày</option>
                   <option value="TN_14NGAY">Tiềm năng 14 ngày</option>
                   <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc</option>
@@ -305,7 +306,7 @@
         <div class="detail-header">
           <h3 class="stat-title">
             <i class="fas fa-user-circle stat-icon-detail"></i>
-            Chi tiết khách hàng
+            &nbsp; Chi tiết khách hàng
           </h3>
           <button class="close-btn" @click="selectedCustomer = null">
             <i class="fas fa-times"></i>
@@ -340,15 +341,15 @@
               </div>
 
               <div class="detail-name-info">
-                <h4>{{ selectedCustomer ? selectedCustomer.name : '' }}</h4>
-                <p class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</p>
+                <input
+                    v-model="detailForm.name"
+                    class="detail-input detail-name-input"
+                    type="text"
+                    placeholder="Nhập họ tên khách"
+                />
+                <div class="detail-phone">{{ selectedCustomer ? selectedCustomer.phone : '' }}</div>
                 <p class="detail-received">
                   Tiếp nhận: {{ selectedCustomer ? formatReceivedAt(selectedCustomer.receivedAt) : '' }}
-                </p>
-                <p class="detail-type">
-                  <span :class="selectedCustomer ? `type-badge ${selectedCustomer.type}` : 'type-badge'">
-                    {{ selectedCustomer ? getCustomerTypeLabel(selectedCustomer.type) : '' }}
-                  </span>
                 </p>
               </div>
             </div>
@@ -357,11 +358,40 @@
               <h5><i class="fas fa-map-marked-alt"></i> Thông tin địa chỉ</h5>
               <div class="detail-row">
                 <span class="detail-label">Tỉnh hiện tại:</span>
-                <span class="detail-value">{{ selectedCustomer.province }}</span>
+                <div class="detail-select-wrapper">
+                  <input
+                      v-model="provinceSearch"
+                      type="text"
+                      class="detail-input search-enabled"
+                      placeholder="Chọn tỉnh/thành phố"
+                      @focus="provinceDropdownOpen = true"
+                      @input="provinceDropdownOpen = true"
+                      @blur="handleProvinceBlur"
+                  />
+                  <div v-if="provinceDropdownOpen" class="detail-dropdown">
+                    <button
+                        v-for="province in filteredProvinces"
+                        :key="province"
+                        type="button"
+                        class="detail-dropdown-item"
+                        @mousedown.prevent="selectProvince(province)"
+                    >
+                      {{ province }}
+                    </button>
+                    <div v-if="filteredProvinces.length === 0" class="detail-dropdown-empty">
+                      Không tìm thấy tỉnh phù hợp
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="detail-row" v-if="selectedCustomer.oldProvince">
+              <div class="detail-row">
                 <span class="detail-label">Tỉnh cũ:</span>
-                <span class="detail-value">{{ selectedCustomer.oldProvince }}</span>
+                <input
+                    v-model="detailForm.oldProvince"
+                    type="text"
+                    class="detail-input"
+                    placeholder="Nhập tỉnh cũ"
+                />
               </div>
             </div>
 
@@ -369,7 +399,14 @@
               <h5><i class="fas fa-coins"></i> Thông tin BĐS</h5>
               <div class="detail-row">
                 <span class="detail-label">Giá BĐS:</span>
-                <span class="detail-value">{{ formatCurrency(selectedCustomer.giaBDS) }}</span>
+                <input
+                    v-model="detailForm.giaBDS"
+                    type="text"
+                    inputmode="numeric"
+                    class="detail-input"
+                    placeholder="Nhập giá BĐS"
+                    @input="handleGiaBdsInput"
+                />
               </div>
             </div>
 
@@ -377,7 +414,12 @@
               <h5><i class="fas fa-layer-group"></i> Phân loại khách</h5>
               <div class="detail-row">
                 <span class="detail-label">Loại khách:</span>
-                <span class="detail-value">{{ getCustomerTypeLabel(selectedCustomer.type) || 'Chưa phân loại' }}</span>
+                <select v-model="detailForm.type" class="detail-input detail-select-input">
+                  <option :value="null">Chưa phân loại</option>
+                  <option value="CHINH_CHU">Chủ nhà</option>
+                  <option value="MOI_GIOI">Môi giới</option>
+                  <option value="NGUOI_THAN">Người thân</option>
+                </select>
               </div>
             </div>
 
@@ -400,10 +442,13 @@
             <div class="detail-section mt-3">
               <h5>
                 <i class="fas fa-sticky-note"></i>Mô tả:
-                <span style="font-size: 14px; color: #4A4A4A; font-weight: 400">
-                  {{ selectedCustomer.note !== '' ? selectedCustomer.note : 'Không có' }}
-                </span>
               </h5>
+              <textarea
+                  v-model="detailForm.note"
+                  class="detail-textarea"
+                  rows="3"
+                  placeholder="Nhập mô tả cho khách hàng"
+              ></textarea>
             </div>
 
             <FileNew
@@ -446,11 +491,9 @@
                   <div class="history-header">
                     <div
                         class="history-status"
-                        :style="{
-                      backgroundColor: STATUS_META[item.trangThai]?.color || '#94a3b8'
-                    }"
+                        :style="{ background: getStatusMeta(item.trangThai).gradient || getStatusMeta(item.trangThai).color }"
                     >
-                      {{ STATUS_META[item.trangThai]?.label || item.trangThai }}
+                      {{ getStatusMeta(item.trangThai).label }}
                     </div>
 
                     <div class="history-time">
@@ -482,6 +525,7 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 import api from '/src/api/api.js'
 import FileNew from './File.vue'
+import addressData from '/src/assets/js/address.json'
 
 import NotificationBell from "../NotificationBell.vue";
 import { useAuthStore } from "/src/stores/authStore.js";
@@ -506,8 +550,7 @@ const STATUS_META = {
 
   // ===== BỔ SUNG =====
   KHACH_HUY_HEN: { label: 'Khách huỷ hẹn', color: '#b45309' },   // cam nâu – huỷ
-  BAN_NHANH: { label: 'Bán nhanh', color: '#15803d' },          // xanh lá đậm
-  BAN_GP: { label: 'Bán GP (Đã lên VP)', color: '#0f766e' },    // xanh ngọc đậm
+  TRIEN_KHAI: { label: 'Triển khai', color: '#10b981', gradient: 'linear-gradient(135deg, #22c55e, #2dd4bf)' }
 }
 
 
@@ -515,6 +558,16 @@ const STATUS_META = {
 const activeTab = ref('new')
 const activeDetailTab = ref('detail')
 const selectedCustomer = ref(null)
+const detailForm = ref({
+  name: '',
+  province: '',
+  oldProvince: '',
+  type: null,
+  giaBDS: '',
+  note: ''
+})
+const provinceSearch = ref('')
+const provinceDropdownOpen = ref(false)
 const newNote = ref('')
 const searchQuery = ref('')
 const originalFiles = ref([])
@@ -554,6 +607,11 @@ const months = [
 
 const isTagActive = (value) => selectedCustomer.value?.status === value
 
+const normalizeStatus = (status) => {
+  if (status === 'BAN_NHANH' || status === 'BAN_GP') return 'TRIEN_KHAI'
+  return status
+}
+
 // ====== Sidebar stats ======
 const todayStats = ref({
   soCuocGoiMoiHN: 0,
@@ -572,7 +630,8 @@ const availableTags = [
   { value: 'THAT_BAI', label: 'Thất bại', color: '#f43f5e' },
   { value: 'KHONG_LIEN_LAC_DUOC', label: 'Không liên lạc được', color: '#f97316' },
   { value: 'SAI_SO_LIEU', label: 'Sai số liệu', color: '#a855f7' },
-  { value: 'THANH_CONG', label: 'Thành công (Lên VP)', color: '#22c55e' }
+  { value: 'THANH_CONG', label: 'Thành công (Lên VP)', color: '#22c55e' },
+  { value: 'TRIEN_KHAI', label: 'Triển khai', color: '#10b981' }
 ]
 
 // ====== Data from API ======
@@ -664,6 +723,11 @@ const getTagLabel = (tag) => {
   return STATUS_META[tag]?.label || tag
 }
 
+const getStatusMeta = (status) => {
+  const normalizedStatus = normalizeStatus(status)
+  return STATUS_META[normalizedStatus] || { label: normalizedStatus, color: '#94a3b8' }
+}
+
 const getLatestHistory = (customer) => {
   if (!customer?.lichSu || !customer.lichSu.length) return null
 
@@ -675,14 +739,16 @@ const getLatestHistory = (customer) => {
 const getLatestHistoryLabel = (customer) => {
   const latest = getLatestHistory(customer)
   if (!latest) return null
-  return STATUS_META[latest.trangThai]?.label || latest.trangThai
+  const normalizedStatus = normalizeStatus(latest.trangThai)
+  return STATUS_META[normalizedStatus]?.label || normalizedStatus
 }
 
 const getLatestHistoryStyle = (customer) => {
   const latest = getLatestHistory(customer)
   if (!latest) return {}
+  const normalizedStatus = normalizeStatus(latest.trangThai)
   return {
-    backgroundColor: STATUS_META[latest.trangThai]?.color || '#94a3b8'
+    background: STATUS_META[normalizedStatus]?.gradient || STATUS_META[normalizedStatus]?.color || '#94a3b8'
   }
 }
 
@@ -729,11 +795,70 @@ const formatCurrency = (value) => {
   return `${new Intl.NumberFormat('vi-VN').format(numericValue)} ₫`
 }
 
+const normalizeText = (value) => (value || '').toString().toLowerCase().trim()
+
+const provinces = computed(() => (addressData || []).map((item) => item.name))
+
+const filteredProvinces = computed(() => {
+  const keyword = normalizeText(provinceSearch.value)
+  if (!keyword) return provinces.value
+  return provinces.value.filter((province) => normalizeText(province).includes(keyword))
+})
+
+const formatCurrencyInput = (value) => {
+  if (value === null || value === undefined) return ''
+  const digits = String(value).replace(/\D/g, '')
+  if (!digits) return ''
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
+const parseCurrencyInput = (value) => {
+  const digits = String(value || '').replace(/\D/g, '')
+  return digits ? Number(digits) : null
+}
+
+const handleGiaBdsInput = () => {
+  detailForm.value.giaBDS = formatCurrencyInput(detailForm.value.giaBDS)
+}
+
+const selectProvince = (province) => {
+  detailForm.value.province = province
+  provinceSearch.value = province
+  provinceDropdownOpen.value = false
+}
+
+const handleProvinceBlur = () => {
+  setTimeout(() => {
+    detailForm.value.province = provinceSearch.value
+    provinceDropdownOpen.value = false
+  }, 150)
+}
+
+const handleDocumentClick = (event) => {
+  if (!event.target.closest('.detail-select-wrapper')) {
+    provinceDropdownOpen.value = false
+    detailForm.value.province = provinceSearch.value
+  }
+}
+
+const syncDetailForm = (customer) => {
+  detailForm.value = {
+    name: customer?.name || '',
+    province: customer?.province || '',
+    oldProvince: customer?.oldProvince || '',
+    type: customer?.type ?? null,
+    giaBDS: formatCurrencyInput(customer?.giaBDS ?? ''),
+    note: customer?.note || ''
+  }
+  provinceSearch.value = detailForm.value.province
+}
+
 // ====== Detail actions ======
 const selectCustomer = (customer) => {
   selectedCustomer.value = customer
   activeDetailTab.value = 'detail'
   newNote.value = ''
+  syncDetailForm(customer)
   resetFileForm(customer?.files)
 }
 
@@ -783,10 +908,18 @@ const handleFileUpdate = (files) => {
 }
 
 const buildFilePayload = () => {
+  const giaBDSValue = parseCurrencyInput(detailForm.value.giaBDS)
   const dto = {
     customerId: selectedCustomer.value.id,
     status: selectedCustomer.value.status,
     description: newNote.value,
+    hoTen: detailForm.value.name,
+    soDienThoai: selectedCustomer.value.phone,
+    tinhMoi: detailForm.value.province,
+    tinhCu: detailForm.value.oldProvince || null,
+    type: detailForm.value.type || null,
+    giaBDS: giaBDSValue,
+    ghiChu: detailForm.value.note || '',
     files: fileForm.value.files
         .filter((file) => !file.file && file.id)
         .map((file) => ({
@@ -828,6 +961,12 @@ const moveToContacted = async () => {
   if (!selectedCustomer.value) return
 
   try {
+    selectedCustomer.value.name = detailForm.value.name
+    selectedCustomer.value.province = detailForm.value.province
+    selectedCustomer.value.oldProvince = detailForm.value.oldProvince || null
+    selectedCustomer.value.type = detailForm.value.type || null
+    selectedCustomer.value.giaBDS = parseCurrencyInput(detailForm.value.giaBDS)
+    selectedCustomer.value.note = detailForm.value.note || ''
     const targetId = selectedCustomer.value.id
     const payload = buildFilePayload()
     const flag = selectedCustomer.value.status === 'THANH_CONG'
@@ -847,6 +986,7 @@ const moveToContacted = async () => {
     newNote.value = ''
     if (selectedCustomer.value) {
       resetFileForm(selectedCustomer.value.files)
+      syncDetailForm(selectedCustomer.value)
     } else {
       resetFileForm([])
     }
@@ -1012,15 +1152,15 @@ const buildLineChartData = () => {
   const isYear = selectedTimeRange.value === 'year'
 
   const labels = isYear
-      ? Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}`)
-      : Array.from({ length: 31 }, (_, i) => `Ngày ${i + 1}`)
+      ? Array.from({ length: 12 }, (_, i) => `T ${i + 1}`)
+      : Array.from({ length: 31 }, (_, i) => `${i + 1}`)
 
   // status -> [..data..]
   const statusMap = {}
 
   for (const item of thongKeThoiGian.value) {
     // expected: {status, time, total}
-    const status = item.status ?? item.label // fallback
+    const status = normalizeStatus(item.status ?? item.label) // fallback
     const t = Number(item.time ?? item.bucket ?? item.day ?? item.month) // fallback
     const total = Number(item.total ?? item.value ?? 0)
 
@@ -1121,9 +1261,9 @@ const initSummaryChart = () => {
     summaryChartInstance.value.destroy()
   }
 
-  const labels = thongKeTrangThai.value.map((item) => STATUS_META[item.label]?.label || item.label)
+  const labels = thongKeTrangThai.value.map((item) => getStatusMeta(item.label).label)
   const data = thongKeTrangThai.value.map((item) => item.value)
-  const backgroundColor = thongKeTrangThai.value.map((item) => STATUS_META[item.label]?.color || '#94a3b8')
+  const backgroundColor = thongKeTrangThai.value.map((item) => getStatusMeta(item.label).color)
 
   summaryChartInstance.value = new Chart(ctx, {
     type: 'doughnut',
@@ -1162,6 +1302,7 @@ const refreshData = async () => {
 
 // ====== Lifecycle ======
 onMounted(async () => {
+  document.addEventListener('click', handleDocumentClick)
   await Promise.all([
     fetchThongKeHomNay(),
     loadKhachDaLienHe(),
@@ -1174,6 +1315,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  document.removeEventListener('click', handleDocumentClick)
   if (lineChartInstance.value) lineChartInstance.value.destroy()
   if (summaryChartInstance.value) summaryChartInstance.value.destroy()
 })
@@ -1877,7 +2019,7 @@ body {
 
 /* Detail panel */
 .detail-panel {
-  width: 400px;
+  width: 500px;
   background: linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%);
   border-left: 1px solid #e2e8f0;
   display: flex;
@@ -1934,8 +2076,9 @@ body {
   font-size: 18px;
   color: #666;
   cursor: pointer;
+  width: 40px;
   padding: 5px;
-  border-radius: 10px;
+  border-radius: 50%;
 }
 
 .close-btn:hover {
@@ -2017,16 +2160,111 @@ body {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
+  align-items: center;
+  gap: 12px;
 }
 
 .detail-label {
   color: #666;
   font-size: 14px;
+  min-width: 110px;
 }
 
 .detail-value {
   font-weight: 500;
   font-size: 14px;
+}
+
+.detail-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1e293b;
+  background: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.detail-input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.detail-name-input {
+  font-size: 18px;
+  font-weight: 600;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+}
+
+.detail-select-input {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #94a3b8 50%),
+    linear-gradient(135deg, #94a3b8 50%, transparent 50%);
+  background-position: calc(100% - 18px) calc(50% - 2px), calc(100% - 12px) calc(50% - 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.detail-select-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.detail-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+  padding: 6px;
+}
+
+.detail-dropdown-item {
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1e293b;
+  cursor: pointer;
+}
+
+.detail-dropdown-item:hover {
+  background: #eef2ff;
+}
+
+.detail-dropdown-empty {
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.detail-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1e293b;
+  background: #ffffff;
+  resize: vertical;
+}
+
+.detail-textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
 .tag-selector {

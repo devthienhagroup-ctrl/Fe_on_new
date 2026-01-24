@@ -39,7 +39,7 @@
                 </span>
                 </span>
             </div>
-              <ReportProduct :listing-id="id"/>
+<!--              <ReportProduct :listing-id="id"/>-->
             </div>
 
             <div class="press-hero">

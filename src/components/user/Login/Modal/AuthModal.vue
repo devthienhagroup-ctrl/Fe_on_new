@@ -699,6 +699,7 @@ const handleRegisterSuccess = async (responseData) => {
     showOtpModal.value = false;
     closeModal();
 
+
     showSuccessAlert("Đăng ký thành công!", "Đã tự động đăng nhập.");
   /*  // Chuyển hướng
     setTimeout(() => {
@@ -709,6 +710,7 @@ const handleRegisterSuccess = async (responseData) => {
         router.push("/-thg/quan-ly")
       }
     }, 1000);*/
+
 
   } catch (loginError) {
     // Đóng loading nếu có lỗi

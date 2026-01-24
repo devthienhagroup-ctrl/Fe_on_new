@@ -156,25 +156,42 @@ import CTVRecruit from "../components/user/NewUser/CTVRecruit/CTVRecruit.vue";
 import ProjectManagementCMS from "../components/cms/NewCms/ProjectMannagement/ProjectManagementCMS.vue";
 import PropertyManagementCMS from "../components/cms/NewCms/PropertyManagement/PropertyManagementCMS.vue";
 import CTVRecruitCMS from "../components/cms/NewCms/CTVRecruit/CTVRecruitCMS.vue";
-import DichVuSetting from "../components/dich-vu/Dich-vu-setting.vue";
 import ProductReportManagemnet from "../components/productAdmin/productReportManagement/ProductReportManagemnet.vue";
 import ContactManagement from "../components/ContactManagement/ContactManagement.vue";
 import ServicePackages from "../components/user/NewUser/ServicePackages/ServicePackages.vue";
 import ServicePackageCMS from "../components/cms/NewCms/ServicePackages/ServicePackageCMS.vue";
-
+import DichVuSetting from "../components/dich-vu/Phi-dich-vu.vue";
+import DichVuSetting2 from "../components/dich-vu/Dich-vu-setting.vue";
 const routes = [
 
     {
-        path: "/-thg/dich-vu",
+        path: "/-thg/quan-ly-hop-dong",
         name: "DichVuSetting",
-        component: DichVuSetting,
-        meta: {requiresAuth: false, enableTailwind: true}
+        component: Menu,
+        meta: {requiresAuth: true, enableTailwind: true, loginFrom: "admin"},
+        children: [{
+            path: '',
+            name: "DichVuSetting1",
+            component: DichVuSetting,
+        }]
+    },
+
+    {
+        path: "/-thg/cau-hinh-phi-dich-vu",
+        name: "DichVuSetting2",
+        component: Menu,
+        meta: {requiresAuth: true, enableTailwind: true, loginFrom: "admin"},
+        children: [{
+            path: '',
+            name: "DichVuSetting3",
+            component: DichVuSetting2,
+        }]
     },
     {
         path: "/-thg/nhap-lieu",
         name: "TeamCollaboration1",
         component: Menu,
-        meta: {requiresAuth: false, enableTailwind: false},
+        meta: {requiresAuth: true, enableTailwind: false, loginFrom: "admin"},
         children: [{
             path: '',
             name: "NHAP_LIEU",
@@ -185,7 +202,7 @@ const routes = [
         path: "/-thg/quan-tri-du-lieu",
         name: "TeamCollaboration",
         component: Menu,
-        meta: {requiresAuth: false, enableTailwind: false},
+        meta: { requiresAuth: true, enableTailwind: false, loginFrom: "admin"},
         children: [{
             path: '',
             name: "QUAN_TRI_KHACH_HANG",
@@ -196,7 +213,7 @@ const routes = [
         path: "/-thg/telesale-lien-he-khach-hang",
         name: "TELESALESetyui",
         component: Menu,
-        meta: {requiresAuth: false, enableTailwind: false},
+        meta: { requiresAuth: true, enableTailwind: false, loginFrom: "admin"},
         children: [{
             path: '',
             name: "LIEN_HE",

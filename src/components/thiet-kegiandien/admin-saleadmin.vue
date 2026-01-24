@@ -75,12 +75,25 @@
                 <option value="all">Tất cả trạng thái</option>
                 <option value="NEW">Mới nhập</option>
                 <option value="DC_TELESALES">Chờ liên hệ</option>
+                <option value="CHAM_SOC">Chăm sóc</option>
                 <option value="TN_7NGAY">Tiềm năng 7 ngày</option>
                 <option value="TN_14NGAY">Tiềm năng 14 ngày</option>
                 <option value="THANH_CONG">Thành công</option>
+                <option value="TRIEN_KHAI">Triển khai</option>
+                <option value="KHACH_HUY_HEN">Khách huỷ hẹn</option>
+                <option value="THAT_BAI">Thất bại</option>
                 <option value="SAI_SO_LIEU">Sai số</option>
                 <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc</option>
-                <option value="CHAM_SOC">Chăm sóc</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label mb-2 fw-medium">Nguồn</label>
+              <select class="form-select form-select-custom" v-model="filters.resource">
+                <option value="all">Tất cả nguồn</option>
+                <option v-for="source in customerSources" :key="source.id" :value="source.id">
+                  {{ source.label }}
+                </option>
               </select>
             </div>
 
@@ -544,11 +557,21 @@
                       <!-- Khách hàng -->
                       <td style="width: 220px!important;">
                         <div class="d-flex align-items-center">
-                          <img
-                              :src="customer.avatarKhach || generateAvatarFromName(customer.hoTen)"
-                              :alt="customer.hoTen"
-                              class="customer-avatar me-3"
-                          />
+                          <div class="customer-avatar-wrap me-3">
+                            <img
+                                :src="customer.avatarKhach || generateAvatarFromName(customer.hoTen)"
+                                :alt="customer.hoTen"
+                                class="customer-avatar"
+                            />
+                            <span
+                                v-if="customer.nguonKhachHang"
+                                class="source-icon-badge"
+                                :class="`source-${customer.nguonKhachHang}`"
+                                :title="getSourceLabel(customer.nguonKhachHang)"
+                            >
+                              <i :class="getSourceIcon(customer.nguonKhachHang)"></i>
+                            </span>
+                          </div>
                           <div>
                             <div class="fw-semibold">{{ shortenName( customer.hoTen, 15 )}}</div>
                             <small class="text-muted">{{ customer.ngayTao }}</small>
@@ -575,7 +598,7 @@
 
                       <!-- Trạng thái -->
                       <td>
-    <span :class="`status-badge status-${customer.trangThai}`">
+    <span :class="['status-badge', getStatusClass(customer.trangThai)]">
       {{ getStatusLabel(customer.trangThai) }}
     </span>
                       </td>
@@ -951,7 +974,7 @@
                 <div class="detail-hero-info">
                   <div class="detail-hero-title">
                     <h4 class="mb-0">{{ customerForm.name || 'Khách hàng' }}</h4>
-                    <span v-if="customerForm.status" :class="`status-badge status-${customerForm.status}`">
+                    <span v-if="customerForm.status" :class="['status-badge', getStatusClass(customerForm.status)]">
                       {{ getStatusLabel(customerForm.status) }}
                     </span>
                   </div>
@@ -1060,8 +1083,7 @@
 
                           <!-- ===== BỔ SUNG ===== -->
                           <option value="KHACH_HUY_HEN">Khách huỷ hẹn</option>
-                          <option value="BAN_NHANH">Bán nhanh</option>
-                          <option value="BAN_GP">Bán giải pháp</option>
+                          <option value="TRIEN_KHAI">Triển khai</option>
 
                           <option value="SAI_SO_LIEU">Sai số</option>
                           <option value="KHONG_LIEN_LAC_DUOC">Không liên lạc được</option>
@@ -1216,9 +1238,16 @@
                 <div class="detail-hero-info">
                   <div class="detail-hero-title">
                     <h4 class="mb-0">{{ detailCustomer.hoTen }}</h4>
-                    <span :class="`status-badge status-${detailCustomer.trangThai}`" style="font-size: 14px !important;">
+                    <span :class="['status-badge', getStatusClass(detailCustomer.trangThai)]" style="font-size: 14px !important;">
                   {{ getStatusLabel(detailCustomer.trangThai) }}
                 </span>
+                    <span
+                      v-if="detailCustomer.nguonKhachHang"
+                      class="source-badge"
+                      :class="`source-${detailCustomer.nguonKhachHang}`"
+                    >
+                      {{ getSourceLabel(detailCustomer.nguonKhachHang) }}
+                    </span>
                   </div>
                   <div class="detail-hero-meta">
                     <span><i class="fas fa-phone-alt"></i> {{ formatPhoneNumber(detailCustomer.soDienThoai) }}</span>
@@ -1259,8 +1288,17 @@
                         <div class="info-value">{{ formatCurrency(detailCustomer.giaBDS) }}</div>
                       </div>
                       <div class="info-item">
-                        <div class="info-label">Phí</div>
-                        <div class="info-value">{{ formatCurrency(detailCustomer.phi) }}</div>
+                        <div class="info-label">Loại dịch vụ triển khai</div>
+                        <div class="info-value">
+                          <span
+                            v-if="detailServiceName"
+                            class="service-badge"
+                            :style="{ background: detailServiceColor ? `linear-gradient(135deg, ${detailServiceColor}, #ffffff)` : 'linear-gradient(135deg, #22c55e, #2dd4bf)' }"
+                          >
+                            {{ detailServiceName }}
+                          </span>
+                          <span v-else>-</span>
+                        </div>
                       </div>
                       <div class="info-item">
                         <div class="info-label">Địa chỉ</div>
@@ -1272,6 +1310,12 @@
                       <span :class="`type-label type-${detailCustomer.phanLoaiKhach}`" style=" font-size: 1rem !important;">
                         {{ getTypeLabel(detailCustomer.phanLoaiKhach) }}
                       </span>
+                        </div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Nguồn khách</div>
+                        <div class="info-value">
+                          {{ getSourceLabel(detailCustomer.nguonKhachHang) || '-' }}
                         </div>
                       </div>
                     </div>
@@ -1361,7 +1405,7 @@
                         <div class="history-content">
                           <div class="history-header">
                             <div class="history-status">
-                          <span :class="`status-badge status-${item.trangThai}`">
+                          <span :class="['status-badge', getStatusClass(item.trangThai)]">
                             {{ getStatusLabel(item.trangThai) }}
                           </span>
                             </div>
@@ -1609,6 +1653,7 @@ const isAnyModalOpen = computed(() =>
 const filters = reactive({
   type: 'all',
   status: 'all',
+  resource: 'all',
   province: '',
   creator: 'all',
   createdFrom: '',
@@ -1655,6 +1700,14 @@ const customerTypes = [
   { id: 'CHINH_CHU', label: 'Chủ nhà', icon: 'fas fa-house-user' },
   { id: 'MOI_GIOI', label: 'Môi giới', icon: 'fas fa-handshake' },
   { id: 'NGUOI_THAN', label: 'Người thân', icon: 'fas fa-people-group' }
+]
+
+const customerSources = [
+  { id: 'ADS', label: 'Quảng cáo', icon: 'fas fa-bullhorn' },
+  { id: 'FORUM', label: 'Diễn đàn', icon: 'fas fa-comments' },
+  { id: 'RAO_VAT', label: 'Rao vặt', icon: 'fas fa-tags' },
+  { id: 'FB', label: 'Facebook', icon: 'fab fa-facebook' },
+  { id: 'SEO', label: 'SEO', icon: 'fas fa-magnifying-glass-chart' }
 ]
 
 const callingCustomer = ref(null)
@@ -1734,6 +1787,8 @@ const callTimer = computed(() => {
 
 const detailCustomer = computed(() => selectedCustomer.value?.customerListItemDTO || null)
 const detailHistory = computed(() => selectedCustomer.value?.lichSu || [])
+const detailServiceName = computed(() => selectedCustomer.value?.tenDichVu || '')
+const detailServiceColor = computed(() => selectedCustomer.value?.mauDichVu || '')
 
 const assignSummary = computed(() => {
   if (selectedCount.value === 0) return 'Chưa có khách hàng nào được chọn'
@@ -1802,6 +1857,7 @@ const resetFilters = () => {
   activeTab.value = 'all'
   filters.type = 'all'
   filters.status = 'all'
+  filters.resource = 'all'
   filters.province = ''
   filters.creator = 'all'
   filters.createdFrom = ''
@@ -2489,6 +2545,13 @@ const showNotification = (message, type = 'info') => {
 }
 
 // Helper functions
+const normalizeStatus = (status) => {
+  if (status === 'BAN_NHANH' || status === 'BAN_GP') return 'TRIEN_KHAI'
+  return status
+}
+
+const getStatusClass = (status) => `status-${normalizeStatus(status)}`
+
 const toDate = (value) => {
   if (!value) return new Date(0)
   const [year, month, day] = value.split('-').map(Number)
@@ -2510,8 +2573,7 @@ const getStatusLabel = (status) => {
 
     // ===== BỔ SUNG =====
     KHACH_HUY_HEN: 'Huỷ hẹn',
-    BAN_NHANH: 'Bán nhanh',
-    BAN_GP: 'Bán GP',
+    TRIEN_KHAI: 'Triển khai',
 
     THAT_BAI: 'Thất bại',
     KHONG_LIEN_LAC_DUOC: 'KLLD',
@@ -2519,13 +2581,23 @@ const getStatusLabel = (status) => {
     SAI_SO_LIEU: 'Sai số',
   }
 
-  return statusMap[status] || status
+  const normalizedStatus = normalizeStatus(status)
+  return statusMap[normalizedStatus] || normalizedStatus
 }
 
 const getTypeLabel = (type) => {
   const typeMap = { 'MOI_GIOI': 'Môi giới', 'CHINH_CHU': 'Chủ nhà', 'NGUOI_THAN': 'Người thân' }
   return typeMap[type] || type
 }
+
+const getSourceMeta = (source) => customerSources.find((item) => item.id === source) || {}
+
+const getSourceLabel = (source) => {
+  if (!source) return ''
+  return getSourceMeta(source).label || source
+}
+
+const getSourceIcon = (source) => getSourceMeta(source).icon || 'fas fa-circle'
 
 const getProvinceLabel = (province) => {
   if (!province) return '-'
@@ -2638,8 +2710,7 @@ const STATUS_META = {
 
   // ===== BỔ SUNG =====
   KHACH_HUY_HEN: { label: 'Khách huỷ hẹn', color: '#b45309' }, // huỷ – cam nâu
-  BAN_NHANH: { label: 'Bán nhanh', color: '#15803d' },        // bán nhanh – xanh đậm
-  BAN_GP: { label: 'Bán GP', color: '#0f766e' }               // đã lên VP – xanh ngọc
+  TRIEN_KHAI: { label: 'Triển khai', color: '#10b981' }        // triển khai – xanh gradient
 }
 
 const PHAN_LOAI_META = {
@@ -2682,10 +2753,15 @@ const buildMonthlyLineDatasets = () => {
 
   const datasets = []
 
+  const normalizedMonthlyStats = monthlyStats.value.map(item => ({
+    ...item,
+    key: normalizeStatus(item.key)
+  }))
+
   Object.entries(meta).forEach(([key, metaItem]) => {
     const dataByMonth = Array(12).fill(0)
 
-    monthlyStats.value
+    normalizedMonthlyStats
         .filter(i => i.key === key)
         .forEach(i => {
           dataByMonth[i.month - 1] = i.count
@@ -2817,10 +2893,15 @@ const buildStatusChartData = () => {
   const labels = []
   const data = []
   const backgroundColor = []
+  const statusTotals = statusStats.value.reduce((acc, item) => {
+    const key = normalizeStatus(item.status)
+    if (!key) return acc
+    acc[key] = (acc[key] || 0) + Number(item.count || 0)
+    return acc
+  }, {})
 
   Object.entries(STATUS_META).forEach(([statusKey, meta]) => {
-    const found = statusStats.value.find(s => s.status === statusKey)
-    const value = found ? found.count : 0
+    const value = statusTotals[statusKey] || 0
 
     // nếu muốn ẩn status = 0 thì uncomment dòng dưới
     // if (value === 0) return
@@ -2967,6 +3048,7 @@ const buildFilterPayload = () => ({
 
   phanLoaiKhach: filters.type !== 'all' ? filters.type : null,
   trangThai: filters.status !== 'all' ? filters.status : null,
+  resource: filters.resource !== 'all' ? filters.resource : null,
   tinhThanhPho: filters.province || null,
   nguoiTaoId: filters.creator !== 'all' ? filters.creator : null,
 
@@ -2985,6 +3067,7 @@ const buildFilterPayloadDB = () => ({
 
   phanLoaiKhach: filters.type !== 'all' ? filters.type : null,
   trangThai: filters.status !== 'all' ? filters.status : null,
+  resource: filters.resource !== 'all' ? filters.resource : null,
   tinhThanhPho: filters.province || null,
   nguoiTaoId: filters.creator !== 'all' ? filters.creator : null,
 
@@ -3642,6 +3725,47 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   transition: var(--transition-normal);
 }
 
+.customer-avatar-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.source-icon-badge {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+  border: 2px solid #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
+  transform: rotate(-12deg);
+}
+
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.source-ADS { background: #f97316; }
+.source-FORUM { background: #6366f1; }
+.source-RAO_VAT { background: #14b8a6; }
+.source-FB { background: #1877f2; }
+.source-SEO { background: #22c55e; }
+
 .customer-avatar-lg {
   width: 72px;
   height: 72px;
@@ -3923,16 +4047,21 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   color: white;
 }
 
-/* ===== Bán nhanh ===== */
-.status-BAN_NHANH {
-  background: linear-gradient(135deg, #0f9b0f 0%, #38ef7d 100%);
+/* ===== Triển khai ===== */
+.status-TRIEN_KHAI {
+  background: linear-gradient(135deg, #22c55e 0%, #2dd4bf 100%);
   color: white;
 }
 
-/* ===== Bán GP (đã lên VP) ===== */
-.status-BAN_GP {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-  color: white;
+.service-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.18);
 }
 
 
@@ -4950,6 +5079,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   color: #64748b;
   display: flex;
   align-items: center;
+  padding-right: 5px;
 }
 
 .history-staff {

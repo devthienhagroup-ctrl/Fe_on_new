@@ -105,6 +105,12 @@ const allMenuItems = [
     title: 'Lịch hẹn'
   },
   {
+    label: 'HOPDONG',
+    route: '/-thg/quan-ly-hop-dong',
+    icon: 'fa-solid fa-file-contract text-success fs-5',
+    title: 'Hợp đồng'
+  },
+  {
     label: 'EDITER',
     route: '/-thg/quan-tri-noi-dung/trang-chu/noi-bat',
     icon: 'fa-solid fa-file-lines text-primary fs-5',
