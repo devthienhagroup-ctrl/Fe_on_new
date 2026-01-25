@@ -68,13 +68,6 @@
                   <span class="font-medium">Làm mới</span>
                 </button>
 
-                <button
-                    @click="sidebar.toggle()"
-                    class="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-3 py-2 rounded-xl transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl text-sm"
-                >
-                  <i class="fa-solid fa-bars"></i>
-                  <span class="font-medium">Menu</span>
-                </button>
               </div>
 
             </div>
@@ -729,14 +722,12 @@
 
   <script setup>
   import {ref, computed, watch, onMounted} from "vue";
-  import {useSidebarStore} from "/src/stores/sidebarStore.js";
   import addressData from "/src/assets/js/address.json";
   import NotificationBell from "/src/components/NotificationBell.vue";
 
   const filterShow = ref("");
 
   import {useAuthStore} from "/src/stores/authStore.js";
-  const sidebar = useSidebarStore();
   const authStore = useAuthStore();
   const info = authStore.userInfo;
 

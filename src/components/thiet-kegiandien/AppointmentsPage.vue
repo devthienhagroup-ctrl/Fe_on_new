@@ -6,9 +6,7 @@ import FileNew from './File.vue'
 import NotificationBell from '/src/components/NotificationBell.vue'
 Chart.register(...registerables)
 import {useAuthStore} from "/src/stores/authStore.js";
-import { useSidebarStore } from "/src/stores/sidebarStore.js";
 const authStore = useAuthStore();
-const sidebar = useSidebarStore();
 const info = authStore.userInfo;
 // Trong script setup, thêm route
 const rootRef = ref(null)
@@ -2150,14 +2148,6 @@ onBeforeUnmount(() => {
       <p>Tạo, theo dõi và cập nhật trạng thái • phân loại • đánh giá</p>
     </div>
     <div class="d-flex align-items-center gap-2 ">
-      <button
-          class="header-menu-toggle"
-          title="Ẩn/hiện menu"
-          @click="sidebar.toggle()"
-      >
-        <i class="fa-solid fa-bars"></i>
-        <span class="d-none d-md-inline ms-1">Menu</span>
-      </button>
       <NotificationBell />
       <div class="d-flex flex-column align-items-end text-end">
         <div class="fw-semibold text-dark">{{ info.fullName }}</div>
@@ -4764,38 +4754,4 @@ tr:hover td{ background: rgba(102,126,234,0.035); }
   border-color: #fb923c;
   box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.15);
 }
-.header-menu-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px 10px;
-  height: 40px;
-
-  border-radius: 15px;
-  border: 1px solid #e5e7eb;
-
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  color: #334155;
-
-  font-size: 18px;
-  cursor: pointer;
-
-  transition: all 0.2s ease-in-out;
-}
-
-.header-menu-toggle:hover {
-  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
-  color: #0369a1;
-  border-color: #bae6fd;
-}
-
-.header-menu-toggle:active {
-  transform: scale(0.95);
-}
-
-.header-menu-toggle:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35);
-}
-
 </style>

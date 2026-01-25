@@ -7,15 +7,6 @@
 
           <!-- ===== BRAND (BÊN TRÁI) ===== -->
           <div class="d-flex align-items-center gap-2">
-            <button
-              type="button"
-              class="header-menu-toggle"
-              title="Ẩn/hiện menu"
-              @click="sidebar.toggle()"
-            >
-              <i class="fas fa-bars"></i>
-              <span class="d-none d-md-inline">Menu</span>
-            </button>
             <a class="navbar-brand d-flex align-items-center gap-2" href="#">
             <i class="fas fa-phone-alt"></i>
             <span class="fw-bold">ADMIN PRO</span>
@@ -1565,10 +1556,8 @@ const recentYears = computed(() => {
   return Array.from({ length: 5 }, (_, i) => currentYear - i)
 })
 import { useAuthStore } from "/src/stores/authStore.js";
-import { useSidebarStore } from "/src/stores/sidebarStore.js";
 const authStore = useAuthStore();
 const info = authStore.userInfo;
-const sidebar = useSidebarStore()
 const phanLoaiStats = ref([])
 watch([chartYear, chartType], async () => {
   // 🔥 LINE CHART (CHUNG)
@@ -3351,28 +3340,6 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; font-weight: 600; }
   line-height: 1;
 }
 
-.header-menu-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.12);
-  color: #f8fafc;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: var(--transition-normal);
-}
-
-.header-menu-toggle:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-}
-
-.header-menu-toggle:active {
-  transform: scale(0.98);
-}
 
 .navbar-custom .navbar-brand i {
   background: var(--primary-gradient);

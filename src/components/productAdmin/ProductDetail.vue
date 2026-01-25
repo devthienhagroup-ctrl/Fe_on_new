@@ -83,14 +83,6 @@
 
           <div class="header-right">
             <div class="header-user">
-              <button
-                class="header-menu-toggle"
-                title="Ẩn/hiện menu"
-                @click="sidebar.toggle()"
-              >
-                <i class="fa-solid fa-bars"></i>
-                <span class="d-none d-md-inline">Menu</span>
-              </button>
               <NotificationBell />
               <div class="d-flex flex-column align-items-end text-end">
                 <div class="fw-semibold text-dark">{{ info.fullName }}</div>
@@ -624,7 +616,6 @@
   import HopTacMoiGioi from "./HopTacMoiGioi.vue";
   import { showCenterSuccess, showCenterError, showCenterWarning } from "/src/assets/js/alertService.js";
   import { useAuthStore } from "../../stores/authStore.js";
-  import { useSidebarStore } from "../../stores/sidebarStore.js";
   import NotificationBell from "../NotificationBell.vue";
 
   const activeTab = ref("DETAIL") // DETAIL | FILE
@@ -632,7 +623,6 @@
   const router = useRouter();
   const authStore = useAuthStore();
   const info = authStore.userInfo;
-  const sidebar = useSidebarStore();
   const id = route.params.id;
   const asset = ref(null);
   const rooms = ref([]);
@@ -1056,29 +1046,6 @@
   font-weight: 600;
 }
 
-.header-menu-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid #cbd5f5;
-  background: #f8fafc;
-  color: #334155;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.header-menu-toggle:hover {
-  background: #e2e8f0;
-  border-color: #94a3b8;
-  color: #1e293b;
-}
-
-.header-menu-toggle:active {
-  transform: scale(0.98);
-}
 
 .back-button {
   display: inline-flex;

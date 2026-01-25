@@ -5,15 +5,6 @@
       <div>
         <div class="header-content">
           <div class="d-flex align-items-center gap-3">
-            <button
-              type="button"
-              class="header-menu-toggle"
-              title="Ẩn/hiện menu"
-              @click="sidebar.toggle()"
-            >
-              <i class="fas fa-bars"></i>
-              <span class="d-none d-md-inline">Menu</span>
-            </button>
             <div class="brand-icon">
               <i class="fa-solid fa-chart-pie"></i>
             </div>
@@ -472,10 +463,8 @@ import {
 } from "../../assets/js/alertService.js";
 import NotificationBell from "../NotificationBell.vue";
 import { useAuthStore } from "/src/stores/authStore.js";
-import { useSidebarStore } from "/src/stores/sidebarStore.js";
 const authStore = useAuthStore();
 const info = authStore.userInfo;
-const sidebar = useSidebarStore();
 const provinces = ref(addressData);
 function normalizePhone(phone) {
   if (!phone) return "";
@@ -1305,35 +1294,6 @@ onBeforeUnmount(() => {
   font-size: 0.875rem;
   color: #64748b;
   margin: 0;
-}
-.header-menu-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px 10px;
-  height: 40px;
-  border-radius: 15px;
-  border: 1px solid #e5e7eb;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  color: #334155;
-  font-size: 18px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-
-.header-menu-toggle:hover {
-  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
-  color: #0369a1;
-  border-color: #bae6fd;
-}
-
-.header-menu-toggle:active {
-  transform: scale(0.95);
-}
-
-.header-menu-toggle:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35);
 }
 
 .header-actions {

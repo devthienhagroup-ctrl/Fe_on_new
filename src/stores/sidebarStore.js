@@ -6,7 +6,7 @@ export const useSidebarStore = defineStore("sidebar", () => {
     const isExpanded = ref(
         localStorage.getItem("sidebar_expanded") !== null
             ? localStorage.getItem("sidebar_expanded") === "true"
-            : true
+            : false
     );
 
     const toggle = () => {

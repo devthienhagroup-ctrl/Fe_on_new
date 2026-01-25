@@ -7,15 +7,6 @@
       <div class="min-w-0">
         <div class="svc3-title">Quản trị Dịch vụ</div>
       </div>
-      <button
-          type="button"
-          class="header-menu-toggle"
-          title="Ẩn/hiện menu"
-          @click="sidebar.toggle()"
-      >
-        <i class="fa-solid fa-bars"></i>
-        <span class="d-none d-md-inline">Menu</span>
-      </button>
     </div>
 
     <div class="svc3-top-actions">
@@ -652,9 +643,7 @@
 import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
 import { computed, reactive, ref, onMounted, watch } from "vue";
 import { useAuthStore } from "/src/stores/authStore.js";
-import { useSidebarStore } from "../../stores/sidebarStore.js";
 const authStore = useAuthStore();
-const sidebar = useSidebarStore();
 const info = authStore.userInfo;
 /* ===== DATA ===== */
 const services = ref([])
@@ -1287,27 +1276,6 @@ watch(activeTab, async (newTab, oldTab) => {
   gap:12px;
   backdrop-filter: blur(10px);
   border-bottom: solid 1px #bbbaba;
-}
-.header-menu-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(37,99,235,.35);
-  background: rgba(248,250,252,.9);
-  color: #334155;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-.header-menu-toggle:hover {
-  background: rgba(226,232,240,.9);
-  border-color: rgba(148,163,184,.9);
-  color: #1e293b;
-}
-.header-menu-toggle:active {
-  transform: scale(0.98);
 }
 .svc3-brand{ display:flex; align-items:center; gap:10px; min-width:0; }
 .svc3-brand-ico{

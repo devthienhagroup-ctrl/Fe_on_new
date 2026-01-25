@@ -262,7 +262,6 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue"
 import { useRouter } from "vue-router";
 import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
 import { useAuthStore } from "/src/stores/authStore.js";
-import { useSidebarStore } from "/src/stores/sidebarStore.js";
 import addressData from "/src/assets/js/address.json";
 import api from "/src/api/api.js";
 import { buildSeoUrl } from "../../../assets/js/global.js";
@@ -341,7 +340,6 @@ const collabHints = [
 const authStore = useAuthStore();
 const auth = useAuthStore();
 const router = useRouter();
-const sidebar = useSidebarStore();
 
 // Helper functions
 const formatDate = (dateString) => {

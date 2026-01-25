@@ -874,7 +874,6 @@ const collabHints = [
 
 import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
-import { useSidebarStore } from "/src/stores/sidebarStore.js";
 import addressData from "/src/assets/js/address.json";
 import NotificationBell from "/src/components/NotificationBell.vue";
 import { buildSeoUrl } from "../../assets/js/global.js";
@@ -883,7 +882,6 @@ import { useAuthStore } from "/src/stores/authStore.js";
 const authStore = useAuthStore();
 const info = authStore.userInfo;
 
-const sidebar = useSidebarStore();
 const goToDetail = (item) => {
   if (activeTab.value === 'MY_ASSET') {
     router.push(`/user/quan-ly-san-pham/${item.id}`);

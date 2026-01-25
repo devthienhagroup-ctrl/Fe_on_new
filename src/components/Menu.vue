@@ -6,7 +6,12 @@
     }"
   >
     <!-- ========== SIDEBAR ========== -->
-    <aside class="sidebar" :class="{ collapsed: sidebar.isExpanded }">
+    <aside
+        class="sidebar"
+        :class="{ collapsed: !sidebar.isExpanded }"
+        @mouseenter="handleSidebarEnter"
+        @mouseleave="handleSidebarLeave"
+    >
 
 
       <!-- Logo -->
@@ -69,7 +74,7 @@
 import backgroundImage from '/imgs/background_login.png'
 import logoImage from '/imgs/logo.png'
 
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useAuthStore } from '../stores/authStore'
 
 const authStore = useAuthStore()
@@ -178,6 +183,52 @@ const filteredMenu = computed(() =>
 
 import { useSidebarStore } from "../stores/sidebarStore";
 const sidebar = useSidebarStore();
+const isPointerInsideSidebar = ref(false);
+const edgeThreshold = 5;
+
+const showSidebar = () => {
+  if (!sidebar.isExpanded) {
+    sidebar.open();
+  }
+};
+
+const hideSidebar = () => {
+  if (sidebar.isExpanded) {
+    sidebar.close();
+  }
+};
+
+const handleEdgeHover = (event) => {
+  if (event.clientX <= edgeThreshold) {
+    showSidebar();
+    return;
+  }
+
+  if (!isPointerInsideSidebar.value) {
+    hideSidebar();
+  }
+};
+
+const handleSidebarEnter = () => {
+  isPointerInsideSidebar.value = true;
+  showSidebar();
+};
+
+const handleSidebarLeave = (event) => {
+  isPointerInsideSidebar.value = false;
+  if (event.clientX > edgeThreshold) {
+    hideSidebar();
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('mousemove', handleEdgeHover);
+  hideSidebar();
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('mousemove', handleEdgeHover);
+});
 
 </script>
 
