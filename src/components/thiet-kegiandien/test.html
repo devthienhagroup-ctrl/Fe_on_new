@@ -4,793 +4,269 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Phòng ban & Chi nhánh</title>
+    <!-- Sử dụng Tailwind CSS từ CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Thêm Font Awesome cho icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --success-color: #2ecc71;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --light-color: #ecf0f1;
-            --dark-color: #34495e;
-        }
-
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
-            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
-            color: white;
-            padding: 20px 0;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo i {
-            font-size: 2.5rem;
-        }
-
-        .logo h1 {
-            font-size: 1.8rem;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-        }
-
-        .btn-success {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background-color: #27ae60;
-            transform: translateY(-2px);
-        }
-
-        .btn-warning {
-            background-color: var(--warning-color);
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background-color: #d68910;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #c0392b;
-            transform: translateY(-2px);
-        }
-
-        .btn-light {
-            background-color: var(--light-color);
-            color: var(--dark-color);
-        }
-
-        .btn-light:hover {
-            background-color: #d5dbdb;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 30px;
-        }
-
-        .sidebar {
-            background-color: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-            height: fit-content;
-        }
-
-        .sidebar h3 {
-            margin-bottom: 20px;
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--light-color);
-            padding-bottom: 10px;
-        }
-
-        .filter-section {
-            margin-bottom: 25px;
-        }
-
-        .filter-section h4 {
-            margin-bottom: 15px;
-            color: var(--dark-color);
-        }
-
-        .filter-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .filter-option {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 5px;
-            transition: background-color 0.2s;
-        }
-
-        .filter-option:hover {
-            background-color: var(--light-color);
-        }
-
-        .filter-option.active {
-            background-color: #e1f0fa;
-            color: var(--secondary-color);
-            font-weight: 600;
-        }
-
-        .content {
-            background-color: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .content-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--light-color);
-        }
-
-        .content-header h2 {
-            color: var(--primary-color);
-        }
-
-        .search-box {
-            display: flex;
-            align-items: center;
-            background-color: var(--light-color);
-            border-radius: 5px;
-            padding: 8px 15px;
-            width: 300px;
-        }
-
-        .search-box input {
-            border: none;
-            background: transparent;
-            outline: none;
-            width: 100%;
-            margin-left: 10px;
-        }
-
-        .department-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 25px;
-        }
-
-        .department-card {
-            background-color: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid #eee;
-        }
-
-        .department-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-        }
-
-        .department-img {
-            height: 180px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .department-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s;
-        }
-
-        .department-card:hover .department-img img {
-            transform: scale(1.05);
-        }
-
-        .department-info {
-            padding: 20px;
-        }
-
-        .department-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-
-        .department-name {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-
-        .department-tag {
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .department-description {
-            color: #666;
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-
-        .department-details {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .detail-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--dark-color);
-        }
-
-        .detail-item i {
-            color: var(--secondary-color);
-            width: 20px;
-        }
-
-        .function-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .function-tag {
-            background-color: #e8f4fc;
-            color: var(--secondary-color);
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .department-actions {
-            display: flex;
-            gap: 10px;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-        }
-
-        .btn-action {
-            flex: 1;
-            padding: 8px;
-            font-size: 0.85rem;
-            justify-content: center;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 50px 20px;
-            color: #7f8c8d;
-            grid-column: 1 / -1;
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            color: #bdc3c7;
-        }
-
-        .empty-state h3 {
-            margin-bottom: 10px;
-            color: var(--dark-color);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal-content {
-            background-color: white;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 700px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 25px;
-            border-bottom: 1px solid #eee;
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 10px 10px 0 0;
-        }
-
-        .modal-header h3 {
-            font-size: 1.4rem;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: white;
-            cursor: pointer;
-        }
-
-        .modal-body {
-            padding: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--dark-color);
-        }
-
-        .required::after {
-            content: " *";
-            color: var(--danger-color);
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--secondary-color);
-        }
-
-        .function-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .function-option {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .image-upload {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border: 2px dashed #ddd;
-            border-radius: 5px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: border-color 0.3s;
-        }
-
-        .image-upload:hover {
-            border-color: var(--secondary-color);
-        }
-
-        .image-upload i {
-            font-size: 2.5rem;
-            color: #aaa;
-            margin-bottom: 10px;
-        }
-
-        .image-preview {
-            width: 100%;
-            height: 150px;
-            overflow: hidden;
-            border-radius: 5px;
-            margin-top: 15px;
-            display: none;
-        }
-
-        .image-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .modal-footer {
-            padding: 20px 25px;
-            border-top: 1px solid #eee;
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px;
-        }
-
-        .delete-confirm {
-            text-align: center;
-            padding: 30px;
-        }
-
-        .delete-confirm i {
-            font-size: 4rem;
-            color: var(--danger-color);
-            margin-bottom: 20px;
-        }
-
-        .delete-confirm h3 {
-            margin-bottom: 10px;
-            color: var(--dark-color);
-        }
-
-        .delete-confirm p {
-            margin-bottom: 25px;
-            color: #666;
-        }
-
-        .delete-actions {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-
-        footer {
-            margin-top: 50px;
-            text-align: center;
-            color: #7f8c8d;
-            padding: 20px;
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 992px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .content-header {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .search-box {
-                width: 100%;
-            }
-
-            .department-list {
-                grid-template-columns: 1fr;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 </head>
-<body>
-<div class="container">
-    <header>
-        <div class="header-content">
-            <div class="logo">
-                <i class="fas fa-building"></i>
-                <h1>Quản lý Phòng ban & Chi nhánh</h1>
+<body class="bg-gray-50 min-h-screen text-gray-800">
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-indigo-600 to-blue-800 text-white rounded-2xl shadow-xl mb-8 p-6">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                <i class="fas fa-building text-4xl"></i>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold">Quản lý Phòng ban & Chi nhánh</h1>
+                    <p class="text-blue-100">Quản lý thông tin phòng ban, chi nhánh và chức năng hệ thống</p>
+                </div>
             </div>
-            <div class="header-actions">
-                <button class="btn btn-primary" id="addDepartmentBtn">
-                    <i class="fas fa-plus"></i> Thêm phòng ban
-                </button>
-            </div>
+            <button id="addDepartmentBtn" class="bg-white text-indigo-700 hover:bg-gray-100 font-bold py-3 px-6 rounded-xl shadow-md transition duration-200 flex items-center space-x-2">
+                <i class="fas fa-plus"></i>
+                <span>Thêm phòng ban mới</span>
+            </button>
         </div>
     </header>
 
-    <div class="main-content">
-        <aside class="sidebar">
-            <h3><i class="fas fa-filter"></i> Bộ lọc & Tìm kiếm</h3>
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Sidebar với các bộ lọc -->
+        <aside class="lg:w-1/4">
+            <div class="bg-white rounded-2xl shadow-md p-6 mb-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4 pb-3 border-b flex items-center">
+                    <i class="fas fa-filter mr-2 text-blue-500"></i> Bộ lọc & Tìm kiếm
+                </h3>
 
-            <div class="filter-section">
-                <h4>Chi nhánh</h4>
-                <div class="filter-options" id="branchFilter">
-                    <div class="filter-option active" data-branch="all">
-                        <i class="fas fa-globe"></i>
-                        <span>Tất cả chi nhánh</span>
-                    </div>
-                    <div class="filter-option" data-branch="hanoi">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Hà Nội</span>
-                    </div>
-                    <div class="filter-option" data-branch="hcm">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>TP. Hồ Chí Minh</span>
-                    </div>
-                    <div class="filter-option" data-branch="danang">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Đà Nẵng</span>
-                    </div>
-                    <div class="filter-option" data-branch="cantho">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Cần Thơ</span>
+                <div class="mb-6">
+                    <h4 class="font-semibold text-gray-700 mb-3">Chi nhánh</h4>
+                    <div id="branchFilter" class="space-y-2">
+                        <div class="filter-option branch-option flex items-center p-3 rounded-lg cursor-pointer bg-blue-50 text-blue-700 border border-blue-200" data-branch="all">
+                            <i class="fas fa-globe mr-3"></i>
+                            <span>Tất cả chi nhánh</span>
+                        </div>
+                        <div class="filter-option branch-option flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100" data-branch="hanoi">
+                            <i class="fas fa-map-marker-alt mr-3 text-red-500"></i>
+                            <span>Hà Nội</span>
+                        </div>
+                        <div class="filter-option branch-option flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100" data-branch="hcm">
+                            <i class="fas fa-map-marker-alt mr-3 text-green-500"></i>
+                            <span>TP. Hồ Chí Minh</span>
+                        </div>
+                        <div class="filter-option branch-option flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100" data-branch="danang">
+                            <i class="fas fa-map-marker-alt mr-3 text-yellow-500"></i>
+                            <span>Đà Nẵng</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="filter-section">
-                <h4>Chức năng hệ thống</h4>
-                <div class="filter-options" id="functionFilter">
-                    <div class="filter-option active" data-function="all">
-                        <i class="fas fa-tasks"></i>
-                        <span>Tất cả chức năng</span>
-                    </div>
-                    <div class="filter-option" data-function="consulting">
-                        <i class="fas fa-comments"></i>
-                        <span>Tư vấn</span>
-                    </div>
-                    <div class="filter-option" data-function="tele">
-                        <i class="fas fa-phone-alt"></i>
-                        <span>Tele</span>
-                    </div>
-                    <div class="filter-option" data-function="marketing">
-                        <i class="fas fa-bullhorn"></i>
-                        <span>Marketing</span>
-                    </div>
-                    <div class="filter-option" data-function="it">
-                        <i class="fas fa-server"></i>
-                        <span>Thông tin</span>
-                    </div>
-                    <div class="filter-option" data-function="deployment">
-                        <i class="fas fa-cogs"></i>
-                        <span>Triển khai</span>
+                <div class="mb-6">
+                    <h4 class="font-semibold text-gray-700 mb-3">Chức năng hệ thống</h4>
+                    <div id="functionFilter" class="space-y-2">
+                        <div class="filter-option function-option flex items-center p-3 rounded-lg cursor-pointer bg-blue-50 text-blue-700 border border-blue-200" data-function="all">
+                            <i class="fas fa-tasks mr-3"></i>
+                            <span>Tất cả chức năng</span>
+                        </div>
+                        <div class="filter-option function-option flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100" data-function="consulting">
+                            <i class="fas fa-comments mr-3 text-purple-500"></i>
+                            <span>Tư vấn</span>
+                        </div>
+                        <div class="filter-option function-option flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100" data-function="tele">
+                            <i class="fas fa-phone-alt mr-3 text-teal-500"></i>
+                            <span>Tele</span>
+                        </div>
+                        <div class="filter-option function-option flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100" data-function="marketing">
+                            <i class="fas fa-bullhorn mr-3 text-pink-500"></i>
+                            <span>Marketing</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="filter-section">
-                <h4>Thống kê</h4>
-                <div class="detail-item">
-                    <i class="fas fa-building"></i>
-                    <span>Tổng phòng ban: <strong id="totalDepartments">6</strong></span>
-                </div>
-                <div class="detail-item">
-                    <i class="fas fa-users"></i>
-                    <span>Chi nhánh: <strong id="totalBranches">4</strong></span>
+                <div>
+                    <h4 class="font-semibold text-gray-700 mb-3">Thống kê</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-building mr-3 text-blue-500"></i>
+                            <span>Tổng phòng ban: <strong id="totalDepartments" class="text-gray-900">6</strong></span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-code-branch mr-3 text-green-500"></i>
+                            <span>Số chi nhánh: <strong id="totalBranches" class="text-gray-900">4</strong></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </aside>
 
-        <main class="content">
-            <div class="content-header">
-                <h2><i class="fas fa-list"></i> Danh sách phòng ban</h2>
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Tìm kiếm phòng ban...">
+        <!-- Main Content -->
+        <main class="lg:w-3/4">
+            <div class="bg-white rounded-2xl shadow-md p-6">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8 pb-6 border-b">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 md:mb-0 flex items-center">
+                        <i class="fas fa-list mr-3 text-blue-500"></i> Danh sách phòng ban
+                    </h2>
+                    <div class="relative w-full md:w-auto">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm phòng ban, trưởng phòng..."
+                               class="pl-10 pr-4 py-3 border border-gray-300 rounded-xl w-full md:w-80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
                 </div>
-            </div>
 
-            <div class="department-list" id="departmentList">
-                <!-- Các phòng ban sẽ được hiển thị ở đây -->
+                <!-- Danh sách phòng ban sẽ hiển thị tại đây -->
+                <div id="departmentList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Dữ liệu mẫu sẽ được tạo bởi JavaScript -->
+                </div>
             </div>
         </main>
     </div>
 
-    <footer>
-        <p>Hệ thống Quản lý Phòng ban & Chi nhánh &copy; 2023 - Phiên bản 1.0</p>
+    <footer class="mt-12 text-center text-gray-600 text-sm">
+        <p>Hệ thống Quản lý Phòng ban & Chi nhánh &copy; 2023 - Phiên bản 2.0 (Nâng cấp với Tailwind CSS)</p>
     </footer>
 </div>
 
 <!-- Modal thêm/sửa phòng ban -->
-<div class="modal" id="departmentModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="modalTitle">Thêm phòng ban mới</h3>
-            <button class="close-modal" id="closeModal">&times;</button>
+<div id="departmentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-t-2xl p-6">
+            <div class="flex justify-between items-center">
+                <h3 id="modalTitle" class="text-2xl font-bold">Thêm phòng ban mới</h3>
+                <button id="closeModal" class="text-white text-3xl hover:text-gray-200">&times;</button>
+            </div>
         </div>
-        <div class="modal-body">
+
+        <div class="p-6">
             <form id="departmentForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="departmentName" class="required">Tên phòng ban</label>
-                        <input type="text" id="departmentName" class="form-control" required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="departmentName" class="block text-gray-700 font-medium mb-2">
+                            Tên phòng ban <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="departmentName" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
-                    <div class="form-group">
-                        <label for="departmentManager" class="required">Trưởng phòng</label>
-                        <input type="text" id="departmentManager" class="form-control" required>
+                    <div>
+                        <label for="departmentManager" class="block text-gray-700 font-medium mb-2">
+                            Trưởng phòng <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="departmentManager" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="departmentBranch" class="required">Chi nhánh</label>
-                        <select id="departmentBranch" class="form-control" required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="departmentBranch" class="block text-gray-700 font-medium mb-2">
+                            Chi nhánh <span class="text-red-500">*</span>
+                        </label>
+                        <select id="departmentBranch" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                             <option value="">Chọn chi nhánh</option>
                             <option value="hanoi">Hà Nội</option>
                             <option value="hcm">TP. Hồ Chí Minh</option>
                             <option value="danang">Đà Nẵng</option>
-                            <option value="cantho">Cần Thơ</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="employeeListLink" class="required">Link danh sách nhân viên</label>
-                        <input type="text" id="employeeListLink" class="form-control" value="/#" required>
+                    <div>
+                        <label for="employeeListLink" class="block text-gray-700 font-medium mb-2">
+                            Link danh sách nhân viên <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="employeeListLink" value="/#" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="departmentDescription" class="required">Mô tả phòng ban</label>
-                    <textarea id="departmentDescription" class="form-control" rows="3" required></textarea>
+                <div class="mb-6">
+                    <label for="departmentDescription" class="block text-gray-700 font-medium mb-2">
+                        Mô tả phòng ban <span class="text-red-500">*</span>
+                    </label>
+                    <textarea id="departmentDescription" rows="3" required
+                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
                 </div>
 
-                <div class="form-group">
-                    <label class="required">Chức năng hệ thống</label>
-                    <div class="function-options">
-                        <label class="function-option">
-                            <input type="checkbox" name="departmentFunctions" value="consulting" checked>
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-3">
+                        Chức năng hệ thống <span class="text-red-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="departmentFunctions" value="consulting" class="mr-2 h-5 w-5 text-blue-600 rounded">
                             <span>Tư vấn</span>
                         </label>
-                        <label class="function-option">
-                            <input type="checkbox" name="departmentFunctions" value="tele">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="departmentFunctions" value="tele" class="mr-2 h-5 w-5 text-blue-600 rounded">
                             <span>Tele</span>
                         </label>
-                        <label class="function-option">
-                            <input type="checkbox" name="departmentFunctions" value="marketing">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="departmentFunctions" value="marketing" class="mr-2 h-5 w-5 text-blue-600 rounded">
                             <span>Marketing</span>
                         </label>
-                        <label class="function-option">
-                            <input type="checkbox" name="departmentFunctions" value="it">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="departmentFunctions" value="it" class="mr-2 h-5 w-5 text-blue-600 rounded">
                             <span>Thông tin</span>
                         </label>
-                        <label class="function-option">
-                            <input type="checkbox" name="departmentFunctions" value="deployment">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="departmentFunctions" value="deployment" class="mr-2 h-5 w-5 text-blue-600 rounded">
                             <span>Triển khai</span>
                         </label>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Ảnh đại diện phòng</label>
-                    <div class="image-upload" id="imageUpload">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>Kéo thả ảnh vào đây hoặc nhấn để tải lên</p>
-                        <input type="file" id="departmentImage" accept="image/*" style="display: none;">
+                <div class="mb-8">
+                    <label class="block text-gray-700 font-medium mb-3">Ảnh đại diện phòng</label>
+                    <div id="imageUpload" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-blue-400 transition duration-200">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-600">Kéo thả ảnh vào đây hoặc <span class="text-blue-600 font-medium">nhấn để tải lên</span></p>
+                        <p class="text-gray-500 text-sm mt-2">Hỗ trợ JPG, PNG, GIF (tối đa 5MB)</p>
+                        <input type="file" id="departmentImage" accept="image/*" class="hidden">
                     </div>
-                    <div class="image-preview" id="imagePreview">
-                        <img src="" alt="Preview" id="previewImage">
+                    <div id="imagePreview" class="mt-4 hidden">
+                        <p class="text-gray-700 font-medium mb-2">Ảnh đã chọn:</p>
+                        <div class="relative w-full h-48 rounded-xl overflow-hidden border">
+                            <img id="previewImage" src="" alt="Preview" class="w-full h-full object-cover">
+                        </div>
                     </div>
                     <input type="hidden" id="departmentImageUrl">
                 </div>
             </form>
         </div>
-        <div class="modal-footer">
-            <button class="btn btn-light" id="cancelBtn">Hủy</button>
-            <button class="btn btn-success" id="saveDepartmentBtn">Lưu phòng ban</button>
+
+        <div class="border-t px-6 py-4">
+            <div class="flex justify-end space-x-4">
+                <button id="cancelBtn" class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition duration-200">
+                    Hủy
+                </button>
+                <button id="saveDepartmentBtn" class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium rounded-xl shadow hover:opacity-90 transition duration-200">
+                    Lưu phòng ban
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- Modal xác nhận xóa -->
-<div class="modal" id="deleteModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Xác nhận xóa</h3>
-            <button class="close-modal" id="closeDeleteModal">&times;</button>
-        </div>
-        <div class="delete-confirm">
-            <i class="fas fa-exclamation-triangle"></i>
-            <h3>Xóa phòng ban này?</h3>
-            <p>Bạn có chắc chắn muốn xóa phòng ban <strong id="deleteDepartmentName"></strong>? Hành động này không thể hoàn tác.</p>
-            <div class="delete-actions">
-                <button class="btn btn-light" id="cancelDeleteBtn">Hủy</button>
-                <button class="btn btn-danger" id="confirmDeleteBtn">Xóa phòng ban</button>
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="p-6 text-center">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
+                <i class="fas fa-exclamation-triangle text-3xl text-red-600"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">Xóa phòng ban này?</h3>
+            <p class="text-gray-600 mb-6">Bạn có chắc chắn muốn xóa phòng ban <strong id="deleteDepartmentName" class="text-gray-900"></strong>? Hành động này không thể hoàn tác.</p>
+            <div class="flex justify-center space-x-4">
+                <button id="cancelDeleteBtn" class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition duration-200">
+                    Hủy
+                </button>
+                <button id="confirmDeleteBtn" class="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-medium rounded-xl shadow hover:opacity-90 transition duration-200">
+                    Xóa phòng ban
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Dữ liệu mẫu
+    // Dữ liệu mẫu (thay bằng API thực tế khi triển khai)
     let departments = [
         {
             id: 1,
@@ -847,7 +323,7 @@
             name: "Phòng Tele Marketing",
             description: "Thực hiện các chiến dịch tiếp thị qua điện thoại và chăm sóc khách hàng tiềm năng.",
             manager: "Đỗ Thị Hà",
-            branch: "cantho",
+            branch: "hanoi",
             functions: ["tele", "marketing"],
             imageUrl: "https://images.unsplash.com/photo-1573164713714-d95e436ab286?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
             employeeLink: "/#"
@@ -863,7 +339,7 @@
     let editingId = null;
     let nextId = departments.length + 1;
 
-    // DOM Elements
+    // Các phần tử DOM
     const departmentList = document.getElementById('departmentList');
     const addDepartmentBtn = document.getElementById('addDepartmentBtn');
     const departmentModal = document.getElementById('departmentModal');
@@ -891,8 +367,7 @@
         const branchNames = {
             "hanoi": "Hà Nội",
             "hcm": "TP. Hồ Chí Minh",
-            "danang": "Đà Nẵng",
-            "cantho": "Cần Thơ"
+            "danang": "Đà Nẵng"
         };
         return branchNames[branch] || branch;
     }
@@ -940,12 +415,12 @@
         // Hiển thị danh sách phòng ban
         if (filteredDepartments.length === 0) {
             departmentList.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-building"></i>
-                        <h3>Không tìm thấy phòng ban nào</h3>
-                        <p>Thử thay đổi bộ lọc hoặc thêm phòng ban mới</p>
-                        <button class="btn btn-primary" id="addEmptyBtn" style="margin-top: 20px;">
-                            <i class="fas fa-plus"></i> Thêm phòng ban mới
+                    <div class="col-span-2 text-center py-12">
+                        <i class="fas fa-building text-6xl text-gray-300 mb-6"></i>
+                        <h3 class="text-2xl font-bold text-gray-700 mb-3">Không tìm thấy phòng ban nào</h3>
+                        <p class="text-gray-600 mb-6">Thử thay đổi bộ lọc hoặc thêm phòng ban mới</p>
+                        <button id="addEmptyBtn" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium py-3 px-6 rounded-xl shadow hover:opacity-90 transition duration-200">
+                            <i class="fas fa-plus mr-2"></i> Thêm phòng ban mới
                         </button>
                     </div>
                 `;
@@ -958,43 +433,46 @@
         }
 
         departmentList.innerHTML = filteredDepartments.map(dept => `
-                <div class="department-card" data-id="${dept.id}">
-                    <div class="department-img">
-                        <img src="${dept.imageUrl}" alt="${dept.name}">
-                        <div class="department-tag">${getBranchName(dept.branch)}</div>
+                <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition duration-300">
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="${dept.imageUrl}" alt="${dept.name}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+                        <div class="absolute top-4 left-4 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">${getBranchName(dept.branch)}</div>
                     </div>
-                    <div class="department-info">
-                        <div class="department-header">
-                            <div class="department-name">${dept.name}</div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-xl font-bold text-gray-900">${dept.name}</h3>
                         </div>
-                        <p class="department-description">${dept.description}</p>
+                        <p class="text-gray-600 mb-4 line-clamp-2">${dept.description}</p>
 
-                        <div class="department-details">
-                            <div class="detail-item">
-                                <i class="fas fa-user-tie"></i>
-                                <span>Trưởng phòng: <strong>${dept.manager}</strong></span>
+                        <div class="space-y-3 mb-4">
+                            <div class="flex items-center text-gray-700">
+                                <i class="fas fa-user-tie mr-3 text-blue-500"></i>
+                                <span>Trưởng phòng: <strong class="text-gray-900">${dept.manager}</strong></span>
                             </div>
-                            <div class="detail-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>Chi nhánh: <strong>${getBranchName(dept.branch)}</strong></span>
+                            <div class="flex items-center text-gray-700">
+                                <i class="fas fa-map-marker-alt mr-3 text-green-500"></i>
+                                <span>Chi nhánh: <strong class="text-gray-900">${getBranchName(dept.branch)}</strong></span>
                             </div>
                         </div>
 
-                        <div class="function-tags">
-                            ${dept.functions.map(func => `
-                                <span class="function-tag">${getFunctionName(func)}</span>
-                            `).join('')}
+                        <div class="mb-6">
+                            <p class="text-gray-700 font-medium mb-2">Chức năng:</p>
+                            <div class="flex flex-wrap gap-2">
+                                ${dept.functions.map(func => `
+                                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">${getFunctionName(func)}</span>
+                                `).join('')}
+                            </div>
                         </div>
 
-                        <div class="department-actions">
-                            <button class="btn btn-action btn-primary view-employees" data-link="${dept.employeeLink}">
-                                <i class="fas fa-users"></i> Nhân viên
+                        <div class="flex border-t pt-4">
+                            <button class="view-employees flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-l-lg transition duration-200 flex items-center justify-center" data-link="${dept.employeeLink}">
+                                <i class="fas fa-users mr-2"></i> Nhân viên
                             </button>
-                            <button class="btn btn-action btn-warning edit-department" data-id="${dept.id}">
-                                <i class="fas fa-edit"></i> Sửa
+                            <button class="edit-department flex-1 bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 transition duration-200 flex items-center justify-center" data-id="${dept.id}">
+                                <i class="fas fa-edit mr-2"></i> Sửa
                             </button>
-                            <button class="btn btn-action btn-danger delete-department" data-id="${dept.id}" data-name="${dept.name}">
-                                <i class="fas fa-trash"></i> Xóa
+                            <button class="delete-department flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-r-lg transition duration-200 flex items-center justify-center" data-id="${dept.id}" data-name="${dept.name}">
+                                <i class="fas fa-trash mr-2"></i> Xóa
                             </button>
                         </div>
                     </div>
@@ -1020,9 +498,7 @@
         document.querySelectorAll('.view-employees').forEach(btn => {
             btn.addEventListener('click', function() {
                 const link = this.getAttribute('data-link');
-                alert(`Chuyển hướng đến: ${link}`);
-                // Trong ứng dụng thực tế, bạn có thể dùng:
-                // window.location.href = link;
+                alert(`Chuyển hướng đến: ${link}\n\nTrong ứng dụng thực tế, bạn sẽ được chuyển đến trang danh sách nhân viên của phòng ban này.`);
             });
         });
     }
@@ -1032,9 +508,10 @@
         editingId = null;
         document.getElementById('modalTitle').textContent = "Thêm phòng ban mới";
         departmentForm.reset();
-        imagePreview.style.display = 'none';
+        imagePreview.classList.add('hidden');
         previewImage.src = '';
-        departmentModal.style.display = 'flex';
+        document.getElementById('departmentImageUrl').value = '';
+        departmentModal.classList.remove('hidden');
     }
 
     // Hàm mở modal sửa phòng ban
@@ -1061,25 +538,25 @@
         // Hiển thị ảnh preview
         if (department.imageUrl) {
             previewImage.src = department.imageUrl;
-            imagePreview.style.display = 'block';
+            imagePreview.classList.remove('hidden');
         } else {
-            imagePreview.style.display = 'none';
+            imagePreview.classList.add('hidden');
         }
 
-        departmentModal.style.display = 'flex';
+        departmentModal.classList.remove('hidden');
     }
 
     // Hàm mở modal xóa phòng ban
     function openDeleteModal(id, name) {
         editingId = id;
         deleteDepartmentName.textContent = name;
-        deleteModal.style.display = 'flex';
+        deleteModal.classList.remove('hidden');
     }
 
     // Hàm đóng tất cả modal
     function closeModals() {
-        departmentModal.style.display = 'none';
-        deleteModal.style.display = 'none';
+        departmentModal.classList.add('hidden');
+        deleteModal.classList.add('hidden');
         editingId = null;
     }
 
@@ -1152,14 +629,16 @@
 
     // Hàm lọc theo chi nhánh
     function handleBranchFilter(e) {
-        const option = e.target.closest('.filter-option');
+        const option = e.target.closest('.branch-option');
         if (!option) return;
 
         // Cập nhật trạng thái active
-        document.querySelectorAll('#branchFilter .filter-option').forEach(opt => {
-            opt.classList.remove('active');
+        document.querySelectorAll('.branch-option').forEach(opt => {
+            opt.classList.remove('bg-blue-50', 'text-blue-700', 'border-blue-200');
+            opt.classList.add('hover:bg-gray-100');
         });
-        option.classList.add('active');
+        option.classList.add('bg-blue-50', 'text-blue-700', 'border', 'border-blue-200');
+        option.classList.remove('hover:bg-gray-100');
 
         // Cập nhật bộ lọc
         currentFilter.branch = option.getAttribute('data-branch');
@@ -1168,14 +647,16 @@
 
     // Hàm lọc theo chức năng
     function handleFunctionFilter(e) {
-        const option = e.target.closest('.filter-option');
+        const option = e.target.closest('.function-option');
         if (!option) return;
 
         // Cập nhật trạng thái active
-        document.querySelectorAll('#functionFilter .filter-option').forEach(opt => {
-            opt.classList.remove('active');
+        document.querySelectorAll('.function-option').forEach(opt => {
+            opt.classList.remove('bg-blue-50', 'text-blue-700', 'border-blue-200');
+            opt.classList.add('hover:bg-gray-100');
         });
-        option.classList.add('active');
+        option.classList.add('bg-blue-50', 'text-blue-700', 'border', 'border-blue-200');
+        option.classList.remove('hover:bg-gray-100');
 
         // Cập nhật bộ lọc
         currentFilter.function = option.getAttribute('data-function');
@@ -1196,7 +677,7 @@
             reader.onload = function(event) {
                 previewImage.src = event.target.result;
                 document.getElementById('departmentImageUrl').value = event.target.result;
-                imagePreview.style.display = 'block';
+                imagePreview.classList.remove('hidden');
             };
             reader.readAsDataURL(file);
         }

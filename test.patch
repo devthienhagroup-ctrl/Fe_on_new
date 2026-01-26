@@ -1,303 +1,215 @@
-diff --git a/src/components/productAdmin/productUser/ProductTable.vue b/src/components/productAdmin/productUser/ProductTable.vue
-index 00d1fb2a72346e525c4b99271219a49604e7c46f..002bc6206d35ac738759f17954e42803881940bf 100644
---- a/src/components/productAdmin/productUser/ProductTable.vue
-+++ b/src/components/productAdmin/productUser/ProductTable.vue
-@@ -65,52 +65,74 @@
-               {{ truncateText(formatWard(item.diaChi), 16) }}
-             </span>
-           </td>
-           <td class="text-slate-900 text-gray-800">
-             <span class="table-truncate max-w-[140px]" :title="formatProvince(item.khuVuc)">
-               {{ truncateText(formatProvince(item.khuVuc), 16) }}
-             </span>
-           </td>
-           <td class="text-slate-900 text-gray-800">{{ item.viTri }}</td>
-           <td class="font-medium text-slate-800">{{ item.dtcn + 'm²' }}</td>
-           <td class="text-slate-900 text-gray-800">{{ catChuoi(item.ketCau || '-', 10) }}</td>
-           <td class="text-slate-900 text-gray-800">{{  formatDate(item.capNhatNgay) }}</td>
-           <td class="font-bold text-blue-700">
-             <div style="position: relative; top: -3px;">
-               {{ item.phiMoiGioi != null ? item.phiMoiGioi + '%' : '-' }}
-             </div>
-           </td>
-           <td>
-               <span :class="['px-2 py-1 rounded-lg font-semibold', badgeClass(item.loaiMH)]"
-                     style="border-radius: 8px !important; font-size: 12px !important;">
-                 {{ item.loaiMH }}
-               </span>
-           </td>
-           <td class="text-center relative whitespace-nowrap">
-             <div class="action-wrapper inline-flex items-center">
--              <button @click="$emit('toggle-love', item)" class="action-heart">
--                <i :class="item.daThich ? 'fa-solid fa-heart text-black text-[12px]' : 'fa-regular fa-heart text-[12px]'"></i>
-+              <button
-+                @click="handleLove(item)"
-+                :class="['action-heart', { 'is-burst': confettiBurstId === item.id }]"
-+              >
-+                <span class="heart-confetti" aria-hidden="true">
-+                <span class="heart-confetti-piece"></span>
-+                <span class="heart-confetti-piece"></span>
-+                <span class="heart-confetti-piece"></span>
-+                <span class="heart-confetti-piece"></span>
-+                <span class="heart-confetti-piece"></span>
-+                <span class="heart-confetti-piece"></span>
-+                <span class="heart-confetti-piece"></span>
-+                <span class="heart-confetti-piece"></span>
-+                <span class="heart-confetti-piece"></span>
-+                <span class="heart-confetti-piece"></span>
-+                <span class="heart-confetti-piece"></span>
-+                <span class="heart-confetti-piece"></span>
-+                </span>
-+                <i
-+                  :class="[
-+                    item.daThich ? 'fa-solid fa-heart text-black text-[16px]' : 'fa-regular fa-heart text-[16px]',
-+                    { 'heart-pop': confettiBurstId === item.id }
-+                  ]"
-+                ></i>
-               </button>
-
-               <div class="action-hover relative inline-flex items-center">
-                 <button class="dot-btn" aria-label="Thao tác">
-                   <i class="fa-solid fa-ellipsis-vertical"></i>
-                 </button>
-
-                 <div class="action-menu">
-                   <button v-if="canRequestCollaboration(item)" @click="$emit('open-collab', item)" class="action-collab">
-                     <i class="fa-solid fa-handshake text-[10px]"></i>
-                     <span>Hợp tác</span>
-                   </button>
-                   <button @click="$emit('view-detail', item)" class="action-view">
-                     <i class="fa-regular fa-eye text-[10px]"></i>
-                     <span>Xem</span>
-                   </button>
+diff --git a/src/components/dich-vu/Phi-dich-vu.vue b/src/components/dich-vu/Phi-dich-vu.vue
+index e6d8819569e5feca7a53bbf3d30aa8b5afc77a38..e2c921ddc6489966bc09f44600c5b5ad17c4993b 100644
+--- a/src/components/dich-vu/Phi-dich-vu.vue
++++ b/src/components/dich-vu/Phi-dich-vu.vue
+@@ -1033,135 +1033,137 @@
+                     <div class="k"><span class="dot"></span>Người tạo</div>
+                     <div class="v font-extrabold fs-6"  style="font-size: 14px!important;">{{ detailContract?.nguoiTaoFullName || '-' }}</div>
+                   </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Dịch vụ</div>
+                     <div class="v font-extrabold fs-6"  style="font-size: 14px!important;">{{ detailContract?.tenDichVu || '-' }}</div>
+                   </div>
                  </div>
                </div>
              </div>
-           </td>
-         </tr>
-         </tbody>
-       </table>
+
+             <div class="card xl:col-span-2">
+               <div class="card-h"><i class="fa-solid fa-layer-group"></i> Lịch sử phát sinh</div>
+
+               <div class="p-3">
+                 <!-- Payments -->
+                 <div class="font-extrabold mb-2 flex items-center gap-2">
+                   <span class="w-2.5 h-2.5 rounded-full" style="background: var(--success-gradient);"></span>
+                   Đóng phí
+                 </div>
+                 <div class="table-wrap mb-4">
+                   <div class="table-scroll">
+                     <table style="min-width: 860px">
+                       <thead>
+                       <tr>
+-                        <th style="width:190px">Ngày</th>
++                        <th style="width:190px">Thời gian</th>
+                         <th style="width:160px">Số tiền</th>
+                         <th style="width:160px">Hình thức</th>
+                         <th>Ghi chú</th>
+                         <th style="width:160px">Người ghi nhận</th>
+                       </tr>
+                       </thead>
+                       <tbody>
+                       <tr v-if="!detailContract?.dotDongTiens?.length">
+                         <td colspan="5">
+                           <div class="text-center py-6 muted">Chưa có đợt đóng phí.</div>
+                         </td>
+                       </tr>
+                       <tr v-for="payment in detailContract?.dotDongTiens || []" :key="payment.id">
+-                        <td class="mono">{{ formatDateValue(payment.ngayDongTien) }}</td>
++                        <td class="mono">{{ formatDateTimeCompact(payment.ngayDongTien) }}</td>
+                         <td class="mono">{{ formatMoney(payment.soTienDong) }}</td>
+                         <td class="mono">{{ payment.hinhThucThanhToan || '-' }}</td>
+                         <td>{{ payment.ghiChu || '' }}</td>
+                         <td class="mono">{{ payment.nguoiGhiNhanFullName || '-' }}</td>
+                       </tr>
+                       </tbody>
+                     </table>
+                   </div>
+                 </div>
+
+                 <!-- Refunds -->
+                 <div class="font-extrabold mb-2 flex items-center gap-2">
+                   <span class="w-2.5 h-2.5 rounded-full" style="background: var(--secondary-gradient);"></span>
+                   Hoàn phí
+                 </div>
+                 <div class="table-wrap mb-4">
+                   <div class="table-scroll">
+                     <table style="min-width: 860px">
+                       <thead>
+                       <tr>
+-                        <th style="width:190px">Ngày</th>
++                        <th style="width:190px">Thời gian</th>
+                         <th style="width:160px">Số tiền</th>
+                         <th>Lý do</th>
+                         <th style="width:160px">Người ghi nhận</th>
+                       </tr>
+                       </thead>
+                       <tbody>
+                       <tr v-if="!detailContract?.hoanTiens?.length">
+                         <td colspan="4">
+                           <div class="text-center py-6 muted">Chưa có đợt hoàn phí.</div>
+                         </td>
+                       </tr>
+                       <tr v-for="refund in detailContract?.hoanTiens || []" :key="refund.id">
+-                        <td class="mono">{{ formatDateValue(refund.ngayHoan) }}</td>
++                        <td class="mono">{{ formatDateTimeCompact(refund.ngayHoan) }}</td>
+                         <td class="mono">{{ formatMoney(refund.soTienHoan) }}</td>
+                         <td>{{ refund.lyDoHoan || '' }}</td>
+                         <td class="mono">{{ refund.nguoiDuyetFullName || '-' }}</td>
+                       </tr>
+                       </tbody>
+                     </table>
+                   </div>
+                 </div>
+
+                 <!-- Adjust -->
+                 <div class="font-extrabold mb-2 flex items-center gap-2">
+                   <span class="w-2.5 h-2.5 rounded-full" style="background: var(--warning-gradient);"></span>
+                   Điều chỉnh
+                 </div>
+                 <div class="table-wrap">
+                   <div class="table-scroll">
+                     <table style="min-width: 860px">
+                       <thead>
+                       <tr>
+-                        <th style="width:210px">Ngày</th>
++                        <th style="width:210px">Thời gian</th>
+                         <th style="width:160px">Số tiền</th>
+                         <th style="width:160px">Loại</th>
+                         <th>Lý do</th>
++                        <th style="width:170px">Người ghi nhận</th>
+                       </tr>
+                       </thead>
+                       <tbody>
+                       <tr v-if="!detailContract?.dieuChinhHopDongs?.length">
+-                        <td colspan="4">
++                        <td colspan="5">
+                           <div class="text-center py-6 muted">Chưa có điều chỉnh.</div>
+                         </td>
+                       </tr>
+                       <tr v-for="adj in detailContract?.dieuChinhHopDongs || []" :key="adj.id">
+-                        <td class="mono">{{ formatDateValue(adj.ngayTao) }}</td>
++                        <td class="mono">{{ formatDateTimeCompact(adj.ngayTao) }}</td>
+                         <td class="mono">{{ formatMoney(adj.soTienDieuChinh) }}</td>
+                         <td class="mono">{{ adj.loaiDieuChinh || '-' }}</td>
+                         <td>{{ adj.lyDo || '' }}</td>
++                        <td class="mono">{{ adj.nguoiGhiNhanFullName || '-' }}</td>
+                       </tr>
+                       </tbody>
+                     </table>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+
+         <div class="modal-f">
+           <button
+             v-if="detailContract?.trangThaiHopDong === 'DANG_HIEU_LUC' && canCancelContract"
+             class="btn danger"
+             @click="cancelContract"
+           >
+             <i class="fa-solid fa-ban"></i> Hủy hợp đồng
+           </button>
+           <button class="btn ghost" @click="closeModal('modalDetail')">
+             <i class="fa-solid fa-xmark"></i> Đóng
+           </button>
+         </div>
+       </div>
      </div>
 
-@@ -153,84 +175,100 @@
-           <i class="fa-solid fa-angles-right text-sm"></i>
-         </button>
-       </div>
-
-       <div class="flex flex-col items-center gap-2 sm:flex-row sm:items-center">
-         <span class="text-sm font-semibold text-slate-900">Số dòng mỗi trang:</span>
-         <input
-             type="number"
-             :value="pageSize"
-             @input="$emit('update-page-size', $event.target.value)"
-             class="w-16 px-2 py-1 border border-slate-400 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm"
-             min="1"
-         />
-         <span class="text-sm text-slate-900 font-semibold">
-           Hiển thị
-           {{ page * pageSize + 1 }}
-           -
-           {{ Math.min((page + 1) * pageSize, totalRecords) }} của {{ totalRecords }}
-         </span>
-       </div>
-     </div>
-   </div>
- </template>
-
- <script setup>
-+import { ref } from "vue";
- import { useAuthStore } from "/src/stores/authStore.js";
-
- defineProps({
-   landAssets: {
-     type: Array,
-     default: () => []
-   },
-   page: {
-     type: Number,
-     default: 0
-   },
-   pageSize: {
-     type: Number,
-     default: 8
-   },
-   totalRecords: {
-     type: Number,
-     default: 0
-   },
-   totalPages: {
-     type: Number,
-     default: 1
+@@ -1664,50 +1666,65 @@ const formatCreatedAt = (value) => {
+     const parts = value.split(',')
+     if (parts.length === 2) {
+       const datePart = parts[0].trim()
+       const timePart = parts[1].trim()
+       if (timePart && datePart) return `${timePart} ${datePart}`
+     }
+     if (/\d{1,2}:\d{2}:\d{2}/.test(value) && /\d{1,2}\/\d{1,2}\/\d{4}/.test(value)) {
+       return value
+     }
    }
- });
+   const parsed = value instanceof Date ? value : new Date(value)
+   if (!Number.isNaN(parsed.getTime())) {
+     return `${parsed.toLocaleTimeString('vi-VN')} ${parsed.toLocaleDateString('vi-VN')}`
+   }
+   return String(value)
+ }
 
--defineEmits([
-+const emit = defineEmits([
-   'go-to-page',
-   'update-page-size',
-   'toggle-love',
-   'open-collab',
-   'view-detail'
- ]);
+ const formatDateValue = (value) => {
+   if (!value) return '-'
+   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+     return value
+   }
+   return formatCreatedAt(value)
+ }
 
- const authStore = useAuthStore();
-+const confettiBurstId = ref(null);
-+
-+const handleLove = (item) => {
-+  const shouldBurst = !item.daThich;
-+  emit('toggle-love', item);
-+  if (!shouldBurst) {
-+    return;
-+  }
-+  confettiBurstId.value = item.id;
-+  setTimeout(() => {
-+    if (confettiBurstId.value === item.id) {
-+      confettiBurstId.value = null;
++const formatDateTimeCompact = (value) => {
++  if (!value) return '-'
++  const parsed = value instanceof Date ? value : new Date(value)
++  if (Number.isNaN(parsed.getTime())) {
++    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
++      const [year, month, day] = value.split('-')
++      return `00:00 ${day}/${month}/${year}`
 +    }
-+  }, 700);
-+};
-
- const formatDate = (dateString) => {
-   if (!dateString) return "";
-   const date = new Date(dateString);
-   return `${String(date.getDate()).padStart(2, "0")}-${String(
-       date.getMonth() + 1
-   ).padStart(2, "0")}-${String(date.getFullYear()).slice(-2)}`;
- };
-
- const formatAddressDetail = (diaChi) => {
-   let raw = diaChi || "";
-   let clean = raw.split("/!!")[0].trim();
-   clean = clean.replace(/đường/iu, "Đ.");
-   return clean;
- };
-
- const formatWard = (addressDetail) => {
-   const raw = addressDetail || "";
-   const parts = raw.split("/!!");
-   let ward = parts[1]?.trim() || "";
-   return ward
-       .replace(/^Phường\s+/i, "P. ")
-       .replace(/^Xã\s+/i, "X. ")
-       .replace(/^Thị trấn\s+/i, "TT. ");
- };
-@@ -321,50 +359,119 @@ function formatMoneyVN(value) {
++    return String(value)
++  }
++  const timePart = parsed.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
++  const datePart = parsed.toLocaleDateString('vi-VN')
++  return `${timePart} ${datePart}`
++}
++
+ const getGiaGiam = (contract) => {
+   return Number(contract?.giaGiam ?? contract?.phiGiam ?? 0)
  }
 
- const canRequestCollaboration = (item) => {
-   if (item.status === 'Đã bán') return false;
-   if (item.isOwner) return false;
-   if (item.daGuiYeuCau) return false;
-   return true;
- };
- </script>
-
- <style scoped>
- .table-header {
-   background: linear-gradient(to right, #641eaf, #562df3);
-   border-bottom: 2px solid #a78bfa;
+ const getGiaTaiSanKy = (contract) => {
+   return Number(contract?.giaTaiSanKyGoc ?? contract?.giaTriTaiSan ?? contract?.giaTriKyBan ?? 0)
  }
 
- .action-heart {
-   background: rgba(133,132,132,0.13);
-   padding: 4px 10px;
-   min-height: 28px;
-   border-radius: 8px;
-   display: inline-flex;
-   align-items: center;
-   justify-content: center;
-   margin-right: 8px;
-+  position: relative;
-+  overflow: visible;
-+}
-+
-+.heart-confetti {
-+  position: absolute;
-+  inset: -12px;
-+  pointer-events: none;
-+}
-+
-+.heart-confetti-piece {
-+  position: absolute;
-+  width: 5px;
-+  height: 10px;
-+  border-radius: 2px;
-+  opacity: 0;
-+  transform: translate(-50%, -50%) scale(0.6);
-+  background: linear-gradient(180deg, #fef08a, #f97316);
-+  box-shadow: 0 0 6px rgba(248, 113, 113, 0.45);
-+}
-+
-+.action-heart.is-burst .heart-confetti-piece {
-+  animation: heart-confetti-burst 700ms ease-out forwards;
-+}
-+
-+.heart-confetti-piece:nth-child(1)  { top: 50%; left: 50%; background: #fb7185; animation-delay: 0ms;  --x: -26px; --y: -10px; }
-+.heart-confetti-piece:nth-child(2)  { top: 50%; left: 50%; background: #facc15; animation-delay: 30ms; --x: 22px;  --y: -14px; }
-+.heart-confetti-piece:nth-child(3)  { top: 50%; left: 50%; background: #34d399; animation-delay: 60ms; --x: 28px;  --y: 6px; }
-+.heart-confetti-piece:nth-child(4)  { top: 50%; left: 50%; background: #60a5fa; animation-delay: 90ms; --x: 10px;  --y: 22px; }
-+.heart-confetti-piece:nth-child(5)  { top: 50%; left: 50%; background: #a78bfa; animation-delay: 120ms;--x: -12px; --y: 24px; }
-+.heart-confetti-piece:nth-child(6)  { top: 50%; left: 50%; background: #fb923c; animation-delay: 150ms;--x: -28px; --y: 8px; }
-+.heart-confetti-piece:nth-child(7)  { top: 50%; left: 50%; background: #f472b6; animation-delay: 180ms;--x: -16px; --y: -22px; }
-+.heart-confetti-piece:nth-child(8)  { top: 50%; left: 50%; background: #22d3ee; animation-delay: 210ms;--x: 6px;   --y: -28px; }
-+.heart-confetti-piece:nth-child(9)  { top: 50%; left: 50%; background: #f87171; animation-delay: 240ms;--x: 30px;  --y: -2px; }
-+.heart-confetti-piece:nth-child(10) { top: 50%; left: 50%; background: #fde047; animation-delay: 270ms;--x: -4px;  --y: 30px; }
-+.heart-confetti-piece:nth-child(11) { top: 50%; left: 50%; background: #4ade80; animation-delay: 300ms;--x: 16px;  --y: 18px; }
-+.heart-confetti-piece:nth-child(12) { top: 50%; left: 50%; background: #818cf8; animation-delay: 330ms;--x: -22px; --y: -2px; }
-+
-+.heart-pop {
-+  animation: heart-pop 320ms ease-in-out;
-+}
-+
-+@keyframes heart-pop {
-+  0% {
-+    transform: scale(1);
-+  }
-+  30% {
-+    transform: scale(1.35);
-+  }
-+  60% {
-+    transform: scale(0.92);
-+  }
-+  100% {
-+    transform: scale(1);
-+  }
-+}
-+
-+@keyframes heart-confetti-burst {
-+  0% {
-+    opacity: 0;
-+    transform: translate(-50%, -50%) scale(0.6);
-+  }
-+  20% {
-+    opacity: 1;
-+  }
-+  100% {
-+    opacity: 0;
-+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.15);
-+  }
+ const getTongHoan = (contract) => {
+   if (contract?.giaHoanTien !== undefined && contract?.giaHoanTien !== null) {
+     return Number(contract.giaHoanTien || 0)
+   }
+   return calcTongHoan(contract)
  }
 
- .action-view {
-   padding: 6px 12px;
-   font-size: 11px;
-   font-weight: 600;
-   border-radius: 12px;
-   background: linear-gradient(135deg, #fbbf24, #f97316);
-   color: #ffffff;
-   display: inline-flex;
-   align-items: center;
-   gap: 6px;
-   min-width: 80px;
-   justify-content: center;
+ const getTongDieuChinh = (contract) => {
+   if (contract?.tongDC !== undefined && contract?.tongDC !== null) {
+     return Number(contract.tongDC || 0)
+   }
+   return 0
  }
 
- .action-collab {
-   padding: 6px 12px;
-   font-size: 11px;
-   font-weight: 600;
-   border-radius: 12px;
-   background: linear-gradient(135deg, #7dd3fc, #8b5cf6);
-   color: #ffffff;
-   display: inline-flex;
-   align-items: center;
+ const getDoanhThuRow = (contract) => {
+   return Number(contract?.doanhThu ?? 0)
+ }

@@ -1055,7 +1055,7 @@
                     <table style="min-width: 860px">
                       <thead>
                       <tr>
-                        <th style="width:190px">Ngày</th>
+                        <th style="width:190px">Thời gian</th>
                         <th style="width:160px">Số tiền</th>
                         <th style="width:160px">Hình thức</th>
                         <th>Ghi chú</th>
@@ -1069,7 +1069,7 @@
                         </td>
                       </tr>
                       <tr v-for="payment in detailContract?.dotDongTiens || []" :key="payment.id">
-                        <td class="mono">{{ formatDateValue(payment.ngayDongTien) }}</td>
+                        <td class="mono">{{ formatDateTimeCompact(payment.ngayDongTien) }}</td>
                         <td class="mono">{{ formatMoney(payment.soTienDong) }}</td>
                         <td class="mono">{{ payment.hinhThucThanhToan || '-' }}</td>
                         <td>{{ payment.ghiChu || '' }}</td>
@@ -1090,7 +1090,7 @@
                     <table style="min-width: 860px">
                       <thead>
                       <tr>
-                        <th style="width:190px">Ngày</th>
+                        <th style="width:190px">Thời gian</th>
                         <th style="width:160px">Số tiền</th>
                         <th>Lý do</th>
                         <th style="width:160px">Người ghi nhận</th>
@@ -1103,7 +1103,7 @@
                         </td>
                       </tr>
                       <tr v-for="refund in detailContract?.hoanTiens || []" :key="refund.id">
-                        <td class="mono">{{ formatDateValue(refund.ngayHoan) }}</td>
+                        <td class="mono">{{ formatDateTimeCompact(refund.ngayHoan) }}</td>
                         <td class="mono">{{ formatMoney(refund.soTienHoan) }}</td>
                         <td>{{ refund.lyDoHoan || '' }}</td>
                         <td class="mono">{{ refund.nguoiDuyetFullName || '-' }}</td>
@@ -1123,23 +1123,25 @@
                     <table style="min-width: 860px">
                       <thead>
                       <tr>
-                        <th style="width:210px">Ngày</th>
+                        <th style="width:210px">Thời gian</th>
                         <th style="width:160px">Số tiền</th>
                         <th style="width:160px">Loại</th>
                         <th>Lý do</th>
+                        <th style="width:170px">Người ghi nhận</th>
                       </tr>
                       </thead>
                       <tbody>
                       <tr v-if="!detailContract?.dieuChinhHopDongs?.length">
-                        <td colspan="4">
+                        <td colspan="5">
                           <div class="text-center py-6 muted">Chưa có điều chỉnh.</div>
                         </td>
                       </tr>
                       <tr v-for="adj in detailContract?.dieuChinhHopDongs || []" :key="adj.id">
-                        <td class="mono">{{ formatDateValue(adj.ngayTao) }}</td>
+                        <td class="mono">{{ formatDateTimeCompact(adj.ngayTao) }}</td>
                         <td class="mono">{{ formatMoney(adj.soTienDieuChinh) }}</td>
                         <td class="mono">{{ adj.loaiDieuChinh || '-' }}</td>
                         <td>{{ adj.lyDo || '' }}</td>
+                        <td class="mono">{{ adj.nguoiGhiNhanFullName || '-' }}</td>
                       </tr>
                       </tbody>
                     </table>
@@ -1684,6 +1686,21 @@ const formatDateValue = (value) => {
     return value
   }
   return formatCreatedAt(value)
+}
+
+const formatDateTimeCompact = (value) => {
+  if (!value) return '-'
+  const parsed = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(parsed.getTime())) {
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [year, month, day] = value.split('-')
+      return `00:00 ${day}/${month}/${year}`
+    }
+    return String(value)
+  }
+  const timePart = parsed.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+  const datePart = parsed.toLocaleDateString('vi-VN')
+  return `${timePart} ${datePart}`
 }
 
 const getGiaGiam = (contract) => {
