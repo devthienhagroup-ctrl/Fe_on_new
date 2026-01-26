@@ -3,240 +3,581 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Phòng ban & Chi nhánh</title>
-    <!-- Sử dụng Tailwind CSS từ CDN -->
+    <title>Admin - Quản lý Phòng ban & Chi nhánh</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Thêm Font Awesome cho icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --info-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+
+        body {
+            font-size: 0.875rem;
+        }
+
+        .card-hover {
+            transition: all 0.2s ease;
+            border: 1px solid rgba(229, 231, 235, 0.8);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .menu-tab {
+            transition: all 0.2s ease;
+            position: relative;
+            padding: 0.5rem 1rem;
+            font-size: 0.8125rem;
+        }
+
+        .menu-tab.active {
+            color: #4f46e5;
+            background: rgba(79, 70, 229, 0.08);
+            border-bottom: 2px solid #4f46e5;
+        }
+
+        .badge-gradient {
+            background: linear-gradient(135deg, var(--color1, #667eea), var(--color2, #764ba2));
+            color: white;
+            border: none;
+            font-weight: 500;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.6rem;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-enter {
+            animation: modalEnter 0.2s ease-out;
+        }
+
+        @keyframes modalEnter {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 3px;
+        }
+
+        .compact-form .form-input {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8125rem;
+        }
+
+        .compact-form .form-label {
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .text-xs {
+            font-size: 0.75rem;
+        }
+
+        .text-sm {
+            font-size: 0.8125rem;
+        }
+
+        .text-base {
+            font-size: 0.875rem;
+        }
+
+        .text-lg {
+            font-size: 1rem;
+        }
+
+        .text-xl {
+            font-size: 1.125rem;
+        }
+
+        .text-2xl {
+            font-size: 1.25rem;
+        }
+
+        .text-3xl {
+            font-size: 1.5rem;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen text-gray-800">
-<div class="container mx-auto px-4 py-8">
-    <!-- Header -->
-    <header class="bg-gradient-to-r from-indigo-600 to-blue-800 text-white rounded-2xl shadow-xl mb-8 p-6">
+<body class="bg-gray-50 text-gray-800">
+<!-- Header -->
+<header class="bg-white shadow-sm border-b">
+    <div class="container mx-auto px-4 py-3">
         <div class="flex flex-col md:flex-row justify-between items-center">
-            <div class="flex items-center space-x-4 mb-4 md:mb-0">
-                <i class="fas fa-building text-4xl"></i>
+            <div class="flex items-center space-x-3 mb-2 md:mb-0">
+                <div class="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-lg">
+                    <i class="fas fa-building text-white text-base"></i>
+                </div>
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-bold">Quản lý Phòng ban & Chi nhánh</h1>
-                    <p class="text-blue-100">Quản lý thông tin phòng ban, chi nhánh và chức năng hệ thống</p>
+                    <h1 class="text-lg font-bold text-gray-900">Quản lý Phòng ban & Chi nhánh</h1>
+                    <p class="text-gray-600 text-xs">Hệ thống quản trị doanh nghiệp</p>
                 </div>
             </div>
-            <button id="addDepartmentBtn" class="bg-white text-indigo-700 hover:bg-gray-100 font-bold py-3 px-6 rounded-xl shadow-md transition duration-200 flex items-center space-x-2">
-                <i class="fas fa-plus"></i>
-                <span>Thêm phòng ban mới</span>
-            </button>
+
+            <div class="flex items-center space-x-3">
+                <div class="hidden md:block">
+                    <div class="flex items-center space-x-2">
+                        <div class="text-right">
+                            <p class="font-medium text-sm">Admin User</p>
+                            <p class="text-xs text-gray-500">Quản trị hệ thống</p>
+                        </div>
+                        <div class="w-8 h-8 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center shadow">
+                            <i class="fas fa-user text-white text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <button class="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow hover:shadow-md transition duration-200">
+                        <i class="fas fa-bell text-white text-sm"></i>
+                    </button>
+                    <span class="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-600 text-xs text-white w-4 h-4 rounded-full flex items-center justify-center font-bold text-[10px]">3</span>
+                </div>
+            </div>
         </div>
-    </header>
-
-    <div class="flex flex-col lg:flex-row gap-8">
-        <!-- Sidebar với các bộ lọc -->
-        <aside class="lg:w-1/4">
-            <div class="bg-white rounded-2xl shadow-md p-6 mb-6">
-                <h3 class="text-xl font-bold text-gray-800 mb-4 pb-3 border-b flex items-center">
-                    <i class="fas fa-filter mr-2 text-blue-500"></i> Bộ lọc & Tìm kiếm
-                </h3>
-
-                <div class="mb-6">
-                    <h4 class="font-semibold text-gray-700 mb-3">Chi nhánh</h4>
-                    <div id="branchFilter" class="space-y-2">
-                        <div class="filter-option branch-option flex items-center p-3 rounded-lg cursor-pointer bg-blue-50 text-blue-700 border border-blue-200" data-branch="all">
-                            <i class="fas fa-globe mr-3"></i>
-                            <span>Tất cả chi nhánh</span>
-                        </div>
-                        <div class="filter-option branch-option flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100" data-branch="hanoi">
-                            <i class="fas fa-map-marker-alt mr-3 text-red-500"></i>
-                            <span>Hà Nội</span>
-                        </div>
-                        <div class="filter-option branch-option flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100" data-branch="hcm">
-                            <i class="fas fa-map-marker-alt mr-3 text-green-500"></i>
-                            <span>TP. Hồ Chí Minh</span>
-                        </div>
-                        <div class="filter-option branch-option flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100" data-branch="danang">
-                            <i class="fas fa-map-marker-alt mr-3 text-yellow-500"></i>
-                            <span>Đà Nẵng</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-6">
-                    <h4 class="font-semibold text-gray-700 mb-3">Chức năng hệ thống</h4>
-                    <div id="functionFilter" class="space-y-2">
-                        <div class="filter-option function-option flex items-center p-3 rounded-lg cursor-pointer bg-blue-50 text-blue-700 border border-blue-200" data-function="all">
-                            <i class="fas fa-tasks mr-3"></i>
-                            <span>Tất cả chức năng</span>
-                        </div>
-                        <div class="filter-option function-option flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100" data-function="consulting">
-                            <i class="fas fa-comments mr-3 text-purple-500"></i>
-                            <span>Tư vấn</span>
-                        </div>
-                        <div class="filter-option function-option flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100" data-function="tele">
-                            <i class="fas fa-phone-alt mr-3 text-teal-500"></i>
-                            <span>Tele</span>
-                        </div>
-                        <div class="filter-option function-option flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100" data-function="marketing">
-                            <i class="fas fa-bullhorn mr-3 text-pink-500"></i>
-                            <span>Marketing</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="font-semibold text-gray-700 mb-3">Thống kê</h4>
-                    <div class="space-y-3">
-                        <div class="flex items-center text-gray-700">
-                            <i class="fas fa-building mr-3 text-blue-500"></i>
-                            <span>Tổng phòng ban: <strong id="totalDepartments" class="text-gray-900">6</strong></span>
-                        </div>
-                        <div class="flex items-center text-gray-700">
-                            <i class="fas fa-code-branch mr-3 text-green-500"></i>
-                            <span>Số chi nhánh: <strong id="totalBranches" class="text-gray-900">4</strong></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="lg:w-3/4">
-            <div class="bg-white rounded-2xl shadow-md p-6">
-                <div class="flex flex-col md:flex-row justify-between items-center mb-8 pb-6 border-b">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4 md:mb-0 flex items-center">
-                        <i class="fas fa-list mr-3 text-blue-500"></i> Danh sách phòng ban
-                    </h2>
-                    <div class="relative w-full md:w-auto">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-gray-400"></i>
-                        </div>
-                        <input type="text" id="searchInput" placeholder="Tìm kiếm phòng ban, trưởng phòng..."
-                               class="pl-10 pr-4 py-3 border border-gray-300 rounded-xl w-full md:w-80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-                </div>
-
-                <!-- Danh sách phòng ban sẽ hiển thị tại đây -->
-                <div id="departmentList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Dữ liệu mẫu sẽ được tạo bởi JavaScript -->
-                </div>
-            </div>
-        </main>
     </div>
 
-    <footer class="mt-12 text-center text-gray-600 text-sm">
-        <p>Hệ thống Quản lý Phòng ban & Chi nhánh &copy; 2023 - Phiên bản 2.0 (Nâng cấp với Tailwind CSS)</p>
-    </footer>
-</div>
+    <!-- Menu -->
+    <div class="container mx-auto px-4">
+        <div class="flex overflow-x-auto space-x-1 py-1">
+            <button id="tabDashboard" class="menu-tab rounded-lg font-medium whitespace-nowrap text-xs">
+                <i class="fas fa-tachometer-alt mr-1.5 text-xs"></i>Tổng quan
+            </button>
+            <button id="tabDepartments" class="menu-tab rounded-lg font-medium whitespace-nowrap text-xs active">
+                <i class="fas fa-users mr-1.5 text-xs"></i>Phòng ban
+            </button>
+            <button id="tabBranches" class="menu-tab rounded-lg font-medium whitespace-nowrap text-xs">
+                <i class="fas fa-code-branch mr-1.5 text-xs"></i>Chi nhánh
+            </button>
+            <button id="tabReports" class="menu-tab rounded-lg font-medium whitespace-nowrap text-xs">
+                <i class="fas fa-chart-bar mr-1.5 text-xs"></i>Báo cáo
+            </button>
+            <button id="tabSettings" class="menu-tab rounded-lg font-medium whitespace-nowrap text-xs">
+                <i class="fas fa-cog mr-1.5 text-xs"></i>Cài đặt
+            </button>
+        </div>
+    </div>
+</header>
 
-<!-- Modal thêm/sửa phòng ban -->
-<div id="departmentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-t-2xl p-6">
-            <div class="flex justify-between items-center">
-                <h3 id="modalTitle" class="text-2xl font-bold">Thêm phòng ban mới</h3>
-                <button id="closeModal" class="text-white text-3xl hover:text-gray-200">&times;</button>
+<main class="container mx-auto px-4 py-4">
+    <!-- Dashboard Content -->
+    <div id="dashboardContent" class="hidden">
+        <div class="mb-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Tổng quan hệ thống</h2>
+            <p class="text-gray-600 text-xs">Thống kê và báo cáo tổng quan</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-xl shadow card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs opacity-90 mb-1">Tổng phòng ban</p>
+                        <p id="statDeptTotal" class="text-2xl font-bold">12</p>
+                    </div>
+                    <div class="bg-white bg-opacity-20 p-2 rounded-lg">
+                        <i class="fas fa-users text-base"></i>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs flex items-center">
+                    <i class="fas fa-arrow-up mr-1"></i> <span class="font-medium">8%</span> tăng
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-xl shadow card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs opacity-90 mb-1">Tổng chi nhánh</p>
+                        <p id="statBranchTotal" class="text-2xl font-bold">6</p>
+                    </div>
+                    <div class="bg-white bg-opacity-20 p-2 rounded-lg">
+                        <i class="fas fa-code-branch text-base"></i>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs flex items-center">
+                    <i class="fas fa-arrow-up mr-1"></i> <span class="font-medium">5%</span> tăng
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-amber-500 to-orange-600 text-white p-4 rounded-xl shadow card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs opacity-90 mb-1">Tổng nhân viên</p>
+                        <p class="text-2xl font-bold">328</p>
+                    </div>
+                    <div class="bg-white bg-opacity-20 p-2 rounded-lg">
+                        <i class="fas fa-user-friends text-base"></i>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs flex items-center">
+                    <i class="fas fa-arrow-up mr-1"></i> <span class="font-medium">12%</span> tăng
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-purple-500 to-pink-600 text-white p-4 rounded-xl shadow card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs opacity-90 mb-1">Hoạt động hôm nay</p>
+                        <p class="text-2xl font-bold">47</p>
+                    </div>
+                    <div class="bg-white bg-opacity-20 p-2 rounded-lg">
+                        <i class="fas fa-chart-line text-base"></i>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs flex items-center">
+                    <i class="fas fa-arrow-up mr-1"></i> <span class="font-medium">3%</span> tăng
+                </div>
             </div>
         </div>
 
-        <div class="p-6">
-            <form id="departmentForm">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label for="departmentName" class="block text-gray-700 font-medium mb-2">
-                            Tên phòng ban <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" id="departmentName" required
-                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-lg shadow p-4 card-hover">
+                <h3 class="text-base font-bold mb-3 flex items-center text-gray-800">
+                    <i class="fas fa-chart-pie mr-2 text-purple-500"></i> Phân bổ phòng ban
+                </h3>
+                <div class="h-48 flex items-center justify-center text-gray-400">
+                    <div class="text-center">
+                        <i class="fas fa-chart-pie text-3xl mb-2 text-gray-300"></i>
+                        <p class="text-xs">Biểu đồ phân bổ</p>
                     </div>
-                    <div>
-                        <label for="departmentManager" class="block text-gray-700 font-medium mb-2">
-                            Trưởng phòng <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" id="departmentManager" required
-                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4 card-hover">
+                <h3 class="text-base font-bold mb-3 flex items-center text-gray-800">
+                    <i class="fas fa-history mr-2 text-green-500"></i> Hoạt động gần đây
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mr-3 text-white">
+                            <i class="fas fa-plus text-xs"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800 text-sm">Thêm phòng QA Testing</p>
+                            <div class="flex items-center mt-1">
+                                <span class="text-xs text-gray-600">15 phút trước</span>
+                                <span class="mx-2 text-gray-400">•</span>
+                                <span class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">Phòng ban</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center p-3 bg-green-50 rounded-lg">
+                        <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center mr-3 text-white">
+                            <i class="fas fa-edit text-xs"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800 text-sm">Cập nhật chi nhánh HCM</p>
+                            <div class="flex items-center mt-1">
+                                <span class="text-xs text-gray-600">2 giờ trước</span>
+                                <span class="mx-2 text-gray-400">•</span>
+                                <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Chi nhánh</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Departments Content -->
+    <div id="departmentsContent">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+            <div class="mb-3 md:mb-0">
+                <h2 class="text-lg font-bold text-gray-900 mb-1">Quản lý Phòng ban</h2>
+                <p class="text-gray-600 text-xs">Danh sách phòng ban - <span id="deptCount" class="font-medium text-blue-600">12 phòng ban</span></p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full md:w-auto">
+                <div class="flex space-x-2">
+                    <button id="deptViewRow" class="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium text-xs shadow hover:shadow-md transition duration-200">
+                        <i class="fas fa-list mr-1.5 text-xs"></i>Xem hàng
+                    </button>
+                    <button id="deptViewCard" class="px-3 py-1.5 bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700 rounded-lg font-medium text-xs shadow hover:shadow-md transition duration-200">
+                        <i class="fas fa-th-large mr-1.5 text-xs"></i>Xem thẻ
+                    </button>
+                </div>
+
+                <button id="addDeptBtn" class="px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg font-medium text-xs shadow hover:shadow-md transition duration-200 flex items-center justify-center">
+                    <i class="fas fa-plus mr-1.5 text-xs"></i>Thêm phòng ban
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-lg shadow p-4 mb-4 card-hover compact-form">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Tìm kiếm</label>
+                    <div class="relative">
+                        <input type="text" id="deptSearch" placeholder="Tìm phòng ban..."
+                               class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        <i class="fas fa-search absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Chi nhánh</label>
+                    <select id="deptBranchFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        <option value="all">Tất cả chi nhánh</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Chức năng</label>
+                    <select id="deptFunctionFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        <option value="all">Tất cả chức năng</option>
+                        <option value="consulting">Tư vấn</option>
+                        <option value="tele">Tele</option>
+                        <option value="marketing">Marketing</option>
+                        <option value="it">Thông tin</option>
+                        <option value="deployment">Triển khai</option>
+                        <option value="qa">QA/Testing</option>
+                        <option value="hr">Nhân sự</option>
+                        <option value="finance">Tài chính</option>
+                    </select>
+                </div>
+
+                <div class="flex items-end">
+                    <button id="deptFilterBtn" class="w-full px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium text-xs shadow hover:shadow-md transition duration-200">
+                        <i class="fas fa-filter mr-1.5 text-xs"></i>Lọc kết quả
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Departments List - Row View -->
+        <div id="deptRowView">
+            <div id="deptList" class="space-y-3">
+                <!-- Departments will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Departments List - Card View -->
+        <div id="deptCardView" class="hidden">
+            <div id="deptCardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Departments card view will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Branches Content -->
+    <div id="branchesContent" class="hidden">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+            <div class="mb-3 md:mb-0">
+                <h2 class="text-lg font-bold text-gray-900 mb-1">Quản lý Chi nhánh</h2>
+                <p class="text-gray-600 text-xs">Danh sách chi nhánh - <span id="branchCount" class="font-medium text-green-600">6 chi nhánh</span></p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full md:w-auto">
+                <div class="flex space-x-2">
+                    <button id="branchViewRow" class="px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-medium text-xs shadow hover:shadow-md transition duration-200">
+                        <i class="fas fa-list mr-1.5 text-xs"></i>Xem hàng
+                    </button>
+                    <button id="branchViewCard" class="px-3 py-1.5 bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700 rounded-lg font-medium text-xs shadow hover:shadow-md transition duration-200">
+                        <i class="fas fa-th-large mr-1.5 text-xs"></i>Xem thẻ
+                    </button>
+                </div>
+
+                <button id="addBranchBtn" class="px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-medium text-xs shadow hover:shadow-md transition duration-200 flex items-center justify-center">
+                    <i class="fas fa-plus mr-1.5 text-xs"></i>Thêm chi nhánh
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-lg shadow p-4 mb-4 card-hover compact-form">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Tìm kiếm</label>
+                    <div class="relative">
+                        <input type="text" id="branchSearch" placeholder="Tìm chi nhánh..."
+                               class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 text-sm">
+                        <i class="fas fa-search absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-end">
+                    <button id="branchFilterBtn" class="w-full px-3 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-medium text-xs shadow hover:shadow-md transition duration-200">
+                        <i class="fas fa-filter mr-1.5 text-xs"></i>Lọc kết quả
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Branches List - Row View -->
+        <div id="branchRowView">
+            <div id="branchList" class="space-y-3">
+                <!-- Branches will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Branches List - Card View -->
+        <div id="branchCardView" class="hidden">
+            <div id="branchCardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Branches card view will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Content -->
+    <div id="reportsContent" class="hidden">
+        <div class="bg-white rounded-lg shadow p-4 card-hover">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Báo cáo & Thống kê</h2>
+            <div class="text-center py-8 text-gray-500">
+                <div class="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-chart-bar text-2xl text-indigo-500"></i>
+                </div>
+                <p class="text-sm mb-1">Báo cáo sẽ được hiển thị ở đây</p>
+                <p class="text-xs">Chức năng đang được phát triển</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Content -->
+    <div id="settingsContent" class="hidden">
+        <div class="bg-white rounded-lg shadow p-4 card-hover">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Cài đặt hệ thống</h2>
+            <div class="text-center py-8 text-gray-500">
+                <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-cog text-2xl text-blue-500"></i>
+                </div>
+                <p class="text-sm mb-1">Cài đặt hệ thống</p>
+                <p class="text-xs">Chức năng đang được phát triển</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Modal Departments -->
+<div id="deptModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto modal-enter">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4 rounded-t-lg">
+            <div class="flex justify-between items-center">
+                <h3 id="deptModalTitle" class="text-base font-bold">Thêm phòng ban mới</h3>
+                <button id="closeDeptModal" class="text-white text-xl hover:text-gray-200">&times;</button>
+            </div>
+        </div>
+
+        <div class="p-4 compact-form">
+            <form id="deptForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label for="departmentBranch" class="block text-gray-700 font-medium mb-2">
+                        <label for="deptName" class="block text-xs font-medium text-gray-700 mb-1">
+                            Tên phòng ban <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="deptName" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                    </div>
+                    <div>
+                        <label for="deptManager" class="block text-xs font-medium text-gray-700 mb-1">
+                            Trưởng phòng <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="deptManager" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="deptBranch" class="block text-xs font-medium text-gray-700 mb-1">
                             Chi nhánh <span class="text-red-500">*</span>
                         </label>
-                        <select id="departmentBranch" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <select id="deptBranch" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm">
                             <option value="">Chọn chi nhánh</option>
-                            <option value="hanoi">Hà Nội</option>
-                            <option value="hcm">TP. Hồ Chí Minh</option>
-                            <option value="danang">Đà Nẵng</option>
                         </select>
                     </div>
                     <div>
-                        <label for="employeeListLink" class="block text-gray-700 font-medium mb-2">
+                        <label for="deptEmployeeLink" class="block text-xs font-medium text-gray-700 mb-1">
                             Link danh sách nhân viên <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" id="employeeListLink" value="/#" required
-                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <input type="text" id="deptEmployeeLink" value="/#" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm">
                     </div>
                 </div>
 
-                <div class="mb-6">
-                    <label for="departmentDescription" class="block text-gray-700 font-medium mb-2">
+                <div class="mb-4">
+                    <label for="deptDescription" class="block text-xs font-medium text-gray-700 mb-1">
                         Mô tả phòng ban <span class="text-red-500">*</span>
                     </label>
-                    <textarea id="departmentDescription" rows="3" required
-                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                    <textarea id="deptDescription" rows="2" required
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"></textarea>
                 </div>
 
-                <div class="mb-6">
-                    <label class="block text-gray-700 font-medium mb-3">
+                <div class="mb-4">
+                    <label class="block text-xs font-medium text-gray-700 mb-2">
                         Chức năng hệ thống <span class="text-red-500">*</span>
                     </label>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        <label class="flex items-center">
-                            <input type="checkbox" name="departmentFunctions" value="consulting" class="mr-2 h-5 w-5 text-blue-600 rounded">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        <label class="flex items-center text-xs">
+                            <input type="checkbox" name="deptFunctions" value="consulting" class="mr-2 h-3.5 w-3.5 text-blue-600 rounded">
                             <span>Tư vấn</span>
                         </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="departmentFunctions" value="tele" class="mr-2 h-5 w-5 text-blue-600 rounded">
+                        <label class="flex items-center text-xs">
+                            <input type="checkbox" name="deptFunctions" value="tele" class="mr-2 h-3.5 w-3.5 text-blue-600 rounded">
                             <span>Tele</span>
                         </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="departmentFunctions" value="marketing" class="mr-2 h-5 w-5 text-blue-600 rounded">
+                        <label class="flex items-center text-xs">
+                            <input type="checkbox" name="deptFunctions" value="marketing" class="mr-2 h-3.5 w-3.5 text-blue-600 rounded">
                             <span>Marketing</span>
                         </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="departmentFunctions" value="it" class="mr-2 h-5 w-5 text-blue-600 rounded">
+                        <label class="flex items-center text-xs">
+                            <input type="checkbox" name="deptFunctions" value="it" class="mr-2 h-3.5 w-3.5 text-blue-600 rounded">
                             <span>Thông tin</span>
                         </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="departmentFunctions" value="deployment" class="mr-2 h-5 w-5 text-blue-600 rounded">
+                        <label class="flex items-center text-xs">
+                            <input type="checkbox" name="deptFunctions" value="deployment" class="mr-2 h-3.5 w-3.5 text-blue-600 rounded">
                             <span>Triển khai</span>
+                        </label>
+                        <label class="flex items-center text-xs">
+                            <input type="checkbox" name="deptFunctions" value="qa" class="mr-2 h-3.5 w-3.5 text-blue-600 rounded">
+                            <span>QA/Testing</span>
                         </label>
                     </div>
                 </div>
 
-                <div class="mb-8">
-                    <label class="block text-gray-700 font-medium mb-3">Ảnh đại diện phòng</label>
-                    <div id="imageUpload" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-blue-400 transition duration-200">
-                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
-                        <p class="text-gray-600">Kéo thả ảnh vào đây hoặc <span class="text-blue-600 font-medium">nhấn để tải lên</span></p>
-                        <p class="text-gray-500 text-sm mt-2">Hỗ trợ JPG, PNG, GIF (tối đa 5MB)</p>
-                        <input type="file" id="departmentImage" accept="image/*" class="hidden">
+                <div class="mb-4">
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Ảnh đại diện phòng</label>
+                    <div id="deptImageUpload" class="border border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition duration-200">
+                        <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-600 text-xs">Kéo thả ảnh vào đây hoặc <span class="text-blue-600 font-medium">nhấn để tải lên</span></p>
+                        <p class="text-gray-500 text-xs mt-1">Hỗ trợ JPG, PNG, GIF (tối đa 5MB)</p>
+                        <input type="file" id="deptImage" accept="image/*" class="hidden">
                     </div>
-                    <div id="imagePreview" class="mt-4 hidden">
-                        <p class="text-gray-700 font-medium mb-2">Ảnh đã chọn:</p>
-                        <div class="relative w-full h-48 rounded-xl overflow-hidden border">
-                            <img id="previewImage" src="" alt="Preview" class="w-full h-full object-cover">
+                    <div id="deptImagePreview" class="mt-3 hidden">
+                        <div class="relative w-full h-32 rounded-lg overflow-hidden border border-gray-300">
+                            <img id="deptPreviewImage" src="" alt="Preview" class="w-full h-full object-cover">
                         </div>
                     </div>
-                    <input type="hidden" id="departmentImageUrl">
+                    <input type="hidden" id="deptImageUrl">
                 </div>
             </form>
         </div>
 
-        <div class="border-t px-6 py-4">
-            <div class="flex justify-end space-x-4">
-                <button id="cancelBtn" class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition duration-200">
+        <div class="border-t px-4 py-3">
+            <div class="flex justify-end space-x-2">
+                <button id="cancelDeptBtn" class="px-3 py-1.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition duration-200 text-xs">
                     Hủy
                 </button>
-                <button id="saveDepartmentBtn" class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium rounded-xl shadow hover:opacity-90 transition duration-200">
+                <button id="saveDeptBtn" class="px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium rounded-lg shadow hover:shadow-md transition duration-200 text-xs">
                     Lưu phòng ban
                 </button>
             </div>
@@ -244,21 +585,127 @@
     </div>
 </div>
 
-<!-- Modal xác nhận xóa -->
-<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-        <div class="p-6 text-center">
-            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
-                <i class="fas fa-exclamation-triangle text-3xl text-red-600"></i>
+<!-- Modal Branches -->
+<div id="branchModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto modal-enter">
+        <div class="bg-gradient-to-r from-green-600 to-emerald-700 text-white p-4 rounded-t-lg">
+            <div class="flex justify-between items-center">
+                <h3 id="branchModalTitle" class="text-base font-bold">Thêm chi nhánh mới</h3>
+                <button id="closeBranchModal" class="text-white text-xl hover:text-gray-200">&times;</button>
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-3">Xóa phòng ban này?</h3>
-            <p class="text-gray-600 mb-6">Bạn có chắc chắn muốn xóa phòng ban <strong id="deleteDepartmentName" class="text-gray-900"></strong>? Hành động này không thể hoàn tác.</p>
-            <div class="flex justify-center space-x-4">
-                <button id="cancelDeleteBtn" class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition duration-200">
+        </div>
+
+        <div class="p-4 compact-form">
+            <form id="branchForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="branchName" class="block text-xs font-medium text-gray-700 mb-1">
+                            Tên chi nhánh <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="branchName" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 text-sm">
+                    </div>
+                    <div>
+                        <label for="branchCode" class="block text-xs font-medium text-gray-700 mb-1">
+                            Mã chi nhánh <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="branchCode" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="branchManager" class="block text-xs font-medium text-gray-700 mb-1">
+                            Giám đốc chi nhánh <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="branchManager" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 text-sm">
+                    </div>
+                    <div>
+                        <label for="branchPhone" class="block text-xs font-medium text-gray-700 mb-1">
+                            Số điện thoại <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="branchPhone" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 text-sm">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="branchAddress" class="block text-xs font-medium text-gray-700 mb-1">
+                        Địa chỉ <span class="text-red-500">*</span>
+                    </label>
+                    <textarea id="branchAddress" rows="2" required
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 text-sm"></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label for="branchEmail" class="block text-xs font-medium text-gray-700 mb-1">
+                        Email liên hệ <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email" id="branchEmail" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 text-sm">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="branchStatus" class="block text-xs font-medium text-gray-700 mb-1">
+                            Trạng thái <span class="text-red-500">*</span>
+                        </label>
+                        <select id="branchStatus" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 text-sm">
+                            <option value="active">Đang hoạt động</option>
+                            <option value="inactive">Ngừng hoạt động</option>
+                            <option value="maintenance">Bảo trì</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="branchEstablished" class="block text-xs font-medium text-gray-700 mb-1">
+                            Ngày thành lập
+                        </label>
+                        <input type="date" id="branchEstablished"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 text-sm">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="branchDescription" class="block text-xs font-medium text-gray-700 mb-1">
+                        Mô tả chi nhánh
+                    </label>
+                    <textarea id="branchDescription" rows="2"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 text-sm"></textarea>
+                </div>
+            </form>
+        </div>
+
+        <div class="border-t px-4 py-3">
+            <div class="flex justify-end space-x-2">
+                <button id="cancelBranchBtn" class="px-3 py-1.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition duration-200 text-xs">
                     Hủy
                 </button>
-                <button id="confirmDeleteBtn" class="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-medium rounded-xl shadow hover:opacity-90 transition duration-200">
-                    Xóa phòng ban
+                <button id="saveBranchBtn" class="px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium rounded-lg shadow hover:shadow-md transition duration-200 text-xs">
+                    Lưu chi nhánh
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-sm modal-enter">
+        <div class="p-4 text-center">
+            <div class="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-red-100 to-pink-100 mb-4">
+                <i class="fas fa-exclamation-triangle text-lg text-red-600"></i>
+            </div>
+            <h3 id="deleteModalTitle" class="text-base font-bold text-gray-900 mb-2">Xóa dữ liệu này?</h3>
+            <p class="text-gray-600 text-xs mb-4">Bạn có chắc chắn muốn xóa <strong id="deleteItemName" class="text-gray-900"></strong>? Hành động này không thể hoàn tác.</p>
+            <div class="flex justify-center space-x-2">
+                <button id="cancelDeleteBtn" class="px-3 py-1.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition duration-200 text-xs">
+                    Hủy
+                </button>
+                <button id="confirmDeleteBtn" class="px-3 py-1.5 bg-gradient-to-r from-red-500 to-pink-600 text-white font-medium rounded-lg shadow hover:shadow-md transition duration-200 text-xs">
+                    Xóa
                 </button>
             </div>
         </div>
@@ -266,323 +713,1065 @@
 </div>
 
 <script>
-    // Dữ liệu mẫu (thay bằng API thực tế khi triển khai)
+    // Dữ liệu mẫu phong phú - ĐÃ SỬA LỖI
     let departments = [
         {
             id: 1,
             name: "Phòng Tư vấn Khách hàng",
             description: "Phụ trách tư vấn và hỗ trợ khách hàng về các sản phẩm và dịch vụ của công ty.",
             manager: "Nguyễn Thị Hương",
-            branch: "hanoi",
+            branch: "HN-001",
             functions: ["consulting", "tele"],
-            imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            employeeLink: "/#"
+            imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            employeeLink: "/#",
+            createdAt: "2023-01-15",
+            employees: 15
         },
         {
             id: 2,
             name: "Phòng Marketing",
             description: "Chịu trách nhiệm về các chiến lược marketing, quảng bá thương hiệu và sản phẩm.",
             manager: "Trần Văn Minh",
-            branch: "hcm",
+            branch: "HCM-002",
             functions: ["marketing"],
-            imageUrl: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            employeeLink: "/#"
+            imageUrl: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            employeeLink: "/#",
+            createdAt: "2023-02-20",
+            employees: 12
         },
         {
             id: 3,
             name: "Phòng Công nghệ Thông tin",
             description: "Phát triển và bảo trì hệ thống công nghệ thông tin, hỗ trợ kỹ thuật cho toàn công ty.",
             manager: "Lê Văn Hải",
-            branch: "danang",
+            branch: "DN-003",
             functions: ["it", "deployment"],
-            imageUrl: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            employeeLink: "/#"
+            imageUrl: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            employeeLink: "/#",
+            createdAt: "2023-03-10",
+            employees: 24
         },
         {
             id: 4,
             name: "Phòng Triển khai Dự án",
             description: "Triển khai các dự án phần mềm và công nghệ cho khách hàng doanh nghiệp.",
             manager: "Phạm Thị Lan",
-            branch: "hanoi",
+            branch: "HN-001",
             functions: ["deployment"],
-            imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            employeeLink: "/#"
+            imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            employeeLink: "/#",
+            createdAt: "2023-01-25",
+            employees: 18
         },
         {
             id: 5,
             name: "Phòng Chăm sóc Khách hàng",
             description: "Chăm sóc khách hàng sau bán hàng, giải đáp thắc mắc và xử lý khiếu nại.",
             manager: "Hoàng Văn Tú",
-            branch: "hcm",
+            branch: "HCM-002",
             functions: ["consulting", "tele"],
-            imageUrl: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            employeeLink: "/#"
+            imageUrl: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            employeeLink: "/#",
+            createdAt: "2023-04-05",
+            employees: 20
         },
         {
             id: 6,
             name: "Phòng Tele Marketing",
             description: "Thực hiện các chiến dịch tiếp thị qua điện thoại và chăm sóc khách hàng tiềm năng.",
             manager: "Đỗ Thị Hà",
-            branch: "hanoi",
+            branch: "HN-001",
             functions: ["tele", "marketing"],
-            imageUrl: "https://images.unsplash.com/photo-1573164713714-d95e436ab286?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            employeeLink: "/#"
+            imageUrl: "https://images.unsplash.com/photo-1573164713714-d95e436ab286?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            employeeLink: "/#",
+            createdAt: "2023-03-22",
+            employees: 16
+        },
+        {
+            id: 7,
+            name: "Phòng Phát triển Phần mềm",
+            description: "Phát triển các ứng dụng phần mềm và hệ thống công nghệ nội bộ.",
+            manager: "Vũ Minh Quang",
+            branch: "HN-001",
+            functions: ["it", "deployment"],
+            imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            employeeLink: "/#",
+            createdAt: "2023-05-10",
+            employees: 28
+        },
+        {
+            id: 8,
+            name: "Phòng Nhân sự",
+            description: "Quản lý tuyển dụng, đào tạo và phát triển nguồn nhân lực toàn công ty.",
+            manager: "Trần Thị Ngọc",
+            branch: "HN-001",
+            functions: ["hr"],
+            imageUrl: "https://images.unsplash.com/photo-1551836026-d5c2c5af78e4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            employeeLink: "/#",
+            createdAt: "2023-02-28",
+            employees: 8
+        },
+        {
+            id: 9,
+            name: "Phòng Tài chính Kế toán",
+            description: "Quản lý tài chính, kế toán và ngân sách của toàn công ty.",
+            manager: "Lê Văn Sơn",
+            branch: "HCM-002",
+            functions: ["finance"],
+            imageUrl: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            employeeLink: "/#",
+            createdAt: "2023-01-10",
+            employees: 14
+        },
+        {
+            id: 10,
+            name: "Phòng QA & Testing",
+            description: "Đảm bảo chất lượng sản phẩm và kiểm thử phần mềm trước khi triển khai.",
+            manager: "Phan Thanh Hải",
+            branch: "DN-003",
+            functions: ["qa"],
+            imageUrl: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            employeeLink: "/#",
+            createdAt: "2023-06-15",
+            employees: 10
+        },
+        {
+            id: 11,
+            name: "Phòng Hành chính Tổng hợp",
+            description: "Quản lý hành chính, văn phòng và hỗ trợ hoạt động nội bộ công ty.",
+            manager: "Ngô Thị Mai",
+            branch: "CT-004",
+            functions: ["hr"],
+            imageUrl: "https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            employeeLink: "/#",
+            createdAt: "2023-03-05",
+            employees: 9
+        },
+        {
+            id: 12,
+            name: "Phòng Nghiên cứu & Phát triển",
+            description: "Nghiên cứu công nghệ mới và phát triển sản phẩm đột phá cho tương lai.",
+            manager: "Đặng Văn Hùng",
+            branch: "HP-005",
+            functions: ["it", "deployment"],
+            imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            employeeLink: "/#",
+            createdAt: "2023-07-01",
+            employees: 15
+        }
+    ];
+
+    let branches = [
+        {
+            id: 1,
+            name: "Chi nhánh Hà Nội",
+            code: "HN-001",
+            manager: "Trần Văn An",
+            phone: "024 1234 5678",
+            address: "Số 123, đường Trần Duy Hưng, Quận Cầu Giấy, Hà Nội",
+            email: "hanoi@company.com",
+            status: "active",
+            established: "2015-05-15",
+            description: "Chi nhánh chính, trụ sở đầu não của công ty",
+            departments: 5,
+            employees: 118,
+            color: "from-blue-500 to-cyan-500"
+        },
+        {
+            id: 2,
+            name: "Chi nhánh TP. Hồ Chí Minh",
+            code: "HCM-002",
+            manager: "Lê Thị Bích",
+            phone: "028 8765 4321",
+            address: "Số 456, đường Nguyễn Văn Linh, Quận 7, TP.HCM",
+            email: "hcm@company.com",
+            status: "active",
+            established: "2017-08-20",
+            description: "Chi nhánh lớn nhất khu vực phía Nam",
+            departments: 4,
+            employees: 96,
+            color: "from-green-500 to-emerald-500"
+        },
+        {
+            id: 3,
+            name: "Chi nhánh Đà Nẵng",
+            code: "DN-003",
+            manager: "Phạm Văn Cường",
+            phone: "0236 4567 8901",
+            address: "Số 789, đường Trần Phú, Quận Hải Châu, Đà Nẵng",
+            email: "danang@company.com",
+            status: "active",
+            established: "2019-03-10",
+            description: "Chi nhánh phát triển mạnh tại miền Trung",
+            departments: 3,
+            employees: 64,
+            color: "from-purple-500 to-pink-500"
+        },
+        {
+            id: 4,
+            name: "Chi nhánh Cần Thơ",
+            code: "CT-004",
+            manager: "Nguyễn Văn Đạt",
+            phone: "0292 3456 7890",
+            address: "Số 321, đường 30/4, Quận Ninh Kiều, Cần Thơ",
+            email: "cantho@company.com",
+            status: "maintenance",
+            established: "2021-11-05",
+            description: "Chi nhánh mới tại khu vực Đồng bằng sông Cửu Long",
+            departments: 1,
+            employees: 18,
+            color: "from-amber-500 to-orange-500"
+        },
+        {
+            id: 5,
+            name: "Chi nhánh Hải Phòng",
+            code: "HP-005",
+            manager: "Hoàng Văn Dũng",
+            phone: "0225 2345 6789",
+            address: "Số 555, đường Lê Hồng Phong, Quận Hồng Bàng, Hải Phòng",
+            email: "haiphong@company.com",
+            status: "active",
+            established: "2020-06-25",
+            description: "Chi nhánh chiến lược tại khu vực phía Bắc",
+            departments: 1,
+            employees: 15,
+            color: "from-red-500 to-rose-500"
+        },
+        {
+            id: 6,
+            name: "Chi nhánh Đà Lạt",
+            code: "DL-006",
+            manager: "Nguyễn Thị Thu Hà",
+            phone: "0263 3456 7890",
+            address: "Số 777, đường Trần Phú, Phường 3, Đà Lạt",
+            email: "dalat@company.com",
+            status: "inactive",
+            established: "2022-02-14",
+            description: "Chi nhánh phục vụ du lịch và nghỉ dưỡng",
+            departments: 0,
+            employees: 7,
+            color: "from-indigo-500 to-purple-500"
         }
     ];
 
     // Biến toàn cục
-    let currentFilter = {
-        branch: "all",
-        function: "all",
-        search: ""
-    };
+    let currentDeptFilter = { branch: "all", function: "all", search: "" };
+    let currentBranchFilter = { search: "" };
     let editingId = null;
-    let nextId = departments.length + 1;
+    let editingType = null;
+    let currentDeptView = "row";
+    let currentBranchView = "row";
+    let nextDeptId = departments.length + 1;
+    let nextBranchId = branches.length + 1;
 
-    // Các phần tử DOM
-    const departmentList = document.getElementById('departmentList');
-    const addDepartmentBtn = document.getElementById('addDepartmentBtn');
-    const departmentModal = document.getElementById('departmentModal');
+    // DOM Elements
+    const tabDashboard = document.getElementById('tabDashboard');
+    const tabDepartments = document.getElementById('tabDepartments');
+    const tabBranches = document.getElementById('tabBranches');
+    const tabReports = document.getElementById('tabReports');
+    const tabSettings = document.getElementById('tabSettings');
+
+    const dashboardContent = document.getElementById('dashboardContent');
+    const departmentsContent = document.getElementById('departmentsContent');
+    const branchesContent = document.getElementById('branchesContent');
+    const reportsContent = document.getElementById('reportsContent');
+    const settingsContent = document.getElementById('settingsContent');
+
+    const deptCount = document.getElementById('deptCount');
+    const branchCount = document.getElementById('branchCount');
+    const statDeptTotal = document.getElementById('statDeptTotal');
+    const statBranchTotal = document.getElementById('statBranchTotal');
+
+    const addDeptBtn = document.getElementById('addDeptBtn');
+    const addBranchBtn = document.getElementById('addBranchBtn');
+
+    const deptViewRow = document.getElementById('deptViewRow');
+    const deptViewCard = document.getElementById('deptViewCard');
+    const branchViewRow = document.getElementById('branchViewRow');
+    const branchViewCard = document.getElementById('branchViewCard');
+
+    const deptRowView = document.getElementById('deptRowView');
+    const deptCardView = document.getElementById('deptCardView');
+    const branchRowView = document.getElementById('branchRowView');
+    const branchCardView = document.getElementById('branchCardView');
+
+    const deptList = document.getElementById('deptList');
+    const deptCardGrid = document.getElementById('deptCardGrid');
+    const branchList = document.getElementById('branchList');
+    const branchCardGrid = document.getElementById('branchCardGrid');
+
+    const deptModal = document.getElementById('deptModal');
+    const branchModal = document.getElementById('branchModal');
     const deleteModal = document.getElementById('deleteModal');
-    const closeModalBtn = document.getElementById('closeModal');
-    const closeDeleteModalBtn = document.getElementById('closeDeleteModal');
-    const cancelBtn = document.getElementById('cancelBtn');
+
+    const deptModalTitle = document.getElementById('deptModalTitle');
+    const branchModalTitle = document.getElementById('branchModalTitle');
+    const deleteModalTitle = document.getElementById('deleteModalTitle');
+    const deleteItemName = document.getElementById('deleteItemName');
+
+    const deptForm = document.getElementById('deptForm');
+    const branchForm = document.getElementById('branchForm');
+
+    const deptSearch = document.getElementById('deptSearch');
+    const deptBranchFilter = document.getElementById('deptBranchFilter');
+    const deptFunctionFilter = document.getElementById('deptFunctionFilter');
+    const deptFilterBtn = document.getElementById('deptFilterBtn');
+
+    const branchSearch = document.getElementById('branchSearch');
+    const branchFilterBtn = document.getElementById('branchFilterBtn');
+
+    const closeDeptModal = document.getElementById('closeDeptModal');
+    const closeBranchModal = document.getElementById('closeBranchModal');
+    const cancelDeptBtn = document.getElementById('cancelDeptBtn');
+    const cancelBranchBtn = document.getElementById('cancelBranchBtn');
+    const saveDeptBtn = document.getElementById('saveDeptBtn');
+    const saveBranchBtn = document.getElementById('saveBranchBtn');
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-    const saveDepartmentBtn = document.getElementById('saveDepartmentBtn');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-    const departmentForm = document.getElementById('departmentForm');
-    const searchInput = document.getElementById('searchInput');
-    const branchFilter = document.getElementById('branchFilter');
-    const functionFilter = document.getElementById('functionFilter');
-    const totalDepartments = document.getElementById('totalDepartments');
-    const totalBranches = document.getElementById('totalBranches');
-    const imageUpload = document.getElementById('imageUpload');
-    const departmentImage = document.getElementById('departmentImage');
-    const imagePreview = document.getElementById('imagePreview');
-    const previewImage = document.getElementById('previewImage');
-    const deleteDepartmentName = document.getElementById('deleteDepartmentName');
 
-    // Hàm lấy tên chi nhánh
-    function getBranchName(branch) {
-        const branchNames = {
-            "hanoi": "Hà Nội",
-            "hcm": "TP. Hồ Chí Minh",
-            "danang": "Đà Nẵng"
+    const deptImageUpload = document.getElementById('deptImageUpload');
+    const deptImage = document.getElementById('deptImage');
+    const deptImagePreview = document.getElementById('deptImagePreview');
+    const deptPreviewImage = document.getElementById('deptPreviewImage');
+
+    // Hàm tiện ích - ĐÃ SỬA LỖI
+    function getBranchInfo(branchCode) {
+        const branch = branches.find(b => b.code === branchCode);
+        return branch || {
+            name: branchCode,
+            color: "from-gray-500 to-gray-700",
+            employees: 0
         };
-        return branchNames[branch] || branch;
     }
 
-    // Hàm lấy tên chức năng
-    function getFunctionName(func) {
-        const functionNames = {
-            "consulting": "Tư vấn",
-            "tele": "Tele",
-            "marketing": "Marketing",
-            "it": "Thông tin",
-            "deployment": "Triển khai"
+    function getFunctionInfo(func) {
+        const functionConfig = {
+            "consulting": { name: "Tư vấn", color: "from-blue-500 to-cyan-500" },
+            "tele": { name: "Tele", color: "from-purple-500 to-pink-500" },
+            "marketing": { name: "Marketing", color: "from-green-500 to-emerald-500" },
+            "it": { name: "Thông tin", color: "from-indigo-500 to-purple-500" },
+            "deployment": { name: "Triển khai", color: "from-amber-500 to-orange-500" },
+            "qa": { name: "QA/Testing", color: "from-red-500 to-rose-500" },
+            "hr": { name: "Nhân sự", color: "from-teal-500 to-cyan-500" },
+            "finance": { name: "Tài chính", color: "from-lime-500 to-green-500" }
         };
-        return functionNames[func] || func;
+        return functionConfig[func] || {
+            name: func,
+            color: "from-gray-500 to-gray-700"
+        };
     }
 
-    // Hàm hiển thị danh sách phòng ban
-    function displayDepartments() {
-        // Lọc phòng ban theo bộ lọc
-        let filteredDepartments = departments.filter(dept => {
-            // Lọc theo chi nhánh
-            if (currentFilter.branch !== "all" && dept.branch !== currentFilter.branch) {
-                return false;
-            }
+    function getStatusInfo(status) {
+        const statusConfig = {
+            "active": { name: "Đang hoạt động", color: "from-green-500 to-emerald-500", icon: "fa-check-circle" },
+            "inactive": { name: "Ngừng hoạt động", color: "from-red-500 to-pink-600", icon: "fa-times-circle" },
+            "maintenance": { name: "Bảo trì", color: "from-amber-500 to-orange-500", icon: "fa-tools" }
+        };
+        return statusConfig[status] || statusConfig.active;
+    }
 
-            // Lọc theo chức năng
-            if (currentFilter.function !== "all" && !dept.functions.includes(currentFilter.function)) {
-                return false;
-            }
+    // Hàm an toàn để lấy màu từ gradient string - ĐÃ THÊM
+    function getColorFromGradient(gradientString) {
+        if (!gradientString) return { color1: '#667eea', color2: '#764ba2' };
 
-            // Lọc theo tìm kiếm
-            if (currentFilter.search && !dept.name.toLowerCase().includes(currentFilter.search.toLowerCase()) &&
-                !dept.manager.toLowerCase().includes(currentFilter.search.toLowerCase())) {
-                return false;
-            }
+        // Lấy màu từ chuỗi gradient như "from-blue-500 to-cyan-500"
+        const parts = gradientString.split(' ');
+        if (parts.length >= 3) {
+            // Chuyển đổi từ Tailwind class sang mã hex (đơn giản hóa)
+            const colorMap = {
+                'blue': '#3b82f6',
+                'cyan': '#06b6d4',
+                'green': '#10b981',
+                'emerald': '#059669',
+                'purple': '#8b5cf6',
+                'pink': '#ec4899',
+                'amber': '#f59e0b',
+                'orange': '#f97316',
+                'red': '#ef4444',
+                'rose': '#f43f5e',
+                'indigo': '#6366f1',
+                'gray': '#6b7280'
+            };
 
+            const fromColor = parts[0].replace('from-', '').split('-')[0];
+            const toColor = parts[2].replace('to-', '').split('-')[0];
+
+            return {
+                color1: colorMap[fromColor] || '#667eea',
+                color2: colorMap[toColor] || '#764ba2'
+            };
+        }
+
+        return { color1: '#667eea', color2: '#764ba2' };
+    }
+
+    function updateStats() {
+        deptCount.textContent = `${departments.length} phòng ban`;
+        branchCount.textContent = `${branches.length} chi nhánh`;
+        statDeptTotal.textContent = departments.length;
+        statBranchTotal.textContent = branches.length;
+    }
+
+    // Chuyển tab
+    function switchTab(tabName) {
+        // Ẩn tất cả content
+        dashboardContent.classList.add('hidden');
+        departmentsContent.classList.add('hidden');
+        branchesContent.classList.add('hidden');
+        reportsContent.classList.add('hidden');
+        settingsContent.classList.add('hidden');
+
+        // Xóa active tất cả tab
+        tabDashboard.classList.remove('active');
+        tabDepartments.classList.remove('active');
+        tabBranches.classList.remove('active');
+        tabReports.classList.remove('active');
+        tabSettings.classList.remove('active');
+
+        // Hiển thị content và active tab tương ứng
+        switch(tabName) {
+            case 'dashboard':
+                dashboardContent.classList.remove('hidden');
+                tabDashboard.classList.add('active');
+                break;
+            case 'departments':
+                departmentsContent.classList.remove('hidden');
+                tabDepartments.classList.add('active');
+                loadDeptList();
+                break;
+            case 'branches':
+                branchesContent.classList.remove('hidden');
+                tabBranches.classList.add('active');
+                loadBranchList();
+                break;
+            case 'reports':
+                reportsContent.classList.remove('hidden');
+                tabReports.classList.add('active');
+                break;
+            case 'settings':
+                settingsContent.classList.remove('hidden');
+                tabSettings.classList.add('active');
+                break;
+        }
+    }
+
+    // Chuyển chế độ xem
+    function switchDeptView(view) {
+        currentDeptView = view;
+
+        if (view === "row") {
+            deptRowView.classList.remove('hidden');
+            deptCardView.classList.add('hidden');
+            deptViewRow.classList.remove('bg-gradient-to-r', 'from-gray-200', 'to-gray-300', 'text-gray-700');
+            deptViewRow.classList.add('bg-gradient-to-r', 'from-blue-500', 'to-blue-600', 'text-white');
+            deptViewCard.classList.remove('bg-gradient-to-r', 'from-blue-500', 'to-blue-600', 'text-white');
+            deptViewCard.classList.add('bg-gradient-to-r', 'from-gray-200', 'to-gray-300', 'text-gray-700');
+        } else {
+            deptRowView.classList.add('hidden');
+            deptCardView.classList.remove('hidden');
+            deptViewRow.classList.remove('bg-gradient-to-r', 'from-blue-500', 'to-blue-600', 'text-white');
+            deptViewRow.classList.add('bg-gradient-to-r', 'from-gray-200', 'to-gray-300', 'text-gray-700');
+            deptViewCard.classList.remove('bg-gradient-to-r', 'from-gray-200', 'to-gray-300', 'text-gray-700');
+            deptViewCard.classList.add('bg-gradient-to-r', 'from-blue-500', 'to-blue-600', 'text-white');
+        }
+
+        loadDeptList();
+    }
+
+    function switchBranchView(view) {
+        currentBranchView = view;
+
+        if (view === "row") {
+            branchRowView.classList.remove('hidden');
+            branchCardView.classList.add('hidden');
+            branchViewRow.classList.remove('bg-gradient-to-r', 'from-gray-200', 'to-gray-300', 'text-gray-700');
+            branchViewRow.classList.add('bg-gradient-to-r', 'from-green-500', 'to-green-600', 'text-white');
+            branchViewCard.classList.remove('bg-gradient-to-r', 'from-green-500', 'to-green-600', 'text-white');
+            branchViewCard.classList.add('bg-gradient-to-r', 'from-gray-200', 'to-gray-300', 'text-gray-700');
+        } else {
+            branchRowView.classList.add('hidden');
+            branchCardView.classList.remove('hidden');
+            branchViewRow.classList.remove('bg-gradient-to-r', 'from-green-500', 'to-green-600', 'text-white');
+            branchViewRow.classList.add('bg-gradient-to-r', 'from-gray-200', 'to-gray-300', 'text-gray-700');
+            branchViewCard.classList.remove('bg-gradient-to-r', 'from-gray-200', 'to-gray-300', 'text-gray-700');
+            branchViewCard.classList.add('bg-gradient-to-r', 'from-green-500', 'to-green-600', 'text-white');
+        }
+
+        loadBranchList();
+    }
+
+    // Load danh sách phòng ban - ĐÃ SỬA LỖI
+    function loadDeptList() {
+        // Cập nhật filter branch options
+        deptBranchFilter.innerHTML = '<option value="all">Tất cả chi nhánh</option>';
+        branches.forEach(branch => {
+            deptBranchFilter.innerHTML += `<option value="${branch.code}">${branch.name}</option>`;
+        });
+
+        // Lọc danh sách
+        let filteredDepts = departments.filter(dept => {
+            if (currentDeptFilter.branch !== "all" && dept.branch !== currentDeptFilter.branch) return false;
+            if (currentDeptFilter.function !== "all" && !dept.functions.includes(currentDeptFilter.function)) return false;
+            if (currentDeptFilter.search && !dept.name.toLowerCase().includes(currentDeptFilter.search.toLowerCase()) &&
+                !dept.manager.toLowerCase().includes(currentDeptFilter.search.toLowerCase())) return false;
             return true;
         });
 
-        // Cập nhật thống kê
-        totalDepartments.textContent = departments.length;
-        const uniqueBranches = [...new Set(departments.map(dept => dept.branch))];
-        totalBranches.textContent = uniqueBranches.length;
-
-        // Hiển thị danh sách phòng ban
-        if (filteredDepartments.length === 0) {
-            departmentList.innerHTML = `
-                    <div class="col-span-2 text-center py-12">
-                        <i class="fas fa-building text-6xl text-gray-300 mb-6"></i>
-                        <h3 class="text-2xl font-bold text-gray-700 mb-3">Không tìm thấy phòng ban nào</h3>
-                        <p class="text-gray-600 mb-6">Thử thay đổi bộ lọc hoặc thêm phòng ban mới</p>
-                        <button id="addEmptyBtn" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium py-3 px-6 rounded-xl shadow hover:opacity-90 transition duration-200">
-                            <i class="fas fa-plus mr-2"></i> Thêm phòng ban mới
+        // Row View
+        if (filteredDepts.length === 0) {
+            deptList.innerHTML = `
+                    <div class="bg-white rounded-lg shadow p-6 text-center">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-users text-xl text-blue-500"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-800 mb-2">Không tìm thấy phòng ban nào</h3>
+                        <p class="text-gray-600 text-xs mb-4">Thử thay đổi bộ lọc hoặc thêm phòng ban mới</p>
+                        <button id="addEmptyDeptBtn" class="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-lg font-medium text-xs shadow hover:shadow-md transition duration-200">
+                            <i class="fas fa-plus mr-1.5 text-xs"></i>Thêm phòng ban mới
                         </button>
                     </div>
                 `;
-
-            document.getElementById('addEmptyBtn')?.addEventListener('click', () => {
-                openAddModal();
-            });
-
+            deptCardGrid.innerHTML = '';
+            document.getElementById('addEmptyDeptBtn')?.addEventListener('click', openDeptModal);
             return;
         }
 
-        departmentList.innerHTML = filteredDepartments.map(dept => `
-                <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition duration-300">
-                    <div class="relative h-48 overflow-hidden">
-                        <img src="${dept.imageUrl}" alt="${dept.name}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
-                        <div class="absolute top-4 left-4 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">${getBranchName(dept.branch)}</div>
+        // Row View HTML
+        deptList.innerHTML = filteredDepts.map(dept => {
+            const branch = getBranchInfo(dept.branch);
+            const branchColors = getColorFromGradient(branch.color);
+
+            return `
+                    <div class="bg-white rounded-lg shadow p-3 card-hover">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between mb-3">
+                            <div class="flex items-start space-x-3 mb-2 md:mb-0">
+                                <div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                                    <img src="${dept.imageUrl}" alt="${dept.name}" class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex flex-wrap items-center gap-1.5 mb-1.5">
+                                        <h3 class="text-sm font-bold text-gray-900 truncate">${dept.name}</h3>
+                                        <span class="badge-gradient px-2 py-0.5 rounded-full text-[10px]" style="--color1: #667eea; --color2: #764ba2">
+                                            ${dept.employees} NV
+                                        </span>
+                                    </div>
+                                    <p class="text-gray-600 text-xs mb-2 line-clamp-2">${dept.description}</p>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <div class="flex items-center">
+                                            <div class="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded flex items-center justify-center mr-1.5">
+                                                <i class="fas fa-user-tie text-white text-[10px]"></i>
+                                            </div>
+                                            <span class="text-xs font-medium text-gray-700 truncate max-w-[120px]">${dept.manager}</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-6 h-6 bg-gradient-to-br ${branch.color} rounded flex items-center justify-center mr-1.5">
+                                                <i class="fas fa-code-branch text-white text-[10px]"></i>
+                                            </div>
+                                            <span class="text-xs font-medium text-gray-700 truncate max-w-[100px]">${branch.name}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex space-x-1.5">
+                                <button class="edit-dept-btn w-7 h-7 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg flex items-center justify-center shadow hover:shadow-md transition duration-200" data-id="${dept.id}" title="Sửa">
+                                    <i class="fas fa-edit text-xs"></i>
+                                </button>
+                                <button class="delete-dept-btn w-7 h-7 bg-gradient-to-br from-red-500 to-pink-600 text-white rounded-lg flex items-center justify-center shadow hover:shadow-md transition duration-200" data-id="${dept.id}" data-name="${dept.name}" title="Xóa">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 border-t">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between">
+                                <div class="flex flex-wrap gap-1.5 mb-2 md:mb-0">
+                                    ${dept.functions.map(func => {
+                const funcInfo = getFunctionInfo(func);
+                const colors = getColorFromGradient(funcInfo.color);
+                return `<span class="badge-gradient px-2 py-0.5 rounded-full text-[10px]" style="--color1: ${colors.color1}; --color2: ${colors.color2}">
+                                            ${funcInfo.name}
+                                        </span>`;
+            }).join('')}
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <button class="view-employees-btn text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center" data-link="${dept.employeeLink}">
+                                        <i class="fas fa-users mr-1 text-xs"></i>Nhân viên
+                                    </button>
+                                    <span class="text-xs text-gray-500">${dept.createdAt}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-start mb-3">
-                            <h3 class="text-xl font-bold text-gray-900">${dept.name}</h3>
-                        </div>
-                        <p class="text-gray-600 mb-4 line-clamp-2">${dept.description}</p>
+                `;
+        }).join('');
 
-                        <div class="space-y-3 mb-4">
-                            <div class="flex items-center text-gray-700">
-                                <i class="fas fa-user-tie mr-3 text-blue-500"></i>
-                                <span>Trưởng phòng: <strong class="text-gray-900">${dept.manager}</strong></span>
+        // Card View HTML
+        deptCardGrid.innerHTML = filteredDepts.map(dept => {
+            const branch = getBranchInfo(dept.branch);
+            const branchColors = getColorFromGradient(branch.color);
+
+            return `
+                    <div class="bg-white rounded-lg shadow overflow-hidden card-hover">
+                        <div class="relative h-32 overflow-hidden">
+                            <img src="${dept.imageUrl}" alt="${dept.name}" class="w-full h-full object-cover">
+                            <div class="absolute top-2 left-2">
+                                <span class="badge-gradient px-2 py-0.5 rounded-full text-[10px]" style="--color1: #667eea; --color2: #764ba2">
+                                    ${dept.employees} NV
+                                </span>
                             </div>
-                            <div class="flex items-center text-gray-700">
-                                <i class="fas fa-map-marker-alt mr-3 text-green-500"></i>
-                                <span>Chi nhánh: <strong class="text-gray-900">${getBranchName(dept.branch)}</strong></span>
+                            <div class="absolute top-2 right-2 flex space-x-1">
+                                <button class="edit-dept-btn w-6 h-6 bg-white bg-opacity-90 text-blue-600 rounded-full flex items-center justify-center shadow hover:shadow-md transition duration-200" data-id="${dept.id}" title="Sửa">
+                                    <i class="fas fa-edit text-[10px]"></i>
+                                </button>
+                                <button class="delete-dept-btn w-6 h-6 bg-white bg-opacity-90 text-red-600 rounded-full flex items-center justify-center shadow hover:shadow-md transition duration-200" data-id="${dept.id}" data-name="${dept.name}" title="Xóa">
+                                    <i class="fas fa-trash text-[10px]"></i>
+                                </button>
                             </div>
                         </div>
 
-                        <div class="mb-6">
-                            <p class="text-gray-700 font-medium mb-2">Chức năng:</p>
-                            <div class="flex flex-wrap gap-2">
-                                ${dept.functions.map(func => `
-                                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">${getFunctionName(func)}</span>
-                                `).join('')}
-                            </div>
-                        </div>
+                        <div class="p-3">
+                            <h3 class="font-bold text-gray-900 text-sm mb-1.5 line-clamp-1" title="${dept.name}">${dept.name}</h3>
+                            <p class="text-gray-600 text-xs mb-3 line-clamp-2">${dept.description}</p>
 
-                        <div class="flex border-t pt-4">
-                            <button class="view-employees flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-l-lg transition duration-200 flex items-center justify-center" data-link="${dept.employeeLink}">
-                                <i class="fas fa-users mr-2"></i> Nhân viên
-                            </button>
-                            <button class="edit-department flex-1 bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 transition duration-200 flex items-center justify-center" data-id="${dept.id}">
-                                <i class="fas fa-edit mr-2"></i> Sửa
-                            </button>
-                            <button class="delete-department flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-r-lg transition duration-200 flex items-center justify-center" data-id="${dept.id}" data-name="${dept.name}">
-                                <i class="fas fa-trash mr-2"></i> Xóa
-                            </button>
+                            <div class="space-y-2 mb-3">
+                                <div class="flex items-center">
+                                    <div class="w-5 h-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded flex items-center justify-center mr-2">
+                                        <i class="fas fa-user-tie text-white text-[8px]"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-[10px] text-gray-500">Trưởng phòng</p>
+                                        <p class="text-xs font-medium text-gray-700 truncate">${dept.manager}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-5 h-5 bg-gradient-to-br ${branch.color} rounded flex items-center justify-center mr-2">
+                                        <i class="fas fa-code-branch text-white text-[8px]"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-[10px] text-gray-500">Chi nhánh</p>
+                                        <p class="text-xs font-medium text-gray-700 truncate">${branch.name}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="flex flex-wrap gap-1">
+                                    ${dept.functions.slice(0, 2).map(func => {
+                const funcInfo = getFunctionInfo(func);
+                const colors = getColorFromGradient(funcInfo.color);
+                return `<span class="badge-gradient px-1.5 py-0.5 rounded-full text-[10px]" style="--color1: ${colors.color1}; --color2: ${colors.color2}">
+                                            ${funcInfo.name}
+                                        </span>`;
+            }).join('')}
+                                    ${dept.functions.length > 2 ? `<span class="badge-gradient px-1.5 py-0.5 rounded-full text-[10px]" style="--color1: #9ca3af; --color2: #6b7280">+${dept.functions.length - 2}</span>` : ''}
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center pt-2 border-t">
+                                <button class="view-employees-btn text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center" data-link="${dept.employeeLink}">
+                                    <i class="fas fa-users mr-1 text-xs"></i>NV
+                                </button>
+                                <span class="text-xs text-gray-500">${dept.createdAt}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+        }).join('');
 
-        // Thêm sự kiện cho các nút
-        document.querySelectorAll('.edit-department').forEach(btn => {
+        // Thêm sự kiện cho cả hai view
+        document.querySelectorAll('.edit-dept-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = parseInt(this.getAttribute('data-id'));
-                openEditModal(id);
+                openDeptModal(id);
             });
         });
 
-        document.querySelectorAll('.delete-department').forEach(btn => {
+        document.querySelectorAll('.delete-dept-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = parseInt(this.getAttribute('data-id'));
                 const name = this.getAttribute('data-name');
-                openDeleteModal(id, name);
+                openDeleteModal('dept', id, name);
             });
         });
 
-        document.querySelectorAll('.view-employees').forEach(btn => {
+        document.querySelectorAll('.view-employees-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const link = this.getAttribute('data-link');
-                alert(`Chuyển hướng đến: ${link}\n\nTrong ứng dụng thực tế, bạn sẽ được chuyển đến trang danh sách nhân viên của phòng ban này.`);
+                alert(`Chuyển hướng đến danh sách nhân viên: ${link}`);
             });
         });
     }
 
-    // Hàm mở modal thêm phòng ban
-    function openAddModal() {
-        editingId = null;
-        document.getElementById('modalTitle').textContent = "Thêm phòng ban mới";
-        departmentForm.reset();
-        imagePreview.classList.add('hidden');
-        previewImage.src = '';
-        document.getElementById('departmentImageUrl').value = '';
-        departmentModal.classList.remove('hidden');
-    }
-
-    // Hàm mở modal sửa phòng ban
-    function openEditModal(id) {
-        const department = departments.find(dept => dept.id === id);
-        if (!department) return;
-
-        editingId = id;
-        document.getElementById('modalTitle').textContent = "Sửa phòng ban";
-
-        // Điền dữ liệu vào form
-        document.getElementById('departmentName').value = department.name;
-        document.getElementById('departmentManager').value = department.manager;
-        document.getElementById('departmentBranch').value = department.branch;
-        document.getElementById('employeeListLink').value = department.employeeLink;
-        document.getElementById('departmentDescription').value = department.description;
-        document.getElementById('departmentImageUrl').value = department.imageUrl;
-
-        // Đặt chức năng
-        document.querySelectorAll('input[name="departmentFunctions"]').forEach(checkbox => {
-            checkbox.checked = department.functions.includes(checkbox.value);
+    // Load danh sách chi nhánh - ĐÃ SỬA LỖI
+    function loadBranchList() {
+        // Lọc danh sách
+        let filteredBranches = branches.filter(branch => {
+            if (currentBranchFilter.search && !branch.name.toLowerCase().includes(currentBranchFilter.search.toLowerCase()) &&
+                !branch.address.toLowerCase().includes(currentBranchFilter.search.toLowerCase()) &&
+                !branch.code.toLowerCase().includes(currentBranchFilter.search.toLowerCase())) return false;
+            return true;
         });
 
-        // Hiển thị ảnh preview
-        if (department.imageUrl) {
-            previewImage.src = department.imageUrl;
-            imagePreview.classList.remove('hidden');
-        } else {
-            imagePreview.classList.add('hidden');
+        // Row View
+        if (filteredBranches.length === 0) {
+            branchList.innerHTML = `
+                    <div class="bg-white rounded-lg shadow p-6 text-center">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-code-branch text-xl text-green-500"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-800 mb-2">Không tìm thấy chi nhánh nào</h3>
+                        <p class="text-gray-600 text-xs mb-4">Thử thay đổi bộ lọc hoặc thêm chi nhánh mới</p>
+                        <button id="addEmptyBranchBtn" class="px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-medium text-xs shadow hover:shadow-md transition duration-200">
+                            <i class="fas fa-plus mr-1.5 text-xs"></i>Thêm chi nhánh mới
+                        </button>
+                    </div>
+                `;
+            branchCardGrid.innerHTML = '';
+            document.getElementById('addEmptyBranchBtn')?.addEventListener('click', openBranchModal);
+            return;
         }
 
-        departmentModal.classList.remove('hidden');
+        // Row View HTML
+        branchList.innerHTML = filteredBranches.map(branch => {
+            const statusInfo = getStatusInfo(branch.status);
+            const statusColors = getColorFromGradient(statusInfo.color);
+            const deptCount = departments.filter(dept => dept.branch === branch.code).length;
+            const branchColors = getColorFromGradient(branch.color);
+
+            return `
+                    <div class="bg-white rounded-lg shadow p-3 card-hover">
+                        <div class="flex flex-col lg:flex-row lg:items-start justify-between mb-3">
+                            <div class="flex-1 mb-2 lg:mb-0">
+                                <div class="flex flex-wrap items-center gap-2 mb-3">
+                                    <h3 class="text-sm font-bold text-gray-900 truncate">${branch.name}</h3>
+                                    <span class="badge-gradient px-2 py-0.5 rounded-full text-[10px]" style="--color1: #10b981; --color2: #059669">
+                                        ${branch.code}
+                                    </span>
+                                    <span class="badge-gradient px-2 py-0.5 rounded-full text-[10px]" style="--color1: ${statusColors.color1}; --color2: ${statusColors.color2}">
+                                        <i class="fas ${statusInfo.icon} mr-0.5 text-[8px]"></i>${statusInfo.name}
+                                    </span>
+                                </div>
+
+                                <p class="text-gray-600 text-xs mb-3 line-clamp-2">${branch.description}</p>
+
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                                    <div class="flex items-center">
+                                        <div class="w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 rounded flex items-center justify-center mr-2">
+                                            <i class="fas fa-user-tie text-white text-[10px]"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] text-gray-500">Giám đốc</p>
+                                            <p class="text-xs font-medium text-gray-700 truncate">${branch.manager}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-600 rounded flex items-center justify-center mr-2">
+                                            <i class="fas fa-phone text-white text-[10px]"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] text-gray-500">Điện thoại</p>
+                                            <p class="text-xs font-medium text-gray-700 truncate">${branch.phone}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-600 rounded flex items-center justify-center mr-2">
+                                            <i class="fas fa-envelope text-white text-[10px]"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] text-gray-500">Email</p>
+                                            <p class="text-xs font-medium text-gray-700 truncate">${branch.email}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-6 h-6 bg-gradient-to-br from-amber-500 to-orange-600 rounded flex items-center justify-center mr-2">
+                                            <i class="fas fa-calendar text-white text-[10px]"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] text-gray-500">Thành lập</p>
+                                            <p class="text-xs font-medium text-gray-700">${branch.established}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center">
+                                    <div class="w-6 h-6 bg-gradient-to-br from-red-500 to-pink-600 rounded flex items-center justify-center mr-2">
+                                        <i class="fas fa-map-marker-alt text-white text-[10px]"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-[10px] text-gray-500">Địa chỉ</p>
+                                        <p class="text-xs font-medium text-gray-700 truncate">${branch.address}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex lg:flex-col space-x-1.5 lg:space-x-0 lg:space-y-1.5">
+                                <button class="edit-branch-btn w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded flex items-center justify-center shadow hover:shadow-md transition duration-200" data-id="${branch.id}" title="Sửa">
+                                    <i class="fas fa-edit text-[10px]"></i>
+                                </button>
+                                <button class="delete-branch-btn w-6 h-6 bg-gradient-to-br from-red-500 to-pink-600 text-white rounded flex items-center justify-center shadow hover:shadow-md transition duration-200" data-id="${branch.id}" data-name="${branch.name}" title="Xóa">
+                                    <i class="fas fa-trash text-[10px]"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 border-t">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between">
+                                <div class="flex space-x-4 mb-2 md:mb-0">
+                                    <div class="text-center">
+                                        <div class="text-base font-bold text-blue-600">${deptCount}</div>
+                                        <div class="text-[10px] text-gray-600">Phòng ban</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-base font-bold text-green-600">${branch.employees}</div>
+                                        <div class="text-[10px] text-gray-600">Nhân viên</div>
+                                    </div>
+                                </div>
+                                <button class="view-branch-details-btn text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center" data-id="${branch.id}">
+                                    <i class="fas fa-eye mr-1.5 text-xs"></i>Chi tiết
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+        }).join('');
+
+        // Card View HTML
+        branchCardGrid.innerHTML = filteredBranches.map(branch => {
+            const statusInfo = getStatusInfo(branch.status);
+            const statusColors = getColorFromGradient(statusInfo.color);
+            const deptCount = departments.filter(dept => dept.branch === branch.code).length;
+            const branchColors = getColorFromGradient(branch.color);
+
+            return `
+                    <div class="bg-white rounded-lg shadow overflow-hidden card-hover">
+                        <div class="h-20 bg-gradient-to-br ${branch.color} relative">
+                            <div class="absolute top-1.5 right-1.5 flex space-x-1">
+                                <button class="edit-branch-btn w-5 h-5 bg-white bg-opacity-90 text-blue-600 rounded-full flex items-center justify-center shadow hover:shadow-md transition duration-200" data-id="${branch.id}" title="Sửa">
+                                    <i class="fas fa-edit text-[8px]"></i>
+                                </button>
+                                <button class="delete-branch-btn w-5 h-5 bg-white bg-opacity-90 text-red-600 rounded-full flex items-center justify-center shadow hover:shadow-md transition duration-200" data-id="${branch.id}" data-name="${branch.name}" title="Xóa">
+                                    <i class="fas fa-trash text-[8px]"></i>
+                                </button>
+                            </div>
+                            <div class="absolute bottom-1.5 left-1.5">
+                                <h3 class="text-sm font-bold text-white truncate max-w-[180px]">${branch.name}</h3>
+                                <span class="text-[10px] text-white opacity-90">${branch.code}</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3">
+                            <div class="mb-3">
+                                <span class="badge-gradient px-2 py-0.5 rounded-full text-[10px] mb-2 inline-block" style="--color1: ${statusColors.color1}; --color2: ${statusColors.color2}">
+                                    <i class="fas ${statusInfo.icon} mr-0.5 text-[8px]"></i>${statusInfo.name}
+                                </span>
+                                <p class="text-gray-600 text-xs line-clamp-2">${branch.description}</p>
+                            </div>
+
+                            <div class="space-y-2 mb-3">
+                                <div class="flex items-center">
+                                    <div class="w-5 h-5 bg-gradient-to-br from-green-500 to-emerald-600 rounded flex items-center justify-center mr-2">
+                                        <i class="fas fa-user-tie text-white text-[8px]"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-[10px] text-gray-500">Giám đốc</p>
+                                        <p class="text-xs font-medium text-gray-700 truncate">${branch.manager}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-5 h-5 bg-gradient-to-br from-blue-500 to-cyan-600 rounded flex items-center justify-center mr-2">
+                                        <i class="fas fa-map-marker-alt text-white text-[8px]"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-[10px] text-gray-500">Địa chỉ</p>
+                                        <p class="text-xs font-medium text-gray-700 truncate">${branch.address.split(',')[0]}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="text-center">
+                                    <div class="text-sm font-bold text-blue-600">${deptCount}</div>
+                                    <div class="text-[10px] text-gray-600">Phòng</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-sm font-bold text-green-600">${branch.employees}</div>
+                                    <div class="text-[10px] text-gray-600">NV</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-sm font-bold text-purple-600">${branch.established.split('-')[0]}</div>
+                                    <div class="text-[10px] text-gray-600">Năm</div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center pt-2 border-t">
+                                <button class="view-branch-details-btn text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center" data-id="${branch.id}">
+                                    <i class="fas fa-eye mr-1 text-xs"></i>Chi tiết
+                                </button>
+                                <span class="text-xs text-gray-500">${branch.phone}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+        }).join('');
+
+        // Thêm sự kiện cho cả hai view
+        document.querySelectorAll('.edit-branch-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.getAttribute('data-id'));
+                openBranchModal(id);
+            });
+        });
+
+        document.querySelectorAll('.delete-branch-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.getAttribute('data-id'));
+                const name = this.getAttribute('data-name');
+                openDeleteModal('branch', id, name);
+            });
+        });
+
+        document.querySelectorAll('.view-branch-details-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.getAttribute('data-id'));
+                viewBranchDetails(id);
+            });
+        });
     }
 
-    // Hàm mở modal xóa phòng ban
-    function openDeleteModal(id, name) {
+    // Xem chi tiết chi nhánh
+    function viewBranchDetails(id) {
+        const branch = branches.find(b => b.id === id);
+        if (!branch) return;
+
+        const branchDepts = departments.filter(dept => dept.branch === branch.code);
+        let deptListText = '';
+
+        if (branchDepts.length > 0) {
+            deptListText = branchDepts.map(dept => `• ${dept.name} (${dept.manager})`).join('\n');
+        } else {
+            deptListText = 'Chưa có phòng ban';
+        }
+
+        alert(`CHI TIẾT CHI NHÁNH\n\n` +
+            `📌 ${branch.name} (${branch.code})\n` +
+            `👨‍💼 Giám đốc: ${branch.manager}\n` +
+            `📞 Điện thoại: ${branch.phone}\n` +
+            `📧 Email: ${branch.email}\n` +
+            `📍 Địa chỉ: ${branch.address}\n` +
+            `📅 Thành lập: ${branch.established}\n` +
+            `📊 Số phòng ban: ${branchDepts.length}\n` +
+            `👥 Tổng nhân viên: ${branch.employees}\n\n` +
+            `📋 Phòng ban thuộc chi nhánh:\n${deptListText}`);
+    }
+
+    // Mở modal phòng ban
+    function openDeptModal(id = null) {
         editingId = id;
-        deleteDepartmentName.textContent = name;
+        editingType = 'dept';
+
+        if (id) {
+            const dept = departments.find(d => d.id === id);
+            if (!dept) return;
+
+            deptModalTitle.textContent = "Sửa phòng ban";
+            document.getElementById('deptName').value = dept.name;
+            document.getElementById('deptManager').value = dept.manager;
+            document.getElementById('deptBranch').value = dept.branch;
+            document.getElementById('deptEmployeeLink').value = dept.employeeLink;
+            document.getElementById('deptDescription').value = dept.description;
+            document.getElementById('deptImageUrl').value = dept.imageUrl;
+
+            document.querySelectorAll('input[name="deptFunctions"]').forEach(checkbox => {
+                checkbox.checked = dept.functions.includes(checkbox.value);
+            });
+
+            if (dept.imageUrl) {
+                deptPreviewImage.src = dept.imageUrl;
+                deptImagePreview.classList.remove('hidden');
+            }
+        } else {
+            deptModalTitle.textContent = "Thêm phòng ban mới";
+            deptForm.reset();
+            deptImagePreview.classList.add('hidden');
+            document.getElementById('deptImageUrl').value = '';
+        }
+
+        // Cập nhật branch options
+        const branchSelect = document.getElementById('deptBranch');
+        branchSelect.innerHTML = '<option value="">Chọn chi nhánh</option>';
+        branches.forEach(branch => {
+            branchSelect.innerHTML += `<option value="${branch.code}">${branch.name}</option>`;
+        });
+        if (id) branchSelect.value = departments.find(d => d.id === id)?.branch || '';
+
+        deptModal.classList.remove('hidden');
+    }
+
+    // Mở modal chi nhánh
+    function openBranchModal(id = null) {
+        editingId = id;
+        editingType = 'branch';
+
+        if (id) {
+            const branch = branches.find(b => b.id === id);
+            if (!branch) return;
+
+            branchModalTitle.textContent = "Sửa chi nhánh";
+            document.getElementById('branchName').value = branch.name;
+            document.getElementById('branchCode').value = branch.code;
+            document.getElementById('branchManager').value = branch.manager;
+            document.getElementById('branchPhone').value = branch.phone;
+            document.getElementById('branchAddress').value = branch.address;
+            document.getElementById('branchEmail').value = branch.email;
+            document.getElementById('branchStatus').value = branch.status;
+            document.getElementById('branchEstablished').value = branch.established;
+            document.getElementById('branchDescription').value = branch.description;
+        } else {
+            branchModalTitle.textContent = "Thêm chi nhánh mới";
+            branchForm.reset();
+            document.getElementById('branchEstablished').value = new Date().toISOString().split('T')[0];
+        }
+
+        branchModal.classList.remove('hidden');
+    }
+
+    // Mở modal xóa
+    function openDeleteModal(type, id, name) {
+        editingId = id;
+        editingType = type;
+        deleteItemName.textContent = name;
+        deleteModalTitle.textContent = type === 'dept' ? 'Xóa phòng ban này?' : 'Xóa chi nhánh này?';
         deleteModal.classList.remove('hidden');
     }
 
-    // Hàm đóng tất cả modal
+    // Đóng tất cả modal
     function closeModals() {
-        departmentModal.classList.add('hidden');
+        deptModal.classList.add('hidden');
+        branchModal.classList.add('hidden');
         deleteModal.classList.add('hidden');
         editingId = null;
+        editingType = null;
     }
 
-    // Hàm lưu phòng ban
-    function saveDepartment() {
-        // Lấy dữ liệu từ form
-        const name = document.getElementById('departmentName').value.trim();
-        const manager = document.getElementById('departmentManager').value.trim();
-        const branch = document.getElementById('departmentBranch').value;
-        const employeeLink = document.getElementById('employeeListLink').value.trim();
-        const description = document.getElementById('departmentDescription').value.trim();
-        const imageUrl = document.getElementById('departmentImageUrl').value || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80";
+    // Lưu phòng ban
+    function saveDept() {
+        const name = document.getElementById('deptName').value.trim();
+        const manager = document.getElementById('deptManager').value.trim();
+        const branch = document.getElementById('deptBranch').value;
+        const employeeLink = document.getElementById('deptEmployeeLink').value.trim();
+        const description = document.getElementById('deptDescription').value.trim();
+        const imageUrl = document.getElementById('deptImageUrl').value || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
 
-        // Lấy các chức năng đã chọn
-        const selectedFunctions = Array.from(document.querySelectorAll('input[name="departmentFunctions"]:checked'))
+        const selectedFunctions = Array.from(document.querySelectorAll('input[name="deptFunctions"]:checked'))
             .map(checkbox => checkbox.value);
 
-        // Kiểm tra dữ liệu
         if (!name || !manager || !branch || !description || selectedFunctions.length === 0) {
             alert("Vui lòng điền đầy đủ thông tin bắt buộc!");
             return;
         }
 
         if (editingId) {
-            // Cập nhật phòng ban
-            const index = departments.findIndex(dept => dept.id === editingId);
+            const index = departments.findIndex(d => d.id === editingId);
             if (index !== -1) {
                 departments[index] = {
                     ...departments[index],
@@ -596,129 +1785,198 @@
                 };
             }
         } else {
-            // Thêm phòng ban mới
             departments.push({
-                id: nextId++,
+                id: nextDeptId++,
                 name,
                 manager,
                 branch,
                 employeeLink,
                 description,
                 functions: selectedFunctions,
-                imageUrl
+                imageUrl,
+                createdAt: new Date().toISOString().split('T')[0],
+                employees: Math.floor(Math.random() * 25) + 5
             });
         }
 
-        // Đóng modal và hiển thị lại danh sách
         closeModals();
-        displayDepartments();
+        loadDeptList();
+        updateStats();
     }
 
-    // Hàm xóa phòng ban
-    function deleteDepartment() {
-        departments = departments.filter(dept => dept.id !== editingId);
-        closeModals();
-        displayDepartments();
-    }
+    // Lưu chi nhánh
+    function saveBranch() {
+        const name = document.getElementById('branchName').value.trim();
+        const code = document.getElementById('branchCode').value.trim();
+        const manager = document.getElementById('branchManager').value.trim();
+        const phone = document.getElementById('branchPhone').value.trim();
+        const address = document.getElementById('branchAddress').value.trim();
+        const email = document.getElementById('branchEmail').value.trim();
+        const status = document.getElementById('branchStatus').value;
+        const established = document.getElementById('branchEstablished').value;
+        const description = document.getElementById('branchDescription').value.trim();
 
-    // Hàm tìm kiếm
-    function handleSearch() {
-        currentFilter.search = searchInput.value.trim();
-        displayDepartments();
-    }
-
-    // Hàm lọc theo chi nhánh
-    function handleBranchFilter(e) {
-        const option = e.target.closest('.branch-option');
-        if (!option) return;
-
-        // Cập nhật trạng thái active
-        document.querySelectorAll('.branch-option').forEach(opt => {
-            opt.classList.remove('bg-blue-50', 'text-blue-700', 'border-blue-200');
-            opt.classList.add('hover:bg-gray-100');
-        });
-        option.classList.add('bg-blue-50', 'text-blue-700', 'border', 'border-blue-200');
-        option.classList.remove('hover:bg-gray-100');
-
-        // Cập nhật bộ lọc
-        currentFilter.branch = option.getAttribute('data-branch');
-        displayDepartments();
-    }
-
-    // Hàm lọc theo chức năng
-    function handleFunctionFilter(e) {
-        const option = e.target.closest('.function-option');
-        if (!option) return;
-
-        // Cập nhật trạng thái active
-        document.querySelectorAll('.function-option').forEach(opt => {
-            opt.classList.remove('bg-blue-50', 'text-blue-700', 'border-blue-200');
-            opt.classList.add('hover:bg-gray-100');
-        });
-        option.classList.add('bg-blue-50', 'text-blue-700', 'border', 'border-blue-200');
-        option.classList.remove('hover:bg-gray-100');
-
-        // Cập nhật bộ lọc
-        currentFilter.function = option.getAttribute('data-function');
-        displayDepartments();
-    }
-
-    // Hàm xử lý upload ảnh
-    function handleImageUpload() {
-        departmentImage.click();
-    }
-
-    function handleImageChange(e) {
-        const file = e.target.files[0];
-        if (file) {
-            // Trong ứng dụng thực tế, bạn sẽ upload ảnh lên server
-            // Ở đây chúng ta sẽ tạo URL tạm thời cho ảnh
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                previewImage.src = event.target.result;
-                document.getElementById('departmentImageUrl').value = event.target.result;
-                imagePreview.classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
+        if (!name || !code || !manager || !phone || !address || !email) {
+            alert("Vui lòng điền đầy đủ thông tin bắt buộc!");
+            return;
         }
+
+        if (editingId) {
+            const index = branches.findIndex(b => b.id === editingId);
+            if (index !== -1) {
+                branches[index] = {
+                    ...branches[index],
+                    name,
+                    code,
+                    manager,
+                    phone,
+                    address,
+                    email,
+                    status,
+                    established,
+                    description
+                };
+            }
+        } else {
+            // Check if code already exists
+            if (branches.some(b => b.code === code)) {
+                alert("Mã chi nhánh đã tồn tại!");
+                return;
+            }
+
+            const colorOptions = [
+                "from-blue-500 to-cyan-500",
+                "from-green-500 to-emerald-500",
+                "from-purple-500 to-pink-500",
+                "from-amber-500 to-orange-500",
+                "from-red-500 to-rose-500",
+                "from-indigo-500 to-purple-500"
+            ];
+
+            branches.push({
+                id: nextBranchId++,
+                name,
+                code,
+                manager,
+                phone,
+                address,
+                email,
+                status,
+                established,
+                description,
+                departments: 0,
+                employees: Math.floor(Math.random() * 100) + 20,
+                color: colorOptions[Math.floor(Math.random() * colorOptions.length)]
+            });
+        }
+
+        closeModals();
+        loadBranchList();
+        updateStats();
     }
 
-    // Khởi tạo ứng dụng
-    function initApp() {
-        // Hiển thị danh sách phòng ban ban đầu
-        displayDepartments();
+    // Xóa item
+    function deleteItem() {
+        if (editingType === 'dept') {
+            departments = departments.filter(d => d.id !== editingId);
+            loadDeptList();
+        } else if (editingType === 'branch') {
+            // Check if branch has departments
+            const branch = branches.find(b => b.id === editingId);
+            if (branch && departments.some(d => d.branch === branch.code)) {
+                alert("Không thể xóa chi nhánh đang có phòng ban!");
+                return;
+            }
+            branches = branches.filter(b => b.id !== editingId);
+            loadBranchList();
+        }
 
-        // Thêm sự kiện
-        addDepartmentBtn.addEventListener('click', openAddModal);
+        closeModals();
+        updateStats();
+    }
 
-        closeModalBtn.addEventListener('click', closeModals);
-        closeDeleteModalBtn.addEventListener('click', closeModals);
-        cancelBtn.addEventListener('click', closeModals);
+    // Khởi tạo
+    function init() {
+        // Tab events
+        tabDashboard.addEventListener('click', () => switchTab('dashboard'));
+        tabDepartments.addEventListener('click', () => switchTab('departments'));
+        tabBranches.addEventListener('click', () => switchTab('branches'));
+        tabReports.addEventListener('click', () => switchTab('reports'));
+        tabSettings.addEventListener('click', () => switchTab('settings'));
+
+        // View mode events
+        deptViewRow.addEventListener('click', () => switchDeptView('row'));
+        deptViewCard.addEventListener('click', () => switchDeptView('card'));
+        branchViewRow.addEventListener('click', () => switchBranchView('row'));
+        branchViewCard.addEventListener('click', () => switchBranchView('card'));
+
+        // Button events
+        addDeptBtn.addEventListener('click', () => openDeptModal());
+        addBranchBtn.addEventListener('click', () => openBranchModal());
+
+        // Modal events
+        closeDeptModal.addEventListener('click', closeModals);
+        closeBranchModal.addEventListener('click', closeModals);
+        cancelDeptBtn.addEventListener('click', closeModals);
+        cancelBranchBtn.addEventListener('click', closeModals);
         cancelDeleteBtn.addEventListener('click', closeModals);
 
-        saveDepartmentBtn.addEventListener('click', saveDepartment);
-        confirmDeleteBtn.addEventListener('click', deleteDepartment);
+        saveDeptBtn.addEventListener('click', saveDept);
+        saveBranchBtn.addEventListener('click', saveBranch);
+        confirmDeleteBtn.addEventListener('click', deleteItem);
 
-        searchInput.addEventListener('input', handleSearch);
-        branchFilter.addEventListener('click', handleBranchFilter);
-        functionFilter.addEventListener('click', handleFunctionFilter);
+        // Filter events
+        deptFilterBtn.addEventListener('click', () => {
+            currentDeptFilter.branch = deptBranchFilter.value;
+            currentDeptFilter.function = deptFunctionFilter.value;
+            currentDeptFilter.search = deptSearch.value.trim();
+            loadDeptList();
+        });
 
-        imageUpload.addEventListener('click', handleImageUpload);
-        departmentImage.addEventListener('change', handleImageChange);
+        deptSearch.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') deptFilterBtn.click();
+        });
+
+        branchFilterBtn.addEventListener('click', () => {
+            currentBranchFilter.search = branchSearch.value.trim();
+            loadBranchList();
+        });
+
+        branchSearch.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') branchFilterBtn.click();
+        });
+
+        // Image upload
+        deptImageUpload.addEventListener('click', () => deptImage.click());
+        deptImage.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    deptPreviewImage.src = event.target.result;
+                    document.getElementById('deptImageUrl').value = event.target.result;
+                    deptImagePreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
         // Đóng modal khi click bên ngoài
-        window.addEventListener('click', function(e) {
-            if (e.target === departmentModal) {
-                closeModals();
-            }
-            if (e.target === deleteModal) {
+        window.addEventListener('click', (e) => {
+            if (e.target === deptModal || e.target === branchModal || e.target === deleteModal) {
                 closeModals();
             }
         });
+
+        // Khởi tạo
+        switchTab('departments');
+        switchDeptView('row');
+        switchBranchView('row');
+        updateStats();
     }
 
-    // Khởi chạy ứng dụng khi trang đã tải xong
-    document.addEventListener('DOMContentLoaded', initApp);
+    // Chạy khi tài liệu đã tải
+    document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>

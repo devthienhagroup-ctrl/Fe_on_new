@@ -145,19 +145,18 @@
                   <th style="width:150px">Mã HĐ</th>
                   <th>Khách hàng</th>
                   <th style="width:220px">Dịch vụ</th>
-                  <th style="width:120px">Giá tài sản</th>
+                  <th style="width:120px">G. trị tài sản</th>
                   <th style="width:160px">Giá sau giảm</th>
                   <th style="width:160px">Doanh thu</th>
                   <th style="width:180px">Doanh số</th>
                   <th style="width:120px">Trạng thái</th>
-                  <th style="width:130px">Nhân viên tạo</th>
-                  <th style="width:100px">Ngày tạo</th>
+                  <th style="width:160px">Hiện trạng</th>
                   <th style="width:80px">Thao tác</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr v-if="contracts.length === 0">
-                  <td colspan="11">
+                  <td colspan="10">
                     <div class="text-center py-10">
                       <div class="mx-auto w-12 h-12 rounded-2xl grid place-items-center text-white shadow-lg" style="background: var(--primary-gradient);">
                         <i class="fa-solid fa-face-smile"></i>
@@ -169,6 +168,7 @@
                 <tr v-for="contract in contracts" :key="contract.id">
                   <td>
                     <div class="font-extrabold mono">{{ contract.maHopDong }}</div>
+                    <div class="muted tiny mono">{{ formatCreatedAtNoSeconds(contract.ngayTao) }}</div>
                   </td>
                   <td>
                     <div class="font-bold">{{ contract.tenKhachHang }}</div>
@@ -178,7 +178,7 @@
                     <div class="muted tiny">Giá gốc: <span class="mono">{{ formatMoney(contract.giaDichVuGoc) }}</span></div>
                   </td>
                   <td>
-                    <div class="price p2">{{ formatMoney(getGiaTaiSanKy(contract)) }}</div>
+                    <div class="price p2">{{ formatGiaTriTaiSan(getGiaTaiSanKy(contract)) }}</div>
                   </td>
                   <td>
                     <div class="price p4">{{ formatMoney(contract.giaSauGiam) }}</div>
@@ -204,9 +204,15 @@
                       </span>
                   </td>
                   <td>
-                    <div class="font-semibold">{{ shortenName(contract.nhanVienTao) }}</div>
+                    <span :class="['status', getHienTrangInfo(contract).class]">
+                      <span class="status-label">
+                        <i :class="getHienTrangInfo(contract).icon"></i>{{ getHienTrangInfo(contract).label }}
+                      </span>
+                      <span v-if="getHienTrangInfo(contract).amount !== null" class="status-amount mono">
+                        {{ formatCompactCurrency(getHienTrangInfo(contract).amount) }}
+                      </span>
+                    </span>
                   </td>
-                  <td class="mono">{{ formatCreatedAt(contract.ngayTao) }}</td>
                   <td>
                     <div class="actions" @click.stop>
                       <div class="icon-btn icon-menu" title="Tác vụ" @click.stop="toggleActionMenu(contract.id, $event)">
@@ -1030,12 +1036,29 @@
                     <div class="v font-extrabold" style="font-size: 14px!important;">{{ detailContract?.tenChiNhanh || '-' }}</div>
                   </div>
                   <div class="kpi">
+                    <div class="k"><span class="dot"></span>Khách hàng</div>
+                    <div class="v font-extrabold fs-6" style="font-size: 14px!important;">{{ detailContract?.tenKhachHang || '-' }}</div>
+                  </div>
+                  <div class="kpi">
                     <div class="k"><span class="dot"></span>Người tạo</div>
                     <div class="v font-extrabold fs-6"  style="font-size: 14px!important;">{{ detailContract?.nguoiTaoFullName || '-' }}</div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Dịch vụ</div>
                     <div class="v font-extrabold fs-6"  style="font-size: 14px!important;">{{ detailContract?.tenDichVu || '-' }}</div>
+                  </div>
+                  <div class="kpi">
+                    <div class="k"><span class="dot"></span>Hiện trạng</div>
+                    <div class="v">
+                      <span :class="['status', getHienTrangInfo(detailContract, true).class]">
+                      <span class="status-label">
+                        <i :class="getHienTrangInfo(detailContract, true).icon"></i>{{ getHienTrangInfo(detailContract, true).label }}
+                      </span>
+                      <span v-if="getHienTrangInfo(detailContract, true).amount !== null" class="status-amount mono">
+                          {{ formatCompactCurrency(getHienTrangInfo(detailContract, true).amount) }}
+                      </span>
+                    </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1214,7 +1237,6 @@ import {
   updateAlertSuccess
 } from '/src/assets/js/alertService.js'
 import ContractStatsDashboard from "../thiet-kegiandien/ContractStatsDashboard.vue";
-import {shortenName} from "../../assets/js/global.js";
 const authStore = useAuthStore()
 const info = computed(() => authStore.userInfo || {})
 const canPayContract = computed(() => authStore.hasPermission('HOPDONG_THU'))
@@ -1601,6 +1623,34 @@ const formatMoney = (n) => {
   return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' ₫'
 }
 
+const formatCompactCurrency = (value) => {
+  const raw = Number(value || 0)
+  const abs = Math.abs(raw)
+  const sign = raw < 0 ? '-' : ''
+  if (abs >= 1_000_000_000) {
+    const formatted = (abs / 1_000_000_000).toLocaleString('vi-VN', {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
+    })
+    return `${sign}${formatted} Tỷ`
+  }
+  if (abs >= 1_000_000) {
+    const formatted = (abs / 1_000_000).toLocaleString('vi-VN', {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
+    })
+    return `${sign}${formatted} Triệu`
+  }
+  if (abs >= 1_000) {
+    const formatted = (abs / 1_000).toLocaleString('vi-VN', {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
+    })
+    return `${sign}${formatted} K`
+  }
+  return `${sign}${abs.toLocaleString('vi-VN')} ₫`
+}
+
 const formatTy = (n) => {
   const raw = Number(n || 0)
   const abs = Math.abs(raw)
@@ -1658,6 +1708,19 @@ const getStatusText = (status) => {
   }
 }
 
+const getHienTrangInfo = (contract, useRow = false) => {
+  const doanhThu = useRow ? getDoanhThuRow(contract) : getDoanhThu(contract)
+  const doanhSo = useRow ? getDoanhSoRow(contract) : getDoanhSo(contract)
+  const diff = Number(doanhSo) - Number(doanhThu)
+  if (diff > 0) {
+    return { label: 'Công nợ', icon: 'fa-solid fa-triangle-exclamation', class: 'st-debt', amount: diff }
+  }
+  if (diff < 0) {
+    return { label: 'Thu lố', icon: 'fa-solid fa-arrow-rotate-left', class: 'st-over', amount: Math.abs(diff) }
+  }
+  return { label: 'Đã thu đủ', icon: 'fa-solid fa-circle-check', class: 'st-balance', amount: null }
+}
+
 
 
 const formatCreatedAt = (value) => {
@@ -1676,6 +1739,28 @@ const formatCreatedAt = (value) => {
   const parsed = value instanceof Date ? value : new Date(value)
   if (!Number.isNaN(parsed.getTime())) {
     return `${parsed.toLocaleTimeString('vi-VN')} ${parsed.toLocaleDateString('vi-VN')}`
+  }
+  return String(value)
+}
+
+const formatCreatedAtNoSeconds = (value) => {
+  if (!value) return '-'
+  const parsed = value instanceof Date ? value : new Date(value)
+  if (!Number.isNaN(parsed.getTime())) {
+    const timePart = parsed.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+    const datePart = parsed.toLocaleDateString('vi-VN')
+    return `${timePart} ${datePart}`
+  }
+  if (typeof value === 'string') {
+    const parts = value.split(',')
+    if (parts.length === 2) {
+      const datePart = parts[0].trim()
+      const timePart = parts[1].trim()
+      if (timePart && datePart) {
+        const timeOnly = timePart.split(':').slice(0, 2).join(':')
+        return `${timeOnly} ${datePart}`
+      }
+    }
   }
   return String(value)
 }
@@ -1701,6 +1786,22 @@ const formatDateTimeCompact = (value) => {
   const timePart = parsed.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
   const datePart = parsed.toLocaleDateString('vi-VN')
   return `${timePart} ${datePart}`
+}
+
+const formatGiaTriTaiSan = (value) => {
+  const raw = Number(value || 0)
+  if (raw >= 100_000_000) {
+    const formatted = (raw / 1_000_000_000).toLocaleString('vi-VN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })
+    return `${formatted} tỷ`
+  }
+  const formatted = (raw / 1_000_000).toLocaleString('vi-VN', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1
+  })
+  return `${formatted} triệu`
 }
 
 const getGiaGiam = (contract) => {
@@ -2899,7 +3000,13 @@ onUnmounted(() => {
   top: -10px;
 }
 .muted{ color: var(--muted); }
-.mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+  "Liberation Mono", "Courier New", monospace;
+  font-size: 14px;
+  white-space: nowrap; /* ❌ không cho rớt chữ xuống dòng */
+}
+
 .tiny{ font-size: 12px; }
 .no-select{ user-select:none; }
 
@@ -3463,9 +3570,24 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
   white-space:nowrap;
   border: 1px solid transparent;
 }
+.status-label{
+  display: inline-flex;
+  align-items:center;
+  gap:6px;
+  font-weight: 600;
+}
+.status-amount{
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1;
+  align-self: center;
+}
 .st-on{ color:#16a34a; background:rgba(34,197,94,.12); border-color: rgba(34,197,94,.26); }
 .st-done{ color:#2563eb; background:rgba(37,99,235,.12); border-color: rgba(37,99,235,.26); }
 .st-cancel{ color:#ef4444; background:rgba(239,68,68,.12); border-color: rgba(239,68,68,.26); }
+.st-balance{ color:#0ea5e9; background:rgba(14,165,233,.12); border-color: rgba(14,165,233,.26); }
+.st-debt{ color:#fb923c; background:rgba(251,146,60,.12); border-color: rgba(251,146,60,.26); }
+.st-over{ color:#a855f7; background:rgba(168,85,247,.12); border-color: rgba(168,85,247,.26); }
 
 /* =========================
    ACTION ICONS - chỉnh sửa cho 5 nút nằm trên 1 hàng
