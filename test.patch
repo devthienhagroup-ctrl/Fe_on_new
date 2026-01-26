@@ -1,5 +1,5 @@
 diff --git a/src/components/productAdmin/productUser/ProductTable.vue b/src/components/productAdmin/productUser/ProductTable.vue
-index 520d2924b2baa269d05a4c25a822f89f3535a670..9e62fe3dad5912dedbfe9a5bc7e0be7a66d1b489 100644
+index 520d2924b2baa269d05a4c25a822f89f3535a670..d347b75e115c9d5b878503ffc027c01c808e25e5 100644
 --- a/src/components/productAdmin/productUser/ProductTable.vue
 +++ b/src/components/productAdmin/productUser/ProductTable.vue
 @@ -1,47 +1,46 @@
@@ -50,7 +50,7 @@ index 520d2924b2baa269d05a4c25a822f89f3535a670..9e62fe3dad5912dedbfe9a5bc7e0be7a
                   alt="checked"
              />
              <img v-else-if="item.status === 'Đã bán'" src="/imgs/sold-out.png" style="width: 29px"
-@@ -64,71 +63,58 @@
+@@ -64,71 +63,62 @@
            <td class="text-slate-900 text-gray-800">
              <span class="table-truncate max-w-[140px]" :title="formatWard(item.diaChi)">
                {{ truncateText(formatWard(item.diaChi), 16) }}
@@ -91,9 +91,14 @@ index 520d2924b2baa269d05a4c25a822f89f3535a670..9e62fe3dad5912dedbfe9a5bc7e0be7a
 -          </td>
            <td class="text-center relative whitespace-nowrap">
              <div class="action-wrapper inline-flex items-center">
-               <button @click="$emit('toggle-love', item)" class="action-heart">
+-              <button @click="$emit('toggle-love', item)" class="action-heart">
 -                <i :class="item.daThich ? 'fa-solid fa-heart text-black text-base' : 'fa-regular fa-heart text-base'"></i>
++              <button
++                @click="$emit('toggle-love', item)"
++                :class="['action-heart', { 'is-loved': item.daThich }]"
++              >
 +                <i :class="item.daThich ? 'fa-solid fa-heart text-black text-[12px]' : 'fa-regular fa-heart text-[12px]'"></i>
++                <span class="heart-fireworks" aria-hidden="true"></span>
                </button>
 
                <div class="action-hover relative inline-flex items-center">
@@ -124,7 +129,7 @@ index 520d2924b2baa269d05a4c25a822f89f3535a670..9e62fe3dad5912dedbfe9a5bc7e0be7a
      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-3 bg-gradient-to-r from-slate-100 to-slate-200 border-t border-slate-300">
        <div class="flex items-center gap-1">
          <button
-@@ -328,113 +314,125 @@ function formatMoneyVN(value) {
+@@ -328,124 +318,215 @@ function formatMoneyVN(value) {
    if (num < 1_000_000_000) {
      const trieu = num / 1_000_000;
      return `${trieu.toFixed(trieu % 1 === 0 ? 0 : 1)} triệu`;
@@ -159,6 +164,8 @@ index 520d2924b2baa269d05a4c25a822f89f3535a670..9e62fe3dad5912dedbfe9a5bc7e0be7a
 +  align-items: center;
 +  justify-content: center;
 +  margin-right: 8px;
++  position: relative;
++  overflow: visible;
  }
 
  .action-view {
@@ -261,6 +268,83 @@ index 520d2924b2baa269d05a4c25a822f89f3535a670..9e62fe3dad5912dedbfe9a5bc7e0be7a
    transform: translateY(0);
  }
 
++.heart-fireworks {
++  position: absolute;
++  width: 6px;
++  height: 6px;
++  border-radius: 999px;
++  pointer-events: none;
++  opacity: 0;
++  background: radial-gradient(circle, #fb7185 0%, #f97316 60%, transparent 70%);
++  transform: translate(-50%, -50%);
++  top: 50%;
++  left: 50%;
++}
++
++.action-heart.is-loved .heart-fireworks {
++  animation: heart-burst 0.8s ease-out forwards;
++}
++
++.action-heart.is-loved::before,
++.action-heart.is-loved::after {
++  content: "";
++  position: absolute;
++  inset: -6px;
++  border-radius: 999px;
++  border: 1px solid rgba(251, 113, 133, 0.35);
++  opacity: 0;
++  animation: heart-ring 0.7s ease-out forwards;
++}
++
++.action-heart.is-loved::after {
++  inset: -10px;
++  border-color: rgba(251, 146, 60, 0.35);
++  animation-delay: 0.08s;
++}
++
++@keyframes heart-burst {
++  0% {
++    opacity: 0;
++    transform: translate(-50%, -50%) scale(0.6);
++    box-shadow:
++      0 -10px 0 0 rgba(251, 113, 133, 0.9),
++      8px -6px 0 0 rgba(249, 115, 22, 0.9),
++      10px 2px 0 0 rgba(251, 191, 36, 0.9),
++      6px 10px 0 0 rgba(168, 85, 247, 0.9),
++      0 12px 0 0 rgba(59, 130, 246, 0.85),
++      -6px 10px 0 0 rgba(139, 92, 246, 0.9),
++      -10px 2px 0 0 rgba(251, 146, 60, 0.9),
++      -8px -6px 0 0 rgba(251, 113, 133, 0.9);
++  }
++  40% {
++    opacity: 1;
++  }
++  100% {
++    opacity: 0;
++    transform: translate(-50%, -50%) scale(1.4);
++    box-shadow:
++      0 -18px 0 0 rgba(251, 113, 133, 0),
++      14px -10px 0 0 rgba(249, 115, 22, 0),
++      18px 4px 0 0 rgba(251, 191, 36, 0),
++      10px 16px 0 0 rgba(168, 85, 247, 0),
++      0 20px 0 0 rgba(59, 130, 246, 0),
++      -10px 16px 0 0 rgba(139, 92, 246, 0),
++      -18px 4px 0 0 rgba(251, 146, 60, 0),
++      -14px -10px 0 0 rgba(251, 113, 133, 0);
++  }
++}
++
++@keyframes heart-ring {
++  0% {
++    opacity: 0.4;
++    transform: scale(0.6);
++  }
++  100% {
++    opacity: 0;
++    transform: scale(1.35);
++  }
++}
++
  .table-truncate {
    display: inline-block;
    overflow: hidden;
@@ -275,3 +359,14 @@ index 520d2924b2baa269d05a4c25a822f89f3535a670..9e62fe3dad5912dedbfe9a5bc7e0be7a
  }
 
  td {
+   padding: 5px 5px 10px 0 !important;
+ }
+
+ * {
+   font-size: 14px;
+ }
+
+ table * {
+   font-size: 13.5px !important;
+ }
+ </style>

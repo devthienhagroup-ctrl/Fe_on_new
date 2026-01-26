@@ -410,8 +410,8 @@ const canRequestCollaboration = (item) => {
   #3b82f6 0%,     /* Xanh da trời sáng */
   #7c3aed 100%    /* Tím nhạt */
   );
-  display: flex;
   color: white;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
