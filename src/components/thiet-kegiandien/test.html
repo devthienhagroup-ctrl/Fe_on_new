@@ -3,990 +3,1241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thống Kê Hợp Đồng</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Quản lý Phòng ban & Chi nhánh</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            --secondary-gradient: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
-            --success-gradient: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-            --warning-gradient: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-            --danger-gradient: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
-            --info-gradient: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            --card-bg: #ffffff;
-            --body-bg: #f8fafc;
-            --text-dark: #1e293b;
-            --text-light: #64748b;
-            --border-color: #e2e8f0;
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
         }
 
         body {
-            background-color: var(--body-bg);
-            color: var(--text-dark);
-            padding: 20px;
-            min-height: 100vh;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
         }
 
-        .header {
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+            color: white;
+            padding: 20px 0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding: 25px;
-            background: var(--primary-gradient);
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);
-            color: white;
+            padding: 0 20px;
         }
 
-        .header h1 {
-            font-size: 32px;
-            font-weight: 700;
+        .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
-        }
-
-        .header h1 i {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 12px;
-            border-radius: 12px;
-            backdrop-filter: blur(5px);
-        }
-
-        .date-filter {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 12px 20px;
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-        }
-
-        .date-filter label {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .date-filter input, .date-filter select {
-            padding: 8px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--text-dark);
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .date-filter input:focus, .date-filter select:focus {
-            outline: none;
-            border-color: white;
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
-        }
-
-        .stats-summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 24px;
-            margin-bottom: 40px;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-        }
-
-        .stat-card:nth-child(1)::before {
-            background: var(--primary-gradient);
-        }
-
-        .stat-card:nth-child(2)::before {
-            background: var(--secondary-gradient);
-        }
-
-        .stat-card:nth-child(3)::before {
-            background: var(--success-gradient);
-        }
-
-        .stat-card:nth-child(4)::before {
-            background: var(--warning-gradient);
-        }
-
-        .stat-card:nth-child(5)::before {
-            background: var(--danger-gradient);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-card .icon {
-            font-size: 28px;
-            margin-bottom: 15px;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            color: white;
-        }
-
-        .stat-card:nth-child(1) .icon {
-            background: var(--primary-gradient);
-        }
-
-        .stat-card:nth-child(2) .icon {
-            background: var(--secondary-gradient);
-        }
-
-        .stat-card:nth-child(3) .icon {
-            background: var(--success-gradient);
-        }
-
-        .stat-card:nth-child(4) .icon {
-            background: var(--warning-gradient);
-        }
-
-        .stat-card:nth-child(5) .icon {
-            background: var(--danger-gradient);
-        }
-
-        .stat-card .value {
-            font-size: 32px;
-            font-weight: 800;
-            margin-bottom: 5px;
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .stat-card:nth-child(1) .value {
-            background-image: var(--primary-gradient);
-        }
-
-        .stat-card:nth-child(2) .value {
-            background-image: var(--secondary-gradient);
-        }
-
-        .stat-card:nth-child(3) .value {
-            background-image: var(--success-gradient);
-        }
-
-        .stat-card:nth-child(4) .value {
-            background-image: var(--warning-gradient);
-        }
-
-        .stat-card:nth-child(5) .value {
-            background-image: var(--danger-gradient);
-        }
-
-        .stat-card .label {
-            color: var(--text-light);
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        /* Biểu đồ đường chiếm full width */
-        .full-width-chart {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-            margin-bottom: 30px;
-        }
-
-        .full-width-chart h3 {
-            margin-bottom: 20px;
-            color: var(--text-dark);
-            font-size: 20px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .full-width-chart h3 i {
-            color: #6366f1;
-            background: rgba(99, 102, 241, 0.1);
-            padding: 8px;
-            border-radius: 8px;
-        }
-
-        .full-width-chart .chart-wrapper {
-            position: relative;
-            height: 350px;
-            width: 100%;
-        }
-
-        /* 3 biểu đồ nhỏ cùng hàng */
-        .three-charts-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        @media (max-width: 1200px) {
-            .three-charts-row {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .three-charts-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .small-chart-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .small-chart-card h3 {
-            margin-bottom: 20px;
-            color: var(--text-dark);
-            font-size: 18px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .small-chart-card h3 i {
-            color: #6366f1;
-            background: rgba(99, 102, 241, 0.1);
-            padding: 8px;
-            border-radius: 8px;
-        }
-
-        .small-chart-card .chart-wrapper {
-            position: relative;
-            height: 280px;
-            width: 100%;
-        }
-
-        .chart-legend {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
             gap: 15px;
-            margin-top: 20px;
         }
 
-        .legend-item {
+        .logo i {
+            font-size: 2.5rem;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+        }
+
+        .header-actions {
             display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
-            font-size: 13px;
-            color: var(--text-light);
         }
 
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 3px;
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: white;
         }
 
-        .footer {
-            text-align: center;
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #d68910;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-light {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+
+        .btn-light:hover {
+            background-color: #d5dbdb;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        .sidebar {
+            background-color: white;
+            border-radius: 10px;
             padding: 25px;
-            color: var(--text-light);
-            font-size: 14px;
-            background: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-            margin-top: 40px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            height: fit-content;
         }
 
-        @media (max-width: 1024px) {
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 20px;
-            }
+        .sidebar h3 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--light-color);
+            padding-bottom: 10px;
+        }
 
-            .date-filter {
-                width: 100%;
-                flex-wrap: wrap;
-            }
+        .filter-section {
+            margin-bottom: 25px;
+        }
 
-            .stats-summary {
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        .filter-section h4 {
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .filter-option:hover {
+            background-color: var(--light-color);
+        }
+
+        .filter-option.active {
+            background-color: #e1f0fa;
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        .content {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-color);
+        }
+
+        .content-header h2 {
+            color: var(--primary-color);
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background-color: var(--light-color);
+            border-radius: 5px;
+            padding: 8px 15px;
+            width: 300px;
+        }
+
+        .search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            margin-left: 10px;
+        }
+
+        .department-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .department-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #eee;
+        }
+
+        .department-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .department-img {
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .department-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .department-card:hover .department-img img {
+            transform: scale(1.05);
+        }
+
+        .department-info {
+            padding: 20px;
+        }
+
+        .department-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .department-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .department-tag {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .department-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .department-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--dark-color);
+        }
+
+        .detail-item i {
+            color: var(--secondary-color);
+            width: 20px;
+        }
+
+        .function-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .function-tag {
+            background-color: #e8f4fc;
+            color: var(--secondary-color);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .department-actions {
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 8px;
+            font-size: 0.85rem;
+            justify-content: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #7f8c8d;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #bdc3c7;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 1px solid #eee;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .modal-header h3 {
+            font-size: 1.4rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .required::after {
+            content: " *";
+            color: var(--danger-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .function-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .function-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .image-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .image-upload:hover {
+            border-color: var(--secondary-color);
+        }
+
+        .image-upload i {
+            font-size: 2.5rem;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 150px;
+            overflow: hidden;
+            border-radius: 5px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        .delete-confirm {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .delete-confirm i {
+            font-size: 4rem;
+            color: var(--danger-color);
+            margin-bottom: 20px;
+        }
+
+        .delete-confirm h3 {
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+
+        .delete-confirm p {
+            margin-bottom: 25px;
+            color: #666;
+        }
+
+        .delete-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #7f8c8d;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
             }
         }
 
         @media (max-width: 768px) {
-            .stats-summary {
-                grid-template-columns: 1fr 1fr;
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
             }
 
-            .full-width-chart .chart-wrapper {
-                height: 300px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            body {
-                padding: 15px;
+            .content-header {
+                flex-direction: column;
+                gap: 15px;
             }
 
-            .stats-summary {
+            .search-box {
+                width: 100%;
+            }
+
+            .department-list {
                 grid-template-columns: 1fr;
             }
 
-            .full-width-chart, .small-chart-card {
-                padding: 20px;
+            .form-row {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="header">
-        <h1><i class="fas fa-chart-network"></i> Thống Kê Hợp Đồng</h1>
-        <div class="date-filter">
-            <label for="timeRange">Thời gian:</label>
-            <select id="timeRange">
-                <option value="month">Tháng này</option>
-                <option value="quarter">Quý này</option>
-                <option value="year" selected>Năm nay</option>
-                <option value="all">Tất cả</option>
-            </select>
-            <label for="startDate">Từ:</label>
-            <input type="date" id="startDate" value="2026-01-01">
-            <label for="endDate">Đến:</label>
-            <input type="date" id="endDate" value="2026-12-31">
-            <button id="applyFilter" style="padding: 8px 16px; background: white; color: #6366f1; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                Áp dụng
-            </button>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+                <h1>Quản lý Phòng ban & Chi nhánh</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" id="addDepartmentBtn">
+                    <i class="fas fa-plus"></i> Thêm phòng ban
+                </button>
+            </div>
         </div>
+    </header>
+
+    <div class="main-content">
+        <aside class="sidebar">
+            <h3><i class="fas fa-filter"></i> Bộ lọc & Tìm kiếm</h3>
+
+            <div class="filter-section">
+                <h4>Chi nhánh</h4>
+                <div class="filter-options" id="branchFilter">
+                    <div class="filter-option active" data-branch="all">
+                        <i class="fas fa-globe"></i>
+                        <span>Tất cả chi nhánh</span>
+                    </div>
+                    <div class="filter-option" data-branch="hanoi">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Hà Nội</span>
+                    </div>
+                    <div class="filter-option" data-branch="hcm">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>TP. Hồ Chí Minh</span>
+                    </div>
+                    <div class="filter-option" data-branch="danang">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Đà Nẵng</span>
+                    </div>
+                    <div class="filter-option" data-branch="cantho">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Cần Thơ</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h4>Chức năng hệ thống</h4>
+                <div class="filter-options" id="functionFilter">
+                    <div class="filter-option active" data-function="all">
+                        <i class="fas fa-tasks"></i>
+                        <span>Tất cả chức năng</span>
+                    </div>
+                    <div class="filter-option" data-function="consulting">
+                        <i class="fas fa-comments"></i>
+                        <span>Tư vấn</span>
+                    </div>
+                    <div class="filter-option" data-function="tele">
+                        <i class="fas fa-phone-alt"></i>
+                        <span>Tele</span>
+                    </div>
+                    <div class="filter-option" data-function="marketing">
+                        <i class="fas fa-bullhorn"></i>
+                        <span>Marketing</span>
+                    </div>
+                    <div class="filter-option" data-function="it">
+                        <i class="fas fa-server"></i>
+                        <span>Thông tin</span>
+                    </div>
+                    <div class="filter-option" data-function="deployment">
+                        <i class="fas fa-cogs"></i>
+                        <span>Triển khai</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h4>Thống kê</h4>
+                <div class="detail-item">
+                    <i class="fas fa-building"></i>
+                    <span>Tổng phòng ban: <strong id="totalDepartments">6</strong></span>
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-users"></i>
+                    <span>Chi nhánh: <strong id="totalBranches">4</strong></span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="content-header">
+                <h2><i class="fas fa-list"></i> Danh sách phòng ban</h2>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm phòng ban...">
+                </div>
+            </div>
+
+            <div class="department-list" id="departmentList">
+                <!-- Các phòng ban sẽ được hiển thị ở đây -->
+            </div>
+        </main>
     </div>
 
-    <div class="stats-summary">
-        <div class="stat-card">
-            <div class="icon"><i class="fas fa-file-contract"></i></div>
-            <div class="value" id="totalContracts">48</div>
-            <div class="label">Tổng hợp đồng</div>
+    <footer>
+        <p>Hệ thống Quản lý Phòng ban & Chi nhánh &copy; 2023 - Phiên bản 1.0</p>
+    </footer>
+</div>
+
+<!-- Modal thêm/sửa phòng ban -->
+<div class="modal" id="departmentModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Thêm phòng ban mới</h3>
+            <button class="close-modal" id="closeModal">&times;</button>
         </div>
-        <div class="stat-card">
-            <div class="icon"><i class="fas fa-handshake"></i></div>
-            <div class="value" id="activeContracts">32</div>
-            <div class="label">Hợp đồng đang hiệu lực</div>
+        <div class="modal-body">
+            <form id="departmentForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="departmentName" class="required">Tên phòng ban</label>
+                        <input type="text" id="departmentName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="departmentManager" class="required">Trưởng phòng</label>
+                        <input type="text" id="departmentManager" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="departmentBranch" class="required">Chi nhánh</label>
+                        <select id="departmentBranch" class="form-control" required>
+                            <option value="">Chọn chi nhánh</option>
+                            <option value="hanoi">Hà Nội</option>
+                            <option value="hcm">TP. Hồ Chí Minh</option>
+                            <option value="danang">Đà Nẵng</option>
+                            <option value="cantho">Cần Thơ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="employeeListLink" class="required">Link danh sách nhân viên</label>
+                        <input type="text" id="employeeListLink" class="form-control" value="/#" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="departmentDescription" class="required">Mô tả phòng ban</label>
+                    <textarea id="departmentDescription" class="form-control" rows="3" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="required">Chức năng hệ thống</label>
+                    <div class="function-options">
+                        <label class="function-option">
+                            <input type="checkbox" name="departmentFunctions" value="consulting" checked>
+                            <span>Tư vấn</span>
+                        </label>
+                        <label class="function-option">
+                            <input type="checkbox" name="departmentFunctions" value="tele">
+                            <span>Tele</span>
+                        </label>
+                        <label class="function-option">
+                            <input type="checkbox" name="departmentFunctions" value="marketing">
+                            <span>Marketing</span>
+                        </label>
+                        <label class="function-option">
+                            <input type="checkbox" name="departmentFunctions" value="it">
+                            <span>Thông tin</span>
+                        </label>
+                        <label class="function-option">
+                            <input type="checkbox" name="departmentFunctions" value="deployment">
+                            <span>Triển khai</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ảnh đại diện phòng</label>
+                    <div class="image-upload" id="imageUpload">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Kéo thả ảnh vào đây hoặc nhấn để tải lên</p>
+                        <input type="file" id="departmentImage" accept="image/*" style="display: none;">
+                    </div>
+                    <div class="image-preview" id="imagePreview">
+                        <img src="" alt="Preview" id="previewImage">
+                    </div>
+                    <input type="hidden" id="departmentImageUrl">
+                </div>
+            </form>
         </div>
-        <div class="stat-card">
-            <div class="icon"><i class="fas fa-check-circle"></i></div>
-            <div class="value" id="completedContracts">12</div>
-            <div class="label">Hợp đồng hoàn tất</div>
-        </div>
-        <div class="stat-card">
-            <div class="icon"><i class="fas fa-times-circle"></i></div>
-            <div class="value" id="cancelledContracts">4</div>
-            <div class="label">Hợp đồng hủy</div>
-        </div>
-        <div class="stat-card">
-            <div class="icon"><i class="fas fa-money-bill-wave"></i></div>
-            <div class="value" id="totalRevenue">1.245</div>
-            <div class="label">Tổng doanh thu (triệu VNĐ)</div>
+        <div class="modal-footer">
+            <button class="btn btn-light" id="cancelBtn">Hủy</button>
+            <button class="btn btn-success" id="saveDepartmentBtn">Lưu phòng ban</button>
         </div>
     </div>
+</div>
 
-    <!-- Biểu đồ đường 1: Xu hướng hợp đồng - Full width -->
-    <div class="full-width-chart">
-        <h3><i class="fas fa-chart-line"></i> Xu hướng hợp đồng theo tháng (2026)</h3>
-        <div class="chart-wrapper">
-            <canvas id="trendChart1"></canvas>
+<!-- Modal xác nhận xóa -->
+<div class="modal" id="deleteModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Xác nhận xóa</h3>
+            <button class="close-modal" id="closeDeleteModal">&times;</button>
         </div>
-    </div>
-
-    <!-- Biểu đồ đường 2: Doanh thu - Full width -->
-    <div class="full-width-chart">
-        <h3><i class="fas fa-money-bill-trend-up"></i> Doanh thu theo tháng (2026)</h3>
-        <div class="chart-wrapper">
-            <canvas id="trendChart2"></canvas>
-        </div>
-    </div>
-
-    <!-- 3 Biểu đồ nhỏ cùng hàng -->
-    <div class="three-charts-row">
-        <!-- Biểu đồ cột: Trạng thái hợp đồng -->
-        <div class="small-chart-card">
-            <h3><i class="fas fa-chart-bar"></i> Trạng thái hợp đồng</h3>
-            <div class="chart-wrapper">
-                <canvas id="statusChart"></canvas>
-            </div>
-            <div class="chart-legend">
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #22c55e;"></div>
-                    <span>Thành công</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #0ea5e9;"></div>
-                    <span>Tiềm năng</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #38bdf8;"></div>
-                    <span>Đang CS</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #f43f5e;"></div>
-                    <span>Thất bại</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #f97316;"></div>
-                    <span>Không LL</span>
-                </div>
+        <div class="delete-confirm">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Xóa phòng ban này?</h3>
+            <p>Bạn có chắc chắn muốn xóa phòng ban <strong id="deleteDepartmentName"></strong>? Hành động này không thể hoàn tác.</p>
+            <div class="delete-actions">
+                <button class="btn btn-light" id="cancelDeleteBtn">Hủy</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">Xóa phòng ban</button>
             </div>
         </div>
-
-        <!-- Biểu đồ tròn: Loại khách hàng -->
-        <div class="small-chart-card">
-            <h3><i class="fas fa-users"></i> Loại khách hàng</h3>
-            <div class="chart-wrapper">
-                <canvas id="customerTypeChart"></canvas>
-            </div>
-            <div class="chart-legend">
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #6366f1;"></div>
-                    <span>Mới tiếp nhận</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #38bdf8;"></div>
-                    <span>Đang chăm sóc</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #a855f7;"></div>
-                    <span>Sai số liệu</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Biểu đồ tròn: Loại dịch vụ -->
-        <div class="small-chart-card">
-            <h3><i class="fas fa-concierge-bell"></i> Loại dịch vụ</h3>
-            <div class="chart-wrapper">
-                <canvas id="serviceTypeChart"></canvas>
-            </div>
-            <div class="chart-legend">
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #f97316;"></div>
-                    <span>Không liên lạc</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #15803d;"></div>
-                    <span>Bán nhanh</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #0f766e;"></div>
-                    <span>Đã lên VP</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="footer">
-        <p>Hệ thống Quản lý Hợp Đồng &copy; 2026 - Dữ liệu được cập nhật tự động</p>
-        <p style="margin-top: 5px; font-size: 12px; opacity: 0.7;">Phiên bản thống kê nâng cao v4.0</p>
     </div>
 </div>
 
 <script>
-    // Màu sắc từ gợi ý
-    const COLORS = {
-        NEW: '#94a3b8',
-        DC_TELESALES: '#6366f1',
-        CHAM_SOC: '#38bdf8',
-        TN_7NGAY: '#0ea5e9',
-        TN_14NGAY: '#0284c7',
-        THAT_BAI: '#f43f5e',
-        KHONG_LIEN_LAC_DUOC: '#f97316',
-        SAI_SO_LIEU: '#a855f7',
-        THANH_CONG: '#22c55e',
-        KHACH_HUY_HEN: '#b45309',
-        BAN_NHANH: '#15803d',
-        BAN_GP: '#0f766e'
+    // Dữ liệu mẫu
+    let departments = [
+        {
+            id: 1,
+            name: "Phòng Tư vấn Khách hàng",
+            description: "Phụ trách tư vấn và hỗ trợ khách hàng về các sản phẩm và dịch vụ của công ty.",
+            manager: "Nguyễn Thị Hương",
+            branch: "hanoi",
+            functions: ["consulting", "tele"],
+            imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            employeeLink: "/#"
+        },
+        {
+            id: 2,
+            name: "Phòng Marketing",
+            description: "Chịu trách nhiệm về các chiến lược marketing, quảng bá thương hiệu và sản phẩm.",
+            manager: "Trần Văn Minh",
+            branch: "hcm",
+            functions: ["marketing"],
+            imageUrl: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            employeeLink: "/#"
+        },
+        {
+            id: 3,
+            name: "Phòng Công nghệ Thông tin",
+            description: "Phát triển và bảo trì hệ thống công nghệ thông tin, hỗ trợ kỹ thuật cho toàn công ty.",
+            manager: "Lê Văn Hải",
+            branch: "danang",
+            functions: ["it", "deployment"],
+            imageUrl: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            employeeLink: "/#"
+        },
+        {
+            id: 4,
+            name: "Phòng Triển khai Dự án",
+            description: "Triển khai các dự án phần mềm và công nghệ cho khách hàng doanh nghiệp.",
+            manager: "Phạm Thị Lan",
+            branch: "hanoi",
+            functions: ["deployment"],
+            imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            employeeLink: "/#"
+        },
+        {
+            id: 5,
+            name: "Phòng Chăm sóc Khách hàng",
+            description: "Chăm sóc khách hàng sau bán hàng, giải đáp thắc mắc và xử lý khiếu nại.",
+            manager: "Hoàng Văn Tú",
+            branch: "hcm",
+            functions: ["consulting", "tele"],
+            imageUrl: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            employeeLink: "/#"
+        },
+        {
+            id: 6,
+            name: "Phòng Tele Marketing",
+            description: "Thực hiện các chiến dịch tiếp thị qua điện thoại và chăm sóc khách hàng tiềm năng.",
+            manager: "Đỗ Thị Hà",
+            branch: "cantho",
+            functions: ["tele", "marketing"],
+            imageUrl: "https://images.unsplash.com/photo-1573164713714-d95e436ab286?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            employeeLink: "/#"
+        }
+    ];
+
+    // Biến toàn cục
+    let currentFilter = {
+        branch: "all",
+        function: "all",
+        search: ""
     };
+    let editingId = null;
+    let nextId = departments.length + 1;
 
-    // Dữ liệu biểu đồ đường 1: Xu hướng hợp đồng
-    const trendData1 = {
-        labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-            'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
-        datasets: [
-            {
-                label: 'Hợp đồng mới',
-                data: [8, 12, 9, 14, 18, 16, 20, 18, 15, 12, 10, 13],
-                borderColor: COLORS.DC_TELESALES,
-                backgroundColor: COLORS.DC_TELESALES + '20',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4
-            },
-            {
-                label: 'Hợp đồng thành công',
-                data: [4, 6, 5, 8, 10, 12, 14, 13, 11, 9, 7, 8],
-                borderColor: COLORS.THANH_CONG,
-                backgroundColor: COLORS.THANH_CONG + '20',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4
-            },
-            {
-                label: 'Hợp đồng thất bại',
-                data: [1, 2, 1, 2, 3, 2, 3, 2, 2, 1, 1, 2],
-                borderColor: COLORS.THAT_BAI,
-                backgroundColor: COLORS.THAT_BAI + '20',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.4
-            }
-        ]
-    };
+    // DOM Elements
+    const departmentList = document.getElementById('departmentList');
+    const addDepartmentBtn = document.getElementById('addDepartmentBtn');
+    const departmentModal = document.getElementById('departmentModal');
+    const deleteModal = document.getElementById('deleteModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const closeDeleteModalBtn = document.getElementById('closeDeleteModal');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    const saveDepartmentBtn = document.getElementById('saveDepartmentBtn');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const departmentForm = document.getElementById('departmentForm');
+    const searchInput = document.getElementById('searchInput');
+    const branchFilter = document.getElementById('branchFilter');
+    const functionFilter = document.getElementById('functionFilter');
+    const totalDepartments = document.getElementById('totalDepartments');
+    const totalBranches = document.getElementById('totalBranches');
+    const imageUpload = document.getElementById('imageUpload');
+    const departmentImage = document.getElementById('departmentImage');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImage = document.getElementById('previewImage');
+    const deleteDepartmentName = document.getElementById('deleteDepartmentName');
 
-    // Dữ liệu biểu đồ đường 2: Doanh thu
-    const trendData2 = {
-        labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-            'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
-        datasets: [
-            {
-                label: 'Doanh thu (triệu VNĐ)',
-                data: [85, 105, 92, 125, 145, 160, 180, 165, 155, 135, 120, 140],
-                borderColor: COLORS.BAN_NHANH,
-                backgroundColor: COLORS.BAN_NHANH + '20',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4
-            },
-            {
-                label: 'Doanh thu bán nhanh',
-                data: [25, 30, 28, 35, 45, 50, 60, 55, 50, 40, 35, 42],
-                borderColor: COLORS.BAN_GP,
-                backgroundColor: COLORS.BAN_GP + '20',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4
-            }
-        ]
-    };
-
-    // Dữ liệu biểu đồ cột: Trạng thái hợp đồng
-    const statusData = {
-        labels: ['Thành công', 'Tiềm năng', 'Đang CS', 'Thất bại', 'Không LL'],
-        datasets: [{
-            label: 'Số lượng',
-            data: [45, 28, 32, 12, 8],
-            backgroundColor: [
-                COLORS.THANH_CONG,
-                COLORS.TN_7NGAY,
-                COLORS.CHAM_SOC,
-                COLORS.THAT_BAI,
-                COLORS.KHONG_LIEN_LAC_DUOC
-            ],
-            borderColor: [
-                '#1db954',
-                '#0c8fd8',
-                '#2ca8e8',
-                '#d32f2f',
-                '#ff6b35'
-            ],
-            borderWidth: 1,
-            borderRadius: 6,
-            barPercentage: 0.5
-        }]
-    };
-
-    // Dữ liệu biểu đồ tròn: Loại khách hàng
-    const customerTypeData = {
-        labels: ['Mới tiếp nhận', 'Đang chăm sóc', 'Sai số liệu'],
-        datasets: [{
-            data: [40, 35, 25],
-            backgroundColor: [
-                COLORS.DC_TELESALES,
-                COLORS.CHAM_SOC,
-                COLORS.SAI_SO_LIEU
-            ],
-            borderWidth: 2,
-            spacing: 3
-        }]
-    };
-
-    // Dữ liệu biểu đồ tròn: Loại dịch vụ
-    const serviceTypeData = {
-        labels: ['Không liên lạc', 'Bán nhanh', 'Đã lên VP'],
-        datasets: [{
-            data: [30, 40, 30],
-            backgroundColor: [
-                COLORS.KHONG_LIEN_LAC_DUOC,
-                COLORS.BAN_NHANH,
-                COLORS.BAN_GP
-            ],
-            borderWidth: 2,
-            spacing: 3
-        }]
-    };
-
-    // Khởi tạo biểu đồ đường 1
-    const trendCtx1 = document.getElementById('trendChart1').getContext('2d');
-    const trendChart1 = new Chart(trendCtx1, {
-        type: 'line',
-        data: trendData1,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
-            scales: {
-                x: {
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    },
-                    title: {
-                        display: true,
-                        text: 'Số hợp đồng',
-                        font: {
-                            weight: 'bold'
-                        }
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 15,
-                        font: {
-                            size: 13
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    // Khởi tạo biểu đồ đường 2
-    const trendCtx2 = document.getElementById('trendChart2').getContext('2d');
-    const trendChart2 = new Chart(trendCtx2, {
-        type: 'line',
-        data: trendData2,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
-            scales: {
-                x: {
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    },
-                    title: {
-                        display: true,
-                        text: 'Triệu VNĐ',
-                        font: {
-                            weight: 'bold'
-                        }
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 15,
-                        font: {
-                            size: 13
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    // Khởi tạo biểu đồ cột trạng thái
-    const statusCtx = document.getElementById('statusChart').getContext('2d');
-    const statusChart = new Chart(statusCtx, {
-        type: 'bar',
-        data: statusData,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-
-    // Khởi tạo biểu đồ tròn loại khách hàng
-    const customerTypeCtx = document.getElementById('customerTypeChart').getContext('2d');
-    const customerTypeChart = new Chart(customerTypeCtx, {
-        type: 'doughnut',
-        data: customerTypeData,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '70%',
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-
-    // Khởi tạo biểu đồ tròn loại dịch vụ
-    const serviceTypeCtx = document.getElementById('serviceTypeChart').getContext('2d');
-    const serviceTypeChart = new Chart(serviceTypeCtx, {
-        type: 'doughnut',
-        data: serviceTypeData,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '70%',
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-
-    // Xử lý sự kiện bộ lọc - ảnh hưởng đến TẤT CẢ biểu đồ
-    document.getElementById('timeRange').addEventListener('change', function() {
-        const timeRange = this.value;
-        let startDate, endDate;
-
-        const today = new Date('2026-06-15');
-
-        if (timeRange === 'month') {
-            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-            endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        } else if (timeRange === 'quarter') {
-            const quarter = Math.floor(today.getMonth() / 3);
-            startDate = new Date(today.getFullYear(), quarter * 3, 1);
-            endDate = new Date(today.getFullYear(), (quarter + 1) * 3, 0);
-        } else if (timeRange === 'year') {
-            startDate = new Date(today.getFullYear(), 0, 1);
-            endDate = new Date(today.getFullYear(), 11, 31);
-        } else {
-            startDate = new Date('2026-01-01');
-            endDate = new Date('2026-12-31');
-        }
-
-        document.getElementById('startDate').valueAsDate = startDate;
-        document.getElementById('endDate').valueAsDate = endDate;
-    });
-
-    document.getElementById('applyFilter').addEventListener('click', function() {
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
-        const timeRange = document.getElementById('timeRange').value;
-
-        // Hiệu ứng loading
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải...';
-        this.disabled = true;
-
-        // Giả lập API call
-        setTimeout(() => {
-            this.innerHTML = 'Áp dụng';
-            this.disabled = false;
-
-            // Cập nhật TẤT CẢ biểu đồ dựa trên bộ lọc
-            updateAllCharts(timeRange, startDate, endDate);
-            console.log(`Đã áp dụng bộ lọc: ${timeRange} (${startDate} đến ${endDate})`);
-        }, 1500);
-    });
-
-    // Hàm cập nhật TẤT CẢ biểu đồ
-    function updateAllCharts(timeRange, startDate, endDate) {
-        // Cập nhật tiêu đề biểu đồ đường
-        const dateText = getDateText(timeRange, startDate, endDate);
-
-        // Cập nhật biểu đồ đường 1
-        const newTrend1Data = generateFilteredData(trendData1.datasets, timeRange);
-        trendChart1.data.datasets.forEach((dataset, index) => {
-            dataset.data = newTrend1Data[index];
-        });
-        trendChart1.update();
-
-        // Cập nhật biểu đồ đường 2
-        const newTrend2Data = generateFilteredData(trendData2.datasets, timeRange);
-        trendChart2.data.datasets.forEach((dataset, index) => {
-            dataset.data = newTrend2Data[index];
-        });
-        trendChart2.update();
-
-        // Cập nhật biểu đồ cột
-        const newStatusData = generateRandomData(5, timeRange);
-        statusChart.data.datasets[0].data = newStatusData;
-        statusChart.update();
-
-        // Cập nhật biểu đồ tròn loại khách hàng
-        const newCustomerData = generateRandomData(3, timeRange);
-        customerTypeChart.data.datasets[0].data = newCustomerData;
-        customerTypeChart.update();
-
-        // Cập nhật biểu đồ tròn loại dịch vụ
-        const newServiceData = generateRandomData(3, timeRange);
-        serviceTypeChart.data.datasets[0].data = newServiceData;
-        serviceTypeChart.update();
-
-        // Cập nhật số liệu thống kê
-        updateStatistics(timeRange);
-    }
-
-    // Hàm tạo dữ liệu ngẫu nhiên dựa trên bộ lọc
-    function generateFilteredData(datasets, timeRange) {
-        const multiplier = timeRange === 'month' ? 0.3 :
-            timeRange === 'quarter' ? 0.7 :
-                timeRange === 'year' ? 1 : 1.2;
-
-        return datasets.map(dataset =>
-            dataset.data.map(value => Math.round(value * multiplier + (Math.random() * 10 - 5)))
-        );
-    }
-
-    // Hàm tạo dữ liệu ngẫu nhiên
-    function generateRandomData(count, timeRange) {
-        const base = timeRange === 'month' ? 10 :
-            timeRange === 'quarter' ? 30 :
-                timeRange === 'year' ? 100 : 150;
-
-        const data = [];
-        for (let i = 0; i < count; i++) {
-            data.push(Math.round(base + Math.random() * 50 - 25));
-        }
-        return data;
-    }
-
-    // Hàm cập nhật số liệu thống kê
-    function updateStatistics(timeRange) {
-        const multiplier = timeRange === 'month' ? 0.3 :
-            timeRange === 'quarter' ? 0.7 :
-                timeRange === 'year' ? 1 : 1.2;
-
-        const total = Math.round(48 * multiplier);
-        const active = Math.round(32 * multiplier);
-        const completed = Math.round(12 * multiplier);
-        const cancelled = Math.round(4 * multiplier);
-        const revenue = Math.round(1245 * multiplier);
-
-        animateValue('totalContracts', parseInt(document.getElementById('totalContracts').textContent), total, 800);
-        animateValue('activeContracts', parseInt(document.getElementById('activeContracts').textContent), active, 800);
-        animateValue('completedContracts', parseInt(document.getElementById('completedContracts').textContent), completed, 800);
-        animateValue('cancelledContracts', parseInt(document.getElementById('cancelledContracts').textContent), cancelled, 800);
-        animateValue('totalRevenue', parseInt(document.getElementById('totalRevenue').textContent), revenue, 800);
-    }
-
-    // Hàm lấy text hiển thị thời gian
-    function getDateText(timeRange, startDate, endDate) {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-
-        if (timeRange === 'month') {
-            return `Tháng ${start.getMonth() + 1}/${start.getFullYear()}`;
-        } else if (timeRange === 'quarter') {
-            const quarter = Math.floor(start.getMonth() / 3) + 1;
-            return `Quý ${quarter}/${start.getFullYear()}`;
-        } else if (timeRange === 'year') {
-            return `Năm ${start.getFullYear()}`;
-        } else {
-            return `${start.toLocaleDateString('vi-VN')} - ${end.toLocaleDateString('vi-VN')}`;
-        }
-    }
-
-    // Hiệu ứng đếm số
-    function animateValue(elementId, start, end, duration) {
-        const element = document.getElementById(elementId);
-        let startTimestamp = null;
-        const step = (timestamp) => {
-            if (!startTimestamp) startTimestamp = timestamp;
-            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            const value = Math.floor(progress * (end - start) + start);
-            element.textContent = value.toLocaleString();
-            if (progress < 1) {
-                window.requestAnimationFrame(step);
-            }
+    // Hàm lấy tên chi nhánh
+    function getBranchName(branch) {
+        const branchNames = {
+            "hanoi": "Hà Nội",
+            "hcm": "TP. Hồ Chí Minh",
+            "danang": "Đà Nẵng",
+            "cantho": "Cần Thơ"
         };
-        window.requestAnimationFrame(step);
+        return branchNames[branch] || branch;
     }
 
-    // Kích hoạt hiệu ứng đếm số khi tải trang
-    window.addEventListener('load', function() {
-        setTimeout(() => {
-            animateValue('totalContracts', 0, 48, 1000);
-            animateValue('activeContracts', 0, 32, 1000);
-            animateValue('completedContracts', 0, 12, 1000);
-            animateValue('cancelledContracts', 0, 4, 1000);
-            animateValue('totalRevenue', 0, 1245, 1000);
-        }, 500);
-    });
+    // Hàm lấy tên chức năng
+    function getFunctionName(func) {
+        const functionNames = {
+            "consulting": "Tư vấn",
+            "tele": "Tele",
+            "marketing": "Marketing",
+            "it": "Thông tin",
+            "deployment": "Triển khai"
+        };
+        return functionNames[func] || func;
+    }
+
+    // Hàm hiển thị danh sách phòng ban
+    function displayDepartments() {
+        // Lọc phòng ban theo bộ lọc
+        let filteredDepartments = departments.filter(dept => {
+            // Lọc theo chi nhánh
+            if (currentFilter.branch !== "all" && dept.branch !== currentFilter.branch) {
+                return false;
+            }
+
+            // Lọc theo chức năng
+            if (currentFilter.function !== "all" && !dept.functions.includes(currentFilter.function)) {
+                return false;
+            }
+
+            // Lọc theo tìm kiếm
+            if (currentFilter.search && !dept.name.toLowerCase().includes(currentFilter.search.toLowerCase()) &&
+                !dept.manager.toLowerCase().includes(currentFilter.search.toLowerCase())) {
+                return false;
+            }
+
+            return true;
+        });
+
+        // Cập nhật thống kê
+        totalDepartments.textContent = departments.length;
+        const uniqueBranches = [...new Set(departments.map(dept => dept.branch))];
+        totalBranches.textContent = uniqueBranches.length;
+
+        // Hiển thị danh sách phòng ban
+        if (filteredDepartments.length === 0) {
+            departmentList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-building"></i>
+                        <h3>Không tìm thấy phòng ban nào</h3>
+                        <p>Thử thay đổi bộ lọc hoặc thêm phòng ban mới</p>
+                        <button class="btn btn-primary" id="addEmptyBtn" style="margin-top: 20px;">
+                            <i class="fas fa-plus"></i> Thêm phòng ban mới
+                        </button>
+                    </div>
+                `;
+
+            document.getElementById('addEmptyBtn')?.addEventListener('click', () => {
+                openAddModal();
+            });
+
+            return;
+        }
+
+        departmentList.innerHTML = filteredDepartments.map(dept => `
+                <div class="department-card" data-id="${dept.id}">
+                    <div class="department-img">
+                        <img src="${dept.imageUrl}" alt="${dept.name}">
+                        <div class="department-tag">${getBranchName(dept.branch)}</div>
+                    </div>
+                    <div class="department-info">
+                        <div class="department-header">
+                            <div class="department-name">${dept.name}</div>
+                        </div>
+                        <p class="department-description">${dept.description}</p>
+
+                        <div class="department-details">
+                            <div class="detail-item">
+                                <i class="fas fa-user-tie"></i>
+                                <span>Trưởng phòng: <strong>${dept.manager}</strong></span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Chi nhánh: <strong>${getBranchName(dept.branch)}</strong></span>
+                            </div>
+                        </div>
+
+                        <div class="function-tags">
+                            ${dept.functions.map(func => `
+                                <span class="function-tag">${getFunctionName(func)}</span>
+                            `).join('')}
+                        </div>
+
+                        <div class="department-actions">
+                            <button class="btn btn-action btn-primary view-employees" data-link="${dept.employeeLink}">
+                                <i class="fas fa-users"></i> Nhân viên
+                            </button>
+                            <button class="btn btn-action btn-warning edit-department" data-id="${dept.id}">
+                                <i class="fas fa-edit"></i> Sửa
+                            </button>
+                            <button class="btn btn-action btn-danger delete-department" data-id="${dept.id}" data-name="${dept.name}">
+                                <i class="fas fa-trash"></i> Xóa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+        // Thêm sự kiện cho các nút
+        document.querySelectorAll('.edit-department').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.getAttribute('data-id'));
+                openEditModal(id);
+            });
+        });
+
+        document.querySelectorAll('.delete-department').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.getAttribute('data-id'));
+                const name = this.getAttribute('data-name');
+                openDeleteModal(id, name);
+            });
+        });
+
+        document.querySelectorAll('.view-employees').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const link = this.getAttribute('data-link');
+                alert(`Chuyển hướng đến: ${link}`);
+                // Trong ứng dụng thực tế, bạn có thể dùng:
+                // window.location.href = link;
+            });
+        });
+    }
+
+    // Hàm mở modal thêm phòng ban
+    function openAddModal() {
+        editingId = null;
+        document.getElementById('modalTitle').textContent = "Thêm phòng ban mới";
+        departmentForm.reset();
+        imagePreview.style.display = 'none';
+        previewImage.src = '';
+        departmentModal.style.display = 'flex';
+    }
+
+    // Hàm mở modal sửa phòng ban
+    function openEditModal(id) {
+        const department = departments.find(dept => dept.id === id);
+        if (!department) return;
+
+        editingId = id;
+        document.getElementById('modalTitle').textContent = "Sửa phòng ban";
+
+        // Điền dữ liệu vào form
+        document.getElementById('departmentName').value = department.name;
+        document.getElementById('departmentManager').value = department.manager;
+        document.getElementById('departmentBranch').value = department.branch;
+        document.getElementById('employeeListLink').value = department.employeeLink;
+        document.getElementById('departmentDescription').value = department.description;
+        document.getElementById('departmentImageUrl').value = department.imageUrl;
+
+        // Đặt chức năng
+        document.querySelectorAll('input[name="departmentFunctions"]').forEach(checkbox => {
+            checkbox.checked = department.functions.includes(checkbox.value);
+        });
+
+        // Hiển thị ảnh preview
+        if (department.imageUrl) {
+            previewImage.src = department.imageUrl;
+            imagePreview.style.display = 'block';
+        } else {
+            imagePreview.style.display = 'none';
+        }
+
+        departmentModal.style.display = 'flex';
+    }
+
+    // Hàm mở modal xóa phòng ban
+    function openDeleteModal(id, name) {
+        editingId = id;
+        deleteDepartmentName.textContent = name;
+        deleteModal.style.display = 'flex';
+    }
+
+    // Hàm đóng tất cả modal
+    function closeModals() {
+        departmentModal.style.display = 'none';
+        deleteModal.style.display = 'none';
+        editingId = null;
+    }
+
+    // Hàm lưu phòng ban
+    function saveDepartment() {
+        // Lấy dữ liệu từ form
+        const name = document.getElementById('departmentName').value.trim();
+        const manager = document.getElementById('departmentManager').value.trim();
+        const branch = document.getElementById('departmentBranch').value;
+        const employeeLink = document.getElementById('employeeListLink').value.trim();
+        const description = document.getElementById('departmentDescription').value.trim();
+        const imageUrl = document.getElementById('departmentImageUrl').value || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80";
+
+        // Lấy các chức năng đã chọn
+        const selectedFunctions = Array.from(document.querySelectorAll('input[name="departmentFunctions"]:checked'))
+            .map(checkbox => checkbox.value);
+
+        // Kiểm tra dữ liệu
+        if (!name || !manager || !branch || !description || selectedFunctions.length === 0) {
+            alert("Vui lòng điền đầy đủ thông tin bắt buộc!");
+            return;
+        }
+
+        if (editingId) {
+            // Cập nhật phòng ban
+            const index = departments.findIndex(dept => dept.id === editingId);
+            if (index !== -1) {
+                departments[index] = {
+                    ...departments[index],
+                    name,
+                    manager,
+                    branch,
+                    employeeLink,
+                    description,
+                    functions: selectedFunctions,
+                    imageUrl
+                };
+            }
+        } else {
+            // Thêm phòng ban mới
+            departments.push({
+                id: nextId++,
+                name,
+                manager,
+                branch,
+                employeeLink,
+                description,
+                functions: selectedFunctions,
+                imageUrl
+            });
+        }
+
+        // Đóng modal và hiển thị lại danh sách
+        closeModals();
+        displayDepartments();
+    }
+
+    // Hàm xóa phòng ban
+    function deleteDepartment() {
+        departments = departments.filter(dept => dept.id !== editingId);
+        closeModals();
+        displayDepartments();
+    }
+
+    // Hàm tìm kiếm
+    function handleSearch() {
+        currentFilter.search = searchInput.value.trim();
+        displayDepartments();
+    }
+
+    // Hàm lọc theo chi nhánh
+    function handleBranchFilter(e) {
+        const option = e.target.closest('.filter-option');
+        if (!option) return;
+
+        // Cập nhật trạng thái active
+        document.querySelectorAll('#branchFilter .filter-option').forEach(opt => {
+            opt.classList.remove('active');
+        });
+        option.classList.add('active');
+
+        // Cập nhật bộ lọc
+        currentFilter.branch = option.getAttribute('data-branch');
+        displayDepartments();
+    }
+
+    // Hàm lọc theo chức năng
+    function handleFunctionFilter(e) {
+        const option = e.target.closest('.filter-option');
+        if (!option) return;
+
+        // Cập nhật trạng thái active
+        document.querySelectorAll('#functionFilter .filter-option').forEach(opt => {
+            opt.classList.remove('active');
+        });
+        option.classList.add('active');
+
+        // Cập nhật bộ lọc
+        currentFilter.function = option.getAttribute('data-function');
+        displayDepartments();
+    }
+
+    // Hàm xử lý upload ảnh
+    function handleImageUpload() {
+        departmentImage.click();
+    }
+
+    function handleImageChange(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Trong ứng dụng thực tế, bạn sẽ upload ảnh lên server
+            // Ở đây chúng ta sẽ tạo URL tạm thời cho ảnh
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                previewImage.src = event.target.result;
+                document.getElementById('departmentImageUrl').value = event.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Khởi tạo ứng dụng
+    function initApp() {
+        // Hiển thị danh sách phòng ban ban đầu
+        displayDepartments();
+
+        // Thêm sự kiện
+        addDepartmentBtn.addEventListener('click', openAddModal);
+
+        closeModalBtn.addEventListener('click', closeModals);
+        closeDeleteModalBtn.addEventListener('click', closeModals);
+        cancelBtn.addEventListener('click', closeModals);
+        cancelDeleteBtn.addEventListener('click', closeModals);
+
+        saveDepartmentBtn.addEventListener('click', saveDepartment);
+        confirmDeleteBtn.addEventListener('click', deleteDepartment);
+
+        searchInput.addEventListener('input', handleSearch);
+        branchFilter.addEventListener('click', handleBranchFilter);
+        functionFilter.addEventListener('click', handleFunctionFilter);
+
+        imageUpload.addEventListener('click', handleImageUpload);
+        departmentImage.addEventListener('change', handleImageChange);
+
+        // Đóng modal khi click bên ngoài
+        window.addEventListener('click', function(e) {
+            if (e.target === departmentModal) {
+                closeModals();
+            }
+            if (e.target === deleteModal) {
+                closeModals();
+            }
+        });
+    }
+
+    // Khởi chạy ứng dụng khi trang đã tải xong
+    document.addEventListener('DOMContentLoaded', initApp);
 </script>
 </body>
 </html>

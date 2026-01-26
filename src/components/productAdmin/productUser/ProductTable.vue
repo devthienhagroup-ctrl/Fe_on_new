@@ -87,8 +87,30 @@
           </td>
           <td class="text-center relative whitespace-nowrap">
             <div class="action-wrapper inline-flex items-center">
-              <button @click="$emit('toggle-love', item)" class="action-heart">
-                <i :class="item.daThich ? 'fa-solid fa-heart text-black text-[12px]' : 'fa-regular fa-heart text-[12px]'"></i>
+              <button
+                @click="handleLove(item)"
+                :class="['action-heart', { 'is-burst': confettiBurstId === item.id }]"
+              >
+                <span class="heart-confetti" aria-hidden="true">
+                <span class="heart-confetti-piece"></span>
+                <span class="heart-confetti-piece"></span>
+                <span class="heart-confetti-piece"></span>
+                <span class="heart-confetti-piece"></span>
+                <span class="heart-confetti-piece"></span>
+                <span class="heart-confetti-piece"></span>
+                <span class="heart-confetti-piece"></span>
+                <span class="heart-confetti-piece"></span>
+                <span class="heart-confetti-piece"></span>
+                <span class="heart-confetti-piece"></span>
+                <span class="heart-confetti-piece"></span>
+                <span class="heart-confetti-piece"></span>
+                </span>
+                <i
+                  :class="[
+                    item.daThich ? 'fa-solid fa-heart text-black text-[16px]' : 'fa-regular fa-heart text-[16px]',
+                    { 'heart-pop': confettiBurstId === item.id }
+                  ]"
+                ></i>
               </button>
 
               <div class="action-hover relative inline-flex items-center">
@@ -175,6 +197,7 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
 import { useAuthStore } from "/src/stores/authStore.js";
 
 defineProps({
@@ -200,7 +223,7 @@ defineProps({
   }
 });
 
-defineEmits([
+const emit = defineEmits([
   'go-to-page',
   'update-page-size',
   'toggle-love',
@@ -209,6 +232,21 @@ defineEmits([
 ]);
 
 const authStore = useAuthStore();
+const confettiBurstId = ref(null);
+
+const handleLove = (item) => {
+  const shouldBurst = !item.daThich;
+  emit('toggle-love', item);
+  if (!shouldBurst) {
+    return;
+  }
+  confettiBurstId.value = item.id;
+  setTimeout(() => {
+    if (confettiBurstId.value === item.id) {
+      confettiBurstId.value = null;
+    }
+  }, 700);
+};
 
 const formatDate = (dateString) => {
   if (!dateString) return "";
@@ -343,6 +381,75 @@ const canRequestCollaboration = (item) => {
   align-items: center;
   justify-content: center;
   margin-right: 8px;
+  position: relative;
+  overflow: visible;
+}
+
+.heart-confetti {
+  position: absolute;
+  inset: -12px;
+  pointer-events: none;
+}
+
+.heart-confetti-piece {
+  position: absolute;
+  width: 5px;
+  height: 10px;
+  border-radius: 2px;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.6);
+  background: linear-gradient(180deg, #fef08a, #f97316);
+  box-shadow: 0 0 6px rgba(248, 113, 113, 0.45);
+}
+
+.action-heart.is-burst .heart-confetti-piece {
+  animation: heart-confetti-burst 700ms ease-out forwards;
+}
+
+.heart-confetti-piece:nth-child(1)  { top: 50%; left: 50%; background: #fb7185; animation-delay: 0ms;  --x: -26px; --y: -10px; }
+.heart-confetti-piece:nth-child(2)  { top: 50%; left: 50%; background: #facc15; animation-delay: 30ms; --x: 22px;  --y: -14px; }
+.heart-confetti-piece:nth-child(3)  { top: 50%; left: 50%; background: #34d399; animation-delay: 60ms; --x: 28px;  --y: 6px; }
+.heart-confetti-piece:nth-child(4)  { top: 50%; left: 50%; background: #60a5fa; animation-delay: 90ms; --x: 10px;  --y: 22px; }
+.heart-confetti-piece:nth-child(5)  { top: 50%; left: 50%; background: #a78bfa; animation-delay: 120ms;--x: -12px; --y: 24px; }
+.heart-confetti-piece:nth-child(6)  { top: 50%; left: 50%; background: #fb923c; animation-delay: 150ms;--x: -28px; --y: 8px; }
+.heart-confetti-piece:nth-child(7)  { top: 50%; left: 50%; background: #f472b6; animation-delay: 180ms;--x: -16px; --y: -22px; }
+.heart-confetti-piece:nth-child(8)  { top: 50%; left: 50%; background: #22d3ee; animation-delay: 210ms;--x: 6px;   --y: -28px; }
+.heart-confetti-piece:nth-child(9)  { top: 50%; left: 50%; background: #f87171; animation-delay: 240ms;--x: 30px;  --y: -2px; }
+.heart-confetti-piece:nth-child(10) { top: 50%; left: 50%; background: #fde047; animation-delay: 270ms;--x: -4px;  --y: 30px; }
+.heart-confetti-piece:nth-child(11) { top: 50%; left: 50%; background: #4ade80; animation-delay: 300ms;--x: 16px;  --y: 18px; }
+.heart-confetti-piece:nth-child(12) { top: 50%; left: 50%; background: #818cf8; animation-delay: 330ms;--x: -22px; --y: -2px; }
+
+.heart-pop {
+  animation: heart-pop 320ms ease-in-out;
+}
+
+@keyframes heart-pop {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.35);
+  }
+  60% {
+    transform: scale(0.92);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes heart-confetti-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.15);
+  }
 }
 
 .action-view {
@@ -410,8 +517,8 @@ const canRequestCollaboration = (item) => {
   #3b82f6 0%,     /* Xanh da trời sáng */
   #7c3aed 100%    /* Tím nhạt */
   );
-  color: white;
   display: flex;
+  color: white;
   align-items: center;
   justify-content: center;
 }

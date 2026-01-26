@@ -1,58 +1,8 @@
 diff --git a/src/components/productAdmin/productUser/ProductTable.vue b/src/components/productAdmin/productUser/ProductTable.vue
-index 520d2924b2baa269d05a4c25a822f89f3535a670..d347b75e115c9d5b878503ffc027c01c808e25e5 100644
+index 00d1fb2a72346e525c4b99271219a49604e7c46f..002bc6206d35ac738759f17954e42803881940bf 100644
 --- a/src/components/productAdmin/productUser/ProductTable.vue
 +++ b/src/components/productAdmin/productUser/ProductTable.vue
-@@ -1,47 +1,46 @@
- <template>
-   <div class="bg-white rounded-2xl shadow-xl border border-slate-300 mb-5 overflow-hidden">
-     <div class="overflow-x-auto">
-       <table class="w-full text-sm rounded-2xl overflow-hidden">
-         <thead class="table-header">
-         <tr class="font-bold text-white">
-           <th class="text-center">STT</th>
-           <th class="text-left">TT</th>
-           <th class="text-left">Chủ Nhà</th>
-           <th class="text-left">Liên hệ</th>
-           <th class="text-left">Giá Bán</th>
-           <th class="text-left">Định Giá</th>
-           <th class="text-left">Địa Chỉ</th>
-           <th class="text-left">Phường/Xã</th>
-           <th class="text-left">Khu Vực</th>
-           <th class="text-left">Vị Trí</th>
-           <th class="text-left">DTCN</th>
-           <th class="text-left">Kết Cấu</th>
-           <th class="text-left">Cập Nhật</th>
-           <th class="text-left">Phí MG</th>
-           <th class="text-left">Loại MH</th>
--          <th class="text-left">Đơn Vị</th>
-           <th class="text-left">&nbsp; Thao Tác</th>
-         </tr>
-         </thead>
-         <tbody>
-         <tr
-             v-for="(item, idx) in landAssets"
-             :key="item.id"
-             :class="['transition-all duration-200', idx % 2 === 0 ? 'bg-blue-50/50' : 'bg-rose-50/50']"
-             style="font-weight: 550;"
-         >
-           <td class="text-center">
-             <div class="relative inline-flex items-center justify-center w-8 h-8">
-               <i :class="[getAssetTypeIcon(item), getAssetTypeColor(item), 'absolute text-lg opacity-20']"></i>
-               <span :class="['relative text-xs font-bold', getAssetTypeColor(item)]">
-                   {{ page * pageSize + idx + 1 }}
-                 </span>
-             </div>
-           </td>
-           <td class="font-bold">
-             <img v-if="item.status === 'Đã kiểm duyệt'"
-                  src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png"
-                  style="width: 27px"
-                  alt="checked"
-             />
-             <img v-else-if="item.status === 'Đã bán'" src="/imgs/sold-out.png" style="width: 29px"
-@@ -64,71 +63,62 @@
-           <td class="text-slate-900 text-gray-800">
-             <span class="table-truncate max-w-[140px]" :title="formatWard(item.diaChi)">
+@@ -65,52 +65,74 @@
                {{ truncateText(formatWard(item.diaChi), 16) }}
              </span>
            </td>
@@ -76,34 +26,38 @@ index 520d2924b2baa269d05a4c25a822f89f3535a670..d347b75e115c9d5b878503ffc027c01c
                  {{ item.loaiMH }}
                </span>
            </td>
--          <td>
--              <span
--                  :class="[
--                  'inline-flex items-center gap-1 px-2 py-1 font-semibold text-white shadow-sm',
--                  item.donVi === 'THG' ? 'bg-[#6A0DAD]' : 'bg-[#0057D9]'
--                ]"
--                  style="border-radius: 8px; font-size: 12px; line-height: 16px;"
--              >
--                <i :class="['fa-solid text-white', item.donVi === 'THG' ? 'fa-building' : 'fa-handshake']"
--                   style="font-size: 11px;"></i>
--                {{ item.donVi }}
--              </span>
--          </td>
            <td class="text-center relative whitespace-nowrap">
              <div class="action-wrapper inline-flex items-center">
 -              <button @click="$emit('toggle-love', item)" class="action-heart">
--                <i :class="item.daThich ? 'fa-solid fa-heart text-black text-base' : 'fa-regular fa-heart text-base'"></i>
+-                <i :class="item.daThich ? 'fa-solid fa-heart text-black text-[12px]' : 'fa-regular fa-heart text-[12px]'"></i>
 +              <button
-+                @click="$emit('toggle-love', item)"
-+                :class="['action-heart', { 'is-loved': item.daThich }]"
++                @click="handleLove(item)"
++                :class="['action-heart', { 'is-burst': confettiBurstId === item.id }]"
 +              >
-+                <i :class="item.daThich ? 'fa-solid fa-heart text-black text-[12px]' : 'fa-regular fa-heart text-[12px]'"></i>
-+                <span class="heart-fireworks" aria-hidden="true"></span>
++                <span class="heart-confetti" aria-hidden="true">
++                <span class="heart-confetti-piece"></span>
++                <span class="heart-confetti-piece"></span>
++                <span class="heart-confetti-piece"></span>
++                <span class="heart-confetti-piece"></span>
++                <span class="heart-confetti-piece"></span>
++                <span class="heart-confetti-piece"></span>
++                <span class="heart-confetti-piece"></span>
++                <span class="heart-confetti-piece"></span>
++                <span class="heart-confetti-piece"></span>
++                <span class="heart-confetti-piece"></span>
++                <span class="heart-confetti-piece"></span>
++                <span class="heart-confetti-piece"></span>
++                </span>
++                <i
++                  :class="[
++                    item.daThich ? 'fa-solid fa-heart text-black text-[16px]' : 'fa-regular fa-heart text-[16px]',
++                    { 'heart-pop': confettiBurstId === item.id }
++                  ]"
++                ></i>
                </button>
 
                <div class="action-hover relative inline-flex items-center">
--                <button class="dot-btn">
-+                <button class="dot-btn" aria-label="Thao tác">
+                 <button class="dot-btn" aria-label="Thao tác">
                    <i class="fa-solid fa-ellipsis-vertical"></i>
                  </button>
 
@@ -125,18 +79,109 @@ index 520d2924b2baa269d05a4c25a822f89f3535a670..d347b75e115c9d5b878503ffc027c01c
        </table>
      </div>
 
-     <!-- Phân trang -->
-     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-3 bg-gradient-to-r from-slate-100 to-slate-200 border-t border-slate-300">
-       <div class="flex items-center gap-1">
-         <button
-@@ -328,124 +318,215 @@ function formatMoneyVN(value) {
-   if (num < 1_000_000_000) {
-     const trieu = num / 1_000_000;
-     return `${trieu.toFixed(trieu % 1 === 0 ? 0 : 1)} triệu`;
-   }
+@@ -153,84 +175,100 @@
+           <i class="fa-solid fa-angles-right text-sm"></i>
+         </button>
+       </div>
 
-   const ty = num / 1_000_000_000;
-   return `${ty.toFixed(ty % 1 === 0 ? 0 : 2)} tỷ`;
+       <div class="flex flex-col items-center gap-2 sm:flex-row sm:items-center">
+         <span class="text-sm font-semibold text-slate-900">Số dòng mỗi trang:</span>
+         <input
+             type="number"
+             :value="pageSize"
+             @input="$emit('update-page-size', $event.target.value)"
+             class="w-16 px-2 py-1 border border-slate-400 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm"
+             min="1"
+         />
+         <span class="text-sm text-slate-900 font-semibold">
+           Hiển thị
+           {{ page * pageSize + 1 }}
+           -
+           {{ Math.min((page + 1) * pageSize, totalRecords) }} của {{ totalRecords }}
+         </span>
+       </div>
+     </div>
+   </div>
+ </template>
+
+ <script setup>
++import { ref } from "vue";
+ import { useAuthStore } from "/src/stores/authStore.js";
+
+ defineProps({
+   landAssets: {
+     type: Array,
+     default: () => []
+   },
+   page: {
+     type: Number,
+     default: 0
+   },
+   pageSize: {
+     type: Number,
+     default: 8
+   },
+   totalRecords: {
+     type: Number,
+     default: 0
+   },
+   totalPages: {
+     type: Number,
+     default: 1
+   }
+ });
+
+-defineEmits([
++const emit = defineEmits([
+   'go-to-page',
+   'update-page-size',
+   'toggle-love',
+   'open-collab',
+   'view-detail'
+ ]);
+
+ const authStore = useAuthStore();
++const confettiBurstId = ref(null);
++
++const handleLove = (item) => {
++  const shouldBurst = !item.daThich;
++  emit('toggle-love', item);
++  if (!shouldBurst) {
++    return;
++  }
++  confettiBurstId.value = item.id;
++  setTimeout(() => {
++    if (confettiBurstId.value === item.id) {
++      confettiBurstId.value = null;
++    }
++  }, 700);
++};
+
+ const formatDate = (dateString) => {
+   if (!dateString) return "";
+   const date = new Date(dateString);
+   return `${String(date.getDate()).padStart(2, "0")}-${String(
+       date.getMonth() + 1
+   ).padStart(2, "0")}-${String(date.getFullYear()).slice(-2)}`;
+ };
+
+ const formatAddressDetail = (diaChi) => {
+   let raw = diaChi || "";
+   let clean = raw.split("/!!")[0].trim();
+   clean = clean.replace(/đường/iu, "Đ.");
+   return clean;
+ };
+
+ const formatWard = (addressDetail) => {
+   const raw = addressDetail || "";
+   const parts = raw.split("/!!");
+   let ward = parts[1]?.trim() || "";
+   return ward
+       .replace(/^Phường\s+/i, "P. ")
+       .replace(/^Xã\s+/i, "X. ")
+       .replace(/^Thị trấn\s+/i, "TT. ");
+ };
+@@ -321,50 +359,119 @@ function formatMoneyVN(value) {
  }
 
  const canRequestCollaboration = (item) => {
@@ -155,218 +200,104 @@ index 520d2924b2baa269d05a4c25a822f89f3535a670..d347b75e115c9d5b878503ffc027c01c
 
  .action-heart {
    background: rgba(133,132,132,0.13);
--  padding: 0 10px;
--  margin-right: 5px;
-+  padding: 4px 10px;
-+  min-height: 28px;
+   padding: 4px 10px;
+   min-height: 28px;
    border-radius: 8px;
-+  display: inline-flex;
-+  align-items: center;
-+  justify-content: center;
-+  margin-right: 8px;
-+  position: relative;
-+  overflow: visible;
- }
-
- .action-view {
--  padding: 2px 6px;
-+  padding: 6px 12px;
-   font-size: 11px;
-   font-weight: 600;
--  border-radius: 8px;
--  background: #BFDBFE;
--  color: #1D4ED8;
--  border: 1px solid #93C5FD;
-+  border-radius: 12px;
-+  background: linear-gradient(135deg, #fbbf24, #f97316);
-+  color: #ffffff;
-+  border: 1px solid #f59e0b;
    display: inline-flex;
-   align-items: center;
--  gap: 4px;
-+  gap: 6px;
-+  min-width: 80px;
-+  justify-content: center;
- }
-
- .action-collab {
--  padding: 2px 12px;
-+  padding: 6px 12px;
-   font-size: 11px;
-   font-weight: 600;
--  border-radius: 8px;
--  background: #f8d7ac;
--  color: #f57430;
--  border: 1px solid #f8b66c;
-+  border-radius: 12px;
-+  background: linear-gradient(135deg, #7dd3fc, #8b5cf6);
-+  color: #ffffff;
-+  border: 1px solid #7c3aed;
-   display: inline-flex;
-   align-items: center;
--  gap: 4px;
--  margin-left: 6px;
--  margin-right: 10px;
-+  gap: 6px;
-+  min-width: 80px;
-+  justify-content: center;
- }
-
- .action-collab:hover {
--  background: #fed7aa;
--  border-color: #fdba74;
-+  background: linear-gradient(135deg, #bae6fd, #7c3aed);
-+  border-color: #a855f7;
-+}
-+
-+.action-view:hover {
-+  background: linear-gradient(135deg, #fcd34d, #ea580c);
-+  border-color: #f97316;
- }
-
- .action-menu {
-   position: absolute;
-   right: 0;
-   top: 36px;
--  display: inline-flex;
--  align-items: center;
--  gap: 6px;
--  padding: 6px;
-+  display: flex;
-+  flex-direction: column;
-+  align-items: stretch;
-+  gap: 10px;
-+  padding: 8px;
-   background: white;
-   border-radius: 10px;
-   border: 1px solid #e5e7eb;
-   box-shadow: 0 10px 20px rgba(0,0,0,.12);
-   opacity: 0;
-   visibility: hidden;
-   transform: translateY(-5px);
-   transition: .2s;
-   z-index: 50;
-   white-space: nowrap;
- }
-
- .dot-btn {
--  width: 32px;
--  height: 32px;
-+  width: 28px;
-+  height: 28px;
-   border-radius: 8px;
--  background: rgba(133,132,132,0.12);
-+  background: #38bdf8;
-   display: flex;
    align-items: center;
    justify-content: center;
- }
-
- .action-hover:hover .action-menu {
-   opacity: 1;
-   visibility: visible;
-   transform: translateY(0);
- }
-
-+.heart-fireworks {
+   margin-right: 8px;
++  position: relative;
++  overflow: visible;
++}
++
++.heart-confetti {
 +  position: absolute;
-+  width: 6px;
-+  height: 6px;
-+  border-radius: 999px;
++  inset: -12px;
 +  pointer-events: none;
-+  opacity: 0;
-+  background: radial-gradient(circle, #fb7185 0%, #f97316 60%, transparent 70%);
-+  transform: translate(-50%, -50%);
-+  top: 50%;
-+  left: 50%;
 +}
 +
-+.action-heart.is-loved .heart-fireworks {
-+  animation: heart-burst 0.8s ease-out forwards;
-+}
-+
-+.action-heart.is-loved::before,
-+.action-heart.is-loved::after {
-+  content: "";
++.heart-confetti-piece {
 +  position: absolute;
-+  inset: -6px;
-+  border-radius: 999px;
-+  border: 1px solid rgba(251, 113, 133, 0.35);
++  width: 5px;
++  height: 10px;
++  border-radius: 2px;
 +  opacity: 0;
-+  animation: heart-ring 0.7s ease-out forwards;
++  transform: translate(-50%, -50%) scale(0.6);
++  background: linear-gradient(180deg, #fef08a, #f97316);
++  box-shadow: 0 0 6px rgba(248, 113, 113, 0.45);
 +}
 +
-+.action-heart.is-loved::after {
-+  inset: -10px;
-+  border-color: rgba(251, 146, 60, 0.35);
-+  animation-delay: 0.08s;
++.action-heart.is-burst .heart-confetti-piece {
++  animation: heart-confetti-burst 700ms ease-out forwards;
 +}
 +
-+@keyframes heart-burst {
++.heart-confetti-piece:nth-child(1)  { top: 50%; left: 50%; background: #fb7185; animation-delay: 0ms;  --x: -26px; --y: -10px; }
++.heart-confetti-piece:nth-child(2)  { top: 50%; left: 50%; background: #facc15; animation-delay: 30ms; --x: 22px;  --y: -14px; }
++.heart-confetti-piece:nth-child(3)  { top: 50%; left: 50%; background: #34d399; animation-delay: 60ms; --x: 28px;  --y: 6px; }
++.heart-confetti-piece:nth-child(4)  { top: 50%; left: 50%; background: #60a5fa; animation-delay: 90ms; --x: 10px;  --y: 22px; }
++.heart-confetti-piece:nth-child(5)  { top: 50%; left: 50%; background: #a78bfa; animation-delay: 120ms;--x: -12px; --y: 24px; }
++.heart-confetti-piece:nth-child(6)  { top: 50%; left: 50%; background: #fb923c; animation-delay: 150ms;--x: -28px; --y: 8px; }
++.heart-confetti-piece:nth-child(7)  { top: 50%; left: 50%; background: #f472b6; animation-delay: 180ms;--x: -16px; --y: -22px; }
++.heart-confetti-piece:nth-child(8)  { top: 50%; left: 50%; background: #22d3ee; animation-delay: 210ms;--x: 6px;   --y: -28px; }
++.heart-confetti-piece:nth-child(9)  { top: 50%; left: 50%; background: #f87171; animation-delay: 240ms;--x: 30px;  --y: -2px; }
++.heart-confetti-piece:nth-child(10) { top: 50%; left: 50%; background: #fde047; animation-delay: 270ms;--x: -4px;  --y: 30px; }
++.heart-confetti-piece:nth-child(11) { top: 50%; left: 50%; background: #4ade80; animation-delay: 300ms;--x: 16px;  --y: 18px; }
++.heart-confetti-piece:nth-child(12) { top: 50%; left: 50%; background: #818cf8; animation-delay: 330ms;--x: -22px; --y: -2px; }
++
++.heart-pop {
++  animation: heart-pop 320ms ease-in-out;
++}
++
++@keyframes heart-pop {
++  0% {
++    transform: scale(1);
++  }
++  30% {
++    transform: scale(1.35);
++  }
++  60% {
++    transform: scale(0.92);
++  }
++  100% {
++    transform: scale(1);
++  }
++}
++
++@keyframes heart-confetti-burst {
 +  0% {
 +    opacity: 0;
 +    transform: translate(-50%, -50%) scale(0.6);
-+    box-shadow:
-+      0 -10px 0 0 rgba(251, 113, 133, 0.9),
-+      8px -6px 0 0 rgba(249, 115, 22, 0.9),
-+      10px 2px 0 0 rgba(251, 191, 36, 0.9),
-+      6px 10px 0 0 rgba(168, 85, 247, 0.9),
-+      0 12px 0 0 rgba(59, 130, 246, 0.85),
-+      -6px 10px 0 0 rgba(139, 92, 246, 0.9),
-+      -10px 2px 0 0 rgba(251, 146, 60, 0.9),
-+      -8px -6px 0 0 rgba(251, 113, 133, 0.9);
 +  }
-+  40% {
++  20% {
 +    opacity: 1;
 +  }
 +  100% {
 +    opacity: 0;
-+    transform: translate(-50%, -50%) scale(1.4);
-+    box-shadow:
-+      0 -18px 0 0 rgba(251, 113, 133, 0),
-+      14px -10px 0 0 rgba(249, 115, 22, 0),
-+      18px 4px 0 0 rgba(251, 191, 36, 0),
-+      10px 16px 0 0 rgba(168, 85, 247, 0),
-+      0 20px 0 0 rgba(59, 130, 246, 0),
-+      -10px 16px 0 0 rgba(139, 92, 246, 0),
-+      -18px 4px 0 0 rgba(251, 146, 60, 0),
-+      -14px -10px 0 0 rgba(251, 113, 133, 0);
++    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.15);
 +  }
-+}
-+
-+@keyframes heart-ring {
-+  0% {
-+    opacity: 0.4;
-+    transform: scale(0.6);
-+  }
-+  100% {
-+    opacity: 0;
-+    transform: scale(1.35);
-+  }
-+}
-+
- .table-truncate {
-   display: inline-block;
-   overflow: hidden;
-   text-overflow: ellipsis;
-   white-space: nowrap;
-   vertical-align: middle;
  }
 
- th {
-   padding-top: 7px !important;
-   padding-bottom: 7px !important;
+ .action-view {
+   padding: 6px 12px;
+   font-size: 11px;
+   font-weight: 600;
+   border-radius: 12px;
+   background: linear-gradient(135deg, #fbbf24, #f97316);
+   color: #ffffff;
+   display: inline-flex;
+   align-items: center;
+   gap: 6px;
+   min-width: 80px;
+   justify-content: center;
  }
 
- td {
-   padding: 5px 5px 10px 0 !important;
- }
-
- * {
-   font-size: 14px;
- }
-
- table * {
-   font-size: 13.5px !important;
- }
- </style>
+ .action-collab {
+   padding: 6px 12px;
+   font-size: 11px;
+   font-weight: 600;
+   border-radius: 12px;
+   background: linear-gradient(135deg, #7dd3fc, #8b5cf6);
+   color: #ffffff;
+   display: inline-flex;
+   align-items: center;

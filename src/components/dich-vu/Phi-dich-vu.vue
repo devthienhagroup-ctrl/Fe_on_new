@@ -1093,7 +1093,7 @@
                         <th style="width:190px">Ngày</th>
                         <th style="width:160px">Số tiền</th>
                         <th>Lý do</th>
-                        <th style="width:160px">Người duyệt</th>
+                        <th style="width:160px">Người ghi nhận</th>
                       </tr>
                       </thead>
                       <tbody>
