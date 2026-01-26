@@ -5,6 +5,7 @@
         <thead class="table-header">
         <tr class="font-bold text-white">
           <th class="text-center">STT</th>
+          <th class="text-left">TT</th>
           <th class="text-left">Chủ Nhà</th>
           <th class="text-left">Liên hệ</th>
           <th class="text-left">Giá Bán</th>
@@ -17,7 +18,6 @@
           <th class="text-left">Kết Cấu</th>
           <th class="text-left">Cập Nhật</th>
           <th class="text-left">Phí MG</th>
-          <th class="text-left">TT</th>
           <th class="text-left">Loại MH</th>
           <th class="text-left">Đơn Vị</th>
           <th class="text-left">&nbsp; Thao Tác</th>
@@ -34,28 +34,8 @@
             <div class="relative inline-flex items-center justify-center w-8 h-8">
               <i :class="[getAssetTypeIcon(item), getAssetTypeColor(item), 'absolute text-lg opacity-20']"></i>
               <span :class="['relative text-xs font-bold', getAssetTypeColor(item)]">
-                  {{ idx + 1 }}
+                  {{ page * pageSize + idx + 1 }}
                 </span>
-            </div>
-          </td>
-          <td class="font-medium text-slate-900 text-gray-800">{{ item.tenChuNha || '—' }}</td>
-          <td class="text-slate-900 text-gray-800">{{ item.soDienThoai || '—' }}</td>
-          <td class="font-bold text-blue-700">{{  formatMoneyVN( item.giaBan ) }}</td>
-          <td v-if="item.giaDinhGia === -1.1" class="text-slate-800">*********</td>
-          <td v-else-if="item.giaDinhGia" class="font-bold text-blue-700">
-            {{ formatMoneyVN(item.giaDinhGia) }}
-          </td>
-          <td v-else class="text-slate-800">—</td>
-          <td class="text-slate-800 text-gray-800">{{ formatAddressDetail(item.diaChi) }}</td>
-          <td class="text-slate-900 text-gray-800">{{ formatWard(item.diaChi) }}</td>
-          <td class="text-slate-900 text-gray-800">{{ formatProvince(item.khuVuc) }}</td>
-          <td class="text-slate-900 text-gray-800">{{ item.viTri }}</td>
-          <td class="font-medium text-slate-800">{{ item.dtcn + 'm²' }}</td>
-          <td class="text-slate-900 text-gray-800">{{ catChuoi(item.ketCau || '-', 10) }}</td>
-          <td class="text-slate-900 text-gray-800">{{  formatDate(item.capNhatNgay) }}</td>
-          <td class="font-bold text-blue-700">
-            <div style="position: relative; top: -3px;">
-              {{ item.phiMoiGioi != null ? item.phiMoiGioi + '%' : '-' }}
             </div>
           </td>
           <td class="font-bold">
@@ -67,6 +47,38 @@
             <img v-else-if="item.status === 'Đã bán'" src="/imgs/sold-out.png" style="width: 29px"
                 alt="checked"
             />
+          </td>
+          <td class="font-medium text-slate-900 text-gray-800">{{ item.tenChuNha || '—' }}</td>
+          <td class="text-slate-900 text-gray-800">{{ item.soDienThoai || '—' }}</td>
+          <td class="font-bold text-blue-700">{{  formatMoneyVN( item.giaBan ) }}</td>
+          <td v-if="item.giaDinhGia === -1.1" class="text-slate-800">*********</td>
+          <td v-else-if="item.giaDinhGia" class="font-bold text-blue-700">
+            {{ formatMoneyVN(item.giaDinhGia) }}
+          </td>
+          <td v-else class="text-slate-800">—</td>
+          <td class="text-slate-800 text-gray-800">
+            <span class="table-truncate max-w-[180px]" :title="formatAddressDetail(item.diaChi)">
+              {{ truncateText(formatAddressDetail(item.diaChi), 22) }}
+            </span>
+          </td>
+          <td class="text-slate-900 text-gray-800">
+            <span class="table-truncate max-w-[140px]" :title="formatWard(item.diaChi)">
+              {{ truncateText(formatWard(item.diaChi), 16) }}
+            </span>
+          </td>
+          <td class="text-slate-900 text-gray-800">
+            <span class="table-truncate max-w-[140px]" :title="formatProvince(item.khuVuc)">
+              {{ truncateText(formatProvince(item.khuVuc), 16) }}
+            </span>
+          </td>
+          <td class="text-slate-900 text-gray-800">{{ item.viTri }}</td>
+          <td class="font-medium text-slate-800">{{ item.dtcn + 'm²' }}</td>
+          <td class="text-slate-900 text-gray-800">{{ catChuoi(item.ketCau || '-', 10) }}</td>
+          <td class="text-slate-900 text-gray-800">{{  formatDate(item.capNhatNgay) }}</td>
+          <td class="font-bold text-blue-700">
+            <div style="position: relative; top: -3px;">
+              {{ item.phiMoiGioi != null ? item.phiMoiGioi + '%' : '-' }}
+            </div>
           </td>
           <td>
               <span :class="['px-2 py-1 rounded-lg font-semibold', badgeClass(item.loaiMH)]"
@@ -87,45 +99,27 @@
                 {{ item.donVi }}
               </span>
           </td>
-          <td class="text-center relative">
-            <!-- ACTION FULL (>=1300px) -->
-            <div class="action-full inline-flex items-center">
+          <td class="text-center relative whitespace-nowrap">
+            <div class="action-wrapper inline-flex items-center">
               <button @click="$emit('toggle-love', item)" class="action-heart">
                 <i :class="item.daThich ? 'fa-solid fa-heart text-black text-base' : 'fa-regular fa-heart text-base'"></i>
               </button>
 
-              <!-- HỢP TÁC -->
-              <button v-if="canRequestCollaboration(item)" @click="$emit('open-collab', item)" class="action-collab">
-                <i class="fa-solid fa-handshake text-[10px]"></i>
-                <span>Hợp tác</span>
-              </button>
-
-              <button @click="$emit('view-detail', item)" class="action-view">
-                <i class="fa-regular fa-eye text-[10px]"></i>
-                <span>Xem</span>
-              </button>
-            </div>
-
-            <!-- ACTION DOT ( <1300px ) -->
-            <div class="action-dot relative inline-block">
-              <button class="dot-btn">
-                <i class="fa-solid fa-ellipsis-vertical"></i>
-              </button>
-
-              <!-- DROPDOWN -->
-              <div class="dot-menu">
-                <button @click="$emit('toggle-love', item)" class="dot-item">
-                  <i :class="item.daThich ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart'"></i>
-                  <span>Yêu thích</span>
+              <div class="action-hover relative inline-flex items-center">
+                <button class="dot-btn">
+                  <i class="fa-solid fa-ellipsis-vertical"></i>
                 </button>
-                <button v-if="canRequestCollaboration(item)" @click="$emit('open-collab', item)" class="dot-item">
-                  <i class="fa-solid fa-handshake"></i>
-                  <span>Hợp tác</span>
-                </button>
-                <button @click="$emit('view-detail', item)" class="dot-item">
-                  <i class="fa-regular fa-eye"></i>
-                  <span>Xem chi tiết</span>
-                </button>
+
+                <div class="action-menu">
+                  <button v-if="canRequestCollaboration(item)" @click="$emit('open-collab', item)" class="action-collab">
+                    <i class="fa-solid fa-handshake text-[10px]"></i>
+                    <span>Hợp tác</span>
+                  </button>
+                  <button @click="$emit('view-detail', item)" class="action-view">
+                    <i class="fa-regular fa-eye text-[10px]"></i>
+                    <span>Xem</span>
+                  </button>
+                </div>
               </div>
             </div>
           </td>
@@ -312,6 +306,11 @@ const catChuoi = (text, max = 11) => {
   return text.length > max ? text.slice(0, max) + '...' : text;
 };
 
+const truncateText = (text, max = 20) => {
+  if (!text) return '—';
+  return text.length > max ? `${text.slice(0, max)}...` : text;
+};
+
 const badgeClass = (code) => {
   const map = {
     BN30N: "bg-green-500 text-white font-semibold",
@@ -389,6 +388,26 @@ const canRequestCollaboration = (item) => {
   border-color: #fdba74;
 }
 
+.action-menu {
+  position: absolute;
+  right: 0;
+  top: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 20px rgba(0,0,0,.12);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-5px);
+  transition: .2s;
+  z-index: 50;
+  white-space: nowrap;
+}
+
 .dot-btn {
   width: 32px;
   height: 32px;
@@ -399,53 +418,18 @@ const canRequestCollaboration = (item) => {
   justify-content: center;
 }
 
-.dot-menu {
-  position: absolute;
-  right: 0;
-  top: 36px;
-  min-width: 140px;
-  background: white;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 10px 20px rgba(0,0,0,.12);
-  padding: 6px;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-5px);
-  transition: .2s;
-  z-index: 50;
-}
-
-.dot-item {
-  width: 100%;
-  padding: 6px 8px;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-radius: 8px;
-}
-
-.dot-item:hover {
-  background: #f1f5f9;
-}
-
-.action-dot:hover .dot-menu {
+.action-hover:hover .action-menu {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
 }
 
-@media (max-width: 1299px) {
-  .action-full {
-    display: none;
-  }
-}
-
-@media (min-width: 1300px) {
-  .action-dot {
-    display: none;
-  }
+.table-truncate {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 th {
