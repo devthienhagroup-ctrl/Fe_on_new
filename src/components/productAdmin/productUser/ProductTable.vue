@@ -19,7 +19,6 @@
           <th class="text-left">Cập Nhật</th>
           <th class="text-left">Phí MG</th>
           <th class="text-left">Loại MH</th>
-          <th class="text-left">Đơn Vị</th>
           <th class="text-left">&nbsp; Thao Tác</th>
         </tr>
         </thead>
@@ -86,27 +85,14 @@
                 {{ item.loaiMH }}
               </span>
           </td>
-          <td>
-              <span
-                  :class="[
-                  'inline-flex items-center gap-1 px-2 py-1 font-semibold text-white shadow-sm',
-                  item.donVi === 'THG' ? 'bg-[#6A0DAD]' : 'bg-[#0057D9]'
-                ]"
-                  style="border-radius: 8px; font-size: 12px; line-height: 16px;"
-              >
-                <i :class="['fa-solid text-white', item.donVi === 'THG' ? 'fa-building' : 'fa-handshake']"
-                   style="font-size: 11px;"></i>
-                {{ item.donVi }}
-              </span>
-          </td>
           <td class="text-center relative whitespace-nowrap">
             <div class="action-wrapper inline-flex items-center">
               <button @click="$emit('toggle-love', item)" class="action-heart">
-                <i :class="item.daThich ? 'fa-solid fa-heart text-black text-base' : 'fa-regular fa-heart text-base'"></i>
+                <i :class="item.daThich ? 'fa-solid fa-heart text-black text-[12px]' : 'fa-regular fa-heart text-[12px]'"></i>
               </button>
 
               <div class="action-hover relative inline-flex items-center">
-                <button class="dot-btn">
+                <button class="dot-btn" aria-label="Thao tác">
                   <i class="fa-solid fa-ellipsis-vertical"></i>
                 </button>
 
@@ -350,52 +336,60 @@ const canRequestCollaboration = (item) => {
 
 .action-heart {
   background: rgba(133,132,132,0.13);
-  padding: 0 10px;
-  margin-right: 5px;
+  padding: 4px 10px;
+  min-height: 28px;
   border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
 }
 
 .action-view {
-  padding: 2px 6px;
+  padding: 6px 12px;
   font-size: 11px;
   font-weight: 600;
-  border-radius: 8px;
-  background: #BFDBFE;
-  color: #1D4ED8;
-  border: 1px solid #93C5FD;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fbbf24, #f97316);
+  color: #ffffff;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  min-width: 80px;
+  justify-content: center;
 }
 
 .action-collab {
-  padding: 2px 12px;
+  padding: 6px 12px;
   font-size: 11px;
   font-weight: 600;
-  border-radius: 8px;
-  background: #f8d7ac;
-  color: #f57430;
-  border: 1px solid #f8b66c;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #7dd3fc, #8b5cf6);
+  color: #ffffff;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  margin-left: 6px;
-  margin-right: 10px;
+  gap: 6px;
+  min-width: 80px;
+  justify-content: center;
 }
 
 .action-collab:hover {
-  background: #fed7aa;
-  border-color: #fdba74;
+  background: linear-gradient(135deg, #bae6fd, #7c3aed);
+}
+
+.action-view:hover {
+  background: linear-gradient(135deg, #fcd34d, #ea580c);
 }
 
 .action-menu {
   position: absolute;
   right: 0;
   top: 36px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 8px;
   background: white;
   border-radius: 10px;
   border: 1px solid #e5e7eb;
@@ -409,11 +403,15 @@ const canRequestCollaboration = (item) => {
 }
 
 .dot-btn {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 8px;
-  background: rgba(133,132,132,0.12);
+  background: linear-gradient(135deg,
+  #3b82f6 0%,     /* Xanh da trời sáng */
+  #7c3aed 100%    /* Tím nhạt */
+  );
   display: flex;
+  color: white;
   align-items: center;
   justify-content: center;
 }

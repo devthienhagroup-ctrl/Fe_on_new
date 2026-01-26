@@ -1,8 +1,8 @@
 diff --git a/src/components/productAdmin/productUser/ProductTable.vue b/src/components/productAdmin/productUser/ProductTable.vue
-index 6a8ecebacf637012aed27ed3be79fdb84dc9dc7f..520d2924b2baa269d05a4c25a822f89f3535a670 100644
+index 520d2924b2baa269d05a4c25a822f89f3535a670..9e62fe3dad5912dedbfe9a5bc7e0be7a66d1b489 100644
 --- a/src/components/productAdmin/productUser/ProductTable.vue
 +++ b/src/components/productAdmin/productUser/ProductTable.vue
-@@ -1,153 +1,147 @@
+@@ -1,47 +1,46 @@
  <template>
    <div class="bg-white rounded-2xl shadow-xl border border-slate-300 mb-5 overflow-hidden">
      <div class="overflow-x-auto">
@@ -10,7 +10,7 @@ index 6a8ecebacf637012aed27ed3be79fdb84dc9dc7f..520d2924b2baa269d05a4c25a822f89f
          <thead class="table-header">
          <tr class="font-bold text-white">
            <th class="text-center">STT</th>
-+          <th class="text-left">TT</th>
+           <th class="text-left">TT</th>
            <th class="text-left">Chủ Nhà</th>
            <th class="text-left">Liên hệ</th>
            <th class="text-left">Giá Bán</th>
@@ -23,9 +23,8 @@ index 6a8ecebacf637012aed27ed3be79fdb84dc9dc7f..520d2924b2baa269d05a4c25a822f89f
            <th class="text-left">Kết Cấu</th>
            <th class="text-left">Cập Nhật</th>
            <th class="text-left">Phí MG</th>
--          <th class="text-left">TT</th>
            <th class="text-left">Loại MH</th>
-           <th class="text-left">Đơn Vị</th>
+-          <th class="text-left">Đơn Vị</th>
            <th class="text-left">&nbsp; Thao Tác</th>
          </tr>
          </thead>
@@ -40,47 +39,28 @@ index 6a8ecebacf637012aed27ed3be79fdb84dc9dc7f..520d2924b2baa269d05a4c25a822f89f
              <div class="relative inline-flex items-center justify-center w-8 h-8">
                <i :class="[getAssetTypeIcon(item), getAssetTypeColor(item), 'absolute text-lg opacity-20']"></i>
                <span :class="['relative text-xs font-bold', getAssetTypeColor(item)]">
--                  {{ idx + 1 }}
-+                  {{ page * pageSize + idx + 1 }}
+                   {{ page * pageSize + idx + 1 }}
                  </span>
              </div>
            </td>
-+          <td class="font-bold">
-+            <img v-if="item.status === 'Đã kiểm duyệt'"
-+                 src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png"
-+                 style="width: 27px"
-+                 alt="checked"
-+            />
-+            <img v-else-if="item.status === 'Đã bán'" src="/imgs/sold-out.png" style="width: 29px"
-+                alt="checked"
-+            />
-+          </td>
-           <td class="font-medium text-slate-900 text-gray-800">{{ item.tenChuNha || '—' }}</td>
-           <td class="text-slate-900 text-gray-800">{{ item.soDienThoai || '—' }}</td>
-           <td class="font-bold text-blue-700">{{  formatMoneyVN( item.giaBan ) }}</td>
-           <td v-if="item.giaDinhGia === -1.1" class="text-slate-800">*********</td>
-           <td v-else-if="item.giaDinhGia" class="font-bold text-blue-700">
-             {{ formatMoneyVN(item.giaDinhGia) }}
+           <td class="font-bold">
+             <img v-if="item.status === 'Đã kiểm duyệt'"
+                  src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png"
+                  style="width: 27px"
+                  alt="checked"
+             />
+             <img v-else-if="item.status === 'Đã bán'" src="/imgs/sold-out.png" style="width: 29px"
+@@ -64,71 +63,58 @@
+           <td class="text-slate-900 text-gray-800">
+             <span class="table-truncate max-w-[140px]" :title="formatWard(item.diaChi)">
+               {{ truncateText(formatWard(item.diaChi), 16) }}
+             </span>
            </td>
-           <td v-else class="text-slate-800">—</td>
--          <td class="text-slate-800 text-gray-800">{{ formatAddressDetail(item.diaChi) }}</td>
--          <td class="text-slate-900 text-gray-800">{{ formatWard(item.diaChi) }}</td>
--          <td class="text-slate-900 text-gray-800">{{ formatProvince(item.khuVuc) }}</td>
-+          <td class="text-slate-800 text-gray-800">
-+            <span class="table-truncate max-w-[180px]" :title="formatAddressDetail(item.diaChi)">
-+              {{ truncateText(formatAddressDetail(item.diaChi), 22) }}
-+            </span>
-+          </td>
-+          <td class="text-slate-900 text-gray-800">
-+            <span class="table-truncate max-w-[140px]" :title="formatWard(item.diaChi)">
-+              {{ truncateText(formatWard(item.diaChi), 16) }}
-+            </span>
-+          </td>
-+          <td class="text-slate-900 text-gray-800">
-+            <span class="table-truncate max-w-[140px]" :title="formatProvince(item.khuVuc)">
-+              {{ truncateText(formatProvince(item.khuVuc), 16) }}
-+            </span>
-+          </td>
+           <td class="text-slate-900 text-gray-800">
+             <span class="table-truncate max-w-[140px]" :title="formatProvince(item.khuVuc)">
+               {{ truncateText(formatProvince(item.khuVuc), 16) }}
+             </span>
+           </td>
            <td class="text-slate-900 text-gray-800">{{ item.viTri }}</td>
            <td class="font-medium text-slate-800">{{ item.dtcn + 'm²' }}</td>
            <td class="text-slate-900 text-gray-800">{{ catChuoi(item.ketCau || '-', 10) }}</td>
@@ -90,90 +70,48 @@ index 6a8ecebacf637012aed27ed3be79fdb84dc9dc7f..520d2924b2baa269d05a4c25a822f89f
                {{ item.phiMoiGioi != null ? item.phiMoiGioi + '%' : '-' }}
              </div>
            </td>
--          <td class="font-bold">
--            <img v-if="item.status === 'Đã kiểm duyệt'"
--                 src="https://s3.cloudfly.vn/thg-storage-dev/uploads-public/icon-kiem-duỵet.png"
--                 style="width: 27px"
--                 alt="checked"
--            />
--            <img v-else-if="item.status === 'Đã bán'" src="/imgs/sold-out.png" style="width: 29px"
--                alt="checked"
--            />
--          </td>
            <td>
                <span :class="['px-2 py-1 rounded-lg font-semibold', badgeClass(item.loaiMH)]"
                      style="border-radius: 8px !important; font-size: 12px !important;">
                  {{ item.loaiMH }}
                </span>
            </td>
-           <td>
-               <span
-                   :class="[
-                   'inline-flex items-center gap-1 px-2 py-1 font-semibold text-white shadow-sm',
-                   item.donVi === 'THG' ? 'bg-[#6A0DAD]' : 'bg-[#0057D9]'
-                 ]"
-                   style="border-radius: 8px; font-size: 12px; line-height: 16px;"
-               >
-                 <i :class="['fa-solid text-white', item.donVi === 'THG' ? 'fa-building' : 'fa-handshake']"
-                    style="font-size: 11px;"></i>
-                 {{ item.donVi }}
-               </span>
-           </td>
--          <td class="text-center relative">
--            <!-- ACTION FULL (>=1300px) -->
--            <div class="action-full inline-flex items-center">
-+          <td class="text-center relative whitespace-nowrap">
-+            <div class="action-wrapper inline-flex items-center">
+-          <td>
+-              <span
+-                  :class="[
+-                  'inline-flex items-center gap-1 px-2 py-1 font-semibold text-white shadow-sm',
+-                  item.donVi === 'THG' ? 'bg-[#6A0DAD]' : 'bg-[#0057D9]'
+-                ]"
+-                  style="border-radius: 8px; font-size: 12px; line-height: 16px;"
+-              >
+-                <i :class="['fa-solid text-white', item.donVi === 'THG' ? 'fa-building' : 'fa-handshake']"
+-                   style="font-size: 11px;"></i>
+-                {{ item.donVi }}
+-              </span>
+-          </td>
+           <td class="text-center relative whitespace-nowrap">
+             <div class="action-wrapper inline-flex items-center">
                <button @click="$emit('toggle-love', item)" class="action-heart">
-                 <i :class="item.daThich ? 'fa-solid fa-heart text-black text-base' : 'fa-regular fa-heart text-base'"></i>
+-                <i :class="item.daThich ? 'fa-solid fa-heart text-black text-base' : 'fa-regular fa-heart text-base'"></i>
++                <i :class="item.daThich ? 'fa-solid fa-heart text-black text-[12px]' : 'fa-regular fa-heart text-[12px]'"></i>
                </button>
 
--              <!-- HỢP TÁC -->
--              <button v-if="canRequestCollaboration(item)" @click="$emit('open-collab', item)" class="action-collab">
--                <i class="fa-solid fa-handshake text-[10px]"></i>
--                <span>Hợp tác</span>
--              </button>
--
--              <button @click="$emit('view-detail', item)" class="action-view">
--                <i class="fa-regular fa-eye text-[10px]"></i>
--                <span>Xem</span>
--              </button>
--            </div>
--
--            <!-- ACTION DOT ( <1300px ) -->
--            <div class="action-dot relative inline-block">
--              <button class="dot-btn">
--                <i class="fa-solid fa-ellipsis-vertical"></i>
--              </button>
--
--              <!-- DROPDOWN -->
--              <div class="dot-menu">
--                <button @click="$emit('toggle-love', item)" class="dot-item">
--                  <i :class="item.daThich ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart'"></i>
--                  <span>Yêu thích</span>
--                </button>
--                <button v-if="canRequestCollaboration(item)" @click="$emit('open-collab', item)" class="dot-item">
--                  <i class="fa-solid fa-handshake"></i>
--                  <span>Hợp tác</span>
--                </button>
--                <button @click="$emit('view-detail', item)" class="dot-item">
--                  <i class="fa-regular fa-eye"></i>
--                  <span>Xem chi tiết</span>
-+              <div class="action-hover relative inline-flex items-center">
-+                <button class="dot-btn">
-+                  <i class="fa-solid fa-ellipsis-vertical"></i>
+               <div class="action-hover relative inline-flex items-center">
+-                <button class="dot-btn">
++                <button class="dot-btn" aria-label="Thao tác">
+                   <i class="fa-solid fa-ellipsis-vertical"></i>
                  </button>
-+
-+                <div class="action-menu">
-+                  <button v-if="canRequestCollaboration(item)" @click="$emit('open-collab', item)" class="action-collab">
-+                    <i class="fa-solid fa-handshake text-[10px]"></i>
-+                    <span>Hợp tác</span>
-+                  </button>
-+                  <button @click="$emit('view-detail', item)" class="action-view">
-+                    <i class="fa-regular fa-eye text-[10px]"></i>
-+                    <span>Xem</span>
-+                  </button>
-+                </div>
+
+                 <div class="action-menu">
+                   <button v-if="canRequestCollaboration(item)" @click="$emit('open-collab', item)" class="action-collab">
+                     <i class="fa-solid fa-handshake text-[10px]"></i>
+                     <span>Hợp tác</span>
+                   </button>
+                   <button @click="$emit('view-detail', item)" class="action-view">
+                     <i class="fa-regular fa-eye text-[10px]"></i>
+                     <span>Xem</span>
+                   </button>
+                 </div>
                </div>
              </div>
            </td>
@@ -186,64 +124,7 @@ index 6a8ecebacf637012aed27ed3be79fdb84dc9dc7f..520d2924b2baa269d05a4c25a822f89f
      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-3 bg-gradient-to-r from-slate-100 to-slate-200 border-t border-slate-300">
        <div class="flex items-center gap-1">
          <button
-             @click="$emit('go-to-page', 0)"
-             :disabled="page === 0"
-             class="p-1.5 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-         >
-           <i class="fa-solid fa-angles-left text-sm"></i>
-         </button>
-         <button
-             @click="$emit('go-to-page', page - 1)"
-             :disabled="page === 0"
-             class="p-1.5 rounded-lg bg-white border border-slate-400 text-slate-800 hover:bg-blue-100 hover:border-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-         >
-           <i class="fa-solid fa-angle-left text-sm"></i>
-         </button>
-@@ -290,50 +284,55 @@ const getAssetType = (item) => {
- };
-
- const getAssetTypeIcon = (item) => {
-   const type = getAssetType(item);
-   switch (type) {
-     case "house": return "fa-solid fa-house-chimney";
-     case "land-large": return "fa-solid fa-mountain-city";
-     default: return "fa-solid fa-map-location-dot";
-   }
- };
-
- const getAssetTypeColor = (item) => {
-   const type = getAssetType(item);
-   switch (type) {
-     case "house": return "text-emerald-700";
-     case "land-large": return "text-rose-700";
-     default: return "text-blue-700";
-   }
- };
-
- const catChuoi = (text, max = 11) => {
-   if (!text) return '-';
-   return text.length > max ? text.slice(0, max) + '...' : text;
- };
-
-+const truncateText = (text, max = 20) => {
-+  if (!text) return '—';
-+  return text.length > max ? `${text.slice(0, max)}...` : text;
-+};
-+
- const badgeClass = (code) => {
-   const map = {
-     BN30N: "bg-green-500 text-white font-semibold",
-     HTT: "bg-yellow-500 text-white font-semibold",
-     HOPTAC: "bg-orange-500 text-white font-semibold",
-   };
-   return map[code] || "bg-slate-400 text-white font-semibold";
- };
-
- function formatMoneyVN(value) {
-   if (value == null || isNaN(value)) return "0";
-   const num = Number(value);
-
-   if (num < 1_000_000) return num.toLocaleString("vi-VN");
+@@ -328,113 +314,125 @@ function formatMoneyVN(value) {
    if (num < 1_000_000_000) {
      const trieu = num / 1_000_000;
      return `${trieu.toFixed(trieu % 1 === 0 ? 0 : 1)} triệu`;
@@ -255,108 +136,137 @@ index 6a8ecebacf637012aed27ed3be79fdb84dc9dc7f..520d2924b2baa269d05a4c25a822f89f
 
  const canRequestCollaboration = (item) => {
    if (item.status === 'Đã bán') return false;
-@@ -367,101 +366,86 @@ const canRequestCollaboration = (item) => {
+   if (item.isOwner) return false;
+   if (item.daGuiYeuCau) return false;
+   return true;
+ };
+ </script>
+
+ <style scoped>
+ .table-header {
+   background: linear-gradient(to right, #641eaf, #562df3);
+   border-bottom: 2px solid #a78bfa;
+ }
+
+ .action-heart {
+   background: rgba(133,132,132,0.13);
+-  padding: 0 10px;
+-  margin-right: 5px;
++  padding: 4px 10px;
++  min-height: 28px;
+   border-radius: 8px;
++  display: inline-flex;
++  align-items: center;
++  justify-content: center;
++  margin-right: 8px;
+ }
+
+ .action-view {
+-  padding: 2px 6px;
++  padding: 6px 12px;
+   font-size: 11px;
+   font-weight: 600;
+-  border-radius: 8px;
+-  background: #BFDBFE;
+-  color: #1D4ED8;
+-  border: 1px solid #93C5FD;
++  border-radius: 12px;
++  background: linear-gradient(135deg, #fbbf24, #f97316);
++  color: #ffffff;
++  border: 1px solid #f59e0b;
    display: inline-flex;
    align-items: center;
-   gap: 4px;
+-  gap: 4px;
++  gap: 6px;
++  min-width: 80px;
++  justify-content: center;
  }
 
  .action-collab {
-   padding: 2px 12px;
+-  padding: 2px 12px;
++  padding: 6px 12px;
    font-size: 11px;
    font-weight: 600;
-   border-radius: 8px;
-   background: #f8d7ac;
-   color: #f57430;
-   border: 1px solid #f8b66c;
+-  border-radius: 8px;
+-  background: #f8d7ac;
+-  color: #f57430;
+-  border: 1px solid #f8b66c;
++  border-radius: 12px;
++  background: linear-gradient(135deg, #7dd3fc, #8b5cf6);
++  color: #ffffff;
++  border: 1px solid #7c3aed;
    display: inline-flex;
    align-items: center;
-   gap: 4px;
-   margin-left: 6px;
-   margin-right: 10px;
+-  gap: 4px;
+-  margin-left: 6px;
+-  margin-right: 10px;
++  gap: 6px;
++  min-width: 80px;
++  justify-content: center;
  }
 
  .action-collab:hover {
-   background: #fed7aa;
-   border-color: #fdba74;
+-  background: #fed7aa;
+-  border-color: #fdba74;
++  background: linear-gradient(135deg, #bae6fd, #7c3aed);
++  border-color: #a855f7;
++}
++
++.action-view:hover {
++  background: linear-gradient(135deg, #fcd34d, #ea580c);
++  border-color: #f97316;
  }
 
--.dot-btn {
--  width: 32px;
--  height: 32px;
--  border-radius: 8px;
--  background: rgba(133,132,132,0.12);
--  display: flex;
--  align-items: center;
--  justify-content: center;
--}
--
--.dot-menu {
-+.action-menu {
+ .action-menu {
    position: absolute;
    right: 0;
    top: 36px;
--  min-width: 140px;
-+  display: inline-flex;
-+  align-items: center;
-+  gap: 6px;
-+  padding: 6px;
+-  display: inline-flex;
+-  align-items: center;
+-  gap: 6px;
+-  padding: 6px;
++  display: flex;
++  flex-direction: column;
++  align-items: stretch;
++  gap: 10px;
++  padding: 8px;
    background: white;
    border-radius: 10px;
    border: 1px solid #e5e7eb;
    box-shadow: 0 10px 20px rgba(0,0,0,.12);
--  padding: 6px;
    opacity: 0;
    visibility: hidden;
    transform: translateY(-5px);
    transition: .2s;
    z-index: 50;
-+  white-space: nowrap;
+   white-space: nowrap;
  }
 
--.dot-item {
--  width: 100%;
--  padding: 6px 8px;
--  font-size: 13px;
-+.dot-btn {
-+  width: 32px;
-+  height: 32px;
-+  border-radius: 8px;
-+  background: rgba(133,132,132,0.12);
+ .dot-btn {
+-  width: 32px;
+-  height: 32px;
++  width: 28px;
++  height: 28px;
+   border-radius: 8px;
+-  background: rgba(133,132,132,0.12);
++  background: #38bdf8;
    display: flex;
    align-items: center;
--  gap: 8px;
--  border-radius: 8px;
--}
--
--.dot-item:hover {
--  background: #f1f5f9;
-+  justify-content: center;
+   justify-content: center;
  }
 
--.action-dot:hover .dot-menu {
-+.action-hover:hover .action-menu {
+ .action-hover:hover .action-menu {
    opacity: 1;
    visibility: visible;
    transform: translateY(0);
  }
 
--@media (max-width: 1299px) {
--  .action-full {
--    display: none;
--  }
--}
--
--@media (min-width: 1300px) {
--  .action-dot {
--    display: none;
--  }
-+.table-truncate {
-+  display: inline-block;
-+  overflow: hidden;
-+  text-overflow: ellipsis;
-+  white-space: nowrap;
-+  vertical-align: middle;
+ .table-truncate {
+   display: inline-block;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+   vertical-align: middle;
  }
 
  th {
@@ -365,16 +275,3 @@ index 6a8ecebacf637012aed27ed3be79fdb84dc9dc7f..520d2924b2baa269d05a4c25a822f89f
  }
 
  td {
-   padding: 5px 5px 10px 0 !important;
- }
-
- * {
-   font-size: 14px;
- }
-
- table * {
-   font-size: 13.5px !important;
- }
--</style>
-\ No newline at end of file
-+</style>
