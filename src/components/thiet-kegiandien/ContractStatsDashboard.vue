@@ -43,6 +43,15 @@
                 </option>
               </select>
             </div>
+
+            <div class="field">
+              <label>Dịch vụ</label>
+              <select v-model="selectedService">
+                <option v-for="service in serviceOptions" :key="service.id" :value="service.id">
+                  {{ service.name }}
+                </option>
+              </select>
+            </div>
           </div>
 
           <div class="filter__hint">
@@ -92,35 +101,12 @@
         <div class="card__title">
           <span class="card__titleIcon bg--emerald"><i class="fa-solid fa-money-bill-trend-up"></i></span>
           <div>
-            <h3>{{ revenueTitle }}</h3>
-            <p class="muted">{{ revenueSubtitle }}</p>
-          </div>
-          <div class="card__actions">
-            <div class="field field--compact">
-              <label>Dịch vụ</label>
-              <select v-model="selectedService">
-                <option v-for="service in serviceOptions" :key="service.id" :value="service.id">
-                  {{ service.name }}
-                </option>
-              </select>
-            </div>
+            <h3>{{ serviceTrendTitle }}</h3>
+            <p class="muted">{{ serviceTrendSubtitle }}</p>
           </div>
         </div>
         <div class="chartWrap chartWrap--lg">
           <canvas ref="trend2El"></canvas>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card__title">
-          <span class="card__titleIcon bg--violet"><i class="fa-solid fa-chart-line"></i></span>
-          <div>
-            <h3>{{ salesTitle }}</h3>
-            <p class="muted">{{ salesSubtitle }}</p>
-          </div>
-        </div>
-        <div class="chartWrap chartWrap--lg">
-          <canvas ref="trend3El"></canvas>
         </div>
       </section>
 
@@ -368,27 +354,17 @@ const filterGridStyle = computed(() => {
   if (canFullBranch.value) {
     columns.push("180px");
   }
+  columns.push("200px");
   return { gridTemplateColumns: columns.join(" ") };
 });
 
-const revenueTitle = computed(() => {
+const serviceTrendTitle = computed(() => {
   const selected = serviceOptions.value.find((option) => option.id === selectedService.value);
   const suffix = timeRange.value === "month" ? "theo tháng" : "theo năm";
-  return `Doanh thu ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
+  return `Doanh số & doanh thu ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
 });
 
-const revenueSubtitle = computed(() => {
-  if (selectedService.value === "all") return "Phân loại theo dịch vụ";
-  return "Phân loại theo phân khúc dịch vụ";
-});
-
-const salesTitle = computed(() => {
-  const selected = serviceOptions.value.find((option) => option.id === selectedService.value);
-  const suffix = timeRange.value === "month" ? "theo tháng" : "theo năm";
-  return `Doanh số ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
-});
-
-const salesSubtitle = computed(() => {
+const serviceTrendSubtitle = computed(() => {
   if (selectedService.value === "all") return "Phân loại theo dịch vụ";
   return "Phân loại theo phân khúc dịch vụ";
 });
@@ -396,7 +372,6 @@ const salesSubtitle = computed(() => {
 // ===== Chart refs =====
 const trend1El = ref(null);
 const trend2El = ref(null);
-const trend3El = ref(null);
 const statusEl = ref(null);
 const customerTypeEl = ref(null);
 const serviceTypeEl = ref(null);
@@ -404,7 +379,6 @@ const serviceTypeEl = ref(null);
 // ===== Chart instances =====
 let trendChart1 = null;
 let trendChart2 = null;
-let trendChart3 = null;
 let statusChart = null;
 let customerTypeChart = null;
 let serviceTypeChart = null;
@@ -495,6 +469,7 @@ function createCharts() {
           labels: { usePointStyle: true, padding: 14, font: { size: 12 } },
         },
         tooltip: { padding: 10, cornerRadius: 10 },
+        datalabels: { display: false },
       },
     },
   });
@@ -520,31 +495,7 @@ function createCharts() {
           labels: { usePointStyle: true, padding: 14, font: { size: 12 } },
         },
         tooltip: { padding: 10, cornerRadius: 10 },
-      },
-    },
-  });
-
-  trendChart3 = new Chart(trend3El.value.getContext("2d"), {
-    type: "line",
-    data: structuredClone(emptyLineData),
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: "index", intersect: false },
-      scales: {
-        x: { grid: { color: gridColor } },
-        y: {
-          beginAtZero: true,
-          grid: { color: gridColor },
-          title: { display: true, text: "Triệu VNĐ", font: { weight: "700" } },
-        },
-      },
-      plugins: {
-        legend: {
-          position: "top",
-          labels: { usePointStyle: true, padding: 14, font: { size: 12 } },
-        },
-        tooltip: { padding: 10, cornerRadius: 10 },
+        datalabels: { display: false },
       },
     },
   });
@@ -559,7 +510,11 @@ function createCharts() {
         y: { beginAtZero: true, grid: { color: gridColor } },
         x: { grid: { display: false } },
       },
-      plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 10 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: { padding: 10, cornerRadius: 10 },
+        datalabels: { display: false },
+      },
     },
   });
 
@@ -570,7 +525,11 @@ function createCharts() {
       responsive: true,
       maintainAspectRatio: false,
       cutout: "72%",
-      plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 10 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: { padding: 10, cornerRadius: 10 },
+        datalabels: { display: false },
+      },
     },
   });
 
@@ -581,16 +540,20 @@ function createCharts() {
       responsive: true,
       maintainAspectRatio: false,
       cutout: "72%",
-      plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 10 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: { padding: 10, cornerRadius: 10 },
+        datalabels: { display: false },
+      },
     },
   });
 }
 
 function destroyCharts() {
-  [trendChart1, trendChart2, trendChart3, statusChart, customerTypeChart, serviceTypeChart].forEach((c) =>
+  [trendChart1, trendChart2, statusChart, customerTypeChart, serviceTypeChart].forEach((c) =>
     c?.destroy()
   );
-  trendChart1 = trendChart2 = trendChart3 = statusChart = customerTypeChart = serviceTypeChart = null;
+  trendChart1 = trendChart2 = statusChart = customerTypeChart = serviceTypeChart = null;
 }
 
 // ===== Filter logic =====
@@ -663,18 +626,57 @@ const normalizeSeries = (series) =>
       }))
     : [];
 
-const buildLineDatasets = (series) =>
-  normalizeSeries(series).map((item, index) => ({
-    label: item.label,
-    data: item.data,
-    borderColor: revenuePalette[index % revenuePalette.length],
-    backgroundColor: `${revenuePalette[index % revenuePalette.length]}22`,
-    borderWidth: 3,
-    fill: true,
-    tension: 0.4,
-    pointRadius: 2,
-    pointHoverRadius: 5,
-  }));
+const sanitizeLabel = (value) => String(value || "").toLowerCase().trim();
+
+const resolveServiceColor = (label) => {
+  const normalizedLabel = sanitizeLabel(label);
+  if (!normalizedLabel) return null;
+  const matched = services.value.find((service) => {
+    const normalizedName = sanitizeLabel(service?.name);
+    return normalizedName && (normalizedName === normalizedLabel || normalizedLabel.includes(normalizedName));
+  });
+  return matched?.color || null;
+};
+
+const buildColorMap = (items) => {
+  const map = new Map();
+  items.forEach((item, index) => {
+    if (map.has(item.label)) return;
+    const serviceColor = resolveServiceColor(item.label);
+    map.set(item.label, serviceColor || revenuePalette[index % revenuePalette.length]);
+  });
+  return map;
+};
+
+const buildLineDataset = (item, color, labelSuffix = "", options = {}) => ({
+  label: labelSuffix ? `${item.label} - ${labelSuffix}` : item.label,
+  data: item.data,
+  borderColor: color,
+  backgroundColor: `${color}22`,
+  borderWidth: 3,
+  fill: true,
+  tension: 0.4,
+  pointRadius: 2,
+  pointHoverRadius: 5,
+  borderDash: options.borderDash,
+});
+
+const buildCombinedServiceDatasets = (salesSeries, revenueSeries) => {
+  const salesItems = normalizeSeries(salesSeries);
+  const revenueItems = normalizeSeries(revenueSeries);
+  const colorMap = buildColorMap([...salesItems, ...revenueItems]);
+  return [
+    ...salesItems.map((item) => buildLineDataset(item, colorMap.get(item.label), "Doanh số")),
+    ...revenueItems.map((item) =>
+      buildLineDataset(item, colorMap.get(item.label), "Doanh thu", { borderDash: [8, 6] })
+    ),
+  ];
+};
+
+const buildLineDatasets = (series, palette = revenuePalette) =>
+  normalizeSeries(series).map((item, index) =>
+    buildLineDataset(item, palette[index % palette.length])
+  );
 
 const buildLegend = (items, palette) =>
   items.map((item, index) => ({
@@ -700,18 +702,21 @@ const updateDoughnutChart = (chart, labels, values, palette) => {
   chart.update();
 };
 
-const updateLineChart = (chart, labels, series) => {
+const updateLineChart = (chart, labels, datasets) => {
   chart.data.labels = labels;
-  chart.data.datasets = buildLineDatasets(series);
+  chart.data.datasets = datasets;
   chart.update();
 };
 
 const updateChartsFromResponse = (payload) => {
   const labels = Array.isArray(payload?.labels) && payload.labels.length ? payload.labels : monthLabels;
 
-  updateLineChart(trendChart1, labels, payload?.hopDongTrend || []);
-  updateLineChart(trendChart2, labels, payload?.doanhThuTrend || []);
-  updateLineChart(trendChart3, labels, payload?.doanhSoTrend || []);
+  updateLineChart(trendChart1, labels, buildLineDatasets(payload?.hopDongTrend || []));
+  updateLineChart(
+    trendChart2,
+    labels,
+    buildCombinedServiceDatasets(payload?.doanhSoTrend || [], payload?.doanhThuTrend || [])
+  );
 
   const statusItems = Array.isArray(payload?.trangThaiHopDong) ? payload.trangThaiHopDong : [];
   const statusLabels = statusItems.map((item) => item?.label || "");
@@ -751,19 +756,12 @@ const updateChartsFromResponse = (payload) => {
   const serviceItems = Array.isArray(payload?.loaiDichVu) ? payload.loaiDichVu : [];
   const serviceLabels = serviceItems.map((item) => item?.label || "");
   const serviceValues = serviceItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
+  const servicePalette = serviceLabels.map(
+    (label, index) => resolveServiceColor(label) || revenuePalette[index % revenuePalette.length]
+  );
   serviceTotal.value = serviceValues.reduce((sum, value) => sum + value, 0);
-  updateDoughnutChart(serviceTypeChart, serviceLabels, serviceValues, [
-    COLORS.KHONG_LIEN_LAC_DUOC,
-    COLORS.BAN_NHANH,
-    COLORS.BAN_GP,
-    COLORS.NEW,
-  ]);
-  serviceLegend.value = buildLegend(serviceItems, [
-    COLORS.KHONG_LIEN_LAC_DUOC,
-    COLORS.BAN_NHANH,
-    COLORS.BAN_GP,
-    COLORS.NEW,
-  ]);
+  updateDoughnutChart(serviceTypeChart, serviceLabels, serviceValues, servicePalette);
+  serviceLegend.value = buildLegend(serviceItems, servicePalette);
 };
 
 const buildRequestParams = () => ({

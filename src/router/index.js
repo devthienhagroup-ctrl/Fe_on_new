@@ -162,6 +162,7 @@ import ServicePackages from "../components/user/NewUser/ServicePackages/ServiceP
 import ServicePackageCMS from "../components/cms/NewCms/ServicePackages/ServicePackageCMS.vue";
 import DichVuSetting from "../components/dich-vu/Phi-dich-vu.vue";
 import DichVuSetting2 from "../components/dich-vu/Dich-vu-setting.vue";
+import AdminDeptBranch from "../components/Branch/AdminDeptBranch.vue";
 const routes = [
 
     {
@@ -175,7 +176,17 @@ const routes = [
             component: DichVuSetting,
         }]
     },
-
+    {
+        path: "/-thg/quan-ly-chi-nhanh",
+        name: "DichVuSetting11152",
+        component: Menu,
+        meta: {requiresAuth: true, enableTailwind: true, loginFrom: "admin"},
+        children: [{
+            path: '',
+            name: "DichVuSetting111555",
+            component: AdminDeptBranch,
+        }]
+    },
     {
         path: "/-thg/cau-hinh-phi-dich-vu",
         name: "DichVuSetting2",

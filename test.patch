@@ -1,398 +1,621 @@
-diff --git a/src/components/dich-vu/Phi-dich-vu.vue b/src/components/dich-vu/Phi-dich-vu.vue
-index 322ee563a27581591db02e657cf68475fbed0f3c..306c3f3ebf43a87be3059147684573e02a67eca1 100644
---- a/src/components/dich-vu/Phi-dich-vu.vue
-+++ b/src/components/dich-vu/Phi-dich-vu.vue
-@@ -410,127 +410,119 @@
-                     <div class="customer-name">{{ selectedCustomer.name }}</div>
-                     <div class="customer-phone"><i class="fa-solid fa-phone me-1"></i>{{ selectedCustomer.phone }}</div>
-                   </div>
-                   <button class="clear-btn" type="button" @click="clearSelectedCustomer">
-                     <i class="fa-solid fa-xmark"></i>
-                   </button>
-                 </div>
-               </div>
-                 <div class="field !m-0" style="max-height: 50px !important;">
-                   <label class="field-label">
-                     <span class="label-ico tone-emerald"><i class="fa-solid fa-phone"></i></span>
-                     <span>Số điện thoại</span>
-                   </label>
-                   <input :value="selectedCustomer?.phone || ''" type="text" readonly>
-                 </div>
-               </div>
-               <div class="section-title">
-                 <i class="fa-solid fa-user-check"></i>
-                 Nhân viên chốt
-               </div>
+diff --git a/src/components/thiet-kegiandien/ContractStatsDashboard.vue b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
+index 5a8ac19f8d0efc23e5302129f1ed4388e9050edf..0fcf5b12c2ed80994c54fea1d37f7fbc79a670bc 100644
+--- a/src/components/thiet-kegiandien/ContractStatsDashboard.vue
++++ b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
+@@ -21,131 +21,117 @@
+                 <option value="month">Theo tháng</option>
+                 <option value="year">Theo năm</option>
+               </select>
+             </div>
 
-               <div class="grid grid-cols-1 md:grid-cols-2 gap-3 px-3 pb-2">
-                 <div class="field !m-0">
-                   <label class="field-label">
-                     <span class="label-ico tone-sky"><i class="fa-solid fa-user-check"></i></span>
--                    <span>Hình thức chốt</span>
-+                    <span>Hợp đồng của</span>
-                   </label>
--                  <select v-model="nguoiChotMode">
--                    <option value="SELF">Chính mình chốt</option>
--                    <option value="OTHER">Người khác chốt</option>
--                  </select>
--                  <div class="muted tiny">Chọn người chốt hợp đồng.</div>
-+                  <div class="switcher">
-+                    <button
-+                      type="button"
-+                      class="switch"
-+                      :class="{ on: nguoiChotMode === 'OTHER' }"
-+                      role="switch"
-+                      :aria-checked="nguoiChotMode === 'OTHER'"
-+                      @click="nguoiChotMode = nguoiChotMode === 'SELF' ? 'OTHER' : 'SELF'"
-+                    >
-+                      <span class="switch-thumb"></span>
-+                    </button>
-+                    <span class="switch-label">{{ nguoiChotMode === 'SELF' ? 'Bản thân' : 'Tạo hộ' }}</span>
-+                  </div>
-+                  <div v-if="nguoiChotMode === 'OTHER'" class="switcher-search">
-+                    <input v-model="employeeSearch" type="text" placeholder="Nhập tên, email hoặc SĐT...">
-+                  </div>
-+                  <div class="muted tiny">Gạt để chọn người chốt hợp đồng.</div>
-                 </div>
+             <div v-if="timeRange === 'month'" class="field">
+               <label>Tháng</label>
+               <select v-model.number="selectedMonth">
+                 <option v-for="m in monthOptions" :key="m" :value="m">Tháng {{ m }}</option>
+               </select>
+             </div>
 
-                 <div class="field !m-0">
-                   <label class="field-label">
-                     <span class="label-ico tone-indigo"><i class="fa-solid fa-user"></i></span>
-                     <span>Nhân viên chốt</span>
-                   </label>
-                   <input
-                     :value="nguoiChotDisplayName"
-                     type="text"
-                     readonly
-                     placeholder="Chưa chọn nhân viên"
-                   >
-                   <div class="muted tiny">
-                     {{ nguoiChotMode === 'SELF' ? 'Tự động lấy từ tài khoản hiện tại.' : 'Chọn từ danh sách tìm kiếm.' }}
-                   </div>
-                 </div>
-               </div>
+             <div class="field">
+               <label>Năm</label>
+               <input v-model.number="selectedYear" type="number" min="1" placeholder="2026" />
+             </div>
 
-               <div v-if="nguoiChotMode === 'OTHER'" class="employee-search customer-search px-3 pb-2">
--                <div class="field !m-0">
--                  <label class="field-label">
--                    <span class="label-ico tone-lilac"><i class="fa-solid fa-magnifying-glass"></i></span>
--                    <span>Tìm nhân viên</span>
--                  </label>
--                  <input v-model="employeeSearch" type="text" placeholder="Nhập tên, email hoặc SĐT...">
--
--                  <div class="search-results" v-if="employeeSearchResults.length">
--                    <div v-for="employee in employeeSearchResults" :key="employee.id" class="customer-result" @click="selectEmployee(employee)">
--                      <img
--                        v-if="employee.avatar"
--                        :src="getEmployeeAvatarUrl(employee.avatar)"
--                        alt="avatar"
--                        class="customer-avatar sm"
--                      />
--                      <div v-else class="customer-avatar sm">{{ initials(employee.tenNhanVien) }}</div>
--                      <div class="cr-main">
--                        <div class="customer-name">{{ employee.tenNhanVien }}</div>
--                        <div class="customer-phone"><i class="fa-solid fa-envelope me-1"></i>{{ employee.email || '-' }}</div>
--                        <div class="customer-phone"><i class="fa-solid fa-phone me-1"></i>{{ employee.phone || '-' }}</div>
--                      </div>
--                    </div>
--                  </div>
--                  <div v-else-if="employeeSearchLoading" class="search-results empty">
--                    <div class="customer-result muted">
--                      <div class="cr-main">
--                        <div class="customer-name">Đang tìm nhân viên...</div>
--                        <div class="customer-phone">Vui lòng chờ</div>
--                      </div>
-+                <div class="search-results" v-if="employeeSearchResults.length">
-+                  <div v-for="employee in employeeSearchResults" :key="employee.id" class="customer-result" @click="selectEmployee(employee)">
-+                    <img
-+                      v-if="employee.avatar"
-+                      :src="getEmployeeAvatarUrl(employee.avatar)"
-+                      alt="avatar"
-+                      class="customer-avatar sm"
-+                    />
-+                    <div v-else class="customer-avatar sm">{{ initials(employee.tenNhanVien) }}</div>
-+                    <div class="cr-main">
-+                      <div class="customer-name">{{ employee.tenNhanVien }}</div>
-+                      <div class="customer-phone"><i class="fa-solid fa-envelope me-1"></i>{{ employee.email || '-' }}</div>
-+                      <div class="customer-phone"><i class="fa-solid fa-phone me-1"></i>{{ employee.phone || '-' }}</div>
-                     </div>
-                   </div>
--                  <div v-else-if="employeeSearchError && employeeSearch.trim()" class="search-results empty">
--                    <div class="customer-result muted">
--                      <div class="cr-main">
--                        <div class="customer-name">{{ employeeSearchError }}</div>
--                        <div class="customer-phone">Thử nhập tên khác.</div>
--                      </div>
-+                </div>
-+                <div v-else-if="employeeSearchLoading" class="search-results empty">
-+                  <div class="customer-result muted">
-+                    <div class="cr-main">
-+                      <div class="customer-name">Đang tìm nhân viên...</div>
-+                      <div class="customer-phone">Vui lòng chờ</div>
-                     </div>
-                   </div>
--
--                  <div v-if="selectedEmployee" class="selected-customer">
--                    <div class="customer-avatar">{{ initials(selectedEmployee.tenNhanVien) }}</div>
--                    <div class="min-w-0">
--                      <div class="customer-name">{{ selectedEmployee.tenNhanVien }}</div>
--                      <div class="customer-phone"><i class="fa-solid fa-envelope me-1"></i>{{ selectedEmployee.email || '-' }}</div>
--                      <div class="customer-phone"><i class="fa-solid fa-phone me-1"></i>{{ selectedEmployee.phone || '-' }}</div>
-+                </div>
-+                <div v-else-if="employeeSearchError && employeeSearch.trim()" class="search-results empty">
-+                  <div class="customer-result muted">
-+                    <div class="cr-main">
-+                      <div class="customer-name">{{ employeeSearchError }}</div>
-+                      <div class="customer-phone">Thử nhập tên khác.</div>
-                     </div>
--                    <button class="clear-btn" type="button" @click="clearSelectedEmployee">
--                      <i class="fa-solid fa-xmark"></i>
--                    </button>
-                   </div>
-                 </div>
-               </div>
-
-               <div class="section-title">
-                 <i class="fa-solid fa-briefcase"></i>
-                 Dịch vụ & giá trị
-               </div>
-
-               <div v-if="canFullBranch" class="field">
-                 <label class="field-label">
-                   <span class="label-ico tone-emerald"><i class="fa-solid fa-code-branch"></i></span>
-                   <span>Chi nhánh</span>
-                 </label>
-                 <select v-model="newContract.branchId" :disabled="branchLoading">
-                   <option v-for="branch in branchOptions" :key="branch.id" :value="branch.id">
-                     {{ branch.label }}
-                   </option>
-                 </select>
-                 <div class="muted tiny">Chọn chi nhánh áp dụng cho hợp đồng.</div>
-               </div>
-
-               <div class="field">
-                 <label class="field-label">
-                   <span class="label-ico tone-indigo"><i class="fa-solid fa-list"></i></span>
-@@ -1508,53 +1500,58 @@ const pageStart = computed(() => {
-
- const pageEnd = computed(() => {
-   return Math.min(currentPage.value * pageSize.value, totalElements.value)
- })
-
- const totalDoanhThu = computed(() => {
-   return contracts.value.reduce((sum, c) => sum + getDoanhThu(c), 0)
- })
-
- const totalDieuChinh = computed(() => {
-   return contracts.value.reduce((sum, c) => sum + getTongDieuChinh(c), 0)
- })
-
- const totalDoanhSo = computed(() => {
-   return contracts.value.reduce((sum, c) => sum + getDoanhSo(c), 0)
- })
-
- const serviceOptions = computed(() => {
-   return services.value
- })
-
- const currentUserId = computed(() => info.value?.id ?? null)
-
- const nguoiChotDisplayName = computed(() => {
-   if (nguoiChotMode.value === 'SELF') {
--    return info.value?.fullName || 'Chưa có tên'
-+    const name = info.value?.fullName || 'Chưa có tên'
-+    const phone = info.value?.phone || ''
-+    return phone ? `${name} • ${phone}` : name
-   }
--  return selectedEmployee.value?.tenNhanVien || ''
-+  const name = selectedEmployee.value?.tenNhanVien || ''
-+  const phone = selectedEmployee.value?.phone || ''
-+  if (!name) return ''
-+  return phone ? `${name} • ${phone}` : name
- })
-
- const branchFilterOptions = computed(() => ([
-   { id: null, label: 'Tất cả' },
-   ...branchOptions.value
- ]))
-
- const selectedService = computed(() => {
-   if (!newContract.value.serviceId) return null
-   return serviceOptions.value.find(s => String(s.id || s.name) === String(newContract.value.serviceId)) || null
- })
-
- const matchingSegment = computed(() => {
-   const serviceId = newContract.value.serviceId
-   const assetValue = Number(newContract.value.giaTriTaiSan || 0)
-   if (!serviceId || assetValue <= 0) return null
-   return segments.value.find(seg =>
-       String(seg.serviceId) === String(serviceId) &&
-       assetValue >= Number(seg.min) &&
-       assetValue < Number(seg.max)
-   ) || null
- })
-
- const getDefaultBranchId = () => {
-   if (canFullBranch.value) {
-@@ -2565,60 +2562,65 @@ const saveContract = async () => {
-   if (!newContract.value.tenDichVu) {
-     showError('Thiếu dữ liệu', 'Bạn cần chọn Dịch vụ.')
-     return
-   }
-
-   if (!newContract.value.giaTriTaiSan) {
-     showError('Thiếu dữ liệu', 'Bạn cần nhập giá trị tài sản.')
-     return
-   }
-
-   if (!newContract.value.giaDichVuGoc) {
-     showError('Thiếu dữ liệu', 'Giá gốc chưa xác định theo phân khúc.')
-     return
-   }
-
-   if (newContract.value.discountMode === 'MONEY' && newContract.value.discountValue <= 0) {
-     showError('Giảm giá không hợp lệ', 'Giảm giá tiền phải > 0 và không vượt quá giá gốc.')
-     return
-   }
-
-   if (nguoiChotMode.value === 'OTHER' && !selectedEmployee.value) {
-     showError('Thiếu dữ liệu', 'Bạn cần chọn nhân viên chốt hợp đồng.')
-     return
-   }
-
-+  const resolvedNguoiChotId = nguoiChotMode.value === 'SELF'
-+    ? currentUserId.value ?? null
-+    : selectedEmployee.value?.id ?? null
-+  newContract.value.nguoiChotId = resolvedNguoiChotId
+             <div v-if="canFullBranch" class="field">
+               <label>Chi nhánh</label>
+               <select v-model="selectedBranch" :disabled="branchLoading">
+                 <option v-for="branch in branchFilterOptions" :key="branch.id ?? 'all'" :value="branch.id">
+                   {{ branch.label }}
+                 </option>
+               </select>
+             </div>
 +
-   const payload = {
-     maKhachHang: newContract.value.maKhachHang,
-     giaTriKyBan: newContract.value.giaTriTaiSan,
-     giaDichVuGoc: newContract.value.giaDichVuGoc,
-     phiGiam: newContract.value.phiGiam || 0,
-     giaSauGiam: newContract.value.giaSauGiam,
-     hinhThucThanhToan: newContract.value.firstMethod,
-     serviceId: newContract.value.serviceId,
-     branchId: newContract.value.branchId ?? null,
--    nguoiChotId: newContract.value.nguoiChotId ?? null,
-+    nguoiChotId: resolvedNguoiChotId,
-     soTienThanhToan: firstPaymentAmount.value,
-     initPlan: newContract.value.initPlan
++            <div class="field">
++              <label>Dịch vụ</label>
++              <select v-model="selectedService">
++                <option v-for="service in serviceOptions" :key="service.id" :value="service.id">
++                  {{ service.name }}
++                </option>
++              </select>
++            </div>
+           </div>
+
+           <div class="filter__hint">
+             <i class="fa-regular fa-calendar"></i>
+             <span>{{ dateText }}</span>
+           </div>
+         </div>
+       </header>
+
+       <!-- Stats -->
+       <section class="stats">
+         <article v-for="(s, idx) in statCards" :key="s.key" class="stat" :class="`stat--${s.tone}`">
+           <div class="stat__top">
+             <div class="stat__icon" :class="`bg--${s.tone}`">
+               <i :class="s.icon"></i>
+             </div>
+             <div class="stat__badge" :class="`chip--${s.tone}`">
+               <i class="fa-solid fa-sparkles"></i>
+               <span>{{ s.badge }}</span>
+             </div>
+           </div>
+
+           <div class="stat__value">
+             <span class="gradient-text" :class="`text--${s.tone}`">{{ s.value }}</span>
+           </div>
+           <div class="stat__label">{{ s.label }}</div>
+
+           <div class="stat__glow" :class="`glow--${s.tone}`"></div>
+         </article>
+       </section>
+
+       <!-- Charts (full width) -->
+       <section class="card">
+         <div class="card__title">
+           <span class="card__titleIcon bg--indigo"><i class="fa-solid fa-chart-line"></i></span>
+           <div>
+             <h3>Xu hướng hợp đồng theo tháng (2026)</h3>
+             <p class="muted">So sánh HĐ mới / thành công / thất bại</p>
+           </div>
+         </div>
+         <div class="chartWrap chartWrap--lg">
+           <canvas ref="trend1El"></canvas>
+         </div>
+       </section>
+
+       <section class="card">
+         <div class="card__title">
+           <span class="card__titleIcon bg--emerald"><i class="fa-solid fa-money-bill-trend-up"></i></span>
+           <div>
+-            <h3>{{ revenueTitle }}</h3>
+-            <p class="muted">{{ revenueSubtitle }}</p>
+-          </div>
+-          <div class="card__actions">
+-            <div class="field field--compact">
+-              <label>Dịch vụ</label>
+-              <select v-model="selectedService">
+-                <option v-for="service in serviceOptions" :key="service.id" :value="service.id">
+-                  {{ service.name }}
+-                </option>
+-              </select>
+-            </div>
++            <h3>{{ serviceTrendTitle }}</h3>
++            <p class="muted">{{ serviceTrendSubtitle }}</p>
+           </div>
+         </div>
+         <div class="chartWrap chartWrap--lg">
+           <canvas ref="trend2El"></canvas>
+         </div>
+       </section>
+
+-      <section class="card">
+-        <div class="card__title">
+-          <span class="card__titleIcon bg--violet"><i class="fa-solid fa-chart-line"></i></span>
+-          <div>
+-            <h3>{{ salesTitle }}</h3>
+-            <p class="muted">{{ salesSubtitle }}</p>
+-          </div>
+-        </div>
+-        <div class="chartWrap chartWrap--lg">
+-          <canvas ref="trend3El"></canvas>
+-        </div>
+-      </section>
+-
+       <!-- 3 charts row -->
+       <section class="grid3">
+         <article class="card">
+           <div class="card__title">
+             <span class="card__titleIcon bg--sky"><i class="fa-solid fa-chart-column"></i></span>
+             <div>
+               <h3>Trạng thái hợp đồng</h3>
+               <p class="muted">Phân bố số lượng theo nhóm</p>
+             </div>
+           </div>
+
+           <div class="chartWrap chartWrap--md">
+             <canvas ref="statusEl"></canvas>
+           </div>
+
+           <div class="legend">
+             <div v-for="l in statusLegend" :key="l.label" class="legend__item">
+               <span class="legend__dot" :style="{ background: l.color }"></span>
+               <span>{{ l.label }}</span>
+             </div>
+           </div>
+         </article>
+
+         <article class="card">
+           <div class="card__title">
+@@ -346,87 +332,75 @@ const statCards = computed(() => [
+     value: formatCompactVnd(stats.value.totalSales),
+     tone: "violet",
+     badge: "Doanh số",
+   },
+ ]);
+
+ const serviceOptions = computed(() => [
+   { id: "all", name: "Tất cả dịch vụ" },
+   ...services.value.map((service) => ({ id: service.id, name: service.name })),
+ ]);
+
+ const branchFilterOptions = computed(() => [
+   { id: null, label: "Tất cả" },
+   ...branchOptions.value,
+ ]);
+
+ const filterGridStyle = computed(() => {
+   const columns = ["1.1fr"];
+   if (timeRange.value === "month") {
+     columns.push("140px");
    }
+   columns.push("140px");
+   if (canFullBranch.value) {
+     columns.push("180px");
+   }
++  columns.push("200px");
+   return { gridTemplateColumns: columns.join(" ") };
+ });
+
+-const revenueTitle = computed(() => {
+-  const selected = serviceOptions.value.find((option) => option.id === selectedService.value);
+-  const suffix = timeRange.value === "month" ? "theo tháng" : "theo năm";
+-  return `Doanh thu ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
+-});
+-
+-const revenueSubtitle = computed(() => {
+-  if (selectedService.value === "all") return "Phân loại theo dịch vụ";
+-  return "Phân loại theo phân khúc dịch vụ";
+-});
+-
+-const salesTitle = computed(() => {
++const serviceTrendTitle = computed(() => {
+   const selected = serviceOptions.value.find((option) => option.id === selectedService.value);
+   const suffix = timeRange.value === "month" ? "theo tháng" : "theo năm";
+-  return `Doanh số ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
++  return `Doanh số & doanh thu ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
+ });
+
+-const salesSubtitle = computed(() => {
++const serviceTrendSubtitle = computed(() => {
+   if (selectedService.value === "all") return "Phân loại theo dịch vụ";
+   return "Phân loại theo phân khúc dịch vụ";
+ });
+
+ // ===== Chart refs =====
+ const trend1El = ref(null);
+ const trend2El = ref(null);
+-const trend3El = ref(null);
+ const statusEl = ref(null);
+ const customerTypeEl = ref(null);
+ const serviceTypeEl = ref(null);
+
+ // ===== Chart instances =====
+ let trendChart1 = null;
+ let trendChart2 = null;
+-let trendChart3 = null;
+ let statusChart = null;
+ let customerTypeChart = null;
+ let serviceTypeChart = null;
+
+ // ===== Initial data =====
+ const monthLabels = [
+   "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+   "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12",
+ ];
+
+ const revenuePalette = [
+   COLORS.BAN_NHANH,
+   COLORS.BAN_GP,
+   COLORS.DC_TELESALES,
+   COLORS.CHAM_SOC,
+   COLORS.TN_7NGAY,
+   COLORS.TN_14NGAY,
+   COLORS.SAI_SO_LIEU,
+   COLORS.THANH_CONG,
+ ];
+
+ const emptyLineData = {
+   labels: monthLabels,
+   datasets: [],
+ };
+@@ -473,146 +447,135 @@ const serviceTypeData = {
+ // ===== Build charts =====
+ function createCharts() {
+   const gridColor = "rgba(15, 23, 42, 0.06)";
+
+   trendChart1 = new Chart(trend1El.value.getContext("2d"), {
+     type: "line",
+     data: structuredClone(emptyLineData),
+     options: {
+       responsive: true,
+       maintainAspectRatio: false,
+       interaction: { mode: "index", intersect: false },
+       scales: {
+         x: { grid: { color: gridColor } },
+         y: {
+           beginAtZero: true,
+           grid: { color: gridColor },
+           title: { display: true, text: "Số hợp đồng", font: { weight: "700" } },
+         },
+       },
+       plugins: {
+         legend: {
+           position: "top",
+           labels: { usePointStyle: true, padding: 14, font: { size: 12 } },
+         },
+         tooltip: { padding: 10, cornerRadius: 10 },
++        datalabels: { display: false },
+       },
+     },
+   });
+
+   trendChart2 = new Chart(trend2El.value.getContext("2d"), {
+     type: "line",
+     data: structuredClone(emptyLineData),
+     options: {
+       responsive: true,
+       maintainAspectRatio: false,
+       interaction: { mode: "index", intersect: false },
+       scales: {
+         x: { grid: { color: gridColor } },
+         y: {
+           beginAtZero: true,
+           grid: { color: gridColor },
+           title: { display: true, text: "Triệu VNĐ", font: { weight: "700" } },
+         },
+       },
+       plugins: {
+         legend: {
+           position: "top",
+           labels: { usePointStyle: true, padding: 14, font: { size: 12 } },
+         },
+         tooltip: { padding: 10, cornerRadius: 10 },
+-      },
+-    },
+-  });
+-
+-  trendChart3 = new Chart(trend3El.value.getContext("2d"), {
+-    type: "line",
+-    data: structuredClone(emptyLineData),
+-    options: {
+-      responsive: true,
+-      maintainAspectRatio: false,
+-      interaction: { mode: "index", intersect: false },
+-      scales: {
+-        x: { grid: { color: gridColor } },
+-        y: {
+-          beginAtZero: true,
+-          grid: { color: gridColor },
+-          title: { display: true, text: "Triệu VNĐ", font: { weight: "700" } },
+-        },
+-      },
+-      plugins: {
+-        legend: {
+-          position: "top",
+-          labels: { usePointStyle: true, padding: 14, font: { size: 12 } },
+-        },
+-        tooltip: { padding: 10, cornerRadius: 10 },
++        datalabels: { display: false },
+       },
+     },
+   });
+
+   statusChart = new Chart(statusEl.value.getContext("2d"), {
+     type: "bar",
+     data: structuredClone(statusData),
+     options: {
+       responsive: true,
+       maintainAspectRatio: false,
+       scales: {
+         y: { beginAtZero: true, grid: { color: gridColor } },
+         x: { grid: { display: false } },
+       },
+-      plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 10 } },
++      plugins: {
++        legend: { display: false },
++        tooltip: { padding: 10, cornerRadius: 10 },
++        datalabels: { display: false },
++      },
+     },
+   });
+
+   customerTypeChart = new Chart(customerTypeEl.value.getContext("2d"), {
+     type: "doughnut",
+     data: structuredClone(customerTypeData),
+     options: {
+       responsive: true,
+       maintainAspectRatio: false,
+       cutout: "72%",
+-      plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 10 } },
++      plugins: {
++        legend: { display: false },
++        tooltip: { padding: 10, cornerRadius: 10 },
++        datalabels: { display: false },
++      },
+     },
+   });
+
+   serviceTypeChart = new Chart(serviceTypeEl.value.getContext("2d"), {
+     type: "doughnut",
+     data: structuredClone(serviceTypeData),
+     options: {
+       responsive: true,
+       maintainAspectRatio: false,
+       cutout: "72%",
+-      plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 10 } },
++      plugins: {
++        legend: { display: false },
++        tooltip: { padding: 10, cornerRadius: 10 },
++        datalabels: { display: false },
++      },
+     },
+   });
+ }
+
+ function destroyCharts() {
+-  [trendChart1, trendChart2, trendChart3, statusChart, customerTypeChart, serviceTypeChart].forEach((c) =>
++  [trendChart1, trendChart2, statusChart, customerTypeChart, serviceTypeChart].forEach((c) =>
+     c?.destroy()
+   );
+-  trendChart1 = trendChart2 = trendChart3 = statusChart = customerTypeChart = serviceTypeChart = null;
++  trendChart1 = trendChart2 = statusChart = customerTypeChart = serviceTypeChart = null;
+ }
+
+ // ===== Filter logic =====
+ const normalizeYear = () => {
+   const safeYear = Math.floor(Number(selectedYear.value) || 0);
+   selectedYear.value = safeYear > 0 ? safeYear : 1;
+ };
+
+ const updateDateRange = () => {
+   normalizeYear();
+   if (timeRange.value === "month") {
+     const s = new Date(selectedYear.value, selectedMonth.value - 1, 1);
+     const e = new Date(selectedYear.value, selectedMonth.value, 0);
+     startDate.value = toISODate(s);
+     endDate.value = toISODate(e);
+   } else {
+     const s = new Date(selectedYear.value, 0, 1);
+     const e = new Date(selectedYear.value, 11, 31);
+     startDate.value = toISODate(s);
+     endDate.value = toISODate(e);
+   }
+ };
+
+ watch([timeRange, selectedMonth, selectedYear], updateDateRange, { immediate: true });
+
+@@ -641,151 +604,186 @@ watch(
+
+ watch(
+   branchOptions,
+   (nextBranches) => {
+     if (!canFullBranch.value) return;
+     if (selectedBranch.value === null) return;
+     const exists = nextBranches.some(
+       (branch) => String(branch.id) === String(selectedBranch.value)
+     );
+     if (!exists) {
+       selectedBranch.value = null;
+     }
+   },
+   { deep: true }
+ );
+
+
+ const normalizeSeries = (series) =>
+   Array.isArray(series)
+     ? series.map((item, index) => ({
+         label: item?.label || `Dòng ${index + 1}`,
+         data: Array.isArray(item?.data) ? item.data : [],
+       }))
+     : [];
+
+-const buildLineDatasets = (series) =>
+-  normalizeSeries(series).map((item, index) => ({
+-    label: item.label,
+-    data: item.data,
+-    borderColor: revenuePalette[index % revenuePalette.length],
+-    backgroundColor: `${revenuePalette[index % revenuePalette.length]}22`,
+-    borderWidth: 3,
+-    fill: true,
+-    tension: 0.4,
+-    pointRadius: 2,
+-    pointHoverRadius: 5,
+-  }));
++const sanitizeLabel = (value) => String(value || "").toLowerCase().trim();
++
++const resolveServiceColor = (label) => {
++  const normalizedLabel = sanitizeLabel(label);
++  if (!normalizedLabel) return null;
++  const matched = services.value.find((service) => {
++    const normalizedName = sanitizeLabel(service?.name);
++    return normalizedName && (normalizedName === normalizedLabel || normalizedLabel.includes(normalizedName));
++  });
++  return matched?.color || null;
++};
++
++const buildColorMap = (items) => {
++  const map = new Map();
++  items.forEach((item, index) => {
++    if (map.has(item.label)) return;
++    const serviceColor = resolveServiceColor(item.label);
++    map.set(item.label, serviceColor || revenuePalette[index % revenuePalette.length]);
++  });
++  return map;
++};
++
++const buildLineDataset = (item, color, labelSuffix = "", options = {}) => ({
++  label: labelSuffix ? `${item.label} - ${labelSuffix}` : item.label,
++  data: item.data,
++  borderColor: color,
++  backgroundColor: `${color}22`,
++  borderWidth: 3,
++  fill: true,
++  tension: 0.4,
++  pointRadius: 2,
++  pointHoverRadius: 5,
++  borderDash: options.borderDash,
++});
++
++const buildCombinedServiceDatasets = (salesSeries, revenueSeries) => {
++  const salesItems = normalizeSeries(salesSeries);
++  const revenueItems = normalizeSeries(revenueSeries);
++  const colorMap = buildColorMap([...salesItems, ...revenueItems]);
++  return [
++    ...salesItems.map((item) => buildLineDataset(item, colorMap.get(item.label), "Doanh số")),
++    ...revenueItems.map((item) =>
++      buildLineDataset(item, colorMap.get(item.label), "Doanh thu", { borderDash: [8, 6] })
++    ),
++  ];
++};
++
++const buildLineDatasets = (series, palette = revenuePalette) =>
++  normalizeSeries(series).map((item, index) =>
++    buildLineDataset(item, palette[index % palette.length])
++  );
+
+ const buildLegend = (items, palette) =>
+   items.map((item, index) => ({
+     label: item?.label || `Nhóm ${index + 1}`,
+     color: palette[index % palette.length],
+   }));
+
+ const updateBarChart = (chart, labels, values, palette) => {
+   chart.data.labels = labels;
+   chart.data.datasets[0].data = values;
+   chart.data.datasets[0].backgroundColor = labels.map(
+     (_, index) => palette[index % palette.length]
+   );
+   chart.update();
+ };
+
+ const updateDoughnutChart = (chart, labels, values, palette) => {
+   chart.data.labels = labels;
+   chart.data.datasets[0].data = values;
+   chart.data.datasets[0].backgroundColor = labels.map(
+     (_, index) => palette[index % palette.length]
+   );
+   chart.update();
+ };
+
+-const updateLineChart = (chart, labels, series) => {
++const updateLineChart = (chart, labels, datasets) => {
+   chart.data.labels = labels;
+-  chart.data.datasets = buildLineDatasets(series);
++  chart.data.datasets = datasets;
+   chart.update();
+ };
+
+ const updateChartsFromResponse = (payload) => {
+   const labels = Array.isArray(payload?.labels) && payload.labels.length ? payload.labels : monthLabels;
+
+-  updateLineChart(trendChart1, labels, payload?.hopDongTrend || []);
+-  updateLineChart(trendChart2, labels, payload?.doanhThuTrend || []);
+-  updateLineChart(trendChart3, labels, payload?.doanhSoTrend || []);
++  updateLineChart(trendChart1, labels, buildLineDatasets(payload?.hopDongTrend || []));
++  updateLineChart(
++    trendChart2,
++    labels,
++    buildCombinedServiceDatasets(payload?.doanhSoTrend || [], payload?.doanhThuTrend || [])
++  );
+
+   const statusItems = Array.isArray(payload?.trangThaiHopDong) ? payload.trangThaiHopDong : [];
+   const statusLabels = statusItems.map((item) => item?.label || "");
+   const statusValues = statusItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
+   updateBarChart(statusChart, statusLabels, statusValues, [
+     COLORS.THANH_CONG,
+     COLORS.TN_7NGAY,
+     COLORS.CHAM_SOC,
+     COLORS.THAT_BAI,
+     COLORS.KHONG_LIEN_LAC_DUOC,
+   ]);
+   statusLegend.value = buildLegend(statusItems, [
+     COLORS.THANH_CONG,
+     COLORS.TN_7NGAY,
+     COLORS.CHAM_SOC,
+     COLORS.THAT_BAI,
+     COLORS.KHONG_LIEN_LAC_DUOC,
+   ]);
+
+   const customerItems = Array.isArray(payload?.loaiKhachHang) ? payload.loaiKhachHang : [];
+   const customerLabels = customerItems.map((item) => item?.label || "");
+   const customerValues = customerItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
+   customerTotal.value = customerValues.reduce((sum, value) => sum + value, 0);
+   updateDoughnutChart(customerTypeChart, customerLabels, customerValues, [
+     COLORS.DC_TELESALES,
+     COLORS.CHAM_SOC,
+     COLORS.SAI_SO_LIEU,
+     COLORS.NEW,
+   ]);
+   customerLegend.value = buildLegend(customerItems, [
+     COLORS.DC_TELESALES,
+     COLORS.CHAM_SOC,
+     COLORS.SAI_SO_LIEU,
+     COLORS.NEW,
+   ]);
+
+   const serviceItems = Array.isArray(payload?.loaiDichVu) ? payload.loaiDichVu : [];
+   const serviceLabels = serviceItems.map((item) => item?.label || "");
+   const serviceValues = serviceItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
++  const servicePalette = serviceLabels.map(
++    (label, index) => resolveServiceColor(label) || revenuePalette[index % revenuePalette.length]
++  );
+   serviceTotal.value = serviceValues.reduce((sum, value) => sum + value, 0);
+-  updateDoughnutChart(serviceTypeChart, serviceLabels, serviceValues, [
+-    COLORS.KHONG_LIEN_LAC_DUOC,
+-    COLORS.BAN_NHANH,
+-    COLORS.BAN_GP,
+-    COLORS.NEW,
+-  ]);
+-  serviceLegend.value = buildLegend(serviceItems, [
+-    COLORS.KHONG_LIEN_LAC_DUOC,
+-    COLORS.BAN_NHANH,
+-    COLORS.BAN_GP,
+-    COLORS.NEW,
+-  ]);
++  updateDoughnutChart(serviceTypeChart, serviceLabels, serviceValues, servicePalette);
++  serviceLegend.value = buildLegend(serviceItems, servicePalette);
+ };
+
+ const buildRequestParams = () => ({
+   nam: selectedYear.value,
+   thang: timeRange.value === "month" ? selectedMonth.value : null,
+   theo: timeRange.value,
+   tuNgay: startDate.value,
+   denNgay: endDate.value,
+   dichVu: selectedService.value === "all" ? "all" : selectedService.value,
+   branchId: canFullBranch.value ? selectedBranch.value : null,
+ });
+
+ async function fetchStats() {
+   if (loading.value) return;
+   loading.value = true;
 
    try {
-     const res = await showLoading(api.post('/hop-dong/admin/create', payload))
-     const created = res?.data || {}
-     const hasPayments = Array.isArray(created.dotDongTien) && created.dotDongTien.length > 0
-     const contract = {
-       id: created.id || crypto.randomUUID(),
-       maHopDong: created.maHopDong || newContract.value.maHopDong,
-       maKhachHang: created.maKhachHang ?? newContract.value.maKhachHang,
-       tenKhachHang: created.tenKhachHang || newContract.value.tenKhachHang,
-       nhanVienTao: created.nhanVienTao || currentUserName.value,
-       tenNhanVienChot: created.tenNhanVienChot || nguoiChotDisplayName.value || '-',
-       tenDichVu: created.tenDichVu || newContract.value.tenDichVu,
-       serviceId: created.serviceId ?? newContract.value.serviceId,
-       giaTriTaiSan: created.giaTriKyBan ?? created.giaTriTaiSan ?? newContract.value.giaTriTaiSan,
-       giaDichVuGoc: created.giaDichVuGoc ?? newContract.value.giaDichVuGoc,
-       phiGiam: created.phiGiam ?? newContract.value.phiGiam ?? 0,
-       giaSauGiam: created.giaSauGiam ?? newContract.value.giaSauGiam,
-       trangThaiHopDong: created.trangThaiHopDong ?? newContract.value.trangThaiHopDong,
-       ngayKy: created.ngayKy ?? newContract.value.ngayKy ?? todayISO(),
-       ngayTao: created.ngayTao ?? new Date().toLocaleString('vi-VN'),
-       dotDongTien: hasPayments ? created.dotDongTien : [],
-@@ -4238,50 +4240,94 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
- }
- .segment-hint i{ color: #4facfe; }
-
- .section-title{
-   margin: 12px 12px 6px;
-   padding-top: 10px;
-   border-top: 1px dashed rgba(148,163,184,.5);
-   font-size: 12px;
-   font-weight: 800;
-   text-transform: uppercase;
-   letter-spacing: .5px;
-   color: rgba(11,18,32,.72);
-   display:flex;
-   align-items:center;
-   gap:8px;
- }
- .section-title i{
-   color: rgba(99,102,241,.8);
- }
- .section-title:first-of-type{
-   border-top: none;
-   padding-top: 0;
- }
-
- .customer-search{ position: relative; }
-+.switcher{
-+  display:flex;
-+  align-items:center;
-+  gap:10px;
-+}
-+.switch{
-+  width: 46px;
-+  height: 26px;
-+  border-radius: 999px;
-+  border: 1px solid rgba(20,30,48,.12);
-+  background: rgba(20,30,48,.08);
-+  position: relative;
-+  padding: 2px;
-+  cursor: pointer;
-+  transition: var(--t);
-+}
-+.switch-thumb{
-+  width: 20px;
-+  height: 20px;
-+  border-radius: 999px;
-+  background: #fff;
-+  box-shadow: 0 4px 10px rgba(15,23,42,.18);
-+  transform: translateX(0);
-+  transition: var(--t);
-+  display:block;
-+}
-+.switch.on{
-+  background: var(--success-gradient);
-+  border-color: rgba(56,249,215,.35);
-+}
-+.switch.on .switch-thumb{
-+  transform: translateX(18px);
-+}
-+.switch-label{
-+  font-size: 13px;
-+  font-weight: 800;
-+  color: rgba(11,18,32,.85);
-+}
-+.switcher-search{
-+  margin-top: 8px;
-+}
-+.switcher-search input{
-+  width: 100%;
-+}
- .search-results{
-   margin-top: 8px;
-   border-radius: 12px;
-   border: 1px solid rgba(20,30,48,.12);
-   background: #fff;
-   box-shadow: 0 14px 26px rgba(15,23,42,.08);
-   max-height: 220px;
-   overflow: auto;
- }
- .search-results.empty{ background: rgba(20,30,48,.02); }
- .customer-result{
-   display:flex;
-   gap:10px;
-   align-items:center;
-   padding: 8px 10px;
-   cursor:pointer;
-   transition: var(--t);
- }
- .customer-result:hover{ background: rgba(102,126,234,.08); }
- .customer-result .cr-main{ flex: 1; }
- .customer-avatar{
-   width: 38px;
-   height: 38px;
-   border-radius: 12px;
-   display:grid;
+     const res = await api.get("/hop-dong/admin/thong-ke", {
+       params: buildRequestParams(),
+     });
+     const payload = res?.data || {};
+     stats.value = {
+       totalContracts: Number(payload?.summary?.totalContracts) || 0,
+       activeContracts: Number(payload?.summary?.activeContracts) || 0,
+       completedContracts: Number(payload?.summary?.completedContracts) || 0,
