@@ -1,621 +1,640 @@
-diff --git a/src/components/thiet-kegiandien/ContractStatsDashboard.vue b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
-index 5a8ac19f8d0efc23e5302129f1ed4388e9050edf..0fcf5b12c2ed80994c54fea1d37f7fbc79a670bc 100644
---- a/src/components/thiet-kegiandien/ContractStatsDashboard.vue
-+++ b/src/components/thiet-kegiandien/ContractStatsDashboard.vue
-@@ -21,131 +21,117 @@
-                 <option value="month">Theo tháng</option>
-                 <option value="year">Theo năm</option>
-               </select>
-             </div>
-
-             <div v-if="timeRange === 'month'" class="field">
-               <label>Tháng</label>
-               <select v-model.number="selectedMonth">
-                 <option v-for="m in monthOptions" :key="m" :value="m">Tháng {{ m }}</option>
-               </select>
-             </div>
-
-             <div class="field">
-               <label>Năm</label>
-               <input v-model.number="selectedYear" type="number" min="1" placeholder="2026" />
-             </div>
-
-             <div v-if="canFullBranch" class="field">
-               <label>Chi nhánh</label>
-               <select v-model="selectedBranch" :disabled="branchLoading">
-                 <option v-for="branch in branchFilterOptions" :key="branch.id ?? 'all'" :value="branch.id">
-                   {{ branch.label }}
-                 </option>
-               </select>
-             </div>
-+
-+            <div class="field">
-+              <label>Dịch vụ</label>
-+              <select v-model="selectedService">
-+                <option v-for="service in serviceOptions" :key="service.id" :value="service.id">
-+                  {{ service.name }}
-+                </option>
-+              </select>
+diff --git a/src/components/Project.vue b/src/components/Project.vue
+index d964fdf4bd3f5036bb8826424a51eb7473ee6a96..73b50f889a16e18cd133a9f531d5a6b1bdf3aded 100644
+--- a/src/components/Project.vue
++++ b/src/components/Project.vue
+@@ -1,62 +1,97 @@
+ <template>
+-  <div class=" container-build pb-4 bg-light min-vh-90 danh-sach-du-an">
+-    <!-- Header -->
+-    <div class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2 " style="border-bottom: solid 0.5px rgba(0,0,0,0.3)">
+-      <h5 class="fw-bold mb-0 d-flex align-items-center">
+-        <button
+-            v-if="canCreateProject"
+-            @click="goToCreateProject"
+-            class="btn border border-primary rounded-circle d-flex align-items-center justify-content-center  me-2"
+-            style="width: 40px; height: 40px;"
+-        >
+-          <i class="fa-solid fa-plus text-primary fs-5"></i>
+-        </button>
+-        Quản lý dự án
+-      </h5>
++  <div class="container-build pb-4 bg-light min-vh-90 danh-sach-du-an project-page">
++    <section class="page-hero px-3 py-3">
++      <div class="hero-main d-flex align-items-center justify-content-between gap-3 flex-wrap">
++        <div class="hero-title">
++          <div class="hero-eyebrow text-uppercase text-white-50">Bảng điều khiển</div>
++          <h2 class="fw-bold mb-1 text-white">Quản lý dự án</h2>
++          <p class="text-white-50 mb-0">
++            Theo dõi tiến độ, ngân sách và hiệu suất triển khai theo thời gian thực.
++          </p>
++        </div>
++        <div class="hero-actions d-flex align-items-center gap-2">
++          <button
++              v-if="canCreateProject"
++              @click="goToCreateProject"
++              class="btn btn-light fw-semibold shadow-sm"
++          >
++            <i class="fa-solid fa-plus me-2"></i>
++            Tạo dự án mới
++          </button>
++          <div class="hero-user d-flex align-items-center gap-2">
++            <NotificationBell />
++            <div class="d-flex flex-column text-end text-white">
++              <span class="fw-semibold">{{ info.fullName }}</span>
++              <small class="text-white-50">Quản trị viên</small>
 +            </div>
-           </div>
++            <img
++                v-if="info.avatarUrl"
++                :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
++                alt="avatar"
++                class="rounded-circle border border-white"
++                style="width: 40px; height: 40px; object-fit: cover;"
++            />
++            <div v-else class="avatar-circle avatar-circle--light">
++              {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
++            </div>
++          </div>
++        </div>
++      </div>
 
-           <div class="filter__hint">
-             <i class="fa-regular fa-calendar"></i>
-             <span>{{ dateText }}</span>
-           </div>
+-      <div class="d-flex align-items-center justify-content-end gap-2">
+-        <NotificationBell />
+-        <div class="d-flex flex-column align-items-end text-end">
+-          <div class="fw-semibold text-dark">{{ info.fullName }}</div>
++      <div class="hero-metrics mt-3">
++        <div
++            v-for="(card, index) in summaryCards"
++            :key="index"
++            class="metric-card"
++            :class="`metric-${card.tone}`"
++        >
++          <div class="metric-icon">
++            <i :class="card.icon"></i>
++          </div>
++          <div>
++            <p class="metric-label mb-1">{{ card.label }}</p>
++            <h5 class="metric-value mb-0">{{ card.value }}</h5>
++          </div>
          </div>
-       </header>
++      </div>
++    </section>
 
-       <!-- Stats -->
-       <section class="stats">
-         <article v-for="(s, idx) in statCards" :key="s.key" class="stat" :class="`stat--${s.tone}`">
-           <div class="stat__top">
-             <div class="stat__icon" :class="`bg--${s.tone}`">
-               <i :class="s.icon"></i>
+-        <img
+-            v-if="info.avatarUrl"
+-            :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
+-            alt="avatar"
+-            class="rounded-circle border"
+-            style="width: 36px; height: 36px; object-fit: cover;"
+-        />
+-        <div v-else class="avatar-circle">
+-          {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
++    <div class="content-panel mt-3">
++      <div class="d-flex justify-content-between align-items-center px-3 mb-3">
++        <div class="d-flex align-items-center gap-2">
++          <span class="section-title">Danh sách dự án</span>
++          <span class="section-subtitle">Cập nhật tức thời</span>
++        </div>
++        <div class="d-flex align-items-center gap-2">
++          <span class="badge rounded-pill bg-primary-subtle text-primary">
++            {{ activeTab?.label || 'Tất cả' }}
++          </span>
+         </div>
+       </div>
+-    </div>
+-    <!-- Tabs -->
+-    <!-- Tabs -->
+-    <div class="tabs-wrapper d-flex align-items-center justify-content-between border-bottom pb-2  px-3">
++
++      <div class="tabs-wrapper d-flex align-items-center justify-content-between border-bottom pb-2 px-3">
+       <!-- Thanh cuộn tab -->
+       <div ref="tabContainer" class="tabs-du-an flex-grow-1 overflow-hidden">
+         <div class="d-flex gap-4 small text-muted fw-medium px-2 inner-tabs">
+       <span
+           v-for="tab in tabs"
+           :key="tab.key"
+           :class="['tab-item', { active: activeTab === tab }]"
+           @click="setActiveTab(tab)"
+       >
+         {{ tab.label }} ( {{tab.count}} )
+       </span>
+         </div>
+       </div>
+
+       <!-- Nút cuộn -->
+       <div class="scroll-controls d-flex align-items-center ms-2">
+         <button class="btn-arrow" @click="scrollTabs('left')" :disabled="isAtStart">
+           <i class="fa-solid fa-chevron-left"></i>
+         </button>
+         <button class="btn-arrow" @click="scrollTabs('right')" :disabled="isAtEnd">
+           <i class="fa-solid fa-chevron-right"></i>
+         </button>
+       </div>
+     </div>
+
+@@ -78,60 +113,60 @@
+         / <b>{{ total }}</b> bản ghi
+       </div>
+
+       <!-- Phân trang -->
+       <div class="d-flex align-items-center me-3">
+         <button class="btn btn-sm btn-light border me-1" @click="goToFirstPage" :disabled="page === 1">
+           <i class="fa-solid fa-backward-step"></i>
+         </button>
+
+         <button class="btn btn-sm btn-light border me-2" @click="prevPage" :disabled="page === 1">
+           <i class="fa-solid fa-chevron-left"></i>
+         </button>
+
+         <span class="small text-muted">{{ pageString }}</span>
+
+         <button class="btn btn-sm btn-light border ms-2 me-1" @click="nextPage" :disabled="page === totalPages">
+           <i class="fa-solid fa-chevron-right"></i>
+         </button>
+
+         <button class="btn btn-sm btn-light border" @click="goToLastPage" :disabled="page === totalPages">
+           <i class="fa-solid fa-forward-step"></i>
+         </button>
+       </div>
+
+       <!-- Tìm kiếm -->
+-      <div class="d-flex align-items-center me-3">
++      <div class="d-flex align-items-center me-3 search-box">
++        <i class="fa-solid fa-magnifying-glass"></i>
+         <input
+             type="text"
+-            class="form-control form-control-sm me-2"
+-            placeholder="Nhập tên nhân sự cần tìm..."
+-            style="width: 200px"
++            class="form-control form-control-sm border-0 flex-grow-1"
++            placeholder="Nhập tên dự án cần tìm..."
+             v-model="search"
+         />
+-        <button class="btn btn-primary btn-sm" @click="getProjects">
+-          <i class="fa-solid fa-magnifying-glass"></i>
++        <button class="btn btn-primary btn-sm ms-2" @click="getProjects">
++          Tìm kiếm
+         </button>
+       </div>
+
+       <!-- Bộ lọc -->
+       <div class="d-flex align-items-center gap-2 small flex-grow-1 justify-content-end">
+         <label class="d-flex align-items-center flex-nowrap mb-0">
+           <span class="me-1">Tiến độ:</span>
+           <select
+               v-model="selectedProgress"
+               class="form-select form-select-sm w-auto"
+               @change="emitChange"
+           >
+             <option :value="null">Tất cả</option>
+             <option value="TRE">Trễ</option>
+             <option value="SOM">Sớm</option>
+             <option value="DUNG">Đúng</option>
+           </select>
+         </label>
+
+
+         <label class="d-flex align-items-center flex-nowrap mb-0">
+           <span class="me-1">Ưu tiên:</span>
+           <select
+               v-model="selectedPriority"
+               class="form-select form-select-sm w-auto"
+@@ -144,52 +179,52 @@
+         </label>
+
+
+         <label class="d-flex align-items-center flex-nowrap mb-0">
+           <span class="me-1">Sắp xếp:</span>
+           <select
+               v-model="selectedSort"
+               class="form-select form-select-sm w-auto"
+               @change="emitChange"
+           >
+             <option :value="defaultSort">Mặc định</option>
+             <option :value="{ sortField: 'price', sortDir: 'ASC' }">Giá tăng dần</option>
+             <option :value="{ sortField: 'price', sortDir: 'DESC' }">Giá giảm dần</option>
+             <option :value="{ sortField: 'createdDate', sortDir: 'DESC' }">Ngày tạo mới nhất</option>
+             <option :value="{ sortField: 'createdDate', sortDir: 'ASC' }">Ngày tạo xa nhất</option>
+             <option :value="{ sortField: 'expectedEndDate', sortDir: 'DESC' }">Deadline xa nhất</option>
+             <option :value="{ sortField: 'expectedEndDate', sortDir: 'ASC' }">Deadline gần nhất</option>
+           </select>
+         </label>
+
+       </div>
+     </div>
+
+
+     <!-- Table -->
+-    <div class="px-4" >
+-    <div class="table-responsive bg-white shadow-sm" style="border-radius: 15px">
++    <div class="px-4">
++    <div class="table-responsive bg-white shadow-sm table-card">
+       <table class="table align-middle mb-0 text-secondary custom-table">
+         <thead class="bg-light text-muted">
+         <tr>
+           <th class="text-start ten-du-an">Tên dự án</th>
+           <th class="text-center nguoiTao">N.Tạo</th>
+           <th class="text-start">Trạng thái</th>
+           <th class="text-center">Effor</th>
+           <th class="text-center">Ngày tạo</th>
+           <th class="text-center tg-batDau">TG Bắt đầu</th>
+           <th class="text-center">KếtThucDK</th>
+           <th class="text-start gia-tien">Giá tiền</th>
+           <th class="text-start thuc-hien">Thực hiện</th>
+           <th class="text-start tien-do-col">Tiến độ</th>
+           <th class="text-center">Ưu tiên</th>
+         </tr>
+         </thead>
+         <tbody>
+         <tr v-for="(pro, index) in projects" :key="index" @click="$router.push(`/-thg/du-an/hang-muc/${pro.projectId}`)" class="project-row">
+           <td class="text-start text-truncate" :title="pro.projectName">{{ pro.projectName }}</td>
+           <td class="align-middle text-center nguoiTao">
+             <div v-if="pro.createdBy.avatar != null" class="avatar-wrapper">
+               <img
+                   class="avatar-small"
+                   :src="` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${pro.createdBy.avatar}`"
+                   alt="Avatar"
+@@ -314,50 +349,51 @@
+                     pro.progressStatus === 'DUNG'
+                         ? 'Đúng tiến độ'
+                         : pro.progressStatus === 'TRE'
+                             ? 'Trễ tiến độ'
+                             : 'Sớm tiến độ'
+                   }}
+       </span>
+               </template>
+
              </div>
-             <div class="stat__badge" :class="`chip--${s.tone}`">
-               <i class="fa-solid fa-sparkles"></i>
-               <span>{{ s.badge }}</span>
-             </div>
-           </div>
+           </td>
 
-           <div class="stat__value">
-             <span class="gradient-text" :class="`text--${s.tone}`">{{ s.value }}</span>
-           </div>
-           <div class="stat__label">{{ s.label }}</div>
+           <td class="text-center">
+             <i
+                 :class="pro.priority
+                 ? 'fa-solid fa-flag text-warning'    // khi priority = true
+                 : 'fa-regular fa-flag text-muted'   // khi priority = false
+               "
+             ></i>
+           </td>
+         </tr>
+         </tbody>
+       </table>
+     </div>
+   </div>
++    </div>
+   </div>
 
-           <div class="stat__glow" :class="`glow--${s.tone}`"></div>
-         </article>
-       </section>
+ </template>
 
-       <!-- Charts (full width) -->
-       <section class="card">
-         <div class="card__title">
-           <span class="card__titleIcon bg--indigo"><i class="fa-solid fa-chart-line"></i></span>
-           <div>
-             <h3>Xu hướng hợp đồng theo tháng (2026)</h3>
-             <p class="muted">So sánh HĐ mới / thành công / thất bại</p>
-           </div>
-         </div>
-         <div class="chartWrap chartWrap--lg">
-           <canvas ref="trend1El"></canvas>
-         </div>
-       </section>
+ <script setup>
+ import {ref, computed, onMounted} from "vue";
+ import { useRouter } from "vue-router";
+ import api from "../api/api.js";
+ import { useAuthStore } from "../stores/authStore.js";
 
-       <section class="card">
-         <div class="card__title">
-           <span class="card__titleIcon bg--emerald"><i class="fa-solid fa-money-bill-trend-up"></i></span>
-           <div>
--            <h3>{{ revenueTitle }}</h3>
--            <p class="muted">{{ revenueSubtitle }}</p>
--          </div>
--          <div class="card__actions">
--            <div class="field field--compact">
--              <label>Dịch vụ</label>
--              <select v-model="selectedService">
--                <option v-for="service in serviceOptions" :key="service.id" :value="service.id">
--                  {{ service.name }}
--                </option>
--              </select>
--            </div>
-+            <h3>{{ serviceTrendTitle }}</h3>
-+            <p class="muted">{{ serviceTrendSubtitle }}</p>
-           </div>
-         </div>
-         <div class="chartWrap chartWrap--lg">
-           <canvas ref="trend2El"></canvas>
-         </div>
-       </section>
 
--      <section class="card">
--        <div class="card__title">
--          <span class="card__titleIcon bg--violet"><i class="fa-solid fa-chart-line"></i></span>
--          <div>
--            <h3>{{ salesTitle }}</h3>
--            <p class="muted">{{ salesSubtitle }}</p>
--          </div>
--        </div>
--        <div class="chartWrap chartWrap--lg">
--          <canvas ref="trend3El"></canvas>
--        </div>
--      </section>
--
-       <!-- 3 charts row -->
-       <section class="grid3">
-         <article class="card">
-           <div class="card__title">
-             <span class="card__titleIcon bg--sky"><i class="fa-solid fa-chart-column"></i></span>
-             <div>
-               <h3>Trạng thái hợp đồng</h3>
-               <p class="muted">Phân bố số lượng theo nhóm</p>
-             </div>
-           </div>
-
-           <div class="chartWrap chartWrap--md">
-             <canvas ref="statusEl"></canvas>
-           </div>
-
-           <div class="legend">
-             <div v-for="l in statusLegend" :key="l.label" class="legend__item">
-               <span class="legend__dot" :style="{ background: l.color }"></span>
-               <span>{{ l.label }}</span>
-             </div>
-           </div>
-         </article>
-
-         <article class="card">
-           <div class="card__title">
-@@ -346,87 +332,75 @@ const statCards = computed(() => [
-     value: formatCompactVnd(stats.value.totalSales),
-     tone: "violet",
-     badge: "Doanh số",
-   },
- ]);
-
- const serviceOptions = computed(() => [
-   { id: "all", name: "Tất cả dịch vụ" },
-   ...services.value.map((service) => ({ id: service.id, name: service.name })),
- ]);
-
- const branchFilterOptions = computed(() => [
-   { id: null, label: "Tất cả" },
-   ...branchOptions.value,
- ]);
-
- const filterGridStyle = computed(() => {
-   const columns = ["1.1fr"];
-   if (timeRange.value === "month") {
-     columns.push("140px");
-   }
-   columns.push("140px");
-   if (canFullBranch.value) {
-     columns.push("180px");
-   }
-+  columns.push("200px");
-   return { gridTemplateColumns: columns.join(" ") };
- });
-
--const revenueTitle = computed(() => {
--  const selected = serviceOptions.value.find((option) => option.id === selectedService.value);
--  const suffix = timeRange.value === "month" ? "theo tháng" : "theo năm";
--  return `Doanh thu ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
--});
--
--const revenueSubtitle = computed(() => {
--  if (selectedService.value === "all") return "Phân loại theo dịch vụ";
--  return "Phân loại theo phân khúc dịch vụ";
--});
--
--const salesTitle = computed(() => {
-+const serviceTrendTitle = computed(() => {
-   const selected = serviceOptions.value.find((option) => option.id === selectedService.value);
-   const suffix = timeRange.value === "month" ? "theo tháng" : "theo năm";
--  return `Doanh số ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
-+  return `Doanh số & doanh thu ${suffix} (${selected?.name || "Tất cả dịch vụ"})`;
- });
-
--const salesSubtitle = computed(() => {
-+const serviceTrendSubtitle = computed(() => {
-   if (selectedService.value === "all") return "Phân loại theo dịch vụ";
-   return "Phân loại theo phân khúc dịch vụ";
- });
-
- // ===== Chart refs =====
- const trend1El = ref(null);
- const trend2El = ref(null);
--const trend3El = ref(null);
- const statusEl = ref(null);
- const customerTypeEl = ref(null);
- const serviceTypeEl = ref(null);
-
- // ===== Chart instances =====
- let trendChart1 = null;
- let trendChart2 = null;
--let trendChart3 = null;
- let statusChart = null;
- let customerTypeChart = null;
- let serviceTypeChart = null;
-
- // ===== Initial data =====
- const monthLabels = [
-   "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
-   "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12",
- ];
-
- const revenuePalette = [
-   COLORS.BAN_NHANH,
-   COLORS.BAN_GP,
-   COLORS.DC_TELESALES,
-   COLORS.CHAM_SOC,
-   COLORS.TN_7NGAY,
-   COLORS.TN_14NGAY,
-   COLORS.SAI_SO_LIEU,
-   COLORS.THANH_CONG,
- ];
-
- const emptyLineData = {
-   labels: monthLabels,
-   datasets: [],
- };
-@@ -473,146 +447,135 @@ const serviceTypeData = {
- // ===== Build charts =====
- function createCharts() {
-   const gridColor = "rgba(15, 23, 42, 0.06)";
-
-   trendChart1 = new Chart(trend1El.value.getContext("2d"), {
-     type: "line",
-     data: structuredClone(emptyLineData),
-     options: {
-       responsive: true,
-       maintainAspectRatio: false,
-       interaction: { mode: "index", intersect: false },
-       scales: {
-         x: { grid: { color: gridColor } },
-         y: {
-           beginAtZero: true,
-           grid: { color: gridColor },
-           title: { display: true, text: "Số hợp đồng", font: { weight: "700" } },
-         },
-       },
-       plugins: {
-         legend: {
-           position: "top",
-           labels: { usePointStyle: true, padding: 14, font: { size: 12 } },
-         },
-         tooltip: { padding: 10, cornerRadius: 10 },
-+        datalabels: { display: false },
-       },
-     },
-   });
-
-   trendChart2 = new Chart(trend2El.value.getContext("2d"), {
-     type: "line",
-     data: structuredClone(emptyLineData),
-     options: {
-       responsive: true,
-       maintainAspectRatio: false,
-       interaction: { mode: "index", intersect: false },
-       scales: {
-         x: { grid: { color: gridColor } },
-         y: {
-           beginAtZero: true,
-           grid: { color: gridColor },
-           title: { display: true, text: "Triệu VNĐ", font: { weight: "700" } },
-         },
-       },
-       plugins: {
-         legend: {
-           position: "top",
-           labels: { usePointStyle: true, padding: 14, font: { size: 12 } },
-         },
-         tooltip: { padding: 10, cornerRadius: 10 },
--      },
--    },
--  });
--
--  trendChart3 = new Chart(trend3El.value.getContext("2d"), {
--    type: "line",
--    data: structuredClone(emptyLineData),
--    options: {
--      responsive: true,
--      maintainAspectRatio: false,
--      interaction: { mode: "index", intersect: false },
--      scales: {
--        x: { grid: { color: gridColor } },
--        y: {
--          beginAtZero: true,
--          grid: { color: gridColor },
--          title: { display: true, text: "Triệu VNĐ", font: { weight: "700" } },
--        },
--      },
--      plugins: {
--        legend: {
--          position: "top",
--          labels: { usePointStyle: true, padding: 14, font: { size: 12 } },
--        },
--        tooltip: { padding: 10, cornerRadius: 10 },
-+        datalabels: { display: false },
-       },
-     },
-   });
-
-   statusChart = new Chart(statusEl.value.getContext("2d"), {
-     type: "bar",
-     data: structuredClone(statusData),
-     options: {
-       responsive: true,
-       maintainAspectRatio: false,
-       scales: {
-         y: { beginAtZero: true, grid: { color: gridColor } },
-         x: { grid: { display: false } },
-       },
--      plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 10 } },
-+      plugins: {
-+        legend: { display: false },
-+        tooltip: { padding: 10, cornerRadius: 10 },
-+        datalabels: { display: false },
-+      },
-     },
-   });
-
-   customerTypeChart = new Chart(customerTypeEl.value.getContext("2d"), {
-     type: "doughnut",
-     data: structuredClone(customerTypeData),
-     options: {
-       responsive: true,
-       maintainAspectRatio: false,
-       cutout: "72%",
--      plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 10 } },
-+      plugins: {
-+        legend: { display: false },
-+        tooltip: { padding: 10, cornerRadius: 10 },
-+        datalabels: { display: false },
-+      },
-     },
-   });
-
-   serviceTypeChart = new Chart(serviceTypeEl.value.getContext("2d"), {
-     type: "doughnut",
-     data: structuredClone(serviceTypeData),
-     options: {
-       responsive: true,
-       maintainAspectRatio: false,
-       cutout: "72%",
--      plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 10 } },
-+      plugins: {
-+        legend: { display: false },
-+        tooltip: { padding: 10, cornerRadius: 10 },
-+        datalabels: { display: false },
-+      },
-     },
-   });
- }
-
- function destroyCharts() {
--  [trendChart1, trendChart2, trendChart3, statusChart, customerTypeChart, serviceTypeChart].forEach((c) =>
-+  [trendChart1, trendChart2, statusChart, customerTypeChart, serviceTypeChart].forEach((c) =>
-     c?.destroy()
-   );
--  trendChart1 = trendChart2 = trendChart3 = statusChart = customerTypeChart = serviceTypeChart = null;
-+  trendChart1 = trendChart2 = statusChart = customerTypeChart = serviceTypeChart = null;
- }
-
- // ===== Filter logic =====
- const normalizeYear = () => {
-   const safeYear = Math.floor(Number(selectedYear.value) || 0);
-   selectedYear.value = safeYear > 0 ? safeYear : 1;
- };
-
- const updateDateRange = () => {
-   normalizeYear();
-   if (timeRange.value === "month") {
-     const s = new Date(selectedYear.value, selectedMonth.value - 1, 1);
-     const e = new Date(selectedYear.value, selectedMonth.value, 0);
-     startDate.value = toISODate(s);
-     endDate.value = toISODate(e);
-   } else {
-     const s = new Date(selectedYear.value, 0, 1);
-     const e = new Date(selectedYear.value, 11, 31);
-     startDate.value = toISODate(s);
-     endDate.value = toISODate(e);
-   }
- };
-
- watch([timeRange, selectedMonth, selectedYear], updateDateRange, { immediate: true });
-
-@@ -641,151 +604,186 @@ watch(
-
- watch(
-   branchOptions,
-   (nextBranches) => {
-     if (!canFullBranch.value) return;
-     if (selectedBranch.value === null) return;
-     const exists = nextBranches.some(
-       (branch) => String(branch.id) === String(selectedBranch.value)
-     );
-     if (!exists) {
-       selectedBranch.value = null;
-     }
-   },
-   { deep: true }
+ const authStore = useAuthStore();
+ const info = authStore.userInfo;
+ const canCreateProject = computed(
+     () => Array.isArray(authStore.listAuthority) && authStore.listAuthority.includes('PROJECT_CREATE')
  );
 
+ const router = useRouter();
 
- const normalizeSeries = (series) =>
-   Array.isArray(series)
-     ? series.map((item, index) => ({
-         label: item?.label || `Dòng ${index + 1}`,
-         data: Array.isArray(item?.data) ? item.data : [],
-       }))
-     : [];
-
--const buildLineDatasets = (series) =>
--  normalizeSeries(series).map((item, index) => ({
--    label: item.label,
--    data: item.data,
--    borderColor: revenuePalette[index % revenuePalette.length],
--    backgroundColor: `${revenuePalette[index % revenuePalette.length]}22`,
--    borderWidth: 3,
--    fill: true,
--    tension: 0.4,
--    pointRadius: 2,
--    pointHoverRadius: 5,
--  }));
-+const sanitizeLabel = (value) => String(value || "").toLowerCase().trim();
-+
-+const resolveServiceColor = (label) => {
-+  const normalizedLabel = sanitizeLabel(label);
-+  if (!normalizedLabel) return null;
-+  const matched = services.value.find((service) => {
-+    const normalizedName = sanitizeLabel(service?.name);
-+    return normalizedName && (normalizedName === normalizedLabel || normalizedLabel.includes(normalizedName));
-+  });
-+  return matched?.color || null;
-+};
-+
-+const buildColorMap = (items) => {
-+  const map = new Map();
-+  items.forEach((item, index) => {
-+    if (map.has(item.label)) return;
-+    const serviceColor = resolveServiceColor(item.label);
-+    map.set(item.label, serviceColor || revenuePalette[index % revenuePalette.length]);
-+  });
-+  return map;
-+};
-+
-+const buildLineDataset = (item, color, labelSuffix = "", options = {}) => ({
-+  label: labelSuffix ? `${item.label} - ${labelSuffix}` : item.label,
-+  data: item.data,
-+  borderColor: color,
-+  backgroundColor: `${color}22`,
-+  borderWidth: 3,
-+  fill: true,
-+  tension: 0.4,
-+  pointRadius: 2,
-+  pointHoverRadius: 5,
-+  borderDash: options.borderDash,
-+});
-+
-+const buildCombinedServiceDatasets = (salesSeries, revenueSeries) => {
-+  const salesItems = normalizeSeries(salesSeries);
-+  const revenueItems = normalizeSeries(revenueSeries);
-+  const colorMap = buildColorMap([...salesItems, ...revenueItems]);
-+  return [
-+    ...salesItems.map((item) => buildLineDataset(item, colorMap.get(item.label), "Doanh số")),
-+    ...revenueItems.map((item) =>
-+      buildLineDataset(item, colorMap.get(item.label), "Doanh thu", { borderDash: [8, 6] })
-+    ),
-+  ];
-+};
-+
-+const buildLineDatasets = (series, palette = revenuePalette) =>
-+  normalizeSeries(series).map((item, index) =>
-+    buildLineDataset(item, palette[index % palette.length])
-+  );
-
- const buildLegend = (items, palette) =>
-   items.map((item, index) => ({
-     label: item?.label || `Nhóm ${index + 1}`,
-     color: palette[index % palette.length],
-   }));
-
- const updateBarChart = (chart, labels, values, palette) => {
-   chart.data.labels = labels;
-   chart.data.datasets[0].data = values;
-   chart.data.datasets[0].backgroundColor = labels.map(
-     (_, index) => palette[index % palette.length]
-   );
-   chart.update();
+ const goToCreateProject = () => {
+   router.push({ name: "CreateProject" });
  };
 
- const updateDoughnutChart = (chart, labels, values, palette) => {
-   chart.data.labels = labels;
-   chart.data.datasets[0].data = values;
-   chart.data.datasets[0].backgroundColor = labels.map(
-     (_, index) => palette[index % palette.length]
-   );
-   chart.update();
- };
+ // Giá trị sắp xếp
+ const sortOrder = ref("asc");
+@@ -457,50 +493,82 @@ const pageString = computed(() => `Trang ${page.value} / ${totalPages.value}`)
 
--const updateLineChart = (chart, labels, series) => {
-+const updateLineChart = (chart, labels, datasets) => {
-   chart.data.labels = labels;
--  chart.data.datasets = buildLineDatasets(series);
-+  chart.data.datasets = datasets;
-   chart.update();
- };
+ const goToFirstPage = () => (page.value = 1)
+ const goToLastPage = () => (page.value = totalPages.value)
+ const nextPage = () => {
+   if (page.value < totalPages.value) page.value++
+   getProjects();
+ }
+ const prevPage = () => {
+   if (page.value > 1) page.value--
+   getProjects();
+ }
 
- const updateChartsFromResponse = (payload) => {
-   const labels = Array.isArray(payload?.labels) && payload.labels.length ? payload.labels : monthLabels;
+ // --- Search ---
+ const search = ref('')
+ const searchBTN = () => {
+   console.log('Tìm kiếm:', search.value)
+   // Gọi API tìm kiếm ở đây
+ }
 
--  updateLineChart(trendChart1, labels, payload?.hopDongTrend || []);
--  updateLineChart(trendChart2, labels, payload?.doanhThuTrend || []);
--  updateLineChart(trendChart3, labels, payload?.doanhSoTrend || []);
-+  updateLineChart(trendChart1, labels, buildLineDatasets(payload?.hopDongTrend || []));
-+  updateLineChart(
-+    trendChart2,
-+    labels,
-+    buildCombinedServiceDatasets(payload?.doanhSoTrend || [], payload?.doanhThuTrend || [])
-+  );
+ // --- Filter state ---
+ const selectedProgress = ref(null) // 'TRE' | 'SOM' | 'DUNG' | null
+ const selectedPriority = ref(null) // true | false | null
+ const defaultSort = { sortField: null, sortDir: null }
+ const selectedSort = ref(defaultSort)
 
-   const statusItems = Array.isArray(payload?.trangThaiHopDong) ? payload.trangThaiHopDong : [];
-   const statusLabels = statusItems.map((item) => item?.label || "");
-   const statusValues = statusItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
-   updateBarChart(statusChart, statusLabels, statusValues, [
-     COLORS.THANH_CONG,
-     COLORS.TN_7NGAY,
-     COLORS.CHAM_SOC,
-     COLORS.THAT_BAI,
-     COLORS.KHONG_LIEN_LAC_DUOC,
-   ]);
-   statusLegend.value = buildLegend(statusItems, [
-     COLORS.THANH_CONG,
-     COLORS.TN_7NGAY,
-     COLORS.CHAM_SOC,
-     COLORS.THAT_BAI,
-     COLORS.KHONG_LIEN_LAC_DUOC,
-   ]);
++const summaryCards = computed(() => [
++  {
++    label: 'Tổng dự án',
++    value: total.value,
++    icon: 'fa-solid fa-layer-group',
++    tone: 'primary'
++  },
++  {
++    label: 'Đang hiển thị',
++    value: projects.value.length,
++    icon: 'fa-solid fa-list-check',
++    tone: 'info'
++  },
++  {
++    label: 'Trang hiện tại',
++    value: pageString.value,
++    icon: 'fa-solid fa-flag-checkered',
++    tone: 'success'
++  },
++  {
++    label: 'Ưu tiên',
++    value:
++        selectedPriority.value === null
++            ? 'Tất cả'
++            : selectedPriority.value
++                ? 'Có ưu tiên'
++                : 'Không ưu tiên',
++    icon: 'fa-solid fa-flag',
++    tone: 'warning'
++  }
++])
++
+ const emitChange = () => {
+   const params = {
+     progressFilter: selectedProgress.value ?? null,
+     priority: selectedPriority.value,
+     sortField: selectedSort.value.sortField,
+     sortDir: selectedSort.value.sortDir,
+   }
+   console.log('Bộ lọc thay đổi:', params)
+   // Bạn có thể emit ra ngoài: emit('change', params)
+ }
+ const flag = ref(0);
 
-   const customerItems = Array.isArray(payload?.loaiKhachHang) ? payload.loaiKhachHang : [];
-   const customerLabels = customerItems.map((item) => item?.label || "");
-   const customerValues = customerItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
-   customerTotal.value = customerValues.reduce((sum, value) => sum + value, 0);
-   updateDoughnutChart(customerTypeChart, customerLabels, customerValues, [
-     COLORS.DC_TELESALES,
-     COLORS.CHAM_SOC,
-     COLORS.SAI_SO_LIEU,
-     COLORS.NEW,
-   ]);
-   customerLegend.value = buildLegend(customerItems, [
-     COLORS.DC_TELESALES,
-     COLORS.CHAM_SOC,
-     COLORS.SAI_SO_LIEU,
-     COLORS.NEW,
-   ]);
+ async function getProjects() {
+   try {
+     if(size.value < 1 ){
+       size.value =10;
+       flag.value = 1;
+     }
+     console.log(activeTab.value.flag);
+     console.log(activeTab.value.key)
+     const res = await api.get("/admin.thg/project/view", {
+       withCredentials: true,
+       params: {
+         // các tham số lọc & sắp xếp
+         priority: selectedPriority.value,
+@@ -546,50 +614,169 @@ watch(
+       getProjects();
+     },
+     { deep: true }
+ );
 
-   const serviceItems = Array.isArray(payload?.loaiDichVu) ? payload.loaiDichVu : [];
-   const serviceLabels = serviceItems.map((item) => item?.label || "");
-   const serviceValues = serviceItems.map((item) => clamp(Number(item?.value) || 0, 0, 999999));
-+  const servicePalette = serviceLabels.map(
-+    (label, index) => resolveServiceColor(label) || revenuePalette[index % revenuePalette.length]
-+  );
-   serviceTotal.value = serviceValues.reduce((sum, value) => sum + value, 0);
--  updateDoughnutChart(serviceTypeChart, serviceLabels, serviceValues, [
--    COLORS.KHONG_LIEN_LAC_DUOC,
--    COLORS.BAN_NHANH,
--    COLORS.BAN_GP,
--    COLORS.NEW,
--  ]);
--  serviceLegend.value = buildLegend(serviceItems, [
--    COLORS.KHONG_LIEN_LAC_DUOC,
--    COLORS.BAN_NHANH,
--    COLORS.BAN_GP,
--    COLORS.NEW,
--  ]);
-+  updateDoughnutChart(serviceTypeChart, serviceLabels, serviceValues, servicePalette);
-+  serviceLegend.value = buildLegend(serviceItems, servicePalette);
- };
-
- const buildRequestParams = () => ({
-   nam: selectedYear.value,
-   thang: timeRange.value === "month" ? selectedMonth.value : null,
-   theo: timeRange.value,
-   tuNgay: startDate.value,
-   denNgay: endDate.value,
-   dichVu: selectedService.value === "all" ? "all" : selectedService.value,
-   branchId: canFullBranch.value ? selectedBranch.value : null,
+ // Theo dõi size riêng (để tránh loop)
+ watch(size, (newSize, oldSize) => {
+   // chỉ gọi nếu size thay đổi hợp lệ và không bị ép lại trong getProjects
+   if (newSize !== oldSize && newSize > 0 && newSize <= total.value) {
+     getProjects();
+   }
  });
 
- async function fetchStats() {
-   if (loading.value) return;
-   loading.value = true;
+ function dayDiff(date1, date2) {
+   if (!date1 || !date2) return 0;
+   const d1 = new Date(date1);
+   const d2 = new Date(date2);
+   return Math.round((d1 - d2) / (1000 * 60 * 60 * 24));
+ }
 
-   try {
-     const res = await api.get("/hop-dong/admin/thong-ke", {
-       params: buildRequestParams(),
-     });
-     const payload = res?.data || {};
-     stats.value = {
-       totalContracts: Number(payload?.summary?.totalContracts) || 0,
-       activeContracts: Number(payload?.summary?.activeContracts) || 0,
-       completedContracts: Number(payload?.summary?.completedContracts) || 0,
+ import NotificationBell from "../components/NotificationBell.vue";
+ </script>
+
+
+ <style scoped>
++.project-page {
++  background: #f4f6fb;
++}
++
++.page-hero {
++  border-radius: 18px;
++  background: linear-gradient(130deg, #4f46e5 0%, #6366f1 45%, #8b5cf6 100%);
++  box-shadow: 0 16px 32px rgba(99, 102, 241, 0.18);
++}
++
++.hero-main {
++  gap: 12px;
++}
++
++.hero-eyebrow {
++  font-size: 11px;
++  letter-spacing: 0.12em;
++}
++
++.hero-actions .btn-light {
++  border-radius: 12px;
++  padding: 10px 18px;
++}
++
++.hero-user {
++  background: rgba(255, 255, 255, 0.12);
++  padding: 8px 12px;
++  border-radius: 999px;
++  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
++}
++
++.hero-metrics {
++  display: grid;
++  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
++  gap: 12px;
++}
++
++.metric-card {
++  background: rgba(255, 255, 255, 0.16);
++  border-radius: 14px;
++  padding: 14px 16px;
++  display: flex;
++  align-items: center;
++  gap: 12px;
++  color: #fff;
++  backdrop-filter: blur(4px);
++}
++
++.metric-icon {
++  width: 38px;
++  height: 38px;
++  border-radius: 12px;
++  display: grid;
++  place-items: center;
++  font-size: 16px;
++  background: rgba(255, 255, 255, 0.2);
++}
++
++.metric-label {
++  font-size: 12px;
++  opacity: 0.75;
++}
++
++.metric-value {
++  font-size: 18px;
++  font-weight: 700;
++}
++
++.content-panel {
++  background: #ffffff;
++  border-radius: 16px;
++  padding-top: 16px;
++  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
++}
++
++.section-title {
++  font-weight: 700;
++  color: #1f2937;
++}
++
++.section-subtitle {
++  font-size: 12px;
++  color: #94a3b8;
++  background: #f1f5f9;
++  padding: 4px 10px;
++  border-radius: 999px;
++}
++
++.toolbar {
++  gap: 12px;
++}
++
++.search-box {
++  background: #f8fafc;
++  border: 1px solid #e2e8f0;
++  border-radius: 999px;
++  padding: 4px 6px 4px 12px;
++  min-width: 300px;
++}
++
++.search-box i {
++  color: #94a3b8;
++  margin-right: 8px;
++}
++
++.search-box input {
++  background: transparent;
++}
++
++.search-box .btn {
++  border-radius: 999px;
++  padding: 4px 14px;
++}
++
++.table-card {
++  border-radius: 16px;
++  overflow: hidden;
++}
++
+
+ .progress-cell {
+   padding: 6px 8px;
+ }
+
+ /* Tổng thể chia 2 phần: thanh và nhãn, luôn cùng hàng ngang */
+ .progress-container {
+   display: flex;
+   align-items: center;
+   justify-content: flex-start;
+   gap: 10px;
+ }
+
+ /* Thanh tiến độ có chiều rộng cố định để các dòng bằng nhau */
+ .progress-wrapper {
+   width: 170px;            /* 👈 cố định chiều rộng */
+   height: 10px;             /* thanh mảnh, chuyên nghiệp */
+   border: 1px solid #d1d5db;
+   border-radius: 6px;
+   position: relative;
+   overflow: hidden;
+   flex-shrink: 0;          /* không bị co lại */
+   background: transparent;
+ }
+
+@@ -884,68 +1071,74 @@ input[type="checkbox"] {
+   font-size: 0.9rem;
+   cursor: pointer;
+   transition: all 0.2s;
+ }
+ .btn-arrow:hover {
+   color: #0d6efd;
+   transform: scale(1.1);
+ }
+ .btn-arrow:disabled {
+   opacity: 0.3;
+   cursor: not-allowed;
+   transform: none;
+ }
+ .avatar-circle {
+   width: 35px;
+   height: 35px;
+   border-radius: 50%;
+   background-color: #d6d9ff;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-weight: bold;
+   color: #333;
+ }
+
++.avatar-circle--light {
++  background: rgba(255, 255, 255, 0.2);
++  color: #fff;
++  border: 1px solid rgba(255, 255, 255, 0.4);
++}
++
+
+ /* Input & select */
+ .toolbar input,
+ .toolbar select {
+   border-radius: 6px;
+   transition: box-shadow 0.2s ease;
+ }
+
+ .toolbar input:focus,
+ .toolbar select:focus {
+   box-shadow: 0 0 4px rgba(13, 110, 253, 0.5);
+   outline: none;
+ }
+
+ :deep(.custom-table tbody tr.project-row) {
+   cursor: pointer;
+   transition: all 0.25s ease;
+   position: relative;
+   z-index: 0;
+ }
+
+ :deep(.custom-table tbody tr.project-row:hover) {
+   z-index: 20;
+ }
+
+ :deep(.custom-table tbody tr.project-row:hover td) {
+-  background-color: #818cf8 !important;
+-  color: #fff !important;
++  background-color: #eef2ff !important;
++  color: #1f2937 !important;
+   transition: all 0.25s ease;
+ }
+ :deep(.custom-table thead.bg-light) {
+-  background: #818cf8 !important;
+-  color: #ffffff !important;
++  background: #e0e7ff !important;
++  color: #4338ca !important;
+   font-weight: 600;
+-  border-bottom: 2px solid #5a4eb8;
++  border-bottom: 2px solid #c7d2fe;
+ }
+ :deep(.table-responsive) {
+   overflow: visible;
+   position: relative;
+   z-index: 0;
+ }
+
+ </style>

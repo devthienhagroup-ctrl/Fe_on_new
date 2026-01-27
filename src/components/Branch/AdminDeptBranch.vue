@@ -381,31 +381,6 @@
           </div>
         </div>
 
-        <!-- Filters -->
-        <div class="ui-card p-4">
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <div class="md:col-span-2">
-              <label class="ui-label">Tìm kiếm</label>
-              <div class="relative">
-                <input
-                    v-model.trim="branchFilter.search"
-                    class="ui-input pl-10"
-                    type="text"
-                    placeholder="Tên / địa chỉ..."
-                    @keyup.enter="applyBranchFilter()"
-                />
-                <i class="fa-solid fa-magnifying-glass ui-input-ico"></i>
-              </div>
-            </div>
-
-            <div class="flex items-end">
-              <button type="button" class="ui-btn ui-btn-emerald w-full" @click="applyBranchFilter()">
-                <i class="fa-solid fa-filter"></i> Lọc
-              </button>
-            </div>
-          </div>
-        </div>
-
         <!-- Empty -->
         <div v-if="filteredBranches.length === 0" class="ui-card mt-4 p-8 text-center">
           <div
@@ -1589,12 +1564,12 @@ applyBranchFilter();
 .ui-select,
 .ui-textarea {
   width: 100%;
-  border-radius: 16px;
+  border-radius: 18px;
   border: 2px solid rgba(203, 213, 225, 0.95);
   background: #fff;
   padding: 0.72rem 0.85rem;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 500;
   outline: none;
   transition: all 0.16s ease;
 }
@@ -1992,4 +1967,5 @@ applyBranchFilter();
   width: 18px;
   height: 18px;
 }
+
 </style>
