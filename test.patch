@@ -1,640 +1,255 @@
-diff --git a/src/components/Project.vue b/src/components/Project.vue
-index d964fdf4bd3f5036bb8826424a51eb7473ee6a96..73b50f889a16e18cd133a9f531d5a6b1bdf3aded 100644
---- a/src/components/Project.vue
-+++ b/src/components/Project.vue
-@@ -1,62 +1,97 @@
- <template>
--  <div class=" container-build pb-4 bg-light min-vh-90 danh-sach-du-an">
--    <!-- Header -->
--    <div class="d-flex justify-content-between align-items-center px-3 mb-3 pb-2 " style="border-bottom: solid 0.5px rgba(0,0,0,0.3)">
--      <h5 class="fw-bold mb-0 d-flex align-items-center">
--        <button
--            v-if="canCreateProject"
--            @click="goToCreateProject"
--            class="btn border border-primary rounded-circle d-flex align-items-center justify-content-center  me-2"
--            style="width: 40px; height: 40px;"
--        >
--          <i class="fa-solid fa-plus text-primary fs-5"></i>
--        </button>
--        Quản lý dự án
--      </h5>
-+  <div class="container-build pb-4 bg-light min-vh-90 danh-sach-du-an project-page">
-+    <section class="page-hero px-3 py-3">
-+      <div class="hero-main d-flex align-items-center justify-content-between gap-3 flex-wrap">
-+        <div class="hero-title">
-+          <div class="hero-eyebrow text-uppercase text-white-50">Bảng điều khiển</div>
-+          <h2 class="fw-bold mb-1 text-white">Quản lý dự án</h2>
-+          <p class="text-white-50 mb-0">
-+            Theo dõi tiến độ, ngân sách và hiệu suất triển khai theo thời gian thực.
-+          </p>
-+        </div>
-+        <div class="hero-actions d-flex align-items-center gap-2">
-+          <button
-+              v-if="canCreateProject"
-+              @click="goToCreateProject"
-+              class="btn btn-light fw-semibold shadow-sm"
-+          >
-+            <i class="fa-solid fa-plus me-2"></i>
-+            Tạo dự án mới
-+          </button>
-+          <div class="hero-user d-flex align-items-center gap-2">
-+            <NotificationBell />
-+            <div class="d-flex flex-column text-end text-white">
-+              <span class="fw-semibold">{{ info.fullName }}</span>
-+              <small class="text-white-50">Quản trị viên</small>
-+            </div>
-+            <img
-+                v-if="info.avatarUrl"
-+                :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
-+                alt="avatar"
-+                class="rounded-circle border border-white"
-+                style="width: 40px; height: 40px; object-fit: cover;"
-+            />
-+            <div v-else class="avatar-circle avatar-circle--light">
-+              {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-+            </div>
-+          </div>
-+        </div>
-+      </div>
-
--      <div class="d-flex align-items-center justify-content-end gap-2">
--        <NotificationBell />
--        <div class="d-flex flex-column align-items-end text-end">
--          <div class="fw-semibold text-dark">{{ info.fullName }}</div>
-+      <div class="hero-metrics mt-3">
-+        <div
-+            v-for="(card, index) in summaryCards"
-+            :key="index"
-+            class="metric-card"
-+            :class="`metric-${card.tone}`"
-+        >
-+          <div class="metric-icon">
-+            <i :class="card.icon"></i>
-+          </div>
-+          <div>
-+            <p class="metric-label mb-1">{{ card.label }}</p>
-+            <h5 class="metric-value mb-0">{{ card.value }}</h5>
-+          </div>
-         </div>
-+      </div>
-+    </section>
-
--        <img
--            v-if="info.avatarUrl"
--            :src="' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + info.avatarUrl"
--            alt="avatar"
--            class="rounded-circle border"
--            style="width: 36px; height: 36px; object-fit: cover;"
--        />
--        <div v-else class="avatar-circle">
--          {{ info.fullName?.charAt(0).toUpperCase() || 'U' }}
-+    <div class="content-panel mt-3">
-+      <div class="d-flex justify-content-between align-items-center px-3 mb-3">
-+        <div class="d-flex align-items-center gap-2">
-+          <span class="section-title">Danh sách dự án</span>
-+          <span class="section-subtitle">Cập nhật tức thời</span>
-+        </div>
-+        <div class="d-flex align-items-center gap-2">
-+          <span class="badge rounded-pill bg-primary-subtle text-primary">
-+            {{ activeTab?.label || 'Tất cả' }}
-+          </span>
-         </div>
-       </div>
--    </div>
--    <!-- Tabs -->
--    <!-- Tabs -->
--    <div class="tabs-wrapper d-flex align-items-center justify-content-between border-bottom pb-2  px-3">
-+
-+      <div class="tabs-wrapper d-flex align-items-center justify-content-between border-bottom pb-2 px-3">
-       <!-- Thanh cuộn tab -->
-       <div ref="tabContainer" class="tabs-du-an flex-grow-1 overflow-hidden">
-         <div class="d-flex gap-4 small text-muted fw-medium px-2 inner-tabs">
-       <span
-           v-for="tab in tabs"
-           :key="tab.key"
-           :class="['tab-item', { active: activeTab === tab }]"
-           @click="setActiveTab(tab)"
-       >
-         {{ tab.label }} ( {{tab.count}} )
-       </span>
-         </div>
-       </div>
-
-       <!-- Nút cuộn -->
-       <div class="scroll-controls d-flex align-items-center ms-2">
-         <button class="btn-arrow" @click="scrollTabs('left')" :disabled="isAtStart">
-           <i class="fa-solid fa-chevron-left"></i>
-         </button>
-         <button class="btn-arrow" @click="scrollTabs('right')" :disabled="isAtEnd">
-           <i class="fa-solid fa-chevron-right"></i>
-         </button>
-       </div>
-     </div>
-
-@@ -78,60 +113,60 @@
-         / <b>{{ total }}</b> bản ghi
-       </div>
-
-       <!-- Phân trang -->
-       <div class="d-flex align-items-center me-3">
-         <button class="btn btn-sm btn-light border me-1" @click="goToFirstPage" :disabled="page === 1">
-           <i class="fa-solid fa-backward-step"></i>
-         </button>
-
-         <button class="btn btn-sm btn-light border me-2" @click="prevPage" :disabled="page === 1">
-           <i class="fa-solid fa-chevron-left"></i>
-         </button>
-
-         <span class="small text-muted">{{ pageString }}</span>
-
-         <button class="btn btn-sm btn-light border ms-2 me-1" @click="nextPage" :disabled="page === totalPages">
-           <i class="fa-solid fa-chevron-right"></i>
-         </button>
-
-         <button class="btn btn-sm btn-light border" @click="goToLastPage" :disabled="page === totalPages">
-           <i class="fa-solid fa-forward-step"></i>
-         </button>
-       </div>
-
-       <!-- Tìm kiếm -->
--      <div class="d-flex align-items-center me-3">
-+      <div class="d-flex align-items-center me-3 search-box">
-+        <i class="fa-solid fa-magnifying-glass"></i>
-         <input
-             type="text"
--            class="form-control form-control-sm me-2"
--            placeholder="Nhập tên nhân sự cần tìm..."
--            style="width: 200px"
-+            class="form-control form-control-sm border-0 flex-grow-1"
-+            placeholder="Nhập tên dự án cần tìm..."
-             v-model="search"
-         />
--        <button class="btn btn-primary btn-sm" @click="getProjects">
--          <i class="fa-solid fa-magnifying-glass"></i>
-+        <button class="btn btn-primary btn-sm ms-2" @click="getProjects">
-+          Tìm kiếm
-         </button>
-       </div>
-
-       <!-- Bộ lọc -->
-       <div class="d-flex align-items-center gap-2 small flex-grow-1 justify-content-end">
-         <label class="d-flex align-items-center flex-nowrap mb-0">
-           <span class="me-1">Tiến độ:</span>
-           <select
-               v-model="selectedProgress"
-               class="form-select form-select-sm w-auto"
-               @change="emitChange"
-           >
-             <option :value="null">Tất cả</option>
-             <option value="TRE">Trễ</option>
-             <option value="SOM">Sớm</option>
-             <option value="DUNG">Đúng</option>
-           </select>
-         </label>
-
-
-         <label class="d-flex align-items-center flex-nowrap mb-0">
-           <span class="me-1">Ưu tiên:</span>
-           <select
-               v-model="selectedPriority"
-               class="form-select form-select-sm w-auto"
-@@ -144,52 +179,52 @@
-         </label>
-
-
-         <label class="d-flex align-items-center flex-nowrap mb-0">
-           <span class="me-1">Sắp xếp:</span>
-           <select
-               v-model="selectedSort"
-               class="form-select form-select-sm w-auto"
-               @change="emitChange"
-           >
-             <option :value="defaultSort">Mặc định</option>
-             <option :value="{ sortField: 'price', sortDir: 'ASC' }">Giá tăng dần</option>
-             <option :value="{ sortField: 'price', sortDir: 'DESC' }">Giá giảm dần</option>
-             <option :value="{ sortField: 'createdDate', sortDir: 'DESC' }">Ngày tạo mới nhất</option>
-             <option :value="{ sortField: 'createdDate', sortDir: 'ASC' }">Ngày tạo xa nhất</option>
-             <option :value="{ sortField: 'expectedEndDate', sortDir: 'DESC' }">Deadline xa nhất</option>
-             <option :value="{ sortField: 'expectedEndDate', sortDir: 'ASC' }">Deadline gần nhất</option>
-           </select>
-         </label>
-
-       </div>
-     </div>
-
-
-     <!-- Table -->
--    <div class="px-4" >
--    <div class="table-responsive bg-white shadow-sm" style="border-radius: 15px">
-+    <div class="px-4">
-+    <div class="table-responsive bg-white shadow-sm table-card">
-       <table class="table align-middle mb-0 text-secondary custom-table">
-         <thead class="bg-light text-muted">
-         <tr>
-           <th class="text-start ten-du-an">Tên dự án</th>
-           <th class="text-center nguoiTao">N.Tạo</th>
-           <th class="text-start">Trạng thái</th>
-           <th class="text-center">Effor</th>
-           <th class="text-center">Ngày tạo</th>
-           <th class="text-center tg-batDau">TG Bắt đầu</th>
-           <th class="text-center">KếtThucDK</th>
-           <th class="text-start gia-tien">Giá tiền</th>
-           <th class="text-start thuc-hien">Thực hiện</th>
-           <th class="text-start tien-do-col">Tiến độ</th>
-           <th class="text-center">Ưu tiên</th>
-         </tr>
-         </thead>
-         <tbody>
-         <tr v-for="(pro, index) in projects" :key="index" @click="$router.push(`/-thg/du-an/hang-muc/${pro.projectId}`)" class="project-row">
-           <td class="text-start text-truncate" :title="pro.projectName">{{ pro.projectName }}</td>
-           <td class="align-middle text-center nguoiTao">
-             <div v-if="pro.createdBy.avatar != null" class="avatar-wrapper">
-               <img
-                   class="avatar-small"
-                   :src="` https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${pro.createdBy.avatar}`"
-                   alt="Avatar"
-@@ -314,50 +349,51 @@
-                     pro.progressStatus === 'DUNG'
-                         ? 'Đúng tiến độ'
-                         : pro.progressStatus === 'TRE'
-                             ? 'Trễ tiến độ'
-                             : 'Sớm tiến độ'
-                   }}
-       </span>
-               </template>
-
+diff --git a/src/components/Branch/AdminDeptBranch.vue b/src/components/Branch/AdminDeptBranch.vue
+index 2de2611f800f5151f6258df5cfefe0bbd65c2157..28f77e8a2490bce1a788aa933643e967ce39654f 100644
+--- a/src/components/Branch/AdminDeptBranch.vue
++++ b/src/components/Branch/AdminDeptBranch.vue
+@@ -891,108 +891,110 @@
+       <div v-if="deleteModal.open" class="ui-overlay" @mousedown.self="closeAllModals()">
+         <div class="ui-modal max-w-sm">
+           <div class="p-6 text-center">
+             <div class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-rose-50 text-rose-700 ring-2 ring-rose-200">
+               <i class="fa-solid fa-triangle-exclamation text-xl"></i>
              </div>
-           </td>
+             <div class="mt-3 text-[16px] font-extrabold text-slate-900">{{ deleteModal.title }}</div>
+             <div class="mt-1 text-[13px] text-slate-600">
+               Xóa <b class="text-slate-900">{{ deleteModal.name }}</b> ? (Không thể hoàn tác)
+             </div>
 
-           <td class="text-center">
-             <i
-                 :class="pro.priority
-                 ? 'fa-solid fa-flag text-warning'    // khi priority = true
-                 : 'fa-regular fa-flag text-muted'   // khi priority = false
-               "
-             ></i>
-           </td>
-         </tr>
-         </tbody>
-       </table>
-     </div>
+             <div class="mt-5 flex justify-center gap-2">
+               <button type="button" class="ui-btn ui-btn-ghost" @click="closeAllModals()">Hủy</button>
+               <button type="button" class="ui-btn ui-btn-danger" @click="confirmDelete()">
+                 <i class="fa-solid fa-trash"></i> Xóa
+               </button>
+             </div>
+           </div>
+         </div>
+       </div>
+     </transition>
    </div>
-+    </div>
-   </div>
-
  </template>
 
  <script setup>
- import {ref, computed, onMounted} from "vue";
- import { useRouter } from "vue-router";
- import api from "../api/api.js";
- import { useAuthStore } from "../stores/authStore.js";
+-import { computed, reactive, ref } from "vue";
++import { computed, onMounted, reactive, ref } from "vue";
++import api from "/src/api/api.js";
 
+ /**
+  * ✅ Địa chỉ lấy từ: /src/assets/js/address.json
+  * - Lưu address dạng: "chi tiết/!!Phường/!!Tỉnh"
+  * - Hiển thị: thay "/!!" thành ", "
+  * - Chọn tỉnh/phường bằng NAME (không dùng mã)
+  */
+ import addressData from "/src/assets/js/address.json";
 
- const authStore = useAuthStore();
- const info = authStore.userInfo;
- const canCreateProject = computed(
-     () => Array.isArray(authStore.listAuthority) && authStore.listAuthority.includes('PROJECT_CREATE')
- );
+ /** Tabs */
+ const tabs = [
+   { key: "departments", label: "Phòng ban", icon: "fa-solid fa-users" },
+   { key: "branches", label: "Chi nhánh", icon: "fa-solid fa-code-branch" },
+ ];
 
- const router = useRouter();
+ const currentTab = ref("departments");
+ const deptView = ref("table"); // table | card
+ const branchView = ref("table"); // table | card
 
- const goToCreateProject = () => {
-   router.push({ name: "CreateProject" });
+ /** Function config */
+ const functionMap = {
+   consulting: { name: "Tư vấn" },
+   tele: { name: "Tele" },
+   marketing: { name: "Marketing" },
+   it: { name: "Thông tin" },
+   deployment: { name: "Triển khai" },
+   qa: { name: "QA/Testing" },
+   hr: { name: "Nhân sự" },
+   finance: { name: "Tài chính" },
  };
+ const functionOptions = Object.entries(functionMap).map(([key, v]) => ({ key, name: v.name }));
 
- // Giá trị sắp xếp
- const sortOrder = ref("asc");
-@@ -457,50 +493,82 @@ const pageString = computed(() => `Trang ${page.value} / ${totalPages.value}`)
-
- const goToFirstPage = () => (page.value = 1)
- const goToLastPage = () => (page.value = totalPages.value)
- const nextPage = () => {
-   if (page.value < totalPages.value) page.value++
-   getProjects();
- }
- const prevPage = () => {
-   if (page.value > 1) page.value--
-   getProjects();
- }
-
- // --- Search ---
- const search = ref('')
- const searchBTN = () => {
-   console.log('Tìm kiếm:', search.value)
-   // Gọi API tìm kiếm ở đây
- }
-
- // --- Filter state ---
- const selectedProgress = ref(null) // 'TRE' | 'SOM' | 'DUNG' | null
- const selectedPriority = ref(null) // true | false | null
- const defaultSort = { sortField: null, sortDir: null }
- const selectedSort = ref(defaultSort)
-
-+const summaryCards = computed(() => [
-+  {
-+    label: 'Tổng dự án',
-+    value: total.value,
-+    icon: 'fa-solid fa-layer-group',
-+    tone: 'primary'
-+  },
-+  {
-+    label: 'Đang hiển thị',
-+    value: projects.value.length,
-+    icon: 'fa-solid fa-list-check',
-+    tone: 'info'
-+  },
-+  {
-+    label: 'Trang hiện tại',
-+    value: pageString.value,
-+    icon: 'fa-solid fa-flag-checkered',
-+    tone: 'success'
-+  },
-+  {
-+    label: 'Ưu tiên',
-+    value:
-+        selectedPriority.value === null
-+            ? 'Tất cả'
-+            : selectedPriority.value
-+                ? 'Có ưu tiên'
-+                : 'Không ưu tiên',
-+    icon: 'fa-solid fa-flag',
-+    tone: 'warning'
-+  }
-+])
-+
- const emitChange = () => {
-   const params = {
-     progressFilter: selectedProgress.value ?? null,
-     priority: selectedPriority.value,
-     sortField: selectedSort.value.sortField,
-     sortDir: selectedSort.value.sortDir,
-   }
-   console.log('Bộ lọc thay đổi:', params)
-   // Bạn có thể emit ra ngoài: emit('change', params)
- }
- const flag = ref(0);
-
- async function getProjects() {
-   try {
-     if(size.value < 1 ){
-       size.value =10;
-       flag.value = 1;
-     }
-     console.log(activeTab.value.flag);
-     console.log(activeTab.value.key)
-     const res = await api.get("/admin.thg/project/view", {
-       withCredentials: true,
-       params: {
-         // các tham số lọc & sắp xếp
-         priority: selectedPriority.value,
-@@ -546,50 +614,169 @@ watch(
-       getProjects();
-     },
-     { deep: true }
- );
-
- // Theo dõi size riêng (để tránh loop)
- watch(size, (newSize, oldSize) => {
-   // chỉ gọi nếu size thay đổi hợp lệ và không bị ép lại trong getProjects
-   if (newSize !== oldSize && newSize > 0 && newSize <= total.value) {
-     getProjects();
-   }
+ /** Provinces */
+ const provinces = Array.isArray(addressData) ? addressData : [];
+ const wardsByProvince = computed(() => {
+   const p = provinces.find((x) => x.name === branchForm.provinceName);
+   return p?.wards || [];
  });
 
- function dayDiff(date1, date2) {
-   if (!date1 || !date2) return 0;
-   const d1 = new Date(date1);
-   const d2 = new Date(date2);
-   return Math.round((d1 - d2) / (1000 * 60 * 60 * 24));
+-/** Seed data (Branch ONLY: id, name, address) */
+-const branches = ref([
+-  {
+-    id: 1,
+-    name: "Chi nhánh Hà Nội",
+-    address: "Số 123 Trần Duy Hưng, Cầu Giấy/!!Phường Hoàn Kiếm/!!Thành phố Hà Nội",
+-  },
+-  {
+-    id: 2,
+-    name: "Chi nhánh TP. Hồ Chí Minh",
+-    address: "Số 456 Nguyễn Văn Linh, Quận 7/!!Phường Bến Nghé/!!Thành phố Hồ Chí Minh",
+-  },
+-  {
+-    id: 3,
+-    name: "Chi nhánh Đà Nẵng",
+-    address: "Số 789 Trần Phú, Hải Châu/!!Phường Hải Châu I/!!Thành phố Đà Nẵng",
+-  },
+-]);
++/** Branch data (BE: ChiNhanhDTO) */
++const branches = ref([]);
++
++const fetchBranches = async () => {
++  try {
++    const res = await api.get("/quan-ly-chi-nhanh/admin/all");
++    const data = Array.isArray(res.data) ? res.data : [];
++    branches.value = data.map((item) => ({
++      id: item.id,
++      name: item.ten,
++      address: item.diaChi,
++      roomCount: item.soLuongPhong ?? 0,
++      employeeCount: item.soLuongNhanVien ?? 0,
++    }));
++  } catch (error) {
++    console.error("❌ Lỗi fetch chi nhánh", error);
++    branches.value = [];
++  }
++};
+
+ /** Department: store branchId */
+ const departments = ref([
+   {
+     id: 1,
+     name: "Phòng Tư vấn Khách hàng",
+     description: "Phụ trách tư vấn và hỗ trợ khách hàng về các sản phẩm và dịch vụ của công ty.",
+     manager: "Nguyễn Thị Hương",
+     branchId: 1,
+     functions: ["consulting", "tele"],
+     imageUrl:
+         "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80",
+     employeeLink: "/#",
+     createdAt: "2023-01-15",
+     employees: 15,
+   },
+   {
+     id: 2,
+     name: "Phòng Marketing",
+     description: "Chịu trách nhiệm về các chiến lược marketing, quảng bá thương hiệu và sản phẩm.",
+     manager: "Trần Văn Minh",
+     branchId: 2,
+     functions: ["marketing"],
+     imageUrl:
+         "https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80",
+@@ -1039,56 +1041,64 @@ const filteredDepartments = computed(() => {
+     if (s) {
+       const ok = d.name.toLowerCase().includes(s) || d.manager.toLowerCase().includes(s);
+       if (!ok) return false;
+     }
+     return true;
+   });
+ });
+
+ const filteredBranches = computed(() => {
+   const s = (appliedBranchFilter.search || "").toLowerCase();
+   return branches.value.filter((b) => {
+     if (!s) return true;
+     const addr = formatAddressDisplay(b.address).toLowerCase();
+     return b.name.toLowerCase().includes(s) || addr.includes(s);
+   });
+ });
+
+ /** Helpers */
+ function branchById(id) {
+   return branches.value.find((b) => b.id === Number(id)) || null;
+ }
+ function functionName(key) {
+   return functionMap[key]?.name || key;
+ }
+ function deptCountByBranch(branchId) {
++  const branch = branchById(branchId);
++  if (branch && Number.isFinite(Number(branch.roomCount))) {
++    return Number(branch.roomCount);
++  }
+   return departments.value.filter((d) => Number(d.branchId) === Number(branchId)).length;
+ }
+ function employeeCountByBranch(branchId) {
++  const branch = branchById(branchId);
++  if (branch && Number.isFinite(Number(branch.employeeCount))) {
++    return Number(branch.employeeCount);
++  }
+   return departments.value
+-      .filter((d) => Number(d.branchId) === Number(branchId))
+-      .reduce((sum, d) => sum + (Number(d.employees) || 0), 0);
++    .filter((d) => Number(d.branchId) === Number(branchId))
++    .reduce((sum, d) => sum + (Number(d.employees) || 0), 0);
+ }
+ function deptListByBranch(branchId) {
+   return departments.value.filter((d) => Number(d.branchId) === Number(branchId));
  }
 
- import NotificationBell from "../components/NotificationBell.vue";
+ /** Tag class (pastel nền + viền đậm + chữ đậm) */
+ function funcTagClass(func) {
+   const map = {
+     consulting: "ui-tag-blue",
+     tele: "ui-tag-purple",
+     marketing: "ui-tag-emerald",
+     it: "ui-tag-indigo",
+     deployment: "ui-tag-amber",
+     qa: "ui-tag-red",
+     hr: "ui-tag-slate",
+     finance: "ui-tag-lime",
+   };
+   return map[func] || "ui-tag-slate";
+ }
+
+ /** Address format */
+ function formatAddressDisplay(addr) {
+   if (!addr) return "";
+   return String(addr).split("/!!").join(", ");
+ }
+@@ -1331,50 +1341,53 @@ function confirmDelete() {
+   if (!deleteModal.open) return;
+
+   if (deleteModal.type === "dept") {
+     departments.value = departments.value.filter((d) => d.id !== deleteModal.id);
+     closeAllModals();
+     return;
+   }
+
+   if (deleteModal.type === "branch") {
+     if (departments.value.some((d) => Number(d.branchId) === Number(deleteModal.id))) {
+       alert("Không thể xóa chi nhánh đang có phòng ban!");
+       return;
+     }
+     branches.value = branches.value.filter((x) => x.id !== deleteModal.id);
+     closeAllModals();
+   }
+ }
+
+ function goEmployees(link) {
+   alert(`Chuyển hướng đến danh sách nhân viên: ${link}`);
+ }
+
+ /** init */
+ applyDeptFilter();
+ applyBranchFilter();
++onMounted(() => {
++  fetchBranches();
++});
  </script>
 
-
  <style scoped>
-+.project-page {
-+  background: #f4f6fb;
-+}
-+
-+.page-hero {
-+  border-radius: 18px;
-+  background: linear-gradient(130deg, #4f46e5 0%, #6366f1 45%, #8b5cf6 100%);
-+  box-shadow: 0 16px 32px rgba(99, 102, 241, 0.18);
-+}
-+
-+.hero-main {
-+  gap: 12px;
-+}
-+
-+.hero-eyebrow {
-+  font-size: 11px;
-+  letter-spacing: 0.12em;
-+}
-+
-+.hero-actions .btn-light {
-+  border-radius: 12px;
-+  padding: 10px 18px;
-+}
-+
-+.hero-user {
-+  background: rgba(255, 255, 255, 0.12);
-+  padding: 8px 12px;
-+  border-radius: 999px;
-+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-+}
-+
-+.hero-metrics {
-+  display: grid;
-+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-+  gap: 12px;
-+}
-+
-+.metric-card {
-+  background: rgba(255, 255, 255, 0.16);
-+  border-radius: 14px;
-+  padding: 14px 16px;
-+  display: flex;
-+  align-items: center;
-+  gap: 12px;
-+  color: #fff;
-+  backdrop-filter: blur(4px);
-+}
-+
-+.metric-icon {
-+  width: 38px;
-+  height: 38px;
-+  border-radius: 12px;
-+  display: grid;
-+  place-items: center;
-+  font-size: 16px;
-+  background: rgba(255, 255, 255, 0.2);
-+}
-+
-+.metric-label {
-+  font-size: 12px;
-+  opacity: 0.75;
-+}
-+
-+.metric-value {
-+  font-size: 18px;
-+  font-weight: 700;
-+}
-+
-+.content-panel {
-+  background: #ffffff;
-+  border-radius: 16px;
-+  padding-top: 16px;
-+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
-+}
-+
-+.section-title {
-+  font-weight: 700;
-+  color: #1f2937;
-+}
-+
-+.section-subtitle {
-+  font-size: 12px;
-+  color: #94a3b8;
-+  background: #f1f5f9;
-+  padding: 4px 10px;
-+  border-radius: 999px;
-+}
-+
-+.toolbar {
-+  gap: 12px;
-+}
-+
-+.search-box {
-+  background: #f8fafc;
-+  border: 1px solid #e2e8f0;
-+  border-radius: 999px;
-+  padding: 4px 6px 4px 12px;
-+  min-width: 300px;
-+}
-+
-+.search-box i {
-+  color: #94a3b8;
-+  margin-right: 8px;
-+}
-+
-+.search-box input {
-+  background: transparent;
-+}
-+
-+.search-box .btn {
-+  border-radius: 999px;
-+  padding: 4px 14px;
-+}
-+
-+.table-card {
-+  border-radius: 16px;
-+  overflow: hidden;
-+}
-+
-
- .progress-cell {
-   padding: 6px 8px;
+ :global(html) {
+   font-size: 16px;
+ }
+ :global(body) {
+   font-size: 16px;
+   background: #f8fafc;
  }
 
- /* Tổng thể chia 2 phần: thanh và nhãn, luôn cùng hàng ngang */
- .progress-container {
-   display: flex;
-   align-items: center;
-   justify-content: flex-start;
-   gap: 10px;
+ /* Scrollbar */
+ :global(::-webkit-scrollbar) {
+   width: 8px;
+   height: 8px;
+ }
+ :global(::-webkit-scrollbar-track) {
+   background: rgba(15, 23, 42, 0.06);
+   border-radius: 999px;
+ }
+ :global(::-webkit-scrollbar-thumb) {
+   background: linear-gradient(135deg, rgba(99, 102, 241, 0.55), rgba(168, 85, 247, 0.55));
+   border-radius: 999px;
  }
 
- /* Thanh tiến độ có chiều rộng cố định để các dòng bằng nhau */
- .progress-wrapper {
-   width: 170px;            /* 👈 cố định chiều rộng */
-   height: 10px;             /* thanh mảnh, chuyên nghiệp */
-   border: 1px solid #d1d5db;
-   border-radius: 6px;
-   position: relative;
-   overflow: hidden;
-   flex-shrink: 0;          /* không bị co lại */
-   background: transparent;
- }
-
-@@ -884,68 +1071,74 @@ input[type="checkbox"] {
-   font-size: 0.9rem;
-   cursor: pointer;
-   transition: all 0.2s;
- }
- .btn-arrow:hover {
-   color: #0d6efd;
-   transform: scale(1.1);
- }
- .btn-arrow:disabled {
-   opacity: 0.3;
-   cursor: not-allowed;
-   transform: none;
- }
- .avatar-circle {
-   width: 35px;
-   height: 35px;
-   border-radius: 50%;
-   background-color: #d6d9ff;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   font-weight: bold;
-   color: #333;
- }
-
-+.avatar-circle--light {
-+  background: rgba(255, 255, 255, 0.2);
-+  color: #fff;
-+  border: 1px solid rgba(255, 255, 255, 0.4);
-+}
-+
-
- /* Input & select */
- .toolbar input,
- .toolbar select {
-   border-radius: 6px;
-   transition: box-shadow 0.2s ease;
- }
-
- .toolbar input:focus,
- .toolbar select:focus {
-   box-shadow: 0 0 4px rgba(13, 110, 253, 0.5);
-   outline: none;
- }
-
- :deep(.custom-table tbody tr.project-row) {
-   cursor: pointer;
-   transition: all 0.25s ease;
-   position: relative;
-   z-index: 0;
- }
-
- :deep(.custom-table tbody tr.project-row:hover) {
-   z-index: 20;
- }
-
- :deep(.custom-table tbody tr.project-row:hover td) {
--  background-color: #818cf8 !important;
--  color: #fff !important;
-+  background-color: #eef2ff !important;
-+  color: #1f2937 !important;
-   transition: all 0.25s ease;
- }
- :deep(.custom-table thead.bg-light) {
--  background: #818cf8 !important;
--  color: #ffffff !important;
-+  background: #e0e7ff !important;
-+  color: #4338ca !important;
-   font-weight: 600;
--  border-bottom: 2px solid #5a4eb8;
-+  border-bottom: 2px solid #c7d2fe;
- }
- :deep(.table-responsive) {
-   overflow: visible;
-   position: relative;
-   z-index: 0;
- }
-
- </style>

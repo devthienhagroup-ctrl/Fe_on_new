@@ -10,7 +10,7 @@
               <i class="fa-solid fa-building"></i>
             </div>
             <div class="leading-tight">
-              <div class="text-[18px] font-extrabold text-slate-900">
+              <div class="text-[18px]  text-slate-900">
                 Quản lý Phòng ban & Chi nhánh
               </div>
               <div class="text-[13px] text-slate-500">CRUD hoàn thiện • UI sáng • Dễ nhìn</div>
@@ -59,10 +59,10 @@
       <section v-if="currentTab === 'departments'">
         <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <div class="text-[18px] font-extrabold text-slate-900">Quản lý Phòng ban</div>
+            <div class="text-[18px]  text-slate-900">Quản lý Phòng ban</div>
             <div class="text-[13px] text-slate-500">
               Hiển thị:
-              <span class="font-extrabold text-indigo-700">{{ filteredDepartments.length }}</span>
+              <span class=" text-indigo-700">{{ filteredDepartments.length }}</span>
               phòng ban
             </div>
           </div>
@@ -143,7 +143,7 @@
           >
             <i class="fa-solid fa-users text-xl"></i>
           </div>
-          <div class="mt-3 text-[16px] font-extrabold text-slate-900">Không có dữ liệu</div>
+          <div class="mt-3 text-[16px]  text-slate-900">Không có dữ liệu</div>
           <div class="mt-1 text-[13px] text-slate-500">Thử thay đổi bộ lọc hoặc thêm phòng ban mới</div>
           <button type="button" class="ui-btn ui-btn-primary mt-4" @click="openDeptModal()">
             <i class="fa-solid fa-plus"></i> Thêm phòng ban
@@ -153,7 +153,7 @@
         <!-- TABLE VIEW (BẢNG THẬT) -->
         <div v-else-if="deptView === 'table'" class="mt-4 ui-card p-0">
           <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-            <div class="text-[14px] font-extrabold text-slate-900">Bảng phòng ban</div>
+            <div class="text-[14px]  text-slate-900">Bảng phòng ban</div>
             <div class="text-[12px] text-slate-500">Tối giản trường quan trọng</div>
           </div>
 
@@ -181,7 +181,7 @@
                       <img :src="d.imageUrl" :alt="d.name" class="h-full w-full object-cover" />
                     </div>
                     <div class="min-w-0">
-                      <div class="truncate text-[14px] font-extrabold text-slate-900" :title="d.name">
+                      <div class="truncate text-[18px] text-slate-900" :title="d.name">
                         {{ d.name }}
                       </div>
                       <div class="text-[12px] text-slate-500 truncate">
@@ -291,7 +291,7 @@
               </div>
 
               <div class="absolute bottom-2 left-2 right-2">
-                <div class="line-clamp-1 text-[14px] font-extrabold text-white" :title="d.name">
+                <div class="line-clamp-1 text-[14px]  text-white" :title="d.name">
                   {{ d.name }}
                 </div>
                 <div class="mt-1 flex items-center gap-2 text-[12px] text-white/90">
@@ -310,7 +310,7 @@
                 <span class="ui-ico-pill ui-ico-purple">
                   <i class="fa-solid fa-code-branch"></i>
                 </span>
-                <span class="truncate font-extrabold text-slate-800 text-[13px]">
+                <span class="truncate  text-slate-800 text-[13px]">
                   {{ branchById(d.branchId)?.name || "—" }}
                 </span>
               </div>
@@ -347,10 +347,10 @@
       <section v-else>
         <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <div class="text-[18px] font-extrabold text-slate-900">Quản lý Chi nhánh</div>
+            <div class="text-[18px]  text-slate-900">Quản lý Chi nhánh</div>
             <div class="text-[13px] text-slate-500">
               Hiển thị:
-              <span class="font-extrabold text-emerald-700">{{ filteredBranches.length }}</span>
+              <span class=" text-emerald-700">{{ filteredBranches.length }}</span>
               chi nhánh
             </div>
           </div>
@@ -388,7 +388,7 @@
           >
             <i class="fa-solid fa-code-branch text-xl"></i>
           </div>
-          <div class="mt-3 text-[16px] font-extrabold text-slate-900">Không có dữ liệu</div>
+          <div class="mt-3 text-[16px]  text-slate-900">Không có dữ liệu</div>
           <div class="mt-1 text-[13px] text-slate-500">Thử thay đổi bộ lọc hoặc thêm chi nhánh mới</div>
           <button type="button" class="ui-btn ui-btn-success mt-4" @click="openBranchModal()">
             <i class="fa-solid fa-plus"></i> Thêm chi nhánh
@@ -398,7 +398,7 @@
         <!-- TABLE VIEW -->
         <div v-else-if="branchView === 'table'" class="mt-4 ui-card p-0">
           <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-            <div class="text-[14px] font-extrabold text-slate-900">Bảng chi nhánh</div>
+            <div class="text-[14px]  text-slate-900">Bảng chi nhánh</div>
             <div class="text-[12px] text-slate-500">Chi nhánh chỉ có: id, name, address</div>
           </div>
 
@@ -407,10 +407,11 @@
               <thead>
               <tr>
                 <th style="width: 44px">#</th>
-                <th>Chi nhánh</th>
-                <th>Địa chỉ</th>
-                <th class="text-right" style="width: 190px">Phòng / NV</th>
-                <th class="text-right" style="width: 170px">Thao tác</th>
+                <th>CHI NHÁNH</th>
+                <th>ĐỊA CHỈ</th>
+                <th class="text-right" style="width: 190px">SỐ LƯƠNG PHÒNG BAN</th>
+                <th class="text-right" style="width: 190px">SỐ LƯỢNG NHÂN VIÊN</th>
+                <th class="text-right" style="width: 170px">THAO TÁC</th>
               </tr>
               </thead>
 
@@ -420,11 +421,11 @@
 
                 <td>
                   <div class="flex items-center gap-2 min-w-0">
-                      <span class="ui-ico-pill ui-ico-emerald">
+                      <span class="ui-ico-pill ui-ico-orange-soft">
                         <i class="fa-solid fa-code-branch"></i>
                       </span>
                     <div class="min-w-0">
-                      <div class="truncate text-[14px] font-extrabold text-slate-900">{{ b.name }}</div>
+                      <div class="truncate text-[14px] fw-medium text-slate-900 text-gradient-blue">{{ b.name }}</div>
                       <div class="text-[12px] text-slate-500 font-semibold">
                         ID: <span class="text-slate-700">{{ b.id }}</span>
                       </div>
@@ -434,11 +435,9 @@
 
                 <td>
                   <div class="flex items-start gap-2">
-                      <span class="ui-ico-pill ui-ico-purple">
-                        <i class="fa-solid fa-location-dot"></i>
-                      </span>
+                        <i class="fa-solid fa-location-dot" style="color: red"></i>
                     <div class="min-w-0">
-                      <div class="text-[13px] font-bold text-slate-700">
+                      <div class="text-[13px] font-medium text-slate-700">
                         {{ formatAddressDisplay(b.address) }}
                       </div>
                     </div>
@@ -446,9 +445,13 @@
                 </td>
 
                 <!-- FIX: 2 badge CHUNG HÀNG -->
-                <td class="text-right">
+                <td class="text-left">
                   <div class="inline-flex items-center justify-end gap-2 whitespace-nowrap">
                     <span class="ui-value ui-value-slate whitespace-nowrap">{{ deptCountByBranch(b.id) }} phòng</span>
+                  </div>
+                </td>
+                <td class="text-left">
+                  <div class="inline-flex items-center justify-end gap-2 whitespace-nowrap">
                     <span class="ui-value ui-value-emerald whitespace-nowrap">{{ employeeCountByBranch(b.id) }} NV</span>
                   </div>
                 </td>
@@ -481,7 +484,7 @@
                   <div class="flex items-center gap-2">
                     <span class="ui-ico-pill ui-ico-emerald"><i class="fa-solid fa-code-branch"></i></span>
                     <div class="min-w-0">
-                      <div class="truncate text-[14px] font-extrabold text-slate-900">{{ b.name }}</div>
+                      <div class="truncate text-[18px]  text-slate-900">{{ b.name }}</div>
                       <div class="text-[12px] text-slate-500 font-semibold">
                         ID: <span class="text-slate-700">{{ b.id }}</span>
                       </div>
@@ -531,7 +534,7 @@
                 <span class="ui-head-ico ui-ico-white">
                   <i class="fa-solid fa-sitemap"></i>
                 </span>
-                <span class="text-[16px] font-extrabold">{{ deptModal.title }}</span>
+                <span class="text-[16px] ">{{ deptModal.title }}</span>
               </div>
               <button class="ui-x" type="button" @click="closeAllModals()">&times;</button>
             </div>
@@ -643,7 +646,7 @@
                 <span class="ui-head-ico ui-ico-white">
                   <i class="fa-solid fa-code-branch"></i>
                 </span>
-                <span class="text-[16px] font-extrabold">{{ branchModal.title }}</span>
+                <span class="text-[16px] ">{{ branchModal.title }}</span>
               </div>
               <button class="ui-x" type="button" @click="closeAllModals()">&times;</button>
             </div>
@@ -661,7 +664,7 @@
             </div>
 
             <div class="mt-3 ui-card p-4 border border-slate-200">
-              <div class="text-[14px] font-extrabold text-slate-900 mb-3 flex items-center gap-2">
+              <div class="text-[14px]  text-slate-900 mb-3 flex items-center gap-2">
                 <span class="ui-ico-pill ui-ico-purple"><i class="fa-solid fa-location-dot"></i></span>
                 Địa chỉ (bắt buộc)
               </div>
@@ -705,7 +708,7 @@
 
               <div class="mt-3">
                 <div class="text-[12px] text-slate-500 font-semibold">Xem trước địa chỉ:</div>
-                <div class="mt-1 text-[14px] font-extrabold text-slate-800">
+                <div class="mt-1 text-[14px]  text-slate-800">
                   {{ previewBranchAddress || "—" }}
                 </div>
               </div>
@@ -732,7 +735,7 @@
                 <span class="ui-head-ico ui-ico-white">
                   <i class="fa-solid fa-eye"></i>
                 </span>
-                <span class="text-[16px] font-extrabold">Chi tiết phòng ban</span>
+                <span class="text-[16px] ">Chi tiết phòng ban</span>
               </div>
               <button class="ui-x" type="button" @click="closeAllModals()">&times;</button>
             </div>
@@ -744,7 +747,7 @@
                 <img :src="deptDetail.data.imageUrl" :alt="deptDetail.data.name" class="h-full w-full object-cover" />
               </div>
               <div class="min-w-0 flex-1">
-                <div class="text-[18px] font-extrabold text-slate-900 truncate">
+                <div class="text-[18px]  text-slate-900 truncate">
                   {{ deptDetail.data.name }}
                 </div>
                 <div class="mt-1 text-[13px] text-slate-600">
@@ -825,7 +828,7 @@
                 <span class="ui-head-ico ui-ico-white">
                   <i class="fa-solid fa-eye"></i>
                 </span>
-                <span class="text-[16px] font-extrabold">Chi tiết chi nhánh</span>
+                <span class="text-[16px] ">Chi tiết chi nhánh</span>
               </div>
               <button class="ui-x" type="button" @click="closeAllModals()">&times;</button>
             </div>
@@ -837,7 +840,7 @@
                 <div class="flex items-center gap-2">
                   <span class="ui-ico-pill ui-ico-emerald"><i class="fa-solid fa-code-branch"></i></span>
                   <div class="min-w-0">
-                    <div class="text-[18px] font-extrabold text-slate-900 truncate">{{ branchDetail.data.name }}</div>
+                    <div class="text-[18px]  text-slate-900 truncate">{{ branchDetail.data.name }}</div>
                     <div class="text-[13px] text-slate-500 font-semibold">
                       ID: <span class="text-slate-800">{{ branchDetail.data.id }}</span>
                     </div>
@@ -846,7 +849,7 @@
 
                 <div class="mt-3 flex items-start gap-2">
                   <span class="ui-ico-pill ui-ico-purple"><i class="fa-solid fa-location-dot"></i></span>
-                  <div class="text-[14px] font-extrabold text-slate-800">
+                  <div class="text-[14px]  text-slate-800">
                     {{ formatAddressDisplay(branchDetail.data.address) }}
                   </div>
                 </div>
@@ -863,7 +866,7 @@
             </div>
 
             <div class="mt-4 ui-card p-4">
-              <div class="text-[14px] font-extrabold text-slate-900 mb-2 flex items-center gap-2">
+              <div class="text-[14px]  text-slate-900 mb-2 flex items-center gap-2">
                 <span class="ui-ico-pill ui-ico-indigo"><i class="fa-solid fa-sitemap"></i></span>
                 Phòng ban thuộc chi nhánh
               </div>
@@ -894,7 +897,7 @@
             <div class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-rose-50 text-rose-700 ring-2 ring-rose-200">
               <i class="fa-solid fa-triangle-exclamation text-xl"></i>
             </div>
-            <div class="mt-3 text-[16px] font-extrabold text-slate-900">{{ deleteModal.title }}</div>
+            <div class="mt-3 text-[16px]  text-slate-900">{{ deleteModal.title }}</div>
             <div class="mt-1 text-[13px] text-slate-600">
               Xóa <b class="text-slate-900">{{ deleteModal.name }}</b> ? (Không thể hoàn tác)
             </div>
@@ -913,7 +916,8 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
+import api from "/src/api/api.js";
 
 /**
  * ✅ Địa chỉ lấy từ: /src/assets/js/address.json
@@ -953,24 +957,25 @@ const wardsByProvince = computed(() => {
   return p?.wards || [];
 });
 
-/** Seed data (Branch ONLY: id, name, address) */
-const branches = ref([
-  {
-    id: 1,
-    name: "Chi nhánh Hà Nội",
-    address: "Số 123 Trần Duy Hưng, Cầu Giấy/!!Phường Hoàn Kiếm/!!Thành phố Hà Nội",
-  },
-  {
-    id: 2,
-    name: "Chi nhánh TP. Hồ Chí Minh",
-    address: "Số 456 Nguyễn Văn Linh, Quận 7/!!Phường Bến Nghé/!!Thành phố Hồ Chí Minh",
-  },
-  {
-    id: 3,
-    name: "Chi nhánh Đà Nẵng",
-    address: "Số 789 Trần Phú, Hải Châu/!!Phường Hải Châu I/!!Thành phố Đà Nẵng",
-  },
-]);
+/** Branch data (BE: ChiNhanhDTO) */
+const branches = ref([]);
+
+const fetchBranches = async () => {
+  try {
+    const res = await api.get("/quan-ly-chi-nhanh/admin/all");
+    const data = Array.isArray(res.data) ? res.data : [];
+    branches.value = data.map((item) => ({
+      id: item.id,
+      name: item.ten,
+      address: item.diaChi,
+      roomCount: item.soLuongPhong ?? 0,
+      employeeCount: item.soLuongNhanVien ?? 0,
+    }));
+  } catch (error) {
+    console.error("❌ Lỗi fetch chi nhánh", error);
+    branches.value = [];
+  }
+};
 
 /** Department: store branchId */
 const departments = ref([
@@ -1061,12 +1066,20 @@ function functionName(key) {
   return functionMap[key]?.name || key;
 }
 function deptCountByBranch(branchId) {
+  const branch = branchById(branchId);
+  if (branch && Number.isFinite(Number(branch.roomCount))) {
+    return Number(branch.roomCount);
+  }
   return departments.value.filter((d) => Number(d.branchId) === Number(branchId)).length;
 }
 function employeeCountByBranch(branchId) {
+  const branch = branchById(branchId);
+  if (branch && Number.isFinite(Number(branch.employeeCount))) {
+    return Number(branch.employeeCount);
+  }
   return departments.value
-      .filter((d) => Number(d.branchId) === Number(branchId))
-      .reduce((sum, d) => sum + (Number(d.employees) || 0), 0);
+    .filter((d) => Number(d.branchId) === Number(branchId))
+    .reduce((sum, d) => sum + (Number(d.employees) || 0), 0);
 }
 function deptListByBranch(branchId) {
   return departments.value.filter((d) => Number(d.branchId) === Number(branchId));
@@ -1353,6 +1366,9 @@ function goEmployees(link) {
 /** init */
 applyDeptFilter();
 applyBranchFilter();
+onMounted(() => {
+  fetchBranches();
+});
 </script>
 
 <style scoped>
@@ -1361,7 +1377,7 @@ applyBranchFilter();
 }
 :global(body) {
   font-size: 16px;
-  background: #f8fafc;
+  background: #f8f9fa;
 }
 
 /* Scrollbar */
@@ -1370,11 +1386,11 @@ applyBranchFilter();
   height: 8px;
 }
 :global(::-webkit-scrollbar-track) {
-  background: rgba(15, 23, 42, 0.06);
+  background: rgba(11, 18, 32, 0.06);
   border-radius: 999px;
 }
 :global(::-webkit-scrollbar-thumb) {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.55), rgba(168, 85, 247, 0.55));
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.55), rgba(118, 75, 162, 0.55));
   border-radius: 999px;
 }
 
@@ -1386,8 +1402,8 @@ applyBranchFilter();
   display: grid;
   place-items: center;
   color: #fff;
-  background: linear-gradient(135deg, #6366f1 0%, #a78bfa 55%, #60a5fa 100%);
-  box-shadow: 0 14px 34px rgba(99, 102, 241, 0.22);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 14px 34px rgba(102, 126, 234, 0.22);
   font-size: 18px;
 }
 .ui-avatar {
@@ -1397,8 +1413,8 @@ applyBranchFilter();
   display: grid;
   place-items: center;
   color: #fff;
-  background: linear-gradient(135deg, #fb7185 0%, #f472b6 55%, #a78bfa 100%);
-  box-shadow: 0 14px 34px rgba(244, 63, 94, 0.14);
+  background: linear-gradient(135deg, #f5576c 0%, #f093fb 55%, #764ba2 100%);
+  box-shadow: 0 14px 34px rgba(245, 87, 108, 0.14);
   font-size: 14px;
 }
 .ui-icon-btn {
@@ -1409,8 +1425,8 @@ applyBranchFilter();
   display: grid;
   place-items: center;
   color: #fff;
-  background: linear-gradient(135deg, #60a5fa 0%, #34d399 55%, #22c55e 100%);
-  box-shadow: 0 16px 36px rgba(59, 130, 246, 0.18);
+  background: linear-gradient(135deg, #4facfe 0%, #43e97b 55%, #38f9d7 100%);
+  box-shadow: 0 16px 36px rgba(79, 172, 254, 0.18);
   transition: transform 0.16s ease;
   font-size: 16px;
 }
@@ -1426,7 +1442,7 @@ applyBranchFilter();
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: linear-gradient(135deg, #ef4444, #fb7185);
+  background: linear-gradient(135deg, #ff5858, #f5576c);
   color: #fff;
   font-size: 11px;
   font-weight: 900;
@@ -1449,31 +1465,31 @@ applyBranchFilter();
   font-size: 14px;
   font-weight: 900;
   color: #475569;
-  background: #ffffff;
-  border: 2px solid rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px solid rgba(20, 30, 48, 0.12);
   transition: all 0.16s ease;
 }
 .ui-tab:hover {
-  background: rgba(99, 102, 241, 0.06);
-  border-color: rgba(99, 102, 241, 0.22);
+  background: rgba(102, 126, 234, 0.06);
+  border-color: rgba(102, 126, 234, 0.22);
   color: #3730a3;
 }
 .ui-tab.active {
-  background: rgba(99, 102, 241, 0.1);
-  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(102, 126, 234, 0.1);
+  border-color: rgba(102, 126, 234, 0.4);
   color: #3730a3;
   box-shadow: 0 12px 28px rgba(2, 6, 23, 0.06);
 }
 
 /* Card */
 .ui-card {
-  background: #fff;
-  border: 2px solid rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px solid rgba(20, 30, 48, 0.12);
   border-radius: 18px;
   box-shadow: 0 12px 34px rgba(2, 6, 23, 0.05);
 }
 .ui-card:hover {
-  border-color: rgba(99, 102, 241, 0.2);
+  border-color: rgba(102, 126, 234, 0.2);
 }
 
 /* Buttons */
@@ -1496,49 +1512,49 @@ applyBranchFilter();
   transform: translateY(0);
 }
 .ui-btn-ghost {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.92);
   color: #334155;
-  border-color: rgba(226, 232, 240, 0.95);
+  border-color: rgba(20, 30, 48, 0.12);
 }
 .ui-btn-ghost:hover {
-  background: #f8fafc;
+  background: rgba(255, 255, 255, 0.86);
 }
 .ui-btn-soft {
-  background: rgba(99, 102, 241, 0.06);
+  background: rgba(102, 126, 234, 0.06);
   color: #3730a3;
-  border-color: rgba(99, 102, 241, 0.25);
+  border-color: rgba(102, 126, 234, 0.25);
 }
 .ui-btn-soft.active {
-  background: rgba(99, 102, 241, 0.12);
-  border-color: rgba(99, 102, 241, 0.45);
+  background: rgba(102, 126, 234, 0.12);
+  border-color: rgba(102, 126, 234, 0.45);
 }
 .ui-btn-soft:hover {
-  background: rgba(99, 102, 241, 0.1);
+  background: rgba(102, 126, 234, 0.1);
 }
 .ui-btn-primary {
   color: #fff;
-  background: linear-gradient(135deg, #6366f1 0%, #a78bfa 55%, #60a5fa 100%);
-  box-shadow: 0 14px 34px rgba(99, 102, 241, 0.18);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 14px 34px rgba(102, 126, 234, 0.18);
 }
 .ui-btn-success {
   color: #fff;
-  background: linear-gradient(135deg, #34d399 0%, #22c55e 55%, #60a5fa 100%);
-  box-shadow: 0 14px 34px rgba(16, 185, 129, 0.16);
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 55%, #4facfe 100%);
+  box-shadow: 0 14px 34px rgba(67, 233, 123, 0.16);
 }
 .ui-btn-danger {
   color: #fff;
-  background: linear-gradient(135deg, #ef4444 0%, #fb7185 60%, #f472b6 100%);
-  box-shadow: 0 14px 34px rgba(244, 63, 94, 0.14);
+  background: linear-gradient(135deg, #ff5858 0%, #f5576c 60%, #f093fb 100%);
+  box-shadow: 0 14px 34px rgba(255, 88, 88, 0.14);
 }
 .ui-btn-indigo {
   color: #fff;
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 60%, #60a5fa 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #667eea 60%, #4facfe 100%);
   box-shadow: 0 14px 34px rgba(79, 70, 229, 0.16);
 }
 .ui-btn-emerald {
   color: #fff;
-  background: linear-gradient(135deg, #10b981 0%, #34d399 60%, #60a5fa 100%);
-  box-shadow: 0 14px 34px rgba(16, 185, 129, 0.14);
+  background: linear-gradient(135deg, #10b981 0%, #43e97b 60%, #38f9d7 100%);
+  box-shadow: 0 14px 34px rgba(67, 233, 123, 0.14);
 }
 
 /* Inputs */
@@ -1548,7 +1564,7 @@ applyBranchFilter();
   gap: 0.5rem;
   font-size: 13px;
   font-weight: 950;
-  color: #0f172a;
+  color: #0b1220;
   margin-bottom: 6px;
 }
 .ui-label-ico {
@@ -1565,8 +1581,8 @@ applyBranchFilter();
 .ui-textarea {
   width: 100%;
   border-radius: 18px;
-  border: 2px solid rgba(203, 213, 225, 0.95);
-  background: #fff;
+  border: 2px solid rgba(20, 30, 48, 0.12);
+  background: rgba(255, 255, 255, 0.92);
   padding: 0.72rem 0.85rem;
   font-size: 14px;
   font-weight: 500;
@@ -1579,8 +1595,8 @@ applyBranchFilter();
 .ui-input:focus,
 .ui-select:focus,
 .ui-textarea:focus {
-  border-color: rgba(99, 102, 241, 0.55);
-  box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.14);
+  border-color: rgba(102, 126, 234, 0.55);
+  box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.14);
 }
 .ui-input-ico {
   position: absolute;
@@ -1596,24 +1612,24 @@ applyBranchFilter();
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 14px;
+  font-size: 12px;
 }
 .ui-table thead th {
   text-align: left;
   padding: 12px 14px;
-  color: #0f172a;
-  font-weight: 950;
-  background: #f8fafc;
-  border-bottom: 2px solid rgba(226, 232, 240, 0.95);
+  color: #0b1220;
+  font-weight: 650;
+  background: rgba(255, 255, 255, 0.86);
+  border-bottom: 2px solid rgba(20, 30, 48, 0.12);
   white-space: nowrap;
 }
 .ui-table tbody td {
   padding: 12px 14px;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  border-bottom: 1px solid rgba(20, 30, 48, 0.12);
   vertical-align: middle;
 }
 .ui-table tbody tr:hover td {
-  background: rgba(99, 102, 241, 0.04);
+  background: rgba(102, 126, 234, 0.04);
 }
 
 /* Tags */
@@ -1630,12 +1646,12 @@ applyBranchFilter();
 .ui-tag-gray {
   background: #f1f5f9;
   border-color: #94a3b8;
-  color: #0f172a;
+  color: #0b1220;
 }
 .ui-tag-slate {
   background: #f1f5f9;
   border-color: #64748b;
-  color: #0f172a;
+  color: #0b1220;
 }
 .ui-tag-blue {
   background: #eff6ff;
@@ -1649,7 +1665,7 @@ applyBranchFilter();
 }
 .ui-tag-purple {
   background: #faf5ff;
-  border-color: #7c3aed;
+  border-color: #764ba2;
   color: #6d28d9;
 }
 .ui-tag-emerald {
@@ -1664,7 +1680,7 @@ applyBranchFilter();
 }
 .ui-tag-red {
   background: #fff1f2;
-  border-color: #e11d48;
+  border-color: #f5576c;
   color: #be123c;
 }
 .ui-tag-lime {
@@ -1678,10 +1694,10 @@ applyBranchFilter();
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.3rem 0.75rem;
+  padding: 0.2rem 0.55rem;
   border-radius: 999px;
   font-size: 13px;
-  font-weight: 950;
+  font-weight: 700;
   border: 2px solid transparent;
 }
 .ui-value-indigo {
@@ -1689,21 +1705,31 @@ applyBranchFilter();
   border-color: #4f46e5;
   color: #3730a3;
 }
+
+.ui-value-slate {
+  background: rgba(254, 249, 195, 0.67);      /* vàng nhạt tươi */
+  border-color: #facc15;    /* vàng đậm */
+  color: #d9ac01;           /* nâu vàng đậm – rất dễ đọc */
+}
+
 .ui-value-emerald {
   background: #ecfdf5;
   border-color: #059669;
   color: #047857;
 }
-.ui-value-slate {
-  background: #f1f5f9;
-  border-color: #64748b;
-  color: #0f172a;
-}
 .ui-value-white {
   background: rgba(255, 255, 255, 0.92);
   border-color: rgba(255, 255, 255, 0.55);
-  color: #0f172a;
+  color: #0b1220;
 }
+
+/* Price */
+.price{ font-weight: 950; white-space: nowrap; }
+.p1{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.p2{ background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.p3{ background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.p4{ background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.p5{ background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 
 /* Icon pill */
 .ui-ico-pill {
@@ -1728,9 +1754,16 @@ applyBranchFilter();
 }
 .ui-ico-purple {
   background: #faf5ff;
-  border-color: #7c3aed;
+  border-color: #764ba2;
   color: #6d28d9;
 }
+.ui-ico-orange-soft {
+  background: linear-gradient(135deg, #ffd194 0%, #ff9f1c 100%);
+  border-color: #ff9f1c;
+  color: #5a2d00;
+  box-shadow: 0 8px 18px rgba(255, 159, 28, 0.25);
+}
+
 .ui-ico-emerald {
   background: #ecfdf5;
   border-color: #059669;
@@ -1743,13 +1776,13 @@ applyBranchFilter();
 }
 .ui-ico-pink {
   background: #fff1f2;
-  border-color: #e11d48;
+  border-color: #f5576c;
   color: #be123c;
 }
 .ui-ico-slate {
   background: #f1f5f9;
   border-color: #64748b;
-  color: #0f172a;
+  color: #0b1220;
 }
 .ui-ico-white {
   background: rgba(255, 255, 255, 0.16);
@@ -1759,31 +1792,49 @@ applyBranchFilter();
 
 /* Actions */
 .ui-mini-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 16px;
+  width: 34px;
+  height: 34px;
+  border-radius: 14px;
   display: grid;
   place-items: center;
   color: #fff;
   border: 2px solid rgba(255, 255, 255, 0.35);
-  transition: transform 0.16s ease;
 }
 .ui-mini-btn:hover {
   transform: translateY(-1px);
 }
 .ui-mini-btn-blue {
-  background: linear-gradient(135deg, #60a5fa 0%, #6366f1 60%, #a78bfa 100%);
-  box-shadow: 0 14px 32px rgba(99, 102, 241, 0.14);
+  background: linear-gradient(
+      135deg,
+      #6ecbff 0%,
+      #4facfe 45%,
+      #667eea 100%
+  );
+  box-shadow: 0 14px 32px rgba(79, 172, 254, 0.28);
 }
+
 .ui-mini-btn-red {
-  background: linear-gradient(135deg, #ef4444 0%, #fb7185 60%, #f472b6 100%);
-  box-shadow: 0 14px 32px rgba(244, 63, 94, 0.12);
+  background: linear-gradient(
+      135deg,
+      #fda4af 0%,
+      #fb7185 55%,
+      #f43f5e 100%
+  );
+  box-shadow: 0 14px 32px rgba(244, 63, 94, 0.26);
 }
+
 .ui-mini-btn-slate {
-  background: linear-gradient(135deg, #64748b 0%, #94a3b8 60%, #cbd5e1 100%);
-  color: #0f172a;
-  border-color: rgba(203, 213, 225, 0.9);
+  background: linear-gradient(
+      135deg,
+      #e2e8f0 0%,
+      #cbd5e1 55%,
+      #94a3b8 100%
+  );
+  color: #0b1220;
+  border-color: rgba(148, 163, 184, 0.9);
+  box-shadow: 0 10px 24px rgba(100, 116, 139, 0.18);
 }
+
 
 /* FAB */
 .ui-fab {
@@ -1793,21 +1844,21 @@ applyBranchFilter();
   display: grid;
   place-items: center;
   background: rgba(255, 255, 255, 0.92);
-  color: #0f172a;
+  color: #0b1220;
   border: 2px solid rgba(255, 255, 255, 0.65);
 }
 .ui-fab:hover {
   transform: translateY(-1px);
 }
 .ui-fab-danger {
-  color: #ef4444;
+  color: #ff5858;
 }
 
 /* Modal */
 .ui-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(2, 6, 23, 0.5);
+  background: rgba(11, 18, 32, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1819,7 +1870,7 @@ applyBranchFilter();
   max-width: 860px;
   background: #fff;
   border-radius: 20px;
-  box-shadow: 0 30px 80px rgba(2, 6, 23, 0.3);
+  box-shadow: 0 30px 80px rgba(11, 18, 32, 0.3);
   overflow: hidden;
   border: 2px solid rgba(255, 255, 255, 0.14);
 }
@@ -1832,10 +1883,10 @@ applyBranchFilter();
   color: #fff;
 }
 .ui-head-indigo {
-  background: linear-gradient(135deg, #4f46e5, #6366f1, #60a5fa);
+  background: linear-gradient(135deg, #4f46e5, #667eea, #4facfe);
 }
 .ui-head-emerald {
-  background: linear-gradient(135deg, #10b981, #34d399, #60a5fa);
+  background: linear-gradient(135deg, #10b981, #43e97b, #38f9d7);
 }
 .ui-head-slate {
   background: linear-gradient(135deg, #334155, #64748b, #94a3b8);
@@ -1849,7 +1900,7 @@ applyBranchFilter();
   border: 2px solid rgba(255, 255, 255, 0.25);
 }
 .ui-modal-foot {
-  border-top: 2px solid rgba(226, 232, 240, 0.95);
+  border-top: 2px solid rgba(20, 30, 48, 0.12);
   padding: 12px 16px;
   display: flex;
   justify-content: flex-end;
@@ -1873,17 +1924,17 @@ applyBranchFilter();
 
 /* Upload */
 .ui-upload {
-  border: 2px dashed rgba(203, 213, 225, 0.95);
+  border: 2px dashed rgba(20, 30, 48, 0.12);
   border-radius: 18px;
   padding: 14px;
   text-align: center;
   cursor: pointer;
   transition: all 0.16s ease;
-  background: rgba(99, 102, 241, 0.05);
+  background: rgba(102, 126, 234, 0.05);
 }
 .ui-upload:hover {
-  border-color: rgba(99, 102, 241, 0.45);
-  box-shadow: 0 16px 44px rgba(2, 6, 23, 0.07);
+  border-color: rgba(102, 126, 234, 0.45);
+  box-shadow: 0 16px 44px rgba(11, 18, 32, 0.07);
 }
 
 /* Detail info */
@@ -1892,8 +1943,8 @@ applyBranchFilter();
   gap: 0.75rem;
   padding: 14px;
   border-radius: 18px;
-  border: 2px solid rgba(226, 232, 240, 0.95);
-  background: #fff;
+  border: 2px solid rgba(20, 30, 48, 0.12);
+  background: rgba(255, 255, 255, 0.92);
 }
 .ui-info-ico {
   width: 42px;
@@ -1908,13 +1959,13 @@ applyBranchFilter();
 .ui-info-label {
   font-size: 12px;
   font-weight: 950;
-  color: #64748b;
+  color: rgba(11, 18, 32, 0.62);
 }
 .ui-info-value {
   margin-top: 2px;
   font-size: 14px;
   font-weight: 950;
-  color: #0f172a;
+  color: #0b1220;
 }
 .ui-link {
   display: inline-flex;
@@ -1959,13 +2010,21 @@ applyBranchFilter();
   gap: 0.55rem;
   padding: 0.55rem 0.75rem;
   border-radius: 16px;
-  border: 2px solid rgba(226, 232, 240, 0.95);
-  background: #fff;
+  border: 2px solid rgba(20, 30, 48, 0.12);
+  background: rgba(255, 255, 255, 0.92);
   font-size: 13px;
 }
 .ui-check input {
   width: 18px;
   height: 18px;
+}
+.text-gradient-blue {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900 !important;
+  text-shadow: 0 1px 1px rgba(0,0,0,.08);
 }
 
 </style>
