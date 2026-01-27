@@ -424,6 +424,96 @@
                 </div>
               </div>
               <div class="section-title">
+                <i class="fa-solid fa-user-check"></i>
+                Nhân viên chốt
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 px-3 pb-2">
+                <div class="field !m-0">
+                  <label class="field-label">
+                    <span class="label-ico tone-sky"><i class="fa-solid fa-user-check"></i></span>
+                    <span>Hình thức chốt</span>
+                  </label>
+                  <select v-model="nguoiChotMode">
+                    <option value="SELF">Chính mình chốt</option>
+                    <option value="OTHER">Người khác chốt</option>
+                  </select>
+                  <div class="muted tiny">Chọn người chốt hợp đồng.</div>
+                </div>
+
+                <div class="field !m-0">
+                  <label class="field-label">
+                    <span class="label-ico tone-indigo"><i class="fa-solid fa-user"></i></span>
+                    <span>Nhân viên chốt</span>
+                  </label>
+                  <input
+                    :value="nguoiChotDisplayName"
+                    type="text"
+                    readonly
+                    placeholder="Chưa chọn nhân viên"
+                  >
+                  <div class="muted tiny">
+                    {{ nguoiChotMode === 'SELF' ? 'Tự động lấy từ tài khoản hiện tại.' : 'Chọn từ danh sách tìm kiếm.' }}
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="nguoiChotMode === 'OTHER'" class="employee-search customer-search px-3 pb-2">
+                <div class="field !m-0">
+                  <label class="field-label">
+                    <span class="label-ico tone-lilac"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <span>Tìm nhân viên</span>
+                  </label>
+                  <input v-model="employeeSearch" type="text" placeholder="Nhập tên, email hoặc SĐT...">
+
+                  <div class="search-results" v-if="employeeSearchResults.length">
+                    <div v-for="employee in employeeSearchResults" :key="employee.id" class="customer-result" @click="selectEmployee(employee)">
+                      <img
+                        v-if="employee.avatar"
+                        :src="getEmployeeAvatarUrl(employee.avatar)"
+                        alt="avatar"
+                        class="customer-avatar sm"
+                      />
+                      <div v-else class="customer-avatar sm">{{ initials(employee.tenNhanVien) }}</div>
+                      <div class="cr-main">
+                        <div class="customer-name">{{ employee.tenNhanVien }}</div>
+                        <div class="customer-phone"><i class="fa-solid fa-envelope me-1"></i>{{ employee.email || '-' }}</div>
+                        <div class="customer-phone"><i class="fa-solid fa-phone me-1"></i>{{ employee.phone || '-' }}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-else-if="employeeSearchLoading" class="search-results empty">
+                    <div class="customer-result muted">
+                      <div class="cr-main">
+                        <div class="customer-name">Đang tìm nhân viên...</div>
+                        <div class="customer-phone">Vui lòng chờ</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-else-if="employeeSearchError && employeeSearch.trim()" class="search-results empty">
+                    <div class="customer-result muted">
+                      <div class="cr-main">
+                        <div class="customer-name">{{ employeeSearchError }}</div>
+                        <div class="customer-phone">Thử nhập tên khác.</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-if="selectedEmployee" class="selected-customer">
+                    <div class="customer-avatar">{{ initials(selectedEmployee.tenNhanVien) }}</div>
+                    <div class="min-w-0">
+                      <div class="customer-name">{{ selectedEmployee.tenNhanVien }}</div>
+                      <div class="customer-phone"><i class="fa-solid fa-envelope me-1"></i>{{ selectedEmployee.email || '-' }}</div>
+                      <div class="customer-phone"><i class="fa-solid fa-phone me-1"></i>{{ selectedEmployee.phone || '-' }}</div>
+                    </div>
+                    <button class="clear-btn" type="button" @click="clearSelectedEmployee">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="section-title">
                 <i class="fa-solid fa-briefcase"></i>
                 Dịch vụ & giá trị
               </div>
@@ -1328,6 +1418,15 @@ const customerSearchError = ref('')
 const customerSearchTimer = ref(null)
 const lastCustomerKeyword = ref('')
 const suppressCustomerSearch = ref(false)
+const nguoiChotMode = ref('SELF')
+const employeeSearch = ref('')
+const selectedEmployee = ref(null)
+const employeeSearchResults = ref([])
+const employeeSearchLoading = ref(false)
+const employeeSearchError = ref('')
+const employeeSearchTimer = ref(null)
+const lastEmployeeKeyword = ref('')
+const suppressEmployeeSearch = ref(false)
 const CONTRACT_DRAFT_KEY = 'contractDraftFromAppointment'
 
 // New contract form
@@ -1338,6 +1437,7 @@ const newContract = ref({
   tenDichVu: '',
   serviceId: null,
   branchId: null,
+  nguoiChotId: null,
   giaTriTaiSan: null,
   giaDichVuGoc: 0,
   phiGiam: 0,
@@ -1424,6 +1524,15 @@ const totalDoanhSo = computed(() => {
 
 const serviceOptions = computed(() => {
   return services.value
+})
+
+const currentUserId = computed(() => info.value?.id ?? null)
+
+const nguoiChotDisplayName = computed(() => {
+  if (nguoiChotMode.value === 'SELF') {
+    return info.value?.fullName || 'Chưa có tên'
+  }
+  return selectedEmployee.value?.tenNhanVien || ''
 })
 
 const branchFilterOptions = computed(() => ([
@@ -1544,6 +1653,19 @@ watch(pageSize, () => {
   fetchContracts()
 })
 
+watch([nguoiChotMode, currentUserId], ([mode, userId]) => {
+  if (mode === 'SELF') {
+    selectedEmployee.value = null
+    employeeSearch.value = ''
+    employeeSearchResults.value = []
+    employeeSearchError.value = ''
+    employeeSearchLoading.value = false
+    newContract.value.nguoiChotId = userId ?? null
+  } else {
+    newContract.value.nguoiChotId = selectedEmployee.value?.id ?? null
+  }
+}, { immediate: true })
+
 watch(customerSearch, (val) => {
   if (suppressCustomerSearch.value) return
 
@@ -1573,6 +1695,37 @@ watch(customerSearch, (val) => {
 
   customerSearchTimer.value = setTimeout(() => {
     fetchCustomerSearch(k)
+  }, 250)
+})
+
+watch(employeeSearch, (val) => {
+  if (suppressEmployeeSearch.value || nguoiChotMode.value !== 'OTHER') return
+
+  if (selectedEmployee.value && (val || '').trim() === (selectedEmployee.value.tenNhanVien || '').trim()) {
+    employeeSearchResults.value = []
+    employeeSearchLoading.value = false
+    employeeSearchError.value = ''
+    return
+  }
+
+  if (selectedEmployee.value && (val || '').trim() !== (selectedEmployee.value?.tenNhanVien || '').trim()) {
+    selectedEmployee.value = null
+    newContract.value.nguoiChotId = null
+  }
+
+  clearEmployeeSearchTimer()
+
+  const k = (val || '').trim()
+  if (!k) {
+    lastEmployeeKeyword.value = ''
+    employeeSearchResults.value = []
+    employeeSearchError.value = ''
+    employeeSearchLoading.value = false
+    return
+  }
+
+  employeeSearchTimer.value = setTimeout(() => {
+    fetchEmployeeOptions(k)
   }, 250)
 })
 
@@ -1744,6 +1897,15 @@ const initials = (name) => {
   if (parts.length === 0) return 'NA'
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
+const EMPLOYEE_AVATAR_BASE = 'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/'
+
+const getEmployeeAvatarUrl = (avatar) => {
+  const raw = String(avatar || '').trim()
+  if (!raw) return ''
+  if (/^https?:\/\//.test(raw)) return raw
+  return `${EMPLOYEE_AVATAR_BASE}${raw}`
 }
 
 const getStatusText = (status) => {
@@ -2130,6 +2292,12 @@ const closeModal = (modal) => {
 const resetContractForm = () => {
   const firstService = serviceOptions.value[0] || null
   draftBranchId.value = null
+  nguoiChotMode.value = 'SELF'
+  selectedEmployee.value = null
+  employeeSearch.value = ''
+  employeeSearchResults.value = []
+  employeeSearchError.value = ''
+  employeeSearchLoading.value = false
   newContract.value = {
     maHopDong: genContractCode(),
     maKhachHang: '',
@@ -2137,6 +2305,7 @@ const resetContractForm = () => {
     tenDichVu: firstService?.name || '',
     serviceId: firstService?.id || firstService?.name || null,
     branchId: getDefaultBranchId(),
+    nguoiChotId: currentUserId.value ?? null,
     giaTriTaiSan: null,
     giaDichVuGoc: 0,
     phiGiam: 0,
@@ -2265,6 +2434,15 @@ const clearSelectedCustomer = () => {
   newContract.value.tenKhachHang = ''
 }
 
+const clearSelectedEmployee = () => {
+  selectedEmployee.value = null
+  employeeSearch.value = ''
+  employeeSearchResults.value = []
+  employeeSearchError.value = ''
+  employeeSearchLoading.value = false
+  newContract.value.nguoiChotId = null
+}
+
 const fetchCustomerSearch = async (keyword) => {
   const k = (keyword || '').trim()
   if (!k) {
@@ -2297,9 +2475,48 @@ const fetchCustomerSearch = async (keyword) => {
   }
 }
 
+const fetchEmployeeOptions = async (keyword) => {
+  const k = (keyword || '').trim()
+  if (!k) {
+    employeeSearchResults.value = []
+    employeeSearchError.value = ''
+    return
+  }
+
+  if (k === lastEmployeeKeyword.value) return
+  lastEmployeeKeyword.value = k
+
+  employeeSearchLoading.value = true
+  employeeSearchError.value = ''
+
+  try {
+    const res = await api.get('/hop-dong/admin/employee-options', {
+      params: { search: k }
+    })
+    const data = res?.data
+    employeeSearchResults.value = (Array.isArray(data) ? data : []).slice(0, 8).map((item) => ({
+      id: item.id,
+      tenNhanVien: item.tenNhanVien,
+      avatar: item.avatar,
+      email: item.email,
+      phone: item.phone
+    }))
+  } catch (e) {
+    employeeSearchResults.value = []
+    employeeSearchError.value = 'Không tìm thấy hoặc lỗi tải dữ liệu.'
+  } finally {
+    employeeSearchLoading.value = false
+  }
+}
+
 const clearCustomerSearchTimer = () => {
   if (customerSearchTimer.value) clearTimeout(customerSearchTimer.value)
   customerSearchTimer.value = null
+}
+
+const clearEmployeeSearchTimer = () => {
+  if (employeeSearchTimer.value) clearTimeout(employeeSearchTimer.value)
+  employeeSearchTimer.value = null
 }
 
 const selectCustomer = (customer) => {
@@ -2319,6 +2536,22 @@ const selectCustomer = (customer) => {
 
   setTimeout(() => {
     suppressCustomerSearch.value = false
+  }, 0)
+}
+
+const selectEmployee = (employee) => {
+  suppressEmployeeSearch.value = true
+  clearEmployeeSearchTimer()
+  employeeSearchLoading.value = false
+  employeeSearchError.value = ''
+  employeeSearchResults.value = []
+
+  selectedEmployee.value = employee
+  employeeSearch.value = employee.tenNhanVien
+  newContract.value.nguoiChotId = employee.id
+
+  setTimeout(() => {
+    suppressEmployeeSearch.value = false
   }, 0)
 }
 
@@ -2349,6 +2582,11 @@ const saveContract = async () => {
     return
   }
 
+  if (nguoiChotMode.value === 'OTHER' && !selectedEmployee.value) {
+    showError('Thiếu dữ liệu', 'Bạn cần chọn nhân viên chốt hợp đồng.')
+    return
+  }
+
   const payload = {
     maKhachHang: newContract.value.maKhachHang,
     giaTriKyBan: newContract.value.giaTriTaiSan,
@@ -2358,6 +2596,7 @@ const saveContract = async () => {
     hinhThucThanhToan: newContract.value.firstMethod,
     serviceId: newContract.value.serviceId,
     branchId: newContract.value.branchId ?? null,
+    nguoiChotId: newContract.value.nguoiChotId ?? null,
     soTienThanhToan: firstPaymentAmount.value,
     initPlan: newContract.value.initPlan
   }
@@ -2372,6 +2611,7 @@ const saveContract = async () => {
       maKhachHang: created.maKhachHang ?? newContract.value.maKhachHang,
       tenKhachHang: created.tenKhachHang || newContract.value.tenKhachHang,
       nhanVienTao: created.nhanVienTao || currentUserName.value,
+      tenNhanVienChot: created.tenNhanVienChot || nguoiChotDisplayName.value || '-',
       tenDichVu: created.tenDichVu || newContract.value.tenDichVu,
       serviceId: created.serviceId ?? newContract.value.serviceId,
       giaTriTaiSan: created.giaTriKyBan ?? created.giaTriTaiSan ?? newContract.value.giaTriTaiSan,
