@@ -1,9 +1,9 @@
 diff --git a/src/components/dich-vu/Phi-dich-vu.vue b/src/components/dich-vu/Phi-dich-vu.vue
-index e2c921ddc6489966bc09f44600c5b5ad17c4993b..7b333f0076f68ccfe8006a85a6fe4674175efa43 100644
+index 1115cf7c0dc21d037c6f0110a3b531348879f5ef..ab17d4e7cfcc6e548268665845e43ef90c6c3dfc 100644
 --- a/src/components/dich-vu/Phi-dich-vu.vue
 +++ b/src/components/dich-vu/Phi-dich-vu.vue
-@@ -123,112 +123,118 @@
- 
+@@ -123,84 +123,86 @@
+
              <div class="input select filter-item filter-date" :class="{ active: denNgay }">
                <label>Đến ngày</label>
                <input v-model="denNgay" type="date">
@@ -16,10 +16,10 @@ index e2c921ddc6489966bc09f44600c5b5ad17c4993b..7b333f0076f68ccfe8006a85a6fe4674
              </div>
            </div>
          </div>
- 
+
          <div class="panel-b">
- 
- 
+
+
            <div class="table-wrap">
              <div class="table-scroll">
                <table>
@@ -28,22 +28,19 @@ index e2c921ddc6489966bc09f44600c5b5ad17c4993b..7b333f0076f68ccfe8006a85a6fe4674
                    <th style="width:150px">Mã HĐ</th>
                    <th>Khách hàng</th>
                    <th style="width:220px">Dịch vụ</th>
--                  <th style="width:120px">Giá tài sản</th>
-+                  <th style="width:120px">G. trị tài sản</th>
+-                  <th style="width:120px">G. trị tài sản</th>
++                  <th style="width:200px">Người chốt, tạo</th>
                    <th style="width:160px">Giá sau giảm</th>
                    <th style="width:160px">Doanh thu</th>
                    <th style="width:180px">Doanh số</th>
                    <th style="width:120px">Trạng thái</th>
--                  <th style="width:130px">Nhân viên tạo</th>
--                  <th style="width:100px">Ngày tạo</th>
-+                  <th style="width:160px">Hiện trạng</th>
+                   <th style="width:160px">Hiện trạng</th>
                    <th style="width:80px">Thao tác</th>
                  </tr>
                  </thead>
                  <tbody>
                  <tr v-if="contracts.length === 0">
--                  <td colspan="11">
-+                  <td colspan="10">
+                   <td colspan="10">
                      <div class="text-center py-10">
                        <div class="mx-auto w-12 h-12 rounded-2xl grid place-items-center text-white shadow-lg" style="background: var(--primary-gradient);">
                          <i class="fa-solid fa-face-smile"></i>
@@ -55,18 +52,21 @@ index e2c921ddc6489966bc09f44600c5b5ad17c4993b..7b333f0076f68ccfe8006a85a6fe4674
                  <tr v-for="contract in contracts" :key="contract.id">
                    <td>
                      <div class="font-extrabold mono">{{ contract.maHopDong }}</div>
-+                    <div class="muted tiny mono mt-1">{{ formatCreatedAtNoSeconds(contract.ngayTao) }}</div>
+                     <div class="muted tiny mono">{{ formatCreatedAtNoSeconds(contract.ngayTao) }}</div>
                    </td>
                    <td>
-                     <div class="font-bold">{{ contract.tenKhachHang }}</div>
+-                    <div class="font-bold">{{ contract.tenKhachHang }}</div>
++                    <div class="font-bold whitespace-nowrap">{{ contract.tenKhachHang }}</div>
++                    <div class="price p4 text-sm">BĐS: {{ formatMoney(getGiaTaiSanKy(contract)) }}</div>
                    </td>
                    <td>
                      <div class="font-extrabold">{{ contract.tenDichVu }}</div>
                      <div class="muted tiny">Giá gốc: <span class="mono">{{ formatMoney(contract.giaDichVuGoc) }}</span></div>
                    </td>
                    <td>
--                    <div class="price p2">{{ formatMoney(getGiaTaiSanKy(contract)) }}</div>
-+                    <div class="price p2">{{ formatGiaTriTaiSan(getGiaTaiSanKy(contract)) }}</div>
+-                    <div class="price p2">{{ formatGiaTriTaiSan(getGiaTaiSanKy(contract)) }}</div>
++                    <div class="font-bold">{{ contract.tenNhanVienChot || '-' }}</div>
++                    <div class="muted tiny">Ng.tạo: {{ shortenName(contract.nguoiTaoFullName, 18) || '-' }}</div>
                    </td>
                    <td>
                      <div class="price p4">{{ formatMoney(contract.giaSauGiam) }}</div>
@@ -92,45 +92,7 @@ index e2c921ddc6489966bc09f44600c5b5ad17c4993b..7b333f0076f68ccfe8006a85a6fe4674
                        </span>
                    </td>
                    <td>
--                    <div class="font-semibold">{{ shortenName(contract.nhanVienTao) }}</div>
-+                    <span :class="['status', getHienTrangInfo(contract).class]">
-+                      <span class="status-label">
-+                        <i :class="getHienTrangInfo(contract).icon"></i>{{ getHienTrangInfo(contract).label }}
-+                      </span>
-+                      <span v-if="getHienTrangInfo(contract).amount !== null" class="status-amount mono">
-+                        {{ formatCompactCurrency(getHienTrangInfo(contract).amount) }}
-+                      </span>
-+                    </span>
-                   </td>
--                  <td class="mono">{{ formatCreatedAt(contract.ngayTao) }}</td>
-                   <td>
-                     <div class="actions" @click.stop>
-                       <div class="icon-btn icon-menu" title="Tác vụ" @click.stop="toggleActionMenu(contract.id, $event)">
-                         <i class="fa-solid fa-ellipsis"></i>
-                       </div>
-                     </div>
-                   </td>
-                 </tr>
-                 </tbody>
-               </table>
-             </div>
-           </div>
-         </div>
-         <teleport to="body">
-           <div
-             v-if="openActionMenu && activeActionContract"
-             class="action-menu action-menu--floating"
-             :style="actionMenuPositionStyle"
-             @click.stop
-           >
-             <div class="action-item" @click="openDetail(activeActionContract); closeActionMenu()">
-               <span class="icon-btn icon-view" aria-hidden="true">
-                 <i class="fa-solid fa-eye"></i>
-               </span>
-               <span class="action-label">Chi tiết</span>
-@@ -1007,58 +1013,75 @@
-                     <div class="k"><span class="dot"></span>Phí giảm</div>
-                     <div class="v price p4 font-extrabold">{{ formatMoney(detailContract?.phiGiam || 0) }}</div>
+@@ -1015,55 +1017,61 @@
                    </div>
                    <div class="kpi">
                      <div class="k"><span class="dot"></span>Giá sau giảm</div>
@@ -154,57 +116,49 @@ index e2c921ddc6489966bc09f44600c5b5ad17c4993b..7b333f0076f68ccfe8006a85a6fe4674
                      <div class="k"><span class="dot"></span>Chi nhánh</div>
                      <div class="v font-extrabold" style="font-size: 14px!important;">{{ detailContract?.tenChiNhanh || '-' }}</div>
                    </div>
-+                  <div class="kpi">
-+                    <div class="k"><span class="dot"></span>Khách hàng</div>
-+                    <div class="v font-extrabold fs-6" style="font-size: 14px!important;">{{ detailContract?.tenKhachHang || '-' }}</div>
-+                  </div>
                    <div class="kpi">
-                     <div class="k"><span class="dot"></span>Người tạo</div>
-                     <div class="v font-extrabold fs-6"  style="font-size: 14px!important;">{{ detailContract?.nguoiTaoFullName || '-' }}</div>
+                     <div class="k"><span class="dot"></span>Khách hàng</div>
+-                    <div class="v font-extrabold fs-6" style="font-size: 14px!important;">{{ detailContract?.tenKhachHang || '-' }}</div>
++                    <div class="v font-extrabold fs-6 whitespace-nowrap" style="font-size: 14px!important;">
++                      {{ detailContract?.tenKhachHang || '-' }}
++                    </div>
++                    <div class="price p4 text-sm">BĐS: {{ formatMoney(detailContract?.giaTaiSanKy || 0) }}</div>
+                   </div>
+                   <div class="kpi">
+-                    <div class="k"><span class="dot"></span>Người tạo</div>
+-                    <div class="v font-extrabold fs-6"  style="font-size: 14px!important;">{{ detailContract?.nguoiTaoFullName || '-' }}</div>
++                    <div class="k"><span class="dot"></span>Người chốt</div>
++                    <div class="v font-extrabold fs-6" style="font-size: 14px!important;">
++                      {{ detailContract?.tenNhanVienChot || '-' }}
++                    </div>
++                    <div class="muted tiny">Ng.tạo: {{ shortenName(detailContract?.nguoiTaoFullName, 18) || '-' }}</div>
                    </div>
                    <div class="kpi">
                      <div class="k"><span class="dot"></span>Dịch vụ</div>
                      <div class="v font-extrabold fs-6"  style="font-size: 14px!important;">{{ detailContract?.tenDichVu || '-' }}</div>
                    </div>
-+                  <div class="kpi">
-+                    <div class="k"><span class="dot"></span>Hiện trạng</div>
-+                    <div class="v">
-+                      <span :class="['status', getHienTrangInfo(detailContract, true).class]">
-+                      <span class="status-label">
-+                        <i :class="getHienTrangInfo(detailContract, true).icon"></i>{{ getHienTrangInfo(detailContract, true).label }}
-+                      </span>
-+                      <span v-if="getHienTrangInfo(detailContract, true).amount !== null" class="status-amount mono">
-+                          {{ formatCompactCurrency(getHienTrangInfo(detailContract, true).amount) }}
-+                      </span>
-+                    </span>
-+                    </div>
-+                  </div>
+                   <div class="kpi">
+                     <div class="k"><span class="dot"></span>Hiện trạng</div>
+                     <div class="v">
+                       <span :class="['status', getHienTrangInfo(detailContract, true).class]">
+                       <span class="status-label">
+                         <i :class="getHienTrangInfo(detailContract, true).icon"></i>{{ getHienTrangInfo(detailContract, true).label }}
+                       </span>
+                       <span v-if="getHienTrangInfo(detailContract, true).amount !== null" class="status-amount mono">
+                           {{ formatCompactCurrency(getHienTrangInfo(detailContract, true).amount) }}
+                       </span>
+                     </span>
+                     </div>
+                   </div>
                  </div>
                </div>
              </div>
- 
+
              <div class="card xl:col-span-2">
                <div class="card-h"><i class="fa-solid fa-layer-group"></i> Lịch sử phát sinh</div>
- 
-               <div class="p-3">
-                 <!-- Payments -->
-                 <div class="font-extrabold mb-2 flex items-center gap-2">
-                   <span class="w-2.5 h-2.5 rounded-full" style="background: var(--success-gradient);"></span>
-                   Đóng phí
-                 </div>
-                 <div class="table-wrap mb-4">
-                   <div class="table-scroll">
-                     <table style="min-width: 860px">
-                       <thead>
-                       <tr>
-                         <th style="width:190px">Thời gian</th>
-                         <th style="width:160px">Số tiền</th>
-                         <th style="width:160px">Hình thức</th>
-                         <th>Ghi chú</th>
-                         <th style="width:160px">Người ghi nhận</th>
-                       </tr>
-                       </thead>
-@@ -1192,51 +1215,50 @@
+
+@@ -1214,50 +1222,51 @@
+         <div class="modal-f">
            <button class="btn ghost" @click="closeModal('modalDelete')">
              <i class="fa-solid fa-ban"></i> Hủy
            </button>
@@ -216,7 +170,7 @@ index e2c921ddc6489966bc09f44600c5b5ad17c4993b..7b333f0076f68ccfe8006a85a6fe4674
      </div>
    </div>
  </template>
- 
+
  <script setup>
  import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
  import api from '/src/api/api.js'
@@ -229,8 +183,8 @@ index e2c921ddc6489966bc09f44600c5b5ad17c4993b..7b333f0076f68ccfe8006a85a6fe4674
    updateAlertError,
    updateAlertSuccess
  } from '/src/assets/js/alertService.js'
++import { shortenName } from '/src/assets/js/global.js'
  import ContractStatsDashboard from "../thiet-kegiandien/ContractStatsDashboard.vue";
--import {shortenName} from "../../assets/js/global.js";
  const authStore = useAuthStore()
  const info = computed(() => authStore.userInfo || {})
  const canPayContract = computed(() => authStore.hasPermission('HOPDONG_THU'))
@@ -251,303 +205,7 @@ index e2c921ddc6489966bc09f44600c5b5ad17c4993b..7b333f0076f68ccfe8006a85a6fe4674
  const ENUM_STATUS = ['DANG_HIEU_LUC', 'HOAN_TAT', 'HUY']
  const ENUM_PAY = ['TIEN_MAT', 'CHUYEN_KHOAN', 'QR', 'KHAC']
  const ENUM_ADJ = ['GIAM_GIA', 'PHU_THU', 'PHAT', 'CHUYEN_DOI_DV']
- 
+
  // State
  const activeTab = ref(1)
  const contracts = ref([])
- const totalElements = ref(0)
-@@ -1579,50 +1601,78 @@ watch(() => payment.value.amount, (val) => {
- })
- 
- watch(() => refund.value.amount, (val) => {
-   if (!currentContract.value) return
- 
-   const maxAmount = getMaxRefundAmount(currentContract.value)
-   let num = Math.floor(parseNumberInput(val))
- 
-   if (num > maxAmount) num = maxAmount
-   if (num < 0) num = 0
- 
-   if (num !== refund.value.amount) {
-     refund.value.amount = num
-   }
- })
- 
- // Methods
- // Helper functions
- const formatMoney = (n) => {
-   const x = Math.round(Number(n || 0))
-   const sign = x < 0 ? '-' : ''
-   const abs = Math.abs(x)
-   return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' ₫'
- }
- 
-+const formatCompactCurrency = (value) => {
-+  const raw = Number(value || 0)
-+  const abs = Math.abs(raw)
-+  const sign = raw < 0 ? '-' : ''
-+  if (abs >= 1_000_000_000) {
-+    const formatted = (abs / 1_000_000_000).toLocaleString('vi-VN', {
-+      minimumFractionDigits: 1,
-+      maximumFractionDigits: 1
-+    })
-+    return `${sign}${formatted} Tỷ`
-+  }
-+  if (abs >= 1_000_000) {
-+    const formatted = (abs / 1_000_000).toLocaleString('vi-VN', {
-+      minimumFractionDigits: 1,
-+      maximumFractionDigits: 1
-+    })
-+    return `${sign}${formatted} Triệu`
-+  }
-+  if (abs >= 1_000) {
-+    const formatted = (abs / 1_000).toLocaleString('vi-VN', {
-+      minimumFractionDigits: 1,
-+      maximumFractionDigits: 1
-+    })
-+    return `${sign}${formatted} K`
-+  }
-+  return `${sign}${abs.toLocaleString('vi-VN')} ₫`
-+}
-+
- const formatTy = (n) => {
-   const raw = Number(n || 0)
-   const abs = Math.abs(raw)
-   if (abs >= 1_000_000_000) {
-     const value = raw / 1_000_000_000
-     const formatted = value.toLocaleString('vi-VN', {
-       minimumFractionDigits: abs > 0 && abs < 1_000_000_000 ? 1 : 0,
-       maximumFractionDigits: 1
-     })
-     return `${formatted} tỷ`
-   }
-   const value = raw / 1_000_000
-   const formatted = value.toLocaleString('vi-VN', {
-     minimumFractionDigits: abs > 0 && abs < 1_000_000 ? 1 : 0,
-     maximumFractionDigits: 1
-   })
-   return `${formatted} triệu`
- }
- 
- const formatNumberInput = (n) => {
-   if (n === null || n === undefined || n === '') return ''
-   const x = Math.round(Number(n || 0))
-   const sign = x < 0 ? '-' : ''
-   const abs = Math.abs(x)
-   return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-@@ -1636,95 +1686,146 @@ const parseNumberInput = (value, allowNegative = false) => {
-   let parsed = Number(cleaned)
-   if (Number.isNaN(parsed)) parsed = 0
-   if (!allowNegative) return Math.max(0, parsed)
-   return parsed
- }
- 
- const initials = (name) => {
-   const parts = String(name || '')
-       .trim()
-       .split(/\s+/)
-       .filter(Boolean)
-   if (parts.length === 0) return 'NA'
-   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
- }
- 
- const getStatusText = (status) => {
-   switch(status) {
-     case 'DANG_HIEU_LUC': return 'Đang hiệu lực'
-     case 'HOAN_TAT': return 'Hoàn tất'
-     case 'HUY': return 'Đã hủy'
-     default: return status
-   }
- }
- 
-+const getHienTrangInfo = (contract, useRow = false) => {
-+  const doanhThu = useRow ? getDoanhThuRow(contract) : getDoanhThu(contract)
-+  const doanhSo = useRow ? getDoanhSoRow(contract) : getDoanhSo(contract)
-+  const diff = Number(doanhSo) - Number(doanhThu)
-+  if (diff > 0) {
-+    return { label: 'Công nợ', icon: 'fa-solid fa-triangle-exclamation', class: 'st-debt', amount: diff }
-+  }
-+  if (diff < 0) {
-+    return { label: 'Thu lố', icon: 'fa-solid fa-arrow-rotate-left', class: 'st-over', amount: Math.abs(diff) }
-+  }
-+  return { label: 'Đã thu đủ', icon: 'fa-solid fa-circle-check', class: 'st-balance', amount: null }
-+}
-+
- 
- 
- const formatCreatedAt = (value) => {
-   if (!value) return '-'
-   if (typeof value === 'string') {
-     const parts = value.split(',')
-     if (parts.length === 2) {
-       const datePart = parts[0].trim()
-       const timePart = parts[1].trim()
-       if (timePart && datePart) return `${timePart} ${datePart}`
-     }
-     if (/\d{1,2}:\d{2}:\d{2}/.test(value) && /\d{1,2}\/\d{1,2}\/\d{4}/.test(value)) {
-       return value
-     }
-   }
-   const parsed = value instanceof Date ? value : new Date(value)
-   if (!Number.isNaN(parsed.getTime())) {
-     return `${parsed.toLocaleTimeString('vi-VN')} ${parsed.toLocaleDateString('vi-VN')}`
-   }
-   return String(value)
- }
- 
-+const formatCreatedAtNoSeconds = (value) => {
-+  if (!value) return '-'
-+  const parsed = value instanceof Date ? value : new Date(value)
-+  if (!Number.isNaN(parsed.getTime())) {
-+    const timePart = parsed.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
-+    const datePart = parsed.toLocaleDateString('vi-VN')
-+    return `${timePart} ${datePart}`
-+  }
-+  if (typeof value === 'string') {
-+    const parts = value.split(',')
-+    if (parts.length === 2) {
-+      const datePart = parts[0].trim()
-+      const timePart = parts[1].trim()
-+      if (timePart && datePart) {
-+        const timeOnly = timePart.split(':').slice(0, 2).join(':')
-+        return `${timeOnly} ${datePart}`
-+      }
-+    }
-+  }
-+  return String(value)
-+}
-+
- const formatDateValue = (value) => {
-   if (!value) return '-'
-   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-     return value
-   }
-   return formatCreatedAt(value)
- }
- 
- const formatDateTimeCompact = (value) => {
-   if (!value) return '-'
-   const parsed = value instanceof Date ? value : new Date(value)
-   if (Number.isNaN(parsed.getTime())) {
-     if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-       const [year, month, day] = value.split('-')
-       return `00:00 ${day}/${month}/${year}`
-     }
-     return String(value)
-   }
-   const timePart = parsed.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
-   const datePart = parsed.toLocaleDateString('vi-VN')
-   return `${timePart} ${datePart}`
- }
- 
-+const formatGiaTriTaiSan = (value) => {
-+  const raw = Number(value || 0)
-+  if (raw >= 100_000_000) {
-+    const formatted = (raw / 1_000_000_000).toLocaleString('vi-VN', {
-+      minimumFractionDigits: 2,
-+      maximumFractionDigits: 2
-+    })
-+    return `${formatted} tỷ`
-+  }
-+  const formatted = (raw / 1_000_000).toLocaleString('vi-VN', {
-+    minimumFractionDigits: 1,
-+    maximumFractionDigits: 1
-+  })
-+  return `${formatted} triệu`
-+}
-+
- const getGiaGiam = (contract) => {
-   return Number(contract?.giaGiam ?? contract?.phiGiam ?? 0)
- }
- 
- const getGiaTaiSanKy = (contract) => {
-   return Number(contract?.giaTaiSanKyGoc ?? contract?.giaTriTaiSan ?? contract?.giaTriKyBan ?? 0)
- }
- 
- const getTongHoan = (contract) => {
-   if (contract?.giaHoanTien !== undefined && contract?.giaHoanTien !== null) {
-     return Number(contract.giaHoanTien || 0)
-   }
-   return calcTongHoan(contract)
- }
- 
- const getTongDieuChinh = (contract) => {
-   if (contract?.tongDC !== undefined && contract?.tongDC !== null) {
-     return Number(contract.tongDC || 0)
-   }
-   return 0
- }
- 
- const getDoanhThuRow = (contract) => {
-   return Number(contract?.doanhThu ?? 0)
- }
-@@ -3441,53 +3542,68 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
-   font-size: 12px;
-   color: var(--muted);
-   background: rgba(20,30,48,.03);
-   border-top: 1px solid rgba(20,30,48,.06);
-   display:flex;
-   justify-content:space-between;
-   gap:10px;
-   flex-wrap:wrap;
- }
- 
- /* =========================
-    BADGES
- ========================= */
- .status{
-   display:inline-flex;
-   align-items:center;
-   gap:6px;
-   padding:4px 10px;
-   border-radius:999px;
-   font-size:12px;
-   font-weight:850;
-   line-height:1;
-   white-space:nowrap;
-   border: 1px solid transparent;
- }
-+.status-label{
-+  display: inline-flex;
-+  align-items:center;
-+  gap:6px;
-+  font-weight: 600;
-+}
-+.status-amount{
-+  font-size: 14px;
-+  font-weight: 900;
-+  line-height: 1;
-+  align-self: center;
-+}
- .st-on{ color:#16a34a; background:rgba(34,197,94,.12); border-color: rgba(34,197,94,.26); }
- .st-done{ color:#2563eb; background:rgba(37,99,235,.12); border-color: rgba(37,99,235,.26); }
- .st-cancel{ color:#ef4444; background:rgba(239,68,68,.12); border-color: rgba(239,68,68,.26); }
-+.st-balance{ color:#0ea5e9; background:rgba(14,165,233,.12); border-color: rgba(14,165,233,.26); }
-+.st-debt{ color:#fb923c; background:rgba(251,146,60,.12); border-color: rgba(251,146,60,.26); }
-+.st-over{ color:#a855f7; background:rgba(168,85,247,.12); border-color: rgba(168,85,247,.26); }
- 
- /* =========================
-    ACTION ICONS - chỉnh sửa cho 5 nút nằm trên 1 hàng
- ========================= */
- .actions{
-   position: relative;
-   display:flex;
-   justify-content:center;
-   align-items:center;
-   min-width: 40px;
- }
- .action-menu{
-   display: grid;
-   gap: 6px;
-   padding: 8px;
-   border-radius: 14px;
-   background: rgb(255, 255, 255);
-   border: 1px solid rgba(20,30,48,.12);
-   box-shadow: 0 14px 26px rgba(20,30,48,.12);
-   z-index: 2000;
-   width: 200px;
- }
- .action-menu--floating{
-   position: fixed;
-   transform: translateY(-50%);

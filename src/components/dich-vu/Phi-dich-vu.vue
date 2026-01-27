@@ -143,9 +143,9 @@
                 <thead>
                 <tr>
                   <th style="width:150px">Mã HĐ</th>
-                  <th>Khách hàng</th>
-                  <th style="width:220px">Dịch vụ</th>
-                  <th style="width:120px">G. trị tài sản</th>
+                  <th style="width:200px">Khách hàng</th>
+                  <th style="width:200px">Dịch vụ</th>
+                  <th style="width:200px">Người chốt, tạo</th>
                   <th style="width:160px">Giá sau giảm</th>
                   <th style="width:160px">Doanh thu</th>
                   <th style="width:180px">Doanh số</th>
@@ -171,26 +171,28 @@
                     <div class="muted tiny mono">{{ formatCreatedAtNoSeconds(contract.ngayTao) }}</div>
                   </td>
                   <td>
-                    <div class="font-bold">{{ contract.tenKhachHang }}</div>
+                    <div class="font-bold whitespace p5" style="font-size: 13px !important; font-weight: 850 !important;">{{ shortenName(contract.tenKhachHang,18) }}</div>
+                    <div class="price p2 text-sm" style="font-size: 12px !important; font-weight: 600 !important;">BĐS: {{ formatCompactCurrency(getGiaTaiSanKy(contract)) }}</div>
                   </td>
                   <td>
                     <div class="font-extrabold">{{ contract.tenDichVu }}</div>
-                    <div class="muted tiny">Giá gốc: <span class="mono">{{ formatMoney(contract.giaDichVuGoc) }}</span></div>
+                    <div class="muted tiny">Giá gốc: <span class="mono">{{ formatCompactCurrency(contract.giaDichVuGoc) }}</span></div>
                   </td>
                   <td>
-                    <div class="price p2">{{ formatGiaTriTaiSan(getGiaTaiSanKy(contract)) }}</div>
+                    <div class="font-bold"> {{ shortenName(contract.tenNhanVienChot, 18) || '-' }}</div>
+                    <div class="muted tiny">Ng.tạo: {{ shortenName(contract.nhanVienTao, 10) || '-' }}</div>
                   </td>
                   <td>
                     <div class="price p4">{{ formatMoney(contract.giaSauGiam) }}</div>
-                    <div class="muted tiny">Giảm: <span class="mono">{{ formatMoney(getGiaGiam(contract)) }}</span></div>
+                    <div class="muted tiny">Giảm: <span class="mono">{{ formatCompactCurrency(getGiaGiam(contract)) }}</span></div>
                   </td>
                   <td>
                     <div class="price p3">{{ formatMoney(getDoanhThu(contract)) }}</div>
-                    <div class="muted tiny">Hoàn: <span class="mono">{{ formatMoney(getTongHoan(contract)) }}</span></div>
+                    <div class="muted tiny">Hoàn: <span class="mono">{{ formatCompactCurrency(getTongHoan(contract)) }}</span></div>
                   </td>
                   <td>
                     <div class="price p1">{{ formatMoney(getDoanhSo(contract)) }}</div>
-                    <div class="muted tiny">ĐC: <span class="mono">{{ formatMoney(getTongDieuChinh(contract)) }}</span></div>
+                    <div class="muted tiny">ĐC: <span class="mono">{{ formatCompactCurrency(getTongDieuChinh(contract)) }}</span></div>
                   </td>
                   <td>
                       <span v-if="contract.trangThaiHopDong === 'DANG_HIEU_LUC'" class="status st-on">
@@ -1037,11 +1039,21 @@
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Khách hàng</div>
-                    <div class="v font-extrabold fs-6" style="font-size: 14px!important;">{{ detailContract?.tenKhachHang || '-' }}</div>
+                    <div class="v font-extrabold fs-6 whitespace-nowrap" style="font-size: 14px!important;">
+                      {{ detailContract?.tenKhachHang || '-' }}
+                    </div>
                   </div>
                   <div class="kpi">
-                    <div class="k"><span class="dot"></span>Người tạo</div>
-                    <div class="v font-extrabold fs-6"  style="font-size: 14px!important;">{{ detailContract?.nguoiTaoFullName || '-' }}</div>
+                    <div class="k"><span class="dot"></span>Nhân viên chốt hợp đồng</div>
+                    <div class="v font-extrabold fs-6" style="font-size: 14px!important;">
+                      {{ detailContract?.tenNhanVienChot || '-' }}
+                    </div>
+                  </div>
+                  <div class="kpi">
+                    <div class="k"><span class="dot"></span>Nhân viên tạo hợp đồng</div>
+                    <div class="v font-extrabold fs-6" style="font-size: 14px!important;">
+                      {{ detailContract?.nguoiTaoFullName || '-' }}
+                    </div>
                   </div>
                   <div class="kpi">
                     <div class="k"><span class="dot"></span>Dịch vụ</div>
@@ -1236,6 +1248,7 @@ import {
   updateAlertError,
   updateAlertSuccess
 } from '/src/assets/js/alertService.js'
+import { shortenName } from '/src/assets/js/global.js'
 import ContractStatsDashboard from "../thiet-kegiandien/ContractStatsDashboard.vue";
 const authStore = useAuthStore()
 const info = computed(() => authStore.userInfo || {})
