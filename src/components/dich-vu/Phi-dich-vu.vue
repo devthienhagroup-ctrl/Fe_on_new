@@ -116,14 +116,34 @@
               </select>
             </div>
 
+            <div class="select filter-item filter-creator" :class="{ active: filterNguoiTaoId }">
+              <label>Nhân viên tạo</label>
+              <select v-model="filterNguoiTaoId">
+                <option :value="null">Tất cả</option>
+                <option v-for="staff in nguoiTaoOptions" :key="staff.id" :value="staff.id">
+                  {{ staff.fullname }}
+                </option>
+              </select>
+            </div>
+
+            <div class="select filter-item filter-approver" :class="{ active: filterNguoiChotId }">
+              <label>Nhân viên chốt</label>
+              <select v-model="filterNguoiChotId">
+                <option :value="null">Tất cả</option>
+                <option v-for="staff in nguoiChotOptions" :key="staff.id" :value="staff.id">
+                  {{ staff.fullname }}
+                </option>
+              </select>
+            </div>
+
             <div class="input select filter-item filter-item filter-date" :class="{ active: tuNgay }">
               <label>Từ ngày</label>
-              <input v-model="tuNgay" type="date">
+              <input v-model="tuNgay" type="date" style="padding-left: 10px !important;">
             </div>
 
             <div class="input select filter-item filter-date" :class="{ active: denNgay }">
               <label>Đến ngày</label>
-              <input v-model="denNgay" type="date">
+              <input v-model="denNgay" type="date" style="padding-left: 10px !important;">
             </div>
             <div class="tools-actions">
               <button class="btn primary" @click="openModal('modalContract')">
@@ -1282,12 +1302,16 @@ const segments = ref([])
 const branchOptions = ref([])
 const branchLoading = ref(false)
 const draftBranchId = ref(null)
+const nguoiTaoOptions = ref([])
+const nguoiChotOptions = ref([])
 
 // Filters
 const searchQuery = ref('')
 const filterService = ref(null)
 const filterBranch = ref(null)
 const filterStatus = ref(null)
+const filterNguoiTaoId = ref(null)
+const filterNguoiChotId = ref(null)
 const tuNgay = ref(null)
 const denNgay = ref(null)
 const currentPage = ref(1)
@@ -1492,6 +1516,16 @@ watch(filterStatus, () => {
 })
 
 watch(filterBranch, () => {
+  currentPage.value = 1
+  fetchContracts()
+})
+
+watch(filterNguoiTaoId, () => {
+  currentPage.value = 1
+  fetchContracts()
+})
+
+watch(filterNguoiChotId, () => {
   currentPage.value = 1
   fetchContracts()
 })
@@ -1904,6 +1938,26 @@ const fetchSegments = async () => {
   }
 }
 
+const fetchNguoiTaoOptions = async () => {
+  try {
+    const res = await api.get('/hop-dong/admin/nguoi-tao')
+    nguoiTaoOptions.value = Array.isArray(res.data) ? res.data : []
+  } catch (e) {
+    console.error('❌ Lỗi fetch người tạo', e)
+    nguoiTaoOptions.value = []
+  }
+}
+
+const fetchNguoiChotOptions = async () => {
+  try {
+    const res = await api.get('/hop-dong/admin/nguoi-chot')
+    nguoiChotOptions.value = Array.isArray(res.data) ? res.data : []
+  } catch (e) {
+    console.error('❌ Lỗi fetch người chốt', e)
+    nguoiChotOptions.value = []
+  }
+}
+
 
 
 const queueSearch = () => {
@@ -1919,6 +1973,8 @@ const fetchContracts = async () => {
     serviceId: filterService.value || null,
     branchId: canFullBranch.value ? filterBranch.value : null,
     trangThaiHopDong: filterStatus.value || null,
+    nguoiTaoId: filterNguoiTaoId.value || null,
+    nguoiChotId: filterNguoiChotId.value || null,
     tuNgay: tuNgay.value || null,
     denNgay: denNgay.value || null,
     page: currentPage.value,
@@ -2715,6 +2771,8 @@ const resetFilters = () => {
   filterService.value = null
   filterBranch.value = null
   filterStatus.value = null
+  filterNguoiTaoId.value = null
+  filterNguoiChotId.value = null
   tuNgay.value = null
   denNgay.value = null
   currentPage.value = 1
@@ -2955,7 +3013,12 @@ const init3Samples = () => {
 // Lifecycle
 onMounted(async () => {
   document.addEventListener('click', handleDocumentClick)
-  await Promise.all([fetchServices(), fetchSegments()])
+  await Promise.all([
+    fetchServices(),
+    fetchSegments(),
+    fetchNguoiTaoOptions(),
+    fetchNguoiChotOptions()
+  ])
   resetContractForm()
   await applyContractDraftFromAppointment()
   await fetchContracts()
@@ -3274,7 +3337,7 @@ onUnmounted(() => {
   max-width: 1280px;
 }
 .tools.tools--branch{
-  grid-template-columns: 250px 160px 160px 190px 190px 190px 150px;
+  grid-template-columns: 300px 140px 150px 110px 145px 145px 120px 120px 145px;
 }
 @media (max-width: 1100px){
   .tools{ grid-template-columns: 1fr 220px 190px; }
