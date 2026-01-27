@@ -432,13 +432,27 @@
                 <div class="field !m-0">
                   <label class="field-label">
                     <span class="label-ico tone-sky"><i class="fa-solid fa-user-check"></i></span>
-                    <span>Hình thức chốt</span>
+                    <span>Hợp đồng của</span>
                   </label>
-                  <select v-model="nguoiChotMode">
-                    <option value="SELF">Chính mình chốt</option>
-                    <option value="OTHER">Người khác chốt</option>
-                  </select>
-                  <div class="muted tiny">Chọn người chốt hợp đồng.</div>
+  <div class="flex gap-4 justify-between align-items-center" >
+                  <div class="switcher">
+                    <button
+                      type="button"
+                      class="switch"
+                      :class="{ on: nguoiChotMode === 'OTHER' }"
+                      role="switch"
+                      :aria-checked="nguoiChotMode === 'OTHER'"
+                      @click="nguoiChotMode = nguoiChotMode === 'SELF' ? 'OTHER' : 'SELF'"
+                    >
+                      <span class="switch-thumb"></span>
+                    </button>
+                    <span class="switch-label">{{ nguoiChotMode === 'SELF' ? 'Bản thân' : 'Tạo hộ' }}</span>
+                  </div>
+                  <div v-if="nguoiChotMode === 'OTHER'" class="switcher-search">
+                    <input v-model="employeeSearch" type="text" placeholder="Nhập tên, email hoặc SĐT...">
+                  </div>
+  </div>
+                  <div class="muted tiny">Gạt để chọn người chốt hợp đồng.</div>
                 </div>
 
                 <div class="field !m-0">
@@ -459,56 +473,36 @@
               </div>
 
               <div v-if="nguoiChotMode === 'OTHER'" class="employee-search customer-search px-3 pb-2">
-                <div class="field !m-0">
-                  <label class="field-label">
-                    <span class="label-ico tone-lilac"><i class="fa-solid fa-magnifying-glass"></i></span>
-                    <span>Tìm nhân viên</span>
-                  </label>
-                  <input v-model="employeeSearch" type="text" placeholder="Nhập tên, email hoặc SĐT...">
-
-                  <div class="search-results" v-if="employeeSearchResults.length">
-                    <div v-for="employee in employeeSearchResults" :key="employee.id" class="customer-result" @click="selectEmployee(employee)">
-                      <img
-                        v-if="employee.avatar"
-                        :src="getEmployeeAvatarUrl(employee.avatar)"
-                        alt="avatar"
-                        class="customer-avatar sm"
-                      />
-                      <div v-else class="customer-avatar sm">{{ initials(employee.tenNhanVien) }}</div>
-                      <div class="cr-main">
-                        <div class="customer-name">{{ employee.tenNhanVien }}</div>
-                        <div class="customer-phone"><i class="fa-solid fa-envelope me-1"></i>{{ employee.email || '-' }}</div>
-                        <div class="customer-phone"><i class="fa-solid fa-phone me-1"></i>{{ employee.phone || '-' }}</div>
-                      </div>
+                <div class="search-results" v-if="employeeSearchResults.length">
+                  <div v-for="employee in employeeSearchResults" :key="employee.id" class="customer-result" @click="selectEmployee(employee)">
+                    <img
+                      v-if="employee.avatar"
+                      :src="getEmployeeAvatarUrl(employee.avatar)"
+                      alt="avatar"
+                      class="customer-avatar sm"
+                    />
+                    <div v-else class="customer-avatar sm">{{ initials(employee.tenNhanVien) }}</div>
+                    <div class="cr-main">
+                      <div class="customer-name">{{ employee.tenNhanVien }}</div>
+                      <div class="customer-phone"><i class="fa-solid fa-envelope me-1"></i>{{ employee.email || '-' }}</div>
+                      <div class="customer-phone"><i class="fa-solid fa-phone me-1"></i>{{ employee.phone || '-' }}</div>
                     </div>
                   </div>
-                  <div v-else-if="employeeSearchLoading" class="search-results empty">
-                    <div class="customer-result muted">
-                      <div class="cr-main">
-                        <div class="customer-name">Đang tìm nhân viên...</div>
-                        <div class="customer-phone">Vui lòng chờ</div>
-                      </div>
+                </div>
+                <div v-else-if="employeeSearchLoading" class="search-results empty">
+                  <div class="customer-result muted">
+                    <div class="cr-main">
+                      <div class="customer-name">Đang tìm nhân viên...</div>
+                      <div class="customer-phone">Vui lòng chờ</div>
                     </div>
                   </div>
-                  <div v-else-if="employeeSearchError && employeeSearch.trim()" class="search-results empty">
-                    <div class="customer-result muted">
-                      <div class="cr-main">
-                        <div class="customer-name">{{ employeeSearchError }}</div>
-                        <div class="customer-phone">Thử nhập tên khác.</div>
-                      </div>
+                </div>
+                <div v-else-if="employeeSearchError && employeeSearch.trim()" class="search-results empty">
+                  <div class="customer-result muted">
+                    <div class="cr-main">
+                      <div class="customer-name">{{ employeeSearchError }}</div>
+                      <div class="customer-phone">Thử nhập tên khác.</div>
                     </div>
-                  </div>
-
-                  <div v-if="selectedEmployee" class="selected-customer">
-                    <div class="customer-avatar">{{ initials(selectedEmployee.tenNhanVien) }}</div>
-                    <div class="min-w-0">
-                      <div class="customer-name">{{ selectedEmployee.tenNhanVien }}</div>
-                      <div class="customer-phone"><i class="fa-solid fa-envelope me-1"></i>{{ selectedEmployee.email || '-' }}</div>
-                      <div class="customer-phone"><i class="fa-solid fa-phone me-1"></i>{{ selectedEmployee.phone || '-' }}</div>
-                    </div>
-                    <button class="clear-btn" type="button" @click="clearSelectedEmployee">
-                      <i class="fa-solid fa-xmark"></i>
-                    </button>
                   </div>
                 </div>
               </div>
@@ -1530,9 +1524,14 @@ const currentUserId = computed(() => info.value?.id ?? null)
 
 const nguoiChotDisplayName = computed(() => {
   if (nguoiChotMode.value === 'SELF') {
-    return info.value?.fullName || 'Chưa có tên'
+    const name = info.value?.fullName || 'Chưa có tên'
+    const phone = info.value?.phone || ''
+    return phone ? `${name} • ${phone}` : name
   }
-  return selectedEmployee.value?.tenNhanVien || ''
+  const name = selectedEmployee.value?.tenNhanVien || ''
+  const phone = selectedEmployee.value?.phone || ''
+  if (!name) return ''
+  return phone ? `${name} • ${phone}` : name
 })
 
 const branchFilterOptions = computed(() => ([
@@ -2587,6 +2586,11 @@ const saveContract = async () => {
     return
   }
 
+  const resolvedNguoiChotId = nguoiChotMode.value === 'SELF'
+    ? currentUserId.value ?? null
+    : selectedEmployee.value?.id ?? null
+  newContract.value.nguoiChotId = resolvedNguoiChotId
+
   const payload = {
     maKhachHang: newContract.value.maKhachHang,
     giaTriKyBan: newContract.value.giaTriTaiSan,
@@ -2596,7 +2600,7 @@ const saveContract = async () => {
     hinhThucThanhToan: newContract.value.firstMethod,
     serviceId: newContract.value.serviceId,
     branchId: newContract.value.branchId ?? null,
-    nguoiChotId: newContract.value.nguoiChotId ?? null,
+    nguoiChotId: resolvedNguoiChotId,
     soTienThanhToan: firstPaymentAmount.value,
     initPlan: newContract.value.initPlan
   }
@@ -4260,6 +4264,51 @@ tbody tr:hover{ background: rgba(79,172,254,.08); }
 }
 
 .customer-search{ position: relative; }
+.switcher{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.switch{
+  width: 46px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid rgba(20,30,48,.12);
+  background: rgba(20,30,48,.08);
+  position: relative;
+  padding: 2px;
+  cursor: pointer;
+  transition: var(--t);
+}
+.switch-thumb{
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(15,23,42,.18);
+  transform: translateX(0);
+  transition: var(--t);
+  display:block;
+}
+.switch.on{
+  background: var(--success-gradient);
+  border-color: rgba(56,249,215,.35);
+}
+.switch.on .switch-thumb{
+  transform: translateX(18px);
+}
+.switch-label{
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(11,18,32,.85);
+}
+.switcher-search {
+  width: 290px;
+}
+
+.switcher-search input{
+  width: 100%;
+}
 .search-results{
   margin-top: 8px;
   border-radius: 12px;
