@@ -1,8 +1,8 @@
 diff --git a/src/components/Branch/AdminDeptBranch.vue b/src/components/Branch/AdminDeptBranch.vue
-index ee51c675f25297e4ed61aa0252da71161831e913..423b160923d78fb5216a109e028a8a1cc9b59cfa 100644
+index 423b160923d78fb5216a109e028a8a1cc9b59cfa..e122e7a52b541b6f6dc184cb180b858de36d15e7 100644
 --- a/src/components/Branch/AdminDeptBranch.vue
 +++ b/src/components/Branch/AdminDeptBranch.vue
-@@ -835,50 +835,51 @@
+@@ -835,51 +835,58 @@
              <div class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-rose-50 text-rose-700 ring-2 ring-rose-200">
                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
              </div>
@@ -28,7 +28,15 @@ index ee51c675f25297e4ed61aa0252da71161831e913..423b160923d78fb5216a109e028a8a1c
  import { computed, onMounted, reactive, ref } from "vue";
  import api from "/src/api/api.js";
  import addressData from "/src/assets/js/address.json";
-+import { showLoading, updateAlertError, updateAlertSuccess } from "/src/assets/js/alertService.js";
+-import { showLoading, updateAlertError, updateAlertSuccess } from "/src/assets/js/alertService.js";
++import {
++  confirmWithInput,
++  showError,
++  showLoading,
++  showSuccess,
++  updateAlertError,
++  updateAlertSuccess,
++} from "/src/assets/js/alertService.js";
 
  /** Tabs */
  const tabs = [
@@ -54,14 +62,7 @@ index ee51c675f25297e4ed61aa0252da71161831e913..423b160923d78fb5216a109e028a8a1c
  };
  const functionOptions = Object.entries(functionMap).map(([key, v]) => ({ key, name: v.name }));
 
-@@ -1252,72 +1253,92 @@ function saveDept() {
-         branchId,
-         employeeLink,
-         description,
-         functions: [...functions],
-         imageUrl,
-       };
-     }
+@@ -1260,104 +1267,145 @@ function saveDept() {
    } else {
      departments.value.push({
        id: nextDeptId.value++,
@@ -80,55 +81,70 @@ index ee51c675f25297e4ed61aa0252da71161831e913..423b160923d78fb5216a109e028a8a1c
    closeAllModals();
  }
 
--function saveBranch() {
-+async function saveBranch() {
+ async function saveBranch() {
    const name = branchForm.name.trim();
    const detail = branchForm.addressDetail.trim();
    const wardName = branchForm.wardName.trim();
    const provinceName = branchForm.provinceName.trim();
 
    if (!name || !detail || !wardName || !provinceName) {
-     alert("Vui lòng nhập Tên chi nhánh và đủ 3 phần địa chỉ (Chi tiết / Phường / Tỉnh)!");
+-    alert("Vui lòng nhập Tên chi nhánh và đủ 3 phần địa chỉ (Chi tiết / Phường / Tỉnh)!");
++    showError("Thiếu thông tin", "Vui lòng nhập Tên chi nhánh và đủ 3 phần địa chỉ.");
      return;
    }
 
    const storedAddress = buildAddress(detail, wardName, provinceName);
 
    if (branchModal.editingId) {
--    const idx = branches.value.findIndex((x) => x.id === branchModal.editingId);
--    if (idx !== -1) {
--      branches.value[idx] = { ...branches.value[idx], name, address: storedAddress };
-+    try {
-+      const res = await showLoading(
-+          api.put(`/quan-ly-chi-nhanh/admin/${branchModal.editingId}`, {
-+            name,
-+            address: storedAddress,
-+          })
-+      );
-+      if (res?.status === 200) {
-+        const idx = branches.value.findIndex((x) => x.id === branchModal.editingId);
-+        if (idx !== -1) {
-+          branches.value[idx] = { ...branches.value[idx], name, address: storedAddress };
-+        }
-+        if (branchDetail.open && branchDetail.data?.id === branchModal.editingId) {
-+          branchDetail.data = { ...branchDetail.data, name, address: storedAddress };
-+        }
-+        updateAlertSuccess("Cập nhật chi nhánh thành công!");
-+        closeAllModals();
-+      } else {
-+        updateAlertError("Không thể cập nhật chi nhánh, vui lòng thử lại!");
-+      }
-+    } catch (error) {
-+      console.error("❌ Lỗi cập nhật chi nhánh", error);
-+      updateAlertError("Không thể cập nhật chi nhánh, vui lòng thử lại!");
+     try {
+       const res = await showLoading(
+           api.put(`/quan-ly-chi-nhanh/admin/${branchModal.editingId}`, {
+             name,
+             address: storedAddress,
+           })
+       );
+       if (res?.status === 200) {
+         const idx = branches.value.findIndex((x) => x.id === branchModal.editingId);
+         if (idx !== -1) {
+           branches.value[idx] = { ...branches.value[idx], name, address: storedAddress };
+         }
+         if (branchDetail.open && branchDetail.data?.id === branchModal.editingId) {
+           branchDetail.data = { ...branchDetail.data, name, address: storedAddress };
+         }
+         updateAlertSuccess("Cập nhật chi nhánh thành công!");
+         closeAllModals();
+       } else {
+         updateAlertError("Không thể cập nhật chi nhánh, vui lòng thử lại!");
+       }
+     } catch (error) {
+       console.error("❌ Lỗi cập nhật chi nhánh", error);
+       updateAlertError("Không thể cập nhật chi nhánh, vui lòng thử lại!");
      }
--  } else {
--    branches.value.push({ id: nextBranchId.value++, name, address: storedAddress });
-+    return;
+     return;
    }
 
-+  branches.value.push({ id: nextBranchId.value++, name, address: storedAddress });
-   closeAllModals();
+-  branches.value.push({ id: nextBranchId.value++, name, address: storedAddress });
+-  closeAllModals();
++  try {
++    const res = await showLoading(
++      api.post("/quan-ly-chi-nhanh/admin", {
++        name,
++        address: storedAddress,
++      })
++    );
++    const payload = res?.data;
++    if (payload?.success) {
++      const newId = payload?.data ?? nextBranchId.value++;
++      branches.value.push({ id: newId, name, address: storedAddress });
++      showSuccess("Tạo chi nhánh thành công!");
++      closeAllModals();
++    } else {
++      showError("Không thể tạo chi nhánh", payload?.message || "Vui lòng thử lại!");
++    }
++  } catch (error) {
++    console.error("❌ Lỗi tạo chi nhánh", error);
++    showError("Không thể tạo chi nhánh", "Vui lòng thử lại!");
++  }
  }
 
  function confirmDelete() {
@@ -142,14 +158,59 @@ index ee51c675f25297e4ed61aa0252da71161831e913..423b160923d78fb5216a109e028a8a1c
 
    if (deleteModal.type === "branch") {
      if (departments.value.some((d) => Number(d.branchId) === Number(deleteModal.id))) {
-       alert("Không thể xóa chi nhánh đang có phòng ban!");
+-      alert("Không thể xóa chi nhánh đang có phòng ban!");
++      showError("Không thể xóa chi nhánh", "Chi nhánh đang có phòng ban.");
        return;
      }
-     branches.value = branches.value.filter((x) => x.id !== deleteModal.id);
-     closeAllModals();
+-    branches.value = branches.value.filter((x) => x.id !== deleteModal.id);
+-    closeAllModals();
++    confirmWithInput(
++      "Xác nhận xóa chi nhánh",
++      `Nhập đúng tên chi nhánh "${deleteModal.name}" để xác nhận.`,
++      deleteModal.name,
++      async () => {
++        try {
++          const res = await showLoading(api.delete(`/quan-ly-chi-nhanh/admin/${deleteModal.id}`));
++          const payload = res?.data;
++          if (payload?.success) {
++            branches.value = branches.value.filter((x) => x.id !== deleteModal.id);
++            if (branchDetail.open && branchDetail.data?.id === deleteModal.id) {
++              branchDetail.open = false;
++              branchDetail.data = null;
++            }
++            showSuccess("Xóa chi nhánh thành công!");
++            closeAllModals();
++          } else {
++            showError("Không thể xóa chi nhánh", payload?.message || "Vui lòng thử lại!");
++          }
++        } catch (error) {
++          console.error("❌ Lỗi xóa chi nhánh", error);
++          showError("Không thể xóa chi nhánh", "Vui lòng thử lại!");
++        }
++      }
++    );
    }
  }
 
  function goEmployees(link) {
    alert(`Chuyển hướng đến danh sách nhân viên: ${link}`);
  }
+
+ /** init */
+ applyDeptFilter();
+ applyBranchFilter();
+ onMounted(() => {
+   fetchBranches();
+ });
+ </script>
+
+ <style scoped>
+ /* Base */
+ :global(html) { font-size: 16px; }
+ :global(body) { background: #f8fafc; }
+
+ /* Scrollbar (subtle) */
+ :global(::-webkit-scrollbar){ width:8px; height:8px; }
+ :global(::-webkit-scrollbar-track){ background: rgba(2,6,23,.06); border-radius: 999px; }
+ :global(::-webkit-scrollbar-thumb){ background: rgba(100,116,139,.35); border-radius: 999px; }
+ :global(::-webkit-scrollbar-thumb:hover){ background: rgba(100,116,139,.5); }

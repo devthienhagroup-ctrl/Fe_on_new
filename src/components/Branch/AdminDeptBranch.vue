@@ -14,9 +14,6 @@
               <div class="text-[16px] md:text-[18px] font-extrabold text-slate-900">
                 Quản lý Phòng ban & Chi nhánh
               </div>
-              <div class="text-[12px] md:text-[13px] text-slate-500 font-semibold">
-                CRUD • UI tối giản • Không rối mắt
-              </div>
             </div>
           </div>
 
@@ -39,32 +36,33 @@
           </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="mt-4">
-          <div class="ui-tabs">
-            <button
-                v-for="t in tabs"
-                :key="t.key"
-                type="button"
-                class="ui-tab"
-                :class="{ active: currentTab === t.key }"
-                @click="currentTab = t.key"
-            >
-              <i :class="t.icon"></i>
-              <span class="whitespace-nowrap font-extrabold">{{ t.label }}</span>
-              <span v-if="t.key === 'departments'" class="ui-chip">
-                {{ filteredDepartments.length }}
-              </span>
-              <span v-else class="ui-chip ui-chip-emerald">
-                {{ filteredBranches.length }}
-              </span>
-            </button>
-          </div>
-        </div>
       </div>
     </header>
-
+    <!-- Tabs -->
+    <div class="mt-4" style="margin-left: 110px">
+      <div class="ui-tabs">
+        <button
+            v-for="t in tabs"
+            :key="t.key"
+            type="button"
+            class="ui-tab"
+            :class="{ active: currentTab === t.key }"
+            @click="currentTab = t.key"
+        >
+          <i :class="t.icon"></i>
+          <span class="whitespace-nowrap font-extrabold">{{ t.label }}</span>
+          <span v-if="t.key === 'departments'" class="ui-chip">
+                {{ filteredDepartments.length }}
+              </span>
+          <span v-else class="ui-chip ui-chip-emerald">
+                {{ filteredBranches.length }}
+              </span>
+        </button>
+      </div>
+    </div>
     <main class="mx-auto max-w-[1400px] px-5 py-5">
+
+
       <!-- ===================== DEPARTMENTS ===================== -->
       <section v-if="currentTab === 'departments'">
         <!-- Toolbar -->
@@ -72,7 +70,7 @@
           <div>
             <div class="text-[16px] md:text-[18px] font-extrabold text-slate-900">Phòng ban</div>
             <div class="text-[12px] md:text-[13px] text-slate-500 font-semibold">
-              Danh sách phòng ban theo chi nhánh và chức năng
+              Danh sách phòng ban theo chi nhánh
             </div>
           </div>
 
@@ -125,12 +123,11 @@
             <div>
               <label class="ui-label">Tìm kiếm</label>
               <div class="ui-input-wrap">
-                <i class="fa-solid fa-magnifying-glass ui-input-ico"></i>
                 <input
                     v-model.trim="deptFilter.search"
                     class="ui-input pl-10"
                     type="text"
-                    placeholder="Tên phòng / Trưởng phòng..."
+                    placeholder="Tên phòng ..."
                     @keyup.enter="applyDeptFilter()"
                 />
               </div>
@@ -144,25 +141,6 @@
                   {{ b.name }}
                 </option>
               </select>
-            </div>
-
-            <div>
-              <label class="ui-label">Chức năng</label>
-              <select v-model="deptFilter.function" class="ui-input">
-                <option value="all">Tất cả</option>
-                <option v-for="f in functionOptions" :key="f.key" :value="f.key">
-                  {{ f.name }}
-                </option>
-              </select>
-            </div>
-
-            <div class="flex items-end gap-2">
-              <button type="button" class="ui-btn ui-btn-indigo w-full" @click="applyDeptFilter()">
-                <i class="fa-solid fa-filter"></i> Lọc
-              </button>
-              <button type="button" class="ui-btn ui-btn-ghost w-full" @click="resetDeptFilter()">
-                <i class="fa-solid fa-rotate-left"></i> Reset
-              </button>
             </div>
           </div>
         </div>
@@ -857,7 +835,14 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import api from "/src/api/api.js";
 import addressData from "/src/assets/js/address.json";
-import { showLoading, updateAlertError, updateAlertSuccess } from "/src/assets/js/alertService.js";
+import {
+  confirmWithInput,
+  showError,
+  showLoading,
+  showSuccess,
+  updateAlertError,
+  updateAlertSuccess,
+} from "/src/assets/js/alertService.js";
 
 /** Tabs */
 const tabs = [
@@ -1282,7 +1267,7 @@ async function saveBranch() {
   const provinceName = branchForm.provinceName.trim();
 
   if (!name || !detail || !wardName || !provinceName) {
-    alert("Vui lòng nhập Tên chi nhánh và đủ 3 phần địa chỉ (Chi tiết / Phường / Tỉnh)!");
+    showError("Thiếu thông tin", "Vui lòng nhập Tên chi nhánh và đủ 3 phần địa chỉ.");
     return;
   }
 
@@ -1316,8 +1301,26 @@ async function saveBranch() {
     return;
   }
 
-  branches.value.push({ id: nextBranchId.value++, name, address: storedAddress });
-  closeAllModals();
+  try {
+    const res = await showLoading(
+      api.post("/quan-ly-chi-nhanh/admin", {
+        name,
+        address: storedAddress,
+      })
+    );
+    const payload = res?.data;
+    if (payload?.success) {
+      const newId = payload?.data ?? nextBranchId.value++;
+      branches.value.push({ id: newId, name, address: storedAddress });
+      showSuccess("Tạo chi nhánh thành công!");
+      closeAllModals();
+    } else {
+      showError("Không thể tạo chi nhánh", payload?.message || "Vui lòng thử lại!");
+    }
+  } catch (error) {
+    console.error("❌ Lỗi tạo chi nhánh", error);
+    showError("Không thể tạo chi nhánh", "Vui lòng thử lại!");
+  }
 }
 
 function confirmDelete() {
@@ -1331,11 +1334,34 @@ function confirmDelete() {
 
   if (deleteModal.type === "branch") {
     if (departments.value.some((d) => Number(d.branchId) === Number(deleteModal.id))) {
-      alert("Không thể xóa chi nhánh đang có phòng ban!");
+      showError("Không thể xóa chi nhánh", "Chi nhánh đang có phòng ban.");
       return;
     }
-    branches.value = branches.value.filter((x) => x.id !== deleteModal.id);
-    closeAllModals();
+    confirmWithInput(
+      "Xác nhận xóa chi nhánh",
+      `Nhập đúng tên chi nhánh "${deleteModal.name}" để xác nhận.`,
+      deleteModal.name,
+      async () => {
+        try {
+          const res = await showLoading(api.delete(`/quan-ly-chi-nhanh/admin/${deleteModal.id}`));
+          const payload = res?.data;
+          if (payload?.success) {
+            branches.value = branches.value.filter((x) => x.id !== deleteModal.id);
+            if (branchDetail.open && branchDetail.data?.id === deleteModal.id) {
+              branchDetail.open = false;
+              branchDetail.data = null;
+            }
+            showSuccess("Xóa chi nhánh thành công!");
+            closeAllModals();
+          } else {
+            showError("Không thể xóa chi nhánh", payload?.message || "Vui lòng thử lại!");
+          }
+        } catch (error) {
+          console.error("❌ Lỗi xóa chi nhánh", error);
+          showError("Không thể xóa chi nhánh", "Vui lòng thử lại!");
+        }
+      }
+    );
   }
 }
 
@@ -1426,8 +1452,8 @@ onMounted(() => {
 }
 .ui-tab:hover{ border-color: rgba(79,70,229,.35); background: rgba(79,70,229,.04); }
 .ui-tab.active{
-  color:#111827;
-  border-color: rgba(79,70,229,.55);
+  color: #3337de;
+  border-color: rgba(56, 46, 224, 0.55);
   box-shadow: 0 12px 28px rgba(2,6,23,.06);
 }
 .ui-chip{
@@ -1658,7 +1684,7 @@ onMounted(() => {
 }
 .ui-modal{
   width:100%;
-  max-width: 860px;
+  max-width: 460px;
   background:#fff;
   border-radius: 20px;
   box-shadow: 0 30px 80px rgba(2,6,23,.35);
