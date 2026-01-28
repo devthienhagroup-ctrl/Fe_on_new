@@ -192,7 +192,7 @@
                 <td>
                   <div class="flex items-center gap-3 min-w-0">
                     <div class="h-10 w-10 rounded-2xl overflow-hidden ring-2 ring-slate-200 shrink-0">
-                      <img :src="d.imageUrl" :alt="d.name" class="h-full w-full object-cover" />
+                      <img :src=" ' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + d.avatar" :alt="d.name" class="h-full w-full object-cover" />
                     </div>
                     <div class="min-w-0">
                       <div class="truncate text-[14px] md:text-[15px] font-extrabold text-slate-900" :title="d.name">
@@ -220,25 +220,18 @@
                         <i class="fa-solid fa-code-branch"></i>
                       </span>
                     <span class="font-extrabold text-slate-800 truncate">
-                        {{ branchById(d.branchId)?.name || "—" }}
+                        {{ d.branchName || "—" }}
                       </span>
                   </div>
                 </td>
 
                 <td>
-                  <div class="flex flex-wrap gap-2">
-                      <span v-for="f in d.functions.slice(0, 3)" :key="f" class="ui-tag" :class="funcTagClass(f)">
-                        {{ functionName(f) }}
-                      </span>
-                    <span v-if="d.functions.length > 3" class="ui-tag ui-tag-gray">
-                        +{{ d.functions.length - 3 }}
-                      </span>
-                  </div>
+                  <span class="ui-tag ui-tag-emerald">{{ d.functionName || "—" }}</span>
                 </td>
 
-                <td class="text-right">
+                <td class="text-left">
                     <span class="ui-value ui-value-indigo whitespace-nowrap">
-                      {{ d.employees }}
+                      {{ d.employees }} nhân sự
                     </span>
                 </td>
 
@@ -269,19 +262,7 @@
               <div class="absolute inset-0 ui-img-overlay"></div>
 
               <div class="absolute left-3 top-3">
-                <span class="ui-value ui-value-white whitespace-nowrap">{{ d.employees }} NV</span>
-              </div>
-
-              <div class="absolute right-3 top-3 flex gap-2">
-                <button class="ui-fab" type="button" title="Chi tiết" @click="openDeptDetail(d.id)">
-                  <i class="fa-solid fa-eye"></i>
-                </button>
-                <button class="ui-fab" type="button" title="Sửa" @click="openDeptModal(d.id)">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                </button>
-                <button class="ui-fab ui-fab-danger" type="button" title="Xóa" @click="openDeleteModal('dept', d.id, d.name)">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
+                <span class="ui-value ui-value-white whitespace-nowrap">{{ d.employees }} nhân sự</span>
               </div>
 
               <div class="absolute bottom-3 left-3 right-3">
@@ -302,18 +283,13 @@
 
               <div class="mt-3 flex items-center gap-2 min-w-0">
                 <span class="ui-pill ui-pill-purple"><i class="fa-solid fa-code-branch"></i></span>
-                <span class="truncate text-slate-800 text-[13px] font-extrabold">
-                  {{ branchById(d.branchId)?.name || "—" }}
+                    <span class="truncate text-slate-800 text-[13px] font-extrabold">
+                  {{ d.branchName || "—" }}
                 </span>
               </div>
 
               <div class="mt-3 flex flex-wrap gap-2">
-                <span v-for="f in d.functions.slice(0, 2)" :key="f" class="ui-tag" :class="funcTagClass(f)">
-                  {{ functionName(f) }}
-                </span>
-                <span v-if="d.functions.length > 2" class="ui-tag ui-tag-gray">
-                  +{{ d.functions.length - 2 }}
-                </span>
+                <span class="ui-tag ui-tag-emerald">{{ d.functionName || "—" }}</span>
               </div>
 
               <div class="mt-3 border-t border-slate-200/70 pt-3 flex items-center justify-between">
@@ -370,8 +346,11 @@
 
         <!-- TABLE VIEW -->
         <div v-else-if="branchView === 'table'" class="mt-4 ui-card p-0 overflow-hidden">
-          <div class="px-4 py-3 border-b border-slate-200/70 flex items-center justify-between">
-            <div class="flex items-center gap-2">
+          <div
+              class="px-4 py-3 border-b border-slate-200/70 flex items-center justify-between"
+              style="background: linear-gradient(135deg, #d7e0fd 0%, #e5e1fa 50%, #ffe0f0 100%);"
+          >
+          <div class="flex items-center gap-2">
               <span class="ui-dot ui-dot-emerald"></span>
               <div class="text-[14px] font-extrabold text-slate-900">Bảng chi nhánh</div>
             </div>
@@ -573,6 +552,85 @@
               </div>
 
               <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div>
+                  <label class="ui-label">Tỉnh/Thành phố <span class="text-rose-500">*</span></label>
+                  <div class="ui-select">
+                    <button type="button" class="ui-select-trigger" @click="toggleProvinceDropdown()">
+                      <span class="truncate">
+                        {{ branchForm.provinceName || "Chọn Tỉnh/Thành" }}
+                      </span>
+                      <i class="fa-solid fa-chevron-down text-[12px] text-slate-400"></i>
+                    </button>
+                    <div v-if="provinceDropdownOpen" class="ui-select-panel">
+                      <div class="ui-select-search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input
+                          v-model.trim="provinceSearch"
+                          type="text"
+                          placeholder="Tìm tỉnh/thành..."
+                          @keydown.escape.prevent="closeProvinceDropdown()"
+                        />
+                      </div>
+                      <div class="ui-select-list">
+                        <button
+                          v-for="p in filteredProvinces"
+                          :key="p.name"
+                          type="button"
+                          class="ui-select-item"
+                          @click="selectProvince(p.name)"
+                        >
+                          {{ p.name }}
+                        </button>
+                        <div v-if="filteredProvinces.length === 0" class="ui-select-empty">
+                          Không tìm thấy tỉnh/thành
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="ui-label">Phường/Xã <span class="text-rose-500">*</span></label>
+                  <div class="ui-select" :class="{ disabled: !branchForm.provinceName }">
+                    <button
+                      type="button"
+                      class="ui-select-trigger"
+                      :disabled="!branchForm.provinceName"
+                      @click="toggleWardDropdown()"
+                    >
+                      <span class="truncate">
+                        {{ branchForm.wardName || "Chọn Phường/Xã" }}
+                      </span>
+                      <i class="fa-solid fa-chevron-down text-[12px] text-slate-400"></i>
+                    </button>
+                    <div v-if="wardDropdownOpen" class="ui-select-panel">
+                      <div class="ui-select-search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input
+                          v-model.trim="wardSearch"
+                          type="text"
+                          placeholder="Tìm phường/xã..."
+                          @keydown.escape.prevent="closeWardDropdown()"
+                        />
+                      </div>
+                      <div class="ui-select-list">
+                        <button
+                          v-for="w in filteredWards"
+                          :key="w.name"
+                          type="button"
+                          class="ui-select-item"
+                          @click="selectWard(w.name)"
+                        >
+                          {{ w.name }}
+                        </button>
+                        <div v-if="filteredWards.length === 0" class="ui-select-empty">
+                          Không tìm thấy phường/xã
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="md:col-span-2">
                   <label class="ui-label">Địa chỉ chi tiết <span class="text-rose-500">*</span></label>
                   <input
@@ -582,27 +640,11 @@
                       placeholder="Ví dụ: Số 12 đường ABC, Quận 1"
                   />
                 </div>
-
-                <div>
-                  <label class="ui-label">Tỉnh/Thành phố <span class="text-rose-500">*</span></label>
-                  <select v-model="branchForm.provinceName" class="ui-input" @change="onProvinceChange()">
-                    <option value="">Chọn Tỉnh/Thành</option>
-                    <option v-for="p in provinces" :key="p.name" :value="p.name">{{ p.name }}</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label class="ui-label">Phường/Xã <span class="text-rose-500">*</span></label>
-                  <select v-model="branchForm.wardName" class="ui-input" :disabled="!branchForm.provinceName">
-                    <option value="">Chọn Phường/Xã</option>
-                    <option v-for="w in wardsByProvince" :key="w.name" :value="w.name">{{ w.name }}</option>
-                  </select>
-                </div>
               </div>
 
               <div class="mt-3">
                 <div class="text-[12px] text-slate-500 font-semibold">Xem trước địa chỉ:</div>
-                <div class="mt-1 text-[14px] font-extrabold text-slate-800">
+                <div class="mt-1 text-[14px]  text-slate-800">
                   {{ previewBranchAddress || "—" }}
                 </div>
               </div>
@@ -650,9 +692,6 @@
 
                 <div class="mt-3 flex flex-wrap gap-2">
                   <span class="ui-value ui-value-indigo whitespace-nowrap">{{ deptDetail.data.employees }} NV</span>
-                  <span class="ui-tag ui-tag-slate">
-                    <i class="fa-solid fa-calendar-days mr-1"></i> {{ deptDetail.data.createdAt }}
-                  </span>
                 </div>
               </div>
             </div>
@@ -670,7 +709,7 @@
                 <span class="ui-pill ui-pill-purple"><i class="fa-solid fa-code-branch"></i></span>
                 <div class="min-w-0">
                   <div class="ui-info-label">Chi nhánh</div>
-                  <div class="ui-info-value">{{ branchById(deptDetail.data.branchId)?.name || "—" }}</div>
+                  <div class="ui-info-value">{{ deptDetail.data.branchName || "—" }}</div>
                 </div>
               </div>
 
@@ -679,22 +718,7 @@
                 <div class="min-w-0">
                   <div class="ui-info-label">Chức năng</div>
                   <div class="mt-2 flex flex-wrap gap-2">
-                    <span v-for="f in deptDetail.data.functions" :key="f" class="ui-tag" :class="funcTagClass(f)">
-                      {{ functionName(f) }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="ui-info md:col-span-2">
-                <span class="ui-pill ui-pill-slate"><i class="fa-solid fa-link"></i></span>
-                <div class="min-w-0">
-                  <div class="ui-info-label">Link nhân viên</div>
-                  <div class="ui-info-value">
-                    <button class="ui-link" type="button" @click="goEmployees(deptDetail.data.employeeLink)">
-                      <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                      <span class="truncate">{{ deptDetail.data.employeeLink }}</span>
-                    </button>
+                    <span class="ui-tag ui-tag-emerald">{{ deptDetail.data.functionName || "—" }}</span>
                   </div>
                 </div>
               </div>
@@ -762,9 +786,6 @@
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="ui-value ui-value-slate">{{ branchDetail.data.roomCount }} phòng</span>
                   <span class="ui-value ui-value-emerald">{{ branchDetail.data.employeeCount }} NV</span>
-                  <button type="button" class="ui-btn ui-btn-emerald" @click="openBranchModal(branchDetail.data.id)">
-                    <i class="fa-solid fa-pen-to-square"></i> Sửa
-                  </button>
                 </div>
               </div>
 
@@ -799,6 +820,9 @@
           </div>
 
           <div class="ui-modal-foot">
+            <button type="button" class="ui-btn ui-btn-emerald" @click="openBranchModal(branchDetail.data.id)">
+              <i class="fa-solid fa-pen-to-square"></i> Sửa
+            </button>
             <button type="button" class="ui-btn ui-btn-ghost" @click="closeAllModals()">Đóng</button>
           </div>
         </div>
@@ -832,7 +856,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import api from "/src/api/api.js";
 import addressData from "/src/assets/js/address.json";
 import {
@@ -875,6 +899,20 @@ const wardsByProvince = computed(() => {
   return p?.wards || [];
 });
 
+const provinceDropdownOpen = ref(false);
+const wardDropdownOpen = ref(false);
+const provinceSearch = ref("");
+const wardSearch = ref("");
+
+const filteredProvinces = computed(() => {
+  const keyword = provinceSearch.value.toLowerCase();
+  return provinces.filter((p) => p.name.toLowerCase().includes(keyword));
+});
+const filteredWards = computed(() => {
+  const keyword = wardSearch.value.toLowerCase();
+  return wardsByProvince.value.filter((w) => w.name.toLowerCase().includes(keyword));
+});
+
 /** Branch data (BE: ChiNhanhDTO) */
 const branches = ref([]);
 const fetchBranches = async () => {
@@ -894,45 +932,8 @@ const fetchBranches = async () => {
   }
 };
 
-/** Department demo */
-const departments = ref([
-  {
-    id: 1,
-    name: "Phòng Tư vấn Khách hàng",
-    description: "Phụ trách tư vấn và hỗ trợ khách hàng về các sản phẩm và dịch vụ của công ty.",
-    manager: "Nguyễn Thị Hương",
-    branchId: 1,
-    functions: ["consulting", "tele"],
-    imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=80",
-    employeeLink: "/#",
-    createdAt: "2023-01-15",
-    employees: 15,
-  },
-  {
-    id: 2,
-    name: "Phòng Marketing",
-    description: "Chịu trách nhiệm về các chiến lược marketing, quảng bá thương hiệu và sản phẩm.",
-    manager: "Trần Văn Minh",
-    branchId: 2,
-    functions: ["marketing"],
-    imageUrl: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=900&q=80",
-    employeeLink: "/#",
-    createdAt: "2023-02-20",
-    employees: 12,
-  },
-  {
-    id: 3,
-    name: "Phòng Công nghệ Thông tin",
-    description: "Phát triển và bảo trì hệ thống công nghệ thông tin, hỗ trợ kỹ thuật cho toàn công ty.",
-    manager: "Lê Văn Hải",
-    branchId: 3,
-    functions: ["it", "deployment"],
-    imageUrl: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?auto=format&fit=crop&w=900&q=80",
-    employeeLink: "/#",
-    createdAt: "2023-03-10",
-    employees: 24,
-  },
-]);
+/** Department data (BE: DepartmentFullTableDTO) */
+const departments = ref([]);
 
 /** Filters */
 const deptFilter = reactive({ branchId: "all", function: "all", search: "" });
@@ -960,18 +961,7 @@ function resetBranchFilter() {
 }
 
 /** Computed lists */
-const filteredDepartments = computed(() => {
-  const s = (appliedDeptFilter.search || "").toLowerCase();
-  return departments.value.filter((d) => {
-    if (appliedDeptFilter.branchId !== "all" && Number(d.branchId) !== Number(appliedDeptFilter.branchId)) return false;
-    if (appliedDeptFilter.function !== "all" && !d.functions.includes(appliedDeptFilter.function)) return false;
-    if (s) {
-      const ok = d.name.toLowerCase().includes(s) || d.manager.toLowerCase().includes(s);
-      if (!ok) return false;
-    }
-    return true;
-  });
-});
+const filteredDepartments = computed(() => departments.value);
 
 const filteredBranches = computed(() => {
   const s = (appliedBranchFilter.search || "").toLowerCase();
@@ -985,9 +975,6 @@ const filteredBranches = computed(() => {
 /** Helpers */
 function branchById(id) {
   return branches.value.find((b) => b.id === Number(id)) || null;
-}
-function functionName(key) {
-  return functionMap[key]?.name || key;
 }
 function deptCountByBranch(branchId) {
   const branch = branchById(branchId);
@@ -1003,21 +990,6 @@ function employeeCountByBranch(branchId) {
 }
 function deptListByBranch(branchId) {
   return departments.value.filter((d) => Number(d.branchId) === Number(branchId));
-}
-
-/** Tag class */
-function funcTagClass(func) {
-  const map = {
-    consulting: "ui-tag-blue",
-    tele: "ui-tag-purple",
-    marketing: "ui-tag-emerald",
-    it: "ui-tag-indigo",
-    deployment: "ui-tag-amber",
-    qa: "ui-tag-red",
-    hr: "ui-tag-slate",
-    finance: "ui-tag-lime",
-  };
-  return map[func] || "ui-tag-slate";
 }
 
 /** Address format */
@@ -1062,13 +1034,37 @@ const previewBranchAddress = computed(() => {
   return formatAddressDisplay(buildAddress(a, w, p));
 });
 
-function onProvinceChange() {
-  branchForm.wardName = "";
-}
-
 /** IDs */
 const nextDeptId = ref(departments.value.length + 1);
 const nextBranchId = ref(branches.value.length + 1);
+
+/** Fake select handlers */
+function toggleProvinceDropdown() {
+  provinceDropdownOpen.value = !provinceDropdownOpen.value;
+  wardDropdownOpen.value = false;
+}
+function closeProvinceDropdown() {
+  provinceDropdownOpen.value = false;
+  provinceSearch.value = "";
+}
+function toggleWardDropdown() {
+  if (!branchForm.provinceName) return;
+  wardDropdownOpen.value = !wardDropdownOpen.value;
+  provinceDropdownOpen.value = false;
+}
+function closeWardDropdown() {
+  wardDropdownOpen.value = false;
+  wardSearch.value = "";
+}
+function selectProvince(name) {
+  branchForm.provinceName = name;
+  branchForm.wardName = "";
+  closeProvinceDropdown();
+}
+function selectWard(name) {
+  branchForm.wardName = name;
+  closeWardDropdown();
+}
 
 /** Upload */
 const deptFileInput = ref(null);
@@ -1105,6 +1101,9 @@ function closeAllModals() {
   branchDetail.data = null;
   branchDetail.loading = false;
   branchDetail.error = "";
+
+  closeProvinceDropdown();
+  closeWardDropdown();
 }
 
 function openDeptModal(id = null) {
@@ -1147,11 +1146,15 @@ function openBranchModal(id = null) {
     branchForm.addressDetail = parts[0] || "";
     branchForm.wardName = parts[1] || "";
     branchForm.provinceName = parts[2] || "";
+    provinceSearch.value = "";
+    wardSearch.value = "";
   } else {
     branchForm.name = "";
     branchForm.addressDetail = "";
     branchForm.provinceName = "";
     branchForm.wardName = "";
+    provinceSearch.value = "";
+    wardSearch.value = "";
   }
 }
 
@@ -1208,6 +1211,42 @@ async function fetchBranchDetail(id, fallbackBranch) {
     };
   } finally {
     branchDetail.loading = false;
+  }
+}
+
+async function fetchDepartments() {
+  try {
+    const params = {};
+    if (deptFilter.search) {
+      params.name = deptFilter.search;
+    }
+    if (deptFilter.branchId !== "all") {
+      params.branchId = deptFilter.branchId;
+    }
+
+    const res = await api.get("/admin.thg/department-new/view", { params });
+    const data = Array.isArray(res.data) ? res.data : [];
+    departments.value = data.map((item, index) => {
+      const branchMatch = branches.value.find((b) => b.name === item.branchName) || null;
+      return {
+        id: index + 1,
+        name: item.departmentName,
+        avatar: item.avatar,
+        description: item.description,
+        manager: item.managerName,
+        managerAvatar: item.managerAvatar,
+        branchName: item.branchName,
+        branchId: branchMatch?.id ?? null,
+        functionName: item.functionName,
+        employees: item.totalEmployee ?? 0,
+        imageUrl:
+          item.managerAvatar ||
+          "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
+      };
+    });
+  } catch (error) {
+    console.error("❌ Lỗi fetch phòng ban", error);
+    departments.value = [];
   }
 }
 
@@ -1365,16 +1404,27 @@ function confirmDelete() {
   }
 }
 
-function goEmployees(link) {
-  alert(`Chuyển hướng đến danh sách nhân viên: ${link}`);
-}
-
 /** init */
 applyDeptFilter();
 applyBranchFilter();
-onMounted(() => {
-  fetchBranches();
+onMounted(async () => {
+  await fetchBranches();
+  await fetchDepartments();
 });
+
+let deptFetchTimer = null;
+watch(
+  () => [deptFilter.search, deptFilter.branchId],
+  () => {
+    applyDeptFilter();
+    if (deptFetchTimer) {
+      clearTimeout(deptFetchTimer);
+    }
+    deptFetchTimer = setTimeout(() => {
+      fetchDepartments();
+    }, 300);
+  }
+);
 </script>
 
 <style scoped>
@@ -1545,7 +1595,7 @@ onMounted(() => {
 /* Inputs */
 .ui-label{
   font-size: 13px;
-  font-weight: 950;
+  font-weight: 600;
   color:#0b1220;
   margin-bottom: 6px;
 }
@@ -1564,11 +1614,83 @@ onMounted(() => {
   padding: .72rem .9rem;
   font-size: 14px;
   outline: none;
+  font-weight: 500;
   transition: box-shadow .16s ease, border-color .16s ease;
 }
 .ui-input:focus{
   border-color: rgba(79,70,229,.55);
   box-shadow: 0 0 0 5px rgba(79,70,229,.12);
+}
+
+/* Fake select */
+.ui-select{ position:relative; }
+.ui-select.disabled .ui-select-trigger{ background: #f1f5f9; color:#94a3b8; cursor:not-allowed; }
+.ui-select-trigger{
+  width:100%;
+  border-radius: 14px;
+  border: 1px solid rgba(148,163,184,.55);
+  background: #fff;
+  padding: .72rem .9rem;
+  font-size: 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.5rem;
+  font-weight: 500;
+  color:#0b1220;
+}
+.ui-select-panel{
+  position:absolute;
+  top: calc(100% + 6px);
+  left:0;
+  right:0;
+  background:#fff;
+  border:1px solid rgba(148,163,184,.55);
+  border-radius: 16px;
+  box-shadow: 0 18px 32px rgba(2,6,23,.12);
+  z-index: 30;
+  overflow: hidden;
+}
+.ui-select-search{
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+  padding:.6rem .8rem;
+  border-bottom:1px solid rgba(148,163,184,.35);
+  font-size: 13px;
+  color:#94a3b8;
+}
+.ui-select-search input{
+  width:100%;
+  border:none;
+  outline:none;
+  font-size: 13px;
+  font-weight: 400;
+  color:#0b1220;
+}
+.ui-select-list{
+  max-height: 220px;
+  overflow:auto;
+  padding:.35rem;
+}
+.ui-select-item{
+  width:100%;
+  text-align:left;
+  padding:.5rem .7rem;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color:#0b1220;
+}
+.ui-select-item:hover{
+  background: rgba(79,70,229,.08);
+  color:#3730a3;
+}
+.ui-select-empty{
+  padding:.7rem;
+  font-size: 12px;
+  font-weight: 700;
+  color:#94a3b8;
 }
 
 /* Table */
@@ -1684,7 +1806,7 @@ onMounted(() => {
 }
 .ui-modal{
   width:100%;
-  max-width: 460px;
+  max-width: 560px;
   background:#fff;
   border-radius: 20px;
   box-shadow: 0 30px 80px rgba(2,6,23,.35);

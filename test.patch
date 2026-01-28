@@ -1,42 +1,248 @@
 diff --git a/src/components/Branch/AdminDeptBranch.vue b/src/components/Branch/AdminDeptBranch.vue
-index 423b160923d78fb5216a109e028a8a1cc9b59cfa..e122e7a52b541b6f6dc184cb180b858de36d15e7 100644
+index 906a7b748b90e1105308098111549628a2540b02..637c9fa6a12e1703f2727439b613c240d8fe37bc 100644
 --- a/src/components/Branch/AdminDeptBranch.vue
 +++ b/src/components/Branch/AdminDeptBranch.vue
-@@ -835,51 +835,58 @@
-             <div class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-rose-50 text-rose-700 ring-2 ring-rose-200">
-               <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+@@ -170,149 +170,163 @@
+               Tổng: <span class="text-indigo-700 font-extrabold">{{ filteredDepartments.length }}</span>
              </div>
-             <div class="mt-3 text-[16px] font-extrabold text-slate-900">{{ deleteModal.title }}</div>
-             <div class="mt-1 text-[13px] text-slate-600 font-semibold">
-               Xóa <b class="text-slate-900">{{ deleteModal.name }}</b> ? (Không thể hoàn tác)
+           </div>
+
+           <div class="overflow-x-auto">
+             <table class="ui-table">
+               <thead>
+               <tr>
+                 <th style="width: 52px">#</th>
+                 <th>PHÒNG BAN</th>
+                 <th>TRƯỞNG PHÒNG</th>
+                 <th>CHI NHÁNH</th>
+                 <th>CHỨC NĂNG</th>
+                 <th class="text-right" style="width: 140px">NHÂN SỰ</th>
+                 <th class="text-right" style="width: 170px">THAO TÁC</th>
+               </tr>
+               </thead>
+
+               <tbody>
+               <tr v-for="(d, idx) in filteredDepartments" :key="d.id">
+                 <td class="text-slate-500 font-extrabold">{{ idx + 1 }}</td>
+
+                 <td>
+                   <div class="flex items-center gap-3 min-w-0">
+                     <div class="h-10 w-10 rounded-2xl overflow-hidden ring-2 ring-slate-200 shrink-0">
+-                      <img :src="d.imageUrl" :alt="d.name" class="h-full w-full object-cover" />
++                      <img :src="deptProfileSrc(d)" :alt="d.name" class="h-full w-full object-cover" />
+                     </div>
+                     <div class="min-w-0">
+-                      <div class="truncate text-[14px] md:text-[15px] font-extrabold text-slate-900" :title="d.name">
++                      <div class="truncate text-[14px] md:text-[15px] font-extrabold text-slate-900 p1" :title="d.name">
+                         {{ d.name }}
+                       </div>
+                       <div class="text-[12px] text-slate-500 font-semibold truncate">
+                         {{ d.description }}
+                       </div>
+                     </div>
+                   </div>
+                 </td>
+
+                 <td>
+                   <div class="flex items-center gap-2 min-w-0">
+-                      <span class="ui-pill ui-pill-blue">
++                    <template v-if="d.manager">
++                      <img v-if="d.managerAvatar" :src="deptManagerAvatar(d)" :alt="d.manager" class="ui-manager-avatar" />
++                      <span v-else class="ui-pill ui-pill-blue">
+                         <i class="fa-solid fa-user-tie"></i>
+                       </span>
+-                    <span class="font-extrabold text-slate-800 truncate" :title="d.manager">{{ d.manager }}</span>
++                      <span class="font-extrabold text-slate-800 truncate p2" :title="d.manager">{{ d.manager }}</span>
++                    </template>
++                    <span v-else class="ui-empty-manager">
++                      <i class="fa-solid fa-circle-exclamation"></i>
++                      Chưa có trưởng phòng
++                    </span>
+                   </div>
+                 </td>
+
+                 <td>
+                   <div class="flex items-center gap-2 min-w-0">
+                       <span class="ui-pill ui-pill-purple">
+                         <i class="fa-solid fa-code-branch"></i>
+                       </span>
+-                    <span class="font-extrabold text-slate-800 truncate">
++                    <span class="font-extrabold text-slate-800 truncate p3">
+                         {{ branchById(d.branchId)?.name || "—" }}
+                       </span>
+                   </div>
+                 </td>
+
+                 <td>
+                   <div class="flex flex-wrap gap-2">
+                       <span v-for="f in d.functions.slice(0, 3)" :key="f" class="ui-tag" :class="funcTagClass(f)">
+                         {{ functionName(f) }}
+                       </span>
+                     <span v-if="d.functions.length > 3" class="ui-tag ui-tag-gray">
+                         +{{ d.functions.length - 3 }}
+                       </span>
+                   </div>
+                 </td>
+
+                 <td class="text-right">
+-                    <span class="ui-value ui-value-indigo whitespace-nowrap">
++                    <span class="ui-value ui-value-indigo whitespace-nowrap p4">
+                       {{ d.employees }}
+                     </span>
+                 </td>
+
+                 <td class="text-right">
+                   <div class="inline-flex justify-end gap-2 whitespace-nowrap">
+                     <button class="ui-mini ui-mini-slate" type="button" title="Xem chi tiết" @click="openDeptDetail(d.id)">
+                       <i class="fa-solid fa-eye"></i>
+                     </button>
+                     <button class="ui-mini ui-mini-blue" type="button" title="Sửa" @click="openDeptModal(d.id)">
+                       <i class="fa-solid fa-pen-to-square"></i>
+                     </button>
+                     <button class="ui-mini ui-mini-red" type="button" title="Xóa" @click="openDeleteModal('dept', d.id, d.name)">
+                       <i class="fa-solid fa-trash"></i>
+                     </button>
+                   </div>
+                 </td>
+               </tr>
+               </tbody>
+             </table>
+           </div>
+         </div>
+
+         <!-- CARD VIEW -->
+         <div v-else class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+           <div v-for="d in filteredDepartments" :key="d.id" class="ui-card overflow-hidden">
+             <div class="relative h-32">
+-              <img :src="d.imageUrl" :alt="d.name" class="h-full w-full object-cover" />
++              <img :src="deptProfileSrc(d)" :alt="d.name" class="h-full w-full object-cover" />
+               <div class="absolute inset-0 ui-img-overlay"></div>
+
+               <div class="absolute left-3 top-3">
+                 <span class="ui-value ui-value-white whitespace-nowrap">{{ d.employees }} NV</span>
+               </div>
+
+               <div class="absolute right-3 top-3 flex gap-2">
+                 <button class="ui-fab" type="button" title="Chi tiết" @click="openDeptDetail(d.id)">
+                   <i class="fa-solid fa-eye"></i>
+                 </button>
+                 <button class="ui-fab" type="button" title="Sửa" @click="openDeptModal(d.id)">
+                   <i class="fa-solid fa-pen-to-square"></i>
+                 </button>
+                 <button class="ui-fab ui-fab-danger" type="button" title="Xóa" @click="openDeleteModal('dept', d.id, d.name)">
+                   <i class="fa-solid fa-trash"></i>
+                 </button>
+               </div>
+
+               <div class="absolute bottom-3 left-3 right-3">
+                 <div class="line-clamp-1 text-[14px] font-extrabold text-white" :title="d.name">
+                   {{ d.name }}
+                 </div>
+                 <div class="mt-1 flex items-center gap-2 text-[12px] text-white/90">
+-                  <i class="fa-solid fa-user-tie"></i>
+-                  <span class="truncate font-semibold">{{ d.manager }}</span>
++                  <template v-if="d.manager">
++                    <img v-if="d.managerAvatar" :src="deptManagerAvatar(d)" :alt="d.manager" class="ui-manager-avatar ui-manager-avatar-sm" />
++                    <i v-else class="fa-solid fa-user-tie"></i>
++                    <span class="truncate font-semibold">{{ d.manager }}</span>
++                  </template>
++                  <span v-else class="ui-empty-manager ui-empty-manager-light">
++                    <i class="fa-solid fa-circle-exclamation"></i>
++                    Chưa có trưởng phòng
++                  </span>
+                 </div>
+               </div>
              </div>
 
-             <div class="mt-5 flex justify-center gap-2">
-               <button type="button" class="ui-btn ui-btn-ghost" @click="closeAllModals()">Hủy</button>
-               <button type="button" class="ui-btn ui-btn-danger" @click="confirmDelete()">
-                 <i class="fa-solid fa-trash"></i> Xóa
-               </button>
-             </div>
+             <div class="p-4">
+               <div class="line-clamp-2 text-[13px] text-slate-600 font-semibold">
+                 {{ d.description }}
+               </div>
+
+               <div class="mt-3 flex items-center gap-2 min-w-0">
+                 <span class="ui-pill ui-pill-purple"><i class="fa-solid fa-code-branch"></i></span>
+                 <span class="truncate text-slate-800 text-[13px] font-extrabold">
+                   {{ branchById(d.branchId)?.name || "—" }}
+                 </span>
+               </div>
+
+               <div class="mt-3 flex flex-wrap gap-2">
+                 <span v-for="f in d.functions.slice(0, 2)" :key="f" class="ui-tag" :class="funcTagClass(f)">
+                   {{ functionName(f) }}
+                 </span>
+                 <span v-if="d.functions.length > 2" class="ui-tag ui-tag-gray">
+                   +{{ d.functions.length - 2 }}
+                 </span>
+               </div>
+
+@@ -616,51 +630,51 @@
+             </button>
            </div>
          </div>
        </div>
      </transition>
-   </div>
+
+     <!-- Dept Detail Modal -->
+     <transition name="fade">
+       <div v-if="deptDetail.open" class="ui-overlay" @mousedown.self="closeAllModals()">
+         <div class="ui-modal modal-scroll">
+           <div class="ui-modal-head ui-head-slate">
+             <div class="flex items-center justify-between">
+               <div class="flex items-center gap-2">
+                 <span class="ui-head-ico">
+                   <i class="fa-solid fa-eye"></i>
+                 </span>
+                 <span class="text-[15px] font-extrabold">Chi tiết phòng ban</span>
+               </div>
+               <button class="ui-x" type="button" @click="closeAllModals()">&times;</button>
+             </div>
+           </div>
+
+           <div class="p-5" v-if="deptDetail.data">
+             <div class="flex items-start gap-4">
+               <div class="h-16 w-16 rounded-2xl overflow-hidden ring-2 ring-slate-200 shrink-0">
+-                <img :src="deptDetail.data.imageUrl" :alt="deptDetail.data.name" class="h-full w-full object-cover" />
++                <img :src="deptProfileSrc(deptDetail.data)" :alt="deptDetail.data.name" class="h-full w-full object-cover" />
+               </div>
+               <div class="min-w-0 flex-1">
+                 <div class="text-[16px] md:text-[18px] font-extrabold text-slate-900 truncate">
+                   {{ deptDetail.data.name }}
+                 </div>
+                 <div class="mt-1 text-[13px] text-slate-600 font-semibold">
+                   {{ deptDetail.data.description }}
+                 </div>
+
+                 <div class="mt-3 flex flex-wrap gap-2">
+                   <span class="ui-value ui-value-indigo whitespace-nowrap">{{ deptDetail.data.employees }} NV</span>
+                   <span class="ui-tag ui-tag-slate">
+                     <i class="fa-solid fa-calendar-days mr-1"></i> {{ deptDetail.data.createdAt }}
+                   </span>
+                 </div>
+               </div>
+             </div>
+
+             <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+               <div class="ui-info">
+                 <span class="ui-pill ui-pill-blue"><i class="fa-solid fa-user-tie"></i></span>
+                 <div class="min-w-0">
+                   <div class="ui-info-label">Trưởng phòng</div>
+                   <div class="ui-info-value">{{ deptDetail.data.manager }}</div>
+                 </div>
+@@ -832,50 +846,51 @@
  </template>
 
  <script setup>
  import { computed, onMounted, reactive, ref } from "vue";
  import api from "/src/api/api.js";
  import addressData from "/src/assets/js/address.json";
--import { showLoading, updateAlertError, updateAlertSuccess } from "/src/assets/js/alertService.js";
-+import {
-+  confirmWithInput,
-+  showError,
-+  showLoading,
-+  showSuccess,
-+  updateAlertError,
-+  updateAlertSuccess,
-+} from "/src/assets/js/alertService.js";
+ import {
+   confirmWithInput,
+   showError,
+   showLoading,
+   showSuccess,
+   updateAlertError,
+   updateAlertSuccess,
+ } from "/src/assets/js/alertService.js";
 
  /** Tabs */
  const tabs = [
@@ -48,6 +254,7 @@ index 423b160923d78fb5216a109e028a8a1cc9b59cfa..e122e7a52b541b6f6dc184cb180b858d
  const deptView = ref("table"); // table | card
  const branchView = ref("table"); // table | card
  const toggleDeptFilter = ref(true);
++const ASSET_BASE_URL = "https://s3.cloudfly.vn/thg-storage-dev/uploads-public/";
 
  /** Function config */
  const functionMap = {
@@ -62,133 +269,129 @@ index 423b160923d78fb5216a109e028a8a1cc9b59cfa..e122e7a52b541b6f6dc184cb180b858d
  };
  const functionOptions = Object.entries(functionMap).map(([key, v]) => ({ key, name: v.name }));
 
-@@ -1260,104 +1267,145 @@ function saveDept() {
-   } else {
-     departments.value.push({
-       id: nextDeptId.value++,
-       name,
-       manager,
-       branchId,
-       employeeLink,
-       description,
-       functions: [...functions],
-       imageUrl,
-       createdAt: new Date().toISOString().split("T")[0],
-       employees: Math.floor(Math.random() * 25) + 5,
-     });
-   }
+ /** Provinces */
+ const provinces = Array.isArray(addressData) ? addressData : [];
+ const wardsByProvince = computed(() => {
+   const p = provinces.find((x) => x.name === branchForm.provinceName);
+   return p?.wards || [];
+ });
 
-   closeAllModals();
+ /** Branch data (BE: ChiNhanhDTO) */
+ const branches = ref([]);
+ const fetchBranches = async () => {
+   try {
+@@ -967,79 +982,95 @@ const filteredDepartments = computed(() => {
+     if (appliedDeptFilter.function !== "all" && !d.functions.includes(appliedDeptFilter.function)) return false;
+     if (s) {
+       const ok = d.name.toLowerCase().includes(s) || d.manager.toLowerCase().includes(s);
+       if (!ok) return false;
+     }
+     return true;
+   });
+ });
+
+ const filteredBranches = computed(() => {
+   const s = (appliedBranchFilter.search || "").toLowerCase();
+   return branches.value.filter((b) => {
+     if (!s) return true;
+     const addr = formatAddressDisplay(b.address).toLowerCase();
+     return b.name.toLowerCase().includes(s) || addr.includes(s);
+   });
+ });
+
+ /** Helpers */
+ function branchById(id) {
+   return branches.value.find((b) => b.id === Number(id)) || null;
+ }
+ function functionName(key) {
+   return functionMap[key]?.name || key;
+ }
++function resolveAssetUrl(path, fallback = "") {
++  if (!path) return fallback;
++  const cleaned = String(path).trim();
++  if (!cleaned) return fallback;
++  if (/^https?:\/\//i.test(cleaned)) return cleaned;
++  return `${ASSET_BASE_URL}${cleaned.replace(/^\\/+/, "")}`;
++}
++function deptProfileSrc(dept) {
++  return resolveAssetUrl(
++    dept?.profileImage || dept?.imageUrl,
++    `${ASSET_BASE_URL}default-image_730.jpg`
++  );
++}
++function deptManagerAvatar(dept) {
++  return resolveAssetUrl(dept?.managerAvatar);
++}
+ function deptCountByBranch(branchId) {
+   const branch = branchById(branchId);
+   if (branch && Number.isFinite(Number(branch.roomCount))) return Number(branch.roomCount);
+   return departments.value.filter((d) => Number(d.branchId) === Number(branchId)).length;
+ }
+ function employeeCountByBranch(branchId) {
+   const branch = branchById(branchId);
+   if (branch && Number.isFinite(Number(branch.employeeCount))) return Number(branch.employeeCount);
+   return departments.value
+       .filter((d) => Number(d.branchId) === Number(branchId))
+       .reduce((sum, d) => sum + (Number(d.employees) || 0), 0);
+ }
+ function deptListByBranch(branchId) {
+   return departments.value.filter((d) => Number(d.branchId) === Number(branchId));
  }
 
- async function saveBranch() {
-   const name = branchForm.name.trim();
-   const detail = branchForm.addressDetail.trim();
-   const wardName = branchForm.wardName.trim();
-   const provinceName = branchForm.provinceName.trim();
+ /** Tag class */
+ function funcTagClass(func) {
+   const map = {
+-    consulting: "ui-tag-blue",
+-    tele: "ui-tag-purple",
+-    marketing: "ui-tag-emerald",
+-    it: "ui-tag-indigo",
+-    deployment: "ui-tag-amber",
+-    qa: "ui-tag-red",
+-    hr: "ui-tag-slate",
+-    finance: "ui-tag-lime",
++    consulting: "ui-tag-primary",
++    tele: "ui-tag-secondary",
++    marketing: "ui-tag-success",
++    it: "ui-tag-info",
++    deployment: "ui-tag-warning",
++    qa: "ui-tag-danger",
++    hr: "ui-tag-dark",
++    finance: "ui-tag-light",
+   };
+-  return map[func] || "ui-tag-slate";
++  return map[func] || "ui-tag-dark";
+ }
 
-   if (!name || !detail || !wardName || !provinceName) {
--    alert("Vui lòng nhập Tên chi nhánh và đủ 3 phần địa chỉ (Chi tiết / Phường / Tỉnh)!");
-+    showError("Thiếu thông tin", "Vui lòng nhập Tên chi nhánh và đủ 3 phần địa chỉ.");
-     return;
-   }
+ /** Address format */
+ function formatAddressDisplay(addr) {
+   if (!addr) return "";
+   return String(addr).split("/!!").join(", ");
+ }
+ function buildAddress(detail, wardName, provinceName) {
+   return `${detail}/!!${wardName}/!!${provinceName}`;
+ }
 
-   const storedAddress = buildAddress(detail, wardName, provinceName);
+ /** Modals state */
+ const deptModal = reactive({ open: false, title: "Thêm phòng ban", editingId: null });
+ const branchModal = reactive({ open: false, title: "Thêm chi nhánh", editingId: null });
+ const deleteModal = reactive({ open: false, type: null, id: null, name: "", title: "" });
+ const deptDetail = reactive({ open: false, data: null });
+ const branchDetail = reactive({ open: false, data: null, loading: false, error: "" });
 
-   if (branchModal.editingId) {
-     try {
-       const res = await showLoading(
-           api.put(`/quan-ly-chi-nhanh/admin/${branchModal.editingId}`, {
-             name,
-             address: storedAddress,
-           })
-       );
-       if (res?.status === 200) {
-         const idx = branches.value.findIndex((x) => x.id === branchModal.editingId);
-         if (idx !== -1) {
-           branches.value[idx] = { ...branches.value[idx], name, address: storedAddress };
+ /** Forms */
+ const deptForm = reactive({
+   name: "",
+   manager: "",
+   branchId: null,
+   employeeLink: "/#",
+   description: "",
+@@ -1359,50 +1390,60 @@ function confirmDelete() {
+         } catch (error) {
+           console.error("❌ Lỗi xóa chi nhánh", error);
+           showError("Không thể xóa chi nhánh", "Vui lòng thử lại!");
          }
-         if (branchDetail.open && branchDetail.data?.id === branchModal.editingId) {
-           branchDetail.data = { ...branchDetail.data, name, address: storedAddress };
-         }
-         updateAlertSuccess("Cập nhật chi nhánh thành công!");
-         closeAllModals();
-       } else {
-         updateAlertError("Không thể cập nhật chi nhánh, vui lòng thử lại!");
        }
-     } catch (error) {
-       console.error("❌ Lỗi cập nhật chi nhánh", error);
-       updateAlertError("Không thể cập nhật chi nhánh, vui lòng thử lại!");
-     }
-     return;
-   }
-
--  branches.value.push({ id: nextBranchId.value++, name, address: storedAddress });
--  closeAllModals();
-+  try {
-+    const res = await showLoading(
-+      api.post("/quan-ly-chi-nhanh/admin", {
-+        name,
-+        address: storedAddress,
-+      })
-+    );
-+    const payload = res?.data;
-+    if (payload?.success) {
-+      const newId = payload?.data ?? nextBranchId.value++;
-+      branches.value.push({ id: newId, name, address: storedAddress });
-+      showSuccess("Tạo chi nhánh thành công!");
-+      closeAllModals();
-+    } else {
-+      showError("Không thể tạo chi nhánh", payload?.message || "Vui lòng thử lại!");
-+    }
-+  } catch (error) {
-+    console.error("❌ Lỗi tạo chi nhánh", error);
-+    showError("Không thể tạo chi nhánh", "Vui lòng thử lại!");
-+  }
- }
-
- function confirmDelete() {
-   if (!deleteModal.open) return;
-
-   if (deleteModal.type === "dept") {
-     departments.value = departments.value.filter((d) => d.id !== deleteModal.id);
-     closeAllModals();
-     return;
-   }
-
-   if (deleteModal.type === "branch") {
-     if (departments.value.some((d) => Number(d.branchId) === Number(deleteModal.id))) {
--      alert("Không thể xóa chi nhánh đang có phòng ban!");
-+      showError("Không thể xóa chi nhánh", "Chi nhánh đang có phòng ban.");
-       return;
-     }
--    branches.value = branches.value.filter((x) => x.id !== deleteModal.id);
--    closeAllModals();
-+    confirmWithInput(
-+      "Xác nhận xóa chi nhánh",
-+      `Nhập đúng tên chi nhánh "${deleteModal.name}" để xác nhận.`,
-+      deleteModal.name,
-+      async () => {
-+        try {
-+          const res = await showLoading(api.delete(`/quan-ly-chi-nhanh/admin/${deleteModal.id}`));
-+          const payload = res?.data;
-+          if (payload?.success) {
-+            branches.value = branches.value.filter((x) => x.id !== deleteModal.id);
-+            if (branchDetail.open && branchDetail.data?.id === deleteModal.id) {
-+              branchDetail.open = false;
-+              branchDetail.data = null;
-+            }
-+            showSuccess("Xóa chi nhánh thành công!");
-+            closeAllModals();
-+          } else {
-+            showError("Không thể xóa chi nhánh", payload?.message || "Vui lòng thử lại!");
-+          }
-+        } catch (error) {
-+          console.error("❌ Lỗi xóa chi nhánh", error);
-+          showError("Không thể xóa chi nhánh", "Vui lòng thử lại!");
-+        }
-+      }
-+    );
+     );
    }
  }
 
@@ -208,9 +411,189 @@ index 423b160923d78fb5216a109e028a8a1cc9b59cfa..e122e7a52b541b6f6dc184cb180b858d
  /* Base */
  :global(html) { font-size: 16px; }
  :global(body) { background: #f8fafc; }
++:global(:root){
++  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
++  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
++  --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
++  --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
++  --danger-gradient: linear-gradient(135deg, #ff5858 0%, #f09819 100%);
++  --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
++  --dark-gradient: linear-gradient(135deg, #141e30 0%, #243b55 100%);
++  --light-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
++}
 
  /* Scrollbar (subtle) */
  :global(::-webkit-scrollbar){ width:8px; height:8px; }
  :global(::-webkit-scrollbar-track){ background: rgba(2,6,23,.06); border-radius: 999px; }
  :global(::-webkit-scrollbar-thumb){ background: rgba(100,116,139,.35); border-radius: 999px; }
  :global(::-webkit-scrollbar-thumb:hover){ background: rgba(100,116,139,.5); }
+
+ /* Atoms */
+ .ui-card{
+   background: rgba(255,255,255,.92);
+   border: 1px solid rgba(148,163,184,.35);
+   border-radius: 18px;
+   box-shadow: 0 12px 34px rgba(2,6,23,.06);
+ }
+ .ui-dot{
+   width:10px;height:10px;border-radius:999px; display:inline-block;
+ }
+ .ui-dot-indigo{ background:#4f46e5; box-shadow:0 0 0 4px rgba(79,70,229,.12); }
+ .ui-dot-emerald{ background:#10b981; box-shadow:0 0 0 4px rgba(16,185,129,.12); }
+
+ .ui-brand{
+   width:44px;height:44px;border-radius:16px;
+   display:grid;place-items:center;
+   color:#fff;
+   background: linear-gradient(135deg, #4f46e5 0%, #667eea 60%, #4facfe 100%);
+@@ -1564,94 +1605,138 @@ onMounted(() => {
+   padding: .72rem .9rem;
+   font-size: 14px;
+   outline: none;
+   transition: box-shadow .16s ease, border-color .16s ease;
+ }
+ .ui-input:focus{
+   border-color: rgba(79,70,229,.55);
+   box-shadow: 0 0 0 5px rgba(79,70,229,.12);
+ }
+
+ /* Table */
+ .ui-table{
+   width:100%;
+   border-collapse: separate;
+   border-spacing: 0;
+   font-size: 12px;
+ }
+ .ui-table thead th{
+   position: sticky;
+   top: 0;
+   z-index: 1;
+   background: #fff;
+   text-align:left;
+   padding: 12px 14px;
+   color:#0b1220;
+-  font-weight: 950;
++  font-weight: 600;
+   border-bottom: 1px solid rgba(148,163,184,.45);
+   white-space: nowrap;
+ }
+ .ui-table tbody td{
+   padding: 12px 14px;
+   border-bottom: 1px solid rgba(148,163,184,.25);
+   vertical-align: middle;
++  font-weight: 500;
+ }
+ .ui-table tbody tr:hover td{ background: rgba(79,70,229,.03); }
++.ui-table .font-extrabold{ font-weight: 600; }
++.ui-table .font-semibold{ font-weight: 500; }
++.ui-table .ui-value{ font-weight: 600; }
+
+ /* Pills */
+ .ui-pill{
+   width:34px;height:34px;border-radius: 14px;
+   display:grid;place-items:center;
+   border: 1px solid rgba(148,163,184,.35);
+   background:#fff;
+   color:#0b1220;
+   flex-shrink:0;
+ }
+ .ui-pill-blue{ background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8; }
+ .ui-pill-purple{ background:#faf5ff; border-color:#e9d5ff; color:#6d28d9; }
+ .ui-pill-emerald{ background:#ecfdf5; border-color:#bbf7d0; color:#047857; }
+ .ui-pill-slate{ background:#f1f5f9; border-color:#cbd5e1; color:#334155; }
+
+ /* Tags */
+ .ui-tag{
+   display:inline-flex; align-items:center;
+   padding: .28rem .65rem;
+   border-radius: 999px;
+   font-size: 12px;
+-  font-weight: 950;
+-  border: 1px solid rgba(148,163,184,.35);
++  font-weight: 600;
++  border: none;
+   white-space: nowrap;
++  color:#fff;
++}
++.ui-tag-gray{
++  background: var(--light-gradient);
++  color:#0b1220;
++}
++.ui-tag-primary{ background: var(--primary-gradient); }
++.ui-tag-secondary{ background: var(--secondary-gradient); }
++.ui-tag-success{ background: var(--success-gradient); }
++.ui-tag-warning{ background: var(--warning-gradient); }
++.ui-tag-danger{ background: var(--danger-gradient); }
++.ui-tag-info{ background: var(--info-gradient); }
++.ui-tag-dark{ background: var(--dark-gradient); }
++.ui-tag-light{ background: var(--light-gradient); color:#0b1220; }
++
++.p1{ background: var(--primary-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
++.p2{ background: var(--secondary-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
++.p3{ background: var(--success-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
++.p4{ background: var(--info-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
++.p5{ background: var(--warning-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
++
++.ui-manager-avatar{
++  width:30px;
++  height:30px;
++  border-radius:999px;
++  object-fit:cover;
++  border:2px solid #fff;
++  box-shadow:0 6px 16px rgba(15,23,42,.18);
++}
++.ui-manager-avatar-sm{
++  width:22px;
++  height:22px;
++  border-width:1px;
++}
++.ui-empty-manager{
++  display:inline-flex;
++  align-items:center;
++  gap:6px;
++  font-size:12px;
++  color:#f59e0b;
++  font-weight:600;
++  white-space:nowrap;
++}
++.ui-empty-manager i{ color:#f97316; }
++.ui-empty-manager-light{
++  color:#fde68a;
++}
++.ui-empty-manager-light i{
++  color:#fef3c7;
+ }
+-.ui-tag-gray{ background:#f1f5f9; color:#0b1220; border-color:#cbd5e1; }
+-.ui-tag-slate{ background:#f1f5f9; border-color:#cbd5e1; color:#0b1220; }
+-.ui-tag-blue{ background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8; }
+-.ui-tag-indigo{ background:#eef2ff; border-color:#c7d2fe; color:#3730a3; }
+-.ui-tag-purple{ background:#faf5ff; border-color:#e9d5ff; color:#6d28d9; }
+-.ui-tag-emerald{ background:#ecfdf5; border-color:#bbf7d0; color:#047857; }
+-.ui-tag-amber{ background:#fffbeb; border-color:#fde68a; color:#b45309; }
+-.ui-tag-red{ background:#fff1f2; border-color:#fecdd3; color:#be123c; }
+-.ui-tag-lime{ background:#f7fee7; border-color:#d9f99d; color:#4d7c0f; }
+
+ /* Values */
+ .ui-value{
+   display:inline-flex; align-items:center; justify-content:center;
+   padding: .18rem .55rem;
+   border-radius: 999px;
+   font-size: 13px;
+   font-weight: 900;
+   border: 1px solid rgba(148,163,184,.35);
+ }
+ .ui-value-indigo{ background:#eef2ff; border-color:#c7d2fe; color:#3730a3; }
+ .ui-value-emerald{ background:#ecfdf5; border-color:#bbf7d0; color:#047857; }
+ .ui-value-slate{ background: rgba(254,249,195,.72); border-color:#facc15; color:#a16207; }
+ .ui-value-white{ background: rgba(255,255,255,.92); border-color: rgba(255,255,255,.55); color:#0b1220; }
+
+ /* Mini actions */
+ .ui-mini{
+   width:34px;height:34px;border-radius: 12px;
+   display:grid;place-items:center;
+   border: 1px solid rgba(148,163,184,.55);
+   background:#fff;
+   transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+ }
+ .ui-mini:hover{ transform: translateY(-1px); box-shadow: 0 10px 22px rgba(2,6,23,.08); }
+ .ui-mini-slate{ color:#334155; }
