@@ -749,52 +749,73 @@
             </div>
           </div>
 
-          <div class="p-5" v-if="branchDetail.data">
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <div class="flex items-center gap-2 min-w-0">
-                  <span class="ui-pill ui-pill-emerald"><i class="fa-solid fa-code-branch"></i></span>
-                  <div class="min-w-0">
-                    <div class="text-[16px] md:text-[18px] font-extrabold text-slate-900 truncate">
-                      {{ branchDetail.data.name }}
-                    </div>
-                    <div class="text-[13px] text-slate-500 font-semibold">
-                      ID: <span class="text-slate-800 font-extrabold">{{ branchDetail.data.id }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="mt-3 flex items-start gap-2 min-w-0">
-                  <span class="ui-pill ui-pill-slate"><i class="fa-solid fa-location-dot"></i></span>
-                  <div class="text-[14px] font-semibold text-slate-800">
-                    {{ formatAddressDisplay(branchDetail.data.address) }}
-                  </div>
-                </div>
-
-                <div class="mt-3 inline-flex items-center gap-2 whitespace-nowrap">
-                  <span class="ui-value ui-value-slate">{{ deptCountByBranch(branchDetail.data.id) }} phòng</span>
-                  <span class="ui-value ui-value-emerald">{{ employeeCountByBranch(branchDetail.data.id) }} NV</span>
-                </div>
+          <div class="p-4">
+            <div v-if="branchDetail.error" class="text-center">
+              <div class="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-rose-50 text-rose-600 ring-2 ring-rose-200">
+                <i class="fa-solid fa-circle-exclamation text-lg"></i>
               </div>
-
-              <button type="button" class="ui-btn ui-btn-emerald" @click="openBranchModal(branchDetail.data.id)">
-                <i class="fa-solid fa-pen-to-square"></i> Sửa
-              </button>
+              <div class="mt-3 text-[14px] font-extrabold text-slate-800">Không thể tải dữ liệu</div>
+              <div class="mt-1 text-[12px] font-semibold text-slate-500">{{ branchDetail.error }}</div>
             </div>
 
-            <div class="mt-4 ui-card p-4">
-              <div class="flex items-center gap-2 mb-2">
-                <span class="ui-dot ui-dot-indigo"></span>
-                <div class="text-[14px] font-extrabold text-slate-900">Phòng ban thuộc chi nhánh</div>
+            <div v-else-if="branchDetail.data">
+              <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <span class="ui-pill ui-pill-emerald"><i class="fa-solid fa-code-branch"></i></span>
+                    <div class="min-w-0">
+                      <div class="text-[16px] md:text-[18px] font-extrabold text-slate-900 truncate">
+                        {{ branchDetail.data.name }}
+                      </div>
+                      <div class="text-[13px] text-slate-500 font-semibold">
+                        ID: <span class="text-slate-800 font-extrabold">{{ branchDetail.data.id }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mt-3 flex items-start gap-2 min-w-0">
+                    <span class="ui-pill ui-pill-slate"><i class="fa-solid fa-location-dot"></i></span>
+                    <div class="text-[14px] font-semibold text-slate-800">
+                      {{ formatAddressDisplay(branchDetail.data.address) }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="ui-value ui-value-slate">{{ branchDetail.data.roomCount }} phòng</span>
+                  <span class="ui-value ui-value-emerald">{{ branchDetail.data.employeeCount }} NV</span>
+                  <button type="button" class="ui-btn ui-btn-emerald" @click="openBranchModal(branchDetail.data.id)">
+                    <i class="fa-solid fa-pen-to-square"></i> Sửa
+                  </button>
+                </div>
               </div>
 
-              <div class="flex flex-wrap gap-2">
-                <template v-if="deptListByBranch(branchDetail.data.id).length">
-                  <span v-for="d in deptListByBranch(branchDetail.data.id)" :key="d.id" class="ui-tag ui-tag-slate">
-                    {{ d.name }}
-                  </span>
-                </template>
-                <span v-else class="text-[13px] font-extrabold text-slate-500">Chưa có phòng ban</span>
+              <div class="mt-4">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="ui-dot ui-dot-indigo"></span>
+                  <div class="text-[14px] font-extrabold text-slate-900">Phòng ban thuộc chi nhánh</div>
+                  <span class="ui-chip">{{ branchDetail.data.rooms.length }}</span>
+                </div>
+
+                <div v-if="branchDetail.data.rooms.length" class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div
+                    v-for="(room, idx) in branchDetail.data.rooms"
+                    :key="`${room.name}-${idx}`"
+                    class="border border-slate-200/70 rounded-2xl p-3 bg-transparent"
+                  >
+                    <div class="flex items-start gap-2">
+                      <span class="ui-pill ui-pill-indigo"><i class="fa-solid fa-building-user"></i></span>
+                      <div class="min-w-0">
+                        <div class="text-[14px] font-extrabold text-emerald-600">{{ room.name }}</div>
+                        <div
+                          class="text-[12px] font-semibold text-slate-500 mt-1 line-clamp-2"
+                          v-html="room.description || 'Không có mô tả'"
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div v-else class="text-[13px] font-extrabold text-slate-500">Chưa có phòng ban</div>
               </div>
             </div>
           </div>
@@ -1027,7 +1048,7 @@ const deptModal = reactive({ open: false, title: "Thêm phòng ban", editingId: 
 const branchModal = reactive({ open: false, title: "Thêm chi nhánh", editingId: null });
 const deleteModal = reactive({ open: false, type: null, id: null, name: "", title: "" });
 const deptDetail = reactive({ open: false, data: null });
-const branchDetail = reactive({ open: false, data: null });
+const branchDetail = reactive({ open: false, data: null, loading: false, error: "" });
 
 /** Forms */
 const deptForm = reactive({
@@ -1096,6 +1117,8 @@ function closeAllModals() {
 
   deptDetail.data = null;
   branchDetail.data = null;
+  branchDetail.loading = false;
+  branchDetail.error = "";
 }
 
 function openDeptModal(id = null) {
@@ -1165,7 +1188,41 @@ function openBranchDetail(id) {
   const b = branches.value.find((x) => x.id === id);
   if (!b) return;
   branchDetail.open = true;
-  branchDetail.data = { ...b };
+  branchDetail.loading = true;
+  branchDetail.error = "";
+  branchDetail.data = null;
+  fetchBranchDetail(id, b);
+}
+
+async function fetchBranchDetail(id, fallbackBranch) {
+  try {
+    const res = await api.get(`/quan-ly-chi-nhanh/admin/${id}/chi-tiet`);
+    const payload = res?.data || {};
+    const chiNhanh = payload.chiNhanh || {};
+    const danhSachPhong = Array.isArray(payload.danhSachPhong) ? payload.danhSachPhong : [];
+    branchDetail.data = {
+      id: chiNhanh.id ?? fallbackBranch.id,
+      name: chiNhanh.ten ?? fallbackBranch.name,
+      address: chiNhanh.diaChi ?? fallbackBranch.address,
+      roomCount: chiNhanh.soLuongPhong ?? fallbackBranch.roomCount ?? danhSachPhong.length,
+      employeeCount: chiNhanh.soLuongNhanVien ?? fallbackBranch.employeeCount ?? 0,
+      rooms: danhSachPhong.map((room) => ({
+        name: room.tenPhong,
+        description: room.moTa,
+      })),
+    };
+  } catch (error) {
+    console.error("❌ Lỗi fetch chi tiết chi nhánh", error);
+    branchDetail.error = "Vui lòng thử lại sau.";
+    branchDetail.data = {
+      ...fallbackBranch,
+      roomCount: fallbackBranch.roomCount ?? 0,
+      employeeCount: fallbackBranch.employeeCount ?? 0,
+      rooms: deptListByBranch(id).map((room) => ({ name: room.name, description: room.description })),
+    };
+  } finally {
+    branchDetail.loading = false;
+  }
 }
 
 /** CRUD */
