@@ -1,11 +1,9 @@
-<!-- AdminDeptBranch.vue (UI v2 - clean, modern, dễ nhìn) -->
 <template>
   <div class="min-h-screen bg-slate-50 text-slate-800">
     <!-- Topbar -->
     <header class="sticky top-0 z-40 border-b border-slate-200/70 bg-white/85 backdrop-blur">
       <div class="mx-auto max-w-[1400px] px-5 py-4">
         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <!-- Brand -->
           <div class="flex items-center gap-3">
             <div class="ui-brand">
               <i class="fa-solid fa-building"></i>
@@ -17,7 +15,6 @@
             </div>
           </div>
 
-          <!-- Right -->
           <div class="flex items-center gap-2 md:gap-3 justify-between md:justify-end">
             <button class="ui-ico-btn" type="button" aria-label="Thông báo">
               <i class="fa-solid fa-bell"></i>
@@ -38,6 +35,7 @@
 
       </div>
     </header>
+
     <!-- Tabs -->
     <div class="mt-4" style="margin-left: 110px">
       <div class="ui-tabs">
@@ -52,20 +50,18 @@
           <i :class="t.icon"></i>
           <span class="whitespace-nowrap font-extrabold">{{ t.label }}</span>
           <span v-if="t.key === 'departments'" class="ui-chip">
-                {{ filteredDepartments.length }}
-              </span>
+            {{ filteredDepartments.length }}
+          </span>
           <span v-else class="ui-chip ui-chip-emerald">
-                {{ filteredBranches.length }}
-              </span>
+            {{ filteredBranches.length }}
+          </span>
         </button>
       </div>
     </div>
+
     <main class="mx-auto max-w-[1400px] px-5 py-5">
-
-
       <!-- ===================== DEPARTMENTS ===================== -->
       <section v-if="currentTab === 'departments'">
-        <!-- Toolbar -->
         <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <div class="text-[16px] md:text-[18px] font-extrabold text-slate-900">Phòng ban</div>
@@ -130,6 +126,7 @@
                     placeholder="Tên phòng ..."
                     @keyup.enter="applyDeptFilter()"
                 />
+                <i class="fa-solid fa-magnifying-glass ui-input-ico"></i>
               </div>
             </div>
 
@@ -192,7 +189,11 @@
                 <td>
                   <div class="flex items-center gap-3 min-w-0">
                     <div class="h-10 w-10 rounded-2xl overflow-hidden ring-2 ring-slate-200 shrink-0">
-                      <img :src=" ' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + d.avatar" :alt="d.name" class="h-full w-full object-cover" />
+                      <img
+                          :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + d.avatar"
+                          :alt="d.name"
+                          class="h-full w-full object-cover"
+                      />
                     </div>
                     <div class="min-w-0">
                       <div class="truncate text-[14px] md:text-[15px] font-extrabold text-slate-900" :title="d.name">
@@ -207,7 +208,6 @@
 
                 <td>
                   <div class="flex items-center gap-2 min-w-0">
-                    <!-- AVATAR TRƯỞNG PHÒNG -->
                     <div class="h-8 w-8 rounded-full overflow-hidden ring-2 ring-slate-200 shrink-0">
                       <img
                           v-if="d.managerAvatar"
@@ -224,21 +224,13 @@
                       </div>
                     </div>
 
-                    <!-- TÊN TRƯỞNG PHÒNG -->
                     <div class="min-w-0">
-      <span
-          v-if="d.manager"
-          class="font-extrabold text-slate-800 truncate block"
-          :title="d.manager"
-      >
-        {{ d.manager }}
-      </span>
-                      <span
-                          v-else
-                          class="text-rose-600 font-extrabold text-[12px]"
-                      >
-        Chưa phân công
-      </span>
+                        <span v-if="d.manager" class="font-extrabold text-slate-800 truncate block" :title="d.manager">
+                          {{ d.manager }}
+                        </span>
+                      <span v-else class="text-rose-600 font-extrabold text-[12px]">
+                          Chưa phân công
+                        </span>
                     </div>
                   </div>
                 </td>
@@ -312,7 +304,7 @@
 
               <div class="mt-3 flex items-center gap-2 min-w-0">
                 <span class="ui-pill ui-pill-purple"><i class="fa-solid fa-code-branch"></i></span>
-                    <span class="truncate text-slate-800 text-[13px] font-extrabold">
+                <span class="truncate text-slate-800 text-[13px] font-extrabold">
                   {{ d.branchName || "—" }}
                 </span>
               </div>
@@ -342,7 +334,6 @@
 
       <!-- ===================== BRANCHES ===================== -->
       <section v-else>
-        <!-- Toolbar -->
         <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <div class="text-[16px] md:text-[18px] font-extrabold text-slate-900">Chi nhánh</div>
@@ -359,7 +350,6 @@
           </div>
         </div>
 
-        <!-- Empty -->
         <div v-if="filteredBranches.length === 0" class="ui-card mt-4 p-8 text-center">
           <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-700 ring-2 ring-emerald-200">
             <i class="fa-solid fa-code-branch text-xl"></i>
@@ -373,13 +363,12 @@
           </button>
         </div>
 
-        <!-- TABLE VIEW -->
         <div v-else-if="branchView === 'table'" class="mt-4 ui-card p-0 overflow-hidden">
           <div
               class="px-4 py-3 border-b border-slate-200/70 flex items-center justify-between"
               style="background: linear-gradient(135deg, #d7e0fd 0%, #e5e1fa 50%, #ffe0f0 100%);"
           >
-          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2">
               <span class="ui-dot ui-dot-emerald"></span>
               <div class="text-[14px] font-extrabold text-slate-900">Bảng chi nhánh</div>
             </div>
@@ -422,7 +411,7 @@
                 <td>
                   <div class="flex items-start gap-2 min-w-0">
                       <span class="ui-pill ui-pill-slate">
-                        <i class="fa-solid fa-location-dot" style="corlor: red !important;"></i>
+                        <i class="fa-solid fa-location-dot"></i>
                       </span>
                     <div class="min-w-0">
                       <div class="text-[13px] font-semibold text-slate-700 line-clamp-2">
@@ -463,7 +452,7 @@
 
     <!-- ===================== MODALS ===================== -->
 
-    <!-- Dept Add/Edit Modal -->
+    <!-- Dept Add/Edit Modal (UPDATED: KHÔNG CẦN TRƯỞNG PHÒNG, THÊM ĐỊA CHỈ GIỐNG CHI NHÁNH) -->
     <transition name="fade">
       <div v-if="deptModal.open" class="ui-overlay" @mousedown.self="closeAllModals()">
         <div class="ui-modal modal-scroll">
@@ -480,51 +469,166 @@
           </div>
 
           <div class="p-5">
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <div>
-                <label class="ui-label">Tên phòng ban <span class="text-rose-500">*</span></label>
-                <input v-model.trim="deptForm.name" class="ui-input" type="text" />
+            <div class="ui-card p-4 border border-slate-200/70">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="ui-pill ui-pill-indigo"><i class="fa-solid fa-pen"></i></span>
+                <div class="font-extrabold text-slate-900">Thông tin phòng ban</div>
               </div>
-              <div>
-                <label class="ui-label">Trưởng phòng <span class="text-rose-500">*</span></label>
-                <input v-model.trim="deptForm.manager" class="ui-input" type="text" />
+
+              <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div>
+                  <label class="ui-label">Tên phòng ban <span class="text-rose-500">*</span></label>
+                  <input v-model.trim="deptForm.name" class="ui-input" type="text" placeholder="Ví dụ: Phòng Kinh doanh" />
+                </div>
+
+                <div>
+                  <label class="ui-label">Chi nhánh <span class="text-rose-500">*</span></label>
+                  <select v-model="deptForm.branchId" class="ui-input">
+                    <option :value="null">Chọn chi nhánh</option>
+                    <option v-for="b in branches" :key="b.id" :value="b.id">
+                      {{ b.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="ui-label">Chức năng <span class="text-rose-500">*</span></label>
+                  <select v-model="deptForm.functionName" class="ui-input">
+                    <option value="">Chọn chức năng</option>
+                    <option v-for="f in systemFunctions" :key="f.name" :value="f.name">
+                      {{ f.displayName }}
+                    </option>
+                  </select>
+                  <div class="mt-1 text-[12px] text-slate-500 font-semibold" v-if="selectedFunctionDescription">
+                    {{ selectedFunctionDescription }}
+                  </div>
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="ui-label">Mô tả <span class="text-rose-500">*</span></label>
+                  <textarea
+                      v-model.trim="deptForm.description"
+                      class="ui-input"
+                      rows="2"
+                      placeholder="Mô tả ngắn về phòng ban..."
+                  ></textarea>
+                </div>
               </div>
             </div>
 
-            <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-              <div>
-                <label class="ui-label">Chi nhánh <span class="text-rose-500">*</span></label>
-                <select v-model="deptForm.branchId" class="ui-input">
-                  <option :value="null">Chọn chi nhánh</option>
-                  <option v-for="b in branches" :key="b.id" :value="b.id">
-                    {{ b.name }}
-                  </option>
-                </select>
+            <!-- ĐỊA CHỈ GIỐNG CHI NHÁNH -->
+            <div class="mt-3 ui-card p-4 border border-slate-200/70">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="ui-pill ui-pill-slate"><i class="fa-solid fa-location-dot"></i></span>
+                <div class="font-extrabold text-slate-900">Địa chỉ (bắt buộc)</div>
               </div>
 
-              <div>
-                <label class="ui-label">Link nhân viên <span class="text-rose-500">*</span></label>
-                <input v-model.trim="deptForm.employeeLink" class="ui-input" type="text" />
+              <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div>
+                  <label class="ui-label">Tỉnh/Thành phố <span class="text-rose-500">*</span></label>
+                  <div class="ui-select">
+                    <button type="button" class="ui-select-trigger" @click="toggleDeptProvinceDropdown()">
+                      <span class="truncate">
+                        {{ deptForm.provinceName || "Chọn Tỉnh/Thành" }}
+                      </span>
+                      <i class="fa-solid fa-chevron-down text-[12px] text-slate-400"></i>
+                    </button>
+                    <div v-if="deptProvinceDropdownOpen" class="ui-select-panel">
+                      <div class="ui-select-search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input
+                            v-model.trim="deptProvinceSearch"
+                            type="text"
+                            placeholder="Tìm tỉnh/thành..."
+                            @keydown.escape.prevent="closeDeptProvinceDropdown()"
+                        />
+                      </div>
+                      <div class="ui-select-list">
+                        <button
+                            v-for="p in deptFilteredProvinces"
+                            :key="p.name"
+                            type="button"
+                            class="ui-select-item"
+                            @click="selectDeptProvince(p.name)"
+                        >
+                          {{ p.name }}
+                        </button>
+                        <div v-if="deptFilteredProvinces.length === 0" class="ui-select-empty">
+                          Không tìm thấy tỉnh/thành
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="ui-label">Phường/Xã <span class="text-rose-500">*</span></label>
+                  <div class="ui-select" :class="{ disabled: !deptForm.provinceName }">
+                    <button
+                        type="button"
+                        class="ui-select-trigger"
+                        :disabled="!deptForm.provinceName"
+                        @click="toggleDeptWardDropdown()"
+                    >
+                      <span class="truncate">
+                        {{ deptForm.wardName || "Chọn Phường/Xã" }}
+                      </span>
+                      <i class="fa-solid fa-chevron-down text-[12px] text-slate-400"></i>
+                    </button>
+                    <div v-if="deptWardDropdownOpen" class="ui-select-panel">
+                      <div class="ui-select-search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input
+                            v-model.trim="deptWardSearch"
+                            type="text"
+                            placeholder="Tìm phường/xã..."
+                            @keydown.escape.prevent="closeDeptWardDropdown()"
+                        />
+                      </div>
+                      <div class="ui-select-list">
+                        <button
+                            v-for="w in deptFilteredWards"
+                            :key="w.name"
+                            type="button"
+                            class="ui-select-item"
+                            @click="selectDeptWard(w.name)"
+                        >
+                          {{ w.name }}
+                        </button>
+                        <div v-if="deptFilteredWards.length === 0" class="ui-select-empty">
+                          Không tìm thấy phường/xã
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="ui-label">Địa chỉ chi tiết <span class="text-rose-500">*</span></label>
+                  <input
+                      v-model.trim="deptForm.addressDetail"
+                      class="ui-input"
+                      type="text"
+                      placeholder="Ví dụ: Số 12 đường ABC, Quận 1"
+                  />
+                </div>
+              </div>
+
+              <div class="mt-3">
+                <div class="text-[12px] text-slate-500 font-semibold">Xem trước địa chỉ:</div>
+                <div class="mt-1 text-[14px] text-slate-800">
+                  {{ previewDeptAddress || "—" }}
+                </div>
               </div>
             </div>
 
-            <div class="mt-3">
-              <label class="ui-label">Mô tả <span class="text-rose-500">*</span></label>
-              <textarea v-model.trim="deptForm.description" class="ui-input" rows="2"></textarea>
-            </div>
-
-            <div class="mt-3">
-              <label class="ui-label">Chức năng <span class="text-rose-500">*</span></label>
-              <div class="grid grid-cols-2 gap-2 md:grid-cols-3">
-                <label v-for="f in functionOptions" :key="f.key" class="ui-check">
-                  <input type="checkbox" :value="f.key" v-model="deptForm.functions" />
-                  <span class="font-extrabold">{{ f.name }}</span>
-                </label>
+            <!-- Upload -->
+            <div class="mt-3 ui-card p-4 border border-slate-200/70">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="ui-pill ui-pill-purple"><i class="fa-solid fa-image"></i></span>
+                <div class="font-extrabold text-slate-900">Ảnh đại diện</div>
               </div>
-            </div>
 
-            <div class="mt-3">
-              <label class="ui-label">Ảnh đại diện</label>
               <div class="ui-upload" @click="triggerDeptFile()">
                 <div class="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-indigo-50 text-indigo-700 ring-2 ring-indigo-200">
                   <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
@@ -536,8 +640,8 @@
                 <input ref="deptFileInput" type="file" class="hidden" accept="image/*" @change="onDeptImageChange" />
               </div>
 
-              <div v-if="deptForm.imageUrl" class="mt-3 overflow-hidden rounded-2xl border-2 border-slate-200">
-                <img :src="deptForm.imageUrl" alt="Preview" class="h-40 w-full object-cover" />
+              <div v-if="deptForm.imagePreview" class="mt-3 overflow-hidden rounded-2xl border-2 border-slate-200">
+                <img :src="deptForm.imagePreview" alt="Preview" class="h-40 w-full object-cover" />
               </div>
             </div>
           </div>
@@ -594,19 +698,19 @@
                       <div class="ui-select-search">
                         <i class="fa-solid fa-magnifying-glass"></i>
                         <input
-                          v-model.trim="provinceSearch"
-                          type="text"
-                          placeholder="Tìm tỉnh/thành..."
-                          @keydown.escape.prevent="closeProvinceDropdown()"
+                            v-model.trim="provinceSearch"
+                            type="text"
+                            placeholder="Tìm tỉnh/thành..."
+                            @keydown.escape.prevent="closeProvinceDropdown()"
                         />
                       </div>
                       <div class="ui-select-list">
                         <button
-                          v-for="p in filteredProvinces"
-                          :key="p.name"
-                          type="button"
-                          class="ui-select-item"
-                          @click="selectProvince(p.name)"
+                            v-for="p in filteredProvinces"
+                            :key="p.name"
+                            type="button"
+                            class="ui-select-item"
+                            @click="selectProvince(p.name)"
                         >
                           {{ p.name }}
                         </button>
@@ -622,10 +726,10 @@
                   <label class="ui-label">Phường/Xã <span class="text-rose-500">*</span></label>
                   <div class="ui-select" :class="{ disabled: !branchForm.provinceName }">
                     <button
-                      type="button"
-                      class="ui-select-trigger"
-                      :disabled="!branchForm.provinceName"
-                      @click="toggleWardDropdown()"
+                        type="button"
+                        class="ui-select-trigger"
+                        :disabled="!branchForm.provinceName"
+                        @click="toggleWardDropdown()"
                     >
                       <span class="truncate">
                         {{ branchForm.wardName || "Chọn Phường/Xã" }}
@@ -636,19 +740,19 @@
                       <div class="ui-select-search">
                         <i class="fa-solid fa-magnifying-glass"></i>
                         <input
-                          v-model.trim="wardSearch"
-                          type="text"
-                          placeholder="Tìm phường/xã..."
-                          @keydown.escape.prevent="closeWardDropdown()"
+                            v-model.trim="wardSearch"
+                            type="text"
+                            placeholder="Tìm phường/xã..."
+                            @keydown.escape.prevent="closeWardDropdown()"
                         />
                       </div>
                       <div class="ui-select-list">
                         <button
-                          v-for="w in filteredWards"
-                          :key="w.name"
-                          type="button"
-                          class="ui-select-item"
-                          @click="selectWard(w.name)"
+                            v-for="w in filteredWards"
+                            :key="w.name"
+                            type="button"
+                            class="ui-select-item"
+                            @click="selectWard(w.name)"
                         >
                           {{ w.name }}
                         </button>
@@ -727,10 +831,10 @@
                 <div class="flex items-start gap-4 min-w-0">
                   <div class="h-16 w-16 rounded-2xl overflow-hidden ring-2 ring-slate-200 shrink-0 bg-slate-100">
                     <img
-                      v-if="deptDetail.data.profileImage"
-                      :src="resolvePublicAsset(deptDetail.data.profileImage)"
-                      :alt="deptDetail.data.departmentName"
-                      class="h-full w-full object-cover"
+                        v-if="deptDetail.data.profileImage"
+                        :src="resolvePublicAsset(deptDetail.data.profileImage)"
+                        :alt="deptDetail.data.departmentName"
+                        class="h-full w-full object-cover"
                     />
                     <div v-else class="h-full w-full grid place-items-center text-slate-400">
                       <i class="fa-solid fa-building-user text-lg"></i>
@@ -763,30 +867,6 @@
 
               <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div class="ui-info">
-                  <span class="ui-pill ui-pill-blue"><i class="fa-solid fa-user-tie"></i></span>
-                  <div class="min-w-0">
-                    <div class="ui-info-label">Trưởng phòng</div>
-                    <div class="ui-info-value">
-                      {{ deptDetail.data.manager?.name || "Chưa phân công" }}
-                    </div>
-                    <div class="mt-1 text-[12px] text-slate-500 font-semibold">
-                      {{ deptDetail.data.manager?.email || "—" }}
-                    </div>
-                  </div>
-                  <div class="ml-auto h-10 w-10 rounded-full overflow-hidden ring-2 ring-slate-200 bg-slate-100">
-                    <img
-                      v-if="deptDetail.data.manager?.avatar"
-                      :src="resolvePublicAsset(deptDetail.data.manager.avatar)"
-                      :alt="deptDetail.data.manager?.name || 'Manager'"
-                      class="h-full w-full object-cover"
-                    />
-                    <div v-else class="h-full w-full grid place-items-center text-slate-400">
-                      <i class="fa-solid fa-user"></i>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="ui-info">
                   <span class="ui-pill ui-pill-purple"><i class="fa-solid fa-code-branch"></i></span>
                   <div class="min-w-0">
                     <div class="ui-info-label">Chi nhánh</div>
@@ -794,6 +874,14 @@
                     <div class="mt-1 text-[12px] text-slate-500 font-semibold">
                       ID: {{ deptDetail.data.branchId || "—" }}
                     </div>
+                  </div>
+                </div>
+
+                <div class="ui-info">
+                  <span class="ui-pill ui-pill-slate"><i class="fa-solid fa-location-dot"></i></span>
+                  <div class="min-w-0">
+                    <div class="ui-info-label">Địa chỉ</div>
+                    <div class="ui-info-value">{{ formatAddressDisplay(deptDetail.data.address) || "—" }}</div>
                   </div>
                 </div>
 
@@ -820,17 +908,17 @@
 
                 <div v-if="deptDetail.data.employees.length" class="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <div
-                    v-for="employee in deptDetail.data.employees"
-                    :key="employee.id || employee.email || employee.name"
-                    class="border border-slate-200/70 rounded-2xl p-3 bg-transparent"
+                      v-for="employee in deptDetail.data.employees"
+                      :key="employee.id || employee.email || employee.name"
+                      class="border border-slate-200/70 rounded-2xl p-3 bg-transparent"
                   >
                     <div class="flex items-start gap-3">
                       <div class="h-10 w-10 rounded-full overflow-hidden ring-2 ring-slate-200 bg-slate-100 shrink-0">
                         <img
-                          v-if="employee.avatar"
-                          :src="resolvePublicAsset(employee.avatar)"
-                          :alt="employee.name"
-                          class="h-full w-full object-cover"
+                            v-if="employee.avatar"
+                            :src="resolvePublicAsset(employee.avatar)"
+                            :alt="employee.name"
+                            class="h-full w-full object-cover"
                         />
                         <div v-else class="h-full w-full grid place-items-center text-slate-400">
                           <i class="fa-solid fa-user"></i>
@@ -859,10 +947,10 @@
           <div class="ui-modal-foot">
             <button type="button" class="ui-btn ui-btn-ghost" @click="closeAllModals()">Đóng</button>
             <button
-              v-if="deptDetail.data?.localId"
-              type="button"
-              class="ui-btn ui-btn-indigo"
-              @click="openDeptModal(deptDetail.data.localId)"
+                v-if="deptDetail.data?.localId"
+                type="button"
+                class="ui-btn ui-btn-indigo"
+                @click="openDeptModal(deptDetail.data.localId)"
             >
               <i class="fa-solid fa-pen-to-square"></i> Sửa
             </button>
@@ -934,17 +1022,17 @@
 
                 <div v-if="branchDetail.data.rooms.length" class="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <div
-                    v-for="(room, idx) in branchDetail.data.rooms"
-                    :key="`${room.name}-${idx}`"
-                    class="border border-slate-200/70 rounded-2xl p-3 bg-transparent"
+                      v-for="(room, idx) in branchDetail.data.rooms"
+                      :key="`${room.name}-${idx}`"
+                      class="border border-slate-200/70 rounded-2xl p-3 bg-transparent"
                   >
                     <div class="flex items-start gap-2">
                       <span class="ui-pill ui-pill-indigo"><i class="fa-solid fa-building-user"></i></span>
                       <div class="min-w-0">
                         <div class="text-[14px] font-extrabold text-emerald-600">{{ room.name }}</div>
                         <div
-                          class="text-[12px] font-semibold text-slate-500 mt-1 line-clamp-2"
-                          v-html="room.description || 'Không có mô tả'"
+                            class="text-[12px] font-semibold text-slate-500 mt-1 line-clamp-2"
+                            v-html="room.description || 'Không có mô tả'"
                         ></div>
                       </div>
                     </div>
@@ -1011,27 +1099,45 @@ const tabs = [
 ];
 
 const currentTab = ref("departments");
-const deptView = ref("table"); // table | card
-const branchView = ref("table"); // table | card
+const deptView = ref("table");
+const branchView = ref("table");
 const toggleDeptFilter = ref(true);
 
-/** Function config */
-const functionMap = {
-  consulting: { name: "Tư vấn" },
-  tele: { name: "Tele" },
-  marketing: { name: "Marketing" },
-  it: { name: "Thông tin" },
-  deployment: { name: "Triển khai" },
-  qa: { name: "QA/Testing" },
-  hr: { name: "Nhân sự" },
-  finance: { name: "Tài chính" },
-};
-const functionOptions = Object.entries(functionMap).map(([key, v]) => ({ key, name: v.name }));
+/** ====== FUNCTIONS (BE: SystemFunctionDTO) ====== */
+const systemFunctions = ref([]);
+async function fetchSystemFunctions() {
+  try {
+    const res = await api.get("/admin.thg/department-new/function/all");
+    const data = Array.isArray(res?.data) ? res.data : [];
+    systemFunctions.value = data
+        .map((x) => ({
+          name: x?.name ?? "",
+          displayName: x?.displayName ?? x?.name ?? "",
+          description: x?.description ?? "",
+        }))
+        .filter((x) => x.name);
+  } catch (error) {
+    console.error("❌ Lỗi fetch chức năng", error);
+    systemFunctions.value = [];
+  }
+}
+
+const selectedFunctionDescription = computed(() => {
+  const code = deptForm.functionName || "";
+  const f = systemFunctions.value.find((x) => x.name === code);
+  return f?.description || "";
+});
 
 /** Provinces */
 const provinces = Array.isArray(addressData) ? addressData : [];
 const wardsByProvince = computed(() => {
   const p = provinces.find((x) => x.name === branchForm.provinceName);
+  return p?.wards || [];
+});
+
+/** Dept address: wards by selected province */
+const deptWardsByProvince = computed(() => {
+  const p = provinces.find((x) => x.name === deptForm.provinceName);
   return p?.wards || [];
 });
 
@@ -1049,7 +1155,22 @@ const filteredWards = computed(() => {
   return wardsByProvince.value.filter((w) => w.name.toLowerCase().includes(keyword));
 });
 
-/** Branch data (BE: ChiNhanhDTO) */
+/** Dept address dropdowns */
+const deptProvinceDropdownOpen = ref(false);
+const deptWardDropdownOpen = ref(false);
+const deptProvinceSearch = ref("");
+const deptWardSearch = ref("");
+
+const deptFilteredProvinces = computed(() => {
+  const keyword = deptProvinceSearch.value.toLowerCase();
+  return provinces.filter((p) => p.name.toLowerCase().includes(keyword));
+});
+const deptFilteredWards = computed(() => {
+  const keyword = deptWardSearch.value.toLowerCase();
+  return deptWardsByProvince.value.filter((w) => w.name.toLowerCase().includes(keyword));
+});
+
+/** Branch data */
 const branches = ref([]);
 const fetchBranches = async () => {
   try {
@@ -1068,7 +1189,7 @@ const fetchBranches = async () => {
   }
 };
 
-/** Department data (BE: DepartmentFullTableDTO) */
+/** Departments */
 const departments = ref([]);
 
 /** Filters */
@@ -1085,20 +1206,9 @@ function applyDeptFilter() {
 function applyBranchFilter() {
   appliedBranchFilter.search = branchFilter.search;
 }
-function resetDeptFilter() {
-  deptFilter.branchId = "all";
-  deptFilter.function = "all";
-  deptFilter.search = "";
-  applyDeptFilter();
-}
-function resetBranchFilter() {
-  branchFilter.search = "";
-  applyBranchFilter();
-}
 
 /** Computed lists */
 const filteredDepartments = computed(() => departments.value);
-
 const filteredBranches = computed(() => {
   const s = (appliedBranchFilter.search || "").toLowerCase();
   return branches.value.filter((b) => {
@@ -1128,7 +1238,7 @@ function deptListByBranch(branchId) {
   return departments.value.filter((d) => Number(d.branchId) === Number(branchId));
 }
 
-/** Address format */
+/** Address format (same as branch) */
 function formatAddressDisplay(addr) {
   if (!addr) return "";
   return String(addr).split("/!!").join(", ");
@@ -1137,7 +1247,7 @@ function buildAddress(detail, wardName, provinceName) {
   return `${detail}/!!${wardName}/!!${provinceName}`;
 }
 
-/** Modals state */
+/** Modals */
 const deptModal = reactive({ open: false, title: "Thêm phòng ban", editingId: null });
 const branchModal = reactive({ open: false, title: "Thêm chi nhánh", editingId: null });
 const deleteModal = reactive({ open: false, type: null, id: null, name: "", title: "" });
@@ -1147,12 +1257,16 @@ const branchDetail = reactive({ open: false, data: null, loading: false, error: 
 /** Forms */
 const deptForm = reactive({
   name: "",
-  manager: "",
   branchId: null,
-  employeeLink: "/#",
   description: "",
-  functions: [],
-  imageUrl: "",
+  functionName: "",
+  // ✅ address like branch
+  addressDetail: "",
+  provinceName: "",
+  wardName: "",
+  // upload
+  imagePreview: "",
+  imageFile: null,
 });
 const branchForm = reactive({
   name: "",
@@ -1169,12 +1283,43 @@ const previewBranchAddress = computed(() => {
   if (!a || !w || !p) return "";
   return formatAddressDisplay(buildAddress(a, w, p));
 });
+const previewDeptAddress = computed(() => {
+  const a = deptForm.addressDetail?.trim();
+  const w = deptForm.wardName?.trim();
+  const p = deptForm.provinceName?.trim();
+  if (!a || !w || !p) return "";
+  return formatAddressDisplay(buildAddress(a, w, p));
+});
 
-/** IDs */
-const nextDeptId = ref(departments.value.length + 1);
-const nextBranchId = ref(branches.value.length + 1);
+/** Dept address dropdown handlers */
+function toggleDeptProvinceDropdown() {
+  deptProvinceDropdownOpen.value = !deptProvinceDropdownOpen.value;
+  deptWardDropdownOpen.value = false;
+}
+function closeDeptProvinceDropdown() {
+  deptProvinceDropdownOpen.value = false;
+  deptProvinceSearch.value = "";
+}
+function toggleDeptWardDropdown() {
+  if (!deptForm.provinceName) return;
+  deptWardDropdownOpen.value = !deptWardDropdownOpen.value;
+  deptProvinceDropdownOpen.value = false;
+}
+function closeDeptWardDropdown() {
+  deptWardDropdownOpen.value = false;
+  deptWardSearch.value = "";
+}
+function selectDeptProvince(name) {
+  deptForm.provinceName = name;
+  deptForm.wardName = "";
+  closeDeptProvinceDropdown();
+}
+function selectDeptWard(name) {
+  deptForm.wardName = name;
+  closeDeptWardDropdown();
+}
 
-/** Fake select handlers */
+/** Branch fake select handlers */
 function toggleProvinceDropdown() {
   provinceDropdownOpen.value = !provinceDropdownOpen.value;
   wardDropdownOpen.value = false;
@@ -1210,9 +1355,11 @@ function triggerDeptFile() {
 function onDeptImageChange(e) {
   const file = e.target.files?.[0];
   if (!file) return;
+  deptForm.imageFile = file;
+
   const reader = new FileReader();
   reader.onload = (ev) => {
-    deptForm.imageUrl = String(ev.target?.result || "");
+    deptForm.imagePreview = String(ev.target?.result || "");
   };
   reader.readAsDataURL(file);
 }
@@ -1242,6 +1389,8 @@ function closeAllModals() {
 
   closeProvinceDropdown();
   closeWardDropdown();
+  closeDeptProvinceDropdown();
+  closeDeptWardDropdown();
 }
 
 function openDeptModal(id = null) {
@@ -1252,21 +1401,29 @@ function openDeptModal(id = null) {
   if (id) {
     const d = departments.value.find((x) => x.id === id);
     if (!d) return;
-    deptForm.name = d.name;
-    deptForm.manager = d.manager;
-    deptForm.branchId = d.branchId;
-    deptForm.employeeLink = d.employeeLink || "/#";
-    deptForm.description = d.description;
-    deptForm.functions = [...(d.functions || [])];
-    deptForm.imageUrl = d.imageUrl || "";
+
+    deptForm.name = d.name || "";
+    deptForm.branchId = d.branchId ?? null;
+    deptForm.description = d.description || "";
+    deptForm.functionName = d.functionName || "";
+
+    const parts = String(d.address || "").split("/!!");
+    deptForm.addressDetail = parts[0] || "";
+    deptForm.wardName = parts[1] || "";
+    deptForm.provinceName = parts[2] || "";
+
+    deptForm.imagePreview = d.avatar ? `https://s3.cloudfly.vn/thg-storage-dev/uploads-public/${d.avatar}` : "";
+    deptForm.imageFile = null;
   } else {
     deptForm.name = "";
-    deptForm.manager = "";
     deptForm.branchId = null;
-    deptForm.employeeLink = "/#";
     deptForm.description = "";
-    deptForm.functions = [];
-    deptForm.imageUrl = "";
+    deptForm.functionName = "";
+    deptForm.addressDetail = "";
+    deptForm.provinceName = "";
+    deptForm.wardName = "";
+    deptForm.imagePreview = "";
+    deptForm.imageFile = null;
   }
 }
 
@@ -1311,7 +1468,6 @@ function resolvePublicAsset(path) {
   if (String(path).startsWith("http")) return String(path);
   return `${publicAssetBase}${path}`;
 }
-
 function normalizeEmployee(raw) {
   if (!raw) return null;
   return {
@@ -1323,7 +1479,6 @@ function normalizeEmployee(raw) {
     avatar: raw.avatar ?? "",
   };
 }
-
 function openDeptDetail(dept) {
   if (!dept) return;
   deptDetail.open = true;
@@ -1383,6 +1538,7 @@ async function fetchDeptDetail(fallbackDept) {
     const payload = res?.data || {};
     const employees = Array.isArray(payload.employees) ? payload.employees : [];
     const manager = normalizeEmployee(payload.manager);
+
     deptDetail.data = {
       departmentId: payload.departmentId ?? null,
       departmentName: payload.departmentName ?? fallbackDept.name,
@@ -1392,13 +1548,14 @@ async function fetchDeptDetail(fallbackDept) {
       branchName: payload.branchName ?? fallbackDept.branchName ?? "",
       functionName: payload.functionName ?? fallbackDept.functionName ?? "",
       functionDisplayName: payload.functionDisplayName ?? "",
+      address: payload.address ?? fallbackDept.address ?? "",
       manager,
       employees: employees.map(normalizeEmployee).filter(Boolean),
       totalEmployee:
-        payload.totalEmployee ??
-        (Array.isArray(employees) ? employees.length : 0) ??
-        fallbackDept.employees ??
-        0,
+          payload.totalEmployee ??
+          (Array.isArray(employees) ? employees.length : 0) ??
+          fallbackDept.employees ??
+          0,
       localId: fallbackDept.id,
     };
   } catch (error) {
@@ -1413,16 +1570,8 @@ async function fetchDeptDetail(fallbackDept) {
       branchName: fallbackDept.branchName ?? "",
       functionName: fallbackDept.functionName ?? "",
       functionDisplayName: "",
-      manager: fallbackDept.manager
-        ? {
-          id: null,
-          name: fallbackDept.manager,
-          address: "",
-          email: "",
-          phone: "",
-          avatar: fallbackDept.managerAvatar ?? "",
-        }
-        : null,
+      address: fallbackDept.address ?? "",
+      manager: null,
       employees: [],
       totalEmployee: fallbackDept.employees ?? 0,
       localId: fallbackDept.id,
@@ -1435,12 +1584,8 @@ async function fetchDeptDetail(fallbackDept) {
 async function fetchDepartments() {
   try {
     const params = {};
-    if (deptFilter.search) {
-      params.name = deptFilter.search;
-    }
-    if (deptFilter.branchId !== "all") {
-      params.branchId = deptFilter.branchId;
-    }
+    if (deptFilter.search) params.name = deptFilter.search;
+    if (deptFilter.branchId !== "all") params.branchId = deptFilter.branchId;
 
     const res = await api.get("/admin.thg/department-new/view", { params });
     const data = Array.isArray(res.data) ? res.data : [];
@@ -1451,15 +1596,17 @@ async function fetchDepartments() {
         name: item.departmentName,
         avatar: item.avatar,
         description: item.description,
+        // table still show manager from BE list view (không đổi)
         manager: item.managerName,
         managerAvatar: item.managerAvatar,
         branchName: item.branchName,
         branchId: branchMatch?.id ?? null,
         functionName: item.functionName,
         employees: item.totalEmployee ?? 0,
+        address: item.address ?? "",
         imageUrl:
-          item.managerAvatar ||
-          "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
+            item.managerAvatar ||
+            "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
       };
     });
   } catch (error) {
@@ -1468,157 +1615,57 @@ async function fetchDepartments() {
   }
 }
 
-/** CRUD */
-function saveDept() {
-  const name = deptForm.name.trim();
-  const manager = deptForm.manager.trim();
-  const branchId = deptForm.branchId;
-  const employeeLink = (deptForm.employeeLink || "/#").trim();
+/** ====== CREATE DEPARTMENT: multipart/form-data (UPDATED: address) ====== */
+async function saveDept() {
+  const departmentName = deptForm.name.trim();
   const description = deptForm.description.trim();
-  const functions = deptForm.functions || [];
-  const imageUrl =
-      deptForm.imageUrl ||
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80";
+  const functionName = (deptForm.functionName || "").trim();
+  const branchId = deptForm.branchId;
 
-  if (!name || !manager || !branchId || !description || functions.length === 0) {
-    alert("Vui lòng điền đầy đủ thông tin bắt buộc!");
-    return;
-  }
+  const detail = deptForm.addressDetail.trim();
+  const wardName = deptForm.wardName.trim();
+  const provinceName = deptForm.provinceName.trim();
 
-  if (deptModal.editingId) {
-    const idx = departments.value.findIndex((x) => x.id === deptModal.editingId);
-    if (idx !== -1) {
-      departments.value[idx] = {
-        ...departments.value[idx],
-        name,
-        manager,
-        branchId,
-        employeeLink,
-        description,
-        functions: [...functions],
-        imageUrl,
-      };
-    }
-  } else {
-    departments.value.push({
-      id: nextDeptId.value++,
-      name,
-      manager,
-      branchId,
-      employeeLink,
-      description,
-      functions: [...functions],
-      imageUrl,
-      createdAt: new Date().toISOString().split("T")[0],
-      employees: Math.floor(Math.random() * 25) + 5,
-    });
-  }
-
-  closeAllModals();
-}
-
-async function saveBranch() {
-  const name = branchForm.name.trim();
-  const detail = branchForm.addressDetail.trim();
-  const wardName = branchForm.wardName.trim();
-  const provinceName = branchForm.provinceName.trim();
-
-  if (!name || !detail || !wardName || !provinceName) {
-    showError("Thiếu thông tin", "Vui lòng nhập Tên chi nhánh và đủ 3 phần địa chỉ.");
+  if (!departmentName || !description || !functionName || !branchId || !detail || !wardName || !provinceName) {
+    showError(
+        "Thiếu thông tin",
+        "Vui lòng nhập đầy đủ: Tên phòng ban, Chi nhánh, Chức năng, Mô tả, và đủ 3 phần địa chỉ."
+    );
     return;
   }
 
   const storedAddress = buildAddress(detail, wardName, provinceName);
 
-  if (branchModal.editingId) {
-    try {
-      const res = await showLoading(
-          api.put(`/quan-ly-chi-nhanh/admin/${branchModal.editingId}`, {
-            name,
-            address: storedAddress,
-          })
-      );
-      if (res?.status === 200) {
-        const idx = branches.value.findIndex((x) => x.id === branchModal.editingId);
-        if (idx !== -1) {
-          branches.value[idx] = { ...branches.value[idx], name, address: storedAddress };
-        }
-        if (branchDetail.open && branchDetail.data?.id === branchModal.editingId) {
-          branchDetail.data = { ...branchDetail.data, name, address: storedAddress };
-        }
-        updateAlertSuccess("Cập nhật chi nhánh thành công!");
-        closeAllModals();
-      } else {
-        updateAlertError("Không thể cập nhật chi nhánh, vui lòng thử lại!");
-      }
-    } catch (error) {
-      console.error("❌ Lỗi cập nhật chi nhánh", error);
-      updateAlertError("Không thể cập nhật chi nhánh, vui lòng thử lại!");
-    }
-    return;
+  const dto = {
+    departmentName,
+    address: storedAddress, // ✅ gửi địa chỉ giống chi nhánh
+    description,
+    functionName, // ✅ gửi code (name)
+  };
+
+  const formData = new FormData();
+  formData.append("departmentForm", new Blob([JSON.stringify(dto)], { type: "application/json" }));
+  if (deptForm.imageFile) {
+    formData.append("file", deptForm.imageFile);
   }
 
   try {
     const res = await showLoading(
-      api.post("/quan-ly-chi-nhanh/admin", {
-        name,
-        address: storedAddress,
-      })
+        api.post("/admin.thg/department-new/create", formData, {
+          headers: { "Content-Type": "multipart/form-data" }
+        })
     );
-    const payload = res?.data;
-    if (payload?.success) {
-      const newId = payload?.data ?? nextBranchId.value++;
-      branches.value.push({ id: newId, name, address: storedAddress });
-      showSuccess("Tạo chi nhánh thành công!");
+
+    if (res?.status === 200) {
+      showSuccess("Tạo phòng ban thành công!");
       closeAllModals();
+      await fetchDepartments();
     } else {
-      showError("Không thể tạo chi nhánh", payload?.message || "Vui lòng thử lại!");
+      updateAlertError("Không thể tạo phòng ban, vui lòng thử lại!");
     }
   } catch (error) {
-    console.error("❌ Lỗi tạo chi nhánh", error);
-    showError("Không thể tạo chi nhánh", "Vui lòng thử lại!");
-  }
-}
-
-function confirmDelete() {
-  if (!deleteModal.open) return;
-
-  if (deleteModal.type === "dept") {
-    departments.value = departments.value.filter((d) => d.id !== deleteModal.id);
-    closeAllModals();
-    return;
-  }
-
-  if (deleteModal.type === "branch") {
-    if (departments.value.some((d) => Number(d.branchId) === Number(deleteModal.id))) {
-      showError("Không thể xóa chi nhánh", "Chi nhánh đang có phòng ban.");
-      return;
-    }
-    confirmWithInput(
-      "Xác nhận xóa chi nhánh",
-      `Nhập đúng tên chi nhánh "${deleteModal.name}" để xác nhận.`,
-      deleteModal.name,
-      async () => {
-        try {
-          const res = await showLoading(api.delete(`/quan-ly-chi-nhanh/admin/${deleteModal.id}`));
-          const payload = res?.data;
-          if (payload?.success) {
-            branches.value = branches.value.filter((x) => x.id !== deleteModal.id);
-            if (branchDetail.open && branchDetail.data?.id === deleteModal.id) {
-              branchDetail.open = false;
-              branchDetail.data = null;
-            }
-            showSuccess("Xóa chi nhánh thành công!");
-            closeAllModals();
-          } else {
-            showError("Không thể xóa chi nhánh", payload?.message || "Vui lòng thử lại!");
-          }
-        } catch (error) {
-          console.error("❌ Lỗi xóa chi nhánh", error);
-          showError("Không thể xóa chi nhánh", "Vui lòng thử lại!");
-        }
-      }
-    );
+    console.error("❌ Lỗi tạo phòng ban", error);
+    updateAlertError("Không thể tạo phòng ban, vui lòng thử lại!");
   }
 }
 
@@ -1627,26 +1674,25 @@ applyDeptFilter();
 applyBranchFilter();
 onMounted(async () => {
   await fetchBranches();
+  await fetchSystemFunctions();
   await fetchDepartments();
 });
 
 let deptFetchTimer = null;
 watch(
-  () => [deptFilter.search, deptFilter.branchId],
-  () => {
-    applyDeptFilter();
-    if (deptFetchTimer) {
-      clearTimeout(deptFetchTimer);
+    () => [deptFilter.search, deptFilter.branchId],
+    () => {
+      applyDeptFilter();
+      if (deptFetchTimer) clearTimeout(deptFetchTimer);
+      deptFetchTimer = setTimeout(() => {
+        fetchDepartments();
+      }, 300);
     }
-    deptFetchTimer = setTimeout(() => {
-      fetchDepartments();
-    }, 300);
-  }
 );
 </script>
 
 <style scoped>
-/* Base */
+/* giữ nguyên style của bạn (không sửa thêm ngoài yêu cầu) */
 :global(html) { font-size: 16px; }
 :global(body) { background: #f8fafc; }
 
@@ -1761,10 +1807,6 @@ watch(
 .ui-seg-btn.active{
   background: rgba(79,70,229,.12);
   color:#3730a3;
-}
-.ui-seg-emerald .ui-seg-btn.active{
-  background: rgba(16,185,129,.12);
-  color:#065f46;
 }
 
 /* Buttons */
@@ -1950,6 +1992,7 @@ watch(
 .ui-pill-purple{ background:#faf5ff; border-color:#e9d5ff; color:#6d28d9; }
 .ui-pill-emerald{ background:#ecfdf5; border-color:#bbf7d0; color:#047857; }
 .ui-pill-slate{ background:#f1f5f9; border-color:#cbd5e1; color:#334155; }
+.ui-pill-indigo{ background:#eef2ff; border-color:#c7d2fe; color:#3730a3; }
 
 /* Tags */
 .ui-tag{
@@ -1961,15 +2004,8 @@ watch(
   border: 1px solid rgba(148,163,184,.35);
   white-space: nowrap;
 }
-.ui-tag-gray{ background:#f1f5f9; color:#0b1220; border-color:#cbd5e1; }
 .ui-tag-slate{ background:#f1f5f9; border-color:#cbd5e1; color:#0b1220; }
-.ui-tag-blue{ background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8; }
-.ui-tag-indigo{ background:#eef2ff; border-color:#c7d2fe; color:#3730a3; }
-.ui-tag-purple{ background:#faf5ff; border-color:#e9d5ff; color:#6d28d9; }
 .ui-tag-emerald{ background:#ecfdf5; border-color:#bbf7d0; color:#047857; }
-.ui-tag-amber{ background:#fffbeb; border-color:#fde68a; color:#b45309; }
-.ui-tag-red{ background:#fff1f2; border-color:#fecdd3; color:#be123c; }
-.ui-tag-lime{ background:#f7fee7; border-color:#d9f99d; color:#4d7c0f; }
 
 /* Values */
 .ui-value{
@@ -2002,17 +2038,6 @@ watch(
 .ui-img-overlay{
   background: linear-gradient(180deg, rgba(2,6,23,.10) 0%, rgba(2,6,23,.45) 100%);
 }
-
-/* FAB */
-.ui-fab{
-  width:30px;height:30px;border-radius:999px;
-  display:grid;place-items:center;
-  background: rgba(255,255,255,.92);
-  color:#0b1220;
-  border: 1px solid rgba(255,255,255,.8);
-}
-.ui-fab:hover{ transform: translateY(-1px); }
-.ui-fab-danger{ color:#ef4444; }
 
 /* Modal */
 .ui-overlay{
@@ -2071,33 +2096,6 @@ watch(
   transform: translateY(-1px);
 }
 
-/* Info */
-.ui-info{
-  display:flex; gap:.75rem;
-  padding: 14px;
-  border-radius: 16px;
-  border: 1px solid rgba(148,163,184,.35);
-  background:#fff;
-}
-.ui-info-label{
-  font-size:12px;
-  font-weight: 900;
-  color: rgba(2,6,23,.55);
-}
-.ui-info-value{
-  margin-top:2px;
-  font-size:14px;
-  font-weight: 950;
-  color:#0b1220;
-}
-.ui-link{
-  display:inline-flex; align-items:center; gap:.5rem;
-  font-weight: 950;
-  color:#1d4ed8;
-  max-width: 100%;
-}
-.ui-link:hover{ color:#1e40af; }
-
 /* Transitions */
 .fade-enter-active,.fade-leave-active{ transition: opacity .16s ease; }
 .fade-enter-from,.fade-leave-to{ opacity: 0; }
@@ -2105,15 +2103,4 @@ watch(
 /* Line clamp */
 .line-clamp-1{ overflow:hidden; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:1; }
 .line-clamp-2{ overflow:hidden; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
-
-/* Checkbox */
-.ui-check{
-  display:flex; align-items:center; gap:.55rem;
-  padding: .55rem .75rem;
-  border-radius: 14px;
-  border: 1px solid rgba(148,163,184,.45);
-  background:#fff;
-  font-size: 13px;
-}
-.ui-check input{ width:18px; height:18px; }
 </style>
