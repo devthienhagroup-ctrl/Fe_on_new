@@ -1,216 +1,355 @@
 diff --git a/src/components/Branch/AdminDeptBranch.vue b/src/components/Branch/AdminDeptBranch.vue
-index 2de2611f800f5151f6258df5cfefe0bbd65c2157..28f77e8a2490bce1a788aa933643e967ce39654f 100644
+index 428e30a63bd3f5e2c352e3fcf463294110c2d6db..91d9b7b1eeba0e5712f158d9ca7fb78d14f76f52 100644
 --- a/src/components/Branch/AdminDeptBranch.vue
 +++ b/src/components/Branch/AdminDeptBranch.vue
-@@ -891,108 +891,110 @@
-       <div v-if="deleteModal.open" class="ui-overlay" @mousedown.self="closeAllModals()">
-         <div class="ui-modal max-w-sm">
-           <div class="p-6 text-center">
-             <div class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-rose-50 text-rose-700 ring-2 ring-rose-200">
-               <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+@@ -1,88 +1,88 @@
+ <!-- AdminDeptBranch.vue -->
+ <template>
+-  <div class="min-h-screen bg-slate-50 text-slate-800">
++  <div class="min-h-screen ui-page text-slate-800">
+     <!-- Header -->
+-    <header class="sticky top-0 z-40 bg-white/85 backdrop-blur border-b border-slate-200">
+-      <div class="px-6 py-4">
++    <header class="sticky top-0 z-40 ui-header">
++      <div class="px-6 py-5">
+         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+           <div class="flex items-center gap-4">
+             <div class="ui-brand">
+               <i class="fa-solid fa-building"></i>
              </div>
-             <div class="mt-3 text-[16px] font-extrabold text-slate-900">{{ deleteModal.title }}</div>
-             <div class="mt-1 text-[13px] text-slate-600">
-               Xóa <b class="text-slate-900">{{ deleteModal.name }}</b> ? (Không thể hoàn tác)
+             <div class="leading-tight">
+-              <div class="text-[18px]  text-slate-900">
++              <div class="ui-title text-slate-900">
+                 Quản lý Phòng ban & Chi nhánh
+               </div>
+-              <div class="text-[13px] text-slate-500">CRUD hoàn thiện • UI sáng • Dễ nhìn</div>
++              <div class="ui-subtitle text-slate-500">CRUD hoàn thiện • UI sáng • Dễ nhìn</div>
+             </div>
+           </div>
+
+           <div class="flex items-center justify-between gap-4 md:justify-end">
+             <div class="hidden md:flex items-center gap-3">
+               <div class="text-right">
+-                <div class="text-[14px] font-semibold text-slate-900">Admin User</div>
++                <div class="text-[15px] font-semibold text-slate-900">Admin User</div>
+                 <div class="text-[12px] text-slate-500">Quản trị hệ thống</div>
+               </div>
+               <div class="ui-avatar">
+                 <i class="fa-solid fa-user"></i>
+               </div>
              </div>
 
-             <div class="mt-5 flex justify-center gap-2">
-               <button type="button" class="ui-btn ui-btn-ghost" @click="closeAllModals()">Hủy</button>
-               <button type="button" class="ui-btn ui-btn-danger" @click="confirmDelete()">
-                 <i class="fa-solid fa-trash"></i> Xóa
+             <button class="ui-icon-btn" type="button" aria-label="Thông báo">
+               <i class="fa-solid fa-bell"></i>
+               <span class="ui-badge">3</span>
+             </button>
+           </div>
+         </div>
+
+         <!-- Tabs -->
+         <div class="mt-4">
+-          <div class="ui-tabs">
++          <div class="ui-tabs ui-tabs-shadow">
+             <button
+                 v-for="t in tabs"
+                 :key="t.key"
+                 type="button"
+                 class="ui-tab"
+                 :class="{ active: currentTab === t.key }"
+                 @click="currentTab = t.key"
+             >
+               <i :class="t.icon"></i>
+               <span class="whitespace-nowrap">{{ t.label }}</span>
+             </button>
+           </div>
+         </div>
+       </div>
+     </header>
+
+     <main class="px-6 py-5">
+       <!-- ===================== DEPARTMENTS ===================== -->
+       <section v-if="currentTab === 'departments'">
+         <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+           <div>
+-            <div class="text-[18px]  text-slate-900">Quản lý Phòng ban</div>
+-            <div class="text-[13px] text-slate-500">
++            <div class="ui-section-title text-slate-900">Quản lý Phòng ban</div>
++            <div class="ui-section-subtitle text-slate-500">
+               Hiển thị:
+               <span class=" text-indigo-700">{{ filteredDepartments.length }}</span>
+               phòng ban
+             </div>
+           </div>
+
+           <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+             <div class="flex gap-2">
+               <button
+                   type="button"
+                   class="ui-btn ui-btn-soft"
+                   :class="{ active: deptView === 'table' }"
+                   @click="deptView = 'table'"
+               >
+                 <i class="fa-solid fa-table"></i> Bảng
+               </button>
+               <button
+                   type="button"
+                   class="ui-btn ui-btn-soft"
+                   :class="{ active: deptView === 'card' }"
+                   @click="deptView = 'card'"
+               >
+                 <i class="fa-solid fa-grid-2"></i> Thẻ
+               </button>
+             </div>
+@@ -115,51 +115,51 @@
+               <select v-model="deptFilter.branchId" class="ui-select">
+                 <option value="all">Tất cả</option>
+                 <option v-for="b in branches" :key="b.id" :value="b.id">
+                   {{ b.name }}
+                 </option>
+               </select>
+             </div>
+
+             <div>
+               <label class="ui-label">Chức năng</label>
+               <select v-model="deptFilter.function" class="ui-select">
+                 <option value="all">Tất cả</option>
+                 <option v-for="f in functionOptions" :key="f.key" :value="f.key">{{ f.name }}</option>
+               </select>
+             </div>
+
+             <div class="flex items-end">
+               <button type="button" class="ui-btn ui-btn-indigo w-full" @click="applyDeptFilter()">
+                 <i class="fa-solid fa-filter"></i> Lọc
                </button>
              </div>
            </div>
          </div>
-       </div>
-     </transition>
-   </div>
- </template>
 
- <script setup>
--import { computed, reactive, ref } from "vue";
-+import { computed, onMounted, reactive, ref } from "vue";
-+import api from "/src/api/api.js";
+         <!-- Empty -->
+-        <div v-if="filteredDepartments.length === 0" class="ui-card mt-4 p-8 text-center">
++        <div v-if="filteredDepartments.length === 0" class="ui-card ui-card-muted mt-4 p-8 text-center">
+           <div
+               class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-indigo-50 text-indigo-700 ring-2 ring-indigo-200"
+           >
+             <i class="fa-solid fa-users text-xl"></i>
+           </div>
+           <div class="mt-3 text-[16px]  text-slate-900">Không có dữ liệu</div>
+           <div class="mt-1 text-[13px] text-slate-500">Thử thay đổi bộ lọc hoặc thêm phòng ban mới</div>
+           <button type="button" class="ui-btn ui-btn-primary mt-4" @click="openDeptModal()">
+             <i class="fa-solid fa-plus"></i> Thêm phòng ban
+           </button>
+         </div>
 
- /**
-  * ✅ Địa chỉ lấy từ: /src/assets/js/address.json
-  * - Lưu address dạng: "chi tiết/!!Phường/!!Tỉnh"
-  * - Hiển thị: thay "/!!" thành ", "
-  * - Chọn tỉnh/phường bằng NAME (không dùng mã)
-  */
- import addressData from "/src/assets/js/address.json";
+         <!-- TABLE VIEW (BẢNG THẬT) -->
+         <div v-else-if="deptView === 'table'" class="mt-4 ui-card p-0">
+           <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+             <div class="text-[14px]  text-slate-900">Bảng phòng ban</div>
+             <div class="text-[12px] text-slate-500">Tối giản trường quan trọng</div>
+           </div>
 
- /** Tabs */
- const tabs = [
-   { key: "departments", label: "Phòng ban", icon: "fa-solid fa-users" },
-   { key: "branches", label: "Chi nhánh", icon: "fa-solid fa-code-branch" },
- ];
+           <div class="overflow-x-auto">
+             <table class="ui-table">
+               <thead>
+               <tr>
+                 <th style="width: 44px">#</th>
+                 <th>Phòng ban</th>
+@@ -242,51 +242,51 @@
+                         class="ui-mini-btn ui-mini-btn-blue"
+                         type="button"
+                         title="Sửa"
+                         @click="openDeptModal(d.id)"
+                     >
+                       <i class="fa-solid fa-pen-to-square"></i>
+                     </button>
+                     <button
+                         class="ui-mini-btn ui-mini-btn-red"
+                         type="button"
+                         title="Xóa"
+                         @click="openDeleteModal('dept', d.id, d.name)"
+                     >
+                       <i class="fa-solid fa-trash"></i>
+                     </button>
+                   </div>
+                 </td>
+               </tr>
+               </tbody>
+             </table>
+           </div>
+         </div>
 
- const currentTab = ref("departments");
- const deptView = ref("table"); // table | card
- const branchView = ref("table"); // table | card
+         <!-- CARD VIEW -->
+         <div v-else class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+-          <div v-for="d in filteredDepartments" :key="d.id" class="ui-card overflow-hidden">
++          <div v-for="d in filteredDepartments" :key="d.id" class="ui-card ui-card-hover overflow-hidden">
+             <div class="relative h-32">
+               <img :src="d.imageUrl" :alt="d.name" class="h-full w-full object-cover" />
+               <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
 
- /** Function config */
- const functionMap = {
-   consulting: { name: "Tư vấn" },
-   tele: { name: "Tele" },
-   marketing: { name: "Marketing" },
-   it: { name: "Thông tin" },
-   deployment: { name: "Triển khai" },
-   qa: { name: "QA/Testing" },
-   hr: { name: "Nhân sự" },
-   finance: { name: "Tài chính" },
- };
- const functionOptions = Object.entries(functionMap).map(([key, v]) => ({ key, name: v.name }));
+               <div class="absolute left-2 top-2">
+                 <span class="ui-value ui-value-white whitespace-nowrap">{{ d.employees }} NV</span>
+               </div>
 
- /** Provinces */
- const provinces = Array.isArray(addressData) ? addressData : [];
- const wardsByProvince = computed(() => {
-   const p = provinces.find((x) => x.name === branchForm.provinceName);
-   return p?.wards || [];
- });
+               <div class="absolute right-2 top-2 flex gap-1">
+                 <button class="ui-fab" type="button" title="Chi tiết" @click="openDeptDetail(d.id)">
+                   <i class="fa-solid fa-eye"></i>
+                 </button>
+                 <button class="ui-fab" type="button" title="Sửa" @click="openDeptModal(d.id)">
+                   <i class="fa-solid fa-pen-to-square"></i>
+                 </button>
+                 <button
+                     class="ui-fab ui-fab-danger"
+                     type="button"
+                     title="Xóa"
+                     @click="openDeleteModal('dept', d.id, d.name)"
+                 >
+                   <i class="fa-solid fa-trash"></i>
+                 </button>
+               </div>
 
--/** Seed data (Branch ONLY: id, name, address) */
--const branches = ref([
--  {
--    id: 1,
--    name: "Chi nhánh Hà Nội",
--    address: "Số 123 Trần Duy Hưng, Cầu Giấy/!!Phường Hoàn Kiếm/!!Thành phố Hà Nội",
--  },
--  {
--    id: 2,
--    name: "Chi nhánh TP. Hồ Chí Minh",
--    address: "Số 456 Nguyễn Văn Linh, Quận 7/!!Phường Bến Nghé/!!Thành phố Hồ Chí Minh",
--  },
--  {
--    id: 3,
--    name: "Chi nhánh Đà Nẵng",
--    address: "Số 789 Trần Phú, Hải Châu/!!Phường Hải Châu I/!!Thành phố Đà Nẵng",
--  },
--]);
-+/** Branch data (BE: ChiNhanhDTO) */
-+const branches = ref([]);
-+
-+const fetchBranches = async () => {
-+  try {
-+    const res = await api.get("/quan-ly-chi-nhanh/admin/all");
-+    const data = Array.isArray(res.data) ? res.data : [];
-+    branches.value = data.map((item) => ({
-+      id: item.id,
-+      name: item.ten,
-+      address: item.diaChi,
-+      roomCount: item.soLuongPhong ?? 0,
-+      employeeCount: item.soLuongNhanVien ?? 0,
-+    }));
-+  } catch (error) {
-+    console.error("❌ Lỗi fetch chi nhánh", error);
-+    branches.value = [];
-+  }
-+};
+@@ -325,86 +325,86 @@
+               </div>
 
- /** Department: store branchId */
- const departments = ref([
-   {
-     id: 1,
-     name: "Phòng Tư vấn Khách hàng",
-     description: "Phụ trách tư vấn và hỗ trợ khách hàng về các sản phẩm và dịch vụ của công ty.",
-     manager: "Nguyễn Thị Hương",
-     branchId: 1,
-     functions: ["consulting", "tele"],
-     imageUrl:
-         "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80",
-     employeeLink: "/#",
-     createdAt: "2023-01-15",
-     employees: 15,
-   },
-   {
-     id: 2,
-     name: "Phòng Marketing",
-     description: "Chịu trách nhiệm về các chiến lược marketing, quảng bá thương hiệu và sản phẩm.",
-     manager: "Trần Văn Minh",
-     branchId: 2,
-     functions: ["marketing"],
-     imageUrl:
-         "https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80",
-@@ -1039,56 +1041,64 @@ const filteredDepartments = computed(() => {
-     if (s) {
-       const ok = d.name.toLowerCase().includes(s) || d.manager.toLowerCase().includes(s);
-       if (!ok) return false;
-     }
-     return true;
-   });
- });
+               <div class="mt-3 border-t border-slate-200 pt-3 flex items-center justify-between">
+                 <span class="ui-value ui-value-indigo whitespace-nowrap">{{ d.employees }} NV</span>
+                 <div class="flex gap-2">
+                   <button class="ui-mini-btn ui-mini-btn-slate" type="button" title="Chi tiết" @click="openDeptDetail(d.id)">
+                     <i class="fa-solid fa-eye"></i>
+                   </button>
+                   <button class="ui-mini-btn ui-mini-btn-blue" type="button" title="Sửa" @click="openDeptModal(d.id)">
+                     <i class="fa-solid fa-pen-to-square"></i>
+                   </button>
+                   <button class="ui-mini-btn ui-mini-btn-red" type="button" title="Xóa" @click="openDeleteModal('dept', d.id, d.name)">
+                     <i class="fa-solid fa-trash"></i>
+                   </button>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+       </section>
 
- const filteredBranches = computed(() => {
-   const s = (appliedBranchFilter.search || "").toLowerCase();
-   return branches.value.filter((b) => {
-     if (!s) return true;
-     const addr = formatAddressDisplay(b.address).toLowerCase();
-     return b.name.toLowerCase().includes(s) || addr.includes(s);
-   });
- });
+       <!-- ===================== BRANCHES ===================== -->
+       <section v-else>
+         <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+           <div>
+-            <div class="text-[18px]  text-slate-900">Quản lý Chi nhánh</div>
+-            <div class="text-[13px] text-slate-500">
++            <div class="ui-section-title text-slate-900">Quản lý Chi nhánh</div>
++            <div class="ui-section-subtitle text-slate-500">
+               Hiển thị:
+               <span class=" text-emerald-700">{{ filteredBranches.length }}</span>
+               chi nhánh
+             </div>
+           </div>
 
- /** Helpers */
- function branchById(id) {
-   return branches.value.find((b) => b.id === Number(id)) || null;
- }
- function functionName(key) {
-   return functionMap[key]?.name || key;
- }
- function deptCountByBranch(branchId) {
-+  const branch = branchById(branchId);
-+  if (branch && Number.isFinite(Number(branch.roomCount))) {
-+    return Number(branch.roomCount);
-+  }
-   return departments.value.filter((d) => Number(d.branchId) === Number(branchId)).length;
- }
- function employeeCountByBranch(branchId) {
-+  const branch = branchById(branchId);
-+  if (branch && Number.isFinite(Number(branch.employeeCount))) {
-+    return Number(branch.employeeCount);
-+  }
-   return departments.value
--      .filter((d) => Number(d.branchId) === Number(branchId))
--      .reduce((sum, d) => sum + (Number(d.employees) || 0), 0);
-+    .filter((d) => Number(d.branchId) === Number(branchId))
-+    .reduce((sum, d) => sum + (Number(d.employees) || 0), 0);
- }
- function deptListByBranch(branchId) {
-   return departments.value.filter((d) => Number(d.branchId) === Number(branchId));
- }
+           <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+             <div class="flex gap-2">
+               <button
+                   type="button"
+                   class="ui-btn ui-btn-soft"
+                   :class="{ active: branchView === 'table' }"
+                   @click="branchView = 'table'"
+               >
+                 <i class="fa-solid fa-table"></i> Bảng
+               </button>
+               <button
+                   type="button"
+                   class="ui-btn ui-btn-soft"
+                   :class="{ active: branchView === 'card' }"
+                   @click="branchView = 'card'"
+               >
+                 <i class="fa-solid fa-grid-2"></i> Thẻ
+               </button>
+             </div>
 
- /** Tag class (pastel nền + viền đậm + chữ đậm) */
- function funcTagClass(func) {
-   const map = {
-     consulting: "ui-tag-blue",
-     tele: "ui-tag-purple",
-     marketing: "ui-tag-emerald",
-     it: "ui-tag-indigo",
-     deployment: "ui-tag-amber",
-     qa: "ui-tag-red",
-     hr: "ui-tag-slate",
-     finance: "ui-tag-lime",
-   };
-   return map[func] || "ui-tag-slate";
- }
+             <button type="button" class="ui-btn ui-btn-success" @click="openBranchModal()">
+               <i class="fa-solid fa-plus"></i> Thêm chi nhánh
+             </button>
+           </div>
+         </div>
 
- /** Address format */
- function formatAddressDisplay(addr) {
-   if (!addr) return "";
-   return String(addr).split("/!!").join(", ");
- }
-@@ -1331,50 +1341,53 @@ function confirmDelete() {
-   if (!deleteModal.open) return;
+         <!-- Empty -->
+-        <div v-if="filteredBranches.length === 0" class="ui-card mt-4 p-8 text-center">
++        <div v-if="filteredBranches.length === 0" class="ui-card ui-card-muted mt-4 p-8 text-center">
+           <div
+               class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-700 ring-2 ring-emerald-200"
+           >
+             <i class="fa-solid fa-code-branch text-xl"></i>
+           </div>
+           <div class="mt-3 text-[16px]  text-slate-900">Không có dữ liệu</div>
+           <div class="mt-1 text-[13px] text-slate-500">Thử thay đổi bộ lọc hoặc thêm chi nhánh mới</div>
+           <button type="button" class="ui-btn ui-btn-success mt-4" @click="openBranchModal()">
+             <i class="fa-solid fa-plus"></i> Thêm chi nhánh
+           </button>
+         </div>
 
-   if (deleteModal.type === "dept") {
-     departments.value = departments.value.filter((d) => d.id !== deleteModal.id);
-     closeAllModals();
-     return;
-   }
+         <!-- TABLE VIEW -->
+         <div v-else-if="branchView === 'table'" class="mt-4 ui-card p-0">
+           <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+             <div class="text-[14px]  text-slate-900">Bảng chi nhánh</div>
+             <div class="text-[12px] text-slate-500">Chi nhánh chỉ có: id, name, address</div>
+           </div>
 
-   if (deleteModal.type === "branch") {
-     if (departments.value.some((d) => Number(d.branchId) === Number(deleteModal.id))) {
-       alert("Không thể xóa chi nhánh đang có phòng ban!");
+           <div class="overflow-x-auto">
+             <table class="ui-table">
+               <thead>
+               <tr>
+                 <th style="width: 44px">#</th>
+                 <th>CHI NHÁNH</th>
+@@ -455,51 +455,51 @@
+                     <span class="ui-value ui-value-emerald whitespace-nowrap">{{ employeeCountByBranch(b.id) }} NV</span>
+                   </div>
+                 </td>
+
+                 <td class="text-right">
+                   <div class="flex justify-end gap-2">
+                     <button class="ui-mini-btn ui-mini-btn-slate" type="button" title="Xem chi tiết" @click="openBranchDetail(b.id)">
+                       <i class="fa-solid fa-eye"></i>
+                     </button>
+                     <button class="ui-mini-btn ui-mini-btn-blue" type="button" title="Sửa" @click="openBranchModal(b.id)">
+                       <i class="fa-solid fa-pen-to-square"></i>
+                     </button>
+                     <button class="ui-mini-btn ui-mini-btn-red" type="button" title="Xóa" @click="openDeleteModal('branch', b.id, b.name)">
+                       <i class="fa-solid fa-trash"></i>
+                     </button>
+                   </div>
+                 </td>
+               </tr>
+               </tbody>
+             </table>
+           </div>
+         </div>
+
+         <!-- CARD VIEW -->
+         <div v-else class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+-          <div v-for="b in filteredBranches" :key="b.id" class="ui-card overflow-hidden">
++          <div v-for="b in filteredBranches" :key="b.id" class="ui-card ui-card-hover overflow-hidden">
+             <div class="p-4">
+               <div class="flex items-start justify-between gap-3">
+                 <div class="min-w-0">
+                   <div class="flex items-center gap-2">
+                     <span class="ui-ico-pill ui-ico-emerald"><i class="fa-solid fa-code-branch"></i></span>
+                     <div class="min-w-0">
+                       <div class="truncate text-[18px]  text-slate-900">{{ b.name }}</div>
+                       <div class="text-[12px] text-slate-500 font-semibold">
+                         ID: <span class="text-slate-700">{{ b.id }}</span>
+                       </div>
+                     </div>
+                   </div>
+
+                   <div class="mt-3 flex items-start gap-2">
+                     <span class="ui-ico-pill ui-ico-purple"><i class="fa-solid fa-location-dot"></i></span>
+                     <div class="text-[13px] font-bold text-slate-700 line-clamp-2">
+                       {{ formatAddressDisplay(b.address) }}
+                     </div>
+                   </div>
+
+                   <div class="mt-3 inline-flex items-center gap-2 whitespace-nowrap">
+                     <span class="ui-value ui-value-slate whitespace-nowrap">{{ deptCountByBranch(b.id) }} phòng</span>
+                     <span class="ui-value ui-value-emerald whitespace-nowrap">{{ employeeCountByBranch(b.id) }} NV</span>
+                   </div>
+                 </div>
+@@ -1355,68 +1355,97 @@ function confirmDelete() {
        return;
      }
      branches.value = branches.value.filter((x) => x.id !== deleteModal.id);
@@ -225,9 +364,9 @@ index 2de2611f800f5151f6258df5cfefe0bbd65c2157..28f77e8a2490bce1a788aa933643e967
  /** init */
  applyDeptFilter();
  applyBranchFilter();
-+onMounted(() => {
-+  fetchBranches();
-+});
+ onMounted(() => {
+   fetchBranches();
+ });
  </script>
 
  <style scoped>
@@ -236,7 +375,8 @@ index 2de2611f800f5151f6258df5cfefe0bbd65c2157..28f77e8a2490bce1a788aa933643e967
  }
  :global(body) {
    font-size: 16px;
-   background: #f8fafc;
+-  background: #f8f9fa;
++  background: #f3f6fb;
  }
 
  /* Scrollbar */
@@ -245,11 +385,375 @@ index 2de2611f800f5151f6258df5cfefe0bbd65c2157..28f77e8a2490bce1a788aa933643e967
    height: 8px;
  }
  :global(::-webkit-scrollbar-track) {
-   background: rgba(15, 23, 42, 0.06);
+   background: rgba(11, 18, 32, 0.06);
    border-radius: 999px;
  }
  :global(::-webkit-scrollbar-thumb) {
-   background: linear-gradient(135deg, rgba(99, 102, 241, 0.55), rgba(168, 85, 247, 0.55));
+   background: linear-gradient(135deg, rgba(102, 126, 234, 0.55), rgba(118, 75, 162, 0.55));
    border-radius: 999px;
  }
 
+ /* Header */
++.ui-page {
++  background: radial-gradient(circle at top, rgba(102, 126, 234, 0.08), transparent 45%),
++    linear-gradient(180deg, #f9fbff 0%, #f3f6fb 45%, #eef2f9 100%);
++}
++.ui-header {
++  background: rgba(255, 255, 255, 0.92);
++  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
++  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
++  backdrop-filter: blur(18px);
++}
++.ui-title {
++  font-size: 20px;
++  font-weight: 800;
++  letter-spacing: -0.01em;
++}
++.ui-subtitle {
++  font-size: 13px;
++  font-weight: 500;
++}
++.ui-section-title {
++  font-size: 19px;
++  font-weight: 700;
++  letter-spacing: -0.01em;
++}
++.ui-section-subtitle {
++  font-size: 13px;
++  font-weight: 500;
++}
++
+ .ui-brand {
+   width: 46px;
+   height: 46px;
+   border-radius: 18px;
+   display: grid;
+   place-items: center;
+   color: #fff;
+   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+   box-shadow: 0 14px 34px rgba(102, 126, 234, 0.22);
+   font-size: 18px;
+ }
+ .ui-avatar {
+   width: 40px;
+   height: 40px;
+   border-radius: 999px;
+   display: grid;
+   place-items: center;
+   color: #fff;
+   background: linear-gradient(135deg, #f5576c 0%, #f093fb 55%, #764ba2 100%);
+   box-shadow: 0 14px 34px rgba(245, 87, 108, 0.14);
+   font-size: 14px;
+ }
+ .ui-icon-btn {
+   position: relative;
+   width: 44px;
+@@ -1434,98 +1463,112 @@ onMounted(() => {
+   transform: translateY(-1px);
+ }
+ .ui-badge {
+   position: absolute;
+   top: -6px;
+   right: -6px;
+   width: 20px;
+   height: 20px;
+   display: grid;
+   place-items: center;
+   border-radius: 999px;
+   background: linear-gradient(135deg, #ff5858, #f5576c);
+   color: #fff;
+   font-size: 11px;
+   font-weight: 900;
+   border: 2px solid rgba(255, 255, 255, 0.95);
+ }
+
+ /* Tabs */
+ .ui-tabs {
+   display: flex;
+   gap: 0.5rem;
+   overflow: auto;
+   padding: 0.15rem;
+ }
++.ui-tabs-shadow {
++  background: rgba(255, 255, 255, 0.6);
++  border-radius: 18px;
++  border: 1px solid rgba(148, 163, 184, 0.35);
++  padding: 0.25rem;
++}
+ .ui-tab {
+   display: flex;
+   align-items: center;
+   gap: 0.6rem;
+   padding: 0.58rem 1rem;
+   border-radius: 16px;
+   font-size: 14px;
+-  font-weight: 900;
++  font-weight: 800;
+   color: #475569;
+   background: rgba(255, 255, 255, 0.92);
+   border: 2px solid rgba(20, 30, 48, 0.12);
+   transition: all 0.16s ease;
+ }
+ .ui-tab:hover {
+   background: rgba(102, 126, 234, 0.06);
+   border-color: rgba(102, 126, 234, 0.22);
+   color: #3730a3;
+ }
+ .ui-tab.active {
+   background: rgba(102, 126, 234, 0.1);
+   border-color: rgba(102, 126, 234, 0.4);
+   color: #3730a3;
+   box-shadow: 0 12px 28px rgba(2, 6, 23, 0.06);
+ }
+
+ /* Card */
+ .ui-card {
+   background: rgba(255, 255, 255, 0.92);
+-  border: 2px solid rgba(20, 30, 48, 0.12);
++  border: 1px solid rgba(148, 163, 184, 0.35);
+   border-radius: 18px;
+-  box-shadow: 0 12px 34px rgba(2, 6, 23, 0.05);
++  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+ }
+ .ui-card:hover {
+-  border-color: rgba(102, 126, 234, 0.2);
++  border-color: rgba(102, 126, 234, 0.3);
++}
++.ui-card-hover:hover {
++  transform: translateY(-2px);
++  box-shadow: 0 22px 44px rgba(15, 23, 42, 0.12);
++}
++.ui-card-muted {
++  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 255, 0.95));
+ }
+
+ /* Buttons */
+ .ui-btn {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   gap: 0.6rem;
+   padding: 0.64rem 1rem;
+   border-radius: 16px;
+   font-size: 14px;
+-  font-weight: 950;
++  font-weight: 800;
+   border: 2px solid transparent;
+   transition: all 0.16s ease;
++  letter-spacing: 0.01em;
+ }
+ .ui-btn:hover {
+   transform: translateY(-1px);
+ }
+ .ui-btn:active {
+   transform: translateY(0);
+ }
+ .ui-btn-ghost {
+   background: rgba(255, 255, 255, 0.92);
+   color: #334155;
+   border-color: rgba(20, 30, 48, 0.12);
+ }
+ .ui-btn-ghost:hover {
+   background: rgba(255, 255, 255, 0.86);
+ }
+ .ui-btn-soft {
+   background: rgba(102, 126, 234, 0.06);
+   color: #3730a3;
+   border-color: rgba(102, 126, 234, 0.25);
+ }
+ .ui-btn-soft.active {
+   background: rgba(102, 126, 234, 0.12);
+   border-color: rgba(102, 126, 234, 0.45);
+ }
+ .ui-btn-soft:hover {
+@@ -1541,127 +1584,127 @@ onMounted(() => {
+   background: linear-gradient(135deg, #43e97b 0%, #38f9d7 55%, #4facfe 100%);
+   box-shadow: 0 14px 34px rgba(67, 233, 123, 0.16);
+ }
+ .ui-btn-danger {
+   color: #fff;
+   background: linear-gradient(135deg, #ff5858 0%, #f5576c 60%, #f093fb 100%);
+   box-shadow: 0 14px 34px rgba(255, 88, 88, 0.14);
+ }
+ .ui-btn-indigo {
+   color: #fff;
+   background: linear-gradient(135deg, #4f46e5 0%, #667eea 60%, #4facfe 100%);
+   box-shadow: 0 14px 34px rgba(79, 70, 229, 0.16);
+ }
+ .ui-btn-emerald {
+   color: #fff;
+   background: linear-gradient(135deg, #10b981 0%, #43e97b 60%, #38f9d7 100%);
+   box-shadow: 0 14px 34px rgba(67, 233, 123, 0.14);
+ }
+
+ /* Inputs */
+ .ui-label {
+   display: flex;
+   align-items: center;
+   gap: 0.5rem;
+   font-size: 13px;
+-  font-weight: 950;
++  font-weight: 800;
+   color: #0b1220;
+   margin-bottom: 6px;
+ }
+ .ui-label-ico {
+   width: 28px;
+   height: 28px;
+   border-radius: 12px;
+   display: grid;
+   place-items: center;
+   border: 2px solid transparent;
+   font-size: 12px;
+ }
+ .ui-input,
+ .ui-select,
+ .ui-textarea {
+   width: 100%;
+   border-radius: 18px;
+-  border: 2px solid rgba(20, 30, 48, 0.12);
+-  background: rgba(255, 255, 255, 0.92);
++  border: 1px solid rgba(148, 163, 184, 0.35);
++  background: rgba(255, 255, 255, 0.96);
+   padding: 0.72rem 0.85rem;
+   font-size: 14px;
+   font-weight: 500;
+   outline: none;
+   transition: all 0.16s ease;
+ }
+ .ui-textarea {
+   padding: 0.78rem 0.85rem;
+ }
+ .ui-input:focus,
+ .ui-select:focus,
+ .ui-textarea:focus {
+   border-color: rgba(102, 126, 234, 0.55);
+   box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.14);
+ }
+ .ui-input-ico {
+   position: absolute;
+   left: 14px;
+   top: 50%;
+   transform: translateY(-50%);
+   font-size: 14px;
+   color: #94a3b8;
+ }
+
+ /* Table */
+ .ui-table {
+   width: 100%;
+   border-collapse: separate;
+   border-spacing: 0;
+-  font-size: 12px;
++  font-size: 13px;
+ }
+ .ui-table thead th {
+   text-align: left;
+   padding: 12px 14px;
+   color: #0b1220;
+-  font-weight: 650;
+-  background: rgba(255, 255, 255, 0.86);
+-  border-bottom: 2px solid rgba(20, 30, 48, 0.12);
++  font-weight: 700;
++  background: rgba(255, 255, 255, 0.94);
++  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+   white-space: nowrap;
+ }
+ .ui-table tbody td {
+   padding: 12px 14px;
+-  border-bottom: 1px solid rgba(20, 30, 48, 0.12);
++  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+   vertical-align: middle;
+ }
+ .ui-table tbody tr:hover td {
+-  background: rgba(102, 126, 234, 0.04);
++  background: rgba(102, 126, 234, 0.06);
+ }
+
+ /* Tags */
+ .ui-tag {
+   display: inline-flex;
+   align-items: center;
+   padding: 0.3rem 0.7rem;
+   border-radius: 999px;
+   font-size: 12px;
+-  font-weight: 950;
++  font-weight: 800;
+   border: 2px solid transparent;
+   white-space: nowrap;
+ }
+ .ui-tag-gray {
+   background: #f1f5f9;
+   border-color: #94a3b8;
+   color: #0b1220;
+ }
+ .ui-tag-slate {
+   background: #f1f5f9;
+   border-color: #64748b;
+   color: #0b1220;
+ }
+ .ui-tag-blue {
+   background: #eff6ff;
+   border-color: #2563eb;
+   color: #1d4ed8;
+ }
+ .ui-tag-indigo {
+   background: #eef2ff;
+   border-color: #4f46e5;
+   color: #3730a3;
+ }
+ .ui-tag-purple {
+   background: #faf5ff;
+@@ -1776,51 +1819,51 @@ onMounted(() => {
+ }
+ .ui-ico-pink {
+   background: #fff1f2;
+   border-color: #f5576c;
+   color: #be123c;
+ }
+ .ui-ico-slate {
+   background: #f1f5f9;
+   border-color: #64748b;
+   color: #0b1220;
+ }
+ .ui-ico-white {
+   background: rgba(255, 255, 255, 0.16);
+   border-color: rgba(255, 255, 255, 0.35);
+   color: #fff;
+ }
+
+ /* Actions */
+ .ui-mini-btn {
+   width: 34px;
+   height: 34px;
+   border-radius: 14px;
+   display: grid;
+   place-items: center;
+   color: #fff;
+-  border: 2px solid rgba(255, 255, 255, 0.35);
++  border: 1px solid rgba(255, 255, 255, 0.5);
+ }
+ .ui-mini-btn:hover {
+   transform: translateY(-1px);
+ }
+ .ui-mini-btn-blue {
+   background: linear-gradient(
+       135deg,
+       #6ecbff 0%,
+       #4facfe 45%,
+       #667eea 100%
+   );
+   box-shadow: 0 14px 32px rgba(79, 172, 254, 0.28);
+ }
+
+ .ui-mini-btn-red {
+   background: linear-gradient(
+       135deg,
+       #fda4af 0%,
+       #fb7185 55%,
+       #f43f5e 100%
+   );
+   box-shadow: 0 14px 32px rgba(244, 63, 94, 0.26);
+ }
+
+ .ui-mini-btn-slate {
