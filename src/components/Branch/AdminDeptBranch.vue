@@ -857,6 +857,7 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import api from "/src/api/api.js";
 import addressData from "/src/assets/js/address.json";
+import { showLoading, updateAlertError, updateAlertSuccess } from "/src/assets/js/alertService.js";
 
 /** Tabs */
 const tabs = [
@@ -1274,7 +1275,7 @@ function saveDept() {
   closeAllModals();
 }
 
-function saveBranch() {
+async function saveBranch() {
   const name = branchForm.name.trim();
   const detail = branchForm.addressDetail.trim();
   const wardName = branchForm.wardName.trim();
@@ -1288,14 +1289,34 @@ function saveBranch() {
   const storedAddress = buildAddress(detail, wardName, provinceName);
 
   if (branchModal.editingId) {
-    const idx = branches.value.findIndex((x) => x.id === branchModal.editingId);
-    if (idx !== -1) {
-      branches.value[idx] = { ...branches.value[idx], name, address: storedAddress };
+    try {
+      const res = await showLoading(
+          api.put(`/quan-ly-chi-nhanh/admin/${branchModal.editingId}`, {
+            name,
+            address: storedAddress,
+          })
+      );
+      if (res?.status === 200) {
+        const idx = branches.value.findIndex((x) => x.id === branchModal.editingId);
+        if (idx !== -1) {
+          branches.value[idx] = { ...branches.value[idx], name, address: storedAddress };
+        }
+        if (branchDetail.open && branchDetail.data?.id === branchModal.editingId) {
+          branchDetail.data = { ...branchDetail.data, name, address: storedAddress };
+        }
+        updateAlertSuccess("Cập nhật chi nhánh thành công!");
+        closeAllModals();
+      } else {
+        updateAlertError("Không thể cập nhật chi nhánh, vui lòng thử lại!");
+      }
+    } catch (error) {
+      console.error("❌ Lỗi cập nhật chi nhánh", error);
+      updateAlertError("Không thể cập nhật chi nhánh, vui lòng thử lại!");
     }
-  } else {
-    branches.value.push({ id: nextBranchId.value++, name, address: storedAddress });
+    return;
   }
 
+  branches.value.push({ id: nextBranchId.value++, name, address: storedAddress });
   closeAllModals();
 }
 
