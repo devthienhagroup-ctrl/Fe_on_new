@@ -207,10 +207,39 @@
 
                 <td>
                   <div class="flex items-center gap-2 min-w-0">
-                      <span class="ui-pill ui-pill-blue">
-                        <i class="fa-solid fa-user-tie"></i>
-                      </span>
-                    <span class="font-extrabold text-slate-800 truncate" :title="d.manager">{{ d.manager }}</span>
+                    <!-- AVATAR TRƯỞNG PHÒNG -->
+                    <div class="h-8 w-8 rounded-full overflow-hidden ring-2 ring-slate-200 shrink-0">
+                      <img
+                          v-if="d.managerAvatar"
+                          :src="'https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + d.managerAvatar"
+                          :alt="d.manager"
+                          class="h-full w-full object-cover"
+                      />
+                      <div
+                          v-else
+                          class="h-full w-full flex items-center justify-center bg-rose-50 text-rose-600"
+                          title="Phòng ban chưa có trưởng phòng"
+                      >
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                      </div>
+                    </div>
+
+                    <!-- TÊN TRƯỞNG PHÒNG -->
+                    <div class="min-w-0">
+      <span
+          v-if="d.manager"
+          class="font-extrabold text-slate-800 truncate block"
+          :title="d.manager"
+      >
+        {{ d.manager }}
+      </span>
+                      <span
+                          v-else
+                          class="text-rose-600 font-extrabold text-[12px]"
+                      >
+        Chưa phân công
+      </span>
+                    </div>
                   </div>
                 </td>
 
@@ -235,7 +264,7 @@
                     </span>
                 </td>
 
-                <td class="text-right">
+                <td class="text-left">
                   <div class="inline-flex justify-end gap-2 whitespace-nowrap">
                     <button class="ui-mini ui-mini-slate" type="button" title="Xem chi tiết" @click="openDeptDetail(d.id)">
                       <i class="fa-solid fa-eye"></i>

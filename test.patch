@@ -1,8 +1,25 @@
 diff --git a/src/components/Branch/AdminDeptBranch.vue b/src/components/Branch/AdminDeptBranch.vue
-index 906a7b748b90e1105308098111549628a2540b02..637c9fa6a12e1703f2727439b613c240d8fe37bc 100644
+index 2fd325d26ca682852dcb8d280c5f5eaeb6c28cd9..62a826440b1e0fc65f4eb0eaf4de69253947c7ce 100644
 --- a/src/components/Branch/AdminDeptBranch.vue
 +++ b/src/components/Branch/AdminDeptBranch.vue
-@@ -170,149 +170,163 @@
+@@ -153,169 +153,180 @@
+           <div class="mt-3 text-[16px] font-extrabold text-slate-900">Không có dữ liệu</div>
+           <div class="mt-1 text-[13px] text-slate-500 font-semibold">
+             Thử thay đổi bộ lọc hoặc thêm phòng ban mới
+           </div>
+           <button type="button" class="ui-btn ui-btn-primary mt-4" @click="openDeptModal()">
+             <i class="fa-solid fa-plus"></i> Thêm phòng ban
+           </button>
+         </div>
+
+         <!-- TABLE VIEW -->
+         <div v-else-if="deptView === 'table'" class="mt-4 ui-card p-0 overflow-hidden">
+           <div class="px-4 py-3 border-b border-slate-200/70 flex items-center justify-between">
+             <div class="flex items-center gap-2">
+               <span class="ui-dot ui-dot-indigo"></span>
+               <div class="text-[14px] font-extrabold text-slate-900">Bảng phòng ban</div>
+             </div>
+             <div class="text-[12px] text-slate-500 font-semibold">
                Tổng: <span class="text-indigo-700 font-extrabold">{{ filteredDepartments.length }}</span>
              </div>
            </div>
@@ -11,54 +28,65 @@ index 906a7b748b90e1105308098111549628a2540b02..637c9fa6a12e1703f2727439b613c240
              <table class="ui-table">
                <thead>
                <tr>
-                 <th style="width: 52px">#</th>
-                 <th>PHÒNG BAN</th>
-                 <th>TRƯỞNG PHÒNG</th>
-                 <th>CHI NHÁNH</th>
-                 <th>CHỨC NĂNG</th>
-                 <th class="text-right" style="width: 140px">NHÂN SỰ</th>
-                 <th class="text-right" style="width: 170px">THAO TÁC</th>
+-                <th style="width: 52px">#</th>
+-                <th>PHÒNG BAN</th>
+-                <th>TRƯỞNG PHÒNG</th>
+-                <th>CHI NHÁNH</th>
+-                <th>CHỨC NĂNG</th>
+-                <th class="text-right" style="width: 140px">NHÂN SỰ</th>
+-                <th class="text-right" style="width: 170px">THAO TÁC</th>
++                <th class="column-text p1" style="width: 52px">#</th>
++                <th class="column-text p2">PHÒNG BAN</th>
++                <th class="column-text p3">TRƯỞNG PHÒNG</th>
++                <th class="column-text p4">CHI NHÁNH</th>
++                <th class="column-text p5">CHỨC NĂNG</th>
++                <th class="column-text p1 text-right" style="width: 140px">NHÂN SỰ</th>
++                <th class="column-text p2 text-right" style="width: 170px">THAO TÁC</th>
                </tr>
                </thead>
 
                <tbody>
                <tr v-for="(d, idx) in filteredDepartments" :key="d.id">
-                 <td class="text-slate-500 font-extrabold">{{ idx + 1 }}</td>
+-                <td class="text-slate-500 font-extrabold">{{ idx + 1 }}</td>
++                <td class="column-text p1">{{ idx + 1 }}</td>
 
                  <td>
                    <div class="flex items-center gap-3 min-w-0">
                      <div class="h-10 w-10 rounded-2xl overflow-hidden ring-2 ring-slate-200 shrink-0">
--                      <img :src="d.imageUrl" :alt="d.name" class="h-full w-full object-cover" />
-+                      <img :src="deptProfileSrc(d)" :alt="d.name" class="h-full w-full object-cover" />
+                       <img :src=" ' https://s3.cloudfly.vn/thg-storage-dev/uploads-public/' + d.avatar" :alt="d.name" class="h-full w-full object-cover" />
                      </div>
                      <div class="min-w-0">
 -                      <div class="truncate text-[14px] md:text-[15px] font-extrabold text-slate-900" :title="d.name">
-+                      <div class="truncate text-[14px] md:text-[15px] font-extrabold text-slate-900 p1" :title="d.name">
++                      <div class="truncate text-[14px] md:text-[15px] column-text p2" :title="d.name">
                          {{ d.name }}
                        </div>
-                       <div class="text-[12px] text-slate-500 font-semibold truncate">
-                         {{ d.description }}
-                       </div>
+-                      <div class="text-[12px] text-slate-500 font-semibold truncate">
+-                        {{ d.description }}
+-                      </div>
++                      <div
++                        class="text-[12px] column-text p2 truncate"
++                        v-html="formatDeptDescription(d.description)"
++                      ></div>
                      </div>
                    </div>
                  </td>
 
                  <td>
-                   <div class="flex items-center gap-2 min-w-0">
+-                  <div class="flex items-center gap-2 min-w-0">
 -                      <span class="ui-pill ui-pill-blue">
-+                    <template v-if="d.manager">
-+                      <img v-if="d.managerAvatar" :src="deptManagerAvatar(d)" :alt="d.manager" class="ui-manager-avatar" />
-+                      <span v-else class="ui-pill ui-pill-blue">
-                         <i class="fa-solid fa-user-tie"></i>
-                       </span>
+-                        <i class="fa-solid fa-user-tie"></i>
+-                      </span>
 -                    <span class="font-extrabold text-slate-800 truncate" :title="d.manager">{{ d.manager }}</span>
-+                      <span class="font-extrabold text-slate-800 truncate p2" :title="d.manager">{{ d.manager }}</span>
-+                    </template>
-+                    <span v-else class="ui-empty-manager">
-+                      <i class="fa-solid fa-circle-exclamation"></i>
-+                      Chưa có trưởng phòng
++                  <div v-if="d.manager" class="flex items-center gap-2 min-w-0">
++                    <span v-if="d.managerAvatar" class="ui-pill ui-pill-blue overflow-hidden">
++                      <img :src="d.managerAvatar" :alt="d.manager" class="h-full w-full object-cover" />
 +                    </span>
++                    <span v-else class="ui-pill ui-pill-blue">
++                      <i class="fa-solid fa-user-tie"></i>
++                    </span>
++                    <span class="column-text p3 truncate" :title="d.manager">{{ d.manager }}</span>
                    </div>
++                  <span v-else class="ui-tag ui-tag-alert column-text">Chưa có trưởng phòng</span>
                  </td>
 
                  <td>
@@ -67,27 +95,23 @@ index 906a7b748b90e1105308098111549628a2540b02..637c9fa6a12e1703f2727439b613c240
                          <i class="fa-solid fa-code-branch"></i>
                        </span>
 -                    <span class="font-extrabold text-slate-800 truncate">
-+                    <span class="font-extrabold text-slate-800 truncate p3">
-                         {{ branchById(d.branchId)?.name || "—" }}
++                    <span class="column-text p4 truncate">
+                         {{ d.branchName || "—" }}
                        </span>
                    </div>
                  </td>
 
                  <td>
-                   <div class="flex flex-wrap gap-2">
-                       <span v-for="f in d.functions.slice(0, 3)" :key="f" class="ui-tag" :class="funcTagClass(f)">
-                         {{ functionName(f) }}
-                       </span>
-                     <span v-if="d.functions.length > 3" class="ui-tag ui-tag-gray">
-                         +{{ d.functions.length - 3 }}
-                       </span>
-                   </div>
+-                  <span class="ui-tag ui-tag-emerald">{{ d.functionName || "—" }}</span>
++                  <span class="ui-tag ui-tag-gradient column-text" :class="functionBadgeClass(d.functionName)">
++                    {{ d.functionName || "—" }}
++                  </span>
                  </td>
 
-                 <td class="text-right">
+                 <td class="text-left">
 -                    <span class="ui-value ui-value-indigo whitespace-nowrap">
-+                    <span class="ui-value ui-value-indigo whitespace-nowrap p4">
-                       {{ d.employees }}
++                    <span class="ui-value ui-value-indigo column-text p5 whitespace-nowrap">
+                       {{ d.employees }} nhân sự
                      </span>
                  </td>
 
@@ -114,74 +138,192 @@ index 906a7b748b90e1105308098111549628a2540b02..637c9fa6a12e1703f2727439b613c240
          <div v-else class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
            <div v-for="d in filteredDepartments" :key="d.id" class="ui-card overflow-hidden">
              <div class="relative h-32">
--              <img :src="d.imageUrl" :alt="d.name" class="h-full w-full object-cover" />
-+              <img :src="deptProfileSrc(d)" :alt="d.name" class="h-full w-full object-cover" />
+               <img :src="d.imageUrl" :alt="d.name" class="h-full w-full object-cover" />
                <div class="absolute inset-0 ui-img-overlay"></div>
 
                <div class="absolute left-3 top-3">
-                 <span class="ui-value ui-value-white whitespace-nowrap">{{ d.employees }} NV</span>
-               </div>
-
-               <div class="absolute right-3 top-3 flex gap-2">
-                 <button class="ui-fab" type="button" title="Chi tiết" @click="openDeptDetail(d.id)">
-                   <i class="fa-solid fa-eye"></i>
-                 </button>
-                 <button class="ui-fab" type="button" title="Sửa" @click="openDeptModal(d.id)">
-                   <i class="fa-solid fa-pen-to-square"></i>
-                 </button>
-                 <button class="ui-fab ui-fab-danger" type="button" title="Xóa" @click="openDeleteModal('dept', d.id, d.name)">
-                   <i class="fa-solid fa-trash"></i>
-                 </button>
+-                <span class="ui-value ui-value-white whitespace-nowrap">{{ d.employees }} nhân sự</span>
++                <span class="ui-value ui-value-white column-text p5 whitespace-nowrap">{{ d.employees }} nhân sự</span>
                </div>
 
                <div class="absolute bottom-3 left-3 right-3">
-                 <div class="line-clamp-1 text-[14px] font-extrabold text-white" :title="d.name">
+-                <div class="line-clamp-1 text-[14px] font-extrabold text-white" :title="d.name">
++                <div class="line-clamp-1 text-[14px] column-text p2 text-white" :title="d.name">
                    {{ d.name }}
                  </div>
                  <div class="mt-1 flex items-center gap-2 text-[12px] text-white/90">
 -                  <i class="fa-solid fa-user-tie"></i>
 -                  <span class="truncate font-semibold">{{ d.manager }}</span>
-+                  <template v-if="d.manager">
-+                    <img v-if="d.managerAvatar" :src="deptManagerAvatar(d)" :alt="d.manager" class="ui-manager-avatar ui-manager-avatar-sm" />
-+                    <i v-else class="fa-solid fa-user-tie"></i>
-+                    <span class="truncate font-semibold">{{ d.manager }}</span>
-+                  </template>
-+                  <span v-else class="ui-empty-manager ui-empty-manager-light">
-+                    <i class="fa-solid fa-circle-exclamation"></i>
-+                    Chưa có trưởng phòng
++                  <span v-if="d.managerAvatar" class="ui-pill ui-pill-blue ui-pill-sm overflow-hidden">
++                    <img :src="d.managerAvatar" :alt="d.manager" class="h-full w-full object-cover" />
 +                  </span>
++                  <i v-else class="fa-solid fa-user-tie"></i>
++                  <span v-if="d.manager" class="truncate column-text p3 text-white">{{ d.manager }}</span>
++                  <span v-else class="ui-tag ui-tag-alert ui-tag-alert--invert column-text">Chưa có trưởng phòng</span>
                  </div>
                </div>
              </div>
 
              <div class="p-4">
-               <div class="line-clamp-2 text-[13px] text-slate-600 font-semibold">
-                 {{ d.description }}
-               </div>
+-              <div class="line-clamp-2 text-[13px] text-slate-600 font-semibold">
+-                {{ d.description }}
+-              </div>
++              <div class="line-clamp-2 text-[13px] column-text p2" v-html="formatDeptDescription(d.description)"></div>
 
                <div class="mt-3 flex items-center gap-2 min-w-0">
                  <span class="ui-pill ui-pill-purple"><i class="fa-solid fa-code-branch"></i></span>
-                 <span class="truncate text-slate-800 text-[13px] font-extrabold">
-                   {{ branchById(d.branchId)?.name || "—" }}
+-                    <span class="truncate text-slate-800 text-[13px] font-extrabold">
++                    <span class="truncate text-[13px] column-text p4">
+                   {{ d.branchName || "—" }}
                  </span>
                </div>
 
                <div class="mt-3 flex flex-wrap gap-2">
-                 <span v-for="f in d.functions.slice(0, 2)" :key="f" class="ui-tag" :class="funcTagClass(f)">
-                   {{ functionName(f) }}
-                 </span>
-                 <span v-if="d.functions.length > 2" class="ui-tag ui-tag-gray">
-                   +{{ d.functions.length - 2 }}
-                 </span>
+-                <span class="ui-tag ui-tag-emerald">{{ d.functionName || "—" }}</span>
++                <span class="ui-tag ui-tag-gradient column-text" :class="functionBadgeClass(d.functionName)">
++                  {{ d.functionName || "—" }}
++                </span>
                </div>
 
-@@ -616,51 +630,51 @@
-             </button>
+               <div class="mt-3 border-t border-slate-200/70 pt-3 flex items-center justify-between">
+-                <span class="ui-value ui-value-indigo whitespace-nowrap">{{ d.employees }} NV</span>
++                <span class="ui-value ui-value-indigo column-text p5 whitespace-nowrap">{{ d.employees }} NV</span>
+                 <div class="inline-flex gap-2 whitespace-nowrap">
+                   <button class="ui-mini ui-mini-slate" type="button" title="Chi tiết" @click="openDeptDetail(d.id)">
+                     <i class="fa-solid fa-eye"></i>
+                   </button>
+                   <button class="ui-mini ui-mini-blue" type="button" title="Sửa" @click="openDeptModal(d.id)">
+                     <i class="fa-solid fa-pen-to-square"></i>
+                   </button>
+                   <button class="ui-mini ui-mini-red" type="button" title="Xóa" @click="openDeleteModal('dept', d.id, d.name)">
+                     <i class="fa-solid fa-trash"></i>
+                   </button>
+                 </div>
+               </div>
+             </div>
            </div>
          </div>
-       </div>
-     </transition>
+       </section>
 
+       <!-- ===================== BRANCHES ===================== -->
+       <section v-else>
+         <!-- Toolbar -->
+         <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+           <div>
+             <div class="text-[16px] md:text-[18px] font-extrabold text-slate-900">Chi nhánh</div>
+             <div class="text-[12px] md:text-[13px] text-slate-500 font-semibold">
+               Chi nhánh trong hệ thống
+@@ -341,96 +352,96 @@
+           </div>
+           <button type="button" class="ui-btn ui-btn-emerald mt-4" @click="openBranchModal()">
+             <i class="fa-solid fa-plus"></i> Thêm chi nhánh
+           </button>
+         </div>
+
+         <!-- TABLE VIEW -->
+         <div v-else-if="branchView === 'table'" class="mt-4 ui-card p-0 overflow-hidden">
+           <div
+               class="px-4 py-3 border-b border-slate-200/70 flex items-center justify-between"
+               style="background: linear-gradient(135deg, #d7e0fd 0%, #e5e1fa 50%, #ffe0f0 100%);"
+           >
+           <div class="flex items-center gap-2">
+               <span class="ui-dot ui-dot-emerald"></span>
+               <div class="text-[14px] font-extrabold text-slate-900">Bảng chi nhánh</div>
+             </div>
+             <div class="text-[12px] text-slate-500 font-semibold">
+               Tổng: <span class="text-emerald-700 font-extrabold">{{ filteredBranches.length }}</span>
+             </div>
+           </div>
+
+           <div class="overflow-x-auto">
+             <table class="ui-table">
+               <thead>
+               <tr>
+-                <th style="width: 52px">#</th>
+-                <th>CHI NHÁNH</th>
+-                <th>ĐỊA CHỈ</th>
+-                <th class="text-right" style="width: 200px">SỐ PHÒNG BAN</th>
+-                <th class="text-right" style="width: 200px">SỐ NHÂN VIÊN</th>
+-                <th class="text-right" style="width: 170px">THAO TÁC</th>
++                <th class="column-text p1" style="width: 52px">#</th>
++                <th class="column-text p2">CHI NHÁNH</th>
++                <th class="column-text p3">ĐỊA CHỈ</th>
++                <th class="column-text p4 text-right" style="width: 200px">SỐ PHÒNG BAN</th>
++                <th class="column-text p5 text-right" style="width: 200px">SỐ NHÂN VIÊN</th>
++                <th class="column-text p1 text-right" style="width: 170px">THAO TÁC</th>
+               </tr>
+               </thead>
+
+               <tbody>
+               <tr v-for="(b, idx) in filteredBranches" :key="b.id">
+-                <td class="text-slate-500 font-extrabold">{{ idx + 1 }}</td>
++                <td class="column-text p1">{{ idx + 1 }}</td>
+
+                 <td>
+                   <div class="flex items-center gap-2 min-w-0">
+                       <span class="ui-pill ui-pill-emerald">
+                         <i class="fa-solid fa-code-branch"></i>
+                       </span>
+                     <div class="min-w-0">
+-                      <div class="truncate text-[14px] font-extrabold text-slate-900">{{ b.name }}</div>
+-                      <div class="text-[12px] text-slate-500 font-semibold">
+-                        ID: <span class="text-slate-800 font-extrabold">{{ b.id }}</span>
++                      <div class="truncate text-[14px] column-text p2">{{ b.name }}</div>
++                      <div class="text-[12px] column-text p2">
++                        ID: <span class="column-text p2">{{ b.id }}</span>
+                       </div>
+                     </div>
+                   </div>
+                 </td>
+
+                 <td>
+                   <div class="flex items-start gap-2 min-w-0">
+                       <span class="ui-pill ui-pill-slate">
+                         <i class="fa-solid fa-location-dot" style="corlor: red !important;"></i>
+                       </span>
+                     <div class="min-w-0">
+-                      <div class="text-[13px] font-semibold text-slate-700 line-clamp-2">
++                      <div class="text-[13px] column-text p3 line-clamp-2">
+                         {{ formatAddressDisplay(b.address) }}
+                       </div>
+                     </div>
+                   </div>
+                 </td>
+
+                 <td class="text-left">
+-                  <span class="ui-value ui-value-slate whitespace-nowrap">{{ deptCountByBranch(b.id) }} phòng</span>
++                  <span class="ui-value ui-value-slate column-text p4 whitespace-nowrap">{{ deptCountByBranch(b.id) }} phòng</span>
+                 </td>
+
+                 <td class="text-left">
+-                  <span class="ui-value ui-value-emerald whitespace-nowrap">{{ employeeCountByBranch(b.id) }} NV</span>
++                  <span class="ui-value ui-value-emerald column-text p5 whitespace-nowrap">{{ employeeCountByBranch(b.id) }} NV</span>
+                 </td>
+
+                 <td class="text-left">
+                   <div class="inline-flex justify-end gap-2 whitespace-nowrap">
+                     <button class="ui-mini ui-mini-slate" type="button" title="Xem chi tiết" @click="openBranchDetail(b.id)">
+                       <i class="fa-solid fa-eye"></i>
+                     </button>
+                     <button class="ui-mini ui-mini-blue" type="button" title="Sửa" @click="openBranchModal(b.id)">
+                       <i class="fa-solid fa-pen-to-square"></i>
+                     </button>
+                     <button class="ui-mini ui-mini-red" type="button" title="Xóa" @click="openDeleteModal('branch', b.id, b.name)">
+                       <i class="fa-solid fa-trash"></i>
+                     </button>
+                   </div>
+                 </td>
+               </tr>
+               </tbody>
+             </table>
+           </div>
+         </div>
+       </section>
+     </main>
+
+     <!-- ===================== MODALS ===================== -->
+
+@@ -664,83 +675,91 @@
      <!-- Dept Detail Modal -->
      <transition name="fade">
        <div v-if="deptDetail.open" class="ui-overlay" @mousedown.self="closeAllModals()">
@@ -201,127 +343,85 @@ index 906a7b748b90e1105308098111549628a2540b02..637c9fa6a12e1703f2727439b613c240
            <div class="p-5" v-if="deptDetail.data">
              <div class="flex items-start gap-4">
                <div class="h-16 w-16 rounded-2xl overflow-hidden ring-2 ring-slate-200 shrink-0">
--                <img :src="deptDetail.data.imageUrl" :alt="deptDetail.data.name" class="h-full w-full object-cover" />
-+                <img :src="deptProfileSrc(deptDetail.data)" :alt="deptDetail.data.name" class="h-full w-full object-cover" />
+                 <img :src="deptDetail.data.imageUrl" :alt="deptDetail.data.name" class="h-full w-full object-cover" />
                </div>
                <div class="min-w-0 flex-1">
                  <div class="text-[16px] md:text-[18px] font-extrabold text-slate-900 truncate">
                    {{ deptDetail.data.name }}
                  </div>
-                 <div class="mt-1 text-[13px] text-slate-600 font-semibold">
-                   {{ deptDetail.data.description }}
-                 </div>
+-                <div class="mt-1 text-[13px] text-slate-600 font-semibold">
+-                  {{ deptDetail.data.description }}
+-                </div>
++                <div class="mt-1 text-[13px] column-text p2" v-html="formatDeptDescription(deptDetail.data.description, 160)"></div>
 
                  <div class="mt-3 flex flex-wrap gap-2">
                    <span class="ui-value ui-value-indigo whitespace-nowrap">{{ deptDetail.data.employees }} NV</span>
-                   <span class="ui-tag ui-tag-slate">
-                     <i class="fa-solid fa-calendar-days mr-1"></i> {{ deptDetail.data.createdAt }}
-                   </span>
                  </div>
                </div>
              </div>
 
              <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
                <div class="ui-info">
-                 <span class="ui-pill ui-pill-blue"><i class="fa-solid fa-user-tie"></i></span>
+-                <span class="ui-pill ui-pill-blue"><i class="fa-solid fa-user-tie"></i></span>
++                <span v-if="deptDetail.data.managerAvatar" class="ui-pill ui-pill-blue overflow-hidden">
++                  <img
++                    :src="deptDetail.data.managerAvatar"
++                    :alt="deptDetail.data.manager || 'Trưởng phòng'"
++                    class="h-full w-full object-cover"
++                  />
++                </span>
++                <span v-else class="ui-pill ui-pill-blue"><i class="fa-solid fa-user-tie"></i></span>
                  <div class="min-w-0">
                    <div class="ui-info-label">Trưởng phòng</div>
-                   <div class="ui-info-value">{{ deptDetail.data.manager }}</div>
+-                  <div class="ui-info-value">{{ deptDetail.data.manager }}</div>
++                  <div class="ui-info-value" v-if="deptDetail.data.manager">{{ deptDetail.data.manager }}</div>
++                  <span v-else class="ui-tag ui-tag-alert column-text">Chưa có trưởng phòng</span>
                  </div>
-@@ -832,50 +846,51 @@
- </template>
+               </div>
 
- <script setup>
- import { computed, onMounted, reactive, ref } from "vue";
- import api from "/src/api/api.js";
- import addressData from "/src/assets/js/address.json";
- import {
-   confirmWithInput,
-   showError,
-   showLoading,
-   showSuccess,
-   updateAlertError,
-   updateAlertSuccess,
- } from "/src/assets/js/alertService.js";
+               <div class="ui-info">
+                 <span class="ui-pill ui-pill-purple"><i class="fa-solid fa-code-branch"></i></span>
+                 <div class="min-w-0">
+                   <div class="ui-info-label">Chi nhánh</div>
+                   <div class="ui-info-value">{{ deptDetail.data.branchName || "—" }}</div>
+                 </div>
+               </div>
 
- /** Tabs */
- const tabs = [
-   { key: "departments", label: "Phòng ban", icon: "fa-solid fa-users" },
-   { key: "branches", label: "Chi nhánh", icon: "fa-solid fa-code-branch" },
- ];
+               <div class="ui-info md:col-span-2">
+                 <span class="ui-pill ui-pill-emerald"><i class="fa-solid fa-shapes"></i></span>
+                 <div class="min-w-0">
+                   <div class="ui-info-label">Chức năng</div>
+                   <div class="mt-2 flex flex-wrap gap-2">
+-                    <span class="ui-tag ui-tag-emerald">{{ deptDetail.data.functionName || "—" }}</span>
++                    <span class="ui-tag ui-tag-gradient column-text" :class="functionBadgeClass(deptDetail.data.functionName)">
++                      {{ deptDetail.data.functionName || "—" }}
++                    </span>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
 
- const currentTab = ref("departments");
- const deptView = ref("table"); // table | card
- const branchView = ref("table"); // table | card
- const toggleDeptFilter = ref(true);
-+const ASSET_BASE_URL = "https://s3.cloudfly.vn/thg-storage-dev/uploads-public/";
+           <div class="ui-modal-foot">
+             <button type="button" class="ui-btn ui-btn-ghost" @click="closeAllModals()">Đóng</button>
+             <button v-if="deptDetail.data" type="button" class="ui-btn ui-btn-indigo" @click="openDeptModal(deptDetail.data.id)">
+               <i class="fa-solid fa-pen-to-square"></i> Sửa
+             </button>
+           </div>
+         </div>
+       </div>
+     </transition>
 
- /** Function config */
- const functionMap = {
-   consulting: { name: "Tư vấn" },
-   tele: { name: "Tele" },
-   marketing: { name: "Marketing" },
-   it: { name: "Thông tin" },
-   deployment: { name: "Triển khai" },
-   qa: { name: "QA/Testing" },
-   hr: { name: "Nhân sự" },
-   finance: { name: "Tài chính" },
- };
- const functionOptions = Object.entries(functionMap).map(([key, v]) => ({ key, name: v.name }));
-
- /** Provinces */
- const provinces = Array.isArray(addressData) ? addressData : [];
- const wardsByProvince = computed(() => {
-   const p = provinces.find((x) => x.name === branchForm.provinceName);
-   return p?.wards || [];
- });
-
- /** Branch data (BE: ChiNhanhDTO) */
- const branches = ref([]);
- const fetchBranches = async () => {
-   try {
-@@ -967,79 +982,95 @@ const filteredDepartments = computed(() => {
-     if (appliedDeptFilter.function !== "all" && !d.functions.includes(appliedDeptFilter.function)) return false;
-     if (s) {
-       const ok = d.name.toLowerCase().includes(s) || d.manager.toLowerCase().includes(s);
-       if (!ok) return false;
-     }
-     return true;
-   });
- });
-
- const filteredBranches = computed(() => {
-   const s = (appliedBranchFilter.search || "").toLowerCase();
-   return branches.value.filter((b) => {
-     if (!s) return true;
-     const addr = formatAddressDisplay(b.address).toLowerCase();
-     return b.name.toLowerCase().includes(s) || addr.includes(s);
-   });
- });
-
- /** Helpers */
- function branchById(id) {
-   return branches.value.find((b) => b.id === Number(id)) || null;
- }
- function functionName(key) {
-   return functionMap[key]?.name || key;
- }
-+function resolveAssetUrl(path, fallback = "") {
-+  if (!path) return fallback;
-+  const cleaned = String(path).trim();
-+  if (!cleaned) return fallback;
-+  if (/^https?:\/\//i.test(cleaned)) return cleaned;
-+  return `${ASSET_BASE_URL}${cleaned.replace(/^\\/+/, "")}`;
-+}
-+function deptProfileSrc(dept) {
-+  return resolveAssetUrl(
-+    dept?.profileImage || dept?.imageUrl,
-+    `${ASSET_BASE_URL}default-image_730.jpg`
-+  );
-+}
-+function deptManagerAvatar(dept) {
-+  return resolveAssetUrl(dept?.managerAvatar);
-+}
+     <!-- Branch Detail Modal -->
+     <transition name="fade">
+       <div v-if="branchDetail.open" class="ui-overlay" @mousedown.self="closeAllModals()">
+         <div class="ui-modal modal-scroll">
+           <div class="ui-modal-head ui-head-slate">
+             <div class="flex items-center justify-between">
+               <div class="flex items-center gap-2">
+                 <span class="ui-head-ico">
+                   <i class="fa-solid fa-eye"></i>
+@@ -979,50 +998,73 @@ function branchById(id) {
  function deptCountByBranch(branchId) {
    const branch = branchById(branchId);
    if (branch && Number.isFinite(Number(branch.roomCount))) return Number(branch.roomCount);
@@ -338,30 +438,6 @@ index 906a7b748b90e1105308098111549628a2540b02..637c9fa6a12e1703f2727439b613c240
    return departments.value.filter((d) => Number(d.branchId) === Number(branchId));
  }
 
- /** Tag class */
- function funcTagClass(func) {
-   const map = {
--    consulting: "ui-tag-blue",
--    tele: "ui-tag-purple",
--    marketing: "ui-tag-emerald",
--    it: "ui-tag-indigo",
--    deployment: "ui-tag-amber",
--    qa: "ui-tag-red",
--    hr: "ui-tag-slate",
--    finance: "ui-tag-lime",
-+    consulting: "ui-tag-primary",
-+    tele: "ui-tag-secondary",
-+    marketing: "ui-tag-success",
-+    it: "ui-tag-info",
-+    deployment: "ui-tag-warning",
-+    qa: "ui-tag-danger",
-+    hr: "ui-tag-dark",
-+    finance: "ui-tag-light",
-   };
--  return map[func] || "ui-tag-slate";
-+  return map[func] || "ui-tag-dark";
- }
-
  /** Address format */
  function formatAddressDisplay(addr) {
    if (!addr) return "";
@@ -371,6 +447,29 @@ index 906a7b748b90e1105308098111549628a2540b02..637c9fa6a12e1703f2727439b613c240
    return `${detail}/!!${wardName}/!!${provinceName}`;
  }
 
++function normalizeText(value) {
++  return String(value || "")
++    .toLowerCase()
++    .normalize("NFD")
++    .replace(/[\u0300-\u036f]/g, "")
++    .trim();
++}
++
++function functionBadgeClass(functionName) {
++  const normalized = normalizeText(functionName);
++  if (normalized.includes("marketing")) return "badge-primary";
++  if (normalized.includes("tele")) return "badge-secondary";
++  if (normalized.includes("tu van") || normalized.includes("tuvan")) return "badge-success";
++  return "badge-neutral";
++}
++
++function formatDeptDescription(description, limit = 80) {
++  const text = String(description || "").replace(/\n/g, "<br />");
++  if (!text) return "";
++  if (text.length <= limit) return text;
++  return `${text.slice(0, limit).trim()}...`;
++}
++
  /** Modals state */
  const deptModal = reactive({ open: false, title: "Thêm phòng ban", editingId: null });
  const branchModal = reactive({ open: false, title: "Thêm chi nhánh", editingId: null });
@@ -385,33 +484,44 @@ index 906a7b748b90e1105308098111549628a2540b02..637c9fa6a12e1703f2727439b613c240
    branchId: null,
    employeeLink: "/#",
    description: "",
-@@ -1359,50 +1390,60 @@ function confirmDelete() {
-         } catch (error) {
-           console.error("❌ Lỗi xóa chi nhánh", error);
-           showError("Không thể xóa chi nhánh", "Vui lòng thử lại!");
-         }
-       }
-     );
-   }
- }
-
- function goEmployees(link) {
-   alert(`Chuyển hướng đến danh sách nhân viên: ${link}`);
- }
-
- /** init */
- applyDeptFilter();
- applyBranchFilter();
- onMounted(() => {
-   fetchBranches();
+   functions: [],
+   imageUrl: "",
  });
+ const branchForm = reactive({
+   name: "",
+   addressDetail: "",
+   provinceName: "",
+   wardName: "",
+ });
+
+ /** Preview address */
+@@ -1409,50 +1451,77 @@ applyDeptFilter();
+ applyBranchFilter();
+ onMounted(async () => {
+   await fetchBranches();
+   await fetchDepartments();
+ });
+
+ let deptFetchTimer = null;
+ watch(
+   () => [deptFilter.search, deptFilter.branchId],
+   () => {
+     applyDeptFilter();
+     if (deptFetchTimer) {
+       clearTimeout(deptFetchTimer);
+     }
+     deptFetchTimer = setTimeout(() => {
+       fetchDepartments();
+     }, 300);
+   }
+ );
  </script>
 
  <style scoped>
  /* Base */
  :global(html) { font-size: 16px; }
  :global(body) { background: #f8fafc; }
-+:global(:root){
++:global(:root) {
 +  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 +  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 +  --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
@@ -421,6 +531,23 @@ index 906a7b748b90e1105308098111549628a2540b02..637c9fa6a12e1703f2727439b613c240
 +  --dark-gradient: linear-gradient(135deg, #141e30 0%, #243b55 100%);
 +  --light-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
 +}
++
++.column-text{ font-weight: 600 !important; }
++.p1,
++.p2,
++.p3,
++.p4,
++.p5{
++  -webkit-background-clip: text;
++  background-clip: text;
++  -webkit-text-fill-color: transparent;
++  color: transparent;
++}
++.p1{ background: var(--primary-gradient); }
++.p2{ background: var(--secondary-gradient); }
++.p3{ background: var(--success-gradient); }
++.p4{ background: var(--info-gradient); }
++.p5{ background: var(--warning-gradient); }
 
  /* Scrollbar (subtle) */
  :global(::-webkit-scrollbar){ width:8px; height:8px; }
@@ -446,34 +573,9 @@ index 906a7b748b90e1105308098111549628a2540b02..637c9fa6a12e1703f2727439b613c240
    display:grid;place-items:center;
    color:#fff;
    background: linear-gradient(135deg, #4f46e5 0%, #667eea 60%, #4facfe 100%);
-@@ -1564,94 +1605,138 @@ onMounted(() => {
-   padding: .72rem .9rem;
-   font-size: 14px;
-   outline: none;
-   transition: box-shadow .16s ease, border-color .16s ease;
- }
- .ui-input:focus{
-   border-color: rgba(79,70,229,.55);
-   box-shadow: 0 0 0 5px rgba(79,70,229,.12);
- }
-
- /* Table */
- .ui-table{
-   width:100%;
-   border-collapse: separate;
-   border-spacing: 0;
-   font-size: 12px;
- }
- .ui-table thead th{
-   position: sticky;
-   top: 0;
-   z-index: 1;
-   background: #fff;
-   text-align:left;
-   padding: 12px 14px;
+@@ -1710,61 +1779,83 @@ watch(
    color:#0b1220;
--  font-weight: 950;
-+  font-weight: 600;
+   font-weight: 950;
    border-bottom: 1px solid rgba(148,163,184,.45);
    white-space: nowrap;
  }
@@ -481,12 +583,8 @@ index 906a7b748b90e1105308098111549628a2540b02..637c9fa6a12e1703f2727439b613c240
    padding: 12px 14px;
    border-bottom: 1px solid rgba(148,163,184,.25);
    vertical-align: middle;
-+  font-weight: 500;
  }
  .ui-table tbody tr:hover td{ background: rgba(79,70,229,.03); }
-+.ui-table .font-extrabold{ font-weight: 600; }
-+.ui-table .font-semibold{ font-weight: 500; }
-+.ui-table .ui-value{ font-weight: 600; }
 
  /* Pills */
  .ui-pill{
@@ -501,6 +599,7 @@ index 906a7b748b90e1105308098111549628a2540b02..637c9fa6a12e1703f2727439b613c240
  .ui-pill-purple{ background:#faf5ff; border-color:#e9d5ff; color:#6d28d9; }
  .ui-pill-emerald{ background:#ecfdf5; border-color:#bbf7d0; color:#047857; }
  .ui-pill-slate{ background:#f1f5f9; border-color:#cbd5e1; color:#334155; }
++.ui-pill-sm{ width:24px; height:24px; border-radius: 10px; }
 
  /* Tags */
  .ui-tag{
@@ -508,70 +607,40 @@ index 906a7b748b90e1105308098111549628a2540b02..637c9fa6a12e1703f2727439b613c240
    padding: .28rem .65rem;
    border-radius: 999px;
    font-size: 12px;
--  font-weight: 950;
--  border: 1px solid rgba(148,163,184,.35);
-+  font-weight: 600;
-+  border: none;
+   font-weight: 950;
+   border: 1px solid rgba(148,163,184,.35);
    white-space: nowrap;
-+  color:#fff;
-+}
-+.ui-tag-gray{
-+  background: var(--light-gradient);
-+  color:#0b1220;
-+}
-+.ui-tag-primary{ background: var(--primary-gradient); }
-+.ui-tag-secondary{ background: var(--secondary-gradient); }
-+.ui-tag-success{ background: var(--success-gradient); }
-+.ui-tag-warning{ background: var(--warning-gradient); }
-+.ui-tag-danger{ background: var(--danger-gradient); }
-+.ui-tag-info{ background: var(--info-gradient); }
-+.ui-tag-dark{ background: var(--dark-gradient); }
-+.ui-tag-light{ background: var(--light-gradient); color:#0b1220; }
-+
-+.p1{ background: var(--primary-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-+.p2{ background: var(--secondary-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-+.p3{ background: var(--success-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-+.p4{ background: var(--info-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-+.p5{ background: var(--warning-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-+
-+.ui-manager-avatar{
-+  width:30px;
-+  height:30px;
-+  border-radius:999px;
-+  object-fit:cover;
-+  border:2px solid #fff;
-+  box-shadow:0 6px 16px rgba(15,23,42,.18);
-+}
-+.ui-manager-avatar-sm{
-+  width:22px;
-+  height:22px;
-+  border-width:1px;
-+}
-+.ui-empty-manager{
-+  display:inline-flex;
-+  align-items:center;
-+  gap:6px;
-+  font-size:12px;
-+  color:#f59e0b;
-+  font-weight:600;
-+  white-space:nowrap;
-+}
-+.ui-empty-manager i{ color:#f97316; }
-+.ui-empty-manager-light{
-+  color:#fde68a;
-+}
-+.ui-empty-manager-light i{
-+  color:#fef3c7;
  }
--.ui-tag-gray{ background:#f1f5f9; color:#0b1220; border-color:#cbd5e1; }
--.ui-tag-slate{ background:#f1f5f9; border-color:#cbd5e1; color:#0b1220; }
--.ui-tag-blue{ background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8; }
--.ui-tag-indigo{ background:#eef2ff; border-color:#c7d2fe; color:#3730a3; }
--.ui-tag-purple{ background:#faf5ff; border-color:#e9d5ff; color:#6d28d9; }
--.ui-tag-emerald{ background:#ecfdf5; border-color:#bbf7d0; color:#047857; }
--.ui-tag-amber{ background:#fffbeb; border-color:#fde68a; color:#b45309; }
--.ui-tag-red{ background:#fff1f2; border-color:#fecdd3; color:#be123c; }
--.ui-tag-lime{ background:#f7fee7; border-color:#d9f99d; color:#4d7c0f; }
++.ui-tag-gradient{
++  border-color: rgba(148,163,184,.35);
++  -webkit-text-fill-color: transparent;
++  color: transparent;
++  -webkit-background-clip: text;
++  background-clip: text;
++}
++.badge-primary{ background: var(--primary-gradient); border-color: rgba(102,126,234,.4); }
++.badge-secondary{ background: var(--secondary-gradient); border-color: rgba(245,87,108,.4); }
++.badge-success{ background: var(--success-gradient); border-color: rgba(67,233,123,.4); }
++.badge-neutral{ background: var(--info-gradient); border-color: rgba(79,172,254,.4); }
++.ui-tag-alert{
++  background: var(--warning-gradient);
++  color:#3b2f1b;
++  border-color: rgba(250,112,154,.35);
++  font-weight: 800;
++}
++.ui-tag-alert--invert{
++  background: rgba(255,255,255,.9);
++  color:#b45309;
++}
+ .ui-tag-gray{ background:#f1f5f9; color:#0b1220; border-color:#cbd5e1; }
+ .ui-tag-slate{ background:#f1f5f9; border-color:#cbd5e1; color:#0b1220; }
+ .ui-tag-blue{ background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8; }
+ .ui-tag-indigo{ background:#eef2ff; border-color:#c7d2fe; color:#3730a3; }
+ .ui-tag-purple{ background:#faf5ff; border-color:#e9d5ff; color:#6d28d9; }
+ .ui-tag-emerald{ background:#ecfdf5; border-color:#bbf7d0; color:#047857; }
+ .ui-tag-amber{ background:#fffbeb; border-color:#fde68a; color:#b45309; }
+ .ui-tag-red{ background:#fff1f2; border-color:#fecdd3; color:#be123c; }
+ .ui-tag-lime{ background:#f7fee7; border-color:#d9f99d; color:#4d7c0f; }
 
  /* Values */
  .ui-value{
@@ -588,12 +657,3 @@ index 906a7b748b90e1105308098111549628a2540b02..637c9fa6a12e1703f2727439b613c240
  .ui-value-white{ background: rgba(255,255,255,.92); border-color: rgba(255,255,255,.55); color:#0b1220; }
 
  /* Mini actions */
- .ui-mini{
-   width:34px;height:34px;border-radius: 12px;
-   display:grid;place-items:center;
-   border: 1px solid rgba(148,163,184,.55);
-   background:#fff;
-   transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
- }
- .ui-mini:hover{ transform: translateY(-1px); box-shadow: 0 10px 22px rgba(2,6,23,.08); }
- .ui-mini-slate{ color:#334155; }
