@@ -1,639 +1,71 @@
 diff --git a/src/components/Branch/AdminDeptBranch.vue b/src/components/Branch/AdminDeptBranch.vue
-index ccdc75f66fa549f2218f009a313e792e0adf7eba..3a3fd844fe2e61c045edc0248c84a115950ae801 100644
+index 9cd76c542b068edc6a4845b9277d6feb1ee5a7f4..974ab538db5fcb9eecbb9c760f997e8f99c0d5d8 100644
 --- a/src/components/Branch/AdminDeptBranch.vue
 +++ b/src/components/Branch/AdminDeptBranch.vue
-@@ -244,51 +244,51 @@
-                 </td>
+@@ -1622,60 +1622,62 @@ async function saveDept() {
+   const functionName = (deptForm.functionName || "").trim();
+   const branchId = deptForm.branchId;
 
-                 <td>
-                   <div class="flex items-center gap-2 min-w-0">
-                       <span class="ui-pill ui-pill-purple">
-                         <i class="fa-solid fa-code-branch"></i>
-                       </span>
-                     <span class="font-extrabold text-slate-800 truncate">
-                         {{ d.branchName || "—" }}
-                       </span>
-                   </div>
-                 </td>
+   const detail = deptForm.addressDetail.trim();
+   const wardName = deptForm.wardName.trim();
+   const provinceName = deptForm.provinceName.trim();
 
-                 <td>
-                   <span class="ui-tag ui-tag-emerald">{{ d.functionName || "—" }}</span>
-                 </td>
+   if (!departmentName || !description || !functionName || !branchId || !detail || !wardName || !provinceName) {
+     showError(
+         "Thiếu thông tin",
+         "Vui lòng nhập đầy đủ: Tên phòng ban, Chi nhánh, Chức năng, Mô tả, và đủ 3 phần địa chỉ."
+     );
+     return;
+   }
 
-                 <td class="text-left">
-                     <span class="ui-value ui-value-indigo whitespace-nowrap">
-                       {{ d.employees }} nhân sự
-                     </span>
-                 </td>
+   const storedAddress = buildAddress(detail, wardName, provinceName);
 
-                 <td class="text-left">
-                   <div class="inline-flex justify-end gap-2 whitespace-nowrap">
--                    <button class="ui-mini ui-mini-slate" type="button" title="Xem chi tiết" @click="openDeptDetail(d.id)">
-+                    <button class="ui-mini ui-mini-slate" type="button" title="Xem chi tiết" @click="openDeptDetail(d)">
-                       <i class="fa-solid fa-eye"></i>
-                     </button>
-                     <button class="ui-mini ui-mini-blue" type="button" title="Sửa" @click="openDeptModal(d.id)">
-                       <i class="fa-solid fa-pen-to-square"></i>
-                     </button>
-                     <button class="ui-mini ui-mini-red" type="button" title="Xóa" @click="openDeleteModal('dept', d.id, d.name)">
-                       <i class="fa-solid fa-trash"></i>
-                     </button>
-                   </div>
-                 </td>
-               </tr>
-               </tbody>
-             </table>
-           </div>
-         </div>
-
-         <!-- CARD VIEW -->
-         <div v-else class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-           <div v-for="d in filteredDepartments" :key="d.id" class="ui-card overflow-hidden">
-             <div class="relative h-32">
-               <img :src="d.imageUrl" :alt="d.name" class="h-full w-full object-cover" />
-               <div class="absolute inset-0 ui-img-overlay"></div>
-
-               <div class="absolute left-3 top-3">
-                 <span class="ui-value ui-value-white whitespace-nowrap">{{ d.employees }} nhân sự</span>
-@@ -302,51 +302,51 @@
-                   <i class="fa-solid fa-user-tie"></i>
-                   <span class="truncate font-semibold">{{ d.manager }}</span>
-                 </div>
-               </div>
-             </div>
-
-             <div class="p-4">
-               <div class="line-clamp-2 text-[13px] text-slate-600 font-semibold">
-                 {{ d.description }}
-               </div>
-
-               <div class="mt-3 flex items-center gap-2 min-w-0">
-                 <span class="ui-pill ui-pill-purple"><i class="fa-solid fa-code-branch"></i></span>
-                     <span class="truncate text-slate-800 text-[13px] font-extrabold">
-                   {{ d.branchName || "—" }}
-                 </span>
-               </div>
-
-               <div class="mt-3 flex flex-wrap gap-2">
-                 <span class="ui-tag ui-tag-emerald">{{ d.functionName || "—" }}</span>
-               </div>
-
-               <div class="mt-3 border-t border-slate-200/70 pt-3 flex items-center justify-between">
-                 <span class="ui-value ui-value-indigo whitespace-nowrap">{{ d.employees }} NV</span>
-                 <div class="inline-flex gap-2 whitespace-nowrap">
--                  <button class="ui-mini ui-mini-slate" type="button" title="Chi tiết" @click="openDeptDetail(d.id)">
-+                  <button class="ui-mini ui-mini-slate" type="button" title="Chi tiết" @click="openDeptDetail(d)">
-                     <i class="fa-solid fa-eye"></i>
-                   </button>
-                   <button class="ui-mini ui-mini-blue" type="button" title="Sửa" @click="openDeptModal(d.id)">
-                     <i class="fa-solid fa-pen-to-square"></i>
-                   </button>
-                   <button class="ui-mini ui-mini-red" type="button" title="Xóa" @click="openDeleteModal('dept', d.id, d.name)">
-                     <i class="fa-solid fa-trash"></i>
-                   </button>
-                 </div>
-               </div>
-             </div>
-           </div>
-         </div>
-       </section>
-
-       <!-- ===================== BRANCHES ===================== -->
-       <section v-else>
-         <!-- Toolbar -->
-         <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-           <div>
-             <div class="text-[16px] md:text-[18px] font-extrabold text-slate-900">Chi nhánh</div>
-             <div class="text-[12px] md:text-[13px] text-slate-500 font-semibold">
-               Chi nhánh trong hệ thống
-             </div>
-           </div>
-@@ -684,101 +684,208 @@
-             <button type="button" class="ui-btn ui-btn-ghost" @click="closeAllModals()">Hủy</button>
-             <button type="button" class="ui-btn ui-btn-emerald" @click="saveBranch()">
-               <i class="fa-solid fa-check"></i> Lưu
-             </button>
-           </div>
-         </div>
-       </div>
-     </transition>
-
-     <!-- Dept Detail Modal -->
-     <transition name="fade">
-       <div v-if="deptDetail.open" class="ui-overlay" @mousedown.self="closeAllModals()">
-         <div class="ui-modal modal-scroll">
-           <div class="ui-modal-head ui-head-slate">
-             <div class="flex items-center justify-between">
-               <div class="flex items-center gap-2">
-                 <span class="ui-head-ico">
-                   <i class="fa-solid fa-eye"></i>
-                 </span>
-                 <span class="text-[15px] font-extrabold">Chi tiết phòng ban</span>
-               </div>
-               <button class="ui-x" type="button" @click="closeAllModals()">&times;</button>
-             </div>
-           </div>
-
--          <div class="p-5" v-if="deptDetail.data">
--            <div class="flex items-start gap-4">
--              <div class="h-16 w-16 rounded-2xl overflow-hidden ring-2 ring-slate-200 shrink-0">
--                <img :src="deptDetail.data.imageUrl" :alt="deptDetail.data.name" class="h-full w-full object-cover" />
-+          <div class="p-5">
-+            <div v-if="deptDetail.loading" class="text-center">
-+              <div class="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-slate-500 ring-2 ring-slate-200">
-+                <i class="fa-solid fa-circle-notch fa-spin text-lg"></i>
-               </div>
--              <div class="min-w-0 flex-1">
--                <div class="text-[16px] md:text-[18px] font-extrabold text-slate-900 truncate">
--                  {{ deptDetail.data.name }}
--                </div>
--                <div class="mt-1 text-[13px] text-slate-600 font-semibold">
--                  {{ deptDetail.data.description }}
--                </div>
-+              <div class="mt-3 text-[14px] font-extrabold text-slate-800">Đang tải dữ liệu...</div>
-+            </div>
-
--                <div class="mt-3 flex flex-wrap gap-2">
--                  <span class="ui-value ui-value-indigo whitespace-nowrap">{{ deptDetail.data.employees }} NV</span>
--                </div>
-+            <div v-else-if="deptDetail.error" class="text-center">
-+              <div class="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-rose-50 text-rose-600 ring-2 ring-rose-200">
-+                <i class="fa-solid fa-circle-exclamation text-lg"></i>
-               </div>
-+              <div class="mt-3 text-[14px] font-extrabold text-slate-800">Không thể tải dữ liệu</div>
-+              <div class="mt-1 text-[12px] font-semibold text-slate-500">{{ deptDetail.error }}</div>
-             </div>
-
--            <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
--              <div class="ui-info">
--                <span class="ui-pill ui-pill-blue"><i class="fa-solid fa-user-tie"></i></span>
--                <div class="min-w-0">
--                  <div class="ui-info-label">Trưởng phòng</div>
--                  <div class="ui-info-value">{{ deptDetail.data.manager }}</div>
-+            <div v-else-if="deptDetail.data">
-+              <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-+                <div class="flex items-start gap-4 min-w-0">
-+                  <div class="h-16 w-16 rounded-2xl overflow-hidden ring-2 ring-slate-200 shrink-0 bg-slate-100">
-+                    <img
-+                      v-if="deptDetail.data.profileImage"
-+                      :src="resolvePublicAsset(deptDetail.data.profileImage)"
-+                      :alt="deptDetail.data.departmentName"
-+                      class="h-full w-full object-cover"
-+                    />
-+                    <div v-else class="h-full w-full grid place-items-center text-slate-400">
-+                      <i class="fa-solid fa-building-user text-lg"></i>
-+                    </div>
-+                  </div>
-+                  <div class="min-w-0 flex-1">
-+                    <div class="text-[16px] md:text-[18px] font-extrabold text-slate-900 truncate">
-+                      {{ deptDetail.data.departmentName }}
-+                    </div>
-+                    <div class="mt-1 text-[13px] text-slate-600 font-semibold">
-+                      {{ deptDetail.data.description || "Chưa có mô tả" }}
-+                    </div>
-+                    <div class="mt-3 flex flex-wrap gap-2">
-+                      <span class="ui-value ui-value-indigo whitespace-nowrap">
-+                        {{ deptDetail.data.totalEmployee }} NV
-+                      </span>
-+                      <span v-if="deptDetail.data.departmentId" class="ui-value ui-value-slate whitespace-nowrap">
-+                        ID: {{ deptDetail.data.departmentId }}
-+                      </span>
-+                    </div>
-+                  </div>
-+                </div>
-+
-+                <div class="flex flex-wrap items-center gap-2">
-+                  <span class="ui-tag ui-tag-emerald">
-+                    {{ deptDetail.data.functionDisplayName || deptDetail.data.functionName || "Chưa phân loại" }}
-+                  </span>
-                 </div>
-               </div>
-
--              <div class="ui-info">
--                <span class="ui-pill ui-pill-purple"><i class="fa-solid fa-code-branch"></i></span>
--                <div class="min-w-0">
--                  <div class="ui-info-label">Chi nhánh</div>
--                  <div class="ui-info-value">{{ deptDetail.data.branchName || "—" }}</div>
-+              <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-+                <div class="ui-info">
-+                  <span class="ui-pill ui-pill-blue"><i class="fa-solid fa-user-tie"></i></span>
-+                  <div class="min-w-0">
-+                    <div class="ui-info-label">Trưởng phòng</div>
-+                    <div class="ui-info-value">
-+                      {{ deptDetail.data.manager?.name || "Chưa phân công" }}
-+                    </div>
-+                    <div class="mt-1 text-[12px] text-slate-500 font-semibold">
-+                      {{ deptDetail.data.manager?.email || "—" }}
-+                    </div>
-+                  </div>
-+                  <div class="ml-auto h-10 w-10 rounded-full overflow-hidden ring-2 ring-slate-200 bg-slate-100">
-+                    <img
-+                      v-if="deptDetail.data.manager?.avatar"
-+                      :src="resolvePublicAsset(deptDetail.data.manager.avatar)"
-+                      :alt="deptDetail.data.manager?.name || 'Manager'"
-+                      class="h-full w-full object-cover"
-+                    />
-+                    <div v-else class="h-full w-full grid place-items-center text-slate-400">
-+                      <i class="fa-solid fa-user"></i>
-+                    </div>
-+                  </div>
-+                </div>
-+
-+                <div class="ui-info">
-+                  <span class="ui-pill ui-pill-purple"><i class="fa-solid fa-code-branch"></i></span>
-+                  <div class="min-w-0">
-+                    <div class="ui-info-label">Chi nhánh</div>
-+                    <div class="ui-info-value">{{ deptDetail.data.branchName || "—" }}</div>
-+                    <div class="mt-1 text-[12px] text-slate-500 font-semibold">
-+                      ID: {{ deptDetail.data.branchId || "—" }}
-+                    </div>
-+                  </div>
-+                </div>
-+
-+                <div class="ui-info md:col-span-2">
-+                  <span class="ui-pill ui-pill-emerald"><i class="fa-solid fa-shapes"></i></span>
-+                  <div class="min-w-0">
-+                    <div class="ui-info-label">Chức năng</div>
-+                    <div class="mt-2 flex flex-wrap gap-2">
-+                      <span class="ui-tag ui-tag-emerald">{{ deptDetail.data.functionName || "—" }}</span>
-+                      <span v-if="deptDetail.data.functionDisplayName" class="ui-tag ui-tag-slate">
-+                        {{ deptDetail.data.functionDisplayName }}
-+                      </span>
-+                    </div>
-+                  </div>
-                 </div>
-               </div>
-
--              <div class="ui-info md:col-span-2">
--                <span class="ui-pill ui-pill-emerald"><i class="fa-solid fa-shapes"></i></span>
--                <div class="min-w-0">
--                  <div class="ui-info-label">Chức năng</div>
--                  <div class="mt-2 flex flex-wrap gap-2">
--                    <span class="ui-tag ui-tag-emerald">{{ deptDetail.data.functionName || "—" }}</span>
-+              <div class="mt-4">
-+                <div class="flex items-center gap-2 mb-3">
-+                  <span class="ui-dot ui-dot-indigo"></span>
-+                  <div class="text-[14px] font-extrabold text-slate-900">Danh sách nhân sự</div>
-+                  <span class="ui-chip">{{ deptDetail.data.employees.length }}</span>
-+                </div>
-+
-+                <div v-if="deptDetail.data.employees.length" class="grid grid-cols-1 gap-3 md:grid-cols-2">
-+                  <div
-+                    v-for="employee in deptDetail.data.employees"
-+                    :key="employee.id || employee.email || employee.name"
-+                    class="border border-slate-200/70 rounded-2xl p-3 bg-transparent"
-+                  >
-+                    <div class="flex items-start gap-3">
-+                      <div class="h-10 w-10 rounded-full overflow-hidden ring-2 ring-slate-200 bg-slate-100 shrink-0">
-+                        <img
-+                          v-if="employee.avatar"
-+                          :src="resolvePublicAsset(employee.avatar)"
-+                          :alt="employee.name"
-+                          class="h-full w-full object-cover"
-+                        />
-+                        <div v-else class="h-full w-full grid place-items-center text-slate-400">
-+                          <i class="fa-solid fa-user"></i>
-+                        </div>
-+                      </div>
-+                      <div class="min-w-0">
-+                        <div class="text-[14px] font-extrabold text-slate-900 truncate">{{ employee.name }}</div>
-+                        <div class="text-[12px] font-semibold text-slate-500 mt-1 truncate">
-+                          {{ employee.email || "—" }}
-+                        </div>
-+                        <div class="text-[12px] font-semibold text-slate-500 truncate">
-+                          {{ employee.phone || "—" }}
-+                        </div>
-+                        <div class="text-[12px] font-semibold text-slate-500 line-clamp-2">
-+                          {{ employee.address || "—" }}
-+                        </div>
-+                      </div>
-+                    </div>
-                   </div>
-                 </div>
-+                <div v-else class="text-[13px] font-extrabold text-slate-500">Chưa có nhân sự</div>
-               </div>
-             </div>
-           </div>
-
-           <div class="ui-modal-foot">
-             <button type="button" class="ui-btn ui-btn-ghost" @click="closeAllModals()">Đóng</button>
--            <button v-if="deptDetail.data" type="button" class="ui-btn ui-btn-indigo" @click="openDeptModal(deptDetail.data.id)">
-+            <button
-+              v-if="deptDetail.data?.localId"
-+              type="button"
-+              class="ui-btn ui-btn-indigo"
-+              @click="openDeptModal(deptDetail.data.localId)"
-+            >
-               <i class="fa-solid fa-pen-to-square"></i> Sửa
-             </button>
-           </div>
-         </div>
-       </div>
-     </transition>
-
-     <!-- Branch Detail Modal -->
-     <transition name="fade">
-       <div v-if="branchDetail.open" class="ui-overlay" @mousedown.self="closeAllModals()">
-         <div class="ui-modal modal-scroll">
-           <div class="ui-modal-head ui-head-slate">
-             <div class="flex items-center justify-between">
-               <div class="flex items-center gap-2">
-                 <span class="ui-head-ico">
-                   <i class="fa-solid fa-eye"></i>
-                 </span>
-                 <span class="text-[15px] font-extrabold">Chi tiết chi nhánh</span>
-               </div>
-               <button class="ui-x" type="button" @click="closeAllModals()">&times;</button>
-             </div>
-           </div>
-
-           <div class="p-4">
-             <div v-if="branchDetail.error" class="text-center">
-@@ -1012,51 +1119,51 @@ function deptCountByBranch(branchId) {
- }
- function employeeCountByBranch(branchId) {
-   const branch = branchById(branchId);
-   if (branch && Number.isFinite(Number(branch.employeeCount))) return Number(branch.employeeCount);
-   return departments.value
-       .filter((d) => Number(d.branchId) === Number(branchId))
-       .reduce((sum, d) => sum + (Number(d.employees) || 0), 0);
- }
- function deptListByBranch(branchId) {
-   return departments.value.filter((d) => Number(d.branchId) === Number(branchId));
- }
-
- /** Address format */
- function formatAddressDisplay(addr) {
-   if (!addr) return "";
-   return String(addr).split("/!!").join(", ");
- }
- function buildAddress(detail, wardName, provinceName) {
-   return `${detail}/!!${wardName}/!!${provinceName}`;
- }
-
- /** Modals state */
- const deptModal = reactive({ open: false, title: "Thêm phòng ban", editingId: null });
- const branchModal = reactive({ open: false, title: "Thêm chi nhánh", editingId: null });
- const deleteModal = reactive({ open: false, type: null, id: null, name: "", title: "" });
--const deptDetail = reactive({ open: false, data: null });
-+const deptDetail = reactive({ open: false, data: null, loading: false, error: "" });
- const branchDetail = reactive({ open: false, data: null, loading: false, error: "" });
-
- /** Forms */
- const deptForm = reactive({
-   name: "",
-   manager: "",
-   branchId: null,
-   employeeLink: "/#",
-   description: "",
-   functions: [],
-   imageUrl: "",
- });
- const branchForm = reactive({
-   name: "",
-   addressDetail: "",
-   provinceName: "",
-   wardName: "",
- });
-
- /** Preview address */
- const previewBranchAddress = computed(() => {
-   const a = branchForm.addressDetail?.trim();
-   const w = branchForm.wardName?.trim();
-   const p = branchForm.provinceName?.trim();
-   if (!a || !w || !p) return "";
-@@ -1105,50 +1212,52 @@ function onDeptImageChange(e) {
-   if (!file) return;
-   const reader = new FileReader();
-   reader.onload = (ev) => {
-     deptForm.imageUrl = String(ev.target?.result || "");
+   const dto = {
+     departmentName,
+     address: storedAddress, // ✅ gửi địa chỉ giống chi nhánh
+     description,
+     functionName, // ✅ gửi code (name)
    };
-   reader.readAsDataURL(file);
- }
 
- /** Open/Close */
- function closeAllModals() {
-   deptModal.open = false;
-   branchModal.open = false;
-   deleteModal.open = false;
-   deptDetail.open = false;
-   branchDetail.open = false;
-
-   deptModal.editingId = null;
-   branchModal.editingId = null;
-
-   deleteModal.type = null;
-   deleteModal.id = null;
-   deleteModal.name = "";
-   deleteModal.title = "";
-
-   deptDetail.data = null;
-+  deptDetail.loading = false;
-+  deptDetail.error = "";
-   branchDetail.data = null;
-   branchDetail.loading = false;
-   branchDetail.error = "";
-
-   closeProvinceDropdown();
-   closeWardDropdown();
- }
-
- function openDeptModal(id = null) {
-   deptModal.open = true;
-   deptModal.editingId = id;
-   deptModal.title = id ? "Sửa phòng ban" : "Thêm phòng ban";
-
-   if (id) {
-     const d = departments.value.find((x) => x.id === id);
-     if (!d) return;
-     deptForm.name = d.name;
-     deptForm.manager = d.manager;
-     deptForm.branchId = d.branchId;
-     deptForm.employeeLink = d.employeeLink || "/#";
-     deptForm.description = d.description;
-     deptForm.functions = [...(d.functions || [])];
-     deptForm.imageUrl = d.imageUrl || "";
-   } else {
-     deptForm.name = "";
-@@ -1174,97 +1283,177 @@ function openBranchModal(id = null) {
-     const parts = String(b.address || "").split("/!!");
-     branchForm.addressDetail = parts[0] || "";
-     branchForm.wardName = parts[1] || "";
-     branchForm.provinceName = parts[2] || "";
-     provinceSearch.value = "";
-     wardSearch.value = "";
-   } else {
-     branchForm.name = "";
-     branchForm.addressDetail = "";
-     branchForm.provinceName = "";
-     branchForm.wardName = "";
-     provinceSearch.value = "";
-     wardSearch.value = "";
+   const formData = new FormData();
+-  formData.append("departmentForm", new Blob([JSON.stringify(dto)], { type: "application/json" }));
++  formData.append(
++      "departmentForm",
++      new Blob([JSON.stringify(dto)], { type: "application/json" }),
++      "departmentForm.json"
++  );
+   if (deptForm.imageFile) {
+     formData.append("file", deptForm.imageFile);
    }
- }
 
- function openDeleteModal(type, id, name) {
-   deleteModal.open = true;
-   deleteModal.type = type;
-   deleteModal.id = id;
-   deleteModal.name = name;
-   deleteModal.title = type === "dept" ? "Xóa phòng ban?" : "Xóa chi nhánh?";
- }
-
- /** Detail modals */
--function openDeptDetail(id) {
--  const d = departments.value.find((x) => x.id === id);
--  if (!d) return;
-+const publicAssetBase = "https://s3.cloudfly.vn/thg-storage-dev/uploads-public/";
-+function resolvePublicAsset(path) {
-+  if (!path) return "";
-+  if (String(path).startsWith("http")) return String(path);
-+  return `${publicAssetBase}${path}`;
-+}
-+
-+function normalizeEmployee(raw) {
-+  if (!raw) return null;
-+  return {
-+    id: raw.id ?? null,
-+    name: raw.name ?? "",
-+    address: raw.address ?? "",
-+    email: raw.email ?? "",
-+    phone: raw.phone ?? "",
-+    avatar: raw.avatar ?? "",
-+  };
-+}
-+
-+function openDeptDetail(dept) {
-+  if (!dept) return;
-   deptDetail.open = true;
--  deptDetail.data = { ...d };
-+  deptDetail.loading = true;
-+  deptDetail.error = "";
-+  deptDetail.data = null;
-+  fetchDeptDetail(dept);
- }
- function openBranchDetail(id) {
-   const b = branches.value.find((x) => x.id === id);
-   if (!b) return;
-   branchDetail.open = true;
-   branchDetail.loading = true;
-   branchDetail.error = "";
-   branchDetail.data = null;
-   fetchBranchDetail(id, b);
- }
-
- async function fetchBranchDetail(id, fallbackBranch) {
    try {
-     const res = await api.get(`/quan-ly-chi-nhanh/admin/${id}/chi-tiet`);
-     const payload = res?.data || {};
-     const chiNhanh = payload.chiNhanh || {};
-     const danhSachPhong = Array.isArray(payload.danhSachPhong) ? payload.danhSachPhong : [];
-     branchDetail.data = {
-       id: chiNhanh.id ?? fallbackBranch.id,
-       name: chiNhanh.ten ?? fallbackBranch.name,
-       address: chiNhanh.diaChi ?? fallbackBranch.address,
-       roomCount: chiNhanh.soLuongPhong ?? fallbackBranch.roomCount ?? danhSachPhong.length,
-       employeeCount: chiNhanh.soLuongNhanVien ?? fallbackBranch.employeeCount ?? 0,
-       rooms: danhSachPhong.map((room) => ({
-         name: room.tenPhong,
-         description: room.moTa,
-       })),
-     };
+     const res = await showLoading(
+-        api.post("/admin.thg/department-new/create", formData, {
+-          headers: { "Content-Type": "multipart/form-data" }
+-        })
++        api.post("/admin.thg/department-new/create", formData)
+     );
+
+     if (res?.status === 200) {
+       showSuccess("Tạo phòng ban thành công!");
+       closeAllModals();
+       await fetchDepartments();
+     } else {
+       updateAlertError("Không thể tạo phòng ban, vui lòng thử lại!");
+     }
    } catch (error) {
-     console.error("❌ Lỗi fetch chi tiết chi nhánh", error);
-     branchDetail.error = "Vui lòng thử lại sau.";
-     branchDetail.data = {
-       ...fallbackBranch,
-       roomCount: fallbackBranch.roomCount ?? 0,
-       employeeCount: fallbackBranch.employeeCount ?? 0,
-       rooms: deptListByBranch(id).map((room) => ({ name: room.name, description: room.description })),
-     };
-   } finally {
-     branchDetail.loading = false;
+     console.error("❌ Lỗi tạo phòng ban", error);
+     updateAlertError("Không thể tạo phòng ban, vui lòng thử lại!");
    }
  }
 
-+async function fetchDeptDetail(fallbackDept) {
-+  try {
-+    const res = await api.get("/admin.thg/department-new/detail", {
-+      params: {
-+        departmentName: fallbackDept.name,
-+      },
-+    });
-+    const payload = res?.data || {};
-+    const employees = Array.isArray(payload.employees) ? payload.employees : [];
-+    const manager = normalizeEmployee(payload.manager);
-+    deptDetail.data = {
-+      departmentId: payload.departmentId ?? null,
-+      departmentName: payload.departmentName ?? fallbackDept.name,
-+      description: payload.description ?? fallbackDept.description ?? "",
-+      profileImage: payload.profileImage ?? fallbackDept.avatar ?? "",
-+      branchId: payload.branchId ?? fallbackDept.branchId ?? null,
-+      branchName: payload.branchName ?? fallbackDept.branchName ?? "",
-+      functionName: payload.functionName ?? fallbackDept.functionName ?? "",
-+      functionDisplayName: payload.functionDisplayName ?? "",
-+      manager,
-+      employees: employees.map(normalizeEmployee).filter(Boolean),
-+      totalEmployee:
-+        payload.totalEmployee ??
-+        (Array.isArray(employees) ? employees.length : 0) ??
-+        fallbackDept.employees ??
-+        0,
-+      localId: fallbackDept.id,
-+    };
-+  } catch (error) {
-+    console.error("❌ Lỗi fetch chi tiết phòng ban", error);
-+    deptDetail.error = "Không thể tải chi tiết phòng ban. Vui lòng thử lại.";
-+    deptDetail.data = {
-+      departmentId: null,
-+      departmentName: fallbackDept.name,
-+      description: fallbackDept.description ?? "",
-+      profileImage: fallbackDept.avatar ?? "",
-+      branchId: fallbackDept.branchId ?? null,
-+      branchName: fallbackDept.branchName ?? "",
-+      functionName: fallbackDept.functionName ?? "",
-+      functionDisplayName: "",
-+      manager: fallbackDept.manager
-+        ? {
-+          id: null,
-+          name: fallbackDept.manager,
-+          address: "",
-+          email: "",
-+          phone: "",
-+          avatar: fallbackDept.managerAvatar ?? "",
-+        }
-+        : null,
-+      employees: [],
-+      totalEmployee: fallbackDept.employees ?? 0,
-+      localId: fallbackDept.id,
-+    };
-+  } finally {
-+    deptDetail.loading = false;
-+  }
-+}
-+
- async function fetchDepartments() {
-   try {
-     const params = {};
-     if (deptFilter.search) {
-       params.name = deptFilter.search;
-     }
-     if (deptFilter.branchId !== "all") {
-       params.branchId = deptFilter.branchId;
-     }
+ /** init */
+ applyDeptFilter();
+ applyBranchFilter();
+ onMounted(async () => {
+   await fetchBranches();
+   await fetchSystemFunctions();
+   await fetchDepartments();
+ });
 
-     const res = await api.get("/admin.thg/department-new/view", { params });
-     const data = Array.isArray(res.data) ? res.data : [];
-     departments.value = data.map((item, index) => {
-       const branchMatch = branches.value.find((b) => b.name === item.branchName) || null;
-       return {
-         id: index + 1,
-         name: item.departmentName,
-         avatar: item.avatar,
-         description: item.description,
-         manager: item.managerName,
-         managerAvatar: item.managerAvatar,
-         branchName: item.branchName,
-         branchId: branchMatch?.id ?? null,
-         functionName: item.functionName,
-         employees: item.totalEmployee ?? 0,
+ let deptFetchTimer = null;

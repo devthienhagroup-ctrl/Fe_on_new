@@ -126,7 +126,6 @@
                     placeholder="Tên phòng ..."
                     @keyup.enter="applyDeptFilter()"
                 />
-                <i class="fa-solid fa-magnifying-glass ui-input-ico"></i>
               </div>
             </div>
 
@@ -1638,23 +1637,40 @@ async function saveDept() {
 
   const dto = {
     departmentName,
-    address: storedAddress, // ✅ gửi địa chỉ giống chi nhánh
+    address: storedAddress,
     description,
-    functionName, // ✅ gửi code (name)
+    functionName,
+    branchId: Number(branchId), // ✅ THÊM branchId vào DTO
   };
 
+  console.log("DTO gửi đi:", dto); // Debug
+
   const formData = new FormData();
-  formData.append("departmentForm", new Blob([JSON.stringify(dto)], { type: "application/json" }));
+  formData.append("departmentForm", new Blob([JSON.stringify(dto)], {
+    type: "application/json"
+  }));
+
   if (deptForm.imageFile) {
     formData.append("file", deptForm.imageFile);
   }
 
+  // Debug formData
+  console.log("FormData entries:");
+  for (let [key, value] of formData.entries()) {
+    console.log(key, value);
+  }
+
   try {
+    // ✅ SỬA LẠI ĐƯỜNG DẪN CHÍNH XÁC
     const res = await showLoading(
         api.post("/admin.thg/department-new/create", formData, {
-          headers: { "Content-Type": "multipart/form-data" }
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
         })
     );
+
+    console.log("Response:", res); // Debug
 
     if (res?.status === 200) {
       showSuccess("Tạo phòng ban thành công!");
@@ -1665,6 +1681,7 @@ async function saveDept() {
     }
   } catch (error) {
     console.error("❌ Lỗi tạo phòng ban", error);
+    console.error("Error response:", error.response?.data); // Chi tiết lỗi
     updateAlertError("Không thể tạo phòng ban, vui lòng thử lại!");
   }
 }
