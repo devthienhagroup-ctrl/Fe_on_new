@@ -1313,8 +1313,8 @@ const form = reactive({
   ownerId: null,
   ownerFullName: '',
   ownerPhone: '',
-  ownerMode: 'system',
-  ownerOption: 'existing',
+  ownerMode: 'nonSystem',
+  ownerOption: 'new',
   ownerGender: null,
   ownerNewAddress: '',
   ownerOldAddress: '',
@@ -2054,8 +2054,8 @@ const resetForm = () => {
     ownerId: null,
     ownerFullName: '',
     ownerPhone: '',
-    ownerMode: 'system',
-    ownerOption: 'existing',
+    ownerMode: 'nonSystem',
+    ownerOption: 'new',
     ownerGender: null,
     ownerNewAddress: '',
     ownerOldAddress: '',
@@ -2073,12 +2073,12 @@ const resetForm = () => {
   form.address = ''
   ownerSearch.value = ''
   ownerLookupMessage.value = ''
-  ownerMode.value = 'system'
+  ownerMode.value = 'nonSystem'
   managerSearch.value = ''
   managerLookupMessage.value = ''
   managerInfo.fullName = ''
   managerInfo.phone = ''
-  nonSystemOwnerOption.value = 'existing'
+  nonSystemOwnerOption.value = 'new'
   nonSystemOwnerSearch.value = ''
   nonSystemLookupMessage.value = ''
   nonSystemExistingOwner.value = null
